@@ -38,7 +38,7 @@ public class Hearing {
     private List<PartyOnCaseCollectionItem> partiesOnCase;
     private YesOrNo wasMigrated;
 
-    public static WorkingHearing mapHearingToWorkingHearing(Hearing hearing, List<HearingType> hearingTypes ) {
+    public static WorkingHearing mapHearingToWorkingHearing(Hearing hearing, List<HearingType> hearingTypes) {
         return WorkingHearing.builder()
             .hearingDate(hearing.getHearingDate())
             .hearingTimeEstimate(hearing.getHearingTimeEstimate())

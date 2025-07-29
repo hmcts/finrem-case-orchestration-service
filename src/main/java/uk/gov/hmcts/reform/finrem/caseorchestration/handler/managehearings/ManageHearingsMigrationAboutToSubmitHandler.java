@@ -32,7 +32,8 @@ public class ManageHearingsMigrationAboutToSubmitHandler extends FinremCallbackH
     private final ManageHearingActionService manageHearingActionService;
 
     public ManageHearingsMigrationAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                       ManageHearingsMigrationService manageHearingsMigrationService, ManageHearingActionService manageHearingActionService) {
+                                                       ManageHearingsMigrationService manageHearingsMigrationService,
+                                                       ManageHearingActionService manageHearingActionService) {
         super(finremCaseDetailsMapper);
         this.manageHearingsMigrationService = manageHearingsMigrationService;
         this.manageHearingActionService = manageHearingActionService;
