@@ -368,7 +368,7 @@ class GeneralApplicationHelperTest {
     }
 
     @Test
-    void givenGeneralApplicationWithReceivedFrom_whenPopulateGeneralApplicationSender_thenShouldSetSender() {
+    void givenGeneralApplicationWithReceivedFrom_whenPopulateGeneralApplicationDataSender_thenShouldSetSender() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
@@ -387,6 +387,58 @@ class GeneralApplicationHelperTest {
             .getGeneralApplicationItems().getGeneralApplicationSender();
         assertEquals(APPLICANT, generalApplicationSender.getValue().getCode());
         assertEquals(APPLICANT, generalApplicationSender.getValue().getLabel());
+        assertEquals(3, generalApplicationSender.getListItems().size());
+    }
+
+    @Test
+    void givenGeneralApplicationWithInvalidApplicantSender_whenPopulateGeneralApplicationDataSender_thenShouldFixSender() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        DynamicRadioList generalApplicationSender = buildDynamicIntervenerList();
+        generalApplicationSender.setValue(getDynamicListElement("applicant", "applicant"));
+
+        GeneralApplicationCollectionData generalApplicationData = GeneralApplicationCollectionData.builder()
+            .generalApplicationItems(GeneralApplicationItems.builder()
+                .generalApplicationSender(generalApplicationSender)
+                .build())
+            .build();
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionData = List.of(generalApplicationData);
+
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        helper.populateGeneralApplicationDataSender(caseData, generalApplicationCollectionData);
+
+        generalApplicationSender = generalApplicationCollectionData.getFirst()
+            .getGeneralApplicationItems().getGeneralApplicationSender();
+        assertEquals(APPLICANT, generalApplicationSender.getValue().getCode());
+        assertEquals(APPLICANT, generalApplicationSender.getValue().getLabel());
+        assertEquals(3, generalApplicationSender.getListItems().size());
+    }
+
+    @Test
+    void givenGeneralApplicationWithInvalidRespondentSender_whenPopulateGeneralApplicationDataSender_thenShouldFixSender() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        DynamicRadioList generalApplicationSender = buildDynamicIntervenerList();
+        generalApplicationSender.setValue(getDynamicListElement("respondent", "respondent"));
+
+        GeneralApplicationCollectionData generalApplicationData = GeneralApplicationCollectionData.builder()
+            .generalApplicationItems(GeneralApplicationItems.builder()
+                .generalApplicationSender(generalApplicationSender)
+                .build())
+            .build();
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionData = List.of(generalApplicationData);
+
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        helper.populateGeneralApplicationDataSender(caseData, generalApplicationCollectionData);
+
+        generalApplicationSender = generalApplicationCollectionData.getFirst()
+            .getGeneralApplicationItems().getGeneralApplicationSender();
+        assertEquals(RESPONDENT, generalApplicationSender.getValue().getCode());
+        assertEquals(RESPONDENT, generalApplicationSender.getValue().getLabel());
         assertEquals(3, generalApplicationSender.getListItems().size());
     }
 
@@ -411,8 +463,7 @@ class GeneralApplicationHelperTest {
                 .build();
     }
 
-    public DynamicRadioList buildDynamicIntervenerList() {
-
+    private DynamicRadioList buildDynamicIntervenerList() {
         List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
                 getDynamicListElement(RESPONDENT, RESPONDENT),
                 getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
@@ -423,14 +474,14 @@ class GeneralApplicationHelperTest {
                 .build();
     }
 
-    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+    private DynamicRadioListElement getDynamicListElement(String code, String label) {
         return DynamicRadioListElement.builder()
                 .code(code)
                 .label(label)
                 .build();
     }
 
-    protected FinremCallbackRequest callbackRequest() {
+    private FinremCallbackRequest callbackRequest() {
         GeneralApplicationItems generalApplicationItems =
                 GeneralApplicationItems.builder().generalApplicationSender(
                                 buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")

@@ -277,6 +277,14 @@ public class GeneralApplicationHelper {
         buildDynamicIntervenerList(dynamicListElements, caseData);
         if (generalApplicationData != null && !generalApplicationData.isEmpty()) {
             generalApplicationData.forEach(ga -> {
+                // Ensure the selected sender is valid
+                // A bug in converting legacy data meant that the code/label were not capitalized
+                DynamicRadioList generalApplicationSender = ga.getGeneralApplicationItems().getGeneralApplicationSender();
+                if (generalApplicationSender != null && generalApplicationSender.getValue() != null) {
+                    DynamicRadioListElement value = generalApplicationSender.getValue();
+                    value.setCode(StringUtils.capitalize(value.getCode()));
+                    value.setLabel(StringUtils.capitalize(value.getLabel()));
+                }
                 String receivedFrom = ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom();
                 if (StringUtils.isNotBlank(receivedFrom)) {
                     String convertedReceivedFrom = convertReceivedFromToSender(receivedFrom);
