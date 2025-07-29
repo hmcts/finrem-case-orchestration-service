@@ -10,18 +10,20 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.getHearingType;
+
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class WorkingHearing {
-
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate hearingDate;
@@ -59,7 +61,16 @@ public class WorkingHearing {
             .build();
     }
 
-    public static HearingType getHearingType(DynamicList hearingTypeDynamicList) {
-        return HearingType.valueOf(hearingTypeDynamicList.getValue().getCode());
+    public static DynamicList initialiseHearingTypeDynamicList(List<HearingType> hearingTypes) {
+        List<DynamicListElement> listElements = hearingTypes.stream()
+            .map(hearingType -> DynamicListElement.builder()
+                .code(hearingType.name())
+                .label(hearingType.getId())
+                .build())
+            .toList();
+
+        return DynamicList.builder()
+            .listItems(listElements)
+            .build();
     }
 }

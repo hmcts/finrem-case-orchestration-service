@@ -103,7 +103,6 @@ public abstract class AbstractDocumentTest extends BaseTest {
 
     protected abstract String apiUrl();
 
-
     void generateEvidenceUploadServiceSuccessStub() throws IOException {
         evidenceManagementService.stubFor(post(urlPathEqualTo(UPLOAD_DOCUMENT_CONTEXT_PATH))
             .willReturn(aResponse()
