@@ -21,16 +21,16 @@ import java.util.List;
 @Service
 public class AmendApplicationConsentedMidHandler extends FinremCallbackHandler {
     private final ConsentOrderService consentOrderService;
-    private final InternationalPostalService postalService;
+    private final InternationalPostalService internationalPostalService;
     private final ObjectMapper objectMapper;
 
     public AmendApplicationConsentedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                ConsentOrderService consentOrderService,
-                                               InternationalPostalService postalService,
+                                               InternationalPostalService internationalPostalService,
                                                ObjectMapper objectMapper) {
         super(finremCaseDetailsMapper);
         this.consentOrderService = consentOrderService;
-        this.postalService = postalService;
+        this.internationalPostalService = internationalPostalService;
         this.objectMapper = objectMapper;
     }
 
@@ -49,7 +49,7 @@ public class AmendApplicationConsentedMidHandler extends FinremCallbackHandler {
         FinremCaseData caseData = finremCaseDetails.getData();
 
         List<String> errors = consentOrderService.performCheck(objectMapper.convertValue(callbackRequest, CallbackRequest.class), userAuthorisation);
-        errors.addAll(postalService.validate(caseData));
+        errors.addAll(internationalPostalService.validate(caseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
 

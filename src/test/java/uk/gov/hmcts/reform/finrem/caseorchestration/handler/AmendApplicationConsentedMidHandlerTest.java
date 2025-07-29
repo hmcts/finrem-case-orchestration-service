@@ -32,7 +32,7 @@ class AmendApplicationConsentedMidHandlerTest {
     @Mock
     private ConsentOrderService consentOrderService;
     @Mock
-    private InternationalPostalService postalService;
+    private InternationalPostalService internationalPostalService;
     @Mock
     private ObjectMapper objectMapper;
 
@@ -45,7 +45,7 @@ class AmendApplicationConsentedMidHandlerTest {
     void testHandle() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(postalService).validate(callbackRequest.getCaseDetails().getData());
+        verify(internationalPostalService).validate(callbackRequest.getCaseDetails().getData());
     }
 
     @Test
@@ -53,7 +53,7 @@ class AmendApplicationConsentedMidHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         handler.handle(callbackRequest, AUTH_TOKEN);
         verify(consentOrderService).performCheck(objectMapper.convertValue(callbackRequest, CallbackRequest.class), AUTH_TOKEN);
-        verify(postalService).validate(callbackRequest.getCaseDetails().getData());
+        verify(internationalPostalService).validate(callbackRequest.getCaseDetails().getData());
     }
 
     @Test
