@@ -9,9 +9,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +53,36 @@ public class ConsentOrderService {
         if (caseDetailsBefore != null) {
             beforeData = caseDetailsBefore.getData();
         }
+        List<CaseDocument> caseDocuments = checkIfD81DocumentContainsEncryption(caseData, beforeData);
+        if (caseDocuments != null && !caseDocuments.isEmpty()) {
+            caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, caseId, errors, userAuthorisation));
+        }
+        return errors;
+    }
+
+    public List<String> performCheck(FinremCallbackRequest callbackRequest, String userAuthorisation, FinremCaseDetailsMapper finremCaseDetailsMapper) {
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        Optional<Long> caseIdObj = Optional.ofNullable(finremCaseDetails.getId());
+
+        String caseId;
+        if (caseIdObj.isPresent()) {
+            caseId = String.valueOf(caseIdObj.get());
+        } else {
+            caseId = "Case not created yet.";
+        }
+        FinremCaseData finremcaseData = finremCaseDetails.getData();
+
+        helper.setConsentVariationOrderLabelField(finremcaseData);
+        List<String> errors = new ArrayList<>();
+
+        Map<String, Object> beforeData = Optional.ofNullable(callbackRequest.getCaseDetailsBefore())
+            .map(finremCaseDetailsMapper::mapToCaseDetails)
+            .map(CaseDetails::getData)
+            .orElseGet(HashMap::new);
+
+        // TODO: This caused NPT - Put in a random state. Remove this once the state is set in the callback
+        finremCaseDetails.setState(State.CASE_ADDED);
+        Map<String, Object> caseData = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails).getData();
         List<CaseDocument> caseDocuments = checkIfD81DocumentContainsEncryption(caseData, beforeData);
         if (caseDocuments != null && !caseDocuments.isEmpty()) {
             caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, caseId, errors, userAuthorisation));

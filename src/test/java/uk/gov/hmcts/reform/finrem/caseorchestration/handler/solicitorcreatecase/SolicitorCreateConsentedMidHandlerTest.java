@@ -64,16 +64,12 @@ class SolicitorCreateConsentedMidHandlerTest {
 
     @Test
     void handle() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
 
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
-            .thenReturn(finremCallbackRequest.getCaseDetails());
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(consentOrderService).performCheck(callbackRequest, AUTH_TOKEN);
-        verify(postalService).validate(callbackRequest.getCaseDetails().getData());
+        verify(consentOrderService).performCheck(finremCallbackRequest, AUTH_TOKEN, finremCaseDetailsMapper);
+        verify(postalService).validate(finremCallbackRequest.getCaseDetails().getData());
     }
 
     @Test
@@ -124,11 +120,7 @@ class SolicitorCreateConsentedMidHandlerTest {
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
-            .thenReturn(finremCallbackRequest.getCaseDetails());
-
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(handle.getErrors()).isEmpty();
     }
@@ -151,11 +143,7 @@ class SolicitorCreateConsentedMidHandlerTest {
             null));
         data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
-            .thenReturn(finremCallbackRequest.getCaseDetails());
-
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(handle.getErrors())
             .containsExactly(APPLICANT_SOLICITOR_POSTCODE_ERROR);
@@ -178,11 +166,7 @@ class SolicitorCreateConsentedMidHandlerTest {
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
         data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
-            .thenReturn(finremCallbackRequest.getCaseDetails());
-
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(handle.getErrors())
             .containsExactly(APPLICANT_POSTCODE_ERROR);
@@ -198,11 +182,7 @@ class SolicitorCreateConsentedMidHandlerTest {
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
-            .thenReturn(finremCallbackRequest.getCaseDetails());
-
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(handle.getErrors())
             .containsExactly(RESPONDENT_SOLICITOR_POSTCODE_ERROR);
@@ -226,28 +206,25 @@ class SolicitorCreateConsentedMidHandlerTest {
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
-            .thenReturn(finremCallbackRequest.getCaseDetails());
-
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(handle.getErrors())
             .containsExactlyInAnyOrder(RESPONDENT_POSTCODE_ERROR);
     }
 
+    /**
+     * This test checks that the handler will return an error message if the applicant and respondent
+     * have the same solicitor.
+     */
     @Test
     void givenConsentedCase_WhenApplicantAndRespondentHaveSameSolicitor_thenHandlerWillShowErrorMessage() {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
 
         String error = "Applicant organisation cannot be the same as respondent organisation";
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
-            .thenReturn(finremCallbackRequest.getCaseDetails());
         when(respondentSolicitorDetailsValidator.validate(any(FinremCaseData.class)))
             .thenReturn(List.of(error));
 
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(handle.getErrors()).contains(error);
     }

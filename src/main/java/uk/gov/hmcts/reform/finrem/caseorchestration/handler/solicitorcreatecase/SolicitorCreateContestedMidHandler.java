@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.RespondentSolicitorDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -25,15 +26,18 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
     private final InternationalPostalService postalService;
     private final SelectedCourtService selectedCourtService;
     private final ExpressCaseService expressCaseService;
+    private final RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator;
 
     public SolicitorCreateContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               InternationalPostalService postalService,
                                               SelectedCourtService selectedCourtService,
-                                              ExpressCaseService expressCaseService) {
+                                              ExpressCaseService expressCaseService,
+                                              RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator) {
         super(finremCaseDetailsMapper);
         this.postalService = postalService;
         this.selectedCourtService = selectedCourtService;
         this.expressCaseService = expressCaseService;
+        this.respondentSolicitorDetailsValidator = respondentSolicitorDetailsValidator;
     }
 
     @Override
@@ -60,6 +64,7 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
             errors.add("You cannot select High Court or Royal Court of Justice. Please select another court.");
         }
         errors.addAll(postalService.validate(caseData));
+        errors.addAll(respondentSolicitorDetailsValidator.validate(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();

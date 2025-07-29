@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.SolicitorCreateContestedMidHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.RespondentSolicitorDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -48,6 +49,9 @@ class SolicitorCreateContestedMidHandlerTest {
     @Mock
     private FeatureToggleService featureToggleService;
 
+    @Mock
+    private RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator;
+
     private static final String APPLICANT_POSTCODE_ERROR = "Postcode field is required for applicant address.";
     private static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
     private static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
@@ -59,7 +63,8 @@ class SolicitorCreateContestedMidHandlerTest {
             finremCaseDetailsMapper,
             postalService,
             selectedCourtService,
-            expressCaseService
+            expressCaseService,
+            respondentSolicitorDetailsValidator
         );
     }
 
