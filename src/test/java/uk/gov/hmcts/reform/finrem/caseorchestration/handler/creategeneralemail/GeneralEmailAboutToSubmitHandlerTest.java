@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.creategeneralemail;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -56,7 +57,7 @@ class GeneralEmailAboutToSubmitHandlerTest {
     private FeatureToggleService featureToggleService;
 
     @BeforeEach
-    public void init() {
+    void init() {
         GeneralEmailDocumentCategoriser categoriser = new GeneralEmailDocumentCategoriser(featureToggleService);
         handler =  new GeneralEmailAboutToSubmitHandler(finremCaseDetailsMapper,
             notificationService,
@@ -140,7 +141,7 @@ class GeneralEmailAboutToSubmitHandlerTest {
     void givenConsentedCallbackRequest_whenHandledForRecipient_thenNotCategorised() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(true);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertNull(response.getData().getGeneralEmailWrapper().getGeneralEmailCollection().get(0)
+        assertNull(response.getData().getGeneralEmailWrapper().getGeneralEmailCollection().getFirst()
                 .getValue().getGeneralEmailUploadedDocument().getCategoryId());
     }
 

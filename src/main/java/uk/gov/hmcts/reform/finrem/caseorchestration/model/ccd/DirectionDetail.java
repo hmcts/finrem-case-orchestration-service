@@ -26,7 +26,19 @@ public class DirectionDetail {
     private LocalDate dateOfHearing;
     private String hearingTime;
     private Court localCourt;
+    /**
+     * This field is no longer in use and is deprecated. Information should be stored in localCourt
+     *
+     * @deprecated This field is no longer in use and is deprecated. Information should be stored in localCourt
+     */
+    @Deprecated
     private NottinghamCourt nottinghamList;
+    /**
+     * This field is no longer in use and is deprecated. Information should be stored in localCourt
+     *
+     * @deprecated This field is no longer in use and is deprecated. Information should be stored in localCourt
+     */
+    @Deprecated
     private CfcCourt cfcList;
     private HearingTypeDirection typeOfHearing;
 }
