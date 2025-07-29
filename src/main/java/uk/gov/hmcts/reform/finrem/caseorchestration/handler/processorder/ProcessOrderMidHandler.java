@@ -1,10 +1,12 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorder;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -25,14 +27,13 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @Service
-public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
+public class ProcessOrderMidHandler extends FinremCallbackHandler {
 
     private final BulkPrintDocumentService bulkPrintDocumentService;
-
     private final ProcessOrderService processOrderService;
 
-    public DirectionUploadOrderMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                          BulkPrintDocumentService bulkPrintDocumentService, ProcessOrderService processOrderService) {
+    public ProcessOrderMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                  BulkPrintDocumentService bulkPrintDocumentService, ProcessOrderService processOrderService) {
         super(finremCaseDetailsMapper);
         this.bulkPrintDocumentService = bulkPrintDocumentService;
         this.processOrderService = processOrderService;
@@ -42,7 +43,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.DIRECTION_UPLOAD_ORDER.equals(eventType);
+            && (EventType.DIRECTION_UPLOAD_ORDER.equals(eventType) || EventType.PROCESS_ORDER.equals(eventType));
     }
 
     @Override
@@ -67,6 +68,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
             caseData.getUploadHearingOrder(),
             caseDataBefore.getUploadHearingOrder()
         );
+
         if (CollectionUtils.isNotEmpty(uploadHearingOrders)) {
             uploadHearingOrders.forEach(doc ->
                 bulkPrintDocumentService.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
@@ -102,11 +104,14 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
                 .build();
         }
 
-        // Create an empty entry if it is empty to save a click on add new button
-        if (ofNullable(caseData.getDirectionDetailsCollection()).orElse(List.of()).isEmpty()) {
-            caseData.setDirectionDetailsCollection(List.of(
-                DirectionDetailCollection.builder().value(DirectionDetail.builder().build()).build()
-            ));
+        // Old Process Order hearing data setup
+        if (EventType.DIRECTION_UPLOAD_ORDER.equals(callbackRequest.getEventType())) {
+            // Create an empty entry if it is empty to save a click on add new button
+            if (ofNullable(caseData.getDirectionDetailsCollection()).orElse(List.of()).isEmpty()) {
+                caseData.setDirectionDetailsCollection(List.of(
+                    DirectionDetailCollection.builder().value(DirectionDetail.builder().build()).build()
+                ));
+            }
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

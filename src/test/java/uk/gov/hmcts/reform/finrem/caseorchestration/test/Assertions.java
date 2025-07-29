@@ -27,7 +27,7 @@ public class Assertions {
                             && caseType == c.get()[1]
                             && eventType == c.get()[2] // This condition will always be true
                     );
-                    assertThat(handler.canHandle(callbackType, caseType, eventType), equalTo(expectedOutcome));
+                   assertThat("Failed for eventType: " + eventType, handler.canHandle(callbackType, caseType, eventType), equalTo(expectedOutcome));
                 }
             }
         }
@@ -39,7 +39,7 @@ public class Assertions {
             for (CaseType caseType : CaseType.values()) {
                 for (EventType eventType : EventType.values()) {
                     boolean expectedOutcome = callbackType == expectedCallbackType && eventType == expectedEventType;
-                    assertThat(handler.canHandle(callbackType, caseType, eventType), equalTo(expectedOutcome));
+                    assertThat("Failed for eventType: " + eventType, handler.canHandle(callbackType, caseType, eventType), equalTo(expectedOutcome));
                 }
             }
         }

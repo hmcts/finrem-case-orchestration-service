@@ -80,7 +80,6 @@ public class PBAValidationTest extends BaseTest {
 
     }
 
-
     @Test
     public void shouldPBAValidationSuccessful() throws Exception {
         setUpPbaValidationRequest("/fixtures/pba-validate.json");
@@ -146,7 +145,6 @@ public class PBAValidationTest extends BaseTest {
                 .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(response)));
     }
-
 
     private void stubForIdam() {
         idamServiceClassRule.stubFor(get("/details")
