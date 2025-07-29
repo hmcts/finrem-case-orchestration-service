@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -56,12 +56,12 @@ public class ManageHearingsCorresponder {
             return;
         }
 
-        List<PartyOnCaseCollection> partiesOnCaseCollection = hearing.getPartiesOnCase();
+        List<PartyOnCaseCollectionItem> partiesOnCaseCollection = hearing.getPartiesOnCase();
         if (partiesOnCaseCollection == null || partiesOnCaseCollection.isEmpty()) {
             return;
         }
 
-        for (PartyOnCaseCollection partyCollection : partiesOnCaseCollection) {
+        for (PartyOnCaseCollectionItem partyCollection : partiesOnCaseCollection) {
             PartyOnCase party = partyCollection.getValue();
             if (party != null) {
                 sendHearingCorrespondenceByParty(
