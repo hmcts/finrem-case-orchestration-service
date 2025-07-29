@@ -23,16 +23,16 @@ import java.util.List;
 @Service
 public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
 
-    private final InternationalPostalService postalService;
+    private final InternationalPostalService internationalPostalService;
     private final SelectedCourtService selectedCourtService;
     private final ExpressCaseService expressCaseService;
 
     public SolicitorCreateContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                              InternationalPostalService postalService,
+                                              InternationalPostalService internationalPostalService,
                                               SelectedCourtService selectedCourtService,
                                               ExpressCaseService expressCaseService) {
         super(finremCaseDetailsMapper);
-        this.postalService = postalService;
+        this.internationalPostalService = internationalPostalService;
         this.selectedCourtService = selectedCourtService;
         this.expressCaseService = expressCaseService;
     }
@@ -62,7 +62,7 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
         if (selectedCourtService.royalCourtOrHighCourtChosen(caseData)) {
             errors.add("You cannot select High Court or Royal Court of Justice. Please select another court.");
         }
-        errors.addAll(postalService.validate(caseData));
+        errors.addAll(internationalPostalService.validate(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }

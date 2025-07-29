@@ -34,7 +34,7 @@ class SolicitorCreateContestedMidHandlerTest {
     @Mock
     FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
-    private InternationalPostalService postalService;
+    private InternationalPostalService internationalPostalService;
 
     @Mock
     private SelectedCourtService selectedCourtService;
@@ -43,11 +43,8 @@ class SolicitorCreateContestedMidHandlerTest {
 
     @BeforeEach
     public void init() {
-        handler = new SolicitorCreateContestedMidHandler(
-                finremCaseDetailsMapper,
-                postalService,
-                selectedCourtService,
-                expressCaseService);
+        handler = new SolicitorCreateContestedMidHandler(finremCaseDetailsMapper, internationalPostalService,
+            selectedCourtService, expressCaseService);
     }
 
     @Test
@@ -59,7 +56,7 @@ class SolicitorCreateContestedMidHandlerTest {
     void testPostalServiceValidationCalled() {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(postalService, times(1))
+        verify(internationalPostalService, times(1))
                 .validate(finremCallbackRequest.getCaseDetails().getData());
     }
 
@@ -98,7 +95,7 @@ class SolicitorCreateContestedMidHandlerTest {
     void testThatErrorsReturned() {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         when(selectedCourtService.royalCourtOrHighCourtChosen(any())).thenReturn(true);
-        when(postalService.validate((FinremCaseData) any())).thenReturn(Arrays.asList("post err 1", "post err 2"));
+        when(internationalPostalService.validate((FinremCaseData) any())).thenReturn(Arrays.asList("post err 1", "post err 2"));
         assertThat(handler.handle(finremCallbackRequest, AUTH_TOKEN).getErrors()).contains(
                 "You cannot select High Court or Royal Court of Justice. Please select another court.",
                 "post err 1",
