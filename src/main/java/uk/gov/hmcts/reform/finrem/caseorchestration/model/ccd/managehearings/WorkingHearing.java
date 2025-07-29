@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
@@ -49,7 +50,7 @@ public class WorkingHearing {
             .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
             .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
             .partiesOnCase(workingHearing.getPartiesOnCaseMultiSelectList().getValue().stream()
-                .map(element -> PartyOnCaseCollection.builder()
+                .map(element -> PartyOnCaseCollectionItem.builder()
                     .value(PartyOnCase.builder()
                         .role(element.getCode())
                         .label(element.getLabel())
@@ -82,6 +83,18 @@ public class WorkingHearing {
         return dynamicList;
     }
 
+    public static DynamicMultiSelectList initialisePartiesOnCaseMultiSelectList(List<PartyOnCaseCollectionItem> partiesOnCase) {
+        List<DynamicMultiSelectListElement> listElements = partiesOnCase.stream()
+            .map(party -> DynamicMultiSelectListElement.builder()
+                .code(party.getValue().getRole())
+                .label(party.getValue().getLabel())
+                .build())
+            .toList();
+
+        return DynamicMultiSelectList.builder()
+            .listItems(listElements)
+            .build();
+    }
 
     public static HearingType getHearingType(DynamicList hearingTypeDynamicList) {
         return HearingType.valueOf(hearingTypeDynamicList.getValue().getCode());

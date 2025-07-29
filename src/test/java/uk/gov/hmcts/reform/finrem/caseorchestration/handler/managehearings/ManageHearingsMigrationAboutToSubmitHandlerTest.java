@@ -11,8 +11,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsMigrationService;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,6 +41,9 @@ class ManageHearingsMigrationAboutToSubmitHandlerTest {
     @Mock
     private ManageHearingsMigrationService manageHearingsMigrationService;
 
+    @Mock
+    private ManageHearingActionService manageHearingActionService;
+
     @Test
     void testCanHandle() {
         assertCanHandle(underTest, ABOUT_TO_SUBMIT, CONTESTED, MANAGE_HEARINGS_MIGRATION);
@@ -45,6 +58,27 @@ class ManageHearingsMigrationAboutToSubmitHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
             CONTESTED, caseData);
         when(manageHearingsMigrationService.wasMigrated(caseData)).thenReturn(wasMigrated);
+
+        lenient().doAnswer(invocation -> {
+            List<ManageHearingsCollectionItem> hearings = List.of(ManageHearingsCollectionItem
+                .builder()
+                .id(UUID.randomUUID())
+                .value(Hearing
+                    .builder()
+                    .hearingType(HearingType.APPEAL_HEARING)
+                    .hearingDate(LocalDate.of(2025, 1, 1))
+                    .hearingTimeEstimate("2 hours")
+                    .hearingTime("10:00 AM")
+                    .hearingCourtSelection(null) // Assuming null for simplicity
+                    .hearingMode(null) // Assuming null for simplicity
+                    .wasMigrated(YesOrNo.YES)
+                    .build())
+                .build());
+
+            // Simulate modification of caseData
+            caseData.getManageHearingsWrapper().setHearings(hearings);
+            return null;
+        }).when(manageHearingsMigrationService).runManageHearingMigration(caseData, "ui");
 
         // Act
         underTest.handle(request, AUTH_TOKEN);

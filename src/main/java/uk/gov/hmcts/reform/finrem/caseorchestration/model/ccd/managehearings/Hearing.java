@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.initialiseHearingTypeDynamicListWithSelection;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.initialisePartiesOnCaseMultiSelectList;
 
 @Builder
 @Data
@@ -34,7 +35,7 @@ public class Hearing {
     private YesOrNo hearingNoticePrompt;
     private YesOrNo additionalHearingDocPrompt;
     private List<DocumentCollectionItem> additionalHearingDocs;
-    private List<PartyOnCaseCollection> partiesOnCase;
+    private List<PartyOnCaseCollectionItem> partiesOnCase;
     private YesOrNo wasMigrated;
 
     public static WorkingHearing mapHearingToWorkingHearing(Hearing hearing, List<HearingType> hearingTypes ) {
@@ -48,7 +49,7 @@ public class Hearing {
             .hearingNoticePrompt(hearing.getHearingNoticePrompt())
             .additionalHearingDocPrompt(hearing.getAdditionalHearingDocPrompt())
             .additionalHearingDocs(hearing.getAdditionalHearingDocs())
-            .partiesOnCaseMultiSelectList(hearing.getPartiesOnCaseMultiSelectList())
+            .partiesOnCaseMultiSelectList(initialisePartiesOnCaseMultiSelectList(hearing.getPartiesOnCase()))
             .hearingTypeDynamicList(initialiseHearingTypeDynamicListWithSelection(hearingTypes, hearing.getHearingType()))
             .build();
     }

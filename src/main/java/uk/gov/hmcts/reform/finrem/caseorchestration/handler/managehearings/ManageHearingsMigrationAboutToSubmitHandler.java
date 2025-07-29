@@ -57,14 +57,13 @@ public class ManageHearingsMigrationAboutToSubmitHandler extends FinremCallbackH
             manageHearingsMigrationService.revertManageHearingMigration(finremCaseData);
         } else {
             manageHearingsMigrationService.runManageHearingMigration(finremCaseData, "ui");
+            ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+
+            // Test to check that a hearing that has been migrated can be used as
+            // the working hearing and not throw CCD validation errors.
+            manageHearingsWrapper.setWorkingHearingId(manageHearingsWrapper.getHearings().getFirst().getId());
+            manageHearingActionService.setWorkingHearingFromWorkingHearingId(finremCaseData);
         }
-
-        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
-
-        // Test to check that a hearing that has been migrated can be used as
-        // the working hearing and not throw CCD validation errors.
-        manageHearingsWrapper.setWorkingHearingId(manageHearingsWrapper.getHearings().getFirst().getId());
-        manageHearingActionService.setWorkingHearingFromWorkingHearingId(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }

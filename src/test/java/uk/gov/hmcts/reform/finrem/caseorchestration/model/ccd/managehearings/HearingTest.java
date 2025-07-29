@@ -9,8 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -44,12 +42,14 @@ class HearingTest {
         assertEquals(hearing.getHearingNoticePrompt(), workingHearing.getHearingNoticePrompt());
         assertEquals(hearing.getAdditionalHearingDocPrompt(), workingHearing.getAdditionalHearingDocPrompt());
         assertEquals(hearing.getAdditionalHearingDocs(), workingHearing.getAdditionalHearingDocs());
-        assertEquals(hearing.getPartiesOnCaseMultiSelectList(), workingHearing.getPartiesOnCaseMultiSelectList());
+        assertEquals(hearing.getPartiesOnCase().getFirst().getValue().getRole(),
+            workingHearing.getPartiesOnCaseMultiSelectList().getListItems().getFirst().getCode());
     }
 
     private static Stream<Arguments> provideHearings() {
         return Stream.of(
             Arguments.of(Hearing.builder()
+                .hearingType(HearingType.APPEAL_HEARING)
                 .hearingDate(LocalDate.of(2023, 1, 1))
                 .hearingTimeEstimate("2 hours")
                 .hearingTime("10:00 AM")
@@ -67,18 +67,19 @@ class HearingTest {
                     .documentUrl("http://example.com/document.pdf")
                     .documentBinaryUrl("http://example.com/document-binary.pdf")
                     .build()).build()))
-                .partiesOnCaseMultiSelectList(DynamicMultiSelectList
+                .partiesOnCase(List.of(PartyOnCaseCollectionItem
                     .builder()
-                    .listItems(List.of(DynamicMultiSelectListElement
+                    .value(PartyOnCase
                         .builder()
-                        .code("Some Party")
+                        .role("Some Party")
                         .label("Some Party Label")
-                        .build()))
-                    .build())
+                        .build())
+                    .build()))
                 .build(),
                 "Non-migrated hearing"
             ),
             Arguments.of(Hearing.builder()
+                    .hearingType(HearingType.DIR)
                     .hearingDate(LocalDate.of(2023, 1, 1))
                     .hearingTimeEstimate("2 hours")
                     .hearingTime("10:00 AM")
@@ -97,14 +98,14 @@ class HearingTest {
                         .documentUrl("http://example.com/document.pdf")
                         .documentBinaryUrl("http://example.com/document-binary.pdf")
                         .build()).build()))
-                    .partiesOnCaseMultiSelectList(DynamicMultiSelectList
+                    .partiesOnCase(List.of(PartyOnCaseCollectionItem
                         .builder()
-                        .listItems(List.of(DynamicMultiSelectListElement
+                        .value(PartyOnCase
                             .builder()
-                            .code("Some Party")
+                            .role("Some Party")
                             .label("Some Party Label")
-                            .build()))
-                        .build())
+                            .build())
+                        .build()))
                     .build(),
                 "Migrated hearing"
             )

@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -224,7 +224,7 @@ class ManageHearingActionServiceTest {
     void updateTabData_shouldAddHearingToTabCollectionInCorrectOrder() {
         Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
         hearing1.setPartiesOnCase(List.of(
-            PartyOnCaseCollection.builder()
+            PartyOnCaseCollectionItem.builder()
                 .value(PartyOnCase.builder()
                     .role(APPLICANT)
                     .label("Applicant")
@@ -234,7 +234,7 @@ class ManageHearingActionServiceTest {
 
         Hearing hearing2 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
         hearing2.setPartiesOnCase(List.of(
-            PartyOnCaseCollection.builder()
+            PartyOnCaseCollectionItem.builder()
                 .value(PartyOnCase.builder()
                     .role(RESPONDENT)
                     .label("Respondent")
@@ -263,7 +263,7 @@ class ManageHearingActionServiceTest {
     void updateTabData_shouldAddHearingToTabCollectionInCorrectOrderWhenManageHearingsMigrationHadDone() {
         Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
         hearing1.setPartiesOnCase(List.of(
-            PartyOnCaseCollection.builder()
+            PartyOnCaseCollectionItem.builder()
                 .value(PartyOnCase.builder()
                     .role(APPLICANT)
                     .label("Applicant")
@@ -273,7 +273,7 @@ class ManageHearingActionServiceTest {
 
         Hearing hearing2 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
         hearing2.setPartiesOnCase(List.of(
-            PartyOnCaseCollection.builder()
+            PartyOnCaseCollectionItem.builder()
                 .value(PartyOnCase.builder()
                     .role(RESPONDENT)
                     .label("Respondent")
@@ -283,7 +283,7 @@ class ManageHearingActionServiceTest {
 
         Hearing hearing3 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 1));
         hearing3.setPartiesOnCase(List.of(
-            PartyOnCaseCollection.builder()
+            PartyOnCaseCollectionItem.builder()
                 .value(PartyOnCase.builder()
                     .role(INTERVENER1)
                     .label("Intervener1")
@@ -450,6 +450,14 @@ class ManageHearingActionServiceTest {
             .hearingDate(date)
             .hearingTime(time)
             .hearingTimeEstimate(estimate)
+            .partiesOnCase(List.of(PartyOnCaseCollectionItem
+                .builder()
+                    .value(PartyOnCase
+                        .builder()
+                        .label("Applicant")
+                        .role(APPLICANT)
+                        .build())
+                .build()))
             .wasMigrated(migrated ? YesOrNo.YES : null)
             .build();
     }
