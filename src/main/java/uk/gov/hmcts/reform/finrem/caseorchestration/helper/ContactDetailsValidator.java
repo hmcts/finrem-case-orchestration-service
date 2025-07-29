@@ -240,7 +240,7 @@ public class ContactDetailsValidator {
 
     private static void checkForRespondentSolicitorEmail(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()
-            && !isValidEmailAddress(wrapper.getRespondentSolicitorEmail())) {
+            && !isValidEmailAddress(wrapper.getRespondentSolicitorEmail(), true)) {
             errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getRespondentSolicitorEmail()));
         }
     }
