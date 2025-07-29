@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -221,26 +223,24 @@ class ManageHearingActionServiceTest {
     @Test
     void updateTabData_shouldAddHearingToTabCollectionInCorrectOrder() {
         Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
-        hearing1.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
+        hearing1.setPartiesOnCase(List.of(
+            PartyOnCaseCollection.builder()
+                .value(PartyOnCase.builder()
+                    .role(APPLICANT)
                     .label("Applicant")
-                    .code(APPLICANT)
-                    .build()))
-            .build()
-        );
+                    .build())
+                .build()
+        ));
 
         Hearing hearing2 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
-        hearing2.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
+        hearing2.setPartiesOnCase(List.of(
+            PartyOnCaseCollection.builder()
+                .value(PartyOnCase.builder()
+                    .role(RESPONDENT)
                     .label("Respondent")
-                    .code(RESPONDENT)
-                    .build()))
-            .build()
-        );
+                    .build())
+                .build()
+        ));
 
         hearingWrapper.setHearings(new ArrayList<>(List.of(
             createHearingCollectionItem(hearing2),
@@ -254,45 +254,42 @@ class ManageHearingActionServiceTest {
         manageHearingActionService.updateTabData(finremCaseDetails.getData());
 
         List<HearingTabCollectionItem> hearingTabItems = hearingWrapper.getHearingTabItems();
-        assertThat(hearingTabItems)
-            .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("15 Jul 2025 11:00", "20 Jul 2025 10:00");
+        assertThat(hearingTabItems).hasSize(2);
+        assertThat(hearingTabItems.get(0).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
+        assertThat(hearingTabItems.get(1).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
     }
 
     @Test
     void updateTabData_shouldAddHearingToTabCollectionInCorrectOrderWhenManageHearingsMigrationHadDone() {
         Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
-        hearing1.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
+        hearing1.setPartiesOnCase(List.of(
+            PartyOnCaseCollection.builder()
+                .value(PartyOnCase.builder()
+                    .role(APPLICANT)
                     .label("Applicant")
-                    .code(APPLICANT)
-                    .build()))
-            .build()
-        );
+                    .build())
+                .build()
+        ));
 
         Hearing hearing2 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
-        hearing2.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
+        hearing2.setPartiesOnCase(List.of(
+            PartyOnCaseCollection.builder()
+                .value(PartyOnCase.builder()
+                    .role(RESPONDENT)
                     .label("Respondent")
-                    .code(RESPONDENT)
-                    .build()))
-            .build()
-        );
+                    .build())
+                .build()
+        ));
 
         Hearing hearing3 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 1));
-        hearing3.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
-                    .label("INTERVENER")
-                    .code(INTERVENER1)
-                    .build()))
-            .build()
-        );
+        hearing3.setPartiesOnCase(List.of(
+            PartyOnCaseCollection.builder()
+                .value(PartyOnCase.builder()
+                    .role(INTERVENER1)
+                    .label("Intervener1")
+                    .build())
+                .build()
+        ));
 
         Hearing migratedHearing1 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 10), true);
 
@@ -428,6 +425,14 @@ class ManageHearingActionServiceTest {
                     .code(HearingType.DIR.name())
                     .label(HearingType.DIR.getId())
                     .build())
+                .build())
+            .partiesOnCaseMultiSelectList(DynamicMultiSelectList.builder()
+                .value(List.of(
+                    DynamicMultiSelectListElement.builder()
+                        .code("[APPSOLICITOR]")
+                        .label("Applicant Solicitor - Hamzah")
+                        .build()
+                ))
                 .build())
             .hearingDate(date)
             .hearingTime("10:00")
