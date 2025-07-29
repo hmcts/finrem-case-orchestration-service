@@ -28,9 +28,11 @@ public class RespondentSolicitorDetailsValidator implements MandatoryDataValidat
     }
 
     /**
-     * Check if the applicant organisation and respondent organisation are the same if the respondent is represented.
+     * Validates that the applicant and respondent have different organisations if both are represented by solicitors.
+     * If they are the same, an error message is added to the errors list.
+     *
      * @param caseData The FinremCaseData to validate.
-     * @param errors A list of error messages.
+     * @param errors   The list to which error messages will be added.
      */
     private void checkApplicantAndRespondentHasSameSolicitor(FinremCaseData caseData, List<String> errors) {
         if (caseData.isApplicantRepresentedByASolicitor() && caseData.isRespondentRepresentedByASolicitor()) {
