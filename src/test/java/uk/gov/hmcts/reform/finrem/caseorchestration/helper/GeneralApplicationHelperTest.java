@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
@@ -92,6 +94,40 @@ class GeneralApplicationHelperTest {
         data.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         assertNull(helper.mapExistingGeneralApplicationToData(data, AUTH_TOKEN, caseId));
+    }
+
+    @Test
+    void givenContestedCase_whenMigratingExistingApplicantGeneralApplication_thenReturnGeneralApplicationData() {
+        GeneralApplicationWrapper generationApplicationWrapper = createLegacyGeneralApplicationData("applicant");
+        FinremCaseData caseData = FinremCaseData.builder()
+            .generalApplicationWrapper(generationApplicationWrapper)
+            .build();
+
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        GeneralApplicationCollectionData generalApplicationCollectionData =
+            helper.mapExistingGeneralApplicationToData(caseData, AUTH_TOKEN, caseId);
+
+        DynamicRadioList generationApplicationSender = generalApplicationCollectionData.getGeneralApplicationItems()
+            .getGeneralApplicationSender();
+        assertEquals(APPLICANT, generationApplicationSender.getValue().getCode());
+        assertEquals(APPLICANT, generationApplicationSender.getValue().getLabel());
+    }
+
+    @Test
+    void givenContestedCase_whenMigratingExistingRespondentGeneralApplication_thenReturnGeneralApplicationData() {
+        GeneralApplicationWrapper generationApplicationWrapper = createLegacyGeneralApplicationData("respondent");
+        FinremCaseData caseData = FinremCaseData.builder()
+            .generalApplicationWrapper(generationApplicationWrapper)
+            .build();
+
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        GeneralApplicationCollectionData generalApplicationCollectionData =
+            helper.mapExistingGeneralApplicationToData(caseData, AUTH_TOKEN, caseId);
+
+        DynamicRadioList generationApplicationSender = generalApplicationCollectionData.getGeneralApplicationItems()
+            .getGeneralApplicationSender();
+        assertEquals(RESPONDENT, generationApplicationSender.getValue().getCode());
+        assertEquals(RESPONDENT, generationApplicationSender.getValue().getLabel());
     }
 
     @Test
@@ -420,5 +456,23 @@ class GeneralApplicationHelperTest {
                 .caseDetails(finremCaseDetails)
                 .caseDetailsBefore(finremCaseDetailsBefore)
                 .build();
+    }
+
+    private GeneralApplicationWrapper createLegacyGeneralApplicationData(String receivedFrom) {
+        GeneralApplicationCollection generalApplicationCollection = GeneralApplicationCollection.builder()
+            .value(GeneralApplication.builder()
+                .generalApplicationDocument(CaseDocument.builder().build())
+                .build())
+            .build();
+
+        return GeneralApplicationWrapper.builder()
+            .generalApplicationCreatedBy("Claire Mumford")
+            .generalApplicationDocumentCollection(List.of(generalApplicationCollection))
+            .generalApplicationReceivedFrom(receivedFrom)
+            .generalApplicationDocument(CaseDocument.builder().build())
+            .generalApplicationLatestDocument(CaseDocument.builder().build())
+            .generalApplicationHearingRequired(YesOrNo.NO)
+            .generalApplicationLatestDocumentDate(LocalDate.of(2025, 7, 28))
+            .build();
     }
 }

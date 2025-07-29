@@ -277,14 +277,11 @@ public class GeneralApplicationHelper {
         buildDynamicIntervenerList(dynamicListElements, caseData);
         if (generalApplicationData != null && !generalApplicationData.isEmpty()) {
             generalApplicationData.forEach(ga -> {
-                if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null
-                    && !ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom().isEmpty()) {
-                    String existingCode = StringUtils.capitalize(
-                        ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom());
-                    String existingLabel = StringUtils.capitalize(
-                        ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom());
+                String receivedFrom = ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom();
+                if (StringUtils.isNotBlank(receivedFrom)) {
+                    String convertedReceivedFrom = convertReceivedFromToSender(receivedFrom);
                     DynamicRadioListElement newListElement = DynamicRadioListElement.builder()
-                        .code(existingCode).label(existingLabel).build();
+                        .code(convertedReceivedFrom).label(convertedReceivedFrom).build();
                     DynamicRadioList existingRadioList = DynamicRadioList.builder().value(newListElement)
                         .listItems(dynamicListElements).build();
                     ga.getGeneralApplicationItems().setGeneralApplicationSender(existingRadioList);
@@ -413,9 +410,10 @@ public class GeneralApplicationHelper {
             List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
             buildDynamicIntervenerList(dynamicListElements, caseData);
             String existingValue = caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom();
+            String convertedValue = convertReceivedFromToSender(existingValue);
             DynamicRadioListElement listElement = DynamicRadioListElement.builder()
-                .code(existingValue)
-                .label(caseData.getGeneralApplicationWrapper().getGeneralApplicationReceivedFrom())
+                .code(convertedValue)
+                .label(convertedValue)
                 .build();
             DynamicRadioList existingRadioList = DynamicRadioList.builder().value(listElement)
                 .listItems(dynamicListElements).build();
@@ -434,4 +432,15 @@ public class GeneralApplicationHelper {
         }
     }
 
+    /**
+     * Converts a {@code generationApplicationReceivedFrom} value to a {@code generationApplicationSender} value.
+     *
+     * <p>
+     * {@code generationApplicationReceivedFrom} is a field from legacy General Applications.
+     * @param receivedFrom the value to convert
+     * @return the converted value
+     */
+    private String convertReceivedFromToSender(String receivedFrom) {
+        return StringUtils.capitalize(receivedFrom);
+    }
 }
