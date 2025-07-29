@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.RespondentSolicitorDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -27,6 +28,7 @@ public class SolicitorCreateConsentedMidHandler implements CallbackHandler<Map<S
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final ConsentOrderService consentOrderService;
     private final InternationalPostalService postalService;
+    private final RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -46,6 +48,7 @@ public class SolicitorCreateConsentedMidHandler implements CallbackHandler<Map<S
 
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseDetails.getData()));
+        errors.addAll(respondentSolicitorDetailsValidator.validate(finremCaseDetails.getData()));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
             .data(callbackRequest.getCaseDetails().getData()).errors(errors).build();
