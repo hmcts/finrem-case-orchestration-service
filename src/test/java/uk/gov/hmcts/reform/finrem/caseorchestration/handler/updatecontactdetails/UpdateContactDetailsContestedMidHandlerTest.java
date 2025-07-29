@@ -217,7 +217,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(1, handle.getErrors().size());
-        assertEquals("Postcode field is required for applicant solicitor address.", handle.getErrors().get(0));
+        assertEquals("Postcode field is required for applicant solicitor address.", handle.getErrors().getFirst());
     }
 
     @Test
