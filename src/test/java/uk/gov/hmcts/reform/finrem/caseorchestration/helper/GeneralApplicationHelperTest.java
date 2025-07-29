@@ -7,14 +7,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -43,8 +42,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
@@ -63,19 +62,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4_GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationHelperTest {
-
-    public static final String AUTH_TOKEN = "tokien:)";
+@ExtendWith(MockitoExtension.class)
+class GeneralApplicationHelperTest {
     @Mock
     private GenericDocumentService service;
-    private String caseId = "123123123";
-    private ObjectMapper objectMapper;
-    @Mock
-    FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final String caseId = "123123123";
 
     @Test
-    public void givenDate_whenOjectToDateTimeIsNotNull_thenReturnLocalDate() {
+    void givenDate_whenOjectToDateTimeIsNotNull_thenReturnLocalDate() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getGeneralOrderWrapper().setGeneralOrderDate(LocalDate.of(2022, 10, 10));
@@ -84,7 +78,7 @@ public class GeneralApplicationHelperTest {
     }
 
     @Test
-    public void givenDate_whenOjectToDateTimeIsNull_thenReturnNull() {
+    void givenDate_whenOjectToDateTimeIsNull_thenReturnNull() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
@@ -92,25 +86,25 @@ public class GeneralApplicationHelperTest {
     }
 
     @Test
-    public void givenContestedCase_whenMigratingExistingGeneralApplicationAndCreatedByIsNull_thenReturnNull() {
+    void givenContestedCase_whenMigratingExistingGeneralApplicationAndCreatedByIsNull_thenReturnNull() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
-        assertNull(helper.mapExistingGeneralApplicationToData(data, AUTH_TOKEN, anyString()));
+        assertNull(helper.mapExistingGeneralApplicationToData(data, AUTH_TOKEN, caseId));
     }
 
     @Test
-    public void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNull_thenReturnNull() {
+    void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNull_thenReturnNull() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
-        assertNull(helper.retrieveInitialGeneralApplicationData(data, "any", AUTH_TOKEN, anyString()));
+        assertNull(helper.retrieveInitialGeneralApplicationData(data, "any", AUTH_TOKEN, caseId));
     }
 
     @Test
-    public void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNotNull_thenReturnNull() {
+    void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNotNull_thenReturnNull() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
@@ -167,7 +161,7 @@ public class GeneralApplicationHelperTest {
     }
 
     @Test
-    public void giveCase_whenCaseDocumentIsNotPdf_thenConvertToPdf() {
+    void giveCase_whenCaseDocumentIsNotPdf_thenConvertToPdf() {
         CallbackRequest callbackRequest = callbackRequestForCaseDetails();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
@@ -178,7 +172,7 @@ public class GeneralApplicationHelperTest {
     }
 
     @Test
-    public void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener1Role() {
+    void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener1Role() {
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
@@ -192,7 +186,7 @@ public class GeneralApplicationHelperTest {
     }
 
     @Test
-    public void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener2Role() {
+    void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener2Role() {
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
@@ -206,7 +200,7 @@ public class GeneralApplicationHelperTest {
     }
 
     @Test
-    public void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener3Role() {
+    void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener3Role() {
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
@@ -220,7 +214,7 @@ public class GeneralApplicationHelperTest {
     }
 
     @Test
-    public void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener4Role() {
+    void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnIntervener4Role() {
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
@@ -234,7 +228,7 @@ public class GeneralApplicationHelperTest {
     }
 
     @Test
-    public void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnApplicantRole() {
+    void givenCollectionName_ThenShouldGetRelevantCollectionDataBasedOnApplicantRole() {
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
@@ -248,25 +242,25 @@ public class GeneralApplicationHelperTest {
     }
 
     @Test
-    public void givenGeneralApplicationReceivedFromFieldSet_ThenShouldUpdateApplicantAndRespondentColl() {
+    void givenGeneralApplicationReceivedFromFieldSet_ThenShouldUpdateApplicantAndRespondentColl() {
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
         List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
                 .getGeneralApplications();
-        collection.get(0).getValue().setGeneralApplicationReceivedFrom(APPLICANT);
+        collection.getFirst().getValue().setGeneralApplicationReceivedFrom(APPLICANT);
         collection.forEach(x -> x.getValue().setGeneralApplicationSender(null));
         helper.populateGeneralApplicationSender(caseData, collection);
-        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
+        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().getFirst()
                 .getValue().getGeneralApplicationSender().getValue().getLabel());
-        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
+        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().getFirst()
                 .getValue().getGeneralApplicationSender().getValue().getCode());
-        assertNull(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0).getValue()
+        assertNull(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().getFirst().getValue()
                 .getGeneralApplicationReceivedFrom());
     }
 
     @Test
-    public void givenGeneralApplicationReceivedFromFieldNull_ThenShouldUpdateApplicantAndRespondentColl() {
+    void givenGeneralApplicationReceivedFromFieldNull_ThenShouldUpdateApplicantAndRespondentColl() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
         List<GeneralApplicationsCollection> collection2 = new ArrayList<>(caseData.getGeneralApplicationWrapper()
@@ -274,7 +268,7 @@ public class GeneralApplicationHelperTest {
         caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(collection2);
         List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
                 .getGeneralApplications();
-        collection.get(0).getValue().setGeneralApplicationReceivedFrom(APPLICANT);
+        collection.getFirst().getValue().setGeneralApplicationReceivedFrom(APPLICANT);
         collection.forEach(x -> x.getValue().setGeneralApplicationSender(null));
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         helper.populateGeneralApplicationSender(caseData, collection);
@@ -293,7 +287,7 @@ public class GeneralApplicationHelperTest {
     }
 
     @Test
-    public void givenIntervenersOnCase_ThenShouldAddToDynamicList() {
+    void givenIntervenersOnCase_ThenShouldAddToDynamicList() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         IntervenerOne oneWrapper = IntervenerOne.builder().intervenerName("firstIntervener").build();
@@ -314,11 +308,11 @@ public class GeneralApplicationHelperTest {
         assertEquals(INTERVENER1, dynamicListElements.get(3).getCode());
         assertEquals(INTERVENER2, dynamicListElements.get(4).getCode());
         assertEquals(INTERVENER3, dynamicListElements.get(5).getCode());
-        assertEquals(INTERVENER4, dynamicListElements.get(dynamicListElements.size() - 1).getCode());
+        assertEquals(INTERVENER4, dynamicListElements.getLast().getCode());
     }
 
     @Test
-    public void givenGeneralApplications_checkForDuplicates() {
+    void givenGeneralApplications_checkForDuplicates() {
         ObjectMapper objectMapper = JsonMapper
             .builder()
             .addModule(new JavaTimeModule())
@@ -334,17 +328,17 @@ public class GeneralApplicationHelperTest {
 
         assertEquals(2, caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplications().size());
         assertEquals("2023-10-04", caseDetails.getData().getGeneralApplicationWrapper()
-            .getGeneralApplications().get(0).getValue().getGeneralApplicationCreatedDate().toString());
+            .getGeneralApplications().getFirst().getValue().getGeneralApplicationCreatedDate().toString());
     }
 
     private void assertData(List<GeneralApplicationItems> resultingList) {
-        assertEquals(APPLICANT, resultingList.get(0).getGeneralApplicationSender().getValue().getCode());
-        assertEquals(APPLICANT, resultingList.get(0).getGeneralApplicationSender().getValue().getLabel());
-        assertEquals("Claire Mumford", resultingList.get(0).getGeneralApplicationCreatedBy());
-        assertEquals("Yes", resultingList.get(0).getGeneralApplicationHearingRequired());
-        assertEquals("24 hours", resultingList.get(0).getGeneralApplicationTimeEstimate());
-        assertEquals("Special measure", resultingList.get(0).getGeneralApplicationSpecialMeasures());
-        assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
+        assertEquals(APPLICANT, resultingList.getFirst().getGeneralApplicationSender().getValue().getCode());
+        assertEquals(APPLICANT, resultingList.getFirst().getGeneralApplicationSender().getValue().getLabel());
+        assertEquals("Claire Mumford", resultingList.getFirst().getGeneralApplicationCreatedBy());
+        assertEquals("Yes", resultingList.getFirst().getGeneralApplicationHearingRequired());
+        assertEquals("24 hours", resultingList.getFirst().getGeneralApplicationTimeEstimate());
+        assertEquals("Special measure", resultingList.getFirst().getGeneralApplicationSpecialMeasures());
+        assertEquals(resultingList.getFirst().getGeneralApplicationCreatedDate(),
                 LocalDate.of(2022, 8, 2));
     }
 
@@ -365,7 +359,7 @@ public class GeneralApplicationHelperTest {
                 getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
         return DynamicRadioList.builder()
-                .value(dynamicListElements.get(0))
+                .value(dynamicListElements.getFirst())
                 .listItems(dynamicListElements)
                 .build();
     }
