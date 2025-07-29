@@ -19,17 +19,18 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class AmendPaperCaseContestedMidHandler extends FinremCallbackHandler {
+public class AmendApplicationDetailsMidHandler extends FinremCallbackHandler {
 
-    private final InternationalPostalService postalService;
+    private final InternationalPostalService internationalPostalService;
     private final ExpressCaseService expressCaseService;
     private final FeatureToggleService featureToggleService;
 
-    public AmendPaperCaseContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                             InternationalPostalService postalService,
-                                             ExpressCaseService expressCaseService, FeatureToggleService featureToggleService) {
+    public AmendApplicationDetailsMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                             InternationalPostalService internationalPostalService,
+                                             ExpressCaseService expressCaseService,
+                                             FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
-        this.postalService = postalService;
+        this.internationalPostalService = internationalPostalService;
         this.expressCaseService = expressCaseService;
         this.featureToggleService = featureToggleService;
     }
@@ -38,7 +39,8 @@ public class AmendPaperCaseContestedMidHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.AMEND_CONTESTED_PAPER_APP_DETAILS.equals(eventType);
+            && List.of(EventType.AMEND_CONTESTED_APP_DETAILS, EventType.AMEND_CONTESTED_PAPER_APP_DETAILS)
+            .contains(eventType);
     }
 
     @Override
@@ -56,8 +58,9 @@ public class AmendPaperCaseContestedMidHandler extends FinremCallbackHandler {
         }
 
         List<String> errors = new ArrayList<>();
+        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseDetails.getData()));
         errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseDetails.getData()));
-        errors.addAll(postalService.validate(caseData));
+        errors.addAll(internationalPostalService.validate(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
