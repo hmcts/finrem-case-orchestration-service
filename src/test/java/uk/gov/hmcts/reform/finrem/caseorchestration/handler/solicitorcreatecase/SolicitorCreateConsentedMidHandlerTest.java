@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.RespondentSolicitorDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +48,9 @@ class SolicitorCreateConsentedMidHandlerTest {
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @Mock
+    private RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator;
 
     private static final String APPLICANT_POSTCODE_ERROR = "Postcode field is required for applicant address.";
     private static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
@@ -229,6 +234,22 @@ class SolicitorCreateConsentedMidHandlerTest {
 
         assertThat(handle.getErrors())
             .containsExactlyInAnyOrder(RESPONDENT_POSTCODE_ERROR);
+    }
+
+    @Test
+    void givenConsentedCase_WhenApplicantAndRespondentHaveSameSolicitor_thenHandlerWillShowErrorMessage() {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+
+        String error = "Applicant organisation cannot be the same as respondent organisation";
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
+            .thenReturn(finremCallbackRequest.getCaseDetails());
+        when(respondentSolicitorDetailsValidator.validate(any(FinremCaseData.class)))
+            .thenReturn(List.of(error));
+
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(handle.getErrors()).contains(error);
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {

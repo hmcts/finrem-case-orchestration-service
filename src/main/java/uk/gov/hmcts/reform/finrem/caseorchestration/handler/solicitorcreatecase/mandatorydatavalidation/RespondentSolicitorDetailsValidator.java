@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
@@ -10,10 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Component
+@Service
 @Slf4j
 public class RespondentSolicitorDetailsValidator implements MandatoryDataValidator {
 
+    /**
+     * Validates the given FinremCaseData for any errors related to Respondent Solicitor details.
+     *
+     * @param caseData The FinremCaseData to validate.
+     * @return A list of error messages. An empty list indicates no errors were found.
+     */
     @Override
     public List<String> validate(FinremCaseData caseData) {
         List<String> errors = new ArrayList<>();
@@ -23,18 +29,16 @@ public class RespondentSolicitorDetailsValidator implements MandatoryDataValidat
 
     /**
      * Check if the applicant organisation and respondent organisation are the same if the respondent is represented.
-     * @param caseData
-     * @param errors
+     * @param caseData The FinremCaseData to validate.
+     * @param errors A list of error messages. An empty list indicates no errors were found.
      */
     private void checkApplicantAndRespondentHasSameSolicitor(FinremCaseData caseData, List<String> errors) {
-        Optional<String> applicantOrgId = Optional.ofNullable(getApplicantOrgId(caseData));
-        Optional<String> respondentOrgId = Optional.ofNullable(getRespondentOrgId(caseData));
-
-        if (caseData.isApplicantRepresentedByASolicitor()
-            && caseData.isRespondentRepresentedByASolicitor()
-            && applicantOrgId.isPresent()
-            && applicantOrgId.equals(respondentOrgId)) {
-            errors.add("Applicant organisation cannot be the same as respondent organisation");
+        if (caseData.isApplicantRepresentedByASolicitor() && caseData.isRespondentRepresentedByASolicitor()) {
+            Optional<String> applicantOrgId = Optional.ofNullable(getApplicantOrgId(caseData));
+            Optional<String> respondentOrgId = Optional.ofNullable(getRespondentOrgId(caseData));
+            if (applicantOrgId.isPresent() && applicantOrgId.equals(respondentOrgId)) {
+                errors.add("Applicant organisation cannot be the same as respondent organisation");
+            }
         }
     }
 
