@@ -101,7 +101,6 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
     public abstract CaseDocument getDocumentToPrint(CaseDetails caseDetails, String authorisationToken,
                                                     DocumentHelper.PaperNotificationRecipient recipient);
 
-
     protected abstract void emailApplicantSolicitor(CaseDetails caseDetails);
 
     protected abstract void emailRespondentSolicitor(CaseDetails caseDetails);

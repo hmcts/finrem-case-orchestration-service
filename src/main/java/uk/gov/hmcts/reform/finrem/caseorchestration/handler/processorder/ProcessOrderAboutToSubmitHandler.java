@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -25,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDoc
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,30 +46,33 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 
 @Slf4j
 @Service
-public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHandler {
+public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
-
     private final HasApprovableCollectionReader hasApprovableCollectionReader;
-
     private final DocumentHelper documentHelper;
-
     private final GenericDocumentService genericDocumentService;
+    private final ManageHearingActionService manageHearingActionService;
 
-    public DirectionUploadOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                    AdditionalHearingDocumentService additionalHearingDocumentService,
-                                                    HasApprovableCollectionReader hasApprovableCollectionReader,
-                                                    DocumentHelper documentHelper, GenericDocumentService genericDocumentService) {
+    public ProcessOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                            AdditionalHearingDocumentService additionalHearingDocumentService,
+                                            HasApprovableCollectionReader hasApprovableCollectionReader,
+                                            DocumentHelper documentHelper, GenericDocumentService genericDocumentService,
+                                            ManageHearingActionService manageHearingActionService) {
         super(finremCaseDetailsMapper);
         this.additionalHearingDocumentService = additionalHearingDocumentService;
         this.hasApprovableCollectionReader = hasApprovableCollectionReader;
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
+        this.manageHearingActionService = manageHearingActionService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return ABOUT_TO_SUBMIT.equals(callbackType) && CONTESTED.equals(caseType) && DIRECTION_UPLOAD_ORDER.equals(eventType);
+        return ABOUT_TO_SUBMIT.equals(callbackType)
+            && CONTESTED.equals(caseType)
+            && (DIRECTION_UPLOAD_ORDER.equals(eventType)
+            || EventType.PROCESS_ORDER.equals(eventType));
     }
 
     @Override
@@ -96,6 +103,11 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         handlePsaDocuments(caseData, stampedDocuments);
         handleAgreedDraftOrdersCollection(caseData, stampedDocuments, additionalDocsConverted);
         clearTemporaryFields(caseData);
+
+        if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())) {
+            manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
+            manageHearingActionService.updateTabData(caseData);
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }

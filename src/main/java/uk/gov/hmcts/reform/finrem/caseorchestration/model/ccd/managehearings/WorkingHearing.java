@@ -18,12 +18,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import java.time.LocalDate;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.getHearingType;
+
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class WorkingHearing {
-
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate hearingDate;
@@ -94,9 +95,5 @@ public class WorkingHearing {
         return DynamicMultiSelectList.builder()
             .listItems(listElements)
             .build();
-    }
-
-    public static HearingType getHearingType(DynamicList hearingTypeDynamicList) {
-        return HearingType.valueOf(hearingTypeDynamicList.getValue().getCode());
     }
 }

@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingServi
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.getHearingType;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.getHearingType;
 
 @Slf4j
 @Service
