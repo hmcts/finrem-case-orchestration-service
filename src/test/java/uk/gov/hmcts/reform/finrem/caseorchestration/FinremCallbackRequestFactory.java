@@ -37,17 +37,6 @@ public class FinremCallbackRequestFactory {
         return from(FinremCaseDetailsBuilderFactory.from(id, caseType, caseData, state));
     }
 
-    public static FinremCallbackRequest from(Long id, FinremCaseData.FinremCaseDataBuilder caseDataBuilder) {
-        return from(id, null, caseDataBuilder);
-    }
-
-    public static FinremCallbackRequest from(Long id, CaseType caseType, FinremCaseData.FinremCaseDataBuilder caseDataBuilder) {
-        return from(FinremCaseDetails.builder()
-            .id(id)
-            .caseType(caseType)
-            .data(caseDataBuilder.build()));
-    }
-
     public static FinremCallbackRequest from(FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBuilder) {
         return from(caseDetailsBuilder, caseDetailsBuilder);
     }
