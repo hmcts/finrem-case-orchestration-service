@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,8 +79,6 @@ public class ConsentOrderService {
             .map(CaseDetails::getData)
             .orElseGet(HashMap::new);
 
-        // TODO: This caused NPT - Put in a random state. Remove this once the state is set in the callback
-        finremCaseDetails.setState(State.CASE_ADDED);
         Map<String, Object> caseData = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails).getData();
         List<CaseDocument> caseDocuments = checkIfD81DocumentContainsEncryption(caseData, beforeData);
         if (caseDocuments != null && !caseDocuments.isEmpty()) {
