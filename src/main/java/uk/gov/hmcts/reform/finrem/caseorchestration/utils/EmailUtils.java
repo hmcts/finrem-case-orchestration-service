@@ -14,8 +14,8 @@ public class EmailUtils {
      * Validates whether the given email address is in a valid format.
      *
      * <p>
-     * This method attempts to create and validate a {@link javax.mail.internet.InternetAddress}
-     * using the provided email string. If the email format is valid, it returns {@code true};
+     * This method delegates to {@link #isValidEmailAddress(String, boolean)} with {@code allowEmpty} set to {@code false}.
+     * It returns {@code true} if the email format is valid according to {@link org.apache.commons.validator.routines.EmailValidator};
      * otherwise, it returns {@code false}.
      * </p>
      *

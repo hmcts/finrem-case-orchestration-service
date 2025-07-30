@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,12 +14,17 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_SOLICITOR_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.RESPONDENT_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.RESPONDENT_SOLICITOR_POSTCODE_ERROR;
 
 class ContactDetailsValidatorTest {
+
+    private static final String INVALID_EMAIL = "invalid-email";
+    private static final String VALID_EMAIL = "valid@email.com";
+    private static final String ERROR_MSG = "%s is not a valid Email address.";
 
     private static class PostCodeModifier {
 
@@ -314,5 +320,165 @@ class ContactDetailsValidatorTest {
                         .build()
                 ).build()
         ).build();
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("provideCaseDataScenarios")
+    @DisplayName("Email validation test cases")
+    void shouldValidateEmailAddresses(String description, FinremCaseData caseData, List<String> expectedErrors) {
+        List<String> errors = ContactDetailsValidator.validateCaseDataEmailAddresses(caseData);
+        assertEquals(expectedErrors, errors);
+    }
+
+    private static Stream<org.junit.jupiter.params.provider.Arguments> provideCaseDataScenarios() {
+        return Stream.of(
+            // Invalid applicant solicitor email - Contested
+            org.junit.jupiter.params.provider.Arguments.of(
+                "Invalid applicant solicitor email (Contested)",
+                FinremCaseData.builder()
+                    .ccdCaseType(CaseType.CONTESTED)
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .applicantRepresented(YesOrNo.YES)
+                        .applicantSolicitorEmail(INVALID_EMAIL)
+                        .build())
+                    .build(),
+                List.of(String.format(ERROR_MSG, INVALID_EMAIL))
+            ),
+
+            // Invalid applicant solicitor email - Consented
+            org.junit.jupiter.params.provider.Arguments.of(
+                "Invalid applicant solicitor email (Consented)",
+                FinremCaseData.builder()
+                    .ccdCaseType(CaseType.CONSENTED)
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .applicantRepresented(YesOrNo.YES)
+                        .solicitorEmail(INVALID_EMAIL)
+                        .build())
+                    .build(),
+                List.of(String.format(ERROR_MSG, INVALID_EMAIL))
+            ),
+
+            // Invalid applicant email
+            org.junit.jupiter.params.provider.Arguments.of(
+                "Invalid applicant email",
+                FinremCaseData.builder()
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .applicantEmail(INVALID_EMAIL)
+                        .build())
+                    .build(),
+                List.of(String.format(ERROR_MSG, INVALID_EMAIL))
+            ),
+
+            // Invalid respondent solicitor email
+            org.junit.jupiter.params.provider.Arguments.of(
+                "Invalid respondent solicitor email (Contested)",
+                FinremCaseData.builder()
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .contestedRespondentRepresented(YesOrNo.YES)
+                        .respondentSolicitorEmail(INVALID_EMAIL)
+                        .build())
+                    .build(),
+                List.of(String.format(ERROR_MSG, INVALID_EMAIL))
+            ),
+
+            // Invalid respondent solicitor email
+            org.junit.jupiter.params.provider.Arguments.of(
+                "Invalid respondent solicitor email (Consented)",
+                FinremCaseData.builder()
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .consentedRespondentRepresented(YesOrNo.YES)
+                        .respondentSolicitorEmail(INVALID_EMAIL)
+                        .build())
+                    .build(),
+                List.of(String.format(ERROR_MSG, INVALID_EMAIL))
+            ),
+
+            // Invalid respondent email (not represented)
+            org.junit.jupiter.params.provider.Arguments.of(
+                "Invalid respondent email (not represented, Contested)",
+                FinremCaseData.builder()
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .contestedRespondentRepresented(YesOrNo.NO)
+                        .respondentEmail(INVALID_EMAIL)
+                        .build())
+                    .build(),
+                List.of(String.format(ERROR_MSG, INVALID_EMAIL))
+            ),
+            org.junit.jupiter.params.provider.Arguments.of(
+                "Invalid respondent email (not represented, Consented)",
+                FinremCaseData.builder()
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .consentedRespondentRepresented(YesOrNo.NO)
+                        .respondentEmail(INVALID_EMAIL)
+                        .build())
+                    .build(),
+                List.of(String.format(ERROR_MSG, INVALID_EMAIL))
+            ),
+
+            // All valid emails
+            org.junit.jupiter.params.provider.Arguments.of(
+                "All valid emails (Contested)",
+                FinremCaseData.builder()
+                    .ccdCaseType(CaseType.CONTESTED)
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .applicantRepresented(YesOrNo.YES)
+                        .contestedRespondentRepresented(YesOrNo.YES)
+                        .applicantSolicitorEmail(VALID_EMAIL)
+                        .applicantEmail(VALID_EMAIL)
+                        .respondentSolicitorEmail(VALID_EMAIL)
+                        .respondentEmail(VALID_EMAIL)
+                        .build())
+                    .build(),
+                List.of()
+            ),
+
+            org.junit.jupiter.params.provider.Arguments.of(
+                "All valid emails (Consented)",
+                FinremCaseData.builder()
+                    .ccdCaseType(CaseType.CONSENTED)
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .applicantRepresented(YesOrNo.YES)
+                        .consentedRespondentRepresented(YesOrNo.YES)
+                        .solicitorEmail(VALID_EMAIL)
+                        .applicantEmail(VALID_EMAIL)
+                        .respondentSolicitorEmail(VALID_EMAIL)
+                        .respondentEmail(VALID_EMAIL)
+                        .build())
+                    .build(),
+                List.of()
+            ),
+
+            org.junit.jupiter.params.provider.Arguments.of(
+                "All valid emails - optional respondent solicitor email (Contested)",
+                FinremCaseData.builder()
+                    .ccdCaseType(CaseType.CONTESTED)
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .applicantRepresented(YesOrNo.YES)
+                        .contestedRespondentRepresented(YesOrNo.YES)
+                        .applicantSolicitorEmail(VALID_EMAIL)
+                        .applicantEmail(VALID_EMAIL)
+                        .respondentSolicitorEmail("")
+                        .respondentEmail(VALID_EMAIL)
+                        .build())
+                    .build(),
+                List.of()
+            ),
+
+            org.junit.jupiter.params.provider.Arguments.of(
+                "All valid emails - optional respondent solicitor email (Consented)",
+                FinremCaseData.builder()
+                    .ccdCaseType(CaseType.CONSENTED)
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .applicantRepresented(YesOrNo.YES)
+                        .consentedRespondentRepresented(YesOrNo.YES)
+                        .solicitorEmail(VALID_EMAIL)
+                        .applicantEmail(VALID_EMAIL)
+                        .respondentSolicitorEmail(null)
+                        .respondentEmail(VALID_EMAIL)
+                        .build())
+                    .build(),
+                List.of()
+            )
+        );
     }
 }
