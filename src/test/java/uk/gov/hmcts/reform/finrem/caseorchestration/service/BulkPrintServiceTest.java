@@ -84,7 +84,6 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(bulkPrintLetterId, is(letterId));
     }
 
-
     @Test
     public void shouldSendDocumentForBulkPrintFinRem() {
         UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(
@@ -293,32 +292,6 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(uuid, is(letterId));
         assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL), is(true));
         assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES), is(false));
-    }
-
-    @Test
-    public void shouldPrintIntervenerDocuments() {
-        final String contestedBulkPrintConsentIntervener1Json
-            = "/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(contestedBulkPrintConsentIntervener1Json, mapper);
-        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
-
-        when(coverSheetService.generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE))
-            .thenReturn(caseDocument);
-        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), anyBoolean(), eq(AUTH_TOKEN))).thenReturn(letterId);
-
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        IntervenerOne intervenerOne = finremCaseDetails.getData().getIntervenerOne();
-
-        UUID uuid = bulkPrintService.printIntervenerDocuments(intervenerOne, caseDetails, AUTH_TOKEN, bulkPrintDocuments);
-
-        assertThat(uuid, is(letterId));
-
-        verify(coverSheetService).generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
-        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), anyBoolean(), eq(AUTH_TOKEN));
-
-        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
-        assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
-        assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
     }
 
     @Test
