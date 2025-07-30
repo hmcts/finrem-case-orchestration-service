@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.RespondentSolicitorDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -13,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
@@ -20,15 +23,18 @@ public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
     private final InternationalPostalService postalService;
     private final ExpressCaseService expressCaseService;
     private final FeatureToggleService featureToggleService;
+    private final RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator;
 
     public AmendApplicationContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                InternationalPostalService postalService,
                                                ExpressCaseService expressCaseService,
-                                               FeatureToggleService featureToggleService) {
+                                               FeatureToggleService featureToggleService,
+                                               RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator) {
         super(finremCaseDetailsMapper);
         this.postalService = postalService;
         this.expressCaseService = expressCaseService;
         this.featureToggleService = featureToggleService;
+        this.respondentSolicitorDetailsValidator = respondentSolicitorDetailsValidator;
     }
 
     @Override
@@ -52,8 +58,10 @@ public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
             expressCaseService.setExpressCaseEnrollmentStatus(caseData);
             expressCaseService.setWhichExpressCaseAmendmentLabelToShow(caseData, caseDataBefore);
         }
+        List<String> errors = postalService.validate(caseData);
+        errors.addAll(respondentSolicitorDetailsValidator.validate(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).errors(postalService.validate(caseData)).build();
+            .data(caseData).errors(errors).build();
     }
 }
