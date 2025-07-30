@@ -32,6 +32,7 @@ public class ConsentOrderService {
     private final ConsentedApplicationHelper helper;
     private final BulkPrintDocumentService service;
     private final DocumentHelper documentHelper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public List<String> performCheck(CallbackRequest callbackRequest, String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -59,7 +60,7 @@ public class ConsentOrderService {
         return errors;
     }
 
-    public List<String> performCheck(FinremCallbackRequest callbackRequest, String userAuthorisation, FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    public List<String> performCheck(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         Optional<Long> caseIdObj = Optional.ofNullable(finremCaseDetails.getId());
 

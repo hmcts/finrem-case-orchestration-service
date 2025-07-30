@@ -51,7 +51,7 @@ public class SolicitorCreateConsentedMidHandler extends FinremCallbackHandler {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = finremCaseDetails.getData();
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
-        List<String> errors = consentOrderService.performCheck(callbackRequest, userAuthorisation, finremCaseDetailsMapper);
+        List<String> errors = consentOrderService.performCheck(callbackRequest, userAuthorisation);
         errors.addAll(postalService.validate(caseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
         errors.addAll(respondentSolicitorDetailsValidator.validate(caseData));

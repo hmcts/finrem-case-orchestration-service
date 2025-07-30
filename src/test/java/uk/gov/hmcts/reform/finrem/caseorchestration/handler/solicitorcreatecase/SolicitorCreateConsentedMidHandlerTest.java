@@ -68,7 +68,7 @@ class SolicitorCreateConsentedMidHandlerTest {
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        verify(consentOrderService).performCheck(finremCallbackRequest, AUTH_TOKEN, finremCaseDetailsMapper);
+        verify(consentOrderService).performCheck(finremCallbackRequest, AUTH_TOKEN);
         verify(postalService).validate(finremCallbackRequest.getCaseDetails().getData());
     }
 
