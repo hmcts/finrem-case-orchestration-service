@@ -5,12 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -37,24 +38,20 @@ class SolicitorCreateContestedAboutToStartHandlerTest {
     }
 
     @Test
-    void testHandlerCanHandle() {
+    void testCanHandle() {
         assertCanHandle(underTest, ABOUT_TO_START, CONTESTED, SOLICITOR_CREATE);
     }
 
     @Test
-    void handle() {
-        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+    void testHandle() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, SOLICITOR_CREATE, caseData);
 
-        underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(onStartDefaultValueService).defaultCivilPartnershipField(finremCallbackRequest);
-        verify(onStartDefaultValueService).defaultTypeOfApplication(finremCallbackRequest);
-        verify(onStartDefaultValueService).defaultUrgencyQuestion(finremCallbackRequest);
-    }
-
-    private FinremCallbackRequest buildFinremCallbackRequest() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
-        return FinremCallbackRequest.builder().eventType(SOLICITOR_CREATE).caseDetails(caseDetails).build();
+        verify(onStartDefaultValueService).defaultCivilPartnershipField(callbackRequest);
+        verify(onStartDefaultValueService).defaultTypeOfApplication(callbackRequest);
+        verify(onStartDefaultValueService).defaultUrgencyQuestion(callbackRequest);
     }
 }

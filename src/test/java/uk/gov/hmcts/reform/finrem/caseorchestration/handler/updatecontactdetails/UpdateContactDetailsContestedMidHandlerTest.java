@@ -9,11 +9,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,8 +76,9 @@ class UpdateContactDetailsContestedMidHandlerTest {
                     List<String> postalErrors,
                     List<String> expectedErrors) {
 
-        FinremCaseData caseData = FinremCaseData.builder().ccdCaseType(CONTESTED).build();
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(caseData);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CONTACT_DETAILS, caseData);
 
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
@@ -93,10 +95,5 @@ class UpdateContactDetailsContestedMidHandlerTest {
 
             verify(internationalPostalService).validate(caseData);
         }
-    }
-
-    private FinremCallbackRequest buildCallbackRequest(FinremCaseData caseData) {
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
-        return FinremCallbackRequest.builder().eventType(UPDATE_CONTACT_DETAILS).caseDetails(caseDetails).build();
     }
 }

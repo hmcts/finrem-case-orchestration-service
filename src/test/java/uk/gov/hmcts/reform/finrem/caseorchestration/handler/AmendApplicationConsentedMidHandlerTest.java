@@ -12,10 +12,10 @@ import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -87,8 +88,9 @@ class AmendApplicationConsentedMidHandlerTest {
                     List<String> consentErrors,
                     List<String> expectedErrors) {
 
-        FinremCaseData caseData = FinremCaseData.builder().ccdCaseType(CONSENTED).build();
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(caseData);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONSENTED, AMEND_APP_DETAILS, caseData);
 
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
@@ -108,14 +110,5 @@ class AmendApplicationConsentedMidHandlerTest {
             verify(internationalPostalService).validate(caseData);
             verify(consentOrderService).performCheck(any(CallbackRequest.class), eq(AUTH_TOKEN));
         }
-    }
-
-    private FinremCallbackRequest buildCallbackRequest(FinremCaseData data) {
-        return FinremCallbackRequest
-            .builder()
-            .eventType(AMEND_APP_DETAILS)
-            .caseDetails(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).caseType(CONSENTED)
-                .data(data).build())
-            .build();
     }
 }

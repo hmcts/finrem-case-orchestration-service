@@ -88,4 +88,36 @@ public class FinremCallbackRequestFactory {
             .caseDetails(FinremCaseDetailsBuilderFactory.from().build())
             .build();
     }
+
+    public static FinremCallbackRequest create(Long id, CaseType caseType, EventType eventType, FinremCaseData caseData) {
+        caseData.setCcdCaseType(caseType);
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(id)
+                .caseType(caseType)
+                .data(caseData)
+                .build())
+            .eventType(eventType)
+            .build();
+    }
+
+    public static FinremCallbackRequest create(Long id, CaseType caseType, EventType eventType, FinremCaseData caseData,
+                                               FinremCaseData caseDataBefore) {
+        caseData.setCcdCaseType(caseType);
+        caseDataBefore.setCcdCaseType(caseType);
+
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(id)
+                .caseType(caseType)
+                .data(caseData)
+                .build())
+            .caseDetailsBefore(FinremCaseDetails.builder()
+                .id(id)
+                .caseType(caseType)
+                .data(caseDataBefore)
+                .build())
+            .eventType(eventType)
+            .build();
+    }
 }

@@ -9,11 +9,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -98,9 +98,11 @@ class AmendApplicationDetailsMidHandlerTest {
                                            List<String> emailErrors,
                                            List<String> postalErrors,
                                            List<String> expectedErrors) {
+
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCaseData caseDataBefore = mock(FinremCaseData.class);
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(eventType, caseData, caseDataBefore);
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, eventType, caseData, caseDataBefore);
 
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
@@ -130,9 +132,11 @@ class AmendApplicationDetailsMidHandlerTest {
                                            List<String> emailErrors,
                                            List<String> postalErrors,
                                            List<String> expectedErrors) {
+
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCaseData caseDataBefore = mock(FinremCaseData.class);
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(eventType, caseData, caseDataBefore);
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, eventType, caseData, caseDataBefore);
 
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
@@ -153,14 +157,5 @@ class AmendApplicationDetailsMidHandlerTest {
             verify(expressCaseService, never()).setExpressCaseEnrollmentStatus(caseData);
             verify(expressCaseService, never()).setWhichExpressCaseAmendmentLabelToShow(caseData, caseDataBefore);
         }
-    }
-
-    private FinremCallbackRequest buildCallbackRequest(EventType eventType, FinremCaseData data, FinremCaseData dataBefore) {
-        return FinremCallbackRequest
-            .builder()
-            .eventType(eventType)
-            .caseDetails(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).caseType(CONTESTED).data(data).build())
-            .caseDetailsBefore(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).caseType(CONTESTED).data(dataBefore).build())
-            .build();
     }
 }
