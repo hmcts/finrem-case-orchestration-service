@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -330,10 +331,10 @@ class ContactDetailsValidatorTest {
         assertEquals(expectedErrors, errors);
     }
 
-    private static Stream<org.junit.jupiter.params.provider.Arguments> provideCaseDataScenarios() {
+    private static Stream<Arguments> provideCaseDataScenarios() {
         return Stream.of(
             // Invalid applicant solicitor email - Contested
-            org.junit.jupiter.params.provider.Arguments.of(
+            Arguments.of(
                 "Invalid applicant solicitor email (Contested)",
                 FinremCaseData.builder()
                     .ccdCaseType(CaseType.CONTESTED)
@@ -346,7 +347,7 @@ class ContactDetailsValidatorTest {
             ),
 
             // Invalid applicant solicitor email - Consented
-            org.junit.jupiter.params.provider.Arguments.of(
+            Arguments.of(
                 "Invalid applicant solicitor email (Consented)",
                 FinremCaseData.builder()
                     .ccdCaseType(CaseType.CONSENTED)
@@ -359,7 +360,7 @@ class ContactDetailsValidatorTest {
             ),
 
             // Invalid applicant email
-            org.junit.jupiter.params.provider.Arguments.of(
+            Arguments.of(
                 "Invalid applicant email",
                 FinremCaseData.builder()
                     .contactDetailsWrapper(ContactDetailsWrapper.builder()
@@ -370,7 +371,7 @@ class ContactDetailsValidatorTest {
             ),
 
             // Invalid respondent solicitor email
-            org.junit.jupiter.params.provider.Arguments.of(
+            Arguments.of(
                 "Invalid respondent solicitor email (Contested)",
                 FinremCaseData.builder()
                     .contactDetailsWrapper(ContactDetailsWrapper.builder()
@@ -382,7 +383,7 @@ class ContactDetailsValidatorTest {
             ),
 
             // Invalid respondent solicitor email
-            org.junit.jupiter.params.provider.Arguments.of(
+            Arguments.of(
                 "Invalid respondent solicitor email (Consented)",
                 FinremCaseData.builder()
                     .contactDetailsWrapper(ContactDetailsWrapper.builder()
@@ -394,7 +395,7 @@ class ContactDetailsValidatorTest {
             ),
 
             // Invalid respondent email (not represented)
-            org.junit.jupiter.params.provider.Arguments.of(
+            Arguments.of(
                 "Invalid respondent email (not represented, Contested)",
                 FinremCaseData.builder()
                     .contactDetailsWrapper(ContactDetailsWrapper.builder()
@@ -404,7 +405,7 @@ class ContactDetailsValidatorTest {
                     .build(),
                 List.of(String.format(ERROR_MSG, INVALID_EMAIL))
             ),
-            org.junit.jupiter.params.provider.Arguments.of(
+            Arguments.of(
                 "Invalid respondent email (not represented, Consented)",
                 FinremCaseData.builder()
                     .contactDetailsWrapper(ContactDetailsWrapper.builder()
@@ -416,7 +417,7 @@ class ContactDetailsValidatorTest {
             ),
 
             // All valid emails
-            org.junit.jupiter.params.provider.Arguments.of(
+            Arguments.of(
                 "All valid emails (Contested)",
                 FinremCaseData.builder()
                     .ccdCaseType(CaseType.CONTESTED)
@@ -432,7 +433,7 @@ class ContactDetailsValidatorTest {
                 List.of()
             ),
 
-            org.junit.jupiter.params.provider.Arguments.of(
+            Arguments.of(
                 "All valid emails (Consented)",
                 FinremCaseData.builder()
                     .ccdCaseType(CaseType.CONSENTED)
@@ -448,7 +449,7 @@ class ContactDetailsValidatorTest {
                 List.of()
             ),
 
-            org.junit.jupiter.params.provider.Arguments.of(
+            Arguments.of(
                 "All valid emails - optional respondent solicitor email (Contested)",
                 FinremCaseData.builder()
                     .ccdCaseType(CaseType.CONTESTED)
@@ -464,7 +465,7 @@ class ContactDetailsValidatorTest {
                 List.of()
             ),
 
-            org.junit.jupiter.params.provider.Arguments.of(
+            Arguments.of(
                 "All valid emails - optional respondent solicitor email (Consented)",
                 FinremCaseData.builder()
                     .ccdCaseType(CaseType.CONSENTED)
