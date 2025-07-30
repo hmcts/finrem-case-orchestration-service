@@ -42,8 +42,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -249,7 +249,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), caseDocument());
         wrapper.getGeneralLetterUploadedDocuments().forEach(doc -> verifyDocumentFields(doc.getValue(),
             DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), uploadedDocument));
-        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), anyBoolean(), any());
+        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(eq(generalLetterCaseDetails), any(), any(), anyBoolean(), any());
     }
 
     @Test
