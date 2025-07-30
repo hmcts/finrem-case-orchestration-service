@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -31,6 +32,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.FinremApprovedOrderNoticeOfHearingCorresponderAdapter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremApprovedOrderNoticeOfHearingCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.time.LocalDate;
@@ -65,7 +68,6 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     static final String CASE_DATA = "case_data";
     static final String CASE_DETAILS = "caseDetails";
 
-
     @Autowired
     private ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
     @Autowired
@@ -74,6 +76,12 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     private DocumentConfiguration documentConfiguration;
     @Autowired
     private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @Autowired
+    private FinremCaseDetailsMapper caseDetailsMapper;
+    @Autowired
+    private FinremApprovedOrderNoticeOfHearingCorresponderAdapter approvedOrderNoticeOfHearingCorresponderAdapter;
+    @Autowired
+    private FinremApprovedOrderNoticeOfHearingCorresponder finremApprovedOrderNoticeOfHearingCorresponder;
 
     @MockitoBean
     private BulkPrintService bulkPrintService;
@@ -109,7 +117,6 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-
 
         data.getContactDetailsWrapper().setApplicantFmName("Poor");
         data.getContactDetailsWrapper().setApplicantLname("Poor");
@@ -262,22 +269,22 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenSubmittedCallbackReceived_whenSubmitNotice_thenSendNoticeOfHearingEmailToAppAndResp() {
         caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, buildHearingNoticePack());
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
         approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, AUTH_TOKEN);
 
         assertNotificationServiceInteraction();
     }
 
     private void assertBulkPrintServiceInteraction() {
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
     }
 
     private void assertNotificationServiceInteraction() {
-        verify(notificationService, times(1)).sendPrepareForHearingEmailApplicant(caseDetails);
-        verify(notificationService, times(1)).sendPrepareForHearingEmailRespondent(caseDetails);
+        verify(notificationService, times(1)).sendPrepareForHearingEmailApplicant(any(FinremCaseDetails.class));
+        verify(notificationService, times(1)).sendPrepareForHearingEmailRespondent(any(FinremCaseDetails.class));
     }
 
     private List<Element<CaseDocument>> buildHearingNoticePack() {
