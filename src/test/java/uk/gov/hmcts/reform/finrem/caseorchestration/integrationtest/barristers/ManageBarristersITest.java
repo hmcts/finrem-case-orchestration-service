@@ -75,6 +75,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
@@ -193,6 +194,8 @@ public class ManageBarristersITest implements IntegrationTest {
     private FinremNotificationRequestMapper finremNotificationRequestMapper;
     @MockitoBean
     private PaperNotificationService paperNotificationService;
+    @MockitoBean
+    private ExpressCaseService expressCaseService;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
