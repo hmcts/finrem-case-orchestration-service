@@ -12,11 +12,9 @@ import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
@@ -33,12 +31,14 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SOLICITOR_CREATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SolicitorCreateConsentedMidHandlerTest {
-
 
     @InjectMocks
     private SolicitorCreateConsentedMidHandler underTest;
@@ -51,7 +51,7 @@ class SolicitorCreateConsentedMidHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest, CallbackType.MID_EVENT, CONSENTED, EventType.SOLICITOR_CREATE);
+        assertCanHandle(underTest, MID_EVENT, CONSENTED, SOLICITOR_CREATE);
     }
 
     static Stream<Arguments> errorScenarios() {
@@ -114,8 +114,8 @@ class SolicitorCreateConsentedMidHandlerTest {
     private FinremCallbackRequest buildCallbackRequest(FinremCaseData data) {
         return FinremCallbackRequest
             .builder()
-            .eventType(EventType.SOLICITOR_CREATE)
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
+            .eventType(SOLICITOR_CREATE)
+            .caseDetails(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).caseType(CONSENTED)
                 .data(data).build())
             .build();
     }
