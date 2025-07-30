@@ -32,6 +32,7 @@ public class ConsentOrderService {
     private final ConsentedApplicationHelper helper;
     private final BulkPrintDocumentService service;
     private final DocumentHelper documentHelper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public List<String> performCheck(CallbackRequest callbackRequest, String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -73,8 +74,6 @@ public class ConsentOrderService {
 
         helper.setConsentVariationOrderLabelField(finremcaseData);
         List<String> errors = new ArrayList<>();
-        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper());
-
         Map<String, Object> beforeData = Optional.ofNullable(callbackRequest.getCaseDetailsBefore())
             .map(finremCaseDetailsMapper::mapToCaseDetails)
             .map(CaseDetails::getData)
