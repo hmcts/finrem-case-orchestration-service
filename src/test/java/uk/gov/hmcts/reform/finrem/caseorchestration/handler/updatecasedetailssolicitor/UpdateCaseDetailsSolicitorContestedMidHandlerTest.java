@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecasedetailssolicitor;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -14,9 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,33 +20,22 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SOLICITOR_CREATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CASE_DETAILS_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class SolicitorCreateContestedMidHandlerTest {
+class UpdateCaseDetailsSolicitorContestedMidHandlerTest {
 
     @InjectMocks
-    private SolicitorCreateContestedMidHandler underTest;
-
-    @Mock
-    private InternationalPostalService internationalPostalService;
-
-    @Mock
-    private SelectedCourtService selectedCourtService;
-
-    @Mock
-    private ExpressCaseService expressCaseService;
+    private UpdateCaseDetailsSolicitorContestedMidHandler underTest;
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest, MID_EVENT, CONTESTED, SOLICITOR_CREATE);
+        assertCanHandle(underTest, MID_EVENT, CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR);
     }
 
     static Stream<Arguments> errorScenarios() {
@@ -58,23 +43,16 @@ class SolicitorCreateContestedMidHandlerTest {
             Arguments.of(
                 List.of("address error 1"),
                 List.of("email error 1"),
-                List.of("postal error 1"),
-                true,
-                List.of("address error 1", "email error 1",
-                    "You cannot select High Court or Royal Court of Justice. Please select another court.", "postal error 1")
+                List.of("address error 1", "email error 1")
             ),
             Arguments.of(
                 List.of(),
                 List.of(),
-                List.of(),
-                false,
                 List.of()
             ),
             Arguments.of(
                 List.of("address only"),
                 List.of(),
-                List.of(),
-                false,
                 List.of("address only")
             )
         );
@@ -84,8 +62,6 @@ class SolicitorCreateContestedMidHandlerTest {
     @MethodSource("errorScenarios")
     void testHandle(List<String> addressErrors,
                     List<String> emailErrors,
-                    List<String> postalErrors,
-                    boolean royalCourtOrHighCourtChosen,
                     List<String> expectedErrors) {
 
         FinremCaseData caseData = FinremCaseData.builder().ccdCaseType(CONTESTED).build();
@@ -96,24 +72,16 @@ class SolicitorCreateContestedMidHandlerTest {
                 .thenReturn(new ArrayList<>(addressErrors));
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
                 .thenReturn(new ArrayList<>(emailErrors));
-            when(internationalPostalService.validate(caseData))
-                .thenReturn(new ArrayList<>(postalErrors));
-            when(selectedCourtService.royalCourtOrHighCourtChosen(caseData)).thenReturn(royalCourtOrHighCourtChosen);
 
             GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
                 underTest.handle(callbackRequest, AUTH_TOKEN);
 
             assertThat(response.getErrors()).containsExactlyElementsOf(expectedErrors);
-
-            verify(internationalPostalService).validate(caseData);
-            verify(selectedCourtService).setSelectedCourtDetailsIfPresent(caseData);
-            verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
-            verify(selectedCourtService).royalCourtOrHighCourtChosen(caseData);
         }
     }
 
     private FinremCallbackRequest buildCallbackRequest(FinremCaseData caseData) {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
-        return FinremCallbackRequest.builder().eventType(SOLICITOR_CREATE).caseDetails(caseDetails).build();
+        return FinremCallbackRequest.builder().eventType(UPDATE_CASE_DETAILS_SOLICITOR).caseDetails(caseDetails).build();
     }
 }
