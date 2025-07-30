@@ -45,7 +45,6 @@ class UpdateContactDetailsContestedMidHandlerTest {
         assertCanHandle(underTest, MID_EVENT, CONTESTED, UPDATE_CONTACT_DETAILS);
     }
 
-
     static Stream<Arguments> errorScenarios() {
         return Stream.of(
             Arguments.of(
