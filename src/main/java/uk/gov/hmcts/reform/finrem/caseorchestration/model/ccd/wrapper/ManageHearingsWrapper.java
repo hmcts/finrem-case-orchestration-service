@@ -42,6 +42,7 @@ public class ManageHearingsWrapper {
 
     /**
      * Retrieves a {@link ManageHearingsCollectionItem} from the hearings list by its UUID.
+     *
      * <p>
      * If the hearings list is {@code null} or no item matches the provided ID, this method returns {@code null}.
      * </p>
