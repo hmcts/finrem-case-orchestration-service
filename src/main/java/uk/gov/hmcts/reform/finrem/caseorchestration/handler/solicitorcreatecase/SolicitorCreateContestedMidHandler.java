@@ -51,7 +51,6 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        // Validating Contact Details
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
 
