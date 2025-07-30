@@ -249,7 +249,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), caseDocument());
         wrapper.getGeneralLetterUploadedDocuments().forEach(doc -> verifyDocumentFields(doc.getValue(),
             DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), uploadedDocument));
-        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(eq(generalLetterCaseDetails), any(), any(), anyBoolean(), any());
+        verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(eq(generalLetterCaseDetails), any(), any(), anyBoolean(), any());
     }
 
     @Test
