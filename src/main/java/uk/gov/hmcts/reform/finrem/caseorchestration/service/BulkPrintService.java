@@ -153,7 +153,6 @@ public class BulkPrintService {
 
     public UUID bulkPrintFinancialRemedyLetterPack(FinremCaseDetails caseDetails, String recipient, List<BulkPrintDocument> documents,
                                                    boolean isInternational, String auth) {
-        log.info("Requesting {} letter print from bulkprint for Case ID: {}", recipient, caseDetails.getId());
         return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
     }
 
