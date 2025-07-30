@@ -8,8 +8,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationOrderCollection;
@@ -54,12 +52,6 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
 
     @MockitoBean
     private BulkPrintDocumentService service;
-
-    @MockitoBean
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
-
-    @MockitoBean
-    private DocumentHelper documentHelper;
 
     private CallbackRequest callbackRequest;
 
@@ -202,6 +194,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     public void given_case_checkIfUploadedConsentOrderIsNotEncrypted() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> dataBefore = new HashMap<>();
         List<String> orderList = List.of("Variation Order", "Property Adjustment Order");
         data.put("natureOfApplication2", orderList);
         data.put("consentOrder", caseDocument());
