@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
@@ -73,15 +73,11 @@ public class ManageHearingsNotificationRequestMapper {
      * @return NotificationRequest for the intervener specified in the CaseRole.
      */
     public NotificationRequest buildHearingNotificationForIntervenerSolicitor(
-            FinremCaseDetails finremCaseDetails,
-            Hearing hearing, CaseRole caseRole) {
+        FinremCaseDetails finremCaseDetails, Hearing hearing, IntervenerWrapper intervener) {
 
-        // Expect this to be something like
-        // finremCaseDetails.getData().getIntervenerOne().getIntervenerSolEmail(),
-        // finremCaseDetails.getData().getIntervenerOne().getIntervenerSolName()
         PartySpecificDetails partySpecificDetails = new PartySpecificDetails(
-                "hardcodedinterveneremail@mailinator.com",
-                "hard coded intervener name"
+                intervener.getIntervenerSolEmail(),
+                nullToEmpty(intervener.getIntervenerSolName())
         );
 
         return buildHearingNotificationForParty(finremCaseDetails, hearing, partySpecificDetails);
