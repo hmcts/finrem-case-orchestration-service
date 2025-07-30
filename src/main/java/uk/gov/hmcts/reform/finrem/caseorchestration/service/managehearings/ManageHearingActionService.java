@@ -77,6 +77,8 @@ public class ManageHearingActionService {
 
         generateHearingNotice(finremCaseDetails, authToken, documentMap);
 
+        // FDR Hearings that are not express cases do not generate Form C or Form G, they
+        // will have been generated at the time of the FDA hearing.
         boolean shouldGenerateFormC = HearingType.FDA.equals(hearingType)
             || (HearingType.FDR.equals(hearingType) && expressCaseService.isExpressCase(caseData));
 
@@ -98,6 +100,7 @@ public class ManageHearingActionService {
         }
 
         addDocumentsToCollection(documentMap, hearingWrapper);
+        // Although the working hearing is cleared, the working hearing ID is retained for use in submitted handler.
         hearingWrapper.setWorkingHearing(null);
     }
 
@@ -250,11 +253,12 @@ public class ManageHearingActionService {
     }
 
     private void generateFormC(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
+        CaseDocumentType formCType = manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails).getLeft();
         documentMap.put(
             FORM_C,
             new DocumentRecord(
                 manageHearingsDocumentService.generateFormC(finremCaseDetails, authToken),
-                CaseDocumentType.FORM_C
+                formCType
             )
         );
     }
