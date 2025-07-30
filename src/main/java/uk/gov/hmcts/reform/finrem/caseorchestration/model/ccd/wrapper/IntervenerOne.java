@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import java.util.ArrayList;
 import java.util.List;
 
-
 @SuperBuilder
 @NoArgsConstructor
 public class IntervenerOne extends IntervenerWrapper {

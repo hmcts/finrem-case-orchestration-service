@@ -52,7 +52,6 @@ public class DocumentConversionService {
 
     private final EvidenceManagementDownloadService evidenceManagementService;
 
-
     public byte[] convertDocumentToPdf(Document sourceDocument, String auth) {
         if (PDF_MIME_TYPE.equalsIgnoreCase(tika.detect(sourceDocument.getFileName()))) {
             throw new DocumentConversionException(
@@ -60,7 +59,6 @@ public class DocumentConversionService {
                 null
             );
         }
-
         return convert(sourceDocument, auth);
     }
 

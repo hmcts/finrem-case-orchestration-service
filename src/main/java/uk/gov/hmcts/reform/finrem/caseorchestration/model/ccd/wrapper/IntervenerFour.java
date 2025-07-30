@@ -84,7 +84,6 @@ public class IntervenerFour extends IntervenerWrapper {
         caseData.setIntervenerFour(null);
     }
 
-
     @Override
     @JsonIgnore
     public IntervenerHearingNoticeCollectionName getIntervenerHearingNoticesCollectionName() {

@@ -26,7 +26,6 @@ public class IntervenerOneFdrHandler extends PartyDocumentsHandler {
         return caseDocumentFdr != null && caseDocumentFdr.equals(YesOrNo.YES);
     }
 
-
     @Override
     public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         return categoriser.getDocumentCategory(caseDocumentType);

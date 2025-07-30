@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -103,7 +102,6 @@ public class SelectablePartiesCorrespondenceService {
         }
         return false;
     }
-
 
     public List<String> validateApplicantAndRespondentCorrespondenceAreSelected(FinremCaseData data, String errorMessage) {
         List<String> errors = new ArrayList<>();

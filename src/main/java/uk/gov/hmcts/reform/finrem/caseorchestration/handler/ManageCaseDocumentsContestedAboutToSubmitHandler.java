@@ -48,7 +48,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     private final EvidenceManagementDeleteService evidenceManagementDeleteService;
     private final FeatureToggleService featureToggleService;
 
-
     @Autowired
     public ManageCaseDocumentsContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                                             List<DocumentHandler> documentHandlers,
@@ -92,7 +91,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
     }
-
 
     private void getValidatedResponse(FinremCaseData caseData, List<String> warnings) {
         List<UploadCaseDocumentCollection> manageCaseDocumentCollection = caseData.getManageCaseDocumentCollection();
