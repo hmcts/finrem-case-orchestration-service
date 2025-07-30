@@ -9,11 +9,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -32,6 +30,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -50,8 +52,8 @@ class AmendApplicationDetailsMidHandlerTest {
     @Test
     void testHandlerCanHandle() {
         assertCanHandle(underTest,
-            Arguments.of(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.AMEND_CONTESTED_APP_DETAILS),
-            Arguments.of(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.AMEND_CONTESTED_PAPER_APP_DETAILS));
+            Arguments.of(MID_EVENT, CONTESTED, AMEND_CONTESTED_APP_DETAILS),
+            Arguments.of(MID_EVENT, CONTESTED, AMEND_CONTESTED_PAPER_APP_DETAILS));
     }
 
     static Stream<Arguments> errorScenarios() {
@@ -84,8 +86,8 @@ class AmendApplicationDetailsMidHandlerTest {
         List<String> expectedErrors
     ) {
         return Stream.of(
-            Arguments.of(EventType.AMEND_CONTESTED_APP_DETAILS, addressErrors, emailErrors, postalErrors, expectedErrors),
-            Arguments.of(EventType.AMEND_CONTESTED_PAPER_APP_DETAILS, addressErrors, emailErrors, postalErrors, expectedErrors)
+            Arguments.of(AMEND_CONTESTED_APP_DETAILS, addressErrors, emailErrors, postalErrors, expectedErrors),
+            Arguments.of(AMEND_CONTESTED_PAPER_APP_DETAILS, addressErrors, emailErrors, postalErrors, expectedErrors)
         );
     }
 
@@ -157,8 +159,8 @@ class AmendApplicationDetailsMidHandlerTest {
         return FinremCallbackRequest
             .builder()
             .eventType(eventType)
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(data).build())
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(dataBefore).build())
+            .caseDetails(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).caseType(CONTESTED).data(data).build())
+            .caseDetailsBefore(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).caseType(CONTESTED).data(dataBefore).build())
             .build();
     }
 }
