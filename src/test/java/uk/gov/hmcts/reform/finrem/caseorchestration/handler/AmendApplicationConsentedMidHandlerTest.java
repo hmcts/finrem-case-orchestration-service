@@ -12,10 +12,8 @@ import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
@@ -32,6 +30,8 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class AmendApplicationConsentedMidHandlerTest {
 
     @InjectMocks
-    private AmendApplicationConsentedMidHandler handler;
+    private AmendApplicationConsentedMidHandler underTest;
     @Mock
     private ConsentOrderService consentOrderService;
     @Mock
@@ -49,7 +49,7 @@ class AmendApplicationConsentedMidHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, CallbackType.MID_EVENT, CONSENTED, EventType.AMEND_APP_DETAILS);
+        assertCanHandle(underTest, MID_EVENT, CONSENTED, AMEND_APP_DETAILS);
     }
 
     static Stream<Arguments> errorScenarios() {
@@ -100,7 +100,7 @@ class AmendApplicationConsentedMidHandlerTest {
                 .thenReturn(new ArrayList<>(postalErrors));
 
             GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-                handler.handle(callbackRequest, AUTH_TOKEN);
+                underTest.handle(callbackRequest, AUTH_TOKEN);
 
             assertThat(response.getErrors()).containsExactlyElementsOf(expectedErrors);
 
@@ -112,7 +112,7 @@ class AmendApplicationConsentedMidHandlerTest {
     private FinremCallbackRequest buildCallbackRequest(FinremCaseData data) {
         return FinremCallbackRequest
             .builder()
-            .eventType(EventType.AMEND_APP_DETAILS)
+            .eventType(AMEND_APP_DETAILS)
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
                 .data(data).build())
             .build();
