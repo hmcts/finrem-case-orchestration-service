@@ -147,6 +147,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FinremCaseDetailsMapperTest {
@@ -308,6 +309,21 @@ class FinremCaseDetailsMapperTest {
         caseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails);
         assertThat(caseDetails.getData()).doesNotContainKeys(manageHearingsWrapperClassJsonProperties);
         assertThat(caseDetails.getData()).doesNotContainKeys(mhMigrationWrapperClassJsonProperties);
+    }
+
+    @Test
+    void mapToCaseDetails_shouldSetStateToNull_whenFinremCaseDetailsStateIsNull() {
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .id(123L)
+            .jurisdiction("DIVORCE")
+            .state(null)
+            .data(FinremCaseData.builder().build())
+            .build();
+
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+
+        assertNull(caseDetails.getState(), "State should be null when FinremCaseDetails.state is null");
     }
 
     private void assertBatchThree(FinremCaseData caseData) {
