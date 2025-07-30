@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationOrderCollection;
@@ -39,6 +41,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_CAMELCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_LOWERCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SOLICITOR_CREATE;
 
 public class ConsentOrderServiceTest extends BaseServiceTest {
 
@@ -50,6 +54,12 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
 
     @MockitoBean
     private BulkPrintDocumentService service;
+
+    @MockitoBean
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @MockitoBean
+    private DocumentHelper documentHelper;
 
     private CallbackRequest callbackRequest;
 
@@ -192,7 +202,6 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     public void given_case_checkIfUploadedConsentOrderIsNotEncrypted() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
-        Map<String, Object> dataBefore = new HashMap<>();
         List<String> orderList = List.of("Variation Order", "Property Adjustment Order");
         data.put("natureOfApplication2", orderList);
         data.put("consentOrder", caseDocument());
@@ -269,7 +278,26 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         assertEquals(CONSENT_OTHER_DOC_LABEL_VALUE, docLabel);
     }
 
+    @Test
+    public void performCheck_shouldHandleNullAndNonNullCaseDetailsBefore() {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+        List<String> errors = consentOrderService.performCheck(finremCallbackRequest, AUTH_TOKEN);
+        assertTrue(errors.isEmpty());
 
+        // test when caseDetailsBefore null
+        finremCallbackRequest.setCaseDetailsBefore(null);
+        errors = consentOrderService.performCheck(finremCallbackRequest, AUTH_TOKEN);
+        assertTrue(errors.isEmpty());
+    }
+
+    private FinremCallbackRequest buildFinremCallbackRequest() {
+        return FinremCallbackRequest
+            .builder()
+            .eventType(SOLICITOR_CREATE)
+            .caseDetails(defaultConsentedFinremCaseDetails())
+            .caseDetailsBefore(defaultConsentedFinremCaseDetails())
+            .build();
+    }
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
