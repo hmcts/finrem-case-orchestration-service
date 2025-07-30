@@ -54,41 +54,43 @@ class ListForInterimHearingWrapperPopulatorTest {
     @Test
     void testShouldPopulate() {
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("null - Skip populate because it's not a contested application.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("null - Skip populate because it's not a contested application.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONSENTED).build()))
-                .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because it's not a contested application.");
 
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED).build()))
-            .isEqualTo(false);
+            .isFalse();
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isListForInterimHearingsMigrated(YesOrNo.YES).build())
             .build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because migration had been done.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isListForInterimHearingsMigrated(YesOrNo.NO).build())
             .build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because collection \"interimHearings\" is empty.");
 
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isListForInterimHearingsMigrated(YesOrNo.NO).build())
-            .interimWrapper(InterimWrapper.builder().interimHearings(List.of(InterimHearingCollection.builder().build())).build())
+            .interimWrapper(InterimWrapper.builder()
+                .interimHearings(List.of(InterimHearingCollection.builder().build()))
+                .build())
             .build()))
-            .isEqualTo(true);
+            .isTrue();
     }
 
     @Test
