@@ -60,7 +60,8 @@ public class ApprovedOrderNoticeOfHearingService {
         hearingNoticePack.add(getDocumentCollectionObj(noticeOfHearingDocument));
 
         FinremCaseData caseData = caseDetails.getData();
-        List<DocumentCollectionItem> documentCollectionItems = Optional.ofNullable(caseData.getHearingNoticesDocumentCollection()).orElse(new ArrayList<>());
+        List<DocumentCollectionItem> documentCollectionItems =
+            Optional.ofNullable(caseData.getHearingNoticesDocumentCollection()).orElse(new ArrayList<>());
 
         documentCollectionItems.add(DocumentCollectionItem.builder().value(
             buildCaseDocumentWithExistingDocBreakingReferences(noticeOfHearingDocument)

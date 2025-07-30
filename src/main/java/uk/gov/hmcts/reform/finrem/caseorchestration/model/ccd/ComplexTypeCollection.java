@@ -49,7 +49,6 @@ public class ComplexTypeCollection<T> extends ArrayList<ImmutableMap<String, T>>
         return this.get(index).get(COMPLEX_TYPE_KEY);
     }
 
-
     @SuppressWarnings("java:S4738")
     private ImmutableMap<String, T> createElement(T item) {
         return ImmutableMap.of(COMPLEX_TYPE_KEY, item);
