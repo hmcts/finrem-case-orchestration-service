@@ -17,14 +17,11 @@ import java.util.List;
 @SuppressWarnings({"java:S110","java:S1068","java:S2387"})
 public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearingCorresponder {
 
-    private final DocumentHelper documentHelper;
-
     @Autowired
     public FinremApprovedOrderNoticeOfHearingCorresponder(BulkPrintService bulkPrintService,
                                                           NotificationService notificationService,
                                                           DocumentHelper documentHelper) {
         super(bulkPrintService, notificationService, documentHelper);
-        this.documentHelper = documentHelper;
     }
 
     @Override
