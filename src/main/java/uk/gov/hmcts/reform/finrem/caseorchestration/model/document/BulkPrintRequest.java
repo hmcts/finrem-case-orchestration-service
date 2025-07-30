@@ -12,7 +12,6 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode
 public class BulkPrintRequest {
-    private String requestId;
     private String caseId;
     private String letterType;
     private List<BulkPrintDocument> bulkPrintDocuments;
