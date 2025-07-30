@@ -39,7 +39,6 @@ public class BulkPrintService {
     private final CaseDataService caseDataService;
     private final InternationalPostalService postalService;
 
-
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
@@ -296,58 +295,8 @@ public class BulkPrintService {
         return documentHelper.mapToBulkPrintDocument(intervenerCoverSheet);
     }
 
-
-    /**
-     * Return BulkPrintDocument.
-     *
-     * <p>Please use @{@link #generateIntervenerCoverSheet(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}</p>
-     *
-     * @param caseDetails        instance of CaseDetails
-     * @param authorisationToken instance of String
-     * @param recipient          instance of DocumentHelper.PaperNotificationRecipient
-     * @deprecated Use {@link CaseDetails caseDetails, String authorisationToken,
-     * DocumentHelper.PaperNotificationRecipient recipient}
-     */
-    @Deprecated(since = "15-june-2023")
-    @SuppressWarnings("java:S1133")
-    private BulkPrintDocument generateIntervenerCoverSheet(CaseDetails caseDetails, String authorisationToken,
-                                                           DocumentHelper.PaperNotificationRecipient recipient) {
-        CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
-        log.info("Intervener cover sheet generated {}, for case Id {}",
-            intervenerCoverSheet, caseDetails.getId());
-        return documentHelper.mapToBulkPrintDocument(intervenerCoverSheet);
-    }
-
     public String getRecipient(String text) {
         return StringUtils.remove(WordUtils.capitalizeFully(text, '_'), "_");
-    }
-
-
-    /**
-     * Return BulkPrintDocument.
-     *
-     * <p>Please use @{@link #printIntervenerDocuments(IntervenerWrapper, FinremCaseDetails, String, List)}</p>
-     *
-     * @param intervenerWrapper  instance of IntervenerWrapper
-     * @param caseDetails        instance of CaseDetails
-     * @param authorisationToken instance of String
-     * @param caseDocuments      instance of List
-     * @deprecated Use {@link IntervenerWrapper intervenerWrapper, CaseDetails caseDetails,
-     * String authorisationToken,
-     * List caseDocuments}
-     */
-    @Deprecated(since = "15-june-2023")
-    @SuppressWarnings("java:S1133")
-    public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails,
-                                         String authorisationToken,
-                                         List<BulkPrintDocument> caseDocuments) {
-
-        return printDocumentsWithCoversheet(caseDetails,
-            generateIntervenerCoverSheet(caseDetails, authorisationToken,
-                intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
-            intervenerWrapper.getIntervenerType().getTypeValue(),
-            postalService.isIntervenerResideOutsideOfUK(intervenerWrapper),
-            authorisationToken);
     }
 
     public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper,
@@ -360,4 +309,3 @@ public class BulkPrintService {
             postalService.isIntervenerResideOutsideOfUK(intervenerWrapper), authorisationToken);
     }
 }
-
