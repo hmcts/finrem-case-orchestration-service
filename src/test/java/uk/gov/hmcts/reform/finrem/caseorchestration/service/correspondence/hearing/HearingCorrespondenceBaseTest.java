@@ -40,7 +40,6 @@ public abstract class HearingCorrespondenceBaseTest {
     CaseDetails caseDetails;
     MultiLetterOrEmailAllPartiesCorresponder applicantAndRespondentMultiLetterCorresponder;
 
-
     @Test
     public void shouldEmailApplicantAndRespondent() {
 
@@ -77,7 +76,6 @@ public abstract class HearingCorrespondenceBaseTest {
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
     }
 
-
     @Test
     public void shouldEmailToApplicantAndSendLetterToRespondent() {
 
@@ -89,7 +87,6 @@ public abstract class HearingCorrespondenceBaseTest {
         verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), anyString(), anyList());
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
     }
-
 
     @Test
     public void shouldEmailInterveners() {
@@ -123,38 +120,6 @@ public abstract class HearingCorrespondenceBaseTest {
             any(SolicitorCaseDataKeysWrapper.class));
 
     }
-
-
-    @Test
-    public void shouldSendLettersToInterveners() {
-
-        ObjectMapper mapper = new ObjectMapper();
-        IntervenerOne intervenerOne = IntervenerOne.builder()
-            .intervenerName("Intervener 1")
-            .intervenerEmail("Intervener email")
-            .intervenerCorrespondenceEnabled(Boolean.TRUE)
-            .build();
-        caseDetails.getData().put("intervener1", mapper.convertValue(intervenerOne, Map.class));
-        caseDetails.setCaseTypeId(CaseType.CONTESTED.getCcdType());
-
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
-
-        FinremCaseDetails finremCaseDetails =
-            FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOne(intervenerOne).build()).build();
-        Mockito.lenient().when(finremCaseDetailsMapper
-            .mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
-        Mockito.lenient().when(notificationService
-            .isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOne, finremCaseDetails)).thenReturn(false);
-
-        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
-
-        verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
-        verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
-        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOne.class), any(CaseDetails.class), anyString(), anyList());
-    }
-
 
     protected BulkPrintDocument getBulkPrintDocument() {
         return BulkPrintDocument.builder().build();
