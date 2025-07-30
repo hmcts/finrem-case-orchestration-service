@@ -16,11 +16,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -74,7 +74,7 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldProcessCorrespondenceWhenNotificationsRequiredAndPartiesExist() {
         // Arrange
-        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -107,7 +107,7 @@ class ManageHearingsCorresponderTest {
         // Arrange
         FinremCallbackRequest callbackRequest = callbackRequest();
 
-        List<PartyOnCaseCollection> list = new ArrayList<>(List.of());
+        List<PartyOnCaseCollectionItem> list = new ArrayList<>(List.of());
 
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(list);
@@ -131,7 +131,7 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldSendHearingNotificationsToApplicant() {
         // Setup
-        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -163,7 +163,7 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldSendHearingNotificationsToRespondent() {
         // Setup
-        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -198,7 +198,7 @@ class ManageHearingsCorresponderTest {
             CaseRole.INTVR_SOLICITOR_3,
             CaseRole.INTVR_SOLICITOR_4
         );
-        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(caseRoles);
 
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
@@ -244,7 +244,7 @@ class ManageHearingsCorresponderTest {
             CaseRole.INTVR_SOLICITOR_3,
             CaseRole.INTVR_SOLICITOR_4
         );
-        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(caseRoles);
 
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
@@ -278,7 +278,7 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldPostHearingNoticeToApplicant() {
         // Setup
-        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -309,7 +309,7 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldPostHearingNoticeToRespondent() {
         // Setup
-        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -345,7 +345,7 @@ class ManageHearingsCorresponderTest {
             CaseRole.INTVR_SOLICITOR_3,
             CaseRole.INTVR_SOLICITOR_4
         );
-        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(caseRoles);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
         YesOrNo doNotMakeRepresented = YesOrNo.NO;
@@ -384,7 +384,7 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldPostHearingDocumentsToApplicant() {
         // Setup
-        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -418,7 +418,7 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldPostHearingDocumentsToRespondent() {
         // Setup
-        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -458,7 +458,7 @@ class ManageHearingsCorresponderTest {
             CaseRole.INTVR_SOLICITOR_3,
             CaseRole.INTVR_SOLICITOR_4
         );
-        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(caseRoles);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
         YesOrNo doNotMakeRepresented = YesOrNo.NO;
@@ -497,7 +497,7 @@ class ManageHearingsCorresponderTest {
     @Test
     void sendPaperNoticeToApplicantShouldHandleMissingNotice() {
         // Setup
-        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -527,7 +527,7 @@ class ManageHearingsCorresponderTest {
             CaseRole.APP_SOLICITOR,
             CaseRole.RESP_SOLICITOR
         );
-        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(caseRoles);
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -563,7 +563,7 @@ class ManageHearingsCorresponderTest {
     @Test
     void sendPaperNoticeToRespondentShouldHandleMissingNotice() {
         // Setup
-        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -600,7 +600,7 @@ class ManageHearingsCorresponderTest {
             CaseRole.INTVR_SOLICITOR_3,
             CaseRole.INTVR_SOLICITOR_4
         );
-        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(caseRoles);
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -637,7 +637,7 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldLogWhenNoHearingDocumentsFoundToPost() {
         // Setup
-        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -674,7 +674,7 @@ class ManageHearingsCorresponderTest {
         // Caseworker is not handled in the switch statement, so it should throw an exception
 
         // Setup
-        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.CASEWORKER));
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.CASEWORKER));
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -714,16 +714,16 @@ class ManageHearingsCorresponderTest {
     /**
      * Reusable test setup method to build a list of PartyOnCaseCollection from a set of CaseRoles.
      */
-    private List<PartyOnCaseCollection> buildPartiesList(Set<CaseRole> caseRoles) {
+    private List<PartyOnCaseCollectionItem> buildPartiesList(Set<CaseRole> caseRoles) {
 
         // build the list elements from the passed set of case roles
-        List<PartyOnCaseCollection> parties = new ArrayList<>();
+        List<PartyOnCaseCollectionItem> parties = new ArrayList<>();
         for (CaseRole role : caseRoles) {
             PartyOnCase party = PartyOnCase.builder()
                 .role(role.getCcdCode())
                 .label(role.name())
                 .build();
-            parties.add(PartyOnCaseCollection.builder()
+            parties.add(PartyOnCaseCollectionItem.builder()
                 .value(party)
                 .build());
         }

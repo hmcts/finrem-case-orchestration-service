@@ -140,7 +140,6 @@ public class ManageBarristersITest implements IntegrationTest {
     private static final String CASEWORKER_NAME = "the Caseworker";
     public static final String APP_BARR_ORG_NAME = "app_barr_org_name";
 
-
     private static final String END_POINT_BARRISTER_ADDED = "http://localhost:8086/notify/contested/barrister-access-added";
 
     private static final String END_POINT_BARRISTER_REMOVED = "http://localhost:8086/notify/contested/barrister-access-removed";
