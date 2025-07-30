@@ -21,7 +21,7 @@ public abstract class BasePopulator implements Populator {
 
     protected final PartyService partyService;
 
-    public BasePopulator(PartyService partyService, Function<MhMigrationWrapper, YesOrNo> migrationFlagExtractor) {
+    protected BasePopulator(PartyService partyService, Function<MhMigrationWrapper, YesOrNo> migrationFlagExtractor) {
         this.partyService = partyService;
         this.migrationFlagExtractor = migrationFlagExtractor;
     }

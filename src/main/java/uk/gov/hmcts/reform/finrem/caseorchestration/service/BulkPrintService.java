@@ -39,7 +39,6 @@ public class BulkPrintService {
     private final CaseDataService caseDataService;
     private final InternationalPostalService postalService;
 
-
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
@@ -78,12 +77,6 @@ public class BulkPrintService {
             bulkPrintDocument,
             postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient),
             auth);
-    }
-
-    public UUID bulkPrintFinancialRemedyLetterPack(Long caseId, String recipient, List<BulkPrintDocument> documents,
-                                                   boolean isInternational, String auth) {
-        log.info("Requesting {} letter print from bulkprint for Case ID: {}", recipient, caseId);
-        return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
     }
 
     /**
@@ -146,6 +139,28 @@ public class BulkPrintService {
         return printDocumentsWithCoversheet(caseDetails,
             generateRespondentCoverSheet(caseDetails, authorisationToken), caseDocuments,
             RESPONDENT, postalService.isRespondentResideOutsideOfUK(caseDetails.getData()), authorisationToken);
+    }
+
+    public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper,
+                                         FinremCaseDetails caseDetails,
+                                         String authorisationToken,
+                                         List<BulkPrintDocument> caseDocuments) {
+        return printDocumentsWithCoversheet(caseDetails,
+            generateIntervenerCoverSheet(caseDetails, authorisationToken, intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
+            intervenerWrapper.getIntervenerType().getTypeValue(),
+            postalService.isIntervenerResideOutsideOfUK(intervenerWrapper), authorisationToken);
+    }
+
+    public UUID bulkPrintFinancialRemedyLetterPack(FinremCaseDetails caseDetails, String recipient, List<BulkPrintDocument> documents,
+                                                   boolean isInternational, String auth) {
+        log.info("Requesting {} letter print from bulkprint for Case ID: {}", recipient, caseDetails.getId());
+        return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
+    }
+
+    private UUID bulkPrintFinancialRemedyLetterPack(Long caseId, String recipient, List<BulkPrintDocument> documents,
+                                                    boolean isInternational, String auth) {
+        log.info("Requesting {} letter print from bulkprint for Case ID: {}", recipient, caseId);
+        return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
     }
 
     private UUID bulkPrintDocuments(Long caseId, String letterType, String recipient, List<BulkPrintDocument> documents,
@@ -296,68 +311,7 @@ public class BulkPrintService {
         return documentHelper.mapToBulkPrintDocument(intervenerCoverSheet);
     }
 
-
-    /**
-     * Return BulkPrintDocument.
-     *
-     * <p>Please use @{@link #generateIntervenerCoverSheet(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}</p>
-     *
-     * @param caseDetails        instance of CaseDetails
-     * @param authorisationToken instance of String
-     * @param recipient          instance of DocumentHelper.PaperNotificationRecipient
-     * @deprecated Use {@link CaseDetails caseDetails, String authorisationToken,
-     * DocumentHelper.PaperNotificationRecipient recipient}
-     */
-    @Deprecated(since = "15-june-2023")
-    @SuppressWarnings("java:S1133")
-    private BulkPrintDocument generateIntervenerCoverSheet(CaseDetails caseDetails, String authorisationToken,
-                                                           DocumentHelper.PaperNotificationRecipient recipient) {
-        CaseDocument intervenerCoverSheet = coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, recipient);
-        log.info("Intervener cover sheet generated {}, for case Id {}",
-            intervenerCoverSheet, caseDetails.getId());
-        return documentHelper.mapToBulkPrintDocument(intervenerCoverSheet);
-    }
-
     public String getRecipient(String text) {
         return StringUtils.remove(WordUtils.capitalizeFully(text, '_'), "_");
     }
-
-
-    /**
-     * Return BulkPrintDocument.
-     *
-     * <p>Please use @{@link #printIntervenerDocuments(IntervenerWrapper, FinremCaseDetails, String, List)}</p>
-     *
-     * @param intervenerWrapper  instance of IntervenerWrapper
-     * @param caseDetails        instance of CaseDetails
-     * @param authorisationToken instance of String
-     * @param caseDocuments      instance of List
-     * @deprecated Use {@link IntervenerWrapper intervenerWrapper, CaseDetails caseDetails,
-     * String authorisationToken,
-     * List caseDocuments}
-     */
-    @Deprecated(since = "15-june-2023")
-    @SuppressWarnings("java:S1133")
-    public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper, CaseDetails caseDetails,
-                                         String authorisationToken,
-                                         List<BulkPrintDocument> caseDocuments) {
-
-        return printDocumentsWithCoversheet(caseDetails,
-            generateIntervenerCoverSheet(caseDetails, authorisationToken,
-                intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
-            intervenerWrapper.getIntervenerType().getTypeValue(),
-            postalService.isIntervenerResideOutsideOfUK(intervenerWrapper),
-            authorisationToken);
-    }
-
-    public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper,
-                                         FinremCaseDetails caseDetails,
-                                         String authorisationToken,
-                                         List<BulkPrintDocument> caseDocuments) {
-        return printDocumentsWithCoversheet(caseDetails,
-            generateIntervenerCoverSheet(caseDetails, authorisationToken, intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
-            intervenerWrapper.getIntervenerType().getTypeValue(),
-            postalService.isIntervenerResideOutsideOfUK(intervenerWrapper), authorisationToken);
-    }
 }
-

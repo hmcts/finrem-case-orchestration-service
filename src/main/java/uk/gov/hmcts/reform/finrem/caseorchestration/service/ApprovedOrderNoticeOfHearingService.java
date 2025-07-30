@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ApprovedOrderNoticeOfHearingCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.FinremApprovedOrderNoticeOfHearingCorresponderAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.HearingNoticesCategoriser;
 
 import java.time.LocalDate;
@@ -49,9 +49,8 @@ public class ApprovedOrderNoticeOfHearingService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final ObjectMapper objectMapper;
-    private final ApprovedOrderNoticeOfHearingCorresponder approvedOrderNoticeOfHearingCorresponder;
+    private final FinremApprovedOrderNoticeOfHearingCorresponderAdapter approvedOrderNoticeOfHearingCorresponder;
     private final FeatureToggleService featureToggleService;
-
 
     public void createAndStoreHearingNoticeDocumentPack(FinremCaseDetails caseDetails,
                                                         String authToken) {
@@ -89,7 +88,6 @@ public class ApprovedOrderNoticeOfHearingService {
             .documentBinaryUrl(caseDocument.getDocumentBinaryUrl())
             .build();
     }
-
 
     private DocumentCollectionItem getDocumentCollectionObj(CaseDocument caseDocument) {
         return DocumentCollectionItem.builder().value(caseDocument).build();
@@ -136,7 +134,6 @@ public class ApprovedOrderNoticeOfHearingService {
             documentConfiguration.getAdditionalHearingFileName(), caseDetails.getId().toString());
 
     }
-
 
     private Map<String, Object> getNoticeOfHearingLetterDetails(FinremCaseDetails caseDetails,
                                                                 HearingDirectionDetail directionDetail) {

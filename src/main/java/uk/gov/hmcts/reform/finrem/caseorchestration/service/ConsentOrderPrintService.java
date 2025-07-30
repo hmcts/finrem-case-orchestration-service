@@ -124,7 +124,7 @@ public class ConsentOrderPrintService {
         FinremCaseData caseData = caseDetails.getData();
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
-            caseDetails.getId(),
+            caseDetails,
             RESPONDENT,
             bulkPrintDocuments,
             postalService.isRespondentResideOutsideOfUK(caseData),
