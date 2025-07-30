@@ -75,7 +75,7 @@ class EmailUtilsTest {
 
         @Test
         void shouldRejectCopiedAndPastedFromOutlook() {
-            assertFalse(EmailUtils.isValidEmailAddress("Turnbull James <turnbull.james@yahoo.com>"));
+            assertFalse(EmailUtils.isValidEmailAddress("Claire Mumford<claire.mumford@yahoo.com>"));
         }
     }
 }
