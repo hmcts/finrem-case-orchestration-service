@@ -25,7 +25,6 @@ public class RejectedConsentOrderAboutToSartHandler extends FinremCallbackHandle
         this.service = service;
     }
 
-
     @Override
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
                              final EventType eventType) {

@@ -109,8 +109,5 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
-
     }
-
-
 }

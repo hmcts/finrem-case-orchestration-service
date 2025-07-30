@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 @Slf4j
 @Service
 public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackHandler implements GeneralApplicationHandler {

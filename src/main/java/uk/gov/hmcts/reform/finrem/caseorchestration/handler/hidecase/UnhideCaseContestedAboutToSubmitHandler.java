@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 @Service
 public class UnhideCaseContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
-
     public UnhideCaseContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper) {
         super(mapper);
     }
@@ -38,5 +37,4 @@ public class UnhideCaseContestedAboutToSubmitHandler extends FinremCallbackHandl
             .build();
 
     }
-
 }
