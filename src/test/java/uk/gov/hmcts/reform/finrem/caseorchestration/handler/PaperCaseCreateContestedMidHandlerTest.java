@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.NEW_PAPER_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -72,7 +73,7 @@ class PaperCaseCreateContestedMidHandlerTest {
         return FinremCallbackRequest
             .builder()
             .eventType(EventType.NEW_PAPER_CASE)
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+            .caseDetails(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).caseType(CONTESTED)
                 .data(data).build())
             .build();
     }
