@@ -23,7 +23,6 @@ import java.util.List;
 @Slf4j
 @Service
 public class SolicitorCreateConsentedMidHandler extends FinremCallbackHandler {
-    // Looks like AmendApplicationConsentedMidHandler is the same. Consider merge them later.
 
     private final ConsentOrderService consentOrderService;
     private final InternationalPostalService internationalPostalService;
@@ -49,6 +48,8 @@ public class SolicitorCreateConsentedMidHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        // Having same logic with AmendApplicationConsentedMidHandler
+        // But we are going to keep it in a separate handler.
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
