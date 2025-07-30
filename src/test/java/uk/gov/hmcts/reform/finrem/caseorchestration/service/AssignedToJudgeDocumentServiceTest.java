@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -55,14 +54,10 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     @Autowired
     private IdamAuthService idamAuthService;
 
-    private CaseDetails caseDetails;
     private FinremCaseDetails frCaseDetails;
 
     @Captor
     private ArgumentCaptor<Map> mapArgumentCaptor;
-
-    @Captor
-    private ArgumentCaptor<DocumentGenerationRequest> documentGenerationRequestCaptor;
 
     @Before
     public void setUp() {
