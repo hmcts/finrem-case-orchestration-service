@@ -29,7 +29,6 @@ public class RejectedConsentOrderAboutToSubmitHandler extends FinremCallbackHand
         this.categoriser = categoriser;
     }
 
-
     @Override
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
                              final EventType eventType) {

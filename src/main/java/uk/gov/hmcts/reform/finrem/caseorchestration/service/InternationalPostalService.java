@@ -162,7 +162,6 @@ public class InternationalPostalService {
         return "Yes".equalsIgnoreCase(applicantResideOutsideUK);
     }
 
-
     public boolean isRespondentResideOutsideOfUK(FinremCaseData caseData) {
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
         YesOrNo respondentResideOutsideUK = wrapper.getRespondentResideOutsideUK();

@@ -18,7 +18,6 @@ import java.util.Map;
 @SuppressWarnings("java:S3740")
 public class PaperCaseCreateConsentedSubmittedHandler implements CallbackHandler {
 
-
     private final CreateCaseService createCaseService;
 
     @Override

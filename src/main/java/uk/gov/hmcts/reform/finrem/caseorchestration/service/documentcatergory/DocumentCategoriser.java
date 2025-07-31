@@ -11,7 +11,6 @@ public abstract class DocumentCategoriser {
         this.featureToggleService = featureToggleService;
     }
 
-
     public void categorise(FinremCaseData finremCaseData) {
         if (featureToggleService.isCaseFileViewEnabled()) {
             categoriseDocuments(finremCaseData);

@@ -15,7 +15,6 @@ public class IntervenerTwoOtherDocumentsHandler extends OtherDocumentsHandler {
         super(INTERVENER_TWO_OTHER_COLLECTION, INTERVENER_TWO, featureToggleService);
     }
 
-
     @Override
     protected DocumentCategory getOtherDocumentCategory() {
         return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2_OTHER;
@@ -65,5 +64,4 @@ public class IntervenerTwoOtherDocumentsHandler extends OtherDocumentsHandler {
     protected DocumentCategory getDefaultPartyCategory() {
         return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_2;
     }
-
 }

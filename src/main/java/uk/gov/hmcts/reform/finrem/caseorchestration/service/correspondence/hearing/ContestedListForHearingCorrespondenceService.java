@@ -27,7 +27,6 @@ public class ContestedListForHearingCorrespondenceService {
         this.selectablePartiesCorrespondenceService = selectablePartiesCorrespondenceService;
     }
 
-
     public void sendHearingCorrespondence(FinremCallbackRequest callbackRequest,
                                           String userAuthorisation) {
 
@@ -47,6 +46,5 @@ public class ContestedListForHearingCorrespondenceService {
             hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, userAuthorisation);
             log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
         }
-
     }
 }

@@ -295,8 +295,8 @@ public class GeneralOrderService {
             .map(AgreedDraftOrderCollection::getValue)
             .filter(agreedDraftOrder -> PROCESSED == agreedDraftOrder.getOrderStatus())
             .forEach(agreedDraftOrder -> {
-                CaseDocument coverLetter = agreedDraftOrder.getCoverLetter() != null ?
-                    agreedDraftOrder.getCoverLetter() : data.getOrderApprovedCoverLetter();
+                CaseDocument coverLetter = agreedDraftOrder.getCoverLetter() != null
+                    ? agreedDraftOrder.getCoverLetter() : data.getOrderApprovedCoverLetter();
                 appendOrderToShareCollection(orderToShareCollection, agreedDraftOrder.getTargetDocument(), "Approved order - %s",
                     coverLetter, // Pass the cover letter
                     emptyIfNull(agreedDraftOrder.getAttachments()).stream().map(DocumentCollectionItem::getValue).toArray(CaseDocument[]::new)
@@ -308,8 +308,8 @@ public class GeneralOrderService {
         emptyIfNull(data.getDraftOrdersWrapper().getFinalisedOrdersCollection()).stream()
             .map(FinalisedOrderCollection::getValue)
             .forEach(finalisedOrder -> {
-                CaseDocument coverLetter = finalisedOrder.getCoverLetter() != null ?
-                    finalisedOrder.getCoverLetter() : data.getOrderApprovedCoverLetter();
+                CaseDocument coverLetter = finalisedOrder.getCoverLetter() != null
+                    ? finalisedOrder.getCoverLetter() : data.getOrderApprovedCoverLetter();
                 appendOrderToShareCollection(orderToShareCollection, finalisedOrder.getFinalisedDocument(), "Finalised order - %s", coverLetter,
                     emptyIfNull(finalisedOrder.getAttachments()).stream().map(DocumentCollectionItem::getValue).toArray(CaseDocument[]::new)
                 );
