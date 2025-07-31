@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,5 +78,4 @@ public class InterimHearingContestedSubmittedHandlerTest extends BaseHandlerTest
 
         verify(interimHearingService).sendNotification(any());
     }
-
 }
