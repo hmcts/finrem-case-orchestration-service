@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class BulkPrintService {
 
     public static final String FINANCIAL_REMEDY_PACK_LETTER_TYPE = "FINANCIAL_REMEDY_PACK";
-    private static final String FINANCIAL_REMEDY_GENERAL_LETTER = "FINREM002";
+    public static final String FINANCIAL_REMEDY_GENERAL_LETTER = "FINREM002";
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final GenerateCoverSheetService coverSheetService;
@@ -153,7 +153,6 @@ public class BulkPrintService {
 
     public UUID bulkPrintFinancialRemedyLetterPack(FinremCaseDetails caseDetails, String recipient, List<BulkPrintDocument> documents,
                                                    boolean isInternational, String auth) {
-        log.info("Requesting {} letter print from bulkprint for Case ID: {}", recipient, caseDetails.getId());
         return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
     }
 
@@ -170,7 +169,10 @@ public class BulkPrintService {
                 .caseId(String.valueOf(caseId))
                 .letterType(letterType)
                 .bulkPrintDocuments(documents)
-                .build(), recipient, isInternational, auth);
+                .recipientParty(recipient)
+                .isInternational(isInternational)
+                .authorisationToken(auth)
+                .build());
 
         log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {} and recipient is {}, isInternational {}",
             caseId, letterId, documents.size(), letterType, documents, recipient, isInternational);

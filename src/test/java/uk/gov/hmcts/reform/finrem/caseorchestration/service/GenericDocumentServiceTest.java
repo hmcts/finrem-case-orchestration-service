@@ -21,7 +21,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -48,7 +47,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     private ArgumentCaptor<String> templateNameCaptor;
 
     @Test
-    public void shouldStampDocument() throws Exception {
+    public void shouldStampDocument() {
         when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
             .thenReturn(document());
 
@@ -56,8 +55,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
             genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, caseId);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock, times(1))
-            .stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId);
+        verify(pdfStampingServiceMock).stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId);
     }
 
     @Test
@@ -69,8 +67,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
             .annexStampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, caseId);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock, times(1))
-            .stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, caseId);
+        verify(pdfStampingServiceMock).stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, caseId);
     }
 
     @Test
@@ -91,8 +88,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
         CaseDocument document = genericDocumentService.generateDocument(AUTH_TOKEN, caseDetails, templateName, fileName);
 
         assertCaseDocument(document);
-        verify(docmosisPdfGenerationServiceMock, times(1))
-            .generateDocFrom(templateNameCaptor.capture(), any());
+        verify(docmosisPdfGenerationServiceMock).generateDocFrom(templateNameCaptor.capture(), any());
 
 
         assertThat(templateNameCaptor.getValue(), is(templateName));
@@ -103,13 +99,17 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     public void shouldDeleteDocument() {
         genericDocumentService.deleteDocument(caseDocument().getDocumentUrl(), AUTH_TOKEN);
 
-        verify(evidenceManagementDeleteService, times(1)).delete(caseDocument().getDocumentUrl(), AUTH_TOKEN);
+        verify(evidenceManagementDeleteService).delete(caseDocument().getDocumentUrl(), AUTH_TOKEN);
     }
 
     @Test
     public void shouldBulkPrintDocument() {
-        genericDocumentService.bulkPrint(BulkPrintRequest.builder().build(), "recipient", true, AUTH_TOKEN);
+        genericDocumentService.bulkPrint(BulkPrintRequest.builder()
+            .isInternational(true)
+            .recipientParty("recipient")
+            .authorisationToken(AUTH_TOKEN)
+            .build());
 
-        verify(bulkPrintDocumentGeneratorService, times(1)).send(any(), any(), anyBoolean(), any());
+        verify(bulkPrintDocumentGeneratorService).send(any(), any(), anyBoolean(), any());
     }
 }
