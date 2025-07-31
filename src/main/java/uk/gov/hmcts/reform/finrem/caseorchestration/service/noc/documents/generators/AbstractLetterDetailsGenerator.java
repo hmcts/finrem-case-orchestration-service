@@ -63,7 +63,6 @@ public abstract class AbstractLetterDetailsGenerator {
             Objects.toString(caseDetails.getData().get(RESP_SOLICITOR_REFERENCE));
     }
 
-
     abstract String getSolicitorFirmName(RepresentationUpdate representationUpdate,
                                          CaseDetails caseDetails,
                                          CaseDetails caseDetailsBefore);
@@ -77,7 +76,6 @@ public abstract class AbstractLetterDetailsGenerator {
     abstract CaseDetails getCaseDetailsToUse(CaseDetails caseDetails,
                                              CaseDetails caseDetailsBefore,
                                              DocumentHelper.PaperNotificationRecipient recipient);
-
 
     private Addressee getAddressee(CaseDetails caseDetails,
                                    CaseDetails caseDetailsBefore,
@@ -110,5 +108,4 @@ public abstract class AbstractLetterDetailsGenerator {
             ? CONSENTED_SOLICITOR_FIRM
             : CONTESTED_SOLICITOR_FIRM;
     }
-
 }

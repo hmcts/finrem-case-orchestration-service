@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.getEventType;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.forValue;
 
-
 @RequiredArgsConstructor
 @Service
 @Slf4j

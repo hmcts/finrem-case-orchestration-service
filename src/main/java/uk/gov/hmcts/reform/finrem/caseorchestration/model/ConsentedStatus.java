@@ -20,7 +20,6 @@ public enum ConsentedStatus {
 
     CASE_ADDED("caseAdded");
 
-
     private final String id;
 
     ConsentedStatus(String id) {
@@ -35,5 +34,4 @@ public enum ConsentedStatus {
     public String getId() {
         return id;
     }
-
 }

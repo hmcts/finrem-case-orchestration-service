@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 
 import java.util.Map;
 
-
 @Data
 @Builder
 public class AddresseeDetails {

@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
 @Service
 public class SolicitorCreateContestedSubmittedHandler extends AssignApplicantSolicitorHandler {
 
-
     private final CreateCaseService createCaseService;
 
     public SolicitorCreateContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
