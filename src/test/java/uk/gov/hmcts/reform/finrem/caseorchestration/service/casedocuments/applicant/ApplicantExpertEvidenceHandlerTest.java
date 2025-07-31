@@ -22,7 +22,6 @@ public class ApplicantExpertEvidenceHandlerTest extends ExpertEvidenceHandlerTes
     @InjectMocks
     ApplicantExpertEvidenceHandler applicantExpertEvidenceHandler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.VALUATION_REPORT,
