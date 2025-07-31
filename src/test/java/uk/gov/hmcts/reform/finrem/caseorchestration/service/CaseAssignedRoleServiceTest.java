@@ -57,7 +57,6 @@ public class CaseAssignedRoleServiceTest {
     @Mock
     private IdamService idamService;
 
-
     @Before
     public void setUp() {
         Map<String, Object> caseData = new HashMap<>();

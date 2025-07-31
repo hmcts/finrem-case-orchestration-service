@@ -190,7 +190,6 @@ class FinremCaseDataTest {
         assertThat(finremCaseData.getRespondentSolicitorEmailForContested()).isEqualTo("respondent@testemail.com");
     }
 
-
     @Test
     void isFastTrackApplicationShouldReturnCorrectValues() {
         // Setup base data

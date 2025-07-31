@@ -320,7 +320,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             is(INTERIM_HEARING_DOCUMENT_BIN_URL));
     }
 
-
     private void assertCaseDataHasGeneralApplicationDirectionsDocument() {
         assertThat(caseDetails.getData(), hasKey(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
         assertThat(((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)).getDocumentBinaryUrl(),

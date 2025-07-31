@@ -36,5 +36,4 @@ public class PensionCollectionDataTest {
         assertThat(pensionDocument.getDocumentUrl(), is("http://file1"));
         assertThat(pensionDocument.getDocumentFilename(), is("file1.pdf"));
     }
-
 }
