@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentHearingService;
 
-
 @Slf4j
 @Service
 public class HearingConsentSubmittedHandler extends FinremCallbackHandler {

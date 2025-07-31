@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsEmailOnlyAllSolicitorsCorresponder;
 
-
 @Component
 @Slf4j
 public class ContestedConsentOrderNotApprovedCorresponder extends CaseDetailsEmailOnlyAllSolicitorsCorresponder {
@@ -32,7 +31,6 @@ public class ContestedConsentOrderNotApprovedCorresponder extends CaseDetailsEma
         log.info("Sending email notification to Respondent Solicitor for 'Contested Consent Order Not Approved' for Case ID: {}",
             caseDetails.getId());
         notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(caseDetails);
-
     }
 
     @Override
@@ -41,6 +39,5 @@ public class ContestedConsentOrderNotApprovedCorresponder extends CaseDetailsEma
             caseDetails.getId());
         notificationService.sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(caseDetails,
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
-
     }
 }

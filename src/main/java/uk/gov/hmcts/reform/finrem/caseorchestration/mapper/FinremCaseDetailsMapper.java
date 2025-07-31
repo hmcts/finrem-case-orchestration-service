@@ -71,33 +71,27 @@ public class FinremCaseDetailsMapper {
     /**
      * Converts a {@link FinremCaseDetails} object to a {@link CaseDetails} object,
      * ensuring that fields with {@code null} values are included in the resulting data map.
-     *
      * <p>
+     *
      * This method creates a copy of the injected {@code ObjectMapper} and applies
      * a MixIn to the specified classes to override any {@code @JsonInclude}
      * annotations that would otherwise exclude null values during serialization.
      * It then serializes the {@code caseDetails} data to JSON (with nulls included),
      * and deserializes it back into a {@link LinkedHashMap}, preserving all keys.
-     *
      * <p>
+     *
      * The returned {@link CaseDetails} will have its {@code data} field populated
      * with a map that contains all keys, including those with {@code null} values.
-     *
      * <p>
+     *
      * This is particularly useful when nulls must be sent to the CCD API
      * to explicitly clear fields (e.g. {@code "fieldA": null} to delete {@code fieldA}).
-     *
      * <p>
+     *
      * @param caseDetails the {@link FinremCaseDetails} instance to convert
-     *
-     * <p>
      * @param classesToOverrideJsonInclude one or more classes for which {@code null} fields
      * should be forcibly included by applying a MixIn that overrides {@code @JsonInclude}
-     *
-     * <p>
      * @return a {@link CaseDetails} instance with its data map including null-valued fields
-     *
-     * <p>
      * @throws JsonProcessingException if an error occurs during JSON serialization or deserialization
      */
     public CaseDetails mapToCaseDetailsIncludingNulls(FinremCaseDetails caseDetails,
