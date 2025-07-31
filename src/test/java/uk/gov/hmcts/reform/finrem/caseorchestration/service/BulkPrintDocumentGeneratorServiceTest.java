@@ -52,7 +52,7 @@ class BulkPrintDocumentGeneratorServiceTest {
         when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class)))
             .thenReturn(new SendLetterResponse(randomId));
 
-        UUID letterId = service.send(getBulkPrintRequest(), APPLICANT, true, singletonList("abc".getBytes()));
+        UUID letterId = service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
         assertThat(letterId, is(equalTo(randomId)));
     }
 
@@ -65,8 +65,8 @@ class BulkPrintDocumentGeneratorServiceTest {
             .thenReturn(new SendLetterResponse(randomId));
 
         // Send 2 requests
-        service.send(getBulkPrintRequest(), APPLICANT, true, singletonList("abc".getBytes()));
-        service.send(getBulkPrintRequest(), APPLICANT, true, singletonList("abc".getBytes()));
+        service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
+        service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
 
         verify(sendLetterApi, times(2)).sendLetter(anyString(), letterWithPdfsRequestArgumentCaptor.capture());
 
@@ -87,8 +87,8 @@ class BulkPrintDocumentGeneratorServiceTest {
             .thenReturn(new SendLetterResponse(randomId));
 
         // Send 2 requests
-        service.send(getBulkPrintRequest(), APPLICANT, true, singletonList("abc".getBytes()));
-        service.send(getBulkPrintRequest(), APPLICANT, true, singletonList("abc".getBytes()));
+        service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
+        service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
 
         verify(sendLetterApi, times(2)).sendLetter(anyString(), letterWithPdfsRequestArgumentCaptor.capture());
 
@@ -104,7 +104,7 @@ class BulkPrintDocumentGeneratorServiceTest {
     void throwsException() {
         when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
 
-        assertThatThrownBy(() -> service.send(getBulkPrintRequest(), APPLICANT, true, singletonList("abc".getBytes())))
+        assertThatThrownBy(() -> service.send(getBulkPrintRequest(), singletonList("abc".getBytes())))
             .isInstanceOf(RuntimeException.class);
         verifyNoInteractions(sendLetterApi);
     }
@@ -114,13 +114,17 @@ class BulkPrintDocumentGeneratorServiceTest {
         when(authTokenGenerator.generate()).thenReturn("random-string");
         when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class))).thenThrow(new RuntimeException());
 
-        assertThatThrownBy(() -> service.send(getBulkPrintRequest(), APPLICANT, true, singletonList("abc".getBytes())))
+        assertThatThrownBy(() -> service.send(getBulkPrintRequest(), singletonList("abc".getBytes())))
             .isInstanceOf(RuntimeException.class);
         verify(authTokenGenerator).generate();
     }
 
     private static BulkPrintRequest getBulkPrintRequest() {
-        return BulkPrintRequest.builder().letterType("any").caseId("any")
+        return BulkPrintRequest.builder()
+            .letterType("any")
+            .caseId("any")
+            .recipientParty(APPLICANT)
+            .isInternational(true)
             .bulkPrintDocuments(Collections.singletonList(
                 BulkPrintDocument.builder().binaryFileUrl(BINARY_URL).fileName(FILE_NAME).build())).build();
     }
