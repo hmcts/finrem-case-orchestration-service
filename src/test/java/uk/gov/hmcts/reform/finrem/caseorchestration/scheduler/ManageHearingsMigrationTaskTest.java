@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -90,6 +91,9 @@ class ManageHearingsMigrationTaskTest {
     @Mock
     private ManageHearingActionService manageHearingActionService;
 
+    @Mock
+    private DocumentHelper documentHelper;
+
     @BeforeEach
     void setup() {
         spyManageHearingsMigrationService = spy(new ManageHearingsMigrationService(
@@ -98,8 +102,9 @@ class ManageHearingsMigrationTaskTest {
         ));
 
         underTest = new ManageHearingsMigrationTask(caseReferenceCsvLoader, ccdService, systemUserService,
-            spyFinremCaseDetailsMapper, spyManageHearingsMigrationService);
+            spyFinremCaseDetailsMapper, spyManageHearingsMigrationService, documentHelper);
         ReflectionTestUtils.setField(underTest, "taskEnabled", true);
+        ReflectionTestUtils.setField(underTest, "dryRun", false);
         ReflectionTestUtils.setField(underTest, "rollback", false);
         ReflectionTestUtils.setField(underTest, "csvFile", ENCRYPTED_CSV_FILENAME);
         ReflectionTestUtils.setField(underTest, "secret", DUMMY_SECRET);
@@ -115,6 +120,55 @@ class ManageHearingsMigrationTaskTest {
         verifyNoInteractions(caseReferenceCsvLoader);
         verifyNoInteractions(systemUserService);
         verifyNoInteractions(spyManageHearingsMigrationService);
+    }
+
+    @Test
+    void givenTaskEnabledAndDryRunEnabledThenKeepOriginalFinremCaseDetailsUntouched()
+        throws JsonProcessingException {
+        ReflectionTestUtils.setField(underTest, "dryRun", true);
+
+        CaseDetails loadedCaseDetailsOne = mock(CaseDetails.class);
+        CaseDetails updatedCaseDetailsOne = mock(CaseDetails.class);
+        FinremCaseData caseDataOne = FinremCaseData.builder().build();
+        FinremCaseData clonedCaseData = FinremCaseData.builder().build();
+        FinremCaseDetails finremCaseDetailsOne = FinremCaseDetailsBuilderFactory
+            .from(CASE_ID, CONTESTED, caseDataOne).build();
+        FinremCaseDetails clonnedFinremCaseDetails = FinremCaseDetailsBuilderFactory
+            .from(CASE_ID, CONTESTED, clonedCaseData).build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+
+        when(caseReferenceCsvLoader.loadCaseReferenceList(ENCRYPTED_CSV_FILENAME, DUMMY_SECRET))
+            .thenReturn(List.of(
+                // Single case
+                CaseReference.builder().caseReference(CASE_ID).build()
+            ));
+        when(ccdService.getCaseByCaseId(CASE_ID, CONTESTED, AUTH_TOKEN))
+            .thenReturn(SearchResult.builder()
+                .cases(List.of(loadedCaseDetailsOne))
+                .total(1)
+                .build());
+
+        when(ccdService.startEventForCaseWorker(AUTH_TOKEN, CASE_ID, CONTESTED.getCcdType(), AMEND_CASE_CRON.getCcdType()))
+            .thenReturn(StartEventResponse.builder()
+                .caseDetails(loadedCaseDetailsOne)
+                .build());
+
+        doReturn(finremCaseDetailsOne).when(spyFinremCaseDetailsMapper).mapToFinremCaseDetails(loadedCaseDetailsOne);
+        when(documentHelper.deepCopy(finremCaseDetailsOne, FinremCaseDetails.class)).thenReturn(clonnedFinremCaseDetails);
+
+        doReturn(updatedCaseDetailsOne).when(spyFinremCaseDetailsMapper)
+            .mapToCaseDetailsIncludingNulls(clonnedFinremCaseDetails, MhMigrationWrapper.class, ManageHearingsWrapper.class);
+        doReturn(false).when(spyManageHearingsMigrationService).wasMigrated(clonedCaseData);
+
+        // Act
+        underTest.run();
+
+        // Assert
+        verify(spyManageHearingsMigrationService).runManageHearingMigration(clonedCaseData, MH_MIGRATION_VERSION);
+        verify(spyManageHearingsMigrationService, never()).runManageHearingMigration(caseDataOne, MH_MIGRATION_VERSION);
+        verify(spyManageHearingsMigrationService, never()).revertManageHearingMigration(clonedCaseData);
+        verify(spyManageHearingsMigrationService, never()).revertManageHearingMigration(caseDataOne);
     }
 
     @Test
