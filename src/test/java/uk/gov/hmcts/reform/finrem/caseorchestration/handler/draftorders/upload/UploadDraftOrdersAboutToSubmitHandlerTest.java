@@ -304,7 +304,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
             .build();
 
-        AgreedDraftOrderCollection draftOrder1 = AgreedDraftOrderCollection.builder()
+        final AgreedDraftOrderCollection draftOrder1 = AgreedDraftOrderCollection.builder()
             .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
 
         DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();

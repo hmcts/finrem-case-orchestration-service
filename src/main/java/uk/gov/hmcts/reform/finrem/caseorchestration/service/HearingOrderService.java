@@ -79,7 +79,6 @@ public class HearingOrderService {
         return latestDraftDirectionOrder.isPresent() && !latestDraftDirectionOrder.get().equals(draftDirectionOrderCollectionTail);
     }
 
-
     public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
 

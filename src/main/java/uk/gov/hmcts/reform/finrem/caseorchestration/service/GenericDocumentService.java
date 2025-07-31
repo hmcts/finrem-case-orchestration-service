@@ -47,8 +47,7 @@ public class GenericDocumentService {
     public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
         final List<byte[]> documents = bulkPrintDocumentService.downloadDocuments(bulkPrintRequest,
             bulkPrintRequest.getAuthorisationToken());
-        return bulkPrintDocumentGeneratorService.send(bulkPrintRequest, bulkPrintRequest.getRecipientParty(),
-            bulkPrintRequest.isInternational(), documents);
+        return bulkPrintDocumentGeneratorService.send(bulkPrintRequest, documents);
     }
 
     public void deleteDocument(String documentUrl, String authorisationToken) {

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,11 +17,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -110,6 +111,6 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
             .authorisationToken(AUTH_TOKEN)
             .build());
 
-        verify(bulkPrintDocumentGeneratorService).send(any(), any(), anyBoolean(), any());
+        verify(bulkPrintDocumentGeneratorService).send(any(BulkPrintRequest.class), ArgumentMatchers.<List<byte[]>>any());
     }
 }

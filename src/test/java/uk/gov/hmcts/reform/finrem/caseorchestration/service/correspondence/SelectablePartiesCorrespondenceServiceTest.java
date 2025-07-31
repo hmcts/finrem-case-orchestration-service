@@ -54,7 +54,6 @@ public class SelectablePartiesCorrespondenceServiceTest {
         assertTrue(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
 
-
     @Test
     public void shouldOnlySetApplicantPartyToReceiveCorrespondence() {
 
@@ -85,7 +84,6 @@ public class SelectablePartiesCorrespondenceServiceTest {
         assertFalse(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
 
-
     @Test
     public void shouldOnlySetIntervenerOnePartyToReceiveCorrespondence() {
 
@@ -100,7 +98,6 @@ public class SelectablePartiesCorrespondenceServiceTest {
         assertFalse(finremCaseData.getIntervenerThree().getIntervenerCorrespondenceEnabled());
         assertFalse(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
-
 
     @Test
     public void shouldOnlySetIntervenerTwoPartyToReceiveCorrespondence() {
@@ -117,7 +114,6 @@ public class SelectablePartiesCorrespondenceServiceTest {
         assertFalse(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
 
-
     @Test
     public void shouldOnlySetIntervenerThreePartyToReceiveCorrespondence() {
 
@@ -132,7 +128,6 @@ public class SelectablePartiesCorrespondenceServiceTest {
         assertTrue(finremCaseData.getIntervenerThree().getIntervenerCorrespondenceEnabled());
         assertFalse(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
-
 
     @Test
     public void shouldOnlySetIntervenerFourPartyToReceiveCorrespondence() {
@@ -149,7 +144,6 @@ public class SelectablePartiesCorrespondenceServiceTest {
         assertTrue(finremCaseData.getIntervenerFour().getIntervenerCorrespondenceEnabled());
     }
 
-
     @Test
     public void shouldDetermineIfApplicantCorrespondenceShouldBeSent() {
 
@@ -161,7 +155,6 @@ public class SelectablePartiesCorrespondenceServiceTest {
 
         assertTrue(selectablePartiesCorrespondenceService.shouldSendApplicantCorrespondence(caseDetails));
     }
-
 
     @Test
     public void shouldDetermineIfRespondentCorrespondenceShouldBeSent() {

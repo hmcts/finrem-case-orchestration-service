@@ -33,7 +33,6 @@ public class OtherDocumentSharer extends DocumentSharer {
         return caseData.getUploadCaseDocumentWrapper().getRespOtherCollectionShared();
     }
 
-
     @Override
     protected void setApplicantSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list) {
         caseData.getUploadCaseDocumentWrapper().setAppOtherCollectionShared(list);
@@ -83,7 +82,6 @@ public class OtherDocumentSharer extends DocumentSharer {
     protected List<UploadCaseDocumentCollection> getApplicantSharedCollection(FinremCaseData caseData) {
         return caseData.getUploadCaseDocumentWrapper().getAppOtherCollectionShared();
     }
-
 
     @Override
     protected List<UploadCaseDocumentCollection> getIntervenerFourCollection(UploadCaseDocumentWrapper documentWrapper) {

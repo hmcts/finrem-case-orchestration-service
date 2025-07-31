@@ -193,7 +193,6 @@ public abstract class BaseServiceTest extends BaseTest {
             .build();
     }
 
-
     protected CallbackRequest getConsentedCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");

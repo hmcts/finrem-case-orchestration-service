@@ -29,7 +29,6 @@ public class LetterAddresseeGeneratorMapper {
         return addresseeGeneratorMap().get(recipient).generate(caseDetails);
     }
 
-
     private Map<DocumentHelper.PaperNotificationRecipient, LetterAddresseeGenerator> addresseeGeneratorMap() {
         return Map.of(DocumentHelper.PaperNotificationRecipient.APPLICANT, applicantAddresseeGenerator,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT, respondentAddresseeGenerator,

@@ -26,7 +26,6 @@ import java.net.URISyntaxException;
 
 import static java.lang.String.format;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j

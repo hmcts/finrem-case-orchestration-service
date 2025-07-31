@@ -74,23 +74,6 @@ public class CourtDetailsMapper {
             .toList();
     }
 
-    @SuppressWarnings("java:S112")
-    private CourtDetailsTemplateFields convertToFrcCourtDetails(Field initialisedCourtField,
-                                                                CourtListWrapper courtListWrapper) throws Exception {
-        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(),
-            TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
-
-        CourtList selectedCourtField = (CourtList) initialisedCourtField.get(courtListWrapper);
-        Object selectedCourtDetailsObject = courtDetailsMap.get(nullToEmpty(selectedCourtField.getSelectedCourtId()));
-
-        if (selectedCourtDetailsObject == null) {
-            return CourtDetailsTemplateFields.builder().courtName("").courtAddress("").phoneNumber("").email("").build();
-        }
-
-        return objectMapper.convertValue(selectedCourtDetailsObject, new TypeReference<>() {
-        });
-    }
-
     private Optional<Field> getCourtField(CourtListWrapper regionWrapper) {
         return Stream.of(regionWrapper.getClass().getDeclaredFields())
             .filter(field -> fieldIsNotNullOrEmpty.test(field, regionWrapper))
@@ -134,6 +117,23 @@ public class CourtDetailsMapper {
                 }
             })
             .orElseThrow(() -> new IllegalStateException("No valid field found in the court list wrapper"));
+    }
+
+    @SuppressWarnings("java:S112")
+    private CourtDetailsTemplateFields convertToFrcCourtDetails(Field initialisedCourtField,
+                                                                CourtListWrapper courtListWrapper) throws Exception {
+        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(),
+            TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
+
+        CourtList selectedCourtField = (CourtList) initialisedCourtField.get(courtListWrapper);
+        Object selectedCourtDetailsObject = courtDetailsMap.get(nullToEmpty(selectedCourtField.getSelectedCourtId()));
+
+        if (selectedCourtDetailsObject == null) {
+            return CourtDetailsTemplateFields.builder().courtName("").courtAddress("").phoneNumber("").email("").build();
+        }
+
+        return objectMapper.convertValue(selectedCourtDetailsObject, new TypeReference<>() {
+        });
     }
 
     public AllocatedRegionWrapper getLatestAllocatedCourt(AllocatedRegionWrapper regionWrapperBefore,

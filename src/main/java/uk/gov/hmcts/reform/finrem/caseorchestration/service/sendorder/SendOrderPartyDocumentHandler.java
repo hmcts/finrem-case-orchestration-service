@@ -143,7 +143,6 @@ public abstract class SendOrderPartyDocumentHandler {
         return false;
     }
 
-
     protected List<ApprovedOrderConsolidateCollection> getPartyConsolidateCollection(List<ApprovedOrderConsolidateCollection> list) {
         List<ApprovedOrderConsolidateCollection> approvedOrderConsolidateCollections = Optional.ofNullable(list).orElse(new ArrayList<>());
         List<ApprovedOrderConsolidateCollection> returnList = new ArrayList<>();

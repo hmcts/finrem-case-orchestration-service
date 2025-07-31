@@ -187,7 +187,6 @@ public class UploadCaseDocumentWrapper implements HasCaseDocument {
     private List<UploadCaseDocumentCollection> intv4CorrespDocsShared;
     private List<UploadCaseDocumentCollection> intv4OtherShared;
 
-
     @JsonIgnore
     @SuppressWarnings({"java:S6204", "java:S1121"})
     public List<UploadCaseDocumentCollection> getAllManageableCollections() {

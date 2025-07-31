@@ -46,7 +46,6 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         categoryToAllPartiesOrders(finremCaseData.getOrderWrapper());
 
         categoryToAllPartiesOrders(finremCaseData.getConsentOrderWrapper());
-
     }
 
     private void categoryToAllPartiesOrders(OrderWrapper orderWrapper) {
@@ -94,7 +93,6 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
             });
         }
     }
-
 
     private void categoryToAllPartiesOrders(ConsentOrderWrapper orderWrapper) {
 
