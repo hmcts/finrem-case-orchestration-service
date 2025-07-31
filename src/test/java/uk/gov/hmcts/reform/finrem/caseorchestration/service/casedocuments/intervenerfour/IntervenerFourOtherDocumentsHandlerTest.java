@@ -24,7 +24,6 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
     @InjectMocks
     IntervenerFourOtherDocumentsHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
@@ -94,7 +93,6 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
             is(DocumentCategory.REPORTS)
         );
 
-
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CERTIFICATES_OF_SERVICE, CaseDocumentParty.INTERVENER_FOUR),
             is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_CERTIFICATES_OF_SERVICE)
@@ -104,7 +102,6 @@ public class IntervenerFourOtherDocumentsHandlerTest extends BaseManageDocuments
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.ES1, CaseDocumentParty.INTERVENER_FOUR),
             is(DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_ES1)
         );
-
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_REPORT, CaseDocumentParty.INTERVENER_FOUR),

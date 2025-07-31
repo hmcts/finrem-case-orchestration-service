@@ -34,7 +34,6 @@ public class FdrDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
     @InjectMocks
     FdrDocumentsHandler handler;
 
-
     private List<UploadCaseDocumentCollection> uploadDocumentList = new ArrayList<>();
 
     @Before

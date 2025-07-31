@@ -23,7 +23,6 @@ public class IntervenerFourFormsHHandlerTest extends FormsHHandlerTest {
     @InjectMocks
     IntervenerFourFormsHHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_H,
