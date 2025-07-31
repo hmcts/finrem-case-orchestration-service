@@ -75,7 +75,6 @@ public class CCDConfigConstant {
     public static final String ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL = "allocatedToBeHeardAtHighCourtJudgeLevel";
     public static final String ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL_TEXT = "allocatedToBeHeardAtHighCourtJudgeLevelText";
 
-
     //Respondent Solicitor Related
     public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
     public static final String CONTESTED_RESPONDENT_REPRESENTED = "respondentRepresented";
@@ -89,7 +88,6 @@ public class CCDConfigConstant {
     public static final String RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT = "RespSolNotificationsEmailConsent";
     public static final String RESPONDENT_SHARE_DOCUMENTS = "respondentShareDocs";
     public static final String RESPONDENT_ORGANISATION_POLICY = "RespondentOrganisationPolicy";
-
 
     //Court related
     public static final String REGION = "regionList";
@@ -259,7 +257,6 @@ public class CCDConfigConstant {
     public static final String HEARING_COURT_DETAILS_ADDRESS_KEY = "hearingCourtAddress";
     public static final String HEARING_COURT_DETAILS_PHONE_KEY = "hearingCourtPhoneNumber";
     public static final String HEARING_COURT_DETAILS_EMAIL_KEY = "hearingCourtEmail";
-
 
     // IDAM
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
@@ -670,7 +667,6 @@ public class CCDConfigConstant {
     public static final String CASEWORKER_ROLE_FIELD_SHOW_LABEL = "CASEWORKER";
     public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
     public static final String MANAGE_BARRISTERS = "Manage Barristers";
-
 
     //Hearing Events
     public static final String LIST_FOR_HEARING = "List for Hearing";

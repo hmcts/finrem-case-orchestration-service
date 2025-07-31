@@ -64,6 +64,4 @@ public class ApplicantOtherDocumentsHandler extends OtherDocumentsHandler {
     protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_WITHOUT_PREJUDICE_OFFERS;
     }
-
-
 }

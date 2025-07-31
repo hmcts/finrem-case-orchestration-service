@@ -15,4 +15,7 @@ public class BulkPrintRequest {
     private String caseId;
     private String letterType;
     private List<BulkPrintDocument> bulkPrintDocuments;
+    private String recipientParty;
+    private boolean isInternational;
+    private String authorisationToken;
 }

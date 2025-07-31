@@ -34,7 +34,6 @@ public class QuestionnaireAnswersDocumentSharer extends DocumentSharer {
         return caseData.getUploadCaseDocumentWrapper().getRespQaCollectionShared();
     }
 
-
     @Override
     protected void setApplicantSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list) {
         caseData.getUploadCaseDocumentWrapper().setAppQaCollectionShared(list);
@@ -84,7 +83,6 @@ public class QuestionnaireAnswersDocumentSharer extends DocumentSharer {
     protected List<UploadCaseDocumentCollection> getApplicantSharedCollection(FinremCaseData caseData) {
         return caseData.getUploadCaseDocumentWrapper().getAppQaCollectionShared();
     }
-
 
     @Override
     protected List<UploadCaseDocumentCollection> getIntervenerFourCollection(UploadCaseDocumentWrapper documentWrapper) {

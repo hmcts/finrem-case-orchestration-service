@@ -12,7 +12,6 @@ public class IntervenerTwoFdrDocumentCategoriser extends PartyFdrDocumentCategor
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2;
     }
 
-
     @Override
     protected DocumentCategory getHearingDraftOrderDocumentCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2_DRAFT_ORDER;

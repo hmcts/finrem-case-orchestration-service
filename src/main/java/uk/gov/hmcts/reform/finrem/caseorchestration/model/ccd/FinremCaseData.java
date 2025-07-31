@@ -299,7 +299,6 @@ public class FinremCaseData implements HasCaseDocument {
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
 
-
     private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
 
     @Getter(AccessLevel.NONE)

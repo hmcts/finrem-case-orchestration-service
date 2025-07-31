@@ -346,7 +346,6 @@ public final class CaseHearingFunctions {
         }
     }
 
-
     public static Map<String, Object> buildFrcCourtDetails(FinremCaseData data) {
         try {
             Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);

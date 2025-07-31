@@ -124,7 +124,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         });
     }
 
-
     private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> getValidatedResponse(FinremCaseData caseData) {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();

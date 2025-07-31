@@ -132,7 +132,6 @@ public class ConsentHearingService {
         return hearingData;
     }
 
-
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     private ConsentedHearingDataWrapper generateHearingDocument(ConsentedHearingDataWrapper hearingData,
                                          CaseDetails caseDetails,

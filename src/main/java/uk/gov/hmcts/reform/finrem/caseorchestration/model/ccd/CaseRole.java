@@ -22,8 +22,6 @@ public enum CaseRole {
     INTVR_BARRISTER_3("[INTVRBARRISTER3]"),
     INTVR_BARRISTER_4("[INTVRBARRISTER4]");
 
-
-
     private final String ccdCode;
 
     @JsonValue
