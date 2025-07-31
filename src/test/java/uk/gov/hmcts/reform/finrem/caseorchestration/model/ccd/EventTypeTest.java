@@ -17,7 +17,6 @@ import static org.junit.Assert.assertTrue;
 @Slf4j
 public class EventTypeTest {
 
-
     @Test
     public void givenEventHandler_whenMoreThanOneEventMatches_thenThrowError() {
 
@@ -86,7 +85,6 @@ public class EventTypeTest {
             }
         });
     }
-
 
     private boolean invokeCanHandleMethod(Class className,
                                           CallbackType callbackType,

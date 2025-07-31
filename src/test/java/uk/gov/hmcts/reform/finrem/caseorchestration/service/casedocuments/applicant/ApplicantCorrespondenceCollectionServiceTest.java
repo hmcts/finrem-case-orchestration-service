@@ -24,7 +24,6 @@ public class ApplicantCorrespondenceCollectionServiceTest extends Correspondence
     @InjectMocks
     ApplicantCorrespondenceHandler collectionService;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OFFERS,
