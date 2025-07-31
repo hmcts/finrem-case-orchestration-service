@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -25,26 +24,19 @@ public class ManageHearingsMigrationTask extends EncryptedCsvFileProcessingTask 
     @Value("${cron.manageHearingsMigration.rollback:false}")
     private boolean rollback;
 
-    @Value("${cron.manageHearingsMigration.caseListFileName:manageHearingsMigration-encrypted.csv}")
+    @Value("${cron.manageHearingsMigration.caseListFileName:updateConsentOrderFRCName-encrypted.csv}")
     private String csvFile;
 
     @Value("${cron.manageHearingsMigration.mhMigrationVersion:1}")
     private String mhMigrationVersion;
 
-    @Value("${cron.manageHearingsMigration.dryRun:true}")
-    private boolean dryRun;
-
     private final ManageHearingsMigrationService manageHearingsMigrationService;
-
-    private final DocumentHelper documentHelper;
 
     public ManageHearingsMigrationTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService,
                                        SystemUserService systemUserService, FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                       ManageHearingsMigrationService manageHearingsMigrationService,
-                                       DocumentHelper documentHelper) {
+                                       ManageHearingsMigrationService manageHearingsMigrationService) {
         super(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
         this.manageHearingsMigrationService = manageHearingsMigrationService;
-        this.documentHelper = documentHelper;
     }
 
     @Override
@@ -54,14 +46,9 @@ public class ManageHearingsMigrationTask extends EncryptedCsvFileProcessingTask 
 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
-        FinremCaseDetails workingFinremCaseDetails = finremCaseDetails;
-        if (dryRun) {
-            workingFinremCaseDetails = documentHelper.deepCopy(finremCaseDetails, FinremCaseDetails.class);
-        }
-
-        FinremCaseData caseData = workingFinremCaseDetails.getData();
+        FinremCaseData caseData = finremCaseDetails.getData();
         // It's weird caseData.ccdCaseId is null
-        caseData.setCcdCaseId(workingFinremCaseDetails.getId().toString());
+        caseData.setCcdCaseId(finremCaseDetails.getId().toString());
 
         if (rollback) {
             if (manageHearingsMigrationService.wasMigrated(caseData)) {
