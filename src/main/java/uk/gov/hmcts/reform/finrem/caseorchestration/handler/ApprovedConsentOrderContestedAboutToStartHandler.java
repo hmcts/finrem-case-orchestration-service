@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 
 import java.util.Map;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor

@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
@@ -29,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.FormGLetterDetails;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,6 +87,14 @@ class ManageHearingFormGLetterDetailsMapperTest {
                             .courtListWrapper(DefaultCourtListWrapper.builder()
                                 .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
                                 .build())
+                            .build())
+                        .partiesOnCaseMultiSelectList(DynamicMultiSelectList.builder()
+                            .value(List.of(
+                                DynamicMultiSelectListElement.builder()
+                                    .code("[APPSOLICITOR]")
+                                    .label("Applicant Solicitor - Hamzah")
+                                    .build()
+                            ))
                             .build())
                         .build())
                     .build())

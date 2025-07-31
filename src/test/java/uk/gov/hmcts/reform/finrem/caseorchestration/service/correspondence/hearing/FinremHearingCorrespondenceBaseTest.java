@@ -30,7 +30,6 @@ public abstract class FinremHearingCorrespondenceBaseTest {
     FinremCaseDetails caseDetails;
     FinremMultiLetterOrEmailAllPartiesCorresponder applicantAndRespondentMultiLetterCorresponder;
 
-
     @Test
     public void shouldEmailApplicantAndRespondent() {
 
@@ -65,7 +64,6 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         verify(bulkPrintService).printApplicantDocuments(any(FinremCaseDetails.class), anyString(), anyList());
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
     }
-
 
     @Test
     public void shouldEmailToApplicantAndSendLetterToRespondent() {
@@ -103,7 +101,6 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         verify(notificationService).sendPrepareForHearingEmailIntervener(any(FinremCaseDetails.class), any(SolicitorCaseDataKeysWrapper.class));
     }
 
-
     @Test
     public void shouldSendLettersToInterveners() {
 
@@ -128,7 +125,6 @@ public abstract class FinremHearingCorrespondenceBaseTest {
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
         verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOne.class), any(FinremCaseDetails.class), anyString(), anyList());
     }
-
 
     protected BulkPrintDocument getBulkPrintDocument() {
         return BulkPrintDocument.builder().build();

@@ -43,16 +43,16 @@ public class DirectionDetailsCollectionPopulator extends BasePopulator {
      */
     @Override
     public void populate(FinremCaseData caseData) {
-        List<DirectionDetail> directionDetailStream = emptyIfNull(caseData.getDirectionDetailsCollection()).stream()
+        List<DirectionDetail> directionDetailList = emptyIfNull(caseData.getDirectionDetailsCollection()).stream()
             .map(DirectionDetailCollection::getValue)
             .filter(d -> YesOrNo.isYes(d.getIsAnotherHearingYN()))
             .toList();
-        log.info("{} - Number of direction details to be migrated: {}", caseData.getCcdCaseId(), directionDetailStream.size());
-        directionDetailStream.forEach(directionDetails -> {
+        log.info("{} - Number of direction details to be migrated: {}", caseData.getCcdCaseId(), directionDetailList.size());
+        directionDetailList.forEach(directionDetails ->
             hearingsAppender.appendToHearings(caseData, () -> ManageHearingsCollectionItem.builder().value(
                 applyCommonMigratedValues(caseData, hearingsAppender.toHearing(directionDetails))
-            ).build());
-        });
+            ).build())
+        );
 
         caseData.getMhMigrationWrapper().setIsDirectionDetailsCollectionMigrated(YesOrNo.YES);
     }

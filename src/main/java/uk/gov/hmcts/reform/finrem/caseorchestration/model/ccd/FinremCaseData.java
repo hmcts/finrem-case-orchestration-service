@@ -299,7 +299,6 @@ public class FinremCaseData implements HasCaseDocument {
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
 
-
     private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
 
     @Getter(AccessLevel.NONE)
@@ -834,9 +833,16 @@ public class FinremCaseData implements HasCaseDocument {
         return nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail());
     }
 
+    /**
+     * If caseAllocatedTo is present, then the fastTrackDecision value is not relevant.
+     * This suits cases where caseAllocatedTo can be null.
+     * caseAllocatedTo may be an older version of an attribute that has been replaced by fastTrackDecision.
+     * @return true if the application can be considered a fast track application, false otherwise.
+     */
     @JsonIgnore
     public boolean isFastTrackApplication() {
-        return Optional.ofNullable(caseAllocatedTo).map(caseAllocatedTo -> caseAllocatedTo.isYes()).orElseGet(() -> fastTrackDecision.isYes());
+        return Optional.ofNullable(caseAllocatedTo).map(caseAllocatedTo ->
+            caseAllocatedTo.isYes()).orElseGet(() -> fastTrackDecision.isYes());
     }
 
     @JsonIgnore

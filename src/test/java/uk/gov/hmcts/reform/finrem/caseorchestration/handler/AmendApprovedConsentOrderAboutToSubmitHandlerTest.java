@@ -144,7 +144,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
 
         aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        List<ConsentOrderCollection> response = callbackRequest.getCaseDetails().getData()
+        final List<ConsentOrderCollection> response = callbackRequest.getCaseDetails().getData()
             .getConsentOrderWrapper().getContestedConsentedApprovedOrders();
 
         verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), anyString());

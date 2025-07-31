@@ -89,7 +89,6 @@ public class RespondentShareDocumentsServiceTest {
     @MockitoBean
     private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
-
     @BeforeEach
     void beforeEach() {
         service = new RespondentShareDocumentsService();
@@ -110,7 +109,6 @@ public class RespondentShareDocumentsServiceTest {
 
         uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
     }
-
 
     @Test
     void applicantSourceDocumentListWhenDocNotPresent() {
@@ -175,13 +173,11 @@ public class RespondentShareDocumentsServiceTest {
         assertNull("no document selected from list", list.getValue());
     }
 
-
     @Test
     void shareOneDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
         FinremCallbackRequest request = buildCallbackRequest();
         FinremCaseDetails details = request.getCaseDetails();
         FinremCaseData data = details.getData();
-
 
         data.getUploadCaseDocumentWrapper().setRespOtherCollection(getTestDocument(OTHER));
         DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();

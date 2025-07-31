@@ -217,7 +217,6 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(caseData.getOrderRefusalPreviewDocument());
     }
 
-
     @Test
     public void setDefaults() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.REJECT_ORDER, CaseType.CONSENTED);
@@ -232,7 +231,6 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         assertEquals(LocalDate.now(), orderRefusalCollectionNew.getOrderRefusalDate());
 
     }
-
 
     private void assertCaseDataExtraFields() {
         verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),

@@ -22,7 +22,6 @@ public class GeneralUploadedDocumentData implements CaseDocumentTabData {
     @JsonProperty("value")
     private GeneralUploadedDocument generalUploadedDocument;
 
-
     @Override
     @JsonIgnore
     public String getElementId() {

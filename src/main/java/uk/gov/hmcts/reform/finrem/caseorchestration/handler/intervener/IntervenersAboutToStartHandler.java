@@ -33,7 +33,6 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
             && (EventType.MANAGE_INTERVENERS.equals(eventType));
     }
 
-
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
@@ -64,5 +63,4 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
                     intervenerWrapper.getIntervenerLabel() + ": " + DEFAULT));
         }
     }
-
 }

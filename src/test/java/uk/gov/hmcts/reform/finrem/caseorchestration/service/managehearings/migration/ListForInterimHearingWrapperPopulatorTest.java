@@ -7,12 +7,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
@@ -51,41 +54,43 @@ class ListForInterimHearingWrapperPopulatorTest {
     @Test
     void testShouldPopulate() {
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("null - Skip populate because it's not a contested application.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("null - Skip populate because it's not a contested application.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONSENTED).build()))
-                .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because it's not a contested application.");
 
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED).build()))
-            .isEqualTo(false);
+            .isFalse();
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isListForInterimHearingsMigrated(YesOrNo.YES).build())
             .build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because migration had been done.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isListForInterimHearingsMigrated(YesOrNo.NO).build())
             .build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because collection \"interimHearings\" is empty.");
 
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isListForInterimHearingsMigrated(YesOrNo.NO).build())
-            .interimWrapper(InterimWrapper.builder().interimHearings(List.of(InterimHearingCollection.builder().build())).build())
+            .interimWrapper(InterimWrapper.builder()
+                .interimHearings(List.of(InterimHearingCollection.builder().build()))
+                .build())
             .build()))
-            .isEqualTo(true);
+            .isTrue();
     }
 
     @Test
@@ -104,7 +109,14 @@ class ListForInterimHearingWrapperPopulatorTest {
 
         Hearing hearing = hearing("10:00");
         Hearing hearingTwo = hearing("11:00");
-        DynamicMultiSelectList allActivePartyList = mock(DynamicMultiSelectList.class);
+        DynamicMultiSelectList allActivePartyList = DynamicMultiSelectList.builder()
+            .value(List.of(
+                DynamicMultiSelectListElement.builder()
+                    .code("[APPSOLICITOR]")
+                    .label("Applicant Solicitor - Hamzah")
+                    .build()
+            ))
+            .build();
         when(partyService.getAllActivePartyList(caseData)).thenReturn(allActivePartyList);
         when(hearingsAppender.toHearing(interimHearingItem)).thenReturn(hearing);
         when(hearingsAppender.toHearing(interimHearingItemTwo)).thenReturn(hearingTwo);
@@ -114,14 +126,22 @@ class ListForInterimHearingWrapperPopulatorTest {
         underTest.populate(caseData);
 
         // Assert
+        List<PartyOnCaseCollectionItem> expectedParties = List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role("[APPSOLICITOR]")
+                    .label("Applicant Solicitor - Hamzah")
+                    .build())
+                .build()
+        );
         verify(partyService).getAllActivePartyList(caseData);
 
         assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
         assertThat(caseData.getManageHearingsWrapper().getHearings())
             .hasSize(2)
             .extracting(ManageHearingsCollectionItem::getValue)
-            .extracting(Hearing::getWasMigrated, Hearing::getPartiesOnCaseMultiSelectList, Hearing::getHearingTime)
-            .containsOnly(tuple(YesOrNo.YES, allActivePartyList, "10:00"),
-                tuple(YesOrNo.YES, allActivePartyList, "11:00"));
+            .extracting(Hearing::getWasMigrated, Hearing::getPartiesOnCase, Hearing::getHearingTime)
+            .containsOnly(tuple(YesOrNo.YES, expectedParties, "10:00"),
+                tuple(YesOrNo.YES, expectedParties, "11:00"));
     }
 }

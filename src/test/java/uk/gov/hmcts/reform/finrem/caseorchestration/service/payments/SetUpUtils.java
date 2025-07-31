@@ -29,7 +29,6 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 
-
 public class SetUpUtils {
 
     public static final int STATUS_CODE = INTERNAL_SERVER_ERROR.value();

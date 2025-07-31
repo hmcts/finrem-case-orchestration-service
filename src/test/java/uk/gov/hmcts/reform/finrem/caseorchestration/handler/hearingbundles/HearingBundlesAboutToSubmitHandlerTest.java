@@ -34,7 +34,6 @@ import static org.hamcrest.Matchers.is;
 @RunWith(MockitoJUnitRunner.class)
 public class HearingBundlesAboutToSubmitHandlerTest {
 
-
     @Mock
     private HearingBundleDocumentCategoriser hearingBundleDocumentCategoriser;
 
@@ -52,7 +51,6 @@ public class HearingBundlesAboutToSubmitHandlerTest {
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANAGE_HEARING_BUNDLES),
             is(true));
     }
-
 
     @Test
     public void givenInvalidCallbackType_whenCanHandle_thenReturnFalse() {
@@ -101,7 +99,6 @@ public class HearingBundlesAboutToSubmitHandlerTest {
             is(LocalDateTime.of(2019, 1, 1, 1, 1)));
 
     }
-
 
     @Test
     public void shouldMoveHearingBundleToFdrCollections() {

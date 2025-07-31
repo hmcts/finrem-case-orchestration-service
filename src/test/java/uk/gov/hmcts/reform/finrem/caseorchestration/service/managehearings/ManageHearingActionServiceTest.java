@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -19,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -32,6 +36,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
@@ -76,20 +81,6 @@ class ManageHearingActionServiceTest {
             .build();
     }
 
-    private WorkingHearing createWorkingHearing(LocalDate date) {
-        return WorkingHearing.builder()
-            .hearingTypeDynamicList(DynamicList.builder()
-                .value(DynamicListElement.builder()
-                    .code(HearingType.DIR.name())
-                    .label(HearingType.DIR.getId())
-                    .build())
-                .build())
-            .hearingDate(date)
-            .hearingTime("10:00")
-            .hearingTimeEstimate("30mins")
-            .build();
-    }
-
     @Test
     void performAddHearing_shouldAddHearingAndGenerateHearingNotice() {
         CaseDocument hearingNotice = createCaseDocument(HEARING_NOTICE_FILENAME, HEARING_NOTICE_URL);
@@ -124,6 +115,8 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
+        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
+            Pair.of(CaseDocumentType.FORM_C, "a template"));
         when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
@@ -165,6 +158,8 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
+        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
+            Pair.of(CaseDocumentType.FORM_C_EXPRESS, "a template"));
         when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
@@ -208,6 +203,8 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
+        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
+            Pair.of(CaseDocumentType.FORM_C, "a template"));
         when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails,
@@ -234,26 +231,24 @@ class ManageHearingActionServiceTest {
     @Test
     void updateTabData_shouldAddHearingToTabCollectionInCorrectOrder() {
         Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
-        hearing1.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
+        hearing1.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(APPLICANT)
                     .label("Applicant")
-                    .code(APPLICANT)
-                    .build()))
-            .build()
-        );
+                    .build())
+                .build()
+        ));
 
         Hearing hearing2 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
-        hearing2.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
+        hearing2.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(RESPONDENT)
                     .label("Respondent")
-                    .code(RESPONDENT)
-                    .build()))
-            .build()
-        );
+                    .build())
+                .build()
+        ));
 
         hearingWrapper.setHearings(new ArrayList<>(List.of(
             createHearingCollectionItem(hearing2),
@@ -267,45 +262,42 @@ class ManageHearingActionServiceTest {
         manageHearingActionService.updateTabData(finremCaseDetails.getData());
 
         List<HearingTabCollectionItem> hearingTabItems = hearingWrapper.getHearingTabItems();
-        assertThat(hearingTabItems)
-            .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("15 Jul 2025 11:00", "20 Jul 2025 10:00");
+        assertThat(hearingTabItems).hasSize(2);
+        assertThat(hearingTabItems.get(0).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
+        assertThat(hearingTabItems.get(1).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
     }
 
     @Test
     void updateTabData_shouldAddHearingToTabCollectionInCorrectOrderWhenManageHearingsMigrationHadDone() {
         Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
-        hearing1.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
+        hearing1.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(APPLICANT)
                     .label("Applicant")
-                    .code(APPLICANT)
-                    .build()))
-            .build()
-        );
+                    .build())
+                .build()
+        ));
 
         Hearing hearing2 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
-        hearing2.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
+        hearing2.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(RESPONDENT)
                     .label("Respondent")
-                    .code(RESPONDENT)
-                    .build()))
-            .build()
-        );
+                    .build())
+                .build()
+        ));
 
         Hearing hearing3 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 1));
-        hearing3.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
-                    .label("INTERVENER")
-                    .code(INTERVENER1)
-                    .build()))
-            .build()
-        );
+        hearing3.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(INTERVENER1)
+                    .label("Intervener1")
+                    .build())
+                .build()
+        ));
 
         Hearing migratedHearing1 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 10), true);
 
@@ -389,8 +381,71 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getInt4HearingTabItems()).isNull();
     }
 
+    @Test
+    void shouldSetWorkingHearingFromWorkingHearingId() {
+        // Setup
+        UUID workingHearingId = UUID.randomUUID();
+        finremCaseDetails.getData().getManageHearingsWrapper().setWorkingHearing(null);
+
+        Hearing hearingToBeWorkedOn = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
+        Hearing otherHearing = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
+
+        ManageHearingsCollectionItem hearingToBeWorkedCollectionItem = ManageHearingsCollectionItem.builder()
+            .id(workingHearingId)
+            .value(hearingToBeWorkedOn)
+            .build();
+
+        ManageHearingsCollectionItem otherHearingCollectionItem = ManageHearingsCollectionItem.builder()
+            .id(UUID.randomUUID())
+            .value(otherHearing)
+            .build();
+
+        ManageHearingsWrapper manageHearingsWrapper = ManageHearingsWrapper.builder()
+            .workingHearingId(workingHearingId)
+            .hearings(List.of(hearingToBeWorkedCollectionItem, otherHearingCollectionItem))
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(manageHearingsWrapper)
+            .build();
+
+        WorkingHearing epxectedWorkingHearing = createWorkingHearing(LocalDate.of(2025, 7, 20));
+
+        // Act
+        manageHearingActionService.setWorkingHearingFromWorkingHearingId(caseData);
+        WorkingHearing actualWorkingHearing = manageHearingsWrapper.getWorkingHearing();
+
+        // Assert
+        assertEquals(epxectedWorkingHearing.getHearingTypeDynamicList().getValue(), actualWorkingHearing.getHearingTypeDynamicList().getValue());
+        assertEquals(epxectedWorkingHearing.getHearingDate(), actualWorkingHearing.getHearingDate());
+        assertEquals(epxectedWorkingHearing.getHearingTime(), actualWorkingHearing.getHearingTime());
+        assertEquals(epxectedWorkingHearing.getHearingTimeEstimate(), actualWorkingHearing.getHearingTimeEstimate());
+    }
+
     private ArgumentMatcher<ManageHearingsCollectionItem> hasHearing(Hearing expected) {
         return entry -> entry != null && expected.equals(entry.getValue());
+    }
+
+    private WorkingHearing createWorkingHearing(LocalDate date) {
+        return WorkingHearing.builder()
+            .hearingTypeDynamicList(DynamicList.builder()
+                .value(DynamicListElement.builder()
+                    .code(HearingType.DIR.name())
+                    .label(HearingType.DIR.getId())
+                    .build())
+                .build())
+            .partiesOnCaseMultiSelectList(DynamicMultiSelectList.builder()
+                .value(List.of(
+                    DynamicMultiSelectListElement.builder()
+                        .code("[APPSOLICITOR]")
+                        .label("Applicant Solicitor - Hamzah")
+                        .build()
+                ))
+                .build())
+            .hearingDate(date)
+            .hearingTime("10:00")
+            .hearingTimeEstimate("30mins")
+            .build();
     }
 
     private Hearing createHearing(HearingType type, String time, String estimate, LocalDate date) {
@@ -403,6 +458,14 @@ class ManageHearingActionServiceTest {
             .hearingDate(date)
             .hearingTime(time)
             .hearingTimeEstimate(estimate)
+            .partiesOnCase(List.of(PartyOnCaseCollectionItem
+                .builder()
+                    .value(PartyOnCase
+                        .builder()
+                        .label("Applicant")
+                        .role(APPLICANT)
+                        .build())
+                .build()))
             .wasMigrated(migrated ? YesOrNo.YES : null)
             .build();
     }

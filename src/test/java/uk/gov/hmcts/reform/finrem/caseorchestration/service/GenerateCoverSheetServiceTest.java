@@ -59,7 +59,6 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     @Captor
     private ArgumentCaptor<Map<String, Object>> generateDocumentCaseDetailsMapCaptor;
 
-
     @Before
     public void setup() {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
@@ -76,7 +75,6 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
         assertCoversheetCalledWithRequiredData();
     }
-
 
     @Test
     public void shouldGenerateRespondentCoverSheet() throws Exception {
@@ -167,7 +165,6 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         assertAddresseeName(2, "Jane Doe");
     }
 
-
     @Test
     public void shouldGenerateIntervenerCoverSheet() throws Exception {
 
@@ -189,7 +186,6 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
-
     }
 
     private CaseDetails caseDetailsWithIntervener1Unrepresented() throws Exception {

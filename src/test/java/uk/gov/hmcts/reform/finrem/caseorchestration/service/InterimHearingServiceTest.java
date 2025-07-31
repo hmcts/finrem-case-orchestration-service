@@ -143,7 +143,6 @@ public class InterimHearingServiceTest {
         assertEquals(3, bulkPrintDocumentsList.size());
     }
 
-
     @Test
     public void givenCoreLitigantNotSelectedForCorrespondenceShouldReturnWithErrorOnSubmitInterimHearing() {
         FinremCaseDetails caseDetails = buildFinremCaseDetails(TWO_OLD_TWO_NEW_INTERIM_HEARING);

@@ -399,7 +399,11 @@ class AdditionalHearingDocumentServiceTest {
         DirectionOrderCollection uploadOrderCollection
             = DirectionOrderCollection.builder().value(DirectionOrder
             .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime)
-            .additionalDocuments(List.of(DocumentCollectionItem.builder().value(caseDocument("attachment", "attachment.pdf")).build())).build()).build();
+            .additionalDocuments(List.of(DocumentCollectionItem.builder()
+                .value(caseDocument("attachment", "attachment.pdf"))
+                .build()))
+                .build())
+            .build();
         uploadOrderCollections.add(uploadOrderCollection);
         data.setUploadHearingOrder(uploadOrderCollections);
         when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);

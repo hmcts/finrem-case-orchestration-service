@@ -39,7 +39,6 @@ public class FinremCallbackRequestDeserializer implements Deserializer<CallbackR
         }
     }
 
-
     public FinremCallbackRequest deserializeFinremCallbackRequest(String source) {
         return deserializeFinrem(resourceContentAsString(source));
     }
@@ -82,7 +81,6 @@ public class FinremCallbackRequestDeserializer implements Deserializer<CallbackR
         }
     }
 
-
     private void validateCaseData(FinremCallbackRequest callbackRequest) {
         if (callbackRequest == null
             || callbackRequest.getCaseDetails() == null
@@ -90,5 +88,4 @@ public class FinremCallbackRequestDeserializer implements Deserializer<CallbackR
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
     }
-
 }

@@ -43,6 +43,4 @@ public class ManageHearingBundlesAboutToStartHandler extends FinremCallbackHandl
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData())
             .build();
     }
-
-
 }

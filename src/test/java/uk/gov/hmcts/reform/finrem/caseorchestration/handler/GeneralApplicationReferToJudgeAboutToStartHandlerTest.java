@@ -52,7 +52,6 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest extends BaseH
     private static final String GA_JSON = "/fixtures/contested/general-application-details.json";
     private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application-finrem.json";
 
-
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
@@ -153,5 +152,4 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest extends BaseH
             .listItems(dynamicListElements)
             .build();
     }
-
 }

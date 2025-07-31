@@ -97,7 +97,6 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
         return caseDocuments;
     }
 
-
     private IntervenerHearingNoticeCollection getHearingNoticesDocumentCollection(CaseDocument hearingNotice) {
         return IntervenerHearingNoticeCollection.builder()
             .value(IntervenerHearingNotice.builder().caseDocument(hearingNotice)
