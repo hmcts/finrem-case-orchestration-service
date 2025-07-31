@@ -35,7 +35,6 @@ class ContestedListForHearingMidHandlerTest extends BaseHandlerTestSetup {
     private static final String FILE_NAME = "abc.pdf";
     public static final String AUTH_TOKEN = "tokien:)";
 
-
     @BeforeEach
     void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
@@ -69,7 +68,6 @@ class ContestedListForHearingMidHandlerTest extends BaseHandlerTestSetup {
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
             is(false));
     }
-
 
     @Test
     void givenContestedCase_whenListForHearingAdditionalUploadedButNonEncryptedFileShouldNotGetError() {

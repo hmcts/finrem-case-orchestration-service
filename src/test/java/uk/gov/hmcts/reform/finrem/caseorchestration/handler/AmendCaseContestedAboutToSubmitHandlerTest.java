@@ -96,7 +96,6 @@ class AmendCaseContestedAboutToSubmitHandlerTest {
         verify(amendCaseService).addApplicationType(finremCallbackRequest.getCaseDetails().getData());
     }
 
-
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()
