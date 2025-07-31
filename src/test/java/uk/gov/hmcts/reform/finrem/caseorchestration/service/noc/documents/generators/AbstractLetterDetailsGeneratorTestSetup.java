@@ -70,7 +70,6 @@ public class AbstractLetterDetailsGeneratorTestSetup {
         representationUpdate = buildChangeOfRepresentation();
     }
 
-
     protected void assertLetterDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
                                        NoticeType noticeType, boolean isConsented) {
         assertThat(noticeOfChangeLetterDetails.getCaseNumber(), is(caseDetails.getId().toString()));

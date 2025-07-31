@@ -40,7 +40,6 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
 
     private CallbackRequest callbackRequest;
 
-
     @ClassRule
     public static WireMockClassRule paymentService = new WireMockClassRule(8181);
 

@@ -217,7 +217,6 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             eq(documentConfiguration.getContestedDraftMiniFormTemplateSchedule()), eq(documentConfiguration.getContestedDraftMiniFormFileName()));
     }
 
-
     @Test
     public void generateContestedDraftMiniFormAScheduleFinRemCaseDetails() {
         FinremCaseDetails caseDetails = finremCaseDetails();
@@ -294,7 +293,6 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
 
         assertThat(data.get(CONSENTED_AUTHORISATION_FIRM), is("Authorised Firm"));
     }
-
 
     private FinremCaseDetails emptyCaseDetails() {
         return FinremCaseDetails.builder().id(1234L).data(new FinremCaseData()).build();

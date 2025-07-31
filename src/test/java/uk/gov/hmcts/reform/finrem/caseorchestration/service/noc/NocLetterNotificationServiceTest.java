@@ -29,7 +29,6 @@ public class NocLetterNotificationServiceTest {
     private CaseDetails caseDetails;
     private CaseDetails caseDetailsBefore;
 
-
     @Before
     public void setUpTest() {
         noticeOfChangeLetterNotificationService =
@@ -50,6 +49,4 @@ public class NocLetterNotificationServiceTest {
         verify(solicitorRemovedRespondentLetterHandler).handle(caseDetails, caseDetailsBefore, AUTH_TOKEN);
         verify(solicitorAddedRespondentLetterHandler).handle(caseDetails, caseDetailsBefore, AUTH_TOKEN);
     }
-
-
 }

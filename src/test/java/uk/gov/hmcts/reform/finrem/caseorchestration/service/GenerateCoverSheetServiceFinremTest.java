@@ -39,7 +39,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 
 public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
-
     @Autowired
     private GenerateCoverSheetService generateCoverSheetService;
     @Autowired
@@ -69,7 +68,6 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
 
         assertCoversheetCalledWithRequiredData();
     }
-
 
     @Test
     public void shouldGenerateRespondentCoverSheet() throws Exception {
@@ -152,7 +150,6 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         assertAddresseeName(2, "Jane Doe");
     }
 
-
     @Test
     public void shouldGenerateIntervenerCoverSheet() throws Exception {
         FinremCaseDetails caseDetails = caseDetailsWithIntervener1Unrepresented();
@@ -197,7 +194,6 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         }
     }
 
-
     private FinremCaseDetails caseDetailsWithIntervener1Unrepresented() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-intervener1-notrepresented.json")) {
@@ -219,7 +215,6 @@ public class GenerateCoverSheetServiceFinremTest extends BaseServiceTest {
         Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
         MatcherAssert.assertThat(addressee.getFormattedAddress(), is(formattedAddress));
     }
-
 
     private void assertAddresseeName(int invocation, String name) {
         verify(genericDocumentService, times(invocation)).generateDocumentFromPlaceholdersMap(any(),
