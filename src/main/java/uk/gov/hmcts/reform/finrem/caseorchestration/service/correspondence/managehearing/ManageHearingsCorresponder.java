@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -238,8 +239,8 @@ public class ManageHearingsCorresponder {
                                                     CaseRole caseRole,
                                                     IntervenerWrapper intervener) {
 
-        Supplier<Boolean> shouldEmailSupplier = () -> YesOrNo.YES.equals(intervener.getIntervenerRepresented());
-        Supplier<Boolean> shouldPostSupplier = () -> !shouldEmailSupplier.get();
+        BooleanSupplier shouldEmailSupplier = () -> YesOrNo.YES.equals(intervener.getIntervenerRepresented());
+        BooleanSupplier shouldPostSupplier = () -> !shouldEmailSupplier.getAsBoolean();
 
         processCorrespondenceForParty(
             finremCaseDetails,
@@ -267,18 +268,18 @@ public class ManageHearingsCorresponder {
         Hearing hearing,
         CaseRole caseRole,
         String userAuthorisation,
-        Supplier<Boolean> shouldEmailPartySolicitor,
-        Supplier<Boolean> shouldPostToParty,
+        BooleanSupplier shouldEmailPartySolicitor,
+        BooleanSupplier shouldPostToParty,
         Supplier<NotificationRequest> notificationRequestSupplier) {
 
-        if (shouldEmailPartySolicitor.get()) {
+        if (shouldEmailPartySolicitor.getAsBoolean()) {
             notificationService.sendHearingNotificationToSolicitor(
                 notificationRequestSupplier.get(),
                 caseRole.toString()
             );
         }
 
-        if (shouldPostToParty.get()) {
+        if (shouldPostToParty.getAsBoolean()) {
             if (hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing)) {
                 postHearingNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
             }
