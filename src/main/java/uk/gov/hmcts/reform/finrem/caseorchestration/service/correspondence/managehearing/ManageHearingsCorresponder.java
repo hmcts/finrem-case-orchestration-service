@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -304,11 +303,13 @@ public class ManageHearingsCorresponder {
             return;
         }
 
-        BulkPrintDocument hearingNoticeDocument =
-            documentHelper.getBulkPrintDocumentFromCaseDocument(hearingNotice);
+        List<CaseDocument> hearingDocuments = manageHearingsDocumentService
+            .getHearingDocumentsToPost(finremCaseDetails);
 
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        bulkPrintDocuments.add(hearingNoticeDocument);
+        hearingDocuments.add(hearingNotice);
+
+        List<BulkPrintDocument> bulkPrintDocuments =
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocuments);
 
         printDocuments(
             finremCaseDetails,
@@ -330,6 +331,8 @@ public class ManageHearingsCorresponder {
     private void postAllHearingDocuments(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
         List<CaseDocument> hearingDocuments = manageHearingsDocumentService
             .getHearingDocumentsToPost(finremCaseDetails);
+
+        hearingDocuments.addAll(manageHearingsDocumentService.getAdditonalHearingDocument(finremCaseDetails));
 
         if (isEmpty(hearingDocuments)) {
             log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());

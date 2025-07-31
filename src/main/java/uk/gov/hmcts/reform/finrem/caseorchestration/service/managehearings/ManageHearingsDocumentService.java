@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
@@ -28,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -189,6 +191,19 @@ public class ManageHearingsDocumentService {
      */
     public CaseDocument getHearingNotice(FinremCaseDetails finremCaseDetails) {
         return getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.HEARING_NOTICE);
+    }
+
+    public List<CaseDocument> getAdditonalHearingDocument(FinremCaseDetails finremCaseDetails) {
+        return Optional.ofNullable(finremCaseDetails)
+            .map(FinremCaseDetails::getData)
+            .map(FinremCaseData::getManageHearingsWrapper)
+            .map(  wrapper -> wrapper.getManageHearingsCollectionItemById(wrapper.getWorkingHearingId()).getValue())
+            .map(Hearing::getAdditionalHearingDocs)
+            .stream()
+            .flatMap(List::stream)
+            .map(DocumentCollectionItem::getValue)
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     /**
