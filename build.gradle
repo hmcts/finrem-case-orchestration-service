@@ -387,7 +387,7 @@ dependencyManagement {
             entry 'the_bouncy_castle_crypto_package_for_java'
         }
         //CVE-2024-25710
-        dependencySet(group: 'org.apache.commons', version: '1.27.1') {
+        dependencySet(group: 'org.apache.commons', version: '1.28.0') {
             entry 'commons-compress'
         }
     }
