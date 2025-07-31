@@ -110,7 +110,6 @@ class IntervenerShareDocumentsServiceTest {
         uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
     }
 
-
     @Test
     void intervenerSourceDocumentListWhenDocNotPresent() {
 
@@ -153,7 +152,6 @@ class IntervenerShareDocumentsServiceTest {
         assertEquals("document size for sharing", 10, list.getListItems().size());
         assertNull(list.getValue());
     }
-
 
     @Test
     void intervenerTwoSourceDocumentListWhenDocPresent() {
@@ -219,7 +217,6 @@ class IntervenerShareDocumentsServiceTest {
         assertNull(list.getValue());
     }
 
-
     @Test
     void intervenerFourSourceDocumentListWhenDocPresent() {
 
@@ -268,7 +265,6 @@ class IntervenerShareDocumentsServiceTest {
         assertEquals("role size for sharing", 0, list.getListItems().size());
         assertNull("no document selected from list", list.getValue());
     }
-
 
     @Test
     void shareOneDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {

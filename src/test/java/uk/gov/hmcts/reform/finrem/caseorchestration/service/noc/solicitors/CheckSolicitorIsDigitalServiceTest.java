@@ -30,7 +30,6 @@ public class CheckSolicitorIsDigitalServiceTest {
     @InjectMocks
     private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
 
-
     @Test
     public void givenApplicantSolicitorIsDigital_whenIsApplicantSolicitorDigital_thenReturnTrue() {
         when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(APP_SOLICITOR_POLICY));
