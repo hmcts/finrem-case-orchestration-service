@@ -23,13 +23,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.
 
 class AddresseeGeneratorHelperTest {
 
-
     @Test
     void givenUnknownRecipient_whenGetAddressee_thenReturnNull() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).build();
         assertNull(AddresseeGeneratorHelper.generateAddressee(caseDetails, null));
     }
-
 
     @Test
     void givenApplicantRecipient_whenGetAddressee_thenReturnApplicantAddressee() {
@@ -88,7 +86,6 @@ class AddresseeGeneratorHelperTest {
         assertEquals("1 Respondent Street\nAddress Line 2", addressee.getFormattedAddress());
     }
 
-
     @Test
     void givenIntervenerOneRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
         FinremCaseData caseData = new FinremCaseData();
@@ -107,7 +104,6 @@ class AddresseeGeneratorHelperTest {
         assertEquals("Intervener Name", addressee.getName());
         assertEquals("2 Intervener Street\nAddress Line 2\nSW1 1AA", addressee.getFormattedAddress());
     }
-
 
     @Test
     void givenIntervenerTwoRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
@@ -128,7 +124,6 @@ class AddresseeGeneratorHelperTest {
         assertEquals("1 Intervener Street\nAddress Line 2\nSW1 1AA", addressee.getFormattedAddress());
     }
 
-
     @Test
     void givenIntervenerThreeRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
         FinremCaseData caseData = new FinremCaseData();
@@ -148,7 +143,6 @@ class AddresseeGeneratorHelperTest {
         assertEquals("3 Intervener Street\nAddress Line 2\nSW1 1AA", addressee.getFormattedAddress());
     }
 
-
     @Test
     void givenIntervenerFourRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
         FinremCaseData caseData = new FinremCaseData();
@@ -167,7 +161,6 @@ class AddresseeGeneratorHelperTest {
         assertEquals("Intervener Name", addressee.getName());
         assertEquals("4 Intervener Street\nAddress Line 2\nSW1 1AA", addressee.getFormattedAddress());
     }
-
 
     @Test
     void givenRespondentSolicitorRecipient_whenGetAddressee_thenReturnRespondentSolicitorAddressee() {
