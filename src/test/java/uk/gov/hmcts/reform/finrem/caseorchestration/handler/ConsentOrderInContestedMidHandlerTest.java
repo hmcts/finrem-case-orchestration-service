@@ -45,7 +45,6 @@ class ConsentOrderInContestedMidHandlerTest  extends BaseHandlerTestSetup {
     private static final String FILE_NAME = "abc.pdf";
     public static final String AUTH_TOKEN = "tokien:)";
 
-
     @BeforeEach
     void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
@@ -57,7 +56,6 @@ class ConsentOrderInContestedMidHandlerTest  extends BaseHandlerTestSetup {
         assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CONSENT_ORDER));
     }
 
-
     @Test
     void canNotHandleWrongEventType() {
         assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE));
@@ -67,7 +65,6 @@ class ConsentOrderInContestedMidHandlerTest  extends BaseHandlerTestSetup {
     void canNotHandleWrongCallbackType() {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CONSENT_ORDER));
     }
-
 
     @Test
     void givenContestedCase_whenConentorderCreated_thenCheckIfAnyFileContainsEncryption() throws Exception {

@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class GiveAllocationDirectionAboutToSubmitHandlerTest {
 

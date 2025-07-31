@@ -40,7 +40,6 @@ class HearingConsentMidHandlerTest extends BaseHandlerTestSetup {
     private static final String FILE_NAME = "abc.pdf";
     public static final String AUTH_TOKEN = "tokien:)";
 
-
     @BeforeEach
     void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
