@@ -170,7 +170,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
             getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
         return DynamicRadioList.builder()
-            .value(dynamicListElements.get(0))
+            .value(dynamicListElements.getFirst())
             .listItems(dynamicListElements)
             .build();
     }
