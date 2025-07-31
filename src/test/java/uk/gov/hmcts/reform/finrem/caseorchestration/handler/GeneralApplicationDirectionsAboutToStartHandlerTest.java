@@ -14,15 +14,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -31,8 +36,10 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
@@ -54,6 +61,8 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     private GenericDocumentService documentService;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Mock
+    private PartyService partyService;
     private ObjectMapper objectMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
@@ -65,13 +74,16 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
         handler = new GeneralApplicationDirectionsAboutToStartHandler(assignCaseAccessService,
-            finremCaseDetailsMapper, helper, service);
+            finremCaseDetailsMapper, helper, service, partyService);
     }
 
     @Test
     public void givenCase_whenCorrectConfigSupplied_thenHandlerCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
+            is(true));
+        assertThat(handler
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH),
             is(true));
     }
 
@@ -178,5 +190,37 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void givenNewEvent_whenHandlerInvoked_thenInitializeWorkingHearing() {
+        //Arrange
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
+        callbackRequest.setEventType(EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
+
+        DynamicList hearingTypeDynamicList = DynamicList.builder()
+            .listItems(List.of(DynamicListElement.builder()
+                .code(HearingType.APPLICATION_HEARING.name())
+                .label(HearingType.APPLICATION_HEARING.getId())
+                .build()))
+            .build();
+
+        DynamicMultiSelectList expectedDynamicMultiSelectList = DynamicMultiSelectList.builder().build();
+        when(partyService.getAllActivePartyList(any(FinremCaseDetails.class))).thenReturn(expectedDynamicMultiSelectList);
+
+        //Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        //Assert
+        FinremCaseData caseData = response.getData();
+        WorkingHearing workingHearing = caseData.getManageHearingsWrapper().getWorkingHearing();
+
+        assertNotNull(workingHearing);
+        assertEquals(hearingTypeDynamicList.getListItems().size(),
+            workingHearing.getHearingTypeDynamicList().getListItems().size());
+        assertNotNull(workingHearing.getPartiesOnCaseMultiSelectList());
+        verify(service).resetGeneralApplicationDirectionsFields(caseData);
     }
 }
