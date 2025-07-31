@@ -153,7 +153,6 @@ class GeneralApplicationsCategoriserTest extends BaseHandlerTestSetup {
             .isEqualTo(expectedCategoryId);
     }
 
-
     @Test
     void testUncategorizeDocuments() {
         FinremCaseData finremCaseData = buildFinremCaseData();

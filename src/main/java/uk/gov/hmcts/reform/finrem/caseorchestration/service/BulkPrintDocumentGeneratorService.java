@@ -39,8 +39,6 @@ public class BulkPrintDocumentGeneratorService {
      * Note: the order of documents you send to this service is the order in which they will print.
      */
     public UUID send(final BulkPrintRequest bulkPrintRequest,
-                     final String recipient,
-                     boolean isInternational,
                      final List<byte[]> listOfDocumentsAsByteArray) {
 
         String letterType = bulkPrintRequest.getLetterType();
@@ -52,25 +50,26 @@ public class BulkPrintDocumentGeneratorService {
             .map(getEncoder()::encodeToString)
             .toList();
 
-        SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(authTokenGenerator.generate(),
-            new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER,
-                getAdditionalData(caseId, recipient, isInternational, letterType, bulkPrintRequest)));
+        Map<String, Object> additionalData = getAdditionalData(bulkPrintRequest);
 
-        log.info("Letter service produced the following letter Id {} for party {} and  Case ID: {}", sendLetterResponse.letterId, recipient, caseId);
+        SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(authTokenGenerator.generate(),
+            new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER, additionalData));
+
+        log.info("Letter service produced the following letter Id {} for party {} and  Case ID: {}",
+            sendLetterResponse.letterId, bulkPrintRequest.getRecipientParty(), caseId);
         return sendLetterResponse.letterId;
     }
 
-    private Map<String, Object> getAdditionalData(final String caseId,
-                                                  final String recipient,
-                                                  final boolean isInternational,
-                                                  final String letterType,
-                                                  final BulkPrintRequest bulkPrintRequest) {
+    private Map<String, Object> getAdditionalData(final BulkPrintRequest bulkPrintRequest) {
+        String caseId = bulkPrintRequest.getCaseId();
+
         final Map<String, Object> additionalData = new HashMap<>();
-        additionalData.put(LETTER_TYPE_KEY, letterType);
+        additionalData.put(LETTER_TYPE_KEY, bulkPrintRequest.getLetterType());
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
         additionalData.put(FILE_NAMES, getFileNames(bulkPrintRequest));
 
+        String recipient = bulkPrintRequest.getRecipientParty();
         log.info("isSendLetterDuplicateCheckEnabled {}, recipient is {} for Case ID: {}",
             featureToggleService.isSendLetterDuplicateCheckEnabled(), recipient, caseId);
         if (featureToggleService.isSendLetterDuplicateCheckEnabled()) {
@@ -78,9 +77,9 @@ public class BulkPrintDocumentGeneratorService {
         } else {
             additionalData.put(RECIPIENTS, List.of(recipient));
         }
-        additionalData.put(IS_INTERNATIONAL, isInternational);
+        additionalData.put(IS_INTERNATIONAL, bulkPrintRequest.isInternational());
         log.info("sending additional data {}  party is {}, isInternational {}, and Case ID: {}",
-            additionalData, recipient, isInternational, caseId);
+            additionalData, recipient, bulkPrintRequest.isInternational(), caseId);
         return additionalData;
     }
 

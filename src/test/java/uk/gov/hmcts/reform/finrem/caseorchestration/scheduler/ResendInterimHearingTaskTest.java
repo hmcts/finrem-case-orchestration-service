@@ -83,7 +83,6 @@ class ResendInterimHearingTaskTest {
     private static final boolean RESPONDENT_REPRESENTED = true;
     private static final boolean RESPONDENT_NOT_REPRESENTED = false;
 
-
     @BeforeEach
     void setup() {
         resendInterimHearingTask = new ResendInterimHearingTask(caseReferenceCsvLoader, ccdService, systemUserService,
@@ -353,7 +352,9 @@ class ResendInterimHearingTaskTest {
         });
     }
 
-    private void verifyCorrespondenceSent(boolean applicantCorrespondenceSent, boolean respondentCorrespondentSent, CaseDocumentsHolder documentsToPrint) {
+    private void verifyCorrespondenceSent(
+        boolean applicantCorrespondenceSent, boolean respondentCorrespondentSent,
+        CaseDocumentsHolder documentsToPrint) {
         verify(interimHearingService, times(1)).prepareDocumentsForPrint(
             finremCaseDetailsArgumentCaptor.capture(),
             interimHearingsToSendCaptor.capture(),

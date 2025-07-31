@@ -100,6 +100,4 @@ public class ManageHearingBundlesAboutToSubmitHandler extends FinremCallbackHand
                 documentFilename));
         }
     }
-
-
 }

@@ -31,7 +31,6 @@ public class HearingBundlesAboutToStartHandlerTest {
     @InjectMocks
     ManageHearingBundlesAboutToStartHandler manageHearingBundlesAboutToStartHandler;
 
-
     @Test
     public void givenHandlerCanHandleCallback_whenCanHandle_thenReturnTrue() {
         assertThat(manageHearingBundlesAboutToStartHandler
@@ -47,7 +46,6 @@ public class HearingBundlesAboutToStartHandlerTest {
                 EventType.MANAGE_BARRISTER),
             is(false));
     }
-
 
     @Test
     public void shouldCombineHearingBundleWithFdrHearingBundle() {
