@@ -66,5 +66,4 @@ public class PaperCaseCreateContestedSubmittedHandlerTest {
             throw new RuntimeException(e);
         }
     }
-
 }

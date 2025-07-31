@@ -32,7 +32,6 @@ class RejectedConsentOrderInContestedAboutToStartHandlerTest {
         assertTrue(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CONSENT_ORDER_NOT_APPROVED));
     }
 
-
     @Test
     void given_case_when_wrong_callback_then_case_can_not_handle() {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CONSENT_ORDER_NOT_APPROVED));
@@ -47,7 +46,6 @@ class RejectedConsentOrderInContestedAboutToStartHandlerTest {
     void given_case_when_all_wrong_then_case_can_not_handle() {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CLOSE));
     }
-
 
     @Test
     void given_case_when_order_not_approved_then_reject_order() {

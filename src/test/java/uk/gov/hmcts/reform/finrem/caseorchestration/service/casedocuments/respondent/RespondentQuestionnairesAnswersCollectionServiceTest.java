@@ -29,7 +29,6 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
     @InjectMocks
     RespondentQuestionnairesAnswersHandler collectionService;
 
-
     @Test
     public void givenAddedDocWithPreviousCollectionNotEmptyWhenaddManagedDocumentToCollectionThenAddNonDuplicatesScreenDocsToCollectionType() {
         screenUploadDocumentList = new ArrayList<>();
