@@ -54,7 +54,6 @@ class UploadDraftOrdersSubmittedHandlerTest {
     @Mock
     private DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper;
 
-
     @Test
     void testCanHandle() {
         Assertions.assertCanHandle(uploadDraftOrdersSubmittedHandler, CallbackType.SUBMITTED, CaseType.CONTESTED,

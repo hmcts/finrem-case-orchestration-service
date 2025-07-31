@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.formc;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -113,5 +112,4 @@ public class FormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTes
 
         caseDetails = FinremCaseDetails.builder().id(12345L).caseType(CaseType.CONTESTED).data(caseData).build();
     }
-
 }
