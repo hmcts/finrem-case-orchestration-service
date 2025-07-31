@@ -18,7 +18,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
-
 public class RemoveRespondentSolOrgTest extends BaseServiceTest {
 
     @Autowired
