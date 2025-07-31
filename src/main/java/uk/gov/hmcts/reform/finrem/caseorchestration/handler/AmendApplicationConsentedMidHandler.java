@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.RespondentSolicitorDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -23,15 +24,20 @@ public class AmendApplicationConsentedMidHandler extends FinremCallbackHandler {
     private final ConsentOrderService consentOrderService;
     private final InternationalPostalService postalService;
     private final ObjectMapper objectMapper;
+    private final RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator;
 
     public AmendApplicationConsentedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                ConsentOrderService consentOrderService,
                                                InternationalPostalService postalService,
-                                               ObjectMapper objectMapper) {
+                                               ObjectMapper objectMapper,
+                                               RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator)
+    {
+
         super(finremCaseDetailsMapper);
         this.consentOrderService = consentOrderService;
         this.postalService = postalService;
         this.objectMapper = objectMapper;
+        this.respondentSolicitorDetailsValidator = respondentSolicitorDetailsValidator;
     }
 
     @Override
@@ -43,7 +49,7 @@ public class AmendApplicationConsentedMidHandler extends FinremCallbackHandler {
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
+                                                                              String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = finremCaseDetails.getData();
 
@@ -51,6 +57,7 @@ public class AmendApplicationConsentedMidHandler extends FinremCallbackHandler {
         List<String> errors = consentOrderService.performCheck(objectMapper.convertValue(callbackRequest, CallbackRequest.class), userAuthorisation);
         errors.addAll(postalService.validate(caseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
+        errors.addAll(respondentSolicitorDetailsValidator.validate(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();

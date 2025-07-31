@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.RespondentSolicitorDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -17,8 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -35,6 +40,8 @@ class AmendApplicationConsentedMidHandlerTest {
     private InternationalPostalService postalService;
     @Mock
     private ObjectMapper objectMapper;
+    @Mock
+    private RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator;
 
     @Test
     void testCanHandle() {
@@ -272,6 +279,23 @@ class AmendApplicationConsentedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(handle.getErrors()).containsExactly("Postcode field is required for respondent solicitor address.");
+    }
+
+    /**
+     * This test checks that the handler will return an error message if the applicant and respondent
+     * have the same solicitor.
+     */
+    @Test
+    void givenConsentedCase_WhenApplicantAndRespondentHaveSameSolicitor_thenHandlerWillShowErrorMessage() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+
+        String error = "Applicant organisation cannot be the same as respondent organisation";
+        when(respondentSolicitorDetailsValidator.validate(any(FinremCaseData.class)))
+            .thenReturn(List.of(error));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertThat(handle.getErrors()).contains(error);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

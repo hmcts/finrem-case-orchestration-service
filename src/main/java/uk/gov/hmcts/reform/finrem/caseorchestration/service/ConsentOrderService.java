@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -31,6 +32,7 @@ public class ConsentOrderService {
     private final ConsentedApplicationHelper helper;
     private final BulkPrintDocumentService service;
     private final DocumentHelper documentHelper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public List<String> performCheck(CallbackRequest callbackRequest, String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -51,6 +53,33 @@ public class ConsentOrderService {
         if (caseDetailsBefore != null) {
             beforeData = caseDetailsBefore.getData();
         }
+        List<CaseDocument> caseDocuments = checkIfD81DocumentContainsEncryption(caseData, beforeData);
+        if (caseDocuments != null && !caseDocuments.isEmpty()) {
+            caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, caseId, errors, userAuthorisation));
+        }
+        return errors;
+    }
+
+    public List<String> performCheck(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        Optional<Long> caseIdObj = Optional.ofNullable(finremCaseDetails.getId());
+
+        String caseId;
+        if (caseIdObj.isPresent()) {
+            caseId = String.valueOf(caseIdObj.get());
+        } else {
+            caseId = "Case not created yet.";
+        }
+        FinremCaseData finremcaseData = finremCaseDetails.getData();
+
+        helper.setConsentVariationOrderLabelField(finremcaseData);
+        List<String> errors = new ArrayList<>();
+        Map<String, Object> beforeData = Optional.ofNullable(callbackRequest.getCaseDetailsBefore())
+            .map(finremCaseDetailsMapper::mapToCaseDetails)
+            .map(CaseDetails::getData)
+            .orElseGet(HashMap::new);
+
+        Map<String, Object> caseData = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails).getData();
         List<CaseDocument> caseDocuments = checkIfD81DocumentContainsEncryption(caseData, beforeData);
         if (caseDocuments != null && !caseDocuments.isEmpty()) {
             caseDocuments.forEach(document -> service.validateEncryptionOnUploadedDocument(document, caseId, errors, userAuthorisation));
