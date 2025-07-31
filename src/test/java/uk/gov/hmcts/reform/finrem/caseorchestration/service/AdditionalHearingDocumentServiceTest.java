@@ -578,7 +578,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-    void givenCase_whenGetApprovedHearingOrdersCalledButNoHearingOrderAvailalle_thenReturnEmptyList() {
+    void givenCase_whenGetApprovedHearingOrdersCalledButNoHearingOrderAvailable_thenReturnEmptyList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
 
@@ -590,7 +590,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-    void givenCase_whenGetApprovedHearingOrdersCalledHearingOrderAvailalle_thenReturnEmptyList() {
+    void givenCase_whenGetApprovedHearingOrdersCalledHearingOrderAvailable_thenReturnEmptyList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
 
