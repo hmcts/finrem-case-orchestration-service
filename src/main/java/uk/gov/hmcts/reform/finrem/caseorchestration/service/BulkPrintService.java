@@ -59,7 +59,7 @@ public class BulkPrintService {
             BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl())
                 .fileName(document.getDocumentFilename())
                 .build());
-        return bulkPrintDocuments(caseDetails.getId(),
+        return bulkPrintDocuments(caseDetails,
             FINANCIAL_REMEDY_GENERAL_LETTER,
             recipient,
             bulkPrintDocument,
@@ -73,7 +73,7 @@ public class BulkPrintService {
             BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl())
                 .fileName(document.getDocumentFilename()).build());
 
-        return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, recipient,
+        return bulkPrintDocuments(caseDetails, FINANCIAL_REMEDY_GENERAL_LETTER, recipient,
             bulkPrintDocument,
             postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient),
             auth);
@@ -153,29 +153,48 @@ public class BulkPrintService {
 
     public UUID bulkPrintFinancialRemedyLetterPack(FinremCaseDetails caseDetails, String recipient, List<BulkPrintDocument> documents,
                                                    boolean isInternational, String auth) {
-        return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
+        return bulkPrintDocuments(caseDetails, FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
     }
 
-    private UUID bulkPrintFinancialRemedyLetterPack(Long caseId, String recipient, List<BulkPrintDocument> documents,
+    private UUID bulkPrintFinancialRemedyLetterPack(CaseDetails caseDetails, String recipient, List<BulkPrintDocument> documents,
                                                     boolean isInternational, String auth) {
-        log.info("Requesting {} letter print from bulkprint for Case ID: {}", recipient, caseId);
-        return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
+        log.info("Requesting {} letter print from bulkprint for Case ID: {}", recipient, caseDetails.getId());
+        return bulkPrintDocuments(caseDetails, FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
     }
 
-    private UUID bulkPrintDocuments(Long caseId, String letterType, String recipient, List<BulkPrintDocument> documents,
+    @Deprecated(since = "31-Jul-2025")
+    private UUID bulkPrintDocuments(CaseDetails caseDetails, String letterType, String recipientParty, List<BulkPrintDocument> documents,
                                     boolean isInternational, String auth) {
         UUID letterId = genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()
-                .caseId(String.valueOf(caseId))
+                .caseId(String.valueOf(caseDetails.getId()))
                 .letterType(letterType)
                 .bulkPrintDocuments(documents)
-                .recipientParty(recipient)
+                .recipientParty(recipientParty)
                 .isInternational(isInternational)
                 .authorisationToken(auth)
                 .build());
 
-        log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {} and recipient is {}, isInternational {}",
-            caseId, letterId, documents.size(), letterType, documents, recipient, isInternational);
+        log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {} and recipient party is {}, isInternational {}",
+            caseDetails.getId(), letterId, documents.size(), letterType, documents, recipientParty, isInternational);
+
+        return letterId;
+    }
+
+    private UUID bulkPrintDocuments(FinremCaseDetails caseDetails, String letterType, String recipientParty, List<BulkPrintDocument> documents,
+                                    boolean isInternational, String auth) {
+        UUID letterId = genericDocumentService.bulkPrint(
+            BulkPrintRequest.builder()
+                .caseId(String.valueOf(caseDetails.getId()))
+                .letterType(letterType)
+                .bulkPrintDocuments(documents)
+                .recipientParty(recipientParty)
+                .isInternational(isInternational)
+                .authorisationToken(auth)
+                .build());
+
+        log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {} and recipient party is {}, isInternational {}",
+            caseDetails.getId(), letterId, documents.size(), letterType, documents, recipientParty, isInternational);
 
         return letterId;
     }
@@ -201,7 +220,7 @@ public class BulkPrintService {
         documents.addAll(caseDocuments);
         validateFileTypeOnCaseDocuments(caseDocuments);
 
-        return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), recipient, documents, isInternational, auth);
+        return bulkPrintFinancialRemedyLetterPack(caseDetails, recipient, documents, isInternational, auth);
     }
 
     private UUID printDocumentsWithCoversheet(FinremCaseDetails caseDetails,
@@ -215,7 +234,7 @@ public class BulkPrintService {
         documents.addAll(caseDocuments);
         validateFileTypeOnCaseDocuments(caseDocuments);
 
-        return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), recipient, documents, isInternational, auth);
+        return bulkPrintFinancialRemedyLetterPack(caseDetails, recipient, documents, isInternational, auth);
     }
 
     private void validateFileTypeOnCaseDocuments(List<BulkPrintDocument> caseDocuments) {
