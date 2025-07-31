@@ -157,7 +157,4 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
         }
 
     }
-
-
-
 }

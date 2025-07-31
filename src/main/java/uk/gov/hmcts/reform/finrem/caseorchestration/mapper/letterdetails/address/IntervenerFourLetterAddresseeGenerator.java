@@ -19,7 +19,6 @@ public class IntervenerFourLetterAddresseeGenerator extends IntervenerLetterAddr
         super(objectMapper);
     }
 
-
     @Override
     protected String getIntervenerFieldName() {
         return IntervenerConstant.INTERVENER_FOUR;

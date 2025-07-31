@@ -34,7 +34,6 @@ public class BulkPrintCoverLetterDetailsMapper extends LetterDetailsMapper {
         return letterDetails;
     }
 
-
     private String formatCtscContactDetailsForCoversheet() {
         CtscContactDetails coversheetCtscContactDetails = CtscContactDetails.builder()
             .serviceCentre("HMCTS Financial Remedy")
