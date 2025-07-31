@@ -38,15 +38,12 @@ class RejectedConsentOrderAboutToSubmitHandlerTest {
     @Mock
     private RefusedConsentOrderDocumentCategoriser categoriser;
 
-
-
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
 
     @Test
     void given_case_whenEventRejectedOrder_thenCanHandle() {
         assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.REJECT_ORDER));
     }
-
 
     @Test
     void given_case_when_wrong_callback_then_case_can_not_handle() {
@@ -78,7 +75,6 @@ class RejectedConsentOrderAboutToSubmitHandlerTest {
             DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
             data.getApprovedOrder().getConsentOrder().getCategoryId()));
     }
-
 
     private List<ConsentOrderCollection> generateFinremNotApprovedConsentOrderData() {
         CaseDocument caseDocument = caseDocument();

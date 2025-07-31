@@ -243,5 +243,4 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
         ConsentOrderCollection consentOrderCollection = ConsentOrderCollection.builder().approvedOrder(approvedOrder).build();
         return List.of(consentOrderCollection);
     }
-
 }

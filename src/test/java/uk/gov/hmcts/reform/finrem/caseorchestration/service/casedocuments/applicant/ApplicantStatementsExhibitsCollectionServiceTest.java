@@ -23,7 +23,6 @@ public class ApplicantStatementsExhibitsCollectionServiceTest extends BaseManage
     @InjectMocks
     ApplicantStatementsExhibitsHandler collectionService;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.STATEMENT_AFFIDAVIT,

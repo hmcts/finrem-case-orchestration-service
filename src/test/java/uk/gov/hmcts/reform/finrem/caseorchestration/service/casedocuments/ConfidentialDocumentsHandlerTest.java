@@ -16,13 +16,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
-
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ConfidentialDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
 
     @InjectMocks
     ConfidentialDocumentsHandler handler;
-
 
     @Override
     public void setUpscreenUploadDocumentList() {

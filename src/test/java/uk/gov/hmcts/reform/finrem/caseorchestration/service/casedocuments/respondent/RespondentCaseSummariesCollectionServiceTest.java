@@ -24,14 +24,12 @@ public class RespondentCaseSummariesCollectionServiceTest extends CaseSummariesH
     @InjectMocks
     RespondentCaseSummariesHandler collectionService;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
-
     }
 
     @Override
