@@ -40,7 +40,6 @@ class SolicitorAndCaseWorkerDraftOrderMidHandlerTest extends BaseHandlerTestSetu
     private static final String FILE_NAME = "abc.pdf";
     public static final String AUTH_TOKEN = "tokien:)";
 
-
     @BeforeEach
     void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
@@ -67,7 +66,6 @@ class SolicitorAndCaseWorkerDraftOrderMidHandlerTest extends BaseHandlerTestSetu
     void canNotHandleWrongCallbackType() {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.SOLICITOR_CW_DRAFT_ORDER));
     }
-
 
     @Test
     void givenContestedCase_whenDraftOrderUploadedButNonEncryptedFileShouldNotGetError() throws Exception {

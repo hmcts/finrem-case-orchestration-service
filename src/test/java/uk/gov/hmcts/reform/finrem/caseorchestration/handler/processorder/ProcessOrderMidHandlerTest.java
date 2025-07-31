@@ -136,7 +136,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         FinremCaseData result = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
         assertEquals(expected, result.getDirectionDetailsCollection());
 
-       // Test with empty directionDetailsCollection
+        // Test with empty directionDetailsCollection
         callbackRequest = FinremCallbackRequestFactory.from(EventType.DIRECTION_UPLOAD_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder().directionDetailsCollection(List.of()).build()));

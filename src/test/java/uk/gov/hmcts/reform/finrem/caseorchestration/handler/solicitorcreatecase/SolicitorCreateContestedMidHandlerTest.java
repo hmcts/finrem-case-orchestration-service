@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
-
 import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
@@ -41,7 +40,6 @@ class SolicitorCreateContestedMidHandlerTest {
     private SelectedCourtService selectedCourtService;
     @Mock
     private ExpressCaseService expressCaseService;
-
 
     @BeforeEach
     public void init() {
@@ -113,5 +111,4 @@ class SolicitorCreateContestedMidHandlerTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
         return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
     }
-
 }

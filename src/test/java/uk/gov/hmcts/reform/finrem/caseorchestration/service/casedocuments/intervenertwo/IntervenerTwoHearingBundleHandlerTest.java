@@ -22,12 +22,10 @@ public class IntervenerTwoHearingBundleHandlerTest extends HearingBundleHandlerT
     @InjectMocks
     IntervenerTwoHearingBundleHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
             CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
-
     }
 
     @Override

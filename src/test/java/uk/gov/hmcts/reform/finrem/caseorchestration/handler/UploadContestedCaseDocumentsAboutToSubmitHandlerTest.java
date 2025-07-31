@@ -140,7 +140,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             is(false));
     }
 
-
     @Test
     public void givenAnNonConfidentialUploadCaseFile_WhenFdr_thenFdrCollectionsSet() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
@@ -454,7 +453,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(response.getErrors().iterator().next(),
             is(UploadContestedCaseDocumentsAboutToSubmitHandler.NO_DOCUMENT_ERROR));
     }
-
 
     @Test
     public void shouldSetDefaultsForWithoutPrejudiceOffersCorrectly() {
