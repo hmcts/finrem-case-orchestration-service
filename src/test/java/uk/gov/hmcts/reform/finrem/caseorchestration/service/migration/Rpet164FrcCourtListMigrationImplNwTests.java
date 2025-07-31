@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.migration;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
