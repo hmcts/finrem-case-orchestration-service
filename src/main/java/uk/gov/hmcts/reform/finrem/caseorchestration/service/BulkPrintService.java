@@ -163,8 +163,8 @@ public class BulkPrintService {
     }
 
     @Deprecated(since = "31-Jul-2025")
-    private UUID bulkPrintDocuments(CaseDetails caseDetails, String letterType, String recipientParty, List<BulkPrintDocument> documents,
-                                    boolean isInternational, String auth) {
+    private UUID bulkPrintDocuments(CaseDetails caseDetails, String letterType, String recipientParty,
+                                    List<BulkPrintDocument> documents, boolean isInternational, String auth) {
         UUID letterId = genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(String.valueOf(caseDetails.getId()))
@@ -181,8 +181,8 @@ public class BulkPrintService {
         return letterId;
     }
 
-    private UUID bulkPrintDocuments(FinremCaseDetails caseDetails, String letterType, String recipientParty, List<BulkPrintDocument> documents,
-                                    boolean isInternational, String auth) {
+    private UUID bulkPrintDocuments(FinremCaseDetails caseDetails, String letterType, String recipientParty,
+                                    List<BulkPrintDocument> documents, boolean isInternational, String auth) {
         UUID letterId = genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(String.valueOf(caseDetails.getId()))
