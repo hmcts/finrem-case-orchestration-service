@@ -267,7 +267,7 @@ public class GeneralLetterService {
                 )
             ));
         String recipient = generalLetterWrapper.getGeneralLetterAddressee().getValue().getCode();
-        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(),
+        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails,
             recipient,
             bulkPrintDocuments,
             postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient),

@@ -34,5 +34,4 @@ public class GeneralApplicationDataTest {
         assertThat(pensionDocument.getDocumentUrl(), is("http://file1"));
         assertThat(pensionDocument.getDocumentFilename(), is("file1.pdf"));
     }
-
 }

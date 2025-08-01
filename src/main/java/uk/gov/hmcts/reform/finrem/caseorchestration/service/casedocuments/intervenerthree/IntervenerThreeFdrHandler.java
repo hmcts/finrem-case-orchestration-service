@@ -25,7 +25,6 @@ public class IntervenerThreeFdrHandler extends PartyDocumentsHandler {
         return uploadCaseDocument.getCaseDocumentFdr().equals(YesOrNo.YES);
     }
 
-
     @Override
     public DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
         return categoriser.getDocumentCategory(caseDocumentType);

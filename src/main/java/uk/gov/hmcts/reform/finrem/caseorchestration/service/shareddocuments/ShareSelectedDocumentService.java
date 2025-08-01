@@ -15,7 +15,6 @@ public class ShareSelectedDocumentService {
 
     private  final List<DocumentSharer> documentCollectionSharers;
 
-
     public void copySharedDocumentsToSharedCollection(FinremCaseData caseData,
                                                        String role,
                                                        List<DynamicMultiSelectListElement> documentList) {

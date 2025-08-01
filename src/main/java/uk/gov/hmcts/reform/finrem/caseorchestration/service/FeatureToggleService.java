@@ -23,7 +23,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_LETTER_RECIPIENT_CHECK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 
-
 /**
  * To add a feature toggle flag:
  * <ul>
@@ -59,7 +58,6 @@ public class FeatureToggleService {
     public boolean isPBAUsingCaseTypeEnabled() {
         return isFeatureEnabled(PAYMENT_REQUEST_USING_CASE_TYPE);
     }
-
 
     /*
      * Used for sending emails to FRC in Notification Service
@@ -99,11 +97,7 @@ public class FeatureToggleService {
     @SuppressWarnings("java:S3740")
     public Map<Class, List<String>> getFieldsIgnoredDuringSerialisation() {
         Map<Class, List<String>> ignoredFields = Maps.newHashMap();
-
-
         ignoredFields.put(UploadCaseDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
-
-
         return ignoredFields;
     }
 }

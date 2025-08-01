@@ -202,6 +202,4 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         }
         return false;
     }
-
-
 }

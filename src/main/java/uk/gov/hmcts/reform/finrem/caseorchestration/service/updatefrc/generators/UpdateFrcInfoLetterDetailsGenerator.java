@@ -27,7 +27,6 @@ public class UpdateFrcInfoLetterDetailsGenerator extends BaseContestedLetterDeta
 
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 
-
     public UpdateFrcInfoLetterDetailsGenerator(CaseDataService caseDataService, DocumentHelper documentHelper,
                                                LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper,
                                                InternationalPostalService postalService) {

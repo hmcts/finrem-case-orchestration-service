@@ -24,7 +24,6 @@ public class ApplicantFormEExhibitsCollectionServiceTest extends BaseManageDocum
     @InjectMocks
     ApplicantFormEExhibitsHandler collectionService;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.APPLICANT_FORM_E,

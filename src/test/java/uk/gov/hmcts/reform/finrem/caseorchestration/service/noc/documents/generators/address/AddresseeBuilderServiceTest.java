@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 
 import static org.mockito.Mockito.verify;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class AddresseeBuilderServiceTest {
 
@@ -51,5 +50,4 @@ public class AddresseeBuilderServiceTest {
             DocumentHelper.PaperNotificationRecipient.RESPONDENT, "respondent");
         verify(respondentAddresseeGenerator).generate(caseDetails, changedRepresentative, "respondent");
     }
-
 }

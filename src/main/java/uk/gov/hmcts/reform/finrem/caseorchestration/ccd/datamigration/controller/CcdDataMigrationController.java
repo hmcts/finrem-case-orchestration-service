@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controller;
 
-
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

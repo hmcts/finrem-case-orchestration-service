@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -147,7 +146,8 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(
             caseData, GENERAL_APPLICATION_COLLECTION);
         List<GeneralApplicationCollectionData> updatedList
-            = existingList.stream().map(this::updateStatus).collect(Collectors.toList());
+            = existingList.stream().map(this::updateStatus).toList();
+
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(updatedList));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);

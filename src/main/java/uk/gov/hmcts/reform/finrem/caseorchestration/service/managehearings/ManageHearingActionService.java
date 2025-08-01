@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
@@ -39,7 +40,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.getHearingType;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing.mapHearingToWorkingHearing;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.getHearingType;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
@@ -75,6 +77,8 @@ public class ManageHearingActionService {
 
         generateHearingNotice(finremCaseDetails, authToken, documentMap);
 
+        // FDR Hearings that are not express cases do not generate Form C or Form G, they
+        // will have been generated at the time of the FDA hearing.
         boolean shouldGenerateFormC = HearingType.FDA.equals(hearingType)
             || (HearingType.FDR.equals(hearingType) && expressCaseService.isExpressCase(caseData));
 
@@ -96,7 +100,32 @@ public class ManageHearingActionService {
         }
 
         addDocumentsToCollection(documentMap, hearingWrapper);
+        // Although the working hearing is cleared, the working hearing ID is retained for use in submitted handler.
         hearingWrapper.setWorkingHearing(null);
+    }
+
+    /**
+     * Sets the working hearing in the `ManageHearingsWrapper` based on the working hearing ID.
+     * Retrieves the hearing associated with the `workingHearingId` from the hearings collection
+     * and maps it to a working hearing. If no hearing is found with the specified ID, an exception is thrown.
+     *
+     * @param caseData the case data containing the `ManageHearingsWrapper` and hearings collection
+     * @throws IllegalArgumentException if no hearing is found with the specified working hearing ID
+     */
+    public void setWorkingHearingFromWorkingHearingId(FinremCaseData caseData) {
+        ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
+
+        UUID workingHearingId = manageHearingsWrapper
+            .getWorkingHearingId();
+
+        Hearing hearingToBeWorkedOn = manageHearingsWrapper
+            .getHearings().stream().filter(h -> h.getId().equals(workingHearingId))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("No hearing found with ID: " + workingHearingId))
+            .getValue();
+
+        manageHearingsWrapper.setWorkingHearing(mapHearingToWorkingHearing(
+            hearingToBeWorkedOn, List.of(HearingType.values())));
     }
 
     /**
@@ -224,11 +253,12 @@ public class ManageHearingActionService {
     }
 
     private void generateFormC(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
+        CaseDocumentType formCType = manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails).getLeft();
         documentMap.put(
             FORM_C,
             new DocumentRecord(
                 manageHearingsDocumentService.generateFormC(finremCaseDetails, authToken),
-                CaseDocumentType.FORM_C
+                formCType
             )
         );
     }

@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import java.util.ArrayList;
 import java.util.List;
 
-
 @SuperBuilder
 @NoArgsConstructor
 public class IntervenerThree extends IntervenerWrapper {
@@ -78,13 +77,11 @@ public class IntervenerThree extends IntervenerWrapper {
         return caseData.getIntervenerThree();
     }
 
-
     @Override
     @JsonIgnore
     public void removeIntervenerWrapperFromCaseData(FinremCaseData caseData) {
         caseData.setIntervenerThree(null);
     }
-
 
     @Override
     @JsonIgnore

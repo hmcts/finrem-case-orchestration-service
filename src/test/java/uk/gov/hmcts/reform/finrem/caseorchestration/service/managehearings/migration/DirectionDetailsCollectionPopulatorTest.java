@@ -9,10 +9,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
@@ -29,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -54,38 +56,38 @@ class DirectionDetailsCollectionPopulatorTest {
     @Test
     void testShouldPopulate() {
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("null - Skip populate because it's not a contested application.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("null - Skip populate because it's not a contested application.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONSENTED).build()))
-                .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because it's not a contested application.");
 
         // event directionDetailsCollection was not set or empty
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED).build()))
-            .isEqualTo(true);
+            .isTrue();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
             .directionDetailsCollection(Collections.emptyList()).build()))
-            .isEqualTo(true);
+            .isTrue();
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isDirectionDetailsCollectionMigrated(YesOrNo.YES).build())
             .build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because migration had been done.");
 
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isGeneralApplicationMigrated(YesOrNo.NO).build())
             .generalApplicationWrapper(GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingDate(LocalDate.now()).build())
             .build()))
-            .isEqualTo(true);
+            .isTrue();
     }
 
     @Test
@@ -107,7 +109,14 @@ class DirectionDetailsCollectionPopulatorTest {
             ))
             .build();
 
-        DynamicMultiSelectList allActivePartyList = mock(DynamicMultiSelectList.class);
+        DynamicMultiSelectList allActivePartyList = DynamicMultiSelectList.builder()
+            .value(List.of(
+                DynamicMultiSelectListElement.builder()
+                    .code("[APPSOLICITOR]")
+                    .label("Applicant Solicitor - Hamzah")
+                    .build()
+            ))
+            .build();
         when(partyService.getAllActivePartyList(caseData)).thenReturn(allActivePartyList);
         when(hearingsAppender.toHearing(hearingReq1)).thenReturn(newHearing1);
         lenient().when(hearingsAppender.toHearing(hearingReq2)).thenReturn(newHearing2);
@@ -116,13 +125,23 @@ class DirectionDetailsCollectionPopulatorTest {
 
         // Act
         underTest.populate(caseData);
+
+        // Assert
+        List<PartyOnCaseCollectionItem> expectedParties = List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role("[APPSOLICITOR]")
+                    .label("Applicant Solicitor - Hamzah")
+                    .build())
+                .build()
+        );
         verify(partyService).getAllActivePartyList(caseData);
 
         assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsDirectionDetailsCollectionMigrated());
         assertThat(caseData.getManageHearingsWrapper().getHearings())
             .hasSize(1)
             .extracting(ManageHearingsCollectionItem::getValue)
-            .extracting(Hearing::getWasMigrated, Hearing::getPartiesOnCaseMultiSelectList, Hearing::getHearingTime)
-            .containsOnly(tuple(YesOrNo.YES, allActivePartyList, "11:00"));
+            .extracting(Hearing::getWasMigrated, Hearing::getPartiesOnCase, Hearing::getHearingTime)
+            .containsOnly(tuple(YesOrNo.YES, expectedParties, "11:00"));
     }
 }

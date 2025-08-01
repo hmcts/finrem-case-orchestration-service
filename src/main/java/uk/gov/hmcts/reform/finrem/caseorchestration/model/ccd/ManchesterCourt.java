@@ -17,7 +17,6 @@ public enum ManchesterCourt implements CourtList {
     CONSENTED_STOCKPORT_COURT("FR_manchesterList_2"),
     CONSENTED_WIGAN_COURT("FR_manchesterList_3");
 
-
     private final String id;
 
     @JsonValue

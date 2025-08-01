@@ -14,7 +14,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-
 class CourtDetailsMigrationTest extends BaseServiceTest {
 
     private ObjectMapper mapper;
@@ -23,7 +22,6 @@ class CourtDetailsMigrationTest extends BaseServiceTest {
     void setup() {
         mapper = new ObjectMapper();
     }
-
 
     @Test
     void shouldMigrateCase_newport() {
