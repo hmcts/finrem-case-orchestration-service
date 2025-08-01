@@ -204,4 +204,28 @@ public class GeneralApplicationDirectionsService {
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
     }
+
+    /**
+     * Generates a General Application Directions document for the new event.
+     * If a hearing is required, it generates a hearing notice document.
+     * Otherwise, it prepares a General Application Directions Order document.
+     * TO DO: Document generation in DFR-3884
+     *
+     * @param authorisationToken the authorisation token for the request
+     * @param caseDetails        the details of the case for which the document is being generated
+     * @return the generated CaseDocument
+     */
+    public CaseDocument generateGeneralApplicationDirectionsDocument(String authorisationToken, CaseDetails caseDetails) {
+        if (caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED).equals(YES_VALUE)) {
+            return genericDocumentService.generateDocument(
+                authorisationToken,
+                caseDetails,
+                documentConfiguration.getGeneralApplicationHearingNoticeTemplate(caseDetails),
+                documentConfiguration.getGeneralApplicationHearingNoticeFileName()
+            );
+        } else {
+            //If no hearing is required, prepare the General Application Directions Order document
+            return prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
+        }
+    }
 }
