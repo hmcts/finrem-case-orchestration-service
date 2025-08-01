@@ -185,7 +185,6 @@ class ManageBarristerServiceTest {
         assertThat(barristerData, is(intervener4Barristers));
     }
 
-
     @Test
     void givenNoCurrentBarristers_whenGetBarristersForPartyApplicant_thenReturnEmptyList() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);

@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class ManageBarristerSubmittedHandlerTest {
 
@@ -99,7 +98,6 @@ public class ManageBarristerSubmittedHandlerTest {
 
         verify(manageBarristerService).notifyBarristerAccess(callbackRequest.getCaseDetails(), barristers, barristers, AUTH_TOKEN);
     }
-
 
     private List<BarristerData> getBarristers() {
         return List.of(

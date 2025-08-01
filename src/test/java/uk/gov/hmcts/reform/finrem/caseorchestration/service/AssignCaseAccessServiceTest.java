@@ -503,7 +503,6 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();
     }
 
-
     @Test
     public void retrieveAllCaseRoles() throws JsonProcessingException {
 

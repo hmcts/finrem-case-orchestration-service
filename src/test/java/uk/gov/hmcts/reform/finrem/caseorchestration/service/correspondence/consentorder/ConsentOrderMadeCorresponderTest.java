@@ -139,5 +139,4 @@ public class ConsentOrderMadeCorresponderTest {
         verify(notificationService).sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(caseDetails,
             dataKeysWrapper);
     }
-
 }

@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 
-
 class DraftOrdersReviewTest {
 
     private List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection;

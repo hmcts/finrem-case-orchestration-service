@@ -46,7 +46,6 @@ class FinremContestedSendOrderCorresponderTest {
     @Mock
     private DocumentHelper documentHelper;
 
-
     private FinremCaseDetails caseDetails;
 
     @BeforeEach
@@ -129,7 +128,6 @@ class FinremContestedSendOrderCorresponderTest {
         List<CaseDocument> documentsToPrint = corresponder.getCaseDocuments(caseDetails);
         assertEquals(1, documentsToPrint.size());
     }
-
 
     @Test
     void shouldSendLettersToInterveners() {

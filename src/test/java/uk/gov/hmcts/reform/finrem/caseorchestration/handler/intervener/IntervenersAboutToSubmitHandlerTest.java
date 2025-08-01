@@ -186,7 +186,6 @@ public class IntervenersAboutToSubmitHandlerTest {
             finremCaseData, finremCallbackRequest.getCaseDetails().getId());
     }
 
-
     @Test
     public void givenContestedCase_whenSelectionMadeToAddIntervener3_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();

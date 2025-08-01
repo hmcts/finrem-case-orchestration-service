@@ -43,7 +43,6 @@ public class AmendCaseContestedAboutToStartHandlerTest {
             is(false));
     }
 
-
     @Test
     public void givenConsentedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
         assertThat(handler
@@ -78,5 +77,4 @@ public class AmendCaseContestedAboutToStartHandlerTest {
         return CallbackRequest.builder()
             .eventId(EventType.AMEND_CASE.getCcdType()).caseDetails(caseDetails).build();
     }
-
 }

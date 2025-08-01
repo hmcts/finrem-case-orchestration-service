@@ -24,7 +24,6 @@ public class IntervenerOneStatementsExhibitsHandlerTest extends BaseManageDocume
     @InjectMocks
     IntervenerOneStatementsExhibitsHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.STATEMENT_AFFIDAVIT,

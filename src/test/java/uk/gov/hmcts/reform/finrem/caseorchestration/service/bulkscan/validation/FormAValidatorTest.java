@@ -163,7 +163,6 @@ public class FormAValidatorTest {
         assertThat(validationResult.getErrors(), is(emptyList()));
     }
 
-
     @Test
     public void shouldFailValidationWhenMandatoryFieldsAreMissing() {
         setupMandatoryFields();

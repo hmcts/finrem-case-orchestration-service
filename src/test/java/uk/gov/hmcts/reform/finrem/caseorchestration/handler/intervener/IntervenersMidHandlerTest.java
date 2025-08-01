@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener;
 
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -142,7 +141,6 @@ public class IntervenersMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         DynamicRadioList intervenerOptionList = midHandleResp.getData().getIntervenerOptionList();
 
-
         assertEquals(1, intervenerOptionList.getListItems().size());
         assertEquals(ADD_INTERVENER_TWO_CODE, intervenerOptionList.getValue().getCode());
         assertEquals(ADD_INTERVENER_TWO_VALUE, intervenerOptionList.getValue().getLabel());
@@ -186,14 +184,12 @@ public class IntervenersMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         DynamicRadioList intervenerOptionList = midHandleResp.getData().getIntervenerOptionList();
 
-
         assertEquals(1, intervenerOptionList.getListItems().size());
         assertEquals(ADD_INTERVENER_FOUR_CODE, intervenerOptionList.getValue().getCode());
         assertEquals(ADD_INTERVENER_FOUR_VALUE, intervenerOptionList.getValue().getLabel());
         assertEquals(ADD_INTERVENER_FOUR_CODE, intervenerOptionList.getListItems().get(0).getCode());
         assertEquals(ADD_INTERVENER_FOUR_VALUE, intervenerOptionList.getListItems().get(0).getLabel());
     }
-
 
     @Test
     public void givenContestedCase_whenMidEventCalled_thenPrepareOptionListForIntvOneBasedOnIntervenersList() {
@@ -213,7 +209,6 @@ public class IntervenersMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> midHandleResp = midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         DynamicRadioList intervenerOptionList = midHandleResp.getData().getIntervenerOptionList();
-
 
         assertEquals(2, intervenerOptionList.getListItems().size());
         assertEquals(ADD_INTERVENER_ONE_CODE, intervenerOptionList.getValue().getCode());
@@ -247,7 +242,6 @@ public class IntervenersMidHandlerTest {
         assertEquals(DEL_INTERVENER_TWO_CODE, intervenerOptionList.getListItems().get(1).getCode());
         assertEquals(DEL_INTERVENER_TWO_VALUE, intervenerOptionList.getListItems().get(1).getLabel());
     }
-
 
     @Test
     public void givenContestedCase_whenMidEventCalled_thenPrepareOptionListForIntvThreeBasedOnIntervenersList() {
@@ -316,7 +310,6 @@ public class IntervenersMidHandlerTest {
         ).isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Invalid intervener selected for caseId " + 123L);
     }
-
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest

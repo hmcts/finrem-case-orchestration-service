@@ -78,7 +78,6 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     private CallbackRequest callbackRequest;
     private CaseDetails caseDetails;
 
-
     @Before
     public void setup() {
         callbackRequest = CallbackRequest.builder().build();
@@ -223,7 +222,6 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
         verify(paperNotificationService, never()).printRespondentRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
 
     }
-
 
     @Test
     public void givenApplicantSolicitorDigital_whenHandle_RejectApplication_thenSendEmailToAppSolicitor() {

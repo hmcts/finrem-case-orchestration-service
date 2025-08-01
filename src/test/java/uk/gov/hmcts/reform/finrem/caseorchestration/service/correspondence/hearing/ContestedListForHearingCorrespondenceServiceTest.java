@@ -102,7 +102,6 @@ public class ContestedListForHearingCorrespondenceServiceTest {
             .build();
     }
 
-
     private List<String> partyList() {
         return of(CaseRole.APP_SOLICITOR.getCcdCode(),
             CaseRole.RESP_SOLICITOR.getCcdCode(), CaseRole.INTVR_SOLICITOR_1.getCcdCode(), CaseRole.INTVR_SOLICITOR_2.getCcdCode(),
@@ -115,6 +114,4 @@ public class ContestedListForHearingCorrespondenceServiceTest {
             .label(role)
             .build();
     }
-
-
 }

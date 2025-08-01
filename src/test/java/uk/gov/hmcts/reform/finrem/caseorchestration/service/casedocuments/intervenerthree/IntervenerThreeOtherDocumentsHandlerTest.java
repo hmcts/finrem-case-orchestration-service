@@ -24,7 +24,6 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
     @InjectMocks
     IntervenerThreeOtherDocumentsHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,

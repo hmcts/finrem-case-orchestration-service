@@ -401,7 +401,6 @@ public class GeneralApplicationServiceTest {
             is(true));
     }
 
-
     @Test
     public void givenGeneralApplicationWithPreviousData_whenUpdateCaseDataStart_thenPreviousDataDeleted() {
 

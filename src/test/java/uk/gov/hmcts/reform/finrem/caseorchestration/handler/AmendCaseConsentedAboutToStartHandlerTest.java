@@ -57,7 +57,6 @@ public class AmendCaseConsentedAboutToStartHandlerTest {
             is(false));
     }
 
-
     @Test
     public void givenConsentedCase_whenEventIsSolCreate_thenHandlerCanNotHandle() {
         assertThat(handler
@@ -77,5 +76,4 @@ public class AmendCaseConsentedAboutToStartHandlerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
     }
-
 }

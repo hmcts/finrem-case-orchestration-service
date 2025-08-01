@@ -128,7 +128,6 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertTrue(errors.isEmpty());
     }
 
-
     @Test
     public void givenCase_whenRemoveOperationChoosenForIntv2NotRepresented_thenRemoveintervener() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
@@ -319,8 +318,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public
-    void givenContestedCase_whenAddingintervenerAndIntv1RepresentWithNullOrgId_thenSetIntvenerDateAddedAndDefaultOrg() {
+    public void givenContestedCase_whenAddingintervenerAndIntv1RepresentWithNullOrgId_thenSetIntvenerDateAddedAndDefaultOrg() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
@@ -592,7 +590,6 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertTrue(errors.isEmpty());
     }
 
-
     @Test
     public void givenContestedCase_whenUpdatingIntervener1AndChangedRepresetationNoToYes_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
@@ -856,7 +853,6 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertTrue(errors.isEmpty());
     }
 
-
     @Test
     public void givenContestedCase_whenUpdatingIntervenerAndChangedRepresetationSolEmailChanged_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
@@ -971,7 +967,6 @@ public class IntervenerServiceTest extends BaseServiceTest {
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
         assertTrue(errors.isEmpty());
     }
-
 
     @Test
     public void givenContestedCase_whenAddingIntervenerAndIntv3NotRepresent_thenSetIntvenerDateAddedAndDefaultOrg() {

@@ -258,7 +258,6 @@ class SendOrderContestedSubmittedHandlerTest {
         verify(contestedSendOrderCorresponder).sendCorrespondence(any(), any());
     }
 
-
     @Test
     void givenAppSolIsNotDigital_WhenApplicantSelectedToHearingShareOrder_ThenSendContestOrderApprovedViaBulkPrint() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
@@ -323,5 +322,4 @@ class SendOrderContestedSubmittedHandlerTest {
                 .data(new FinremCaseData()).build())
             .build();
     }
-
 }

@@ -217,7 +217,6 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
             .build();
     }
 
-
     private Address getRespAddress() {
         return Address.builder()
             .build();

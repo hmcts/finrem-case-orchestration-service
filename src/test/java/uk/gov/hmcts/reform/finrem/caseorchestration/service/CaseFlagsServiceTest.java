@@ -82,7 +82,6 @@ class CaseFlagsServiceTest {
         assertEquals(APPLICANT, applicantFlags.getRoleOnCase());
     }
 
-
     @Test
     void givenCaseFlags_whenHandleAboutToSubmit_thenSetRespondentFlagDetails() {
         when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn(RESPONDENT_NAME);
