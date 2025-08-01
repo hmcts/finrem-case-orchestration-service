@@ -83,7 +83,6 @@ class ManualPaymentSubmittedHandlerTest {
             .sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class), any(), anyString());
     }
 
-
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()

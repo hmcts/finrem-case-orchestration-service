@@ -41,6 +41,4 @@ public class LitigantSolicitorAddedNocDocumentServiceTest extends NocDocumentSer
         assertPlaceHoldersMap(placeholdersMap);
         assertAndVerifyDocumentsAreGenerated(caseDocument);
     }
-
-
 }

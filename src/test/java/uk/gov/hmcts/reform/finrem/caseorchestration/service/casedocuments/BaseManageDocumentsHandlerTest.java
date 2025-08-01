@@ -56,10 +56,8 @@ public abstract class BaseManageDocumentsHandlerTest<H extends DocumentHandler> 
 
     protected abstract List<UploadCaseDocumentCollection> getDocumentCollection();
 
-
     @Test
     public abstract void assertCorrectCategoryAssignedFromDocumentType();
-
 
     private void assertDocumentCategoryIdAppliedForDocumentCollection() {
         if (featureToggleService.isCaseFileViewEnabled()) {
@@ -84,7 +82,6 @@ public abstract class BaseManageDocumentsHandlerTest<H extends DocumentHandler> 
         assertExpectedCollectionType();
         assertDocumentCategoryIdAppliedForDocumentCollection();
     }
-
 
     private void handleAssignDocumentCatergoryForUploadDocumentCollections(Boolean cfvSwitch) {
 
@@ -114,7 +111,6 @@ public abstract class BaseManageDocumentsHandlerTest<H extends DocumentHandler> 
     public void handleAssignDocumentCategoryForDocumentCollectionCorrectlyCvfOff() {
         handleAssignDocumentCatergoryForUploadDocumentCollections(false);
     }
-
 
     protected UploadCaseDocumentCollection createContestedUploadDocumentItem(CaseDocumentType type,
                                                                              CaseDocumentParty party,

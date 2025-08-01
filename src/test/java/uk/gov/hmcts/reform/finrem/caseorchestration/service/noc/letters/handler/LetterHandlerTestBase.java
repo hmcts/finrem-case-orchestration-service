@@ -87,7 +87,6 @@ public abstract class LetterHandlerTestBase {
             bulkPrintService.getRecipient(recipient.toString()), AUTH_TOKEN);
     }
 
-
     protected void shouldNotSendLetter(String caseDetailsPath, String caseDetailsBeforePath) {
         CaseDetails caseDetails =
             getCaseDetails(caseDetailsPath);

@@ -58,7 +58,6 @@ public class CreateCaseServiceTest {
             times(1)).submitSupplementaryData(any(), any(), any(), any());
     }
 
-
     @Test
     public void givenFinremCallbackRequest_whenSetSupplementaryData_thenCallCcdSubmitSupplementaryData() {
         FinremCallbackRequest callbackRequest =

@@ -49,7 +49,6 @@ public class IntervenerTwoExpertEvidenceHandlerTest extends ExpertEvidenceHandle
             .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_TWO_EXPERT_EVIDENCE_COLLECTION);
     }
 
-
     @Override
     protected DocumentCategory getValuationReportCategory() {
         return DocumentCategory.REPORTS;

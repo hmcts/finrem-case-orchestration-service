@@ -48,7 +48,6 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     private DocumentHelper documentHelper;
     private FinremCaseDetails caseDetails;
 
-
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
         assertThat(handler
