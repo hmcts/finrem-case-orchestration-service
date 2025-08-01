@@ -23,10 +23,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -40,15 +38,12 @@ class BulkPrintDocumentGeneratorServiceTest {
     @InjectMocks private BulkPrintDocumentGeneratorService service;
     @Mock private AuthTokenGenerator authTokenGenerator;
     @Mock private SendLetterApi sendLetterApi;
-    @Mock private FeatureToggleService featureToggleService;
     @Captor private ArgumentCaptor<LetterWithPdfsRequest> letterWithPdfsRequestArgumentCaptor;
 
     @Test
     void downloadDocuments() {
         UUID randomId = UUID.randomUUID();
         when(authTokenGenerator.generate()).thenReturn("random-string");
-        when(featureToggleService.isSendLetterDuplicateCheckEnabled()).thenReturn(false);
-
         when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class)))
             .thenReturn(new SendLetterResponse(randomId));
 
@@ -57,54 +52,32 @@ class BulkPrintDocumentGeneratorServiceTest {
     }
 
     @Test
-    void givenFeatureToggleOff_whenSend_thenRecipientsIdentical() {
+    void testSend() {
         UUID randomId = UUID.randomUUID();
         when(authTokenGenerator.generate()).thenReturn("random-string");
-        when(featureToggleService.isSendLetterDuplicateCheckEnabled()).thenReturn(false);
         when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class)))
             .thenReturn(new SendLetterResponse(randomId));
 
-        // Send 2 requests
-        service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
         service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
 
-        verify(sendLetterApi, times(2)).sendLetter(anyString(), letterWithPdfsRequestArgumentCaptor.capture());
+        verify(sendLetterApi).sendLetter(anyString(), letterWithPdfsRequestArgumentCaptor.capture());
 
-        LetterWithPdfsRequest letterWithPdfsRequest1 = letterWithPdfsRequestArgumentCaptor.getAllValues().get(0);
-        List<String> request1Recipients = (List<String>) letterWithPdfsRequest1.getAdditionalData().get("recipients");
-        LetterWithPdfsRequest letterWithPdfsRequest2 = letterWithPdfsRequestArgumentCaptor.getAllValues().get(1);
-        List<String> request2Recipients = (List<String>) letterWithPdfsRequest2.getAdditionalData().get("recipients");
-
-        assertThat(request1Recipients, is(equalTo(request2Recipients)));
-    }
-
-    @Test
-    void givenFeatureToggleOn_whenSend_thenRecipientsDifferent() {
-        UUID randomId = UUID.randomUUID();
-        when(authTokenGenerator.generate()).thenReturn("random-string");
-        when(featureToggleService.isSendLetterDuplicateCheckEnabled()).thenReturn(true);
-        when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class)))
-            .thenReturn(new SendLetterResponse(randomId));
-
-        // Send 2 requests
-        service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
-        service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
-
-        verify(sendLetterApi, times(2)).sendLetter(anyString(), letterWithPdfsRequestArgumentCaptor.capture());
-
-        LetterWithPdfsRequest letterWithPdfsRequest1 = letterWithPdfsRequestArgumentCaptor.getAllValues().get(0);
-        List<String> request1Recipients = (List<String>) letterWithPdfsRequest1.getAdditionalData().get("recipients");
-        LetterWithPdfsRequest letterWithPdfsRequest2 = letterWithPdfsRequestArgumentCaptor.getAllValues().get(1);
-        List<String> request2Recipients = (List<String>) letterWithPdfsRequest2.getAdditionalData().get("recipients");
-
-        assertThat(request1Recipients, not(equalTo(request2Recipients)));
+        LetterWithPdfsRequest request = letterWithPdfsRequestArgumentCaptor.getValue();
+        assertThat(request.getAdditionalData().get("letterType"), is("any"));
+        assertThat(request.getAdditionalData().get("caseReferenceNumber"), is("any"));
+        assertThat(request.getAdditionalData().get("caseIdentifier"), is("any"));
+        assertThat(request.getAdditionalData().get("fileNames"), is(Collections.singletonList("app_docs.pdf")));
+        assertThat(request.getAdditionalData().get("recipients"), is(Collections.singletonList("123")));
+        assertThat(request.getAdditionalData().get("recipientParty"), is(APPLICANT));
     }
 
     @Test
     void throwsException() {
         when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
 
-        assertThatThrownBy(() -> service.send(getBulkPrintRequest(), singletonList("abc".getBytes())))
+        BulkPrintRequest bulkPrintRequest = getBulkPrintRequest();
+        List<byte[]> documents = List.of("abc".getBytes());
+        assertThatThrownBy(() -> service.send(bulkPrintRequest, documents))
             .isInstanceOf(RuntimeException.class);
         verifyNoInteractions(sendLetterApi);
     }
@@ -114,7 +87,9 @@ class BulkPrintDocumentGeneratorServiceTest {
         when(authTokenGenerator.generate()).thenReturn("random-string");
         when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class))).thenThrow(new RuntimeException());
 
-        assertThatThrownBy(() -> service.send(getBulkPrintRequest(), singletonList("abc".getBytes())))
+        BulkPrintRequest bulkPrintRequest = getBulkPrintRequest();
+        List<byte[]> documents = List.of("abc".getBytes());
+        assertThatThrownBy(() -> service.send(bulkPrintRequest, documents))
             .isInstanceOf(RuntimeException.class);
         verify(authTokenGenerator).generate();
     }
@@ -125,6 +100,7 @@ class BulkPrintDocumentGeneratorServiceTest {
             .caseId("any")
             .recipientParty(APPLICANT)
             .isInternational(true)
+            .requestId("123")
             .bulkPrintDocuments(Collections.singletonList(
                 BulkPrintDocument.builder().binaryFileUrl(BINARY_URL).fileName(FILE_NAME).build())).build();
     }
