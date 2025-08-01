@@ -1,114 +1,116 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SOLICITOR_CREATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SolicitorCreateContestedMidHandlerTest {
 
-    public static final String AUTH_TOKEN = "tokien:)";
-
-    private SolicitorCreateContestedMidHandler handler;
+    @InjectMocks
+    private SolicitorCreateContestedMidHandler underTest;
 
     @Mock
-    FinremCaseDetailsMapper finremCaseDetailsMapper;
-    @Mock
-    private InternationalPostalService postalService;
+    private InternationalPostalService internationalPostalService;
 
     @Mock
     private SelectedCourtService selectedCourtService;
+
     @Mock
     private ExpressCaseService expressCaseService;
 
-    @BeforeEach
-    public void init() {
-        handler = new SolicitorCreateContestedMidHandler(
-                finremCaseDetailsMapper,
-                postalService,
-                selectedCourtService,
-                expressCaseService);
+    @Test
+    void testCanHandle() {
+        assertCanHandle(underTest, MID_EVENT, CONTESTED, SOLICITOR_CREATE);
     }
 
-    @Test
-    void testHandlerCanHandle() {
-        assertCanHandle(handler, CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE);
-    }
-
-    @Test
-    void testPostalServiceValidationCalled() {
-        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(postalService, times(1))
-                .validate(finremCallbackRequest.getCaseDetails().getData());
-    }
-
-    @Test
-    void testSetSelectedCourtDetailsIfPresentCalled() {
-        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(selectedCourtService, times(1))
-                .setSelectedCourtDetailsIfPresent(finremCallbackRequest.getCaseDetails().getData());
-    }
-
-    @Test
-    void testExpressCaseServiceCalled() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
-    }
-
-    @Test
-    void testRoyalCourtOrHighCourtChosenCalled() {
-        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(selectedCourtService, times(1))
-                .royalCourtOrHighCourtChosen(finremCallbackRequest.getCaseDetails().getData());
-    }
-
-    /*
-     * handler can add errors that stem from either postalService.validate or
-     * selectedCourtService.royalCourtOrHighCourtChosen.
-     * This checks that any errors from each service are present in the callback response.
-     */
-    @Test
-    void testThatErrorsReturned() {
-        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
-        when(selectedCourtService.royalCourtOrHighCourtChosen(any())).thenReturn(true);
-        when(postalService.validate((FinremCaseData) any())).thenReturn(Arrays.asList("post err 1", "post err 2"));
-        assertThat(handler.handle(finremCallbackRequest, AUTH_TOKEN).getErrors()).contains(
-                "You cannot select High Court or Royal Court of Justice. Please select another court.",
-                "post err 1",
-                "post err 2"
+    static Stream<Arguments> errorScenarios() {
+        return Stream.of(
+            Arguments.of(
+                List.of("address error 1"),
+                List.of("email error 1"),
+                List.of("postal error 1"),
+                true,
+                List.of("address error 1", "email error 1",
+                    "You cannot select High Court or Royal Court of Justice. Please select another court.", "postal error 1")
+            ),
+            Arguments.of(
+                List.of(),
+                List.of(),
+                List.of(),
+                false,
+                List.of()
+            ),
+            Arguments.of(
+                List.of("address only"),
+                List.of(),
+                List.of(),
+                false,
+                List.of("address only")
+            )
         );
     }
 
-    private FinremCallbackRequest buildFinremCallbackRequest() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
-        return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
+    @ParameterizedTest
+    @MethodSource("errorScenarios")
+    void testHandle(List<String> addressErrors,
+                    List<String> emailErrors,
+                    List<String> postalErrors,
+                    boolean royalCourtOrHighCourtChosen,
+                    List<String> expectedErrors) {
+
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, SOLICITOR_CREATE, caseData);
+
+        try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
+                .thenReturn(new ArrayList<>(addressErrors));
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
+                .thenReturn(new ArrayList<>(emailErrors));
+            when(internationalPostalService.validate(caseData))
+                .thenReturn(new ArrayList<>(postalErrors));
+            when(selectedCourtService.royalCourtOrHighCourtChosen(caseData)).thenReturn(royalCourtOrHighCourtChosen);
+
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                underTest.handle(callbackRequest, AUTH_TOKEN);
+
+            assertThat(response.getErrors()).containsExactlyElementsOf(expectedErrors);
+
+            verify(internationalPostalService).validate(caseData);
+            verify(selectedCourtService).setSelectedCourtDetailsIfPresent(caseData);
+            verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
+            verify(selectedCourtService).royalCourtOrHighCourtChosen(caseData);
+        }
     }
 }
