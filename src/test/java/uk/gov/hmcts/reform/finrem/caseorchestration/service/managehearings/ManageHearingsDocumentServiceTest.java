@@ -151,9 +151,9 @@ class ManageHearingsDocumentServiceTest {
         FinremCaseData caseData = FinremCaseData.builder()
             .expressCaseWrapper(
                 ExpressCaseWrapper.builder()
-                .expressCaseParticipation(isExpressCase
-                    ? ExpressCaseParticipation.ENROLLED : ExpressCaseParticipation.DOES_NOT_QUALIFY)
-                .build())
+                    .expressCaseParticipation(isExpressCase
+                        ? ExpressCaseParticipation.ENROLLED : ExpressCaseParticipation.DOES_NOT_QUALIFY)
+                    .build())
             .fastTrackDecision(isFastTrackApplication ? YesOrNo.YES : YesOrNo.NO)
             .build();
         finremCaseDetails.setData(caseData);
@@ -235,7 +235,7 @@ class ManageHearingsDocumentServiceTest {
         verify(documentConfiguration).getFormGTemplate(finremCaseDetails);
         verify(documentConfiguration).getFormGFileName();
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
-            AUTH_TOKEN, documentDataMap, FORM_G_TEMPLATE,  FORM_G_FILE_NAME, CASE_ID);
+            AUTH_TOKEN, documentDataMap, FORM_G_TEMPLATE, FORM_G_FILE_NAME, CASE_ID);
     }
 
     @Test
@@ -249,13 +249,13 @@ class ManageHearingsDocumentServiceTest {
             .documentFilename(PFD_NCDR_COVER_LETTER_FILE_NAME)
             .build();
 
-        when(staticHearingDocumentService.uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN)))
+        when(staticHearingDocumentService.uploadPfdNcdrComplianceLetter(CASE_ID, AUTH_TOKEN))
             .thenReturn(complianceLetter);
 
-        when(staticHearingDocumentService.isPdfNcdrCoverSheetRequired(eq(finremCaseDetails)))
+        when(staticHearingDocumentService.isPdfNcdrCoverSheetRequired(finremCaseDetails))
             .thenReturn(true);
 
-        when(staticHearingDocumentService.uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN)))
+        when(staticHearingDocumentService.uploadPfdNcdrCoverLetter(CASE_ID, AUTH_TOKEN))
             .thenReturn(coverLetter);
 
         // Act
@@ -266,9 +266,9 @@ class ManageHearingsDocumentServiceTest {
         assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
         assertEquals(coverLetter, documentMap.get(PFD_NCDR_COVER_LETTER));
 
-        verify(staticHearingDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
-        verify(staticHearingDocumentService).isPdfNcdrCoverSheetRequired(eq(finremCaseDetails));
-        verify(staticHearingDocumentService).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
+        verify(staticHearingDocumentService).uploadPfdNcdrComplianceLetter(CASE_ID, AUTH_TOKEN);
+        verify(staticHearingDocumentService).isPdfNcdrCoverSheetRequired(finremCaseDetails);
+        verify(staticHearingDocumentService).uploadPfdNcdrCoverLetter(CASE_ID, AUTH_TOKEN);
     }
 
     @Test
@@ -292,9 +292,9 @@ class ManageHearingsDocumentServiceTest {
         assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
         assertNull(documentMap.get(PFD_NCDR_COVER_LETTER));
 
-        verify(staticHearingDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
-        verify(staticHearingDocumentService).isPdfNcdrCoverSheetRequired(eq(finremCaseDetails));
-        verify(staticHearingDocumentService, never()).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
+        verify(staticHearingDocumentService).uploadPfdNcdrComplianceLetter(CASE_ID, AUTH_TOKEN);
+        verify(staticHearingDocumentService).isPdfNcdrCoverSheetRequired(finremCaseDetails);
+        verify(staticHearingDocumentService, never()).uploadPfdNcdrCoverLetter(CASE_ID, AUTH_TOKEN);
     }
 
     @Test
@@ -327,10 +327,10 @@ class ManageHearingsDocumentServiceTest {
                     DocumentCollectionItem
                         .builder()
                         .value(CaseDocument
-                                .builder()
-                                .categoryId(null)
-                                .build())
-                            .build()))
+                            .builder()
+                            .categoryId(null)
+                            .build())
+                        .build()))
                 .build())
             .build();
 
@@ -428,6 +428,47 @@ class ManageHearingsDocumentServiceTest {
 
         // Assert
         assertNull(result);
+    }
+
+    @Test
+    void shouldReturnAdditionalHearingDocsFromHearing() {
+        // Arrange
+        UUID hearingId = UUID.randomUUID();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .workingHearingId(hearingId)
+            .hearings(List.of(
+                    ManageHearingsCollectionItem
+                        .builder()
+                        .id(hearingId)
+                        .value(Hearing.builder()
+                            .additionalHearingDocs(List.of(DocumentCollectionItem
+                                .builder()
+                                .value(CaseDocument.builder().documentFilename("expected doc url").build())
+                                .build()))
+                            .build())
+                        .build(),
+                    ManageHearingsCollectionItem
+                        .builder()
+                        .id(UUID.randomUUID())
+                        .value(Hearing.builder()
+                            .additionalHearingDocs(List.of(DocumentCollectionItem
+                                .builder()
+                                .value(CaseDocument.builder().documentFilename("Other doc").build())
+                                .build()))
+                            .build())
+                        .build()
+                )
+            )
+            .build();
+
+        // Act
+        List<CaseDocument> result =
+            manageHearingsDocumentService.getAddHearingDocsFromWorkingHearing(wrapper);
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals("expected doc url", result.getFirst().getDocumentFilename());
     }
 
     @Test
@@ -630,6 +671,7 @@ class ManageHearingsDocumentServiceTest {
     /**
      * Builds a collection of ManageHearingDocumentsCollectionItem for all hearing documents.
      * Useful to check which documents are posted for a hearing.
+     *
      * @param hearingId the UUID of the hearing associated with the documents
      * @return a list of ManageHearingDocumentsCollectionItem containing all hearing documents
      */
@@ -648,6 +690,7 @@ class ManageHearingsDocumentServiceTest {
 
     /**
      * Helper method to create a ManageHearingDocumentsCollectionItem with a specific CaseDocumentType and URL.
+     *
      * @param type      the CaseDocumentType for the document
      * @param url       the URL of the document
      * @param hearingId the UUID of the hearing associated with the document
@@ -677,10 +720,11 @@ class ManageHearingsDocumentServiceTest {
     /**
      * Builds a FinremCaseData object with a ManageHearingsWrapper containing hearing documents.
      * And sets other attributes using the arguments provided.  MiniFormA is set to a test value.
-     * @param hearingId used so that tests can check that the correct hearing documents are returned
-     * @param hearingDocuments the list of hearing documents to be included in the case data
+     *
+     * @param hearingId              used so that tests can check that the correct hearing documents are returned
+     * @param hearingDocuments       the list of hearing documents to be included in the case data
      * @param isFastTrackApplication indicates if the application is fast track (use for FDA hearings).
-     * @param hearingType the type of hearing
+     * @param hearingType            the type of hearing
      * @return FinremCaseData with the specified hearing documents and attributes
      */
     private FinremCaseData buildCaseDataWithHearingDocuments(

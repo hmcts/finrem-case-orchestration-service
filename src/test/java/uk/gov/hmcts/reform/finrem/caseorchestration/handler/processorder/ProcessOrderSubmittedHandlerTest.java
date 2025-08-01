@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,8 @@ class ProcessOrderSubmittedHandlerTest {
     private HearingDocumentService hearingDocumentService;
     @Mock
     private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @Mock
+    private ManageHearingsCorresponder manageHearingsCorresponder;
 
     @InjectMocks
     private ProcessOrderSubmittedHandler handler;
@@ -96,6 +99,18 @@ class ProcessOrderSubmittedHandlerTest {
 
         verify(hearingDocumentService).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
         verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
+    }
+
+    @Test
+    void givenMhProcessOrderEvent_whenHandling_thenSendMhNotifications() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.setEventType(EventType.PROCESS_ORDER);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
+        verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
+        verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DIRECTION_UPLOAD_ORDER;
@@ -26,12 +27,16 @@ public class ProcessOrderSubmittedHandler extends FinremCallbackHandler {
 
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
+    private final ManageHearingsCorresponder manageHearingsCorresponder;
 
-    public ProcessOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService,
-                                        AdditionalHearingDocumentService additionalHearingDocumentService) {
+    public ProcessOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                        HearingDocumentService hearingDocumentService,
+                                        AdditionalHearingDocumentService additionalHearingDocumentService,
+                                        ManageHearingsCorresponder manageHearingsCorresponder) {
         super(finremCaseDetailsMapper);
         this.hearingDocumentService = hearingDocumentService;
         this.additionalHearingDocumentService = additionalHearingDocumentService;
+        this.manageHearingsCorresponder = manageHearingsCorresponder;
     }
 
     @Override
@@ -45,7 +50,8 @@ public class ProcessOrderSubmittedHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Handling contested event {} submit callback for case id: {}", callbackRequest.getEventType(), caseDetails.getId());
+        log.info("Handling contested event {} submit callback for case id: {}", callbackRequest.getEventType(),
+            caseDetails.getId());
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         if (EventType.DIRECTION_UPLOAD_ORDER.equals(callbackRequest.getEventType())) {
@@ -55,9 +61,12 @@ public class ProcessOrderSubmittedHandler extends FinremCallbackHandler {
 
                     if (caseDetailsBefore != null && caseDetailsBefore.getData() != null
                         && caseDetailsBefore.getData().getListForHearingWrapper().getFormC() != null) {
-                        log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
-                        additionalHearingDocumentService.sendAdditionalHearingDocuments(userAuthorisation, caseDetails);
-                        log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
+                        log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}",
+                            caseDetails.getId());
+                        additionalHearingDocumentService.sendAdditionalHearingDocuments(userAuthorisation,
+                            caseDetails);
+                        log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}",
+                            caseDetails.getId());
                     } else {
                         log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
                         hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, userAuthorisation);
@@ -68,6 +77,7 @@ public class ProcessOrderSubmittedHandler extends FinremCallbackHandler {
         } else if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())) {
             // MH Process Order notifications
             log.info("Handling process order notifications for contested case id: {}", caseDetails.getId());
+            manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }
 
 
