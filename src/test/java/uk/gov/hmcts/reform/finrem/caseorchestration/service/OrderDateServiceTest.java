@@ -61,7 +61,7 @@ class OrderDateServiceTest  {
         orderCollections.add(orderCollection);
 
         List<DirectionOrderCollection> directionOrderCollections
-            = orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN);
+            = orderDateService.syncCreatedDateAndMarkDocumentStamped(orderCollections, AUTH_TOKEN);
 
         DirectionOrder value = directionOrderCollections.get(0).getValue();
         LocalDateTime dateTime = LocalDateTime.of(2023, 5, 21, 10, 10, 10);
@@ -81,7 +81,7 @@ class OrderDateServiceTest  {
         orderCollections.add(orderCollection);
 
         List<DirectionOrderCollection> directionOrderCollections
-            = orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN);
+            = orderDateService.syncCreatedDateAndMarkDocumentStamped(orderCollections, AUTH_TOKEN);
 
         DirectionOrder value = directionOrderCollections.get(0).getValue();
 
@@ -95,7 +95,7 @@ class OrderDateServiceTest  {
         List<DirectionOrderCollection> orderCollections = new ArrayList<>();
 
         List<DirectionOrderCollection> directionOrderCollections
-            = orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN);
+            = orderDateService.syncCreatedDateAndMarkDocumentStamped(orderCollections, AUTH_TOKEN);
 
         assertThat(directionOrderCollections).isEmpty();
         verify(emService, never()).audit(anyList(), any());
@@ -104,7 +104,7 @@ class OrderDateServiceTest  {
     @Test
     void addCreatedDateInFinalOrderWhenFinalOrderIsNullThenDoNotCallEvidenceService() {
         List<DirectionOrderCollection> directionOrderCollections
-            = orderDateService.addCreatedDateInFinalOrder(null, AUTH_TOKEN);
+            = orderDateService.syncCreatedDateAndMarkDocumentStamped(null, AUTH_TOKEN);
 
         assertThat(directionOrderCollections).isEmpty();
         verify(emService, never()).audit(anyList(), any());
@@ -119,7 +119,7 @@ class OrderDateServiceTest  {
         orderCollections.add(orderCollection);
 
         List<DirectionOrderCollection> directionOrderCollections
-            = orderDateService.addCreatedDateInUploadedOrder(orderCollections, AUTH_TOKEN);
+            = orderDateService.syncCreatedDateAndMarkDocumentNotStamped(orderCollections, AUTH_TOKEN);
 
         DirectionOrder value = directionOrderCollections.get(0).getValue();
         LocalDateTime dateTime = LocalDateTime.of(2023, 5, 21, 10, 10, 10);
@@ -138,7 +138,7 @@ class OrderDateServiceTest  {
         orderCollections.add(orderCollection);
 
         List<DirectionOrderCollection> directionOrderCollections
-            = orderDateService.addCreatedDateInUploadedOrder(orderCollections, AUTH_TOKEN);
+            = orderDateService.syncCreatedDateAndMarkDocumentNotStamped(orderCollections, AUTH_TOKEN);
 
         DirectionOrder value = directionOrderCollections.get(0).getValue();
         LocalDateTime dateTime = LocalDateTime.of(2023, 5, 21, 10, 10, 10);
@@ -152,7 +152,7 @@ class OrderDateServiceTest  {
         List<DirectionOrderCollection> orderCollections = new ArrayList<>();
 
         List<DirectionOrderCollection> directionOrderCollections
-            = orderDateService.addCreatedDateInUploadedOrder(orderCollections, AUTH_TOKEN);
+            = orderDateService.syncCreatedDateAndMarkDocumentNotStamped(orderCollections, AUTH_TOKEN);
 
         assertThat(directionOrderCollections).isEmpty();
         verify(emService, never()).audit(anyList(), any());
@@ -161,7 +161,7 @@ class OrderDateServiceTest  {
     @Test
     void addCreatedDateInUploadedOrderWhenCollectionIsNullThenDoNotCallEvidenceService() {
         List<DirectionOrderCollection> directionOrderCollections
-            = orderDateService.addCreatedDateInUploadedOrder(null, AUTH_TOKEN);
+            = orderDateService.syncCreatedDateAndMarkDocumentNotStamped(null, AUTH_TOKEN);
 
         assertThat(directionOrderCollections).isEmpty();
         verify(emService, never()).audit(anyList(), any());
@@ -179,7 +179,7 @@ class OrderDateServiceTest  {
         orderCollections.add(orderCollection);
 
         List<DirectionOrderCollection> directionOrderCollections
-            = orderDateService.addCreatedDateInUploadedOrder(orderCollections, AUTH_TOKEN);
+            = orderDateService.syncCreatedDateAndMarkDocumentNotStamped(orderCollections, AUTH_TOKEN);
 
         DirectionOrder value = directionOrderCollections.get(0).getValue();
         LocalDateTime dateTime = LocalDateTime.of(2023, 5, 21, 10, 10, 10);

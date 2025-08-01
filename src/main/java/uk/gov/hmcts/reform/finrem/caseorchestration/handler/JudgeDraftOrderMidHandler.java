@@ -36,27 +36,27 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.JUDGE_DRAFT_ORDER.equals(eventType));
+            && EventType.JUDGE_DRAFT_ORDER.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for Case ID: {}",
-            EventType.JUDGE_DRAFT_ORDER, caseId);
         FinremCaseData caseData = caseDetails.getData();
         DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
-        List<DraftDirectionOrderCollection> draftDirectionOrderCollection = draftDirectionWrapper.getDraftDirectionOrderCollection();
+        List<DraftDirectionOrderCollection> judgeApprovedOrderCollection = draftDirectionWrapper.getJudgeApprovedOrderCollection();
 
         List<String> errors = new ArrayList<>();
-        if (CollectionUtils.isEmpty(draftDirectionOrderCollection)) {
+        if (CollectionUtils.isEmpty(judgeApprovedOrderCollection)) {
             errors.add(NO_ORDERS_IN_COLLECTION);
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(errors).build();
         }
 
+        // The following validation will not be needed, as another ticket will prevent previously uploaded orders
+        // from being shown for amendment and removal.
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData beforeCaseData = caseDetailsBefore.getData();
         DraftDirectionWrapper draftDirectionWrapperBefore = beforeCaseData.getDraftDirectionWrapper();
@@ -65,16 +65,15 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
             List<DraftDirectionOrderCollection> draftDirectionOrderCollectionBefore
                 = draftDirectionWrapperBefore.getDraftDirectionOrderCollection();
             if (draftDirectionOrderCollectionBefore != null && !draftDirectionOrderCollectionBefore.isEmpty()) {
-                draftDirectionOrderCollection.removeAll(draftDirectionOrderCollectionBefore);
+                judgeApprovedOrderCollection.removeAll(draftDirectionOrderCollectionBefore);
             }
         }
 
-        draftDirectionOrderCollection.forEach(doc ->
+        judgeApprovedOrderCollection.forEach(doc ->
             service.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
-                caseId, errors, userAuthorisation)
+                caseData.getCcdCaseId(), errors, userAuthorisation)
         );
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 }
