@@ -193,11 +193,10 @@ public class ManageHearingsDocumentService {
         return getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.HEARING_NOTICE);
     }
 
-    public List<CaseDocument> getAdditonalHearingDocument(FinremCaseDetails finremCaseDetails) {
-        return Optional.ofNullable(finremCaseDetails)
-            .map(FinremCaseDetails::getData)
-            .map(FinremCaseData::getManageHearingsWrapper)
-            .map(  wrapper -> wrapper.getManageHearingsCollectionItemById(wrapper.getWorkingHearingId()).getValue())
+    public List<CaseDocument> getAddHearingDocsFromWorkingHearing(ManageHearingsWrapper wrapper) {
+        return Optional.ofNullable(wrapper)
+            .map(w -> w.getManageHearingsCollectionItemById(w.getWorkingHearingId()))
+            .map(ManageHearingsCollectionItem::getValue)
             .map(Hearing::getAdditionalHearingDocs)
             .stream()
             .flatMap(List::stream)

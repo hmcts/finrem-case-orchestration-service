@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -303,10 +304,10 @@ public class ManageHearingsCorresponder {
             return;
         }
 
-        List<CaseDocument> hearingDocuments = manageHearingsDocumentService
-            .getHearingDocumentsToPost(finremCaseDetails);
+        List<CaseDocument> hearingDocuments = new ArrayList<>(List.of(hearingNotice));
 
-        hearingDocuments.add(hearingNotice);
+        hearingDocuments.addAll(manageHearingsDocumentService
+            .getAddHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
 
         List<BulkPrintDocument> bulkPrintDocuments =
             documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocuments);
@@ -329,10 +330,12 @@ public class ManageHearingsCorresponder {
      * @param userAuthorisation the user authorisation token.
      */
     private void postAllHearingDocuments(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
-        List<CaseDocument> hearingDocuments = manageHearingsDocumentService
-            .getHearingDocumentsToPost(finremCaseDetails);
+        List<CaseDocument> hearingDocuments = new ArrayList<>(
+            manageHearingsDocumentService.getHearingDocumentsToPost(finremCaseDetails)
+        );
 
-        hearingDocuments.addAll(manageHearingsDocumentService.getAdditonalHearingDocument(finremCaseDetails));
+        hearingDocuments.addAll(manageHearingsDocumentService.getAddHearingDocsFromWorkingHearing(
+            finremCaseDetails.getData().getManageHearingsWrapper()));
 
         if (isEmpty(hearingDocuments)) {
             log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());
