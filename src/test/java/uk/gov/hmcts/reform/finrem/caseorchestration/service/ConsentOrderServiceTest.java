@@ -144,7 +144,6 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         assertThat(latestConsentOrderData.getDocumentUrl(), is("http://file2"));
     }
 
-
     @Test
     public void shouldReturnLatestAmendedConsentOrderWhenACaseIsAmendedByCaseWorker() throws Exception {
         setUpCaseDetails("amend-consent-order-by-caseworker.json");
@@ -186,7 +185,6 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         assertThat(latestConsentOrderData.getDocumentFilename(), is("doc2"));
         assertThat(latestConsentOrderData.getDocumentBinaryUrl(), is("http://doc2/binary"));
     }
-
 
     @Test
     public void given_case_checkIfUploadedConsentOrderIsNotEncrypted() {

@@ -22,7 +22,6 @@ public class UploadApprovedOrderConsentedAboutToSubmitHandler extends FinremCall
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService service;
 
-
     public UploadApprovedOrderConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                             ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
                                                             GenericDocumentService service) {

@@ -89,7 +89,6 @@ public class HearingBundleDocumentCategoriserTest {
         return hearingUploadBundleCollection;
     }
 
-
     private static HearingBundleDocumentCollection getHearingBundleDocumentCollection(String filename) {
         HearingBundleDocumentCollection hearingBundleDocumentCollection1 = HearingBundleDocumentCollection.builder()
             .value(HearingBundleDocument.builder()

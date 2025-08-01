@@ -140,7 +140,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             hasSize(0));
     }
 
-
     @Test
     public void givenAdministrativeDocsAreAdded_ThenDefaultsAreSetCorrectly() {
         setUpAdministrativeDocuments();
@@ -167,8 +166,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
                 is(YesOrNo.NO));
         });
     }
-
-
 
     @Test
     public void givenACaseWithoutIntervenersAndManagedDocIntoIntv2WhichIsNull_WhenHandle_thenThrowValidationError() {

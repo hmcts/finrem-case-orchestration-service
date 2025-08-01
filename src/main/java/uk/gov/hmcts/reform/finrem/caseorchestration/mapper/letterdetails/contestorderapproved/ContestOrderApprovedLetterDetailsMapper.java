@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 import java.time.LocalDate;
 import java.util.Optional;
 
-
 @Component
 public class ContestOrderApprovedLetterDetailsMapper extends AbstractLetterDetailsMapper {
 

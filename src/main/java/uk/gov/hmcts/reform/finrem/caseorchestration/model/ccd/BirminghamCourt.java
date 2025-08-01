@@ -28,7 +28,6 @@ public enum BirminghamCourt implements CourtList {
     CONSENTED_STAFFORD_COMBINED_COURT("FR_birminghamList_9"),
     CONSENTED_HEREFORD_COUNTY_COURT_AND_FAMILY_COURT("FR_birminghamList_10");
 
-
     private final String id;
 
     @JsonValue

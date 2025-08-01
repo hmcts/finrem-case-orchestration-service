@@ -6,7 +6,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
@@ -36,11 +39,14 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -143,9 +149,12 @@ class ManageHearingsMigrationTaskTest {
         verify(spyManageHearingsMigrationService, never()).revertManageHearingMigration(caseDataOne);
     }
 
-    @Test
-    void givenTaskEnabled_whenMultipleCasesAreRead_thenShouldPopulateCaseDetails()
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenTaskEnabled_whenMultipleCasesAreRead_thenShouldPopulateCaseDetails(boolean dryRun)
         throws JsonProcessingException {
+        ReflectionTestUtils.setField(underTest, "dryRun", dryRun);
+
         CaseDetails loadedCaseDetailsOne = mock(CaseDetails.class);
         CaseDetails updatedCaseDetailsOne = mock(CaseDetails.class);
         FinremCaseData caseDataOne = spy(FinremCaseData.builder().build());
@@ -177,6 +186,9 @@ class ManageHearingsMigrationTaskTest {
         verify(spyManageHearingsMigrationService).runManageHearingMigration(caseDataTwo, MH_MIGRATION_VERSION);
         verify(spyManageHearingsMigrationService, never()).revertManageHearingMigration(caseDataOne);
         verify(spyManageHearingsMigrationService, never()).revertManageHearingMigration(caseDataTwo);
+        verify(ccdService, times(dryRun ? 0 : 2)).submitEventForCaseWorker(any(StartEventResponse.class),
+            eq(AUTH_TOKEN), anyString(), anyString(), eq(EventType.AMEND_CASE_CRON.getCcdType()),
+            anyString(), anyString());
     }
 
     @Test
@@ -219,8 +231,8 @@ class ManageHearingsMigrationTaskTest {
     void givenTaskEnabledAndRollbackIsSetToTrue_whenMultipleCasesAreRead_thenShouldRevertMigratedCaseDetails()
         throws JsonProcessingException {
         ReflectionTestUtils.setField(underTest, "rollback", true);
-        final CaseDetails loadedCaseDetailsOne = CaseDetails.builder().data(Map.of("one", "loaded")).build();;
-        final CaseDetails updatedCaseDetailsOne = CaseDetails.builder().data(Map.of("one", "updated")).build();;
+        final CaseDetails loadedCaseDetailsOne = CaseDetails.builder().data(Map.of("one", "loaded")).build();
+        final CaseDetails updatedCaseDetailsOne = CaseDetails.builder().data(Map.of("one", "updated")).build();
         final FinremCaseData caseDataOne = spy(FinremCaseData.builder().build());
         final FinremCaseDetails finremCaseDetailsOne = FinremCaseDetailsBuilderFactory
             .from(CASE_ID, CONTESTED, caseDataOne, State.CASE_ADDED).build();

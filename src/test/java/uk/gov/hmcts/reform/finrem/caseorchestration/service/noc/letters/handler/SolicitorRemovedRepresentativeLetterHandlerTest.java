@@ -51,7 +51,6 @@ public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandl
 
     }
 
-
     public AbstractLetterHandler getLetterHandler() {
         return solicitorRemovedRepresentativeLetterHandler;
     }

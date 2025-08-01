@@ -57,6 +57,4 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
-
-
 }

@@ -54,7 +54,6 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         this.expressCaseService = expressCaseService;
     }
 
-
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)

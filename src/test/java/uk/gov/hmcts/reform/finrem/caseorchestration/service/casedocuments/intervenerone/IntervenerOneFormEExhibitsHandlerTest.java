@@ -24,7 +24,6 @@ public class IntervenerOneFormEExhibitsHandlerTest extends BaseManageDocumentsHa
     @InjectMocks
     IntervenerOneFormEExhibitsHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.APPLICANT_FORM_E,

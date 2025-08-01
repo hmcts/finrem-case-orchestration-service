@@ -21,5 +21,4 @@ public class PBAValidationResponseTest {
     public void shouldCreatePBAValidationResponseFromJson() {
         assertThat(response.isPbaNumberValid(), is(true));
     }
-
 }

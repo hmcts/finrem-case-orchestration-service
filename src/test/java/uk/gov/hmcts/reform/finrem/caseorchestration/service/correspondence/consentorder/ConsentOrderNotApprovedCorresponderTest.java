@@ -67,7 +67,6 @@ public class ConsentOrderNotApprovedCorresponderTest {
         verify(notificationService).sendConsentOrderNotApprovedEmailToRespondentSolicitor(caseDetails);
     }
 
-
     @Test
     public void shouldEmailRespondentSolicitorForContestedCase() {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
@@ -97,5 +96,4 @@ public class ConsentOrderNotApprovedCorresponderTest {
         verify(notificationService).sendContestOrderNotApprovedEmailIntervener(caseDetails,
             dataKeysWrapper);
     }
-
 }

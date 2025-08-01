@@ -85,7 +85,6 @@ public class RejectedConsentOrderSubmittedHandlerTest {
         verify(consentOrderNotApprovedCorresponder).sendCorrespondence(any());
     }
 
-
     protected CallbackRequest getConsentedCallbackRequestForConsentOrder() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);

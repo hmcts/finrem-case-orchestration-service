@@ -154,7 +154,6 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
             .generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
     }
 
-
     private List<DirectionOrderCollection> getHearingOrderCollection() {
         DirectionOrder directionOrder = DirectionOrder.builder()
             .uploadDraftDocument(caseDocument())

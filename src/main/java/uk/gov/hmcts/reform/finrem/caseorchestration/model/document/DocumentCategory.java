@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.document;
 
 import lombok.RequiredArgsConstructor;
 
-
 @RequiredArgsConstructor
 public enum DocumentCategory {
     APPLICATIONS("applications"),
@@ -277,7 +276,6 @@ public enum DocumentCategory {
     INTERVENER_DOCUMENTS_INTERVENER_4_CONSENT_ORDERS_OVERFLOW("intervenerDocumentsIntervener4ConsentOrdersOverflow"),
 
     UNCATEGORISED(null);
-
 
     private final String documentCategoryId;
 

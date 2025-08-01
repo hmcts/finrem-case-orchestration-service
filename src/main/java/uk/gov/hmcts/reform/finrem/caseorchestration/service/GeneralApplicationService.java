@@ -377,7 +377,6 @@ public class GeneralApplicationService {
             documentHelper.convertToCaseDocument(caseDocument), userAuthorisation, caseId);
     }
 
-
     public void updateCaseDataSubmit(Map<String, Object> caseData,
                                      CaseDetails caseDetailsBefore,
                                      String authorisationToken,
@@ -467,7 +466,6 @@ public class GeneralApplicationService {
 
         generalApplicationsCategoriser.uncategoriseDuplicatedCollections(caseData);
     }
-
 
     public void checkIfApplicationCompleted(FinremCaseDetails caseDetails, List<String> errors,
                                             List<GeneralApplicationsCollection> generalApplications,
@@ -595,5 +593,4 @@ public class GeneralApplicationService {
             }
         });
     }
-
 }

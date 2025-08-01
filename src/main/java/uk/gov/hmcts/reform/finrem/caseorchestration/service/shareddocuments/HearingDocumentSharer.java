@@ -34,7 +34,6 @@ public class HearingDocumentSharer extends DocumentSharer {
         return caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollShared();
     }
 
-
     @Override
     protected void setApplicantSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list) {
         caseData.getUploadCaseDocumentWrapper().setAppHearingBundlesCollectionShared(list);
@@ -84,7 +83,6 @@ public class HearingDocumentSharer extends DocumentSharer {
     protected List<UploadCaseDocumentCollection> getApplicantSharedCollection(FinremCaseData caseData) {
         return caseData.getUploadCaseDocumentWrapper().getAppHearingBundlesCollectionShared();
     }
-
 
     @Override
     protected List<UploadCaseDocumentCollection> getIntervenerFourCollection(UploadCaseDocumentWrapper documentWrapper) {

@@ -11,9 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -22,7 +24,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 @RequiredArgsConstructor
 @Service
@@ -56,12 +61,12 @@ public class ManageHearingsCorresponder {
             return;
         }
 
-        List<PartyOnCaseCollection> partiesOnCaseCollection = hearing.getPartiesOnCase();
+        List<PartyOnCaseCollectionItem> partiesOnCaseCollection = hearing.getPartiesOnCase();
         if (partiesOnCaseCollection == null || partiesOnCaseCollection.isEmpty()) {
             return;
         }
 
-        for (PartyOnCaseCollection partyCollection : partiesOnCaseCollection) {
+        for (PartyOnCaseCollectionItem partyCollection : partiesOnCaseCollection) {
             PartyOnCase party = partyCollection.getValue();
             if (party != null) {
                 sendHearingCorrespondenceByParty(
@@ -90,21 +95,17 @@ public class ManageHearingsCorresponder {
         CaseRole caseRole = CaseRole.forValue(role);
         switch (caseRole) {
             case CaseRole.APP_SOLICITOR ->
-                processCorrespondenceForApplicant(
-                    finremCaseDetails,
-                    hearing,
-                    userAuthorisation);
+                processCorrespondenceForApplicant(finremCaseDetails, hearing, userAuthorisation);
             case CaseRole.RESP_SOLICITOR ->
-                processCorrespondenceForRespondent(
-                    finremCaseDetails,
-                    hearing,
-                    userAuthorisation);
-            case CaseRole.INTVR_SOLICITOR_1, CaseRole.INTVR_SOLICITOR_2, CaseRole.INTVR_SOLICITOR_3, CaseRole.INTVR_SOLICITOR_4 ->
-                processCorrespondenceForIntervener(
-                    finremCaseDetails,
-                    hearing,
-                    userAuthorisation,
-                    caseRole);
+                processCorrespondenceForRespondent(finremCaseDetails, hearing, userAuthorisation);
+            case CaseRole.INTVR_SOLICITOR_1 ->
+                processCorrespondenceForIntervenerOne(finremCaseDetails, hearing, userAuthorisation, caseRole);
+            case CaseRole.INTVR_SOLICITOR_2 ->
+                processCorrespondenceForIntervenerTwo(finremCaseDetails, hearing, userAuthorisation, caseRole);
+            case CaseRole.INTVR_SOLICITOR_3 ->
+                processCorrespondenceForIntervenerThree(finremCaseDetails, hearing, userAuthorisation, caseRole);
+            case CaseRole.INTVR_SOLICITOR_4 ->
+                processCorrespondenceForIntervenerFour(finremCaseDetails, hearing, userAuthorisation, caseRole);
             default -> throw new IllegalStateException(
                 String.format(
                     "Unexpected value: %s for case reference %s",
@@ -158,27 +159,100 @@ public class ManageHearingsCorresponder {
     }
 
     /**
-     * Processes correspondence for Interveners. Uses CaseRole to determine which Intervener.
-     * Calls ProcessCorrespondenceForParty with the appropriate parameters.
-     * Lambdas are passed to ProcessCorrespondenceForParty, so the information is lazy-loaded if needed.
-     *
-     * @param finremCaseDetails the case details containing relevant information about the hearing and case participants
-     * @param hearing the hearing for which the notification is being sent
-     * @param userAuthorisation the user authorisation token for sending notifications
+     * Used by processCorrespondenceForIntervener.  Forwards Intervener One data to processCorrespondenceForIntervener.
      */
-    private void processCorrespondenceForIntervener(FinremCaseDetails finremCaseDetails, Hearing hearing,
-                                                     String userAuthorisation, CaseRole caseRole) {
+    private void processCorrespondenceForIntervenerOne(FinremCaseDetails finremCaseDetails, Hearing hearing,
+                                                       String auth, CaseRole role) {
+        IntervenerWrapper intervenerOne = finremCaseDetails.getData().getIntervenerOneWrapperIfPopulated();
+
+        if (isIntervenerDataIncomplete(intervenerOne)) {
+            log.warn("Intervener One has no addresses for case ID: {}. Hearing correspondence not processed.", finremCaseDetails.getId());
+            return;
+        }
+
+        processCorrespondenceForIntervener(finremCaseDetails, hearing, auth, role, intervenerOne);
+    }
+
+    /**
+     * Used by processCorrespondenceForIntervener. Forwards Intervener Two data to processCorrespondenceForIntervener.
+     */
+    private void processCorrespondenceForIntervenerTwo(FinremCaseDetails finremCaseDetails, Hearing hearing,
+                                                       String auth, CaseRole role) {
+        IntervenerWrapper intervenerTwo = finremCaseDetails.getData().getIntervenerTwoWrapperIfPopulated();
+
+        if (isIntervenerDataIncomplete(intervenerTwo)) {
+            log.warn("Intervener Two has no addresses for case ID: {}. Hearing correspondence not processed.", finremCaseDetails.getId());
+            return;
+        }
+
+        processCorrespondenceForIntervener(finremCaseDetails, hearing, auth, role, intervenerTwo);
+    }
+
+    /**
+     * Used by processCorrespondenceForIntervener. Forwards Intervener Three data to processCorrespondenceForIntervener.
+     */
+    private void processCorrespondenceForIntervenerThree(FinremCaseDetails finremCaseDetails, Hearing hearing,
+                                                         String auth, CaseRole role) {
+        IntervenerWrapper intervenerThree = finremCaseDetails.getData().getIntervenerThreeWrapperIfPopulated();
+
+        if (isIntervenerDataIncomplete(intervenerThree)) {
+            log.warn("Intervener Three has no addresses for case ID: {}. Hearing correspondence not processed.", finremCaseDetails.getId());
+            return;
+        }
+
+        processCorrespondenceForIntervener(finremCaseDetails, hearing, auth, role, intervenerThree);
+    }
+
+    /**
+     * Used by processCorrespondenceForIntervener. Forwards Intervener Four data to processCorrespondenceForIntervener.
+     */
+    private void processCorrespondenceForIntervenerFour(FinremCaseDetails finremCaseDetails, Hearing hearing,
+                                                        String auth, CaseRole role) {
+        IntervenerWrapper intervenerFour = finremCaseDetails.getData().getIntervenerFourWrapperIfPopulated();
+
+        if (isIntervenerDataIncomplete(intervenerFour)) {
+            log.warn("Intervener Four has no addresses for case ID: {}. Hearing correspondence not processed.", finremCaseDetails.getId());
+            return;
+        }
+
+        processCorrespondenceForIntervener(finremCaseDetails, hearing, auth, role, intervenerFour);
+    }
+
+    /**
+     * Returns true if we can't post to, or email the intervener.
+     * @param intervener the intervener wrapper containing the data for the intervener
+     * @return true if the intervener data is insufficient, false is an email address or postal address is available.
+     */
+    private boolean isIntervenerDataIncomplete(IntervenerWrapper intervener) {
+        return intervener == null
+            || !intervener.isIntervenerSolicitorPopulated()
+            && intervener.getIntervenerAddress() == null;
+    }
+
+    /**
+     * Used by the methods processCorrespondenceForIntervenerOne to processCorrespondenceForIntervenerFour
+     * encapsulates the common logic for sending hearing correspondence for each intervener.
+     */
+    private void processCorrespondenceForIntervener(FinremCaseDetails finremCaseDetails,
+                                                    Hearing hearing,
+                                                    String userAuthorisation,
+                                                    CaseRole caseRole,
+                                                    IntervenerWrapper intervener) {
+
+        BooleanSupplier shouldEmailSupplier = () -> YesOrNo.YES.equals(intervener.getIntervenerRepresented());
+        BooleanSupplier shouldPostSupplier = () -> !shouldEmailSupplier.getAsBoolean();
+
         processCorrespondenceForParty(
             finremCaseDetails,
             hearing,
             caseRole,
             userAuthorisation,
-            () -> hearingCorrespondenceHelper.shouldEmailToIntervener(finremCaseDetails, caseRole),
-            () -> hearingCorrespondenceHelper.shouldPostToIntervener(finremCaseDetails, caseRole),
+            shouldEmailSupplier,
+            shouldPostSupplier,
             () -> notificationRequestMapper.buildHearingNotificationForIntervenerSolicitor(
                 finremCaseDetails,
                 hearing,
-                caseRole)
+                intervener)
         );
     }
 
@@ -188,55 +262,92 @@ public class ManageHearingsCorresponder {
      * Determines whether to send email notifications post documents.
      * @param finremCaseDetails the case details containing relevant information about the hearing and case participants
      * @param hearing the hearing for which the notification is being sent
-     *
-     *                change javadoc
      */
     private void processCorrespondenceForParty(
         FinremCaseDetails finremCaseDetails,
-        // If FDA or FDR, follow up by emailing certain docs.  Future planned work will address this.
         Hearing hearing,
         CaseRole caseRole,
         String userAuthorisation,
-        Supplier<Boolean> shouldEmailPartySolicitor,
-        Supplier<Boolean> shouldPostToParty,
+        BooleanSupplier shouldEmailPartySolicitor,
+        BooleanSupplier shouldPostToParty,
         Supplier<NotificationRequest> notificationRequestSupplier) {
 
-        if (shouldEmailPartySolicitor.get()) {
+        if (shouldEmailPartySolicitor.getAsBoolean()) {
             notificationService.sendHearingNotificationToSolicitor(
                 notificationRequestSupplier.get(),
                 caseRole.toString()
             );
         }
 
-        if (shouldPostToParty.get()) {
-
-            if (hearingCorrespondenceHelper.shouldSendHearingNoticeOnly(finremCaseDetails, hearing)) {
-
-                CaseDocument hearingNotice = manageHearingsDocumentService
-                    .getHearingNotice(finremCaseDetails);
-
-                if (hearingNotice != null) {
-                    BulkPrintDocument hearingNoticeDocument =
-                        documentHelper.getBulkPrintDocumentFromCaseDocument(hearingNotice);
-
-                    List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-                    bulkPrintDocuments.add(hearingNoticeDocument);
-
-                    printDocuments(
-                        finremCaseDetails,
-                        userAuthorisation,
-                        bulkPrintDocuments,
-                        caseRole
-                    );
-
-                    log.info("Request sent to Bulk Print to post notice to the {} party. Request sent for case ID: {}",
-                        caseRole, finremCaseDetails.getId());
-                } else {
-                    log.warn("Hearing notice is null. No document sent for case ID: {}", finremCaseDetails.getId());
-                }
+        if (shouldPostToParty.getAsBoolean()) {
+            if (hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing)) {
+                postHearingNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
             }
-            // Else send hearing docs too.  Future planned work will address this.
+            if (hearingCorrespondenceHelper.shouldPostAllHearingDocuments(finremCaseDetails, hearing)) {
+                postAllHearingDocuments(finremCaseDetails, caseRole, userAuthorisation);
+            }
         }
+    }
+
+    /**
+     * Gets the hearing notice then sends it to the Bulk Print service.
+     * @param finremCaseDetails the case details.
+     * @param caseRole the case role of the party to whom the notice is being sent.
+     * @param userAuthorisation the user authorisation token.
+     */
+    private void postHearingNoticeOnly(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
+        CaseDocument hearingNotice = manageHearingsDocumentService
+            .getHearingNotice(finremCaseDetails);
+
+        if (hearingNotice == null) {
+            log.warn("Hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
+            return;
+        }
+
+        BulkPrintDocument hearingNoticeDocument =
+            documentHelper.getBulkPrintDocumentFromCaseDocument(hearingNotice);
+
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        bulkPrintDocuments.add(hearingNoticeDocument);
+
+        printDocuments(
+            finremCaseDetails,
+            userAuthorisation,
+            bulkPrintDocuments,
+            caseRole
+        );
+
+        log.info("Request sent to Bulk Print to post notice to the {} party. Request sent for case ID: {}",
+            caseRole, finremCaseDetails.getId());
+    }
+
+    /**
+     * Gets the correct hearing documents then sends them to the Bulk Print service.
+     * @param finremCaseDetails the case details.
+     * @param caseRole the case role of the party to whom the documents are being sent.
+     * @param userAuthorisation the user authorisation token.
+     */
+    private void postAllHearingDocuments(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
+        List<CaseDocument> hearingDocuments = manageHearingsDocumentService
+            .getHearingDocumentsToPost(finremCaseDetails);
+
+        if (isEmpty(hearingDocuments)) {
+            log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());
+            return;
+        }
+
+        List<BulkPrintDocument> bulkPrintDocuments =
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocuments);
+
+        printDocuments(
+            finremCaseDetails,
+            userAuthorisation,
+            bulkPrintDocuments,
+            caseRole
+        );
+
+        log.info("Request sent to Bulk Print to post hearing documents to the {} party. Request sent for case ID: {}",
+            caseRole, finremCaseDetails.getId());
     }
 
     /**
@@ -252,25 +363,29 @@ public class ManageHearingsCorresponder {
                                 List<BulkPrintDocument> bulkPrintDocuments, CaseRole caseRole) {
         switch (caseRole) {
             case CaseRole.APP_SOLICITOR ->
-                bulkPrintService.printApplicantDocuments(
-                    finremCaseDetails,
-                    userAuthorisation,
-                    bulkPrintDocuments);
+                bulkPrintService.printApplicantDocuments(finremCaseDetails, userAuthorisation, bulkPrintDocuments);
             case CaseRole.RESP_SOLICITOR ->
-                bulkPrintService.printRespondentDocuments(
-                    finremCaseDetails,
-                    userAuthorisation,
-                    bulkPrintDocuments);
-            case CaseRole.INTVR_SOLICITOR_1 ->
-                // Likely to need the wrapper to be populated correctly first.
-                bulkPrintService.printIntervenerDocuments(
-                    finremCaseDetails.getData().getIntervenerOneWrapperIfPopulated(),
-                    finremCaseDetails,
-                    userAuthorisation,
-                    bulkPrintDocuments);
-            case CaseRole.INTVR_SOLICITOR_2 -> log.info("print for: INTVR_SOLICITOR_2, work to follow");
-            case CaseRole.INTVR_SOLICITOR_3 -> log.info("print for: INTVR_SOLICITOR_3, work to follow");
-            case CaseRole.INTVR_SOLICITOR_4 -> log.info("print for: INTVR_SOLICITOR_4, work to follow");
+                bulkPrintService.printRespondentDocuments(finremCaseDetails, userAuthorisation, bulkPrintDocuments);
+            case CaseRole.INTVR_SOLICITOR_1 -> {
+                IntervenerWrapper intervenerOne =
+                    finremCaseDetails.getData().getIntervenerOneWrapperIfPopulated();
+                bulkPrintService.printIntervenerDocuments(intervenerOne, finremCaseDetails, userAuthorisation, bulkPrintDocuments);
+            }
+            case CaseRole.INTVR_SOLICITOR_2 -> {
+                IntervenerWrapper intervenerTwo =
+                    finremCaseDetails.getData().getIntervenerTwoWrapperIfPopulated();
+                bulkPrintService.printIntervenerDocuments(intervenerTwo, finremCaseDetails, userAuthorisation, bulkPrintDocuments);
+            }
+            case CaseRole.INTVR_SOLICITOR_3 -> {
+                IntervenerWrapper intervenerThree =
+                    finremCaseDetails.getData().getIntervenerThreeWrapperIfPopulated();
+                bulkPrintService.printIntervenerDocuments(intervenerThree, finremCaseDetails, userAuthorisation, bulkPrintDocuments);
+            }
+            case CaseRole.INTVR_SOLICITOR_4 -> {
+                IntervenerWrapper intervenerFour =
+                    finremCaseDetails.getData().getIntervenerFourWrapperIfPopulated();
+                bulkPrintService.printIntervenerDocuments(intervenerFour, finremCaseDetails, userAuthorisation, bulkPrintDocuments);
+            }
             default -> throw new IllegalStateException(
                 String.format(
                     "Unexpected value: %s for case reference %s",

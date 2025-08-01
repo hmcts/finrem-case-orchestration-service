@@ -45,7 +45,6 @@ public class HearingDocumentService {
     private final StaticHearingDocumentService staticHearingDocumentService;
     private final ExpressCaseService expressCaseService;
 
-
     public Map<String, CaseDocument> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         caseDetailsCopy = addHearingCourtFields(caseDetailsCopy);

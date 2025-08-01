@@ -31,6 +31,8 @@ public abstract class BaseTask implements Runnable {
     private int bulkPrintBatchSize;
     @Value("${cron.wait-time-mins:10}")
     private int bulkPrintWaitTime;
+    @Value("${cron.dryRun:false}")
+    private boolean dryRun;
 
     protected BaseTask(CcdService ccdService, SystemUserService systemUserService,
                        FinremCaseDetailsMapper finremCaseDetailsMapper) {
@@ -81,13 +83,17 @@ public abstract class BaseTask implements Runnable {
                         CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails,
                             classesToOverrideJsonInclude());
                         startEventResponse.getCaseDetails().setData(updatedCaseDetails.getData());
-                        ccdService.submitEventForCaseWorker(startEventResponse, systemUserToken,
-                            caseId,
-                            getCaseType().getCcdType(),
-                            EventType.AMEND_CASE_CRON.getCcdType(),
-                            getSummary(),
-                            description);
-                        log.info("Updated {} for Case ID: {}", getTaskName(), caseId);
+                        if (!dryRun) {
+                            ccdService.submitEventForCaseWorker(startEventResponse, systemUserToken,
+                                caseId,
+                                getCaseType().getCcdType(),
+                                EventType.AMEND_CASE_CRON.getCcdType(),
+                                getSummary(),
+                                description);
+                            log.info("Updated {} for Case ID: {}", getTaskName(), caseId);
+                        } else {
+                            log.info("[DRY RUN] Updated {} for Case ID: {}", getTaskName(), caseId);
+                        }
                     }
                 } catch (InterruptedException | RuntimeException | JsonProcessingException e) {
                     log.error("Cron task {}: Error processing case {}", getTaskName(), caseId, e);

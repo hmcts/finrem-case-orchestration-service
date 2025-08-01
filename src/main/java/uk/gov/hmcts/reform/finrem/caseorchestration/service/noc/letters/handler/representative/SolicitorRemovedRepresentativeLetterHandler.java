@@ -26,6 +26,4 @@ public class SolicitorRemovedRepresentativeLetterHandler extends RepresentativeL
             bulkPrintService, caseDataService, NoticeType.REMOVE, checkApplicantSolicitorIsDigitalService,
             checkRespondentSolicitorIsDigitalService);
     }
-
-
 }

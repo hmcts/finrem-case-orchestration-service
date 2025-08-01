@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 
 import java.time.LocalDate;
@@ -129,7 +129,7 @@ public class HearingTabDataMapper {
     private String getConfidentialParties(Hearing hearing) {
         return hearing.getPartiesOnCase() != null
             ? hearing.getPartiesOnCase().stream()
-            .map(PartyOnCaseCollection::getValue).map(PartyOnCase::getLabel)
+            .map(PartyOnCaseCollectionItem::getValue).map(PartyOnCase::getLabel)
             .collect(Collectors.joining(", "))
             : DEFAULT_CONFIDENTIAL_PARTIES;
     }

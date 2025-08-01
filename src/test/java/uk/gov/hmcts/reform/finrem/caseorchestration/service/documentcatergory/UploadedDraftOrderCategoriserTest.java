@@ -104,7 +104,6 @@ class UploadedDraftOrderCategoriserTest {
         return caseData;
     }
 
-
     private FinremCaseData createCaseDataForDraftDirectionOrderCollection(boolean withAdditionalDocuments) {
         FinremCaseData caseData = new FinremCaseData();
         DraftDirectionWrapper wrapper = new DraftDirectionWrapper();

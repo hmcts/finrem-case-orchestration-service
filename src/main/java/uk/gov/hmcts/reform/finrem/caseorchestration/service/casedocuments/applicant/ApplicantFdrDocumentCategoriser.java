@@ -17,12 +17,10 @@ public class ApplicantFdrDocumentCategoriser extends PartyFdrDocumentCategoriser
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_DRAFT_ORDER;
     }
 
-
     @Override
     protected DocumentCategory getOtherDocumentCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER;
     }
-
 
     @Override
     protected DocumentCategory getWithoutPrejudiceDocumentCategory() {
@@ -38,5 +36,4 @@ public class ApplicantFdrDocumentCategoriser extends PartyFdrDocumentCategoriser
     protected DocumentCategory getPointsOfClaimOrDefenceDocumentCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POINTS_OF_CLAIM_OR_DEFENCE;
     }
-
 }

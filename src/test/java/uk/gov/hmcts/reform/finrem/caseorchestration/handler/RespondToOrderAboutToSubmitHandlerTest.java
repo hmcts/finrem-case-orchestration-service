@@ -51,7 +51,6 @@ class RespondToOrderAboutToSubmitHandlerTest {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CLOSE));
     }
 
-
     @Test
     void givenCase_whenRequestToUpdateLatestConsentOrder_thenHandlerCanHandle() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
@@ -62,7 +61,6 @@ class RespondToOrderAboutToSubmitHandlerTest {
         Assertions.assertNotNull(response.getData().getLatestConsentOrder());
         verify(consentOrderService).getLatestConsentOrderData(any(FinremCallbackRequest.class));
     }
-
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest

@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 
-
 @ExtendWith(MockitoExtension.class)
 class RejectedConsentOrderMidHandlerTest {
 
@@ -33,7 +32,6 @@ class RejectedConsentOrderMidHandlerTest {
         assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.REJECT_ORDER));
     }
 
-
     @Test
     void given_case_when_wrong_callback_then_case_can_not_handle() {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.REJECT_ORDER));
@@ -48,7 +46,6 @@ class RejectedConsentOrderMidHandlerTest {
     void given_case_when_all_wrong_then_case_can_not_handle() {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CLOSE));
     }
-
 
     @Test
     void given_case_when_order_not_approved_then_reject_order() {

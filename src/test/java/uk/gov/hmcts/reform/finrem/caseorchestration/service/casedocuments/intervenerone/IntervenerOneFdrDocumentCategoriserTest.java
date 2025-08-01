@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerone;
 
-
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
@@ -10,8 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class IntervenerOneFdrDocumentCategoriserTest {
 
     private final IntervenerOneFdrDocumentCategoriser categoriser = new IntervenerOneFdrDocumentCategoriser();
-
-
 
     @Test
     public void testGetDocumentCategory() {

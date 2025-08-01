@@ -51,8 +51,6 @@ public abstract class DocumentUploadService<T extends CaseDocumentTabData> {
         allDocuments.stream().forEach(document -> addDateToNewDocuments(documentsBeforeEvent, document));
     }
 
-
-
     private void addDateToNewDocuments(List<T> documentsBeforeEvent, T document) {
         if (isNewDocument.test(document.getElementId(), documentsBeforeEvent)) {
             document.setUploadDateTime(LocalDateTime.now());
