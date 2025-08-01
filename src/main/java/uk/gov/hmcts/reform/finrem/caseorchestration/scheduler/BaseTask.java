@@ -31,7 +31,7 @@ public abstract class BaseTask implements Runnable {
     private int bulkPrintBatchSize;
     @Value("${cron.wait-time-mins:10}")
     private int bulkPrintWaitTime;
-    @Value("${cron.dryRun:true}")
+    @Value("${cron.dryRun:false}")
     private boolean dryRun;
 
     protected BaseTask(CcdService ccdService, SystemUserService systemUserService,
