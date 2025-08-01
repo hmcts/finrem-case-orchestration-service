@@ -49,7 +49,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     public GeneralApplicationDirectionsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                             GeneralApplicationHelper helper,
                                                             GeneralApplicationDirectionsService service,
-                                                            GeneralApplicationService gaService, ManageHearingActionService manageHearingActionService,
+                                                            GeneralApplicationService gaService,
+                                                            ManageHearingActionService manageHearingActionService,
                                                             GeneralApplicationsCategoriser generalApplicationsCategoriser) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
@@ -189,8 +190,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
         //Check for new event to invoke the correct service method
-        CaseDocument caseDocument = Boolean.TRUE.equals(newEvent) ?
-            service.generateGeneralApplicationDirectionsDocument(userAuthorisation, caseDetails)
+        CaseDocument caseDocument = Boolean.TRUE.equals(newEvent)
+            ? service.generateGeneralApplicationDirectionsDocument(userAuthorisation, caseDetails)
             : service.getBulkPrintDocument(caseDetails, userAuthorisation);
 
         items.setGeneralApplicationDirectionsDocument(caseDocument);
