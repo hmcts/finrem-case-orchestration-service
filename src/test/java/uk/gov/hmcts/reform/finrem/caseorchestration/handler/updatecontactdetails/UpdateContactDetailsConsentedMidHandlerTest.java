@@ -93,7 +93,6 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         assertEquals(0, handle.getErrors().size());
     }
 
-
     @Test
     void givenConsentedCase_WhenEmptyApplicantPostCode_thenHandlerWillShowMessage() {
 
@@ -214,7 +213,6 @@ class UpdateContactDetailsConsentedMidHandlerTest {
 
         assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant solicitor address.");
     }
-
 
     @Test
     void givenConsentedCase_WhenNullApplicantSolicitorPostCode_thenHandlerWillShowMessage() {

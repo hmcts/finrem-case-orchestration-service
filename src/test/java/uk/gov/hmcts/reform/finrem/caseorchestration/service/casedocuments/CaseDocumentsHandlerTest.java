@@ -22,7 +22,6 @@ public class CaseDocumentsHandlerTest extends BaseManageDocumentsHandlerTest {
     @InjectMocks
     CaseDocumentsHandler caseDocumentsHandler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT,

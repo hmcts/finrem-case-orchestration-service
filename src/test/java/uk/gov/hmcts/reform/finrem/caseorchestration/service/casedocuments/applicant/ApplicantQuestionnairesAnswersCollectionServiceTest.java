@@ -24,7 +24,6 @@ public class ApplicantQuestionnairesAnswersCollectionServiceTest extends BaseMan
     @InjectMocks
     ApplicantQuestionnairesAnswersHandler collectionService;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.QUESTIONNAIRE,

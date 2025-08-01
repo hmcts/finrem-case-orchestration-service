@@ -79,7 +79,6 @@ public class IntervenerDocumentServiceTest {
     @Captor
     ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor;
 
-
     @Before
     public void setUp() {
         intervenerDocumentService = new IntervenerDocumentService(genericDocumentService,

@@ -47,7 +47,6 @@ class SendConsentOrderInContestedAboutToStartHandlerTest {
             is(false));
     }
 
-
     @Test
     void handle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();

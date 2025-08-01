@@ -24,7 +24,6 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
     @InjectMocks
     RespondentOtherDocumentsHandler collectionService;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,

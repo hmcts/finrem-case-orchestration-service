@@ -79,7 +79,7 @@ class ContestedOrderApprovedLetterServiceTest {
         when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn("Contested Applicant Name");
         when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn("Contested Respondent Name");
-        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class ), any(String.class), any(String.class)))
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), any(String.class), any(String.class)))
             .thenReturn(expectedCaseDocument);
         when(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails))
             .thenReturn("FL-FRM-LET-ENG-HC-00666.docx");
@@ -87,8 +87,8 @@ class ContestedOrderApprovedLetterServiceTest {
             .thenReturn("contestedOrderApprovedCoverLetter.pdf");
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().build();
-        CaseDocument document = contestedOrderApprovedLetterService.generateAndStoreApprovedOrderCoverLetter(finremCaseDetails, "District Judge Peter Chapman",
-            AUTH_TOKEN, FIXED_DATE);
+        CaseDocument document = contestedOrderApprovedLetterService.generateAndStoreApprovedOrderCoverLetter(
+            finremCaseDetails, "District Judge Peter Chapman", AUTH_TOKEN, FIXED_DATE);
 
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
             eq("FL-FRM-LET-ENG-HC-00666.docx"),
@@ -108,7 +108,7 @@ class ContestedOrderApprovedLetterServiceTest {
         when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
         when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn("Contested Applicant Name");
         when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn("Contested Respondent Name");
-        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class ), any(String.class), any(String.class)))
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), any(String.class), any(String.class)))
             .thenReturn(expectedCaseDocument);
         when(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails))
             .thenReturn("FL-FRM-LET-ENG-HC-00666.docx");

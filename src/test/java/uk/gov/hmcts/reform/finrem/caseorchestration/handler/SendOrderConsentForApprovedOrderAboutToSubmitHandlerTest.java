@@ -18,7 +18,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 
-
 @ExtendWith(MockitoExtension.class)
 class SendOrderConsentForApprovedOrderAboutToSubmitHandlerTest {
 
@@ -28,7 +27,6 @@ class SendOrderConsentForApprovedOrderAboutToSubmitHandlerTest {
 
     @Mock
     private ConsentOrderPrintService service;
-
 
     @Test
     void givenCase_whenEventIsAmendApplication_thenCanHandle() {
@@ -53,7 +51,6 @@ class SendOrderConsentForApprovedOrderAboutToSubmitHandlerTest {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE));
     }
 
-
     @Test
     void handle() {
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -63,7 +60,6 @@ class SendOrderConsentForApprovedOrderAboutToSubmitHandlerTest {
             any(EventType.class),
             anyString());
     }
-
 
     private FinremCallbackRequest callbackRequest() {
         return FinremCallbackRequest

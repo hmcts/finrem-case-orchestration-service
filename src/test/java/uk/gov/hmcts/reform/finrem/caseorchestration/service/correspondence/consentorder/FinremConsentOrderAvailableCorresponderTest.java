@@ -40,5 +40,4 @@ public class FinremConsentOrderAvailableCorresponderTest {
         consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
     }
-
 }

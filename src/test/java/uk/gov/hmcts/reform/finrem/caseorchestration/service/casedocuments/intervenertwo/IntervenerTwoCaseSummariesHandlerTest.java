@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenertwo;
 
-
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -23,7 +22,6 @@ import static org.hamcrest.Matchers.is;
 public class IntervenerTwoCaseSummariesHandlerTest extends CaseSummariesHandlerTest {
     @InjectMocks
     IntervenerTwoCaseSummariesHandler handler;
-
 
     @Override
     public void setUpscreenUploadDocumentList() {

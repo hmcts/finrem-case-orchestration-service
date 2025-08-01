@@ -71,7 +71,6 @@ public class IntervenerAddresseeGeneratorTest {
         assertEquals("intervener2 postcode", addresseeDetails.getAddressToSendTo().get("PostCode"));
     }
 
-
     @Test
     public void shouldGenerateAddresseeFromCaseDetailsIntervener3() {
         AddresseeDetails addresseeDetails = intervenerThreeAddresseeGenerator.generate(
@@ -97,7 +96,6 @@ public class IntervenerAddresseeGeneratorTest {
         assertEquals("intervener4 address line 2", addresseeDetails.getAddressToSendTo().get("AddressLine2"));
         assertEquals("intervener4 postcode", addresseeDetails.getAddressToSendTo().get("PostCode"));
     }
-
 
     @Test
     public void shouldGenerateAddresseeFromFinremCaseDetailsIntervener1() {
@@ -163,7 +161,6 @@ public class IntervenerAddresseeGeneratorTest {
         caseData.put(intervenerField, objectMapper.convertValue(intervenerWrapper, Map.class));
         return CaseDetails.builder().id(1234L).data(caseData).build();
     }
-
 
     private FinremCaseDetails buildFinremCaseDetails() {
         return FinremCaseDetails.builder().id(1234L).data(FinremCaseData.builder().build()).build();

@@ -21,7 +21,6 @@ public class RespondentHearingBundleCollectionServiceTest extends HearingBundleH
     @InjectMocks
     RespondentHearingBundleHandler collectionService;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
