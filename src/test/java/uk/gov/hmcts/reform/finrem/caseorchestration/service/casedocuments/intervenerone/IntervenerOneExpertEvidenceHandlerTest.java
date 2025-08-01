@@ -22,7 +22,6 @@ public class IntervenerOneExpertEvidenceHandlerTest extends ExpertEvidenceHandle
     @InjectMocks
     IntervenerOneExpertEvidenceHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.VALUATION_REPORT,

@@ -24,9 +24,6 @@ public class IntervenerOneCorrespondenceHandlerTest extends CorrespondenceHandle
     @InjectMocks
     IntervenerOneCorrespondenceHandler handler;
 
-   
-
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OFFERS,

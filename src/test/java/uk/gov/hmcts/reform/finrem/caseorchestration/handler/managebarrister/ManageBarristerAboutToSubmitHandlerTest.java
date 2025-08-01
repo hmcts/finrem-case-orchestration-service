@@ -30,7 +30,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class ManageBarristerAboutToSubmitHandlerTest {
 
@@ -107,7 +106,6 @@ public class ManageBarristerAboutToSubmitHandlerTest {
         verify(manageBarristerService).updateBarristerAccess(callbackRequest.getCaseDetails(), barristers, barristers, AUTH_TOKEN);
         assertTrue(response.getData().containsKey(REPRESENTATION_UPDATE_HISTORY));
     }
-
 
     private List<BarristerData> getBarristers() {
         return List.of(

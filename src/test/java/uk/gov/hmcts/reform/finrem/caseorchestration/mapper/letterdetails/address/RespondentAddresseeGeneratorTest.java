@@ -160,7 +160,6 @@ public class RespondentAddresseeGeneratorTest {
         assertEquals("SE1", addresseeDetails.getAddressToSendTo().get("PostCode"));
     }
 
-
     private static Map<String, Object> buildAddress(String addressLine1) {
         Map<String, Object> solicitorAddress = new HashMap<>();
         solicitorAddress.put("AddressLine1", addressLine1);

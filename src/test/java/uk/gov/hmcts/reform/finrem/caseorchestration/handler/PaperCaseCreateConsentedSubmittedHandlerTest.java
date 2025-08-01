@@ -66,5 +66,4 @@ public class PaperCaseCreateConsentedSubmittedHandlerTest {
             throw new RuntimeException(e);
         }
     }
-
 }

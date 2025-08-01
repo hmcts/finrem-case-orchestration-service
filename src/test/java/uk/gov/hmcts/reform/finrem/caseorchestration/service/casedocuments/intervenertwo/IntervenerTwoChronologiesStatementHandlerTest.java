@@ -23,9 +23,6 @@ public class IntervenerTwoChronologiesStatementHandlerTest extends BaseManageDoc
     @InjectMocks
     IntervenerTwoChronologiesStatementHandler handler;
 
-   
-
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.STATEMENT_OF_ISSUES,

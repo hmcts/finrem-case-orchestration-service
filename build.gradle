@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.67'
     id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1821'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1823'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -387,7 +387,7 @@ dependencyManagement {
             entry 'the_bouncy_castle_crypto_package_for_java'
         }
         //CVE-2024-25710
-        dependencySet(group: 'org.apache.commons', version: '1.27.1') {
+        dependencySet(group: 'org.apache.commons', version: '1.28.0') {
             entry 'commons-compress'
         }
     }
@@ -526,9 +526,9 @@ tasks.withType(Zip).configureEach {
 }
 
 tasks.named('checkstyleMain') {
-    maxWarnings = 174
+    maxWarnings = 4
 }
 
 tasks.named('checkstyleTest') {
-    maxWarnings = 477
+    maxWarnings = 3
 }

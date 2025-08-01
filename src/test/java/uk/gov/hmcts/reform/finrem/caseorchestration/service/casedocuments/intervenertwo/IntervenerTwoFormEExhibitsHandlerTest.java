@@ -23,12 +23,10 @@ public class IntervenerTwoFormEExhibitsHandlerTest extends BaseManageDocumentsHa
     @InjectMocks
     IntervenerTwoFormEExhibitsHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.APPLICANT_FORM_E,
             CaseDocumentParty.INTERVENER_TWO, YesOrNo.NO, YesOrNo.NO, null));
-
     }
 
     @Override

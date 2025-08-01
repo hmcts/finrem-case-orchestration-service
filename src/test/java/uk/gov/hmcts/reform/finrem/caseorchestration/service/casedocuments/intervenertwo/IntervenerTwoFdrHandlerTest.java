@@ -39,7 +39,6 @@ public class IntervenerTwoFdrHandlerTest extends BaseManageDocumentsHandlerTest 
         when(categoriser.getDocumentCategory(CaseDocumentType.TRIAL_BUNDLE)).thenReturn(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_2);
     }
 
-
     @Test
     public void givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionType() {
         screenUploadDocumentList = new ArrayList<>();

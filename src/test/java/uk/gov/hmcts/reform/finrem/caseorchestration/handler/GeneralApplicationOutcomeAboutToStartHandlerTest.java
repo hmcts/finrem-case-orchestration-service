@@ -172,5 +172,4 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
             .listItems(dynamicListElements)
             .build();
     }
-
 }

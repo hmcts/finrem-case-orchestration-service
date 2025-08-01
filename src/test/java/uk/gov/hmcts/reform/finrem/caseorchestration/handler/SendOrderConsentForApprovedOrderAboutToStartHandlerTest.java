@@ -50,7 +50,6 @@ class SendOrderConsentForApprovedOrderAboutToStartHandlerTest {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE));
     }
 
-
     @Test
     void handleError() {
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -69,7 +68,6 @@ class SendOrderConsentForApprovedOrderAboutToStartHandlerTest {
         data.setLatestConsentOrder(caseDocument());
         assertFalse(handler.handle(callbackRequest, AUTH_TOKEN).hasErrors());
     }
-
 
     private FinremCallbackRequest callbackRequest() {
         return FinremCallbackRequest
