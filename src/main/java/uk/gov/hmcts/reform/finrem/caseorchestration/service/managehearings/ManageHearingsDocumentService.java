@@ -205,7 +205,7 @@ public class ManageHearingsDocumentService {
      * @param wrapper the {@link ManageHearingsWrapper} containing hearing data
      * @return a list of {@link CaseDocument} representing the additional hearing documents
      */
-    public List<CaseDocument> getAddHearingDocsFromWorkingHearing(ManageHearingsWrapper wrapper) {
+    public List<CaseDocument> getAdditionalHearingDocsFromWorkingHearing(ManageHearingsWrapper wrapper) {
         return Optional.of(wrapper)
             .map(w -> w.getManageHearingsCollectionItemById(w.getWorkingHearingId()))
             .map(ManageHearingsCollectionItem::getValue)

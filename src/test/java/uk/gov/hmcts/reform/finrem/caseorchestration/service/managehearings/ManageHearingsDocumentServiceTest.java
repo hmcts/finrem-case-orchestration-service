@@ -464,7 +464,7 @@ class ManageHearingsDocumentServiceTest {
 
         // Act
         List<CaseDocument> result =
-            manageHearingsDocumentService.getAddHearingDocsFromWorkingHearing(wrapper);
+            manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(wrapper);
 
         // Assert
         assertEquals(1, result.size());

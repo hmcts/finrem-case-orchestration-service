@@ -289,7 +289,7 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
-        when(manageHearingsDocumentService.getAddHearingDocsFromWorkingHearing(
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
         // act
@@ -322,7 +322,7 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
-        when(manageHearingsDocumentService.getAddHearingDocsFromWorkingHearing(
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
         // act
@@ -362,7 +362,7 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
-        when(manageHearingsDocumentService.getAddHearingDocsFromWorkingHearing(
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
         // act
@@ -402,7 +402,7 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
-        when(manageHearingsDocumentService.getAddHearingDocsFromWorkingHearing(
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
 
@@ -440,7 +440,7 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
         when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
-        when(manageHearingsDocumentService.getAddHearingDocsFromWorkingHearing(
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
         // act
@@ -484,7 +484,7 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
         when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
-        when(manageHearingsDocumentService.getAddHearingDocsFromWorkingHearing(
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
         // act

@@ -307,7 +307,7 @@ public class ManageHearingsCorresponder {
         List<CaseDocument> hearingDocuments = new ArrayList<>(List.of(hearingNotice));
 
         hearingDocuments.addAll(manageHearingsDocumentService
-            .getAddHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
+            .getAdditionalHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
 
         List<BulkPrintDocument> bulkPrintDocuments =
             documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocuments);
@@ -334,7 +334,7 @@ public class ManageHearingsCorresponder {
             manageHearingsDocumentService.getHearingDocumentsToPost(finremCaseDetails)
         );
 
-        hearingDocuments.addAll(manageHearingsDocumentService.getAddHearingDocsFromWorkingHearing(
+        hearingDocuments.addAll(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             finremCaseDetails.getData().getManageHearingsWrapper()));
 
         if (isEmpty(hearingDocuments)) {
