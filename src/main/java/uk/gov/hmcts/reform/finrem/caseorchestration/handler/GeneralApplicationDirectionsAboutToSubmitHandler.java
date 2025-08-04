@@ -42,8 +42,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     private final GeneralApplicationDirectionsService service;
     private final GeneralApplicationService gaService;
     private final ManageHearingActionService manageHearingActionService;
-
-
     private final GeneralApplicationsCategoriser generalApplicationsCategoriser;
 
     public GeneralApplicationDirectionsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
