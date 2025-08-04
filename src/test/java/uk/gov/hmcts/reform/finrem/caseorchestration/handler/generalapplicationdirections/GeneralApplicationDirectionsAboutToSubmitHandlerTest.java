@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationdirections;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +12,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.BaseHandlerTestSetup;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationdirection.GeneralApplicationDirectionsAboutToStartHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationdirection.GeneralApplicationDirectionsAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -389,7 +393,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
             .setGeneralApplicationOutcome(GeneralApplicationOutcome.APPROVED);
 
-
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
         DynamicListElement listElement = DynamicListElement.builder()
             .label("General Application 1 - Received from - applicant - Created Date 2023-06-13 -Hearing Required - No")
@@ -431,7 +434,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
             = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
         assertEquals(1, list.size());
         verify(service).generateGeneralApplicationDirectionsDocument(any(), any());
-
     }
 
     public DynamicRadioList buildDynamicIntervenerList() {
