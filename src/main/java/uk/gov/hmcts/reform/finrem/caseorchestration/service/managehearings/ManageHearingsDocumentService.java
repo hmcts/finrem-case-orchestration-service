@@ -62,14 +62,14 @@ public class ManageHearingsDocumentService {
     public CaseDocument generateHearingNotice(FinremCaseDetails finremCaseDetails,
                                               String authorisationToken) {
 
-        Map<String, Object>  documentDataMap = hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
+        Map<String, Object> documentDataMap = hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
-                authorisationToken,
-                documentDataMap,
-                documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails),
-                documentConfiguration.getManageHearingNoticeFileName(),
-                finremCaseDetails.getId().toString()
+            authorisationToken,
+            documentDataMap,
+            documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails),
+            documentConfiguration.getManageHearingNoticeFileName(),
+            finremCaseDetails.getId().toString()
         );
     }
 
@@ -83,14 +83,14 @@ public class ManageHearingsDocumentService {
     public CaseDocument generateFormC(FinremCaseDetails finremCaseDetails,
                                       String authorisationToken) {
 
-        Map<String, Object>  documentDataMap = manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
+        Map<String, Object> documentDataMap = manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
-                authorisationToken,
-                documentDataMap,
-                determineFormCTemplate(finremCaseDetails).getRight(),
-                documentConfiguration.getFormCFileName(),
-                finremCaseDetails.getId().toString()
+            authorisationToken,
+            documentDataMap,
+            determineFormCTemplate(finremCaseDetails).getRight(),
+            documentConfiguration.getFormCFileName(),
+            finremCaseDetails.getId().toString()
         );
     }
 
@@ -104,14 +104,14 @@ public class ManageHearingsDocumentService {
     public CaseDocument generateFormG(FinremCaseDetails finremCaseDetails,
                                       String authorisationToken) {
 
-        Map<String, Object>  documentDataMap = formGLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
+        Map<String, Object> documentDataMap = formGLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
-                authorisationToken,
-                documentDataMap,
-                documentConfiguration.getFormGTemplate(finremCaseDetails),
-                documentConfiguration.getFormGFileName(),
-                finremCaseDetails.getId().toString()
+            authorisationToken,
+            documentDataMap,
+            documentConfiguration.getFormGTemplate(finremCaseDetails),
+            documentConfiguration.getFormGFileName(),
+            finremCaseDetails.getId().toString()
         );
     }
 
@@ -125,7 +125,7 @@ public class ManageHearingsDocumentService {
     public Map<String, CaseDocument> generatePfdNcdrDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
         String caseId = caseDetails.getId().toString();
 
-        Map<String, CaseDocument>  documentMap = new HashMap<>();
+        Map<String, CaseDocument> documentMap = new HashMap<>();
 
         documentMap.put(
             PFD_NCDR_COMPLIANCE_LETTER,
@@ -134,8 +134,8 @@ public class ManageHearingsDocumentService {
 
         if (staticHearingDocumentService.isPdfNcdrCoverSheetRequired(caseDetails)) {
             documentMap.put(
-                    PFD_NCDR_COVER_LETTER,
-                    staticHearingDocumentService.uploadPfdNcdrCoverLetter(caseId, authorisationToken)
+                PFD_NCDR_COVER_LETTER,
+                staticHearingDocumentService.uploadPfdNcdrCoverLetter(caseId, authorisationToken)
             );
         }
 
@@ -145,14 +145,14 @@ public class ManageHearingsDocumentService {
     /**
      * Generates an Out-of-Court Resolution document.
      *
-     * @param caseDetails  the case details containing case data
-     * @param authToken    the authorization token for document generation
+     * @param caseDetails the case details containing case data
+     * @param authToken   the authorization token for document generation
      * @return the generated Out Of Court Resolution document as a {@link CaseDocument}
      */
     public CaseDocument generateOutOfCourtResolutionDoc(FinremCaseDetails caseDetails, String authToken) {
         CaseDocument outOfCourtDoc = staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
         outOfCourtDoc.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
-        return  outOfCourtDoc;
+        return outOfCourtDoc;
     }
 
     /**
@@ -193,8 +193,20 @@ public class ManageHearingsDocumentService {
         return getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.HEARING_NOTICE);
     }
 
+    /**
+     * Retrieves the additional hearing documents from the working hearing in the provided wrapper.
+     *
+     * <p>
+     * This method navigates through the `ManageHearingsWrapper` to locate the working hearing
+     * using its ID, extracts the additional hearing documents, and returns them as a list of
+     * {@link CaseDocument} objects. If the wrapper or any intermediate data is null, an empty list is returned.
+     * </p>
+     *
+     * @param wrapper the {@link ManageHearingsWrapper} containing hearing data
+     * @return a list of {@link CaseDocument} representing the additional hearing documents
+     */
     public List<CaseDocument> getAddHearingDocsFromWorkingHearing(ManageHearingsWrapper wrapper) {
-        return Optional.ofNullable(wrapper)
+        return Optional.of(wrapper)
             .map(w -> w.getManageHearingsCollectionItemById(w.getWorkingHearingId()))
             .map(ManageHearingsCollectionItem::getValue)
             .map(Hearing::getAdditionalHearingDocs)
@@ -208,6 +220,7 @@ public class ManageHearingsDocumentService {
     /**
      * Retrieves all hearing documents that need to be posted for the current working hearing.
      * Note: FDR Hearings should only reach this point for Express cases.
+     *
      * @param finremCaseDetails the case details containing the hearing documents
      * @return a {@link CaseDocument}
      */
@@ -262,8 +275,9 @@ public class ManageHearingsDocumentService {
      * Retrieves the case's current working hearing.
      * Then uses that to get the most recent hearing document with the passed CaseDocumentType argument.
      * If no notice is found, returns an empty list.
+     *
      * @param finremCaseDetails the case details containing the hearing documents.
-     * @param documentType a {@link CaseDocumentType} identifying the type of hearing document.
+     * @param documentType      a {@link CaseDocumentType} identifying the type of hearing document.
      * @return a {@link CaseDocument}
      */
     private CaseDocument getByWorkingHearingAndDocumentType(FinremCaseDetails finremCaseDetails,
@@ -295,6 +309,7 @@ public class ManageHearingsDocumentService {
      * </ul>
      * Removes non-null objects from the list, so exceptions are not thrown when documents are missing.
      * The Form A doesn't exist in the hearing documents collection, so it is added separately.
+     *
      * @param finremCaseDetails the case details containing the hearing documents
      * @return a list of {@link CaseDocument} that are posted for all cases
      */
@@ -313,6 +328,7 @@ public class ManageHearingsDocumentService {
     /**
      * Gets an Express Form C and Form G CaseDocument.
      * Filters out non-null case documents from the list, so exceptions are not thrown when documents are missing.
+     *
      * @param finremCaseDetails the case details containing the hearing documents
      * @return a list of {@link CaseDocument} that are posted for FDR Express cases
      */
@@ -330,6 +346,7 @@ public class ManageHearingsDocumentService {
      * Fast track cases only post the fast track Form C.
      * Standard FDA cases post both Form C and Form G.
      * Filters out non-null case documents from the list, so exceptions are not thrown when documents are missing.
+     *
      * @param finremCaseDetails the case details containing the hearing documents
      * @return a list of {@link CaseDocument} that are posted for FDA cases
      */
@@ -350,6 +367,7 @@ public class ManageHearingsDocumentService {
     /**
      * Retrieves hearing type for the latest hearing to be the working hearing.
      * The working hearing is nullified in about to submit handler, but working hearing ID is retained.
+     *
      * @param finremCaseDetails the case details containing the hearing information
      * @return the type of working hearing
      */
