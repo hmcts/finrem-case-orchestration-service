@@ -425,7 +425,7 @@ dependencies {
             strictly '[1.6.0,)'
         }
     }
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.13.1'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.14.0'
     implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
     implementation group: 'org.elasticsearch', name: 'elasticsearch', version: versions.elasticSearch
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
