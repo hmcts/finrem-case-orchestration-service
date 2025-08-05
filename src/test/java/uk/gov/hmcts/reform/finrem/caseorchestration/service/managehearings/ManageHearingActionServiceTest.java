@@ -152,10 +152,6 @@ class ManageHearingActionServiceTest {
                 .build())
             .build());
 
-        CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
-        CaseDocument formG = createCaseDocument("FormG.pdf", "http://example.com/form-g");
-        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
-            "http://example.com/OutOfCourtResolution");
         CaseDocument pfdComplianceLetter = createCaseDocument(PFD_NCDR_COMPLIANCE_LETTER_FILENAME, PFD_NCDR_COMPLIANCE_LETTER_URL);
 
         Map<String, CaseDocument> pfdDocs = new HashMap<>();
@@ -163,6 +159,10 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COMPLIANCE_LETTER,
             pfdComplianceLetter);
 
+        CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
+        CaseDocument formG = createCaseDocument("FormG.pdf", "http://example.com/form-g");
+        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
+            "http://example.com/OutOfCourtResolution");
 
         when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
             Pair.of(CaseDocumentType.FORM_C, "a template"));
