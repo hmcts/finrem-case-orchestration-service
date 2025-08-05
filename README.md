@@ -112,6 +112,9 @@ Ensure you have the following environment variables set:
 1. From a terminal window run `./gradlew bootWithCCD`
 2. From a separate terminal window run `./gradlew functional`
 
+To run a single functional test, you can use:
+`./gradlew functional --rerun --tests uk.gov.hmcts.reform.finrem.functional.notification.NotificationTests.verifyNotifyUpdateFrcInfoIsOkay`
+
 bootWithCCD starts the service with an active profile of 'local'.
 This can be used to determine locally running behavior. Such as:
 - Calls to the GOV.UK Notify API only render a preview of an email in the console.
