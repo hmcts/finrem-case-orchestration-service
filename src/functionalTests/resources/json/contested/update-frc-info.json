@@ -1,109 +1,329 @@
 {
-  "token": "token_test",
-  "event_id": "FR_issueApplication",
   "case_details": {
-    "id": 1234567890,
+    "id": 1754387794924941,
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
+    "version": 4,
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
-      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
-      "PBANumber": "PBA123456",
-      "d81Question": "No",
-      "PBAreference": "ABCD",
-      "d81Applicant": {
-        "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b/binary"
-      },
-      "d81Respondent": {
-        "document_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
-      },
-      "solicitorFirm": "Mr",
-      "solicitorName": "Solictor",
-      "applicantLName": "Guy",
-      "authorisation3": "2010-01-01",
-      "solicitorEmail": "test@admin.com",
-      "solicitorPhone": "9963472494",
-      "applicantFMName": "Poor",
-      "authorisation2b": "test",
-      "respondentEmail": null,
-      "respondentPhone": "9963472494",
-      "appRespondentRep": "No",
-      "solicitorAddress": {
-        "County": "test",
+      "amountToPay": "31300",
+      "rSolicitorAddress": {
+        "AddressLine1": "Coral, 65-68",
+        "AddressLine2": "Leadenhall Street",
+        "AddressLine3": "",
+        "County": "",
         "Country": "United Kingdom",
-        "PostCode": "b1 1ab",
-        "PostTown": "SRIKALAHASTI",
-        "AddressLine1": "House no: 6-354-2, Gandhi Street",
-        "AddressLine2": "Srikalahasti, Chittor District",
-        "AddressLine3": "test"
-      },
-      "authorisationFirm": "test",
-      "authorisationName": "test",
-      "divorceCaseNumber": "DD12D12345",
-      "respondentAddress": {
-        "County": "Essex",
-        "Country": "United Kingdom",
-        "PostCode": "SE12 9SE",
         "PostTown": "London",
-        "AddressLine1": "252 Marvels Lane",
-        "AddressLine2": "AddressGlobalUK",
-        "AddressLine3": "London"
+        "PostCode": "EC3A 2AD"
       },
-      "solicitorDXnumber": null,
-      "appRespondentLName": "Korivi",
-      "solicitorReference": "LL01",
-      "appRespondentFMName": "test",
-      "divorceStageReached": "Decree Nisi",
-      "helpWithFeesQuestion": "No",
-      "orderForChildrenQuestion1": "Yes",
+      "divorcePetitionIssuedDate": "2025-08-05",
+      "rSolicitorName": "Sauron",
+      "divorceStageReached": "Petition Issued",
+      "authorisationName": "Sauron",
+      "otherReasonForComplexity": "No",
+      "applicantFMName": "Frodo",
+      "divorceDecreeNisiDate": "2024-01-01",
+      "fastTrackDecision": "No",
+      "authorisation3": "2025-03-13",
+      "potentialAllegationChecklist": [
+        "potentialAllegationChecklist_1"
+      ],
+      "applicantAddressConfidential": "Yes",
+      "applicantSolicitorAddress": {
+        "AddressLine1": "3rd Floor, 65-68 Leadenhall St",
+        "County": "Greater London",
+        "PostTown": "London",
+        "PostCode": "EC3A 2AD"
+      },
+      "nameOfCourtDivorceCentre": "Shire Court",
+      "applicantSolicitorFirm": "FinRem-1-Org",
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "95V5X7X",
+          "OrganisationName": "FinRem-2-Org"
+        },
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "netValueOfHome": "125000",
+      "dateOfSepration": "2022-01-01",
+      "promptForAnyDocument": "No",
+      "applicantLName": "Baggins",
+      "rSolicitorEmail": "fr_respondent_solicitor1@mailinator.com",
+      "solicitorFirm": "Mnt Doom Sol",
+      "natureOfApplicationChecklist": [
+        "Maintenance Pending Suit"
+      ],
       "applicantSolicitorConsentForEmails": "Yes",
-      "RespSolNotificationsEmailConsent": "Yes",
-      "allocatedCourtList": {
-        "regionList": "wales",
-        "walesList": "swansea",
-        "swanseaCourtList": "FR_swansea_hc_list_6"
+      "isAdmin": "No",
+      "caseFlags": {
+        "partyName": "Case",
+        "roleOnCase": "Case",
+        "details": []
       },
-      "regionList": "wales",
-      "walesFRCList": "swansea",
-      "cfcCourtList": "FR_swansea_hc_list_6",
-      "applicationNotApproved": [
-        {
-          "id": "acdfd900-5976-4c8a-a518-9e972c5acc81",
-          "value": {
-            "andAfter": "test",
-            "dateOfOrder": "2019-06-15",
-            "selectJudge": "nasim_fr_judge@mailinator.com",
-            "othersTextOrders": "testing",
-            "reasonForRefusal": [
-              "FR_ms_refusalReason_14",
-              "FR_ms_refusalReason_13",
-              "FR_ms_refusalReason_12",
-              "FR_ms_refusalReason_11",
-              "FR_ms_refusalReason_10",
-              "FR_ms_refusalReason_9"
-            ],
-            "additionalComments": "test"
+      "orderSummary": {
+        "PaymentReference": null,
+        "PaymentTotal": "31300",
+        "Fees": [
+          {
+            "value": {
+              "FeeDescription": "Application for a financial order",
+              "FeeVersion": "5",
+              "FeeCode": "FEE0229",
+              "FeeAmount": "31300"
+            },
+            "id": "4813294c-5027-45b3-96f0-26bf29f2910d"
           }
-        }
-      ],
-      "applicationNotApprovedReasonForRefusal": [
-        "FR_ms_refusalReason_12",
-        "FR_ms_refusalReason_8",
-        "FR_ms_refusalReason_1"
-      ],
-      "applicationNotApprovedOthersTextOrders": "other reason for not approving the application",
-      "applicationNotApprovedJudgeType": "District Judge",
-      "applicationNotApprovedJudgeName": "Her Justice",
-      "applicationNotApprovedDateOfOrder": "2020-07-09",
-      "applicationNotApprovedDocumentPreview": {
-        "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0631e",
-        "document_filename": "contestedApplicationNotApproved.pdf",
-        "document_binary_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0631e/binary"
-      }
+        ]
+      },
+      "applicantSolicitorName": "Bilbo Baggins",
+      "walesFRCList": "swansea",
+      "applicantSolicitorEmail": "fr_applicant_solicitor1@mailinator.com",
+      "expressCaseParticipation": "Does not qualify",
+      "HWFNumber": "HWF1234",
+      "promptForUrgentCaseQuestion": "No",
+      "familyMediatorServiceName": "Gandalf the Great Div",
+      "specificArrangementsRequired": "N/A",
+      "respondentRepresented": "Yes",
+      "miniFormA": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b52f354e-1fb6-489a-99b6-1cfab97725f9",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b52f354e-1fb6-489a-99b6-1cfab97725f9/binary",
+        "upload_timestamp": "2025-08-05T09:56:40.078506"
+      },
+      "swanseaCourtList": "FR_swansea_hc_list_1",
+      "applicantFlags": {
+        "partyName": "Frodo Baggins",
+        "roleOnCase": "Applicant",
+        "details": []
+      },
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "Y707HZM",
+          "OrganisationName": "FinRem-1-Org"
+        },
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "applicantRepresented": "Yes",
+      "respondentLName": "Gollum",
+      "consentOrderFRCAddress": "Carvella House, Quay West, Quay Parade, Swansea, SA1 1SD",
+      "rSolicitorPhone": "07821 639001",
+      "applicantAttendedMIAM": "Yes",
+      "specialAssistanceRequired": "N/A",
+      "consentOrderFRCPhone": "0300 123 5577",
+      "uploadMediatorDocument": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e2c922db-a9a6-4b10-832c-50c632c4ed23",
+        "document_filename": "test.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e2c922db-a9a6-4b10-832c-50c632c4ed23/binary",
+        "upload_timestamp": "2025-08-05T09:56:35.990912"
+      },
+      "rSolicitorFirm": "Mnt Doom Sols",
+      "isApplicantsHomeCourt": "No",
+      "additionalInformationAboutHearing": "we want cakes",
+      "applicantSolicitorPhone": "07777777777",
+      "solicitorReference": "Y707HZM",
+      "soleTraderName": "Wizard Divorce",
+      "authorisation2b": "Boss",
+      "divorceUploadPetition": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6fc1ed85-2ef1-4740-b1b8-1e1c7dd4fbbf",
+        "document_filename": "PETITION FORM A.docx",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6fc1ed85-2ef1-4740-b1b8-1e1c7dd4fbbf/binary",
+        "upload_timestamp": "2025-01-16T09:46:21.592232195"
+      },
+      "issueDate": "2025-03-06",
+      "mediatorRegistrationNumber": "MIAM12345",
+      "detailPotentialAllegation": "Stealing ring",
+      "regionList": "wales",
+      "allocatedToBeHeardAtHighCourtJudgeLevel": "No",
+      "applicantAddress": {
+        "AddressLine1": "Water Unite, 65-68",
+        "AddressLine2": "Leadenhall Street",
+        "AddressLine3": "",
+        "County": "",
+        "Country": "United Kingdom",
+        "PostTown": "London",
+        "PostCode": "EC3A 2AD"
+      },
+      "dateOfMarriage": "1999-01-01",
+      "divorceCaseNumber": "LV12D12345",
+      "applicantInRefugeTab": "Yes",
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
+      "respondentFlags": {
+        "partyName": "Smeagol Gollum",
+        "roleOnCase": "Respondent",
+        "details": []
+      },
+      "civilPartnership": "No",
+      "consentOrderFRCName": "Swansea Civil & Family Justice Centre",
+      "respondentFMName": "Smeagol",
+      "estimatedAssetsChecklistV2": "underTwoHundredAndFiftyThousandPounds",
+      "consentOrderFRCEmail": "FRCswansea@justice.gov.uk",
+      "applicantResideOutsideUK": "No",
+      "helpWithFeesQuestion": "Yes",
+      "addToComplexityListOfCourts": "falseNo"
     }
-  }
+  },
+  "case_details_before": {
+    "id": 1754387794924941,
+    "jurisdiction": "DIVORCE",
+    "state": "applicationIssued",
+    "version": 3,
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "amountToPay": "31300",
+      "rSolicitorAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "EC3A 2AD",
+        "PostTown": "London",
+        "AddressLine1": "Coral, 65-68",
+        "AddressLine2": "Leadenhall Street",
+        "AddressLine3": ""
+      },
+      "divorcePetitionIssuedDate": "2025-08-05",
+      "rSolicitorName": "Sauron",
+      "divorceStageReached": "Petition Issued",
+      "authorisationName": "Sauron",
+      "otherReasonForComplexity": "No",
+      "applicantFMName": "Frodo",
+      "divorceDecreeNisiDate": "2024-01-01",
+      "fastTrackDecision": "No",
+      "authorisation3": "2025-03-13",
+      "potentialAllegationChecklist": [
+        "potentialAllegationChecklist_1"
+      ],
+      "applicantAddressConfidential": "Yes",
+      "applicantSolicitorAddress": {
+        "County": "Greater London",
+        "PostCode": "EC3A 2AD",
+        "PostTown": "London",
+        "AddressLine1": "3rd Floor, 65-68 Leadenhall St"
+      },
+      "applicantSolicitorFirm": "FinRem-1-Org",
+      "nameOfCourtDivorceCentre": "Shire Court",
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "95V5X7X",
+          "OrganisationName": "FinRem-2-Org"
+        },
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "netValueOfHome": "125000",
+      "dateOfSepration": "2022-01-01",
+      "promptForAnyDocument": "No",
+      "applicantLName": "Baggins",
+      "rSolicitorEmail": "fr_respondent_solicitor1@mailinator.com",
+      "solicitorFirm": "Mnt Doom Sol",
+      "natureOfApplicationChecklist": [
+        "Maintenance Pending Suit"
+      ],
+      "applicantSolicitorConsentForEmails": "Yes",
+      "isAdmin": "No",
+      "caseFlags": {
+        "details": [],
+        "partyName": "Case",
+        "roleOnCase": "Case"
+      },
+      "orderSummary": {
+        "Fees": [
+          {
+            "id": "5aeae687-c111-47c6-b1a9-d7cb1ecee318",
+            "value": {
+              "FeeCode": "FEE0229",
+              "FeeAmount": "31300",
+              "FeeVersion": "5",
+              "FeeDescription": "Application for a financial order"
+            }
+          }
+        ],
+        "PaymentTotal": "31300",
+        "PaymentReference": null
+      },
+      "applicantSolicitorName": "Bilbo Baggins",
+      "applicantSolicitorEmail": "fr_applicant_solicitor1@mailinator.com",
+      "expressCaseParticipation": "Does not qualify",
+      "HWFNumber": "HWF1234",
+      "promptForUrgentCaseQuestion": "No",
+      "familyMediatorServiceName": "Gandalf the Great Div",
+      "specificArrangementsRequired": "N/A",
+      "respondentRepresented": "Yes",
+      "miniFormA": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b52f354e-1fb6-489a-99b6-1cfab97725f9",
+        "upload_timestamp": "2025-08-05T09:56:40.078506000",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b52f354e-1fb6-489a-99b6-1cfab97725f9/binary"
+      },
+      "applicantFlags": {
+        "details": [],
+        "partyName": "Frodo Baggins",
+        "roleOnCase": "Applicant"
+      },
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "Y707HZM",
+          "OrganisationName": "FinRem-1-Org"
+        },
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "respondentLName": "Gollum",
+      "applicantRepresented": "Yes",
+      "consentOrderFRCAddress": "Tapton Lane, Chesterfield S41 7TW",
+      "midlandsFRCList": "birmingham",
+      "rSolicitorPhone": "07821 639001",
+      "birminghamCourtList": "FR_birmingham_hc_list_2",
+      "applicantAttendedMIAM": "Yes",
+      "specialAssistanceRequired": "N/A",
+      "consentOrderFRCPhone": "0300 123 5577",
+      "rSolicitorFirm": "Mnt Doom Sols",
+      "uploadMediatorDocument": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e2c922db-a9a6-4b10-832c-50c632c4ed23",
+        "upload_timestamp": "2025-08-05T09:56:35.990912",
+        "document_filename": "test.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e2c922db-a9a6-4b10-832c-50c632c4ed23/binary"
+      },
+      "isApplicantsHomeCourt": "No",
+      "applicantSolicitorPhone": "07777777777",
+      "solicitorReference": "Y707HZM",
+      "soleTraderName": "Wizard Divorce",
+      "authorisation2b": "Boss",
+      "divorceUploadPetition": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6fc1ed85-2ef1-4740-b1b8-1e1c7dd4fbbf",
+        "upload_timestamp": "2025-01-16T09:46:21.592232195",
+        "document_filename": "PETITION FORM A.docx",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6fc1ed85-2ef1-4740-b1b8-1e1c7dd4fbbf/binary"
+      },
+      "issueDate": "2025-03-06",
+      "mediatorRegistrationNumber": "MIAM12345",
+      "detailPotentialAllegation": "Stealing ring",
+      "regionList": "midlands",
+      "applicantAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "EC3A 2AD",
+        "PostTown": "London",
+        "AddressLine1": "Water Unite, 65-68",
+        "AddressLine2": "Leadenhall Street",
+        "AddressLine3": ""
+      },
+      "allocatedToBeHeardAtHighCourtJudgeLevel": "No",
+      "dateOfMarriage": "1999-01-01",
+      "divorceCaseNumber": "LV12D12345",
+      "applicantInRefugeTab": "Yes",
+      "respondentFlags": {
+        "details": [],
+        "partyName": "Smeagol Gollum",
+        "roleOnCase": "Respondent"
+      },
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
+      "civilPartnership": "No",
+      "consentOrderFRCName": "Chesterfield County Court",
+      "respondentFMName": "Smeagol",
+      "consentOrderFRCEmail": "FRCNottingham@justice.gov.uk",
+      "estimatedAssetsChecklistV2": "underTwoHundredAndFiftyThousandPounds",
+      "helpWithFeesQuestion": "Yes",
+      "applicantResideOutsideUK": "No",
+      "addToComplexityListOfCourts": "falseNo"
+    }
+  },
+  "event_id": "FR_updateFRCInformation",
+  "ignore_warning": null
 }
