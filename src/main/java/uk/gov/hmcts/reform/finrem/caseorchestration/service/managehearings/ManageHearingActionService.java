@@ -94,7 +94,8 @@ public class ManageHearingActionService {
             Map<String, CaseDocument> pfdDocs = manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, authToken);
 
             if (pfdDocs.get(PFD_NCDR_COVER_LETTER) != null) {
-                documentMap.put(PFD_NCDR_COVER_LETTER, new DocumentRecord(pfdDocs.get(PFD_NCDR_COVER_LETTER), CaseDocumentType.PFD_NCDR_COVER_LETTER));
+                documentMap.put(PFD_NCDR_COVER_LETTER, new DocumentRecord(pfdDocs.get(PFD_NCDR_COVER_LETTER),
+                    CaseDocumentType.PFD_NCDR_COVER_LETTER));
             }
 
             documentMap.put(PFD_NCDR_COMPLIANCE_LETTER, new DocumentRecord(pfdDocs.get(PFD_NCDR_COMPLIANCE_LETTER),
