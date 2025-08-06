@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -55,6 +56,8 @@ class ManageHearingActionServiceTest {
 
     private static final String HEARING_NOTICE_URL = "http://example.com/hearing-notice";
     private static final String HEARING_NOTICE_FILENAME = "HearingNotice.pdf";
+    private static final String PFD_NCDR_COMPLIANCE_LETTER_URL = "http://example.com/compliance-letter";
+    private static final String PFD_NCDR_COMPLIANCE_LETTER_FILENAME = "PFD_NCDR_COMPLIANCE_LETTER";
 
     @Mock
     private ManageHearingsDocumentService manageHearingsDocumentService;
@@ -137,6 +140,53 @@ class ManageHearingActionServiceTest {
                 pfdNcdrDocuments.get(PFD_NCDR_COMPLIANCE_LETTER),
                 pfdNcdrDocuments.get(PFD_NCDR_COVER_LETTER),
                 outOfCourtResolution);
+    }
+
+    @Test
+    void performAddHearing_shouldNotAddPfdNcdrCover_ifNotGenerated() {
+
+        workingHearing.setHearingTypeDynamicList(DynamicList.builder()
+            .value(DynamicListElement.builder()
+                .code(HearingType.FDA.name())
+                .label(HearingType.FDA.getId())
+                .build())
+            .build());
+
+        CaseDocument pfdComplianceLetter = createCaseDocument(PFD_NCDR_COMPLIANCE_LETTER_FILENAME, PFD_NCDR_COMPLIANCE_LETTER_URL);
+
+        Map<String, CaseDocument> pfdDocs = new HashMap<>();
+        pfdDocs.put(
+            PFD_NCDR_COMPLIANCE_LETTER,
+            pfdComplianceLetter);
+
+        CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
+        CaseDocument formG = createCaseDocument("FormG.pdf", "http://example.com/form-g");
+        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
+            "http://example.com/OutOfCourtResolution");
+
+        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
+            Pair.of(CaseDocumentType.FORM_C, "a template"));
+        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formG);
+        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(outOfCourtResolution);
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(createCaseDocument(HEARING_NOTICE_FILENAME, HEARING_NOTICE_URL));
+
+        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN))
+            .thenReturn(pfdDocs);
+
+        manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
+
+        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(5);
+        assertThat(hearingWrapper.getHearingDocumentsCollection())
+            .extracting(item -> item.getValue().getHearingDocument())
+            .contains(pfdComplianceLetter);
+        assertThat(hearingWrapper.getHearingDocumentsCollection())
+            .extracting(item -> item.getValue().getHearingCaseDocumentType())
+            .doesNotContain(CaseDocumentType.PFD_NCDR_COVER_LETTER);
     }
 
     @Test
