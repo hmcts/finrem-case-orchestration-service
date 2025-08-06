@@ -163,16 +163,16 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? rejectedOrderHighCourtTemplate : rejectedOrderTemplate;
     }
 
-    public String getFormCFastTrackTemplate(FinremCaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? manageHearingFastTrackHCFormCTemplate : manageHearingFastTrackFormCTemplate;
-    }
-
     public String getFormCStandardTemplate(FinremCaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? manageHearingHCFromCTemplate : manageHearingFormCTemplate;
     }
 
     public String getFormCFastTrackTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? formCFastTrackHighCourtTemplate : formCFastTrackTemplate;
+    }
+
+    public String getFormCFastTrackTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? manageHearingFastTrackHCFormCTemplate : manageHearingFastTrackFormCTemplate;
     }
 
     public String getFormCNonFastTrackTemplate(CaseDetails caseDetails) {
@@ -198,7 +198,6 @@ public class DocumentConfiguration {
     public String getContestedMiniFormScheduleTemplate(FinremCaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? contestedMiniFormHighCourtScheduleTemplate : contestedMiniFormScheduleTemplate;
     }
-
 
     public String getApprovedConsentOrderTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? approvedConsentOrderHighCourtTemplate : approvedConsentOrderTemplate;
@@ -248,17 +247,17 @@ public class DocumentConfiguration {
             : hearingNoticeConsentedTemplate;
     }
 
+    public String getManageHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
+        return isHighCourtSelected(finremCaseDetails) ? manageHearingHCNoticeTemplate
+            : manageHearingNoticeTemplate;
+    }
+
     private boolean isHighCourtSelected(CaseDetails caseDetails) {
         if (caseDetails != null && caseDetails.getData() != null
             && caseDetails.getData().get(HIGHCOURT_COURTLIST) != null) {
             return true;
         }
         return false;
-    }
-
-    public String getManageHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
-        return isHighCourtSelected(finremCaseDetails) ? manageHearingHCNoticeTemplate
-            : manageHearingNoticeTemplate;
     }
 
     private boolean isHighCourtSelected(FinremCaseDetails caseDetails) {

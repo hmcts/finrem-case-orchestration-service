@@ -39,7 +39,6 @@ public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandler
     private static final String GA_JSON = "/fixtures/contested/general-application-details.json";
     private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application.json";
 
-
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();

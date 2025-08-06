@@ -24,7 +24,6 @@ public class IntervenerFourCaseSummariesHandlerTest extends CaseSummariesHandler
     @InjectMocks
     IntervenerFourCaseSummariesHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT_SKELETON_ARGUMENT,

@@ -10,7 +10,6 @@ import static org.hamcrest.Matchers.is;
 
 public abstract class ExpertEvidenceHandlerTest extends BaseManageDocumentsHandlerTest<ExpertEvidenceHandler> {
 
-
     @Override
     @Test
     public void assertCorrectCategoryAssignedFromDocumentType() {

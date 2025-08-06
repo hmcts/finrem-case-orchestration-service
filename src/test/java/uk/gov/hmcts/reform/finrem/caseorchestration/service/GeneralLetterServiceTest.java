@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
 import java.util.ArrayList;
@@ -41,9 +43,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -249,7 +250,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), caseDocument());
         wrapper.getGeneralLetterUploadedDocuments().forEach(doc -> verifyDocumentFields(doc.getValue(),
             DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), uploadedDocument));
-        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), anyBoolean(), any());
+        verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(eq(generalLetterCaseDetails), eq(OTHER_RECIPIENT),
+            ArgumentMatchers.<List<BulkPrintDocument>>any(), eq(Boolean.FALSE), eq(AUTH_TOKEN));
     }
 
     @Test

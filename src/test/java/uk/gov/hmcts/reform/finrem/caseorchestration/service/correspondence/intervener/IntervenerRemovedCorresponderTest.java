@@ -369,5 +369,4 @@ public class IntervenerRemovedCorresponderTest {
 
         return FinremCaseDetails.builder().data(finremCaseData).build();
     }
-
 }

@@ -24,7 +24,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
-
 public class AmendApplicationAboutToStartHandlerTest {
 
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
@@ -62,7 +61,6 @@ public class AmendApplicationAboutToStartHandlerTest {
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CLOSE),
             is(false));
     }
-
 
     @Test
     public void givenCase_whenIntendsToIsApplyToVary_thenShouldAddToNatureList() {

@@ -67,6 +67,4 @@ public class SolicitorAddedLetterDetailsGeneratorTest extends AbstractLetterDeta
             is("Your notice of change has been completed successfully. You can now view your client's case."));
 
     }
-
-
 }

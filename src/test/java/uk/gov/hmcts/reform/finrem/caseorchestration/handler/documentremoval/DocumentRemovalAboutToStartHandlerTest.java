@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-
 @ExtendWith(MockitoExtension.class)
 class DocumentRemovalAboutToStartHandlerTest {
 

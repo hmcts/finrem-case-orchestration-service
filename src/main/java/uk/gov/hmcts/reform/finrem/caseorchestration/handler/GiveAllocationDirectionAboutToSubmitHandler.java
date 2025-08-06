@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 
-
 @Slf4j
 @Service
 public class GiveAllocationDirectionAboutToSubmitHandler extends FinremCallbackHandler {

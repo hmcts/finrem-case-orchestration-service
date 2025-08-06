@@ -121,5 +121,4 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest extends BaseHandle
         assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationDraftOrder());
         assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationLatestDocumentDate());
     }
-
 }

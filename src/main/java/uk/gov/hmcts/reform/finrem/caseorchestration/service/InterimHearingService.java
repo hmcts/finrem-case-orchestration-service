@@ -137,7 +137,6 @@ public class InterimHearingService {
         return errors;
     }
 
-
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void sendToBulkPrint(FinremCaseDetails finremCaseDetails, String authorisationToken,
                                  CaseDocumentsHolder caseDocumentsHolder) {
@@ -404,6 +403,4 @@ public class InterimHearingService {
             });
         }
     }
-
-
 }

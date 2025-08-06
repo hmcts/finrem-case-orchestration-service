@@ -39,7 +39,6 @@ public class IntervenerAddedCorresponder extends IntervenerCorresponder {
         }
     }
 
-
     @Override
     public CaseDocument getAppRepDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                                  DocumentHelper.PaperNotificationRecipient recipient) {

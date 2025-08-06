@@ -50,7 +50,6 @@ public abstract class DocumentSharer {
         }
     }
 
-
     public List<UploadCaseDocumentCollection> getDocumentCollection(FinremCaseData caseData, String collectionName) {
         UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
         if (collectionName.equalsIgnoreCase(getApplicantCollectionCcdKey())) {
@@ -68,7 +67,6 @@ public abstract class DocumentSharer {
         }
         return new ArrayList<>();
     }
-
 
     private List<UploadCaseDocumentCollection> getAndAddToExistingSharedCollection(String collId,
                                                                                    List<UploadCaseDocumentCollection> documentCollectionToShare,
@@ -145,5 +143,4 @@ public abstract class DocumentSharer {
     protected abstract void setIntervenerFourSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list);
 
     protected abstract List<UploadCaseDocumentCollection> getApplicantSharedCollection(FinremCaseData caseData);
-
 }

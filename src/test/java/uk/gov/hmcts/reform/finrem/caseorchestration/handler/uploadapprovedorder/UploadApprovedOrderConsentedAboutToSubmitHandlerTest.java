@@ -27,7 +27,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_FI
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class UploadApprovedOrderConsentedAboutToSubmitHandlerTest {
 
@@ -37,7 +36,6 @@ public class UploadApprovedOrderConsentedAboutToSubmitHandlerTest {
     private GenericDocumentService service;
     @InjectMocks
     private UploadApprovedOrderConsentedAboutToSubmitHandler uploadApprovedOrderConsentedAboutToSubmitHandler;
-
 
     @Test
     public void givenConsentedCase_whenAboutToSubmitUploadApprovedOrder_thenCanHandle() {

@@ -93,7 +93,6 @@ public class ConsentOrderService {
         }
     }
 
-
     public List<CaseDocument> checkIfD81DocumentContainsEncryption(Map<String, Object> caseData, Map<String, Object> beforeData) {
         List<CaseDocument> caseDocumentList = new ArrayList<>();
 

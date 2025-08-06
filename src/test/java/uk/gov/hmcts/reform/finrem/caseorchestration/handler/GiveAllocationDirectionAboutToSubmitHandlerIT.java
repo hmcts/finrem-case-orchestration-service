@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
-
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { CaseOrchestrationApplication.class })
 @TestPropertySource(value = "classpath:application.properties")

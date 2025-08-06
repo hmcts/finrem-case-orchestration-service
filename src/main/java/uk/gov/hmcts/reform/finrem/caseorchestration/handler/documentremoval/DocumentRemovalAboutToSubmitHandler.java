@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService;
 
-
 @Slf4j
 @Service
 public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {

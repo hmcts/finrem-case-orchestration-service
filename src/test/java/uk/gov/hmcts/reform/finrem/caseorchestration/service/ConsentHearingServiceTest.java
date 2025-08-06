@@ -119,7 +119,6 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
         assertEquals("2023-12-10", hearings.get(1).getValue().getHearingDate());
     }
 
-
     @Test
     public void givenFinremCaseDetailsConsentedPaperCase_WhenPaperCase_ThenItShouldNotSendNotification() {
         FinremCaseDetails caseDetails = buildFinremCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);

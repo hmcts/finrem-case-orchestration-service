@@ -38,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-
 @ExtendWith(MockitoExtension.class)
 class DocumentRemovalServiceTest {
 
@@ -127,7 +126,6 @@ class DocumentRemovalServiceTest {
         assertEquals("https://example.com/binary", result.get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
         assertEquals("123", result.get(0).getValue().getDocumentId());
     }
-
 
     @Test
     void testGetCaseDocumentsList_NestedObjectWithinArrayWithDocumentUrl() {

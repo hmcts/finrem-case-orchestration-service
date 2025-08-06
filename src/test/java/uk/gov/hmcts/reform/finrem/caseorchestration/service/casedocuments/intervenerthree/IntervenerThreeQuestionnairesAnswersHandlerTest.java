@@ -24,7 +24,6 @@ public class IntervenerThreeQuestionnairesAnswersHandlerTest extends BaseManageD
     @InjectMocks
     IntervenerThreeQuestionnairesAnswersHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.QUESTIONNAIRE,

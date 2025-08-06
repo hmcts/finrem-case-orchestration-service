@@ -341,7 +341,6 @@ public class RemovedSolicitorServiceTest {
         assertNull(removedSolicitor.getOrganisation());
     }
 
-
     private DynamicList getApplicantCaseRole() {
         DynamicListElement appSolRole = DynamicListElement.builder()
             .code(APP_SOLICITOR_POLICY)

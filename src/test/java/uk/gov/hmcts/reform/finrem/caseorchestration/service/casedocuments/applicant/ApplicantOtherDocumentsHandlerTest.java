@@ -24,7 +24,6 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
     @InjectMocks
     ApplicantOtherDocumentsHandler collectionService;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
@@ -44,7 +43,6 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
     public DocumentHandler getDocumentHandler() {
         return collectionService;
     }
-
 
     @Override
     public void assertExpectedCollectionType() {

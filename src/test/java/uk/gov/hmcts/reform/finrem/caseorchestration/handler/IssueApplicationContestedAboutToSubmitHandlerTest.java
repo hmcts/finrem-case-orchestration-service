@@ -31,7 +31,6 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
     @Mock
     private OnlineFormDocumentService service;
 
-
     @Test
     void givenContestedCase_whenCaseTypeIsConsented_thenHandlerWillNotHandle() {
         assertThat(handler

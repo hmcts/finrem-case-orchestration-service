@@ -13,10 +13,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferen
 
 /**
  * Utility class to encrypt/decrypt a file using AES encryption.
- * <p>
  * Usage:
  * <pre>
- * java CaseMigrationEncryptionUtil <encrypt|decrypt> <inputFilePath> <outputFilePath> <secretKey>
+ * java CaseMigrationEncryptionUtil &lt;encrypt|decrypt&gt; &lt;inputFilePath&gt; &lt;outputFilePath&gt; &lt;secretKey&gt;
  * </pre>
  */
 

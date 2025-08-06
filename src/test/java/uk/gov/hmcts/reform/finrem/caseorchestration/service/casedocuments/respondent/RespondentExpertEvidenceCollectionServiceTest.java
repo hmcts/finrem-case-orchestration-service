@@ -22,7 +22,6 @@ public class RespondentExpertEvidenceCollectionServiceTest extends ExpertEvidenc
     @InjectMocks
     RespondentExpertEvidenceHandler respondentExpertEvidenceHandler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.VALUATION_REPORT,
@@ -49,7 +48,6 @@ public class RespondentExpertEvidenceCollectionServiceTest extends ExpertEvidenc
         return caseData.getUploadCaseDocumentWrapper()
             .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_EXPERT_EVIDENCE_COLLECTION);
     }
-
 
     @Override
     protected DocumentCategory getValuationReportCategory() {

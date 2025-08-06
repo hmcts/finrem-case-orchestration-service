@@ -35,6 +35,4 @@ public class IntervenerOneLetterAddresseeGenerator extends IntervenerLetterAddre
             });
         return intervenerWrapper;
     }
-
-
 }
