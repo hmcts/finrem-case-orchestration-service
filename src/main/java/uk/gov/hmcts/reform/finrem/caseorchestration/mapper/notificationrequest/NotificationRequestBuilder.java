@@ -37,6 +37,12 @@ public class NotificationRequestBuilder {
     private String judgeFeedback;
     private String documentName;
 
+    /**
+     * Sets default values for the NotificationRequestBuilder based on the provided case details.
+     * This method initializes the builder with values derived from the case details, such as case reference.
+     * @param caseDetails the case details
+     * @return the NotificationRequestBuilder instance with default values set
+     */
     public NotificationRequestBuilder withDefaults(FinremCaseDetails caseDetails) {
         caseReferenceNumber = String.valueOf(caseDetails.getId());
         applicantName = caseDetails.getData().getFullApplicantName();
@@ -47,6 +53,10 @@ public class NotificationRequestBuilder {
         return this;
     }
 
+    /**
+     * Builds a NotificationRequest object using the values set in the builder.
+     * @return a NotificationRequest
+     */
     public NotificationRequest build() {
         NotificationRequest notificationRequest = new NotificationRequest();
         notificationRequest.setCaseReferenceNumber(caseReferenceNumber);
