@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.ManageHearingsNotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -289,6 +289,8 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
+            callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
@@ -320,6 +322,8 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
+            callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
@@ -358,6 +362,8 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
+            callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
@@ -396,6 +402,10 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
+            callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
+
+
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
@@ -430,6 +440,8 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
         when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
+            callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
@@ -472,6 +484,8 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
         when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
+        when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
+            callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);

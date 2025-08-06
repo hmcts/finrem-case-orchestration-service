@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
+package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
