@@ -304,11 +304,13 @@ public class ManageHearingsCorresponder {
             return;
         }
 
-        BulkPrintDocument hearingNoticeDocument =
-            documentHelper.getBulkPrintDocumentFromCaseDocument(hearingNotice);
+        List<CaseDocument> hearingDocuments = new ArrayList<>(List.of(hearingNotice));
 
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        bulkPrintDocuments.add(hearingNoticeDocument);
+        hearingDocuments.addAll(manageHearingsDocumentService
+            .getAdditionalHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
+
+        List<BulkPrintDocument> bulkPrintDocuments =
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocuments);
 
         printDocuments(
             finremCaseDetails,
@@ -328,8 +330,12 @@ public class ManageHearingsCorresponder {
      * @param userAuthorisation the user authorisation token.
      */
     private void postAllHearingDocuments(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
-        List<CaseDocument> hearingDocuments = manageHearingsDocumentService
-            .getHearingDocumentsToPost(finremCaseDetails);
+        List<CaseDocument> hearingDocuments = new ArrayList<>(
+            manageHearingsDocumentService.getHearingDocumentsToPost(finremCaseDetails)
+        );
+
+        hearingDocuments.addAll(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
+            finremCaseDetails.getData().getManageHearingsWrapper()));
 
         if (isEmpty(hearingDocuments)) {
             log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());
