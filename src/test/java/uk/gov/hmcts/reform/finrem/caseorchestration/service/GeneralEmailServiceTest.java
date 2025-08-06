@@ -14,6 +14,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 public class GeneralEmailServiceTest extends BaseServiceTest {
@@ -37,6 +38,7 @@ public class GeneralEmailServiceTest extends BaseServiceTest {
         assertThat(addedEmail.getGeneralEmailRecipient(), is("b1@b.com"));
         assertThat(addedEmail.getGeneralEmailCreatedBy(), is("Test user"));
         assertThat(addedEmail.getGeneralEmailBody(), is("Test email body"));
+        assertThat(addedEmail.getGeneralEmailDateSent(), is(notNullValue()));
     }
 
     @Test
@@ -57,6 +59,7 @@ public class GeneralEmailServiceTest extends BaseServiceTest {
         assertThat(addedEmail.getGeneralEmailCreatedBy(), is("Test user"));
         assertThat(addedEmail.getGeneralEmailBody(), is("Test email body"));
         assertThat(addedEmail.getGeneralEmailUploadedDocument(), is(caseDocument()));
+        assertThat(addedEmail.getGeneralEmailDateSent(), is(notNullValue()));
     }
 
     private FinremCaseDetails caseDetailsConsented() throws Exception {
