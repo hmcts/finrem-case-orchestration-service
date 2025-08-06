@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,7 @@ public class GeneralEmailService {
             .generalEmailCreatedBy(generalEmailWrapper.getGeneralEmailCreatedBy())
             .generalEmailRecipient(generalEmailWrapper.getGeneralEmailRecipient())
             .generalEmailUploadedDocument(createNewCaseDocumentObject(generalEmailWrapper))
+            .generalEmailDateSent(LocalDateTime.now())
             .build()).build();
         generalEmailCollection.add(collection);
 
