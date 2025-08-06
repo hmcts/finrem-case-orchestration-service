@@ -26,8 +26,7 @@ public class DraftOrdersNotificationRequestMapper extends AbstractNotificationRe
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
 
     public DraftOrdersNotificationRequestMapper(
-        NotificationRequestBuilderFactory builderFactory,
-        CourtDetailsConfiguration courtDetailsConfiguration) {
+        NotificationRequestBuilderFactory builderFactory, CourtDetailsConfiguration courtDetailsConfiguration) {
         super(builderFactory);
         this.courtDetailsConfiguration = courtDetailsConfiguration;
     }
