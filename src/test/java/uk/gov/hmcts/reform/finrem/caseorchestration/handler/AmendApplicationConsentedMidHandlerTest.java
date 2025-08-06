@@ -3,23 +3,36 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -28,260 +41,74 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class AmendApplicationConsentedMidHandlerTest {
 
     @InjectMocks
-    private AmendApplicationConsentedMidHandler handler;
+    private AmendApplicationConsentedMidHandler underTest;
     @Mock
     private ConsentOrderService consentOrderService;
     @Mock
-    private InternationalPostalService postalService;
-    @Mock
+    private InternationalPostalService internationalPostalService;
+    @Spy
     private ObjectMapper objectMapper;
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, CallbackType.MID_EVENT, CONSENTED, EventType.AMEND_APP_DETAILS);
+        assertCanHandle(underTest, MID_EVENT, CONSENTED, AMEND_APP_DETAILS);
     }
 
-    @Test
-    void testHandle() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(postalService).validate(callbackRequest.getCaseDetails().getData());
+    static Stream<Arguments> errorScenarios() {
+        return Stream.of(
+            Arguments.of(
+                List.of("address error 1"),
+                List.of("email error 1"),
+                List.of("postal error 1"),
+                List.of("consent check error"),
+                List.of("consent check error", "postal error 1", "address error 1", "email error 1")
+            ),
+            Arguments.of(
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
+            ),
+            Arguments.of(
+                List.of("address only"),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of("address only")
+            )
+        );
     }
 
-    @Test
-    void handle() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(consentOrderService).performCheck(objectMapper.convertValue(callbackRequest, CallbackRequest.class), AUTH_TOKEN);
-        verify(postalService).validate(callbackRequest.getCaseDetails().getData());
-    }
+    @ParameterizedTest
+    @MethodSource("errorScenarios")
+    void testHandle(List<String> addressErrors,
+                    List<String> emailErrors,
+                    List<String> postalErrors,
+                    List<String> consentErrors,
+                    List<String> expectedErrors) {
 
-    @Test
-    void givenConsentedCase_WhenNotEmptyPostCode_thenHandlerWillShowNoErrorMessage() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONSENTED, AMEND_APP_DETAILS, caseData);
 
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
+        try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
+                .thenReturn(new ArrayList<>(addressErrors));
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
+                .thenReturn(new ArrayList<>(emailErrors));
+            when(consentOrderService.performCheck(any(CallbackRequest.class), eq(AUTH_TOKEN)))
+                .thenReturn(new ArrayList<>(consentErrors));
+            when(internationalPostalService.validate(caseData))
+                .thenReturn(new ArrayList<>(postalErrors));
 
-        data.getContactDetailsWrapper().setApplicantAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            "SW1A 1AA"
-        ));
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        data.getContactDetailsWrapper().setRespondentAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            "SW1A 2AA"
-        ));
+            assertThat(response.getErrors()).containsExactlyElementsOf(expectedErrors);
 
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertThat(handle.getErrors()).isEmpty();
-    }
-
-    @Test
-    void givenBlankApplicantOrRespondentAddress_thenHandlerWillShowNoErrorMessage() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setApplicantAddress(new Address());
-        data.getContactDetailsWrapper().setRespondentAddress(new Address());
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertThat(handle.getErrors()).isEmpty();
-    }
-
-    @Test
-    void givenConsentedCase_WhenEmptyApplicantPostCode_thenHandlerWillShowMessage() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setApplicantAddress(new Address(
-                "AddressLine1",
-                "AddressLine2",
-                "AddressLine3",
-                "County",
-                "Country",
-                "Town",
-                null
-        ));
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant address.");
-    }
-
-    @Test
-    void givenConsentedCase_WhenNullApplicantPostCode_thenHandlerWillShowMessage() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setApplicantAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            null
-        ));
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant address.");
-    }
-
-    @Test
-    void givenConsentedCase_WhenEmptyRespondentPostCode_thenHandlerWillShowMessage() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setRespondentAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            null
-        ));
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(handle.getErrors()).containsExactly("Postcode field is required for respondent address.");
-    }
-
-    @Test
-    void givenConsentedCase_WhenNullRespondentPostCode_thenHandlerWillShowMessage() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setRespondentAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            null
-        ));
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(handle.getErrors()).containsExactly("Postcode field is required for respondent address.");
-    }
-
-    @Test
-    void givenConsentedCase_WhenEmptyApplicantSolicitorPostCode_thenHandlerWillShowMessage() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setSolicitorAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            null
-        ));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant solicitor address.");
-    }
-
-    @Test
-    void givenConsentedCase_WhenNullApplicantSolicitorPostCode_thenHandlerWillShowMessage() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setSolicitorAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            null
-        ));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant solicitor address.");
-    }
-
-    @Test
-    void givenConsentedCase_WhenNullRespondentSolicitorPostCode_thenHandlerWillShowMessage() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setRespondentSolicitorAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            null
-        ));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(handle.getErrors()).containsExactly("Postcode field is required for respondent solicitor address.");
-    }
-
-    private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequest
-            .builder()
-            .eventType(AMEND_APP_DETAILS)
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
-                .data(FinremCaseData.builder().ccdCaseType(CONSENTED).build()).build())
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
-                .data(FinremCaseData.builder().ccdCaseType(CONSENTED).build()).build())
-            .build();
+            verify(internationalPostalService).validate(caseData);
+            verify(consentOrderService).performCheck(any(CallbackRequest.class), eq(AUTH_TOKEN));
+        }
     }
 }
