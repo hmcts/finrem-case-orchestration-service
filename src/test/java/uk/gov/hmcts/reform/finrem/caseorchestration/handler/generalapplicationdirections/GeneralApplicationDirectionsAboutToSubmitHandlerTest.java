@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -45,8 +47,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,6 +61,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
@@ -99,31 +100,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     }
 
     @Test
-    public void givenCase_whenCorrectConfigSupplied_thenHandlerCanHandle() {
-        assertThat(submitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-            is(true));
-    }
-
-    @Test
-    public void givenCase_whenInCorrectConfigCaseTypeSupplied_thenHandlerCanHandle() {
-        assertThat(submitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-            is(false));
-    }
-
-    @Test
-    public void givenCase_whenInCorrectConfigEventTypeSupplied_thenHandlerCanHandle() {
-        assertThat(submitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
-    }
-
-    @Test
-    public void givenCase_whenInCorrectConfigCallbackTypeSupplied_thenHandlerCanHandle() {
-        assertThat(submitHandler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-            is(false));
+    public void testCanHandle() {
+        assertCanHandle(submitHandler,
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
+        );
     }
 
     @Test
@@ -398,23 +379,30 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
             .label("General Application 1 - Received from - applicant - Created Date 2023-06-13 -Hearing Required - No")
             .code("46132d38-259b-467e-bd4e-e4d7431e32f0#Not Approved").build();
         dynamicListForCaseDetails.setValue(listElement);
+
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
+
         CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
         GeneralApplicationItems generalApplicationItems =
             GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").build();
+
         when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             generalApplicationItems);
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
         FinremCaseData finremCaseData = startHandle.getData();
+
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
+        finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
+
         DynamicList dynamicList = objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(1, dynamicList.getListItems().size());
 
@@ -434,6 +422,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
             = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
         assertEquals(1, list.size());
         verify(service).generateGeneralApplicationDirectionsDocument(any(), any());
+        verify(manageHearingActionService).performAddHearing(any(), any());
+        verify(manageHearingActionService).updateTabData(any());
     }
 
     public DynamicRadioList buildDynamicIntervenerList() {
