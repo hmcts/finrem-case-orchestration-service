@@ -189,7 +189,7 @@ class AdditionalHearingDocumentServiceTest {
             .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
         uploadOrderCollections.add(uploadOrderCollection);
         data.setUploadHearingOrder(uploadOrderCollections);
-        when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
+        when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
@@ -236,7 +236,7 @@ class AdditionalHearingDocumentServiceTest {
             .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
         orderCollections.add(orderCollection);
         data.setFinalOrderCollection(orderCollections);
-        when(orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
+        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
 
         List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
         LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
@@ -245,7 +245,7 @@ class AdditionalHearingDocumentServiceTest {
             .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
         uploadOrderCollections.add(uploadOrderCollection);
         data.setUploadHearingOrder(uploadOrderCollections);
-        when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
+        when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
@@ -291,7 +291,7 @@ class AdditionalHearingDocumentServiceTest {
             .isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
         orderCollections.add(orderCollection);
         data.setFinalOrderCollection(orderCollections);
-        when(orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
+        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
 
         List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
         LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
@@ -300,7 +300,7 @@ class AdditionalHearingDocumentServiceTest {
             .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
         uploadOrderCollections.add(uploadOrderCollection);
         data.setUploadHearingOrder(uploadOrderCollections);
-        when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
+        when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
@@ -369,8 +369,8 @@ class AdditionalHearingDocumentServiceTest {
         directionDetailsCollection.add(detailCollection);
         data.setDirectionDetailsCollection(directionDetailsCollection);
 
-        when(orderDateService.addCreatedDateInFinalOrder(isNull(), eq(AUTH_TOKEN))).thenReturn(List.of());
-        when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
+        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(isNull(), eq(AUTH_TOKEN))).thenReturn(List.of());
+        when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument("stampedDoc1", "stampedDoc1"));
 
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
@@ -392,21 +392,20 @@ class AdditionalHearingDocumentServiceTest {
             .isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
         orderCollections.add(orderCollection);
         data.setFinalOrderCollection(orderCollections);
-        when(orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
+        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
 
         List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
         LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
         DirectionOrderCollection uploadOrderCollection
             = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime)
-            .additionalDocuments(List.of(DocumentCollectionItem.builder()
-                .value(caseDocument("attachment", "attachment.pdf"))
-                .build()))
-                .build())
+                .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime)
+                .additionalDocuments(List.of(
+                    DocumentCollectionItem.builder().value(caseDocument("attachment", "attachment.pdf")).build()
+                )).build())
             .build();
         uploadOrderCollections.add(uploadOrderCollection);
         data.setUploadHearingOrder(uploadOrderCollections);
-        when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
+        when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
@@ -579,7 +578,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-    void givenCase_whenGetApprovedHearingOrdersCalledButNoHearingOrderAvailalle_thenReturnEmptyList() {
+    void givenCase_whenGetApprovedHearingOrdersCalledButNoHearingOrderAvailable_thenReturnEmptyList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
 
@@ -587,11 +586,11 @@ class AdditionalHearingDocumentServiceTest {
             = additionalHearingDocumentService.getApprovedHearingOrders(caseDetails, AUTH_TOKEN);
 
         assertThat(approvedHearingOrders).isEmpty();
-        verify(orderDateService).addCreatedDateInUploadedOrder(any(),any());
+        verify(orderDateService).syncCreatedDateAndMarkDocumentNotStamped(any(),any());
     }
 
     @Test
-    void givenCase_whenGetApprovedHearingOrdersCalledHearingOrderAvailalle_thenReturnEmptyList() {
+    void givenCase_whenGetApprovedHearingOrdersCalledHearingOrderAvailable_thenReturnEmptyList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
 
@@ -611,7 +610,7 @@ class AdditionalHearingDocumentServiceTest {
         List<DirectionOrderCollection> mockOrder = new ArrayList<>();
         mockOrder.add(orderCollection1);
 
-        when(orderDateService.addCreatedDateInUploadedOrder(uploadHearingOrder, AUTH_TOKEN)).thenReturn(mockOrder);
+        when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadHearingOrder, AUTH_TOKEN)).thenReturn(mockOrder);
 
         List<DirectionOrderCollection> approvedHearingOrders
             = additionalHearingDocumentService.getApprovedHearingOrders(caseDetails, AUTH_TOKEN);
@@ -621,7 +620,7 @@ class AdditionalHearingDocumentServiceTest {
             .extracting(order -> order.getValue().getIsOrderStamped())
             .first()
             .isEqualTo(YesOrNo.YES);
-        verify(orderDateService).addCreatedDateInUploadedOrder(any(),any());
+        verify(orderDateService).syncCreatedDateAndMarkDocumentNotStamped(any(),any());
     }
 
     @Test
@@ -638,7 +637,7 @@ class AdditionalHearingDocumentServiceTest {
         FinremCaseData data = caseDetails.getData();
         data.setUploadHearingOrder(uploadHearingOrder);
 
-        when(orderDateService.addCreatedDateInFinalOrder(isNull(), eq(AUTH_TOKEN))).thenReturn(new ArrayList<>());
+        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(isNull(), eq(AUTH_TOKEN))).thenReturn(new ArrayList<>());
 
         additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, AUTH_TOKEN);
 
@@ -647,7 +646,7 @@ class AdditionalHearingDocumentServiceTest {
             .extracting(order -> order.getValue().getIsOrderStamped())
             .first()
             .isEqualTo(YesOrNo.YES);
-        verify(orderDateService).addCreatedDateInFinalOrder(any(),any());
+        verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(any(),any());
     }
 
     @Test
@@ -671,7 +670,7 @@ class AdditionalHearingDocumentServiceTest {
         List<DirectionOrderCollection> mockOrder = new ArrayList<>();
         mockOrder.add(orderCollection1);
 
-        when(orderDateService.addCreatedDateInFinalOrder(uploadHearingOrder, AUTH_TOKEN)).thenReturn(mockOrder);
+        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(uploadHearingOrder, AUTH_TOKEN)).thenReturn(mockOrder);
 
         additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, AUTH_TOKEN);
 
@@ -681,7 +680,7 @@ class AdditionalHearingDocumentServiceTest {
             .first()
             .isEqualTo(YesOrNo.YES);
 
-        verify(orderDateService).addCreatedDateInFinalOrder(any(),any());
+        verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(any(),any());
     }
 
     @Test
