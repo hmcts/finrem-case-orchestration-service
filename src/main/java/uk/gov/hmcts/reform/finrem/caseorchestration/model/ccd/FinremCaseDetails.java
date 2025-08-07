@@ -48,6 +48,9 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     @JsonProperty("locked_by_user_id")
     private Integer lockedBy;
 
+    @Setter(lombok.AccessLevel.NONE)
+    private Integer version;
+
     @JsonIgnore
     public boolean isConsentedApplication() {
         return CaseType.CONSENTED.equals(caseType);

@@ -175,6 +175,7 @@ class FinremCaseDetailsMapperTest {
         caseDetails = buildCaseDetailsFromJson(BASIC_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
+        assertThat(finremCaseDetails.getVersion()).isEqualTo(13);
     }
 
     @Test
