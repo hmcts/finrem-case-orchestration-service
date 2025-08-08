@@ -30,9 +30,7 @@ public class AmendApplicationConsentedMidHandler extends FinremCallbackHandler {
                                                ConsentOrderService consentOrderService,
                                                InternationalPostalService postalService,
                                                ObjectMapper objectMapper,
-                                               RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator)
-    {
-
+                                               RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator) {
         super(finremCaseDetailsMapper);
         this.consentOrderService = consentOrderService;
         this.postalService = postalService;
