@@ -73,7 +73,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
             FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
+        
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         //CHECK FOR NEW EVENT
