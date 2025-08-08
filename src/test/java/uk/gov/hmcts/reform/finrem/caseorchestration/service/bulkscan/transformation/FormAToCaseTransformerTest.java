@@ -642,7 +642,6 @@ public class FormAToCaseTransformerTest {
             .build();
     }
 
-
     private void assertOnSingleFieldTransformationResult(String ocrFieldName, String ocrFieldValue, String ccdFieldName, String ccdFieldValue) {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(
             createExceptionRecord(asList(new OcrDataField(ocrFieldName, ocrFieldValue))));

@@ -37,7 +37,6 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
     private final List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList;
     private final SendOrdersCategoriser sendOrdersCategoriser;
 
-
     public SendConsentOrderInContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            GeneralOrderService generalOrderService,
                                                            GenericDocumentService genericDocumentService,
@@ -160,7 +159,6 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
                                                                 String userAuthorisation,
                                                                 String caseId,
                                                                 List<OrderSentToPartiesCollection> printOrderCollection) {
-
         List<CaseDocument> documents = new ArrayList<>();
         List<DocumentCollectionItem> caseDocuments = new ArrayList<>();
         if (caseData.getAdditionalCicDocuments() != null) {
@@ -177,6 +175,5 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
             });
         }
         return caseDocuments;
-
     }
 }

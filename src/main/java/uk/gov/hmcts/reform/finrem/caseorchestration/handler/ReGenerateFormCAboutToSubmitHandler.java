@@ -19,7 +19,6 @@ import java.util.Map;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor

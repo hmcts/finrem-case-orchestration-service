@@ -111,7 +111,6 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
         verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
-
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartAndThereIsExistingApplicationButNotAddedNewApplicationWithSelectedParty_thenThrowErrorMessage1() {
         List<String> roleList = List.of("Case", "Intervener1", "Intervener2", "Intervener3", "Intervener4", "Applicant");
@@ -125,7 +124,6 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
         verify(service, times(12)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
-
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()
@@ -136,7 +134,6 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTestSetup {
                 .data(new FinremCaseData()).build())
             .build();
     }
-
 
     private FinremCallbackRequest buildCallbackRequestWithCaseDetailsBefore() {
         GeneralApplicationsCollection record1 = GeneralApplicationsCollection.builder().id(UUID.randomUUID())

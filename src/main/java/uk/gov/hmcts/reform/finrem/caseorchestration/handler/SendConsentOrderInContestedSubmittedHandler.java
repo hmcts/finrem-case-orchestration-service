@@ -53,7 +53,6 @@ public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackH
         this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;
     }
 
-
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
@@ -119,6 +118,4 @@ public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackH
         return consentOrderNotApprovedDocumentService.getFirstOrderModifiedAfterSecondOrder(
                 latestRefusedConsentOrder, latestGeneralOrder, userAuth);
     }
-
-
 }

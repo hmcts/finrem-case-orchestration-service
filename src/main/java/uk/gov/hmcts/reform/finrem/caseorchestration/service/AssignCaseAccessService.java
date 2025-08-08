@@ -61,7 +61,6 @@ public class AssignCaseAccessService {
     private final SystemUserService systemUserService;
     private final FeatureToggleService featureToggleService;
 
-
     public void assignCaseAccess(CaseDetails caseDetails, String authorisationToken) {
         String userId = idamService.getIdamUserId(authorisationToken);
         AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, userId);
@@ -239,7 +238,6 @@ public class AssignCaseAccessService {
             serviceAuthTokenGenerator.generate(),
             SearchCaseAssignedUserRolesRequest.builder().caseIds(List.of(caseId)).build());
     }
-
 
     private List<CaseAssignmentUserRole> getCreatorRoles(List<CaseAssignmentUserRole> allRoles) {
         return allRoles.stream()

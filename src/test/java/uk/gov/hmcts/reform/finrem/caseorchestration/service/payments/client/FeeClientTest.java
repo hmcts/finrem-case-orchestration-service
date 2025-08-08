@@ -19,7 +19,6 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
 
-
 public class FeeClientTest extends PaymentsBaseServiceTest {
 
     @Autowired
@@ -47,7 +46,6 @@ public class FeeClientTest extends PaymentsBaseServiceTest {
         MatcherAssert.assertThat(feeResponse.getFeeAmount(), Matchers.is(BigDecimal.valueOf(50)));
     }
 
-
     @Test
     public void retrieveContestedFee() {
         String typeOfApplication  =  "In connection to matrimonial and civil partnership proceedings";
@@ -63,7 +61,6 @@ public class FeeClientTest extends PaymentsBaseServiceTest {
         MatcherAssert.assertThat(feeResponse.getVersion(), Matchers.is("v1"));
         MatcherAssert.assertThat(feeResponse.getFeeAmount(), Matchers.is(BigDecimal.valueOf(255)));
     }
-
 
     @Test
     public void retrieveContestedSchedule1ApplicationFee() {

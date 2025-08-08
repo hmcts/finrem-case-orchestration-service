@@ -34,7 +34,6 @@ public class CorrespondenceDocumentSharer extends DocumentSharer {
         return caseData.getUploadCaseDocumentWrapper().getRespCorrespondenceDocsCollShared();
     }
 
-
     @Override
     protected void setApplicantSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list) {
         caseData.getUploadCaseDocumentWrapper().setAppCorrespondenceDocsCollShared(list);
@@ -84,7 +83,6 @@ public class CorrespondenceDocumentSharer extends DocumentSharer {
     protected List<UploadCaseDocumentCollection> getApplicantSharedCollection(FinremCaseData caseData) {
         return caseData.getUploadCaseDocumentWrapper().getAppCorrespondenceDocsCollShared();
     }
-
 
     @Override
     protected List<UploadCaseDocumentCollection> getIntervenerFourCollection(UploadCaseDocumentWrapper documentWrapper) {

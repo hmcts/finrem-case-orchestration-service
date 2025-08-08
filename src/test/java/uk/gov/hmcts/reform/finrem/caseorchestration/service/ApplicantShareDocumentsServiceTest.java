@@ -107,7 +107,6 @@ public class ApplicantShareDocumentsServiceTest {
 
     }
 
-
     @Test
     void applicantSourceDocumentListWhenDocNotPresent() {
 
@@ -162,7 +161,6 @@ public class ApplicantShareDocumentsServiceTest {
         assertEquals("role size for sharing", 0, list.getListItems().size());
         assertNull("no document selected from list", list.getValue());
     }
-
 
     @Test
     void shareOneDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {

@@ -22,7 +22,6 @@ public class IntervenerFourHearingBundleHandlerTest extends HearingBundleHandler
     @InjectMocks
     IntervenerFourHearingBundleHandler handler;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,

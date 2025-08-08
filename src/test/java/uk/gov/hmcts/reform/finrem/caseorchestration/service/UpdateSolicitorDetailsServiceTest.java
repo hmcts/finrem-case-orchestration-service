@@ -100,7 +100,6 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         Assert.assertEquals(TEST_SOLICITOR_REFERENCE, caseDetails.getData().get(SOLICITOR_REFERENCE));
     }
 
-
     @Test
     public void shouldSuccessfullyConvertOrganisationAddress() {
 

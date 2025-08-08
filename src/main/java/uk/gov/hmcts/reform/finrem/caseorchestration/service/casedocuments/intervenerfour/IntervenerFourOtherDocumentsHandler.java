@@ -15,7 +15,6 @@ public class IntervenerFourOtherDocumentsHandler extends OtherDocumentsHandler {
         super(INTERVENER_FOUR_OTHER_COLLECTION, INTERVENER_FOUR, featureToggleService);
     }
 
-
     @Override
     protected DocumentCategory getOtherDocumentCategory() {
         return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_OTHER;

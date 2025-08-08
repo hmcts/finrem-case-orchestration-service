@@ -42,7 +42,6 @@ public class ListForHearingContestedAboutToStartHandlerTest {
             is(true));
     }
 
-
     @Test
     public void givenContestedCase_whenEventIsNotListForHearing_thenHandlerCanNotHandle() {
         assertThat(handler
@@ -64,7 +63,6 @@ public class ListForHearingContestedAboutToStartHandlerTest {
             is(false));
     }
 
-
     @Test
     public void givenCase_whenEventStart_thenSetDefaultOptionToNo() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
@@ -72,7 +70,6 @@ public class ListForHearingContestedAboutToStartHandlerTest {
             = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(YesOrNo.NO, response.getData().getListForHearingWrapper().getAdditionalHearingDocumentsOption());
     }
-
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest

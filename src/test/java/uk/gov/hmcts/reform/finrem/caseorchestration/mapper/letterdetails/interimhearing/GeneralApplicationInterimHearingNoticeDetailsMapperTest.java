@@ -41,7 +41,6 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapperTest extends Abs
         assertEquals(expected, actual);
     }
 
-
     private GeneralApplicationInterimHearingNoticeDetails getExpectedGeneralApplicationInterimHearingNoticeDetails() {
         CourtDetailsTemplateFields courtDetails = getCourtDetails(CfcCourt.KINGSTON_UPON_THAMES_COUNTY_COURT_AND_FAMILY_COURT);
         return GeneralApplicationInterimHearingNoticeDetails.builder()

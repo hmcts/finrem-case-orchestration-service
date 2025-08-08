@@ -44,7 +44,6 @@ public class BarristerRepresentationCheckerTest {
         caseData = new HashMap<>();
     }
 
-
     @Test
     public void givenNoRepresentationHistory_thenReturnFalse() {
         caseData.put(REPRESENTATION_UPDATE_HISTORY, null);

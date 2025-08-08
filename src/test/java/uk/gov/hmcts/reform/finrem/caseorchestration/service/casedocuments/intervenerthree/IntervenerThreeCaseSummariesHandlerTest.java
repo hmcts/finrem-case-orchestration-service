@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerthree;
 
-
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -24,7 +23,6 @@ public class IntervenerThreeCaseSummariesHandlerTest extends CaseSummariesHandle
 
     @InjectMocks
     IntervenerThreeCaseSummariesHandler handler;
-
 
     @Override
     public void setUpscreenUploadDocumentList() {

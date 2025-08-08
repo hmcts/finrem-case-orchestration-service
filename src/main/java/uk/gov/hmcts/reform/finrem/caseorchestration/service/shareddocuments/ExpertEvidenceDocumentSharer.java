@@ -34,7 +34,6 @@ public class ExpertEvidenceDocumentSharer extends DocumentSharer {
         return caseData.getUploadCaseDocumentWrapper().getRespExpertEvidenceCollShared();
     }
 
-
     @Override
     protected void setApplicantSharedCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> list) {
         caseData.getUploadCaseDocumentWrapper().setAppExpertEvidenceCollectionShared(list);
@@ -84,7 +83,6 @@ public class ExpertEvidenceDocumentSharer extends DocumentSharer {
     protected List<UploadCaseDocumentCollection> getApplicantSharedCollection(FinremCaseData caseData) {
         return caseData.getUploadCaseDocumentWrapper().getAppExpertEvidenceCollectionShared();
     }
-
 
     @Override
     protected List<UploadCaseDocumentCollection> getIntervenerFourCollection(UploadCaseDocumentWrapper documentWrapper) {

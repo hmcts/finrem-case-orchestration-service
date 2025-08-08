@@ -110,7 +110,6 @@ public enum MiamDomesticViolence {
     FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_23("FR_ms_MIAMDomesticViolenceChecklist_Value_23",
         "I am unable to provide the required evidence with my application.");
 
-
     private final String value;
 
     private final String text;

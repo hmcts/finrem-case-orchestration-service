@@ -136,5 +136,4 @@ class SolicitorCreateContestedMidHandlerTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
         return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
     }
-
 }

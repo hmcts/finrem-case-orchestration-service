@@ -23,7 +23,6 @@ public class ApplicantFormsHCollectionServiceTest extends FormsHHandlerTest {
     @InjectMocks
     ApplicantFormsHHandler collectionService;
 
-
     @Override
     public void setUpscreenUploadDocumentList() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_H,

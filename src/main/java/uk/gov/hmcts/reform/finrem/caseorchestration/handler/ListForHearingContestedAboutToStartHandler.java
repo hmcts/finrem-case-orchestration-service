@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
-
 @Slf4j
 @Service
 public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHandler {
@@ -29,7 +28,6 @@ public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHa
             && CaseType.CONTESTED.equals(caseType)
             && EventType.LIST_FOR_HEARING.equals(eventType);
     }
-
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,

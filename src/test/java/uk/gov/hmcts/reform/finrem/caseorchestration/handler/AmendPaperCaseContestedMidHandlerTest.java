@@ -44,7 +44,6 @@ class AmendPaperCaseContestedMidHandlerTest {
     @Mock
     private ExpressCaseService expressCaseService;
 
-
     @ParameterizedTest
     @MethodSource
     void testCanHandle(CallbackType callbackType, CaseType caseType, EventType eventType, boolean expected) {
