@@ -39,6 +39,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_CAMELCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_LOWERCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SOLICITOR_CREATE;
 
 public class ConsentOrderServiceTest extends BaseServiceTest {
 
@@ -265,6 +267,27 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         assertEquals(CONSENT_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
         final String docLabel = (String) data.get(CV_OTHER_DOC_LABEL_FIELD);
         assertEquals(CONSENT_OTHER_DOC_LABEL_VALUE, docLabel);
+    }
+
+    @Test
+    public void performCheck_shouldHandleNullAndNonNullCaseDetailsBefore() {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+        List<String> errors = consentOrderService.performCheck(finremCallbackRequest, AUTH_TOKEN);
+        assertTrue(errors.isEmpty());
+
+        // test when caseDetailsBefore null
+        finremCallbackRequest.setCaseDetailsBefore(null);
+        errors = consentOrderService.performCheck(finremCallbackRequest, AUTH_TOKEN);
+        assertTrue(errors.isEmpty());
+    }
+
+    private FinremCallbackRequest buildFinremCallbackRequest() {
+        return FinremCallbackRequest
+            .builder()
+            .eventType(SOLICITOR_CREATE)
+            .caseDetails(defaultConsentedFinremCaseDetails())
+            .caseDetailsBefore(defaultConsentedFinremCaseDetails())
+            .build();
     }
 
     private CallbackRequest buildCallbackRequest() {

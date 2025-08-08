@@ -58,7 +58,7 @@ public class FinremCaseDetailsMapper {
         return CaseDetails.builder().caseTypeId(caseDetails.getCaseType().getCcdType())
             .id(caseDetails.getId())
             .jurisdiction(caseDetails.getJurisdiction())
-            .state(caseDetails.getState().getStateId())
+            .state(caseDetails.getState() != null ? caseDetails.getState().getStateId() : null)
             .createdDate(caseDetails.getCreatedDate())
             .securityLevel(caseDetails.getSecurityLevel())
             .callbackResponseStatus(caseDetails.getCallbackResponseStatus())
