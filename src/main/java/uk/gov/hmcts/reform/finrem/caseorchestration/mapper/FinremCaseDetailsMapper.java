@@ -86,8 +86,6 @@ public class FinremCaseDetailsMapper {
      * @param caseDetails the {@link FinremCaseDetails} instance to convert
      * @param classesToOverrideJsonInclude one or more classes for which {@code null} fields
      * should be forcibly included by applying a MixIn that overrides {@code @JsonInclude}
-     *                                     should be forcibly included by applying a MixIn that overrides
-     *                                     {@code @JsonInclude}
      * @return a {@link CaseDetails} instance with its data map including null-valued fields
      * @throws JsonProcessingException if an error occurs during JSON serialization or deserialization
      */
