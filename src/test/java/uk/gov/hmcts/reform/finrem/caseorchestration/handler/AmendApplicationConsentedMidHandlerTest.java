@@ -116,7 +116,6 @@ class AmendApplicationConsentedMidHandlerTest {
 
     @Test
     void givenConsentedCase_WhenEmptyApplicantPostCode_thenHandlerWillShowMessage() {
-
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -128,7 +127,7 @@ class AmendApplicationConsentedMidHandlerTest {
                 "County",
                 "Country",
                 "Town",
-                null
+                ""
         ));
 
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
@@ -176,7 +175,7 @@ class AmendApplicationConsentedMidHandlerTest {
             "County",
             "Country",
             "Town",
-            null
+            ""
         ));
 
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
@@ -227,7 +226,7 @@ class AmendApplicationConsentedMidHandlerTest {
             "County",
             "Country",
             "Town",
-            null
+            ""
         ));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
