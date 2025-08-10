@@ -19,8 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingServi
 
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.initialiseHearingTypeDynamicList;
-
 @Slf4j
 @Service
 public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
@@ -65,7 +63,7 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
         finremCaseData.getManageHearingsWrapper().setWorkingHearing(
             WorkingHearing.builder()
                 .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
-                .hearingTypeDynamicList(initialiseHearingTypeDynamicList(List.of(HearingType.values())))
+                .withHearingTypes(HearingType.values())
                 .build()
         );
 

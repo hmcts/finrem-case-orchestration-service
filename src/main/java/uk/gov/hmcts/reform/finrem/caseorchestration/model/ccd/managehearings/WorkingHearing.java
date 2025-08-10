@@ -16,8 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.getHearingType;
 
 @Builder
@@ -38,6 +40,23 @@ public class WorkingHearing {
     private YesOrNo additionalHearingDocPrompt;
     private List<DocumentCollectionItem> additionalHearingDocs;
     private DynamicMultiSelectList partiesOnCaseMultiSelectList;
+
+    public static WorkingHearing from(Hearing hearing) {
+        return WorkingHearing.builder()
+            .hearingDate(hearing.getHearingDate())
+            .hearingTimeEstimate(hearing.getHearingTimeEstimate())
+            .hearingTime(hearing.getHearingTime())
+            .hearingCourtSelection(hearing.getHearingCourtSelection())
+            .hearingMode(hearing.getHearingMode())
+            .additionalHearingInformation(hearing.getAdditionalHearingInformation())
+            .hearingNoticePrompt(hearing.getHearingNoticePrompt())
+            .additionalHearingDocPrompt(hearing.getAdditionalHearingDocPrompt())
+            .additionalHearingDocs(hearing.getAdditionalHearingDocs())
+            .withPartiesOnCase(hearing.getPartiesOnCase())
+            .withHearingTypes(HearingType.values())
+            .withHearingTypeSelected(hearing.getHearingType())
+            .build();
+    }
 
     public static Hearing transformHearingInputsToHearing(WorkingHearing workingHearing) {
         return Hearing.builder()
@@ -62,38 +81,54 @@ public class WorkingHearing {
             .build();
     }
 
-    public static DynamicList initialiseHearingTypeDynamicList(List<HearingType> hearingTypes) {
-        List<DynamicListElement> listElements = hearingTypes.stream()
-            .map(hearingType -> DynamicListElement.builder()
+    public static class WorkingHearingBuilder {
+        private DynamicList hearingTypeDynamicList;
+        private DynamicMultiSelectList partiesOnCaseMultiSelectList;
+
+        private DynamicListElement hearingTypeItem(HearingType hearingType) {
+            return DynamicListElement.builder()
                 .code(hearingType.name())
                 .label(hearingType.getId())
-                .build())
-            .toList();
+                .build();
+        }
 
-        return DynamicList.builder()
-            .listItems(listElements)
-            .build();
-    }
+        public WorkingHearingBuilder withHearingTypes(HearingType... hearingTypes) {
+            List<DynamicListElement> listElements = Arrays.stream(hearingTypes)
+                .map(this::hearingTypeItem)
+                .toList();
 
-    public static DynamicList initialiseHearingTypeDynamicListWithSelection(List<HearingType> hearingTypes, HearingType selectedHearingType) {
-        DynamicList dynamicList = initialiseHearingTypeDynamicList(hearingTypes);
-        dynamicList.setValue(DynamicListElement.builder()
-            .code(selectedHearingType.name())
-            .label(selectedHearingType.getId())
-            .build());
-        return dynamicList;
-    }
+            DynamicList list = ofNullable(this.hearingTypeDynamicList)
+                .orElse(DynamicList.builder().build());
+            list.setListItems(listElements);
+            this.hearingTypeDynamicList = list;
 
-    public static DynamicMultiSelectList initialisePartiesOnCaseMultiSelectList(List<PartyOnCaseCollectionItem> partiesOnCase) {
-        List<DynamicMultiSelectListElement> listElements = partiesOnCase.stream()
-            .map(party -> DynamicMultiSelectListElement.builder()
-                .code(party.getValue().getRole())
-                .label(party.getValue().getLabel())
-                .build())
-            .toList();
+            return this;
+        }
 
-        return DynamicMultiSelectList.builder()
-            .listItems(listElements)
-            .build();
+        public WorkingHearingBuilder withHearingTypeSelected(HearingType hearingType) {
+            DynamicList list = ofNullable(this.hearingTypeDynamicList)
+                .orElse(DynamicList.builder().build());
+            list.setValue(hearingTypeItem(hearingType));
+            this.hearingTypeDynamicList = list;
+
+            return this;
+        }
+
+        public WorkingHearingBuilder withPartiesOnCase(List<PartyOnCaseCollectionItem> partiesOnCaseCollectionItems) {
+            List<DynamicMultiSelectListElement> listElements = partiesOnCaseCollectionItems.stream()
+                .map(PartyOnCaseCollectionItem::getValue)
+                .map(partyOnCase -> DynamicMultiSelectListElement.builder()
+                    .code(partyOnCase.getRole())
+                    .label(partyOnCase.getLabel())
+                    .build())
+                .toList();
+
+            DynamicMultiSelectList list = ofNullable(this.partiesOnCaseMultiSelectList)
+                .orElse(DynamicMultiSelectList.builder().build());
+            list.setListItems(listElements);
+            this.partiesOnCaseMultiSelectList = list;
+
+            return this;
+        }
     }
 }
