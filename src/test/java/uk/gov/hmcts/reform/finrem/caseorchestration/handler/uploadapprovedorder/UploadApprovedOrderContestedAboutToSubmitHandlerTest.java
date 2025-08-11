@@ -1,51 +1,51 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
 
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPLOAD_APPROVED_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UploadApprovedOrderContestedAboutToSubmitHandlerTest extends UploadApprovedOrderBaseHandlerTestSetup {
+@ExtendWith(MockitoExtension.class)
+class UploadApprovedOrderContestedAboutToSubmitHandlerTest {
 
     @InjectMocks
-    UploadApprovedOrderContestedAboutToSubmitHandler handler;
+    private UploadApprovedOrderContestedAboutToSubmitHandler underTest;
 
     @Mock
-    UploadApprovedOrderService service;
+    private UploadApprovedOrderService uploadApprovedOrderService;
+
+    @Mock
+    private DocumentWarningsHelper documentWarningsHelper;
 
     @Test
-    public void givenContestedCase_whenAboutToSubmitUploadApprovedOrder_thenCanHandle() {
-        assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER));
-    }
-
-    @Test
-    public void givenContestedCase_whenSubmittedUploadApprovedOrder_thenCannotHandle() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_APPROVED_ORDER));
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER));
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE));
+    void canHandle() {
+        assertCanHandle(underTest, ABOUT_TO_SUBMIT, CONTESTED, UPLOAD_APPROVED_ORDER);
     }
 
     @Test
     public void givenContestedCase_whenAboutToSubmitUploadApprovedOrderAndNoErrors_thenHandle() {
-        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest(EventType.UPLOAD_APPROVED_ORDER);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory
+            .from(Long.valueOf(CASE_ID), CONTESTED, UPLOAD_APPROVED_ORDER);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertTrue(response.getErrors().isEmpty());
-        verify(service).processApprovedOrders(finremCallbackRequest, new ArrayList<>(), AUTH_TOKEN);
+        verify(uploadApprovedOrderService).processApprovedOrders(finremCallbackRequest, new ArrayList<>(), AUTH_TOKEN);
     }
 }
