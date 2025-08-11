@@ -141,67 +141,71 @@ class WorkingHearingTest {
 
     private static Stream<Arguments> testFrom() {
         return Stream.of(
-            Arguments.of(Hearing.builder()
-                    .hearingType(HearingType.APPEAL_HEARING)
-                    .hearingDate(LocalDate.of(2023, 1, 1))
-                    .hearingTimeEstimate("2 hours")
-                    .hearingTime("10:00 AM")
-                    .hearingCourtSelection(Court.builder()
-                        .region(Region.LONDON)
-                        .londonList(RegionLondonFrc.LONDON)
-                        .build())
-                    .hearingMode(HearingMode.IN_PERSON)
-                    .additionalHearingInformation("Info A")
-                    .hearingNoticePrompt(YesOrNo.YES)
-                    .additionalHearingDocPrompt(YesOrNo.NO)
-                    .additionalHearingDocs(List.of(DocumentCollectionItem.builder().value(CaseDocument
-                        .builder()
-                        .documentFilename("Test Document.pdf")
-                        .documentUrl("https://example.com/document.pdf")
-                        .documentBinaryUrl("https://example.com/document-binary.pdf")
-                        .build()).build()))
-                    .partiesOnCase(List.of(PartyOnCaseCollectionItem
-                        .builder()
-                        .value(PartyOnCase
-                            .builder()
-                            .role("Some Party")
-                            .label("Some Party Label")
-                            .build())
-                        .build()))
-                    .build(),
-                "Non-migrated hearing"
-            ),
-            Arguments.of(Hearing.builder()
-                    .hearingType(HearingType.DIR)
-                    .hearingDate(LocalDate.of(2023, 1, 1))
-                    .hearingTimeEstimate("2 hours")
-                    .hearingTime("10:00 AM")
-                    .wasMigrated(YesOrNo.YES)
-                    .hearingCourtSelection(Court.builder()
-                        .region(Region.LONDON)
-                        .londonList(RegionLondonFrc.LONDON)
-                        .build())
-                    .hearingMode(null)
-                    .additionalHearingInformation("Info A")
-                    .hearingNoticePrompt(null)
-                    .additionalHearingDocPrompt(YesOrNo.NO)
-                    .additionalHearingDocs(List.of(DocumentCollectionItem.builder().value(CaseDocument
-                        .builder()
-                        .documentFilename("Test Document.pdf")
-                        .documentUrl("https://example.com/document.pdf")
-                        .documentBinaryUrl("https://example.com/document-binary.pdf")
-                        .build()).build()))
-                    .partiesOnCase(List.of(PartyOnCaseCollectionItem
-                        .builder()
-                        .value(PartyOnCase
-                            .builder()
-                            .role("Some Party")
-                            .label("Some Party Label")
-                            .build())
-                        .build()))
-                    .build(),
-                "Migrated hearing"
-            )
+            Arguments.of(nonMigratedHearing()),
+            Arguments.of(migratedHearing())
         );
+    }
+
+    private static Hearing nonMigratedHearing() {
+        return Hearing.builder()
+            .hearingType(HearingType.APPEAL_HEARING)
+            .hearingDate(LocalDate.of(2023, 1, 1))
+            .hearingTimeEstimate("2 hours")
+            .hearingTime("10:00 AM")
+            .hearingCourtSelection(Court.builder()
+                .region(Region.LONDON)
+                .londonList(RegionLondonFrc.LONDON)
+                .build())
+            .hearingMode(HearingMode.IN_PERSON)
+            .additionalHearingInformation("Info A")
+            .hearingNoticePrompt(YesOrNo.YES)
+            .additionalHearingDocPrompt(YesOrNo.NO)
+            .additionalHearingDocs(List.of(DocumentCollectionItem.builder().value(CaseDocument
+                .builder()
+                .documentFilename("Test Document.pdf")
+                .documentUrl("https://example.com/document.pdf")
+                .documentBinaryUrl("https://example.com/document-binary.pdf")
+                .build()).build()))
+            .partiesOnCase(List.of(PartyOnCaseCollectionItem
+                .builder()
+                .value(PartyOnCase
+                    .builder()
+                    .role("Some Party")
+                    .label("Some Party Label")
+                    .build())
+                .build()))
+            .build();
+    }
+
+    private static Hearing migratedHearing() {
+        return Hearing.builder()
+            .hearingType(HearingType.DIR)
+            .hearingDate(LocalDate.of(2023, 1, 1))
+            .hearingTimeEstimate("2 hours")
+            .hearingTime("10:00 AM")
+            .wasMigrated(YesOrNo.YES)
+            .hearingCourtSelection(Court.builder()
+                .region(Region.LONDON)
+                .londonList(RegionLondonFrc.LONDON)
+                .build())
+            .hearingMode(null)
+            .additionalHearingInformation("Info A")
+            .hearingNoticePrompt(null)
+            .additionalHearingDocPrompt(YesOrNo.NO)
+            .additionalHearingDocs(List.of(DocumentCollectionItem.builder().value(CaseDocument
+                .builder()
+                .documentFilename("Test Document.pdf")
+                .documentUrl("https://example.com/document.pdf")
+                .documentBinaryUrl("https://example.com/document-binary.pdf")
+                .build()).build()))
+            .partiesOnCase(List.of(PartyOnCaseCollectionItem
+                .builder()
+                .value(PartyOnCase
+                    .builder()
+                    .role("Some Party")
+                    .label("Some Party Label")
+                    .build())
+                .build()))
+            .build();
     }
 }
