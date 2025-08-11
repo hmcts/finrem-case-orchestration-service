@@ -49,6 +49,7 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = finremCaseDetails.getData();
 
