@@ -41,6 +41,11 @@ public class WorkingHearing {
     private List<DocumentCollectionItem> additionalHearingDocs;
     private DynamicMultiSelectList partiesOnCaseMultiSelectList;
 
+    /**
+     * Creates a WorkingHearing instance from a Hearing instance.
+     * @param hearing the Hearing instance to convert
+     * @return a WorkingHearing instance with fields populated from the Hearing instance
+     */
     public static WorkingHearing from(Hearing hearing) {
         return WorkingHearing.builder()
             .hearingDate(hearing.getHearingDate())
