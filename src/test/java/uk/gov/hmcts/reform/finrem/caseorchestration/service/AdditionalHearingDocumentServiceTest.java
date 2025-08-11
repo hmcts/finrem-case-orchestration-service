@@ -176,7 +176,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderCollIsEmpty_thenHandlerWillAddNewOrderToFinalOrder()
+    void givenStampAndCollectOrderCollectionWhenFinalOrderCollIsEmpty_thenHandlerWillAddNewOrderToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -209,11 +209,13 @@ class AdditionalHearingDocumentServiceTest {
         List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
         caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
 
-        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
+        additionalHearingDocumentService.storeHearingNotice(caseDetails, AUTH_TOKEN);
 
         assertThat(data.getFinalOrderCollection()).hasSize(1);
         assertThat(data.getUploadHearingOrder()).hasSize(1);
         assertThat(data.getLatestDraftHearingOrder()).extracting(CaseDocument::getDocumentFilename).isEqualTo(FILE_NAME);
+
         assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
             .isNotEmpty()
             .allSatisfy(doc -> assertThat(doc.getValue()).isNotNull());
@@ -224,7 +226,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderHasSameOrder_thenHandlerWillNotAddNewOrderToFinalOrder()
+    void givenStampAndCollectOrderCollectionWhenFinalOrderHasSameOrder_thenHandlerWillNotAddNewOrderToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -263,7 +265,9 @@ class AdditionalHearingDocumentServiceTest {
         Map<String, Object> caseData = baseCaseData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
         caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
+
+        additionalHearingDocumentService.storeHearingNotice(caseDetails, AUTH_TOKEN);
 
         assertThat(data.getFinalOrderCollection()).hasSize(1);
         assertThat(data.getUploadHearingOrder()).hasSize(1);
@@ -278,7 +282,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrder_thenHandlerWillAddNewOrderToFinalOrder()
+    void givenStampAndCollectOrderCollectionWhenFinalOrderIsNotSameOrder_thenHandlerWillAddNewOrderToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -320,23 +324,29 @@ class AdditionalHearingDocumentServiceTest {
         List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
         caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
 
-        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
 
         assertThat(data.getFinalOrderCollection()).hasSize(2);
         assertThat(data.getUploadHearingOrder()).hasSize(1);
         assertThat(data.getLatestDraftHearingOrder().getDocumentFilename()).isEqualTo(FILE_NAME);
-        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
-            .isNotEmpty()
-            .allSatisfy(doc -> assertThat(doc.getValue()).isNotNull());
-
-        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
-            .extracting(doc -> doc.getValue().getDocument())
-            .first()
-            .isEqualTo(caseDocument());
     }
 
     @Test
-    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNull_thenHandlerWillAddMultipleNewOrdersToFinalOrder()
+    void givenStoreHearingNotice_withNoDirectionDetailsCollection_thenShouldNotAddHearingNoice() {
+
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setDirectionDetailsCollection(Collections.emptyList());
+
+        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
+
+        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
+            .isNull();
+    }
+
+    @Test
+    void givenStampAndCollectOrderCollectionWhenFinalOrderIsNull_thenHandlerWillAddMultipleNewOrdersToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -373,13 +383,13 @@ class AdditionalHearingDocumentServiceTest {
         when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument("stampedDoc1", "stampedDoc1"));
 
-        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
 
         assertThat(data.getFinalOrderCollection()).hasSize(2);
     }
 
     @Test
-    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrderAndNoAnotherHearing_thenHandle()
+    void givenStampAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrderAndNoAnotherHearing_thenHandle()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -426,7 +436,7 @@ class AdditionalHearingDocumentServiceTest {
         List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
         caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
 
-        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
 
         assertThat(data.getFinalOrderCollection()).hasSize(2);
         assertThat(data.getUploadHearingOrder()).hasSize(1);
@@ -440,7 +450,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-    void givenAdditionalDocumentsToBeStored_whenCreateAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
+    void givenAdditionalDocumentsToBeStored_whenStampAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
         FinremCallbackRequest request = buildCallbackRequest();
         FinremCaseDetails finremCaseDetails = request.getCaseDetails();
         CaseDocument expectedDocument = CaseDocument.builder().documentBinaryUrl(BINARY_URL).documentFilename(FILE_NAME)
