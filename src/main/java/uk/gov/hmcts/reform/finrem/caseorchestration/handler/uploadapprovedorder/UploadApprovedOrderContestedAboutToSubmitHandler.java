@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -37,8 +38,7 @@ public class UploadApprovedOrderContestedAboutToSubmitHandler extends FinremCall
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("invoking about to submit event {} for Case ID:{}", EventType.UPLOAD_APPROVED_ORDER,
-            callbackRequest.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
         List<String> errors = new ArrayList<>();
         service.processApprovedOrders(callbackRequest, errors, userAuthorisation);
