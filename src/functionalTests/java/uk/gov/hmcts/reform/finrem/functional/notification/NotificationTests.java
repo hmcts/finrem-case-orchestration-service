@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.functional.notification;
 
 import net.serenitybdd.junit.runners.SerenityRunner;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,28 +9,22 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 @RunWith(SerenityRunner.class)
 public class NotificationTests extends IntegrationTestBase {
 
-    @Value("${cos.notification.prepare-for-hearing-order-sent.api}")
-    private String prepareForHearingOrderSentApiUri;
-
     @Value("${cos.notification.contest-application-issued.api}")
     private String contestApplicationIssuedApiUri;
 
-    @Value(" /notify/update-frc")
+    @Value("${cos.notification.update-frc-information.api}")
     private String updateFrcInfoUri;
 
-    private final String consentedDir = "/json/consented/";
-    private final String contestedDir = "/json/contested/";
+    private static final String CONTESTED_DIR = "/json/contested/";
 
     @Test
     public void verifyNotifyContestApplicationIssuedIsOkay() {
-
         utils.validatePostSuccess(contestApplicationIssuedApiUri,
-            "ccd-request-with-solicitor-contestApplicationIssued.json", contestedDir);
+            "ccd-request-with-solicitor-contestApplicationIssued.json", CONTESTED_DIR);
     }
 
-    @Ignore
     @Test
     public void verifyNotifyUpdateFrcInfoIsOkay() {
-        utils.validatePostSuccess(updateFrcInfoUri, "update-frc-info.json", contestedDir);
+        utils.validatePostSuccess(updateFrcInfoUri, "update-frc-info.json", CONTESTED_DIR);
     }
 }

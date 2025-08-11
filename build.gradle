@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.67'
     id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1821'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1834'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -17,7 +17,7 @@ apply plugin: 'io.spring.dependency-management'
 def versions = [
         guava                : '33.4.8-jre',
         bspCommonLib         : '0.1.2',
-        ccdClient            : '5.1.1',
+        ccdClient            : '5.2.0',
         commonsIo            : '2.20.0',
         commonsLang3         : '3.18.0',
         hmctsNotify          : '5.2.1-RELEASE',
@@ -36,7 +36,7 @@ def versions = [
         jjwt                 : '0.12.6',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
-        tika                 : '3.2.1',
+        tika                 : '3.2.2',
         amClient             : '1.59.2',
         sendLetterClient     : '5.1.1',
         elasticSearch        : '7.17.29',
@@ -387,7 +387,7 @@ dependencyManagement {
             entry 'the_bouncy_castle_crypto_package_for_java'
         }
         //CVE-2024-25710
-        dependencySet(group: 'org.apache.commons', version: '1.27.1') {
+        dependencySet(group: 'org.apache.commons', version: '1.28.0') {
             entry 'commons-compress'
         }
     }
@@ -425,7 +425,7 @@ dependencies {
             strictly '[1.6.0,)'
         }
     }
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.13.1'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.14.0'
     implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
     implementation group: 'org.elasticsearch', name: 'elasticsearch', version: versions.elasticSearch
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
@@ -469,7 +469,7 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation('com.github.hmcts:fortify-client:1.4.9:all')
+    testImplementation('com.github.hmcts:fortify-client:1.4.10:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
@@ -526,9 +526,5 @@ tasks.withType(Zip).configureEach {
 }
 
 tasks.named('checkstyleMain') {
-    maxWarnings = 4
-}
-
-tasks.named('checkstyleTest') {
     maxWarnings = 3
 }

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
+package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
