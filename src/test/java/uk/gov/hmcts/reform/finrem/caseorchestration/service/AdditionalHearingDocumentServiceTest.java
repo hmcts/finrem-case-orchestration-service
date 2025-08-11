@@ -346,7 +346,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-    void givenStampAndCollectOrderCollectionWhenFinalOrderIsNull_thenHandlerWillAddMultipleNewOrdersToFinalOrder()
+    void givenStampAndCollectOrderCollection_AndStoreHearingNotice_WhenFinalOrderIsNull_thenHandlerWillAddMultipleNewOrdersToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -384,8 +384,17 @@ class AdditionalHearingDocumentServiceTest {
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument("stampedDoc1", "stampedDoc1"));
 
         additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
+        additionalHearingDocumentService.storeHearingNotice(caseDetails, AUTH_TOKEN);
 
         assertThat(data.getFinalOrderCollection()).hasSize(2);
+
+        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
+            .isNotEmpty()
+            .extracting(AdditionalHearingDocumentCollection::getValue)
+            .isNotNull()
+            .extracting(AdditionalHearingDocument::getDocument)
+            .first()
+            .isEqualTo(caseDocument());
     }
 
     @Test
