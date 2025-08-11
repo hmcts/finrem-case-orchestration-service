@@ -13,7 +13,7 @@ class NotificationsRequestBuilderFactoryTest {
     void testNewInstance() {
         @SuppressWarnings("unchecked")
         ObjectProvider<NotificationRequestBuilder> builderProvider = mock(ObjectProvider.class);
-        when(builderProvider.getObject()).thenReturn(new NotificationRequestBuilder());
+        when(builderProvider.getObject()).thenReturn(mock(NotificationRequestBuilder.class));
         NotificationRequestBuilderFactory factory = new NotificationRequestBuilderFactory(builderProvider);
 
         NotificationRequestBuilder builder = factory.newInstance();

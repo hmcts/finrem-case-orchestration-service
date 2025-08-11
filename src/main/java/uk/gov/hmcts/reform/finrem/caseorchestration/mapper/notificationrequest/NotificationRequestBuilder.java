@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -9,7 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 
 @Component
 @Scope(value = "prototype")
+@RequiredArgsConstructor
 public class NotificationRequestBuilder {
+
+    private final CourtDetailsConfiguration courtDetailsConfiguration;
+
     private String caseReferenceNumber;
     private String solicitorReferenceNumber;
     private String divorceCaseNumber;
@@ -49,6 +55,18 @@ public class NotificationRequestBuilder {
         respondentName = caseDetails.getData().getRespondentFullName();
         caseOrderType = caseDetails.getCaseType().getCcdType();
         caseType = CaseType.CONTESTED.equals(caseDetails.getCaseType()) ? EmailService.CONTESTED : EmailService.CONSENTED;
+
+        return this;
+    }
+
+    /**
+     * Sets the notification email destination to the court's email based on the selected allocated court in the case details.
+     * @param caseDetails the case details
+     * @return the NotificationRequestBuilder instance
+     */
+    public NotificationRequestBuilder withCourtAsEmailDestination(FinremCaseDetails caseDetails) {
+        String selectedAllocatedCourt = caseDetails.getData().getSelectedAllocatedCourt();
+        notificationEmail = courtDetailsConfiguration.getCourts().get(selectedAllocatedCourt).getEmail();
 
         return this;
     }

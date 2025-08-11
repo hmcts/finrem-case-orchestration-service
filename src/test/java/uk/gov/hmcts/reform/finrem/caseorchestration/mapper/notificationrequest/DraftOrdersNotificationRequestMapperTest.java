@@ -55,14 +55,13 @@ class DraftOrdersNotificationRequestMapperTest {
     private CourtDetailsConfiguration courtDetailsConfiguration;
     @Mock
     private NotificationRequestBuilderFactory notificationRequestBuilderFactory;
-    @Mock
-    private EmailService emailService;
     @InjectMocks
     private DraftOrdersNotificationRequestMapper mapper;
 
     @BeforeEach
     void setUp() {
-        lenient().when(notificationRequestBuilderFactory.newInstance()).thenReturn(new NotificationRequestBuilder());
+        lenient().when(notificationRequestBuilderFactory.newInstance())
+            .thenReturn(new NotificationRequestBuilder(courtDetailsConfiguration));
     }
 
     @Test

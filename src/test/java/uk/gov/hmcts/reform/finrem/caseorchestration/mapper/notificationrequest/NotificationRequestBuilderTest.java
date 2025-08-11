@@ -1,6 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -14,7 +19,13 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(MockitoExtension.class)
 class NotificationRequestBuilderTest {
+
+    @InjectMocks
+    private NotificationRequestBuilder builder;
+    @Mock
+    private CourtDetailsConfiguration courtDetailsConfiguration;
 
     @Test
     void givenConsentedCase_whenWithDefaults_thenCaseDetailsPopulated() {
@@ -32,7 +43,7 @@ class NotificationRequestBuilderTest {
             .caseType(CaseType.CONSENTED)
             .data(caseData)
             .build();
-        NotificationRequestBuilder builder = new NotificationRequestBuilder();
+
         NotificationRequest notificationRequest = builder
             .withDefaults(caseDetails)
             .build();
@@ -69,7 +80,7 @@ class NotificationRequestBuilderTest {
             .caseType(CaseType.CONTESTED)
             .data(caseData)
             .build();
-        NotificationRequestBuilder builder = new NotificationRequestBuilder();
+
         NotificationRequest notificationRequest = builder
             .withDefaults(caseDetails)
             .build();
@@ -93,7 +104,7 @@ class NotificationRequestBuilderTest {
     @Test
     void givenAllPropertiesSet_whenBuild_thenAllPropertiesPopulated() {
         byte[] documentContents = {1, 2, 3};
-        NotificationRequest notificationRequest = new NotificationRequestBuilder()
+        NotificationRequest notificationRequest = builder
             .caseReferenceNumber("123456789")
             .solicitorReferenceNumber("SOL123")
             .divorceCaseNumber("DIV123")

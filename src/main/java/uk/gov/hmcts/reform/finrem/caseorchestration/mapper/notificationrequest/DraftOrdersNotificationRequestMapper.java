@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -22,13 +21,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Service
 @Slf4j
 public class DraftOrdersNotificationRequestMapper extends AbstractNotificationRequestMapper {
-    private final CourtDetailsConfiguration courtDetailsConfiguration;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
 
-    public DraftOrdersNotificationRequestMapper(
-        NotificationRequestBuilderFactory builderFactory, CourtDetailsConfiguration courtDetailsConfiguration) {
+    public DraftOrdersNotificationRequestMapper(NotificationRequestBuilderFactory builderFactory) {
         super(builderFactory);
-        this.courtDetailsConfiguration = courtDetailsConfiguration;
     }
 
     public NotificationRequest buildJudgeNotificationRequest(FinremCaseDetails caseDetails, LocalDate hearingDate, String judge) {
@@ -47,26 +43,20 @@ public class DraftOrdersNotificationRequestMapper extends AbstractNotificationRe
      * @return a {@link NotificationRequest} containing all required notification placeholder data
      */
     public NotificationRequest buildAdminReviewNotificationRequest(FinremCaseDetails caseDetails, LocalDate hearingDate) {
-        FinremCaseData caseData = caseDetails.getData();
-        String email = getCourtAdminEmail(caseData);
-
         return notificationRequestBuilder()
             .withDefaults(caseDetails)
+            .withCourtAsEmailDestination(caseDetails)
             .hearingDate(dateFormatter.format(hearingDate))
-            .notificationEmail(email)
             .build();
     }
 
     public NotificationRequest buildCaseworkerDraftOrderReviewOverdue(FinremCaseDetails caseDetails,
                                                                       DraftOrdersReview draftOrdersReview) {
-        FinremCaseData caseData = caseDetails.getData();
-        String notificationEmail = getCourtAdminEmail(caseData);
-
         return notificationRequestBuilder()
             .withDefaults(caseDetails)
+            .withCourtAsEmailDestination(caseDetails)
             .hearingDate(dateFormatter.format(draftOrdersReview.getHearingDate()))
             .judgeName(draftOrdersReview.getHearingJudge())
-            .notificationEmail(notificationEmail)
             .oldestDraftOrderDate(dateFormatter.format(draftOrdersReview.getEarliestToBeReviewedOrderDate()))
             .selectedCourt(CourtHelper.getSelectedFrc(caseDetails))
             .build();
@@ -100,11 +90,6 @@ public class DraftOrdersNotificationRequestMapper extends AbstractNotificationRe
             .solicitorReferenceNumber(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
             .name(getRefusedOrderName(caseDetails, refusedOrder))
             .build();
-    }
-
-    private String getCourtAdminEmail(FinremCaseData caseData) {
-        String selectedAllocatedCourt = caseData.getSelectedAllocatedCourt();
-        return courtDetailsConfiguration.getCourts().get(selectedAllocatedCourt).getEmail();
     }
 
     private String getRefusedOrderEmail(FinremCaseDetails caseDetails, RefusedOrder refusedOrder) {
