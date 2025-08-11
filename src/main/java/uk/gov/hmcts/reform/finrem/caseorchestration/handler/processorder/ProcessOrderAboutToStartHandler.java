@@ -24,7 +24,6 @@ import java.util.List;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.initialiseHearingTypeDynamicList;
 
 @Slf4j
 @Service
@@ -70,7 +69,7 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
             caseData.getManageHearingsWrapper().setWorkingHearing(
                 WorkingHearing.builder()
                     .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
-                    .hearingTypeDynamicList(initialiseHearingTypeDynamicList(List.of(HearingType.values())))
+                    .withHearingTypes(HearingType.values())
                     .build()
             );
         }
