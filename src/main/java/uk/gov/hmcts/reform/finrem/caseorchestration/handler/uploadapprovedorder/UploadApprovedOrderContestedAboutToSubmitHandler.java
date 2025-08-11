@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -20,12 +21,16 @@ import java.util.List;
 @Service
 public class UploadApprovedOrderContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final UploadApprovedOrderService service;
+    private final DocumentWarningsHelper documentWarningsHelper;
+
+    private final UploadApprovedOrderService uploadApprovedOrderService;
 
     public UploadApprovedOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                            UploadApprovedOrderService service) {
+                                                            UploadApprovedOrderService uploadApprovedOrderService,
+                                                            DocumentWarningsHelper documentWarningsHelper) {
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.uploadApprovedOrderService = uploadApprovedOrderService;
+        this.documentWarningsHelper = documentWarningsHelper;
     }
 
     @Override
@@ -41,7 +46,7 @@ public class UploadApprovedOrderContestedAboutToSubmitHandler extends FinremCall
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
         List<String> errors = new ArrayList<>();
-        service.processApprovedOrders(callbackRequest, errors, userAuthorisation);
+        uploadApprovedOrderService.processApprovedOrders(callbackRequest, errors, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData()).errors(errors).build();
