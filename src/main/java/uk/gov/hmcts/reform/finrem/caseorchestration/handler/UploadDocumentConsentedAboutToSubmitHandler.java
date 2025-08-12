@@ -34,7 +34,6 @@ public class UploadDocumentConsentedAboutToSubmitHandler extends FinremCallbackH
     }
 
     @Override
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
