@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -20,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Up
 
 import java.util.List;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+
 @Slf4j
 @Service
 public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
@@ -28,16 +31,19 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
     private final GenericDocumentService genericDocumentService;
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
     private final UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
+    private final DocumentWarningsHelper documentWarningsHelper;
 
     public JudgeDraftOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingOrderService hearingOrderService,
                                                GenericDocumentService genericDocumentService,
                                                ContestedOrderApprovedLetterService contestedOrderApprovedLetterService,
-                                               UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser) {
+                                               UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser,
+                                               DocumentWarningsHelper documentWarningsHelper) {
         super(finremCaseDetailsMapper);
         this.hearingOrderService = hearingOrderService;
         this.genericDocumentService = genericDocumentService;
         this.contestedOrderApprovedLetterService = contestedOrderApprovedLetterService;
         this.uploadedDraftOrderCategoriser = uploadedDraftOrderCategoriser;
+        this.documentWarningsHelper = documentWarningsHelper;
     }
 
     @Override
@@ -65,7 +71,11 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         uploadedDraftOrderCategoriser.categorise(finremCaseDetailsUpdated.getData());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseDetailsUpdated.getData()).build();
+            .data(finremCaseDetailsUpdated.getData())
+            .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, data ->
+                emptyIfNull(data.getDraftDirectionWrapper().getDraftDirectionOrderCollection()).stream()
+                    .map(DraftDirectionOrderCollection::getValue).toList(), userAuthorisation))
+            .build();
     }
 
     private void convertAdditionalDocumentsToPdf(FinremCaseDetails caseDetails, String authorisation) {

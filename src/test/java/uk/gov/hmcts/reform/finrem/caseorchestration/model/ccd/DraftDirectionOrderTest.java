@@ -7,13 +7,13 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
-public class DirectionOrderTest {
+public class DraftDirectionOrderTest {
 
     @Test
     void getUploadingDocuments_shouldReturnListWithDocument_whenUploadDraftDocumentIsNotNull() {
         CaseDocument document = caseDocument();
 
-        DirectionOrder underTest = DirectionOrder.builder().build();
+        DraftDirectionOrder underTest = DraftDirectionOrder.builder().build();
         underTest.setUploadDraftDocument(document);
 
         List<CaseDocument> result = underTest.getUploadingDocuments();
@@ -23,7 +23,7 @@ public class DirectionOrderTest {
 
     @Test
     void getUploadingDocuments_shouldReturnEmptyList_whenUploadDraftDocumentIsNull() {
-        DirectionOrder underTest = DirectionOrder.builder().build();
+        DraftDirectionOrder underTest = DraftDirectionOrder.builder().build();
         underTest.setUploadDraftDocument(null);
 
         List<CaseDocument> result = underTest.getUploadingDocuments();
