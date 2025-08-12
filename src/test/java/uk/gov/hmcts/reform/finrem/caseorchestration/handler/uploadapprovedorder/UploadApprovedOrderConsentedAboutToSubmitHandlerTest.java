@@ -15,12 +15,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrd
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
@@ -50,17 +50,23 @@ class UploadApprovedOrderConsentedAboutToSubmitHandlerTest {
     @Test
     void givenUploadConsentedApproveOrder_whenHandle_thenSetLatestConsentOrderAndCallAddGeneratedDocs() {
         CaseDocument uploadApproveOrder = caseDocument(DOC_URL, DOC_FILE_NAME, BINARY_URL);
-        FinremCaseData finremCaseData = FinremCaseData.builder().consentOrderWrapper(
-                ConsentOrderWrapper.builder().uploadApprovedConsentOrder(uploadApproveOrder).build())
+
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .consentOrderWrapper(
+                ConsentOrderWrapper.builder().uploadApprovedConsentOrder(uploadApproveOrder).build()
+            )
             .build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(1L).data(finremCaseData).build();
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).data(finremCaseData).build();
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(finremCaseDetails).build();
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
+
+        CaseDocument convertedCaseDocument = caseDocument("convertedUrl", "converted.pdf");
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(convertedCaseDocument);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getData().getLatestConsentOrder(), is(caseDocument()));
+        assertThat(response.getData().getLatestConsentOrder()).isEqualTo(convertedCaseDocument);
         verify(consentOrderApprovedDocumentService).addGeneratedApprovedConsentOrderDocumentsToCase(any(), any());
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), any());
     }
