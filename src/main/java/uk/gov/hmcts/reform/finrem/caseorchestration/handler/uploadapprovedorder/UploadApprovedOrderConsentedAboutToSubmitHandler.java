@@ -30,7 +30,8 @@ public class UploadApprovedOrderConsentedAboutToSubmitHandler extends FinremCall
 
     public UploadApprovedOrderConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                             ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
-                                                            GenericDocumentService genericDocumentService, DocumentWarningsHelper documentWarningsHelper) {
+                                                            GenericDocumentService genericDocumentService,
+                                                            DocumentWarningsHelper documentWarningsHelper) {
         super(finremCaseDetailsMapper);
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.genericDocumentService =  genericDocumentService;
