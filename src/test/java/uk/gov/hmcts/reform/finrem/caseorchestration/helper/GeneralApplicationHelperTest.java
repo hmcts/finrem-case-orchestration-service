@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
@@ -92,6 +94,40 @@ class GeneralApplicationHelperTest {
         data.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         assertNull(helper.mapExistingGeneralApplicationToData(data, AUTH_TOKEN, caseId));
+    }
+
+    @Test
+    void givenContestedCase_whenMigratingExistingApplicantGeneralApplication_thenReturnGeneralApplicationData() {
+        GeneralApplicationWrapper generationApplicationWrapper = createLegacyGeneralApplicationData("applicant");
+        FinremCaseData caseData = FinremCaseData.builder()
+            .generalApplicationWrapper(generationApplicationWrapper)
+            .build();
+
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        GeneralApplicationCollectionData generalApplicationCollectionData =
+            helper.mapExistingGeneralApplicationToData(caseData, AUTH_TOKEN, caseId);
+
+        DynamicRadioList generationApplicationSender = generalApplicationCollectionData.getGeneralApplicationItems()
+            .getGeneralApplicationSender();
+        assertEquals(APPLICANT, generationApplicationSender.getValue().getCode());
+        assertEquals(APPLICANT, generationApplicationSender.getValue().getLabel());
+    }
+
+    @Test
+    void givenContestedCase_whenMigratingExistingRespondentGeneralApplication_thenReturnGeneralApplicationData() {
+        GeneralApplicationWrapper generationApplicationWrapper = createLegacyGeneralApplicationData("respondent");
+        FinremCaseData caseData = FinremCaseData.builder()
+            .generalApplicationWrapper(generationApplicationWrapper)
+            .build();
+
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        GeneralApplicationCollectionData generalApplicationCollectionData =
+            helper.mapExistingGeneralApplicationToData(caseData, AUTH_TOKEN, caseId);
+
+        DynamicRadioList generationApplicationSender = generalApplicationCollectionData.getGeneralApplicationItems()
+            .getGeneralApplicationSender();
+        assertEquals(RESPONDENT, generationApplicationSender.getValue().getCode());
+        assertEquals(RESPONDENT, generationApplicationSender.getValue().getLabel());
     }
 
     @Test
@@ -331,6 +367,81 @@ class GeneralApplicationHelperTest {
             .getGeneralApplications().getFirst().getValue().getGeneralApplicationCreatedDate().toString());
     }
 
+    @Test
+    void givenGeneralApplicationWithReceivedFrom_whenPopulateGeneralApplicationDataSender_thenShouldSetSender() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        GeneralApplicationCollectionData generalApplicationData = GeneralApplicationCollectionData.builder()
+            .generalApplicationItems(GeneralApplicationItems.builder()
+                .generalApplicationReceivedFrom("applicant")
+                .build())
+            .build();
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionData = List.of(generalApplicationData);
+
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        helper.populateGeneralApplicationDataSender(caseData, generalApplicationCollectionData);
+
+        DynamicRadioList generalApplicationSender = generalApplicationCollectionData.getFirst()
+            .getGeneralApplicationItems().getGeneralApplicationSender();
+        assertEquals(APPLICANT, generalApplicationSender.getValue().getCode());
+        assertEquals(APPLICANT, generalApplicationSender.getValue().getLabel());
+        assertEquals(3, generalApplicationSender.getListItems().size());
+    }
+
+    @Test
+    void givenGeneralApplicationWithInvalidApplicantSender_whenPopulateGeneralApplicationDataSender_thenShouldFixSender() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        DynamicRadioList generalApplicationSender = buildDynamicIntervenerList();
+        generalApplicationSender.setValue(getDynamicListElement("applicant", "applicant"));
+
+        GeneralApplicationCollectionData generalApplicationData = GeneralApplicationCollectionData.builder()
+            .generalApplicationItems(GeneralApplicationItems.builder()
+                .generalApplicationSender(generalApplicationSender)
+                .build())
+            .build();
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionData = List.of(generalApplicationData);
+
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        helper.populateGeneralApplicationDataSender(caseData, generalApplicationCollectionData);
+
+        generalApplicationSender = generalApplicationCollectionData.getFirst()
+            .getGeneralApplicationItems().getGeneralApplicationSender();
+        assertEquals(APPLICANT, generalApplicationSender.getValue().getCode());
+        assertEquals(APPLICANT, generalApplicationSender.getValue().getLabel());
+        assertEquals(3, generalApplicationSender.getListItems().size());
+    }
+
+    @Test
+    void givenGeneralApplicationWithInvalidRespondentSender_whenPopulateGeneralApplicationDataSender_thenShouldFixSender() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        DynamicRadioList generalApplicationSender = buildDynamicIntervenerList();
+        generalApplicationSender.setValue(getDynamicListElement("respondent", "respondent"));
+
+        GeneralApplicationCollectionData generalApplicationData = GeneralApplicationCollectionData.builder()
+            .generalApplicationItems(GeneralApplicationItems.builder()
+                .generalApplicationSender(generalApplicationSender)
+                .build())
+            .build();
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionData = List.of(generalApplicationData);
+
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        helper.populateGeneralApplicationDataSender(caseData, generalApplicationCollectionData);
+
+        generalApplicationSender = generalApplicationCollectionData.getFirst()
+            .getGeneralApplicationItems().getGeneralApplicationSender();
+        assertEquals(RESPONDENT, generalApplicationSender.getValue().getCode());
+        assertEquals(RESPONDENT, generalApplicationSender.getValue().getLabel());
+        assertEquals(3, generalApplicationSender.getListItems().size());
+    }
+
     private void assertData(List<GeneralApplicationItems> resultingList) {
         assertEquals(APPLICANT, resultingList.getFirst().getGeneralApplicationSender().getValue().getCode());
         assertEquals(APPLICANT, resultingList.getFirst().getGeneralApplicationSender().getValue().getLabel());
@@ -352,8 +463,7 @@ class GeneralApplicationHelperTest {
                 .build();
     }
 
-    public DynamicRadioList buildDynamicIntervenerList() {
-
+    private DynamicRadioList buildDynamicIntervenerList() {
         List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
                 getDynamicListElement(RESPONDENT, RESPONDENT),
                 getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
@@ -364,14 +474,14 @@ class GeneralApplicationHelperTest {
                 .build();
     }
 
-    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+    private DynamicRadioListElement getDynamicListElement(String code, String label) {
         return DynamicRadioListElement.builder()
                 .code(code)
                 .label(label)
                 .build();
     }
 
-    protected FinremCallbackRequest callbackRequest() {
+    private FinremCallbackRequest callbackRequest() {
         GeneralApplicationItems generalApplicationItems =
                 GeneralApplicationItems.builder().generalApplicationSender(
                                 buildDynamicIntervenerList()).generalApplicationCreatedBy("Claire Mumford")
@@ -420,5 +530,23 @@ class GeneralApplicationHelperTest {
                 .caseDetails(finremCaseDetails)
                 .caseDetailsBefore(finremCaseDetailsBefore)
                 .build();
+    }
+
+    private GeneralApplicationWrapper createLegacyGeneralApplicationData(String receivedFrom) {
+        GeneralApplicationCollection generalApplicationCollection = GeneralApplicationCollection.builder()
+            .value(GeneralApplication.builder()
+                .generalApplicationDocument(CaseDocument.builder().build())
+                .build())
+            .build();
+
+        return GeneralApplicationWrapper.builder()
+            .generalApplicationCreatedBy("Claire Mumford")
+            .generalApplicationDocumentCollection(List.of(generalApplicationCollection))
+            .generalApplicationReceivedFrom(receivedFrom)
+            .generalApplicationDocument(CaseDocument.builder().build())
+            .generalApplicationLatestDocument(CaseDocument.builder().build())
+            .generalApplicationHearingRequired(YesOrNo.NO)
+            .generalApplicationLatestDocumentDate(LocalDate.of(2025, 7, 28))
+            .build();
     }
 }

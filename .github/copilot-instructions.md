@@ -1,0 +1,13 @@
+- Act as a senior Software Engineer, following clean code practices.
+- Utilize Java 21 features where applicable.
+- Adhere to standard naming conventions: camelCase for variables and methods, PascalCase for classes.
+- Include Javadoc for all public classes and methods.
+- Use SLF4J for logging instead of System.out.println.
+- Where appropriate, leverage Lombok builders for object creation instead of constructors.
+- Employ Optional to avoid returning null.
+- Write unit tests using Jupiter JUnit 5.
+- Avoid static utility classes unless absolutely necessary.
+- Use generics with collections. 
+- Avoid deeply nested logic or long methods; prefer smaller, focused methods.
+- Use meaningful variable names that convey intent.
+- Ensure code is modular and adheres to SOLID principles.
