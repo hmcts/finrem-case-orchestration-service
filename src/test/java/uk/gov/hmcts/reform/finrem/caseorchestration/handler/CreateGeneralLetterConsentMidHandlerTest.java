@@ -30,6 +30,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,7 +68,7 @@ public class CreateGeneralLetterConsentMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, "userAuthorisation");
 
         verify(generalLetterService).previewGeneralLetter(anyString(), any());
-        verify(generalLetterService).validateEncryptionOnUploadedDocuments(any(), any(), any(), any());
+        verify(generalLetterService).validateEncryptionOnUploadedDocuments(any(), eq("userAuthorisation"), any(), any());
         assertNull(response.getData().getIntervenerOne().getIntervenerAddress());
     }
 
