@@ -173,8 +173,7 @@ public class AdditionalHearingDocumentService {
             .build()).build();
     }
 
-    public void createAndStoreAdditionalHearingDocuments(FinremCaseDetails caseDetails, String authorisationToken)
-        throws CourtDetailsParseException, JsonProcessingException {
+    public void stampAndCollectOrderCollection(FinremCaseDetails caseDetails, String authorisationToken) {
         String caseId = caseDetails.getId().toString();
         log.info("Dealing with Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
@@ -202,6 +201,13 @@ public class AdditionalHearingDocumentService {
             caseData.setUploadHearingOrder(orderCollections);
             caseData.setLatestDraftHearingOrder(orderCollections.getLast().getValue().getUploadDraftDocument());
         }
+    }
+
+    public void storeHearingNotice(FinremCaseDetails caseDetails, String authorisationToken)
+        throws CourtDetailsParseException, JsonProcessingException {
+
+        FinremCaseData caseData = caseDetails.getData();
+        String caseId = String.valueOf(caseDetails.getId());
 
         List<DirectionDetailCollection> directionDetailsCollection = emptyIfNull(caseData.getDirectionDetailsCollection());
 
