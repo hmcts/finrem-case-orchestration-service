@@ -49,6 +49,7 @@ public abstract class BaseTask implements Runnable {
             List<CaseReference> caseReferences = getCaseReferences();
             int count = 0;
             int batchCount = 1;
+            long startTime = System.currentTimeMillis(); // Start the timer
             for (CaseReference caseReference : caseReferences) {
                 count++;
                 final String caseId = caseReference.getCaseReference();
@@ -101,6 +102,8 @@ public abstract class BaseTask implements Runnable {
                     RequestContextHolder.resetRequestAttributes();
                 }
             }
+            long endTime = System.currentTimeMillis(); // End the timer
+            log.info("Scheduled task {} completed. Total time taken: {} ms", getTaskName(), (endTime - startTime));
         }
     }
 

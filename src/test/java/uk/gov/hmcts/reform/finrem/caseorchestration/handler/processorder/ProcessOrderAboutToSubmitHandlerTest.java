@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -462,10 +463,12 @@ class ProcessOrderAboutToSubmitHandlerTest {
             .caseType(CaseType.CONTESTED)
             .data(caseData));
 
-        underTest.handle(callbackRequest, AUTH_TOKEN);
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         verify(manageHearingActionService).performAddHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(caseData);
+        assertEquals(ManageHearingsAction.ADD_HEARING,
+            response.getData().getManageHearingsWrapper().getManageHearingsActionSelection());
     }
 
     private void mockDocumentStamping(CaseDocument originalDocument, CaseDocument stampedDocument) {
