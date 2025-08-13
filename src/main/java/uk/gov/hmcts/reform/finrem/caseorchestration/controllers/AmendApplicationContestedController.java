@@ -26,10 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -76,20 +73,6 @@ public class AmendApplicationContestedController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
 
-    @PostMapping(path = "/amend-application-validate-respondent-solicitor", consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(description = "Validate postcode on respondent solicitor page")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> amendApplicationRespondentSolicitor(
-        @RequestBody CallbackRequest callbackRequest,
-        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken
-    ) {
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        List<String> errors = new ArrayList<>();
-        validateRespondentPostcodeDetails(caseData, errors);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
-    }
-
     private void validateApplicantSolicitorPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
 
         if (YES_VALUE.equals(caseData.get(APPLICANT_REPRESENTED))) {
@@ -100,7 +83,6 @@ public class AmendApplicationContestedController extends BaseController {
                 errors.add("Postcode field is required for applicant solicitor address.");
             }
         }
-
     }
 
     private void validateApplicantPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
@@ -112,24 +94,4 @@ public class AmendApplicationContestedController extends BaseController {
             errors.add("Postcode field is required for applicant address.");
         }
     }
-
-    private void validateRespondentPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
-
-        if (YES_VALUE.equals(caseData.get(CONTESTED_RESPONDENT_REPRESENTED))) {
-            Map<String, Object> respondentSolicitorAddress = (Map<String, Object>) caseData.get(RESP_SOLICITOR_ADDRESS);
-            String respondentPostCode = (String) respondentSolicitorAddress.get(POST_CODE);
-
-            if (StringUtils.isBlank(respondentPostCode)) {
-                errors.add("Postcode field is required for respondent solicitor address.");
-            }
-        } else {
-            Map<String, Object> respondentAddress = (Map<String, Object>) caseData.get(RESPONDENT_ADDRESS);
-            String respondentPostCode = (String) respondentAddress.get(POST_CODE);
-
-            if (StringUtils.isBlank(respondentPostCode)) {
-                errors.add("Postcode field is required for respondent address.");
-            }
-        }
-    }
-
 }
