@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationdirection;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationdirections;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
