@@ -1,63 +1,57 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
-import org.junit.Before;
-import org.junit.Test;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SOLICITOR_CREATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
+@ExtendWith(MockitoExtension.class)
+class SolicitorCreateContestedAboutToStartHandlerTest {
 
-public class SolicitorCreateContestedAboutToStartHandlerTest {
+    private SolicitorCreateContestedAboutToStartHandler underTest;
 
-    public static final String AUTH_TOKEN = "tokien:)";
-    private SolicitorCreateContestedAboutToStartHandler handler;
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    @Before
-    public void setup() {
-        handler =  new SolicitorCreateContestedAboutToStartHandler(new OnStartDefaultValueService());
+    @Mock
+    private OnStartDefaultValueService onStartDefaultValueService;
+
+    @BeforeEach
+    void setup() {
+        underTest =  new SolicitorCreateContestedAboutToStartHandler(finremCaseDetailsMapper,
+            onStartDefaultValueService);
     }
 
     @Test
-    public void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
-            is(false));
+    void testCanHandle() {
+        assertCanHandle(underTest, ABOUT_TO_START, CONTESTED, SOLICITOR_CREATE);
     }
 
     @Test
-    public void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
-            is(true));
-    }
+    void testHandle() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, SOLICITOR_CREATE, caseData);
 
-    @Test
-    public void handle() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertEquals(NO_VALUE, response.getData().get(CIVIL_PARTNERSHIP));
-        assertEquals(TYPE_OF_APPLICATION_DEFAULT_TO, response.getData().get(TYPE_OF_APPLICATION));
-        assertEquals(NO_VALUE, response.getData().get(URGENT_CASE_QUESTION));
-    }
+        underTest.handle(callbackRequest, AUTH_TOKEN);
 
-    private CallbackRequest buildCallbackRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
+        verify(onStartDefaultValueService).defaultCivilPartnershipField(callbackRequest);
+        verify(onStartDefaultValueService).defaultTypeOfApplication(callbackRequest);
+        verify(onStartDefaultValueService).defaultUrgencyQuestion(callbackRequest);
     }
 }
