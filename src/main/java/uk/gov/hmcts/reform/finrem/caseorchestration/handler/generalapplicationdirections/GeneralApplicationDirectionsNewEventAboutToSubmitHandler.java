@@ -144,9 +144,6 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
     private void updateApplications(FinremCaseDetails caseDetails,
                                     List<BulkPrintDocument> bulkPrintDocuments,
                                     String userAuthorisation) {
-
-
-
         FinremCaseData caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingList =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
