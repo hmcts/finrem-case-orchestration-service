@@ -4,46 +4,52 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.GeneralApplicationDirectionsAboutToStartHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.io.InputStream;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationDirectionsMHAboutToStartHandlerTest {
 
-    private GeneralApplicationDirectionsAboutToStartHandler handler;
+    private GeneralApplicationDirectionsMHAboutToStartHandler handler;
     private GeneralApplicationHelper helper;
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
@@ -55,6 +61,9 @@ public class GeneralApplicationDirectionsMHAboutToStartHandlerTest {
     private GenericDocumentService documentService;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Mock
+    private PartyService partyService;
+
     private ObjectMapper objectMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
@@ -65,36 +74,15 @@ public class GeneralApplicationDirectionsMHAboutToStartHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
-        handler = new GeneralApplicationDirectionsAboutToStartHandler(assignCaseAccessService,
-            finremCaseDetailsMapper, helper, service);
+        handler = new GeneralApplicationDirectionsMHAboutToStartHandler(assignCaseAccessService,
+            finremCaseDetailsMapper, helper, service, partyService);
     }
 
     @Test
-    public void givenCase_whenCorrectConfigSupplied_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-            is(true));
-    }
-
-    @Test
-    public void givenCase_whenInCorrectConfigCaseTypeSupplied_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-            is(false));
-    }
-
-    @Test
-    public void givenCase_whenInCorrectConfigEventTypeSupplied_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
-    }
-
-    @Test
-    public void givenCase_whenInCorrectConfigCallbackTypeSupplied_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-            is(false));
+    public void testCanHandle() {
+        assertCanHandle(handler,
+            Arguments.of(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
+        );
     }
 
     @Test
@@ -144,6 +132,31 @@ public class GeneralApplicationDirectionsMHAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for issue direction."));
         verify(service).resetGeneralApplicationDirectionsFields(any());
+    }
+
+
+    @Test
+    public void givenCase_whenHandlerInvoked_thenInitializeWorkingHearing() {
+        //Arrange
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
+        callbackRequest.setEventType(EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
+
+        DynamicMultiSelectList expectedDynamicMultiSelectList = DynamicMultiSelectList.builder().build();
+        when(partyService.getAllActivePartyList(any(FinremCaseDetails.class))).thenReturn(expectedDynamicMultiSelectList);
+
+        //Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        //Assert
+        FinremCaseData caseData = response.getData();
+        WorkingHearing workingHearing = caseData.getManageHearingsWrapper().getWorkingHearing();
+
+        List<DynamicListElement> listItems = workingHearing.getHearingTypeDynamicList().getListItems();
+        assertEquals(1, listItems.size()); assertEquals(HearingType.APPLICATION_HEARING.name(), listItems.getFirst().getCode());
+        assertEquals(HearingType.APPLICATION_HEARING.getId(), listItems.getFirst().getLabel());
+        verify(service).resetGeneralApplicationDirectionsFields(caseData);
     }
 
     public DynamicRadioListElement getDynamicListElement(String code, String label) {

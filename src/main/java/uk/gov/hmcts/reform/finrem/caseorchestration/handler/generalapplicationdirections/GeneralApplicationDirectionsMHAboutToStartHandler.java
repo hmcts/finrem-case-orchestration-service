@@ -60,13 +60,11 @@ public class GeneralApplicationDirectionsMHAboutToStartHandler extends FinremCal
         FinremCaseData caseData = finremCaseDetails.getData();
 
         // Initialize the working hearing for general application directions (MH)
-        if (EventType.GENERAL_APPLICATION_DIRECTIONS_MH.equals(callbackRequest.getEventType())) {
-            caseData.getManageHearingsWrapper().setWorkingHearing(
-                WorkingHearing.builder()
-                    .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(finremCaseDetails))
-                    .withHearingTypes(HearingType.APPLICATION_HEARING)
-                    .build());
-        }
+        caseData.getManageHearingsWrapper().setWorkingHearing(
+            WorkingHearing.builder()
+                .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(finremCaseDetails))
+                .withHearingTypes(HearingType.APPLICATION_HEARING)
+                .build());
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
         log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
