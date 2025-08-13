@@ -11,7 +11,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.GeneralApplicationHa
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -24,17 +30,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
-public class GeneralApplicationDirectionsMHAboutToStartHandler extends FinremCallbackHandler implements GeneralApplicationHandler {
+public class GeneralApplicationDirectionsNewEventAboutToStartHandler extends FinremCallbackHandler implements GeneralApplicationHandler {
 
     private final AssignCaseAccessService assignCaseAccessService;
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
     private final PartyService partyService;
 
-    public GeneralApplicationDirectionsMHAboutToStartHandler(AssignCaseAccessService assignCaseAccessService,
-                                                             FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                             GeneralApplicationHelper helper,
-                                                             GeneralApplicationDirectionsService service, PartyService partyService) {
+    public GeneralApplicationDirectionsNewEventAboutToStartHandler(AssignCaseAccessService assignCaseAccessService,
+                                                                   FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                                   GeneralApplicationHelper helper,
+                                                                   GeneralApplicationDirectionsService service, PartyService partyService) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;

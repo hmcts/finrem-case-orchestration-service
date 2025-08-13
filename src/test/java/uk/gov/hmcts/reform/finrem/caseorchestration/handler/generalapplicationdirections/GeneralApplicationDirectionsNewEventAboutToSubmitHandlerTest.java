@@ -50,10 +50,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
+public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
-    private GeneralApplicationDirectionsMHAboutToStartHandler startHandler;
-    private GeneralApplicationDirectionsMHAboutToSubmitHandler aboutToSubmitHandler;
+    private GeneralApplicationDirectionsNewEventAboutToStartHandler startHandler;
+    private GeneralApplicationDirectionsNewEventAboutToSubmitHandler aboutToSubmitHandler;
     @Mock
     private GeneralApplicationHelper helper;
     @Mock
@@ -79,9 +79,9 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        startHandler = new GeneralApplicationDirectionsMHAboutToStartHandler(
+        startHandler = new GeneralApplicationDirectionsNewEventAboutToStartHandler(
                 assignCaseAccessService, finremCaseDetailsMapper, helper, service, partyService);
-        aboutToSubmitHandler = new GeneralApplicationDirectionsMHAboutToSubmitHandler(
+        aboutToSubmitHandler = new GeneralApplicationDirectionsNewEventAboutToSubmitHandler(
                 finremCaseDetailsMapper, helper, service, gaService, manageHearingActionService, generalApplicationsCategoriser);
     }
 
@@ -442,7 +442,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
     }
 
     private CaseDetails buildCaseDetailsFromJson() {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(GeneralApplicationDirectionsMHAboutToSubmitHandlerTest.GA_JSON)) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest.GA_JSON)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         } catch (Exception e) {
             throw new RuntimeException(e);

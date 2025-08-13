@@ -14,7 +14,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHel
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -25,11 +32,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.*;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 
 @Slf4j
 @Service
-public class GeneralApplicationDirectionsMHAboutToSubmitHandler extends FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
+public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
@@ -37,12 +48,12 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandler extends FinremCa
     private final ManageHearingActionService manageHearingActionService;
     private final GeneralApplicationsCategoriser generalApplicationsCategoriser;
 
-    public GeneralApplicationDirectionsMHAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                              GeneralApplicationHelper helper,
-                                                              GeneralApplicationDirectionsService service,
-                                                              GeneralApplicationService gaService,
-                                                              ManageHearingActionService manageHearingActionService,
-                                                              GeneralApplicationsCategoriser generalApplicationsCategoriser) {
+    public GeneralApplicationDirectionsNewEventAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                                    GeneralApplicationHelper helper,
+                                                                    GeneralApplicationDirectionsService service,
+                                                                    GeneralApplicationService gaService,
+                                                                    ManageHearingActionService manageHearingActionService,
+                                                                    GeneralApplicationsCategoriser generalApplicationsCategoriser) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;

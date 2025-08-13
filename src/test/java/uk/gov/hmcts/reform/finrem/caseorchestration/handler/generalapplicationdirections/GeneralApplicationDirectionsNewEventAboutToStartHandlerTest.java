@@ -47,9 +47,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationDirectionsMHAboutToStartHandlerTest {
+public class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
 
-    private GeneralApplicationDirectionsMHAboutToStartHandler handler;
+    private GeneralApplicationDirectionsNewEventAboutToStartHandler handler;
     private GeneralApplicationHelper helper;
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
@@ -74,7 +74,7 @@ public class GeneralApplicationDirectionsMHAboutToStartHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
-        handler = new GeneralApplicationDirectionsMHAboutToStartHandler(assignCaseAccessService,
+        handler = new GeneralApplicationDirectionsNewEventAboutToStartHandler(assignCaseAccessService,
             finremCaseDetailsMapper, helper, service, partyService);
     }
 
@@ -153,7 +153,8 @@ public class GeneralApplicationDirectionsMHAboutToStartHandlerTest {
         WorkingHearing workingHearing = caseData.getManageHearingsWrapper().getWorkingHearing();
 
         List<DynamicListElement> listItems = workingHearing.getHearingTypeDynamicList().getListItems();
-        assertEquals(1, listItems.size()); assertEquals(HearingType.APPLICATION_HEARING.name(), listItems.getFirst().getCode());
+        assertEquals(1, listItems.size());
+        assertEquals(HearingType.APPLICATION_HEARING.name(), listItems.getFirst().getCode());
         assertEquals(HearingType.APPLICATION_HEARING.getId(), listItems.getFirst().getLabel());
         verify(service).resetGeneralApplicationDirectionsFields(caseData);
     }
