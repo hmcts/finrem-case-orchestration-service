@@ -109,7 +109,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
-        CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
+        CaseDetails details = buildCaseDetailsFromJson();
         GeneralApplicationItems generalApplicationItems =
             GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
@@ -168,7 +168,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
-        CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
+        CaseDetails details = buildCaseDetailsFromJson();
         GeneralApplicationItems generalApplicationItems =
             GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
@@ -180,7 +180,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
-                .getGeneralApplications().get(0).getValue());
+                .getGeneralApplications().getFirst().getValue());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
@@ -219,7 +219,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
 
         dynamicListForCaseDetails.setListItems(listItems);
 
-        CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
+        CaseDetails details = buildCaseDetailsFromJson();
         GeneralApplicationItems generalApplicationItems =
             GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
@@ -231,7 +231,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         when(helper.getApplicationItems(finremCallbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, finremCallbackRequest.getCaseDetails().getId().toString())).thenReturn(
             finremCallbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
-                .getGeneralApplications().get(0).getValue());
+                .getGeneralApplications().getFirst().getValue());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         FinremCaseData finremCaseData = startHandle.getData();
@@ -247,7 +247,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         assertEquals(2, list.size());
 
         assertEquals(DIRECTION_NOT_APPROVED.getId(),
-            list.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
+            list.getFirst().getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
     }
@@ -267,7 +267,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
 
-        CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
+        CaseDetails details = buildCaseDetailsFromJson();
         GeneralApplicationItems generalApplicationItems =
             GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
@@ -279,7 +279,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
-                .getGeneralApplications().get(0).getValue());
+                .getGeneralApplications().getFirst().getValue());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData finremCaseData = startHandle.getData();
@@ -315,7 +315,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
-        CaseDetails details = buildCaseDetailsFromJson(GA_JSON);
+        CaseDetails details = buildCaseDetailsFromJson();
         GeneralApplicationItems generalApplicationItems =
             GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
                 .generalApplicationCreatedBy("Claire Mumford")
@@ -327,7 +327,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
-                .getGeneralApplications().get(0).getValue());
+                .getGeneralApplications().getFirst().getValue());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData finremCaseData = startHandle.getData();
@@ -358,7 +358,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
             getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
         return DynamicRadioList.builder()
-            .value(dynamicListElements.get(0))
+            .value(dynamicListElements.getFirst())
             .listItems(dynamicListElements)
             .build();
     }
@@ -441,11 +441,9 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         });
     }
 
-    private CaseDetails buildCaseDetailsFromJson(String testJson) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
-            CaseDetails caseDetails =
-                objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return caseDetails;
+    private CaseDetails buildCaseDetailsFromJson() {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(GeneralApplicationDirectionsMHAboutToSubmitHandlerTest.GA_JSON)) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
