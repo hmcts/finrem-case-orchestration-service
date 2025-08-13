@@ -62,7 +62,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private static final String HEARING_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
     private static final String HEARING_DOCUMENT_NAME = "Hearing Notice.pdf";
 
-
     @Autowired
     private GeneralApplicationDirectionsService generalApplicationDirectionsService;
     @Autowired
