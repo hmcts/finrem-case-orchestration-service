@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
@@ -44,6 +46,16 @@ public class HearingsAppender {
             caseData.getManageHearingsWrapper()::setHearings, item);
     }
 
+    private Court resolveHearingCourtSelection(HearingRegionWrapper hearingRegionWrapper,
+                                               AllocatedRegionWrapper allocatedRegionWrapper) {
+        Court ret = hearingRegionWrapper == null ? null : hearingRegionWrapper.toCourt();
+        assert ret != null;
+        if (ret.getRegion() == null || StringUtils.isBlank(ret.getRegion().getValue())) {
+            return allocatedRegionWrapper.toCourt();
+        }
+        return ret;
+    }
+
     /**
      * Converts a {@link ListForHearingWrapper} instance into a {@link Hearing} domain object.
      *
@@ -54,9 +66,10 @@ public class HearingsAppender {
      * </p>
      *
      * @param listForHearingWrapper the hearing data wrapper to convert
+     * @param allocatedRegionWrapper for old-style data
      * @return the constructed {@code Hearing} object
      */
-    public Hearing toHearing(ListForHearingWrapper listForHearingWrapper) {
+    public Hearing toHearing(ListForHearingWrapper listForHearingWrapper, AllocatedRegionWrapper allocatedRegionWrapper) {
         // Type of Hearing
         HearingTypeDirection hearingType = listForHearingWrapper.getHearingType();
         // Hearing Date
@@ -75,7 +88,7 @@ public class HearingsAppender {
             .hearingType(hearingType == null ? null : HearingType.valueOf(hearingType.name()))
             .hearingTimeEstimate(timeEstimate)
             .hearingTime(hearingTime)
-            .hearingCourtSelection(hearingRegionWrapper == null ? null : hearingRegionWrapper.toCourt())
+            .hearingCourtSelection(resolveHearingCourtSelection(hearingRegionWrapper, allocatedRegionWrapper))
             //.hearingMode(null) // Ignore it because existing List for Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
             .additionalHearingDocs(toAdditionalHearingDocs(listForHearingWrapper))

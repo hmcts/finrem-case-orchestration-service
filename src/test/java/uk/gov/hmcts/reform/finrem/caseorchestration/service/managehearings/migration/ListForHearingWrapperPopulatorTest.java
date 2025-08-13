@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
@@ -109,7 +110,7 @@ class ListForHearingWrapperPopulatorTest {
             ))
             .build();
         when(partyService.getAllActivePartyList(caseData)).thenReturn(allActivePartyList);
-        when(hearingsAppender.toHearing(listForHearingWrapper)).thenReturn(hearing);
+        when(hearingsAppender.toHearing(listForHearingWrapper, AllocatedRegionWrapper.builder().build())).thenReturn(hearing);
         doCallRealMethod().when(hearingsAppender).appendToHearings(eq(caseData), anySupplier());
 
         // Act

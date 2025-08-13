@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 
+import java.util.Optional;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
