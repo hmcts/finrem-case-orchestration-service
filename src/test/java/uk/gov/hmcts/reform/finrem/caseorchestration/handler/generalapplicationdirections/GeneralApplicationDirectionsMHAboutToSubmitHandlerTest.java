@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -14,40 +15,28 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.BaseHandlerTestSetup;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.GeneralApplicationDirectionsAboutToStartHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.GeneralApplicationDirectionsAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
@@ -58,12 +47,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
-    private GeneralApplicationDirectionsAboutToStartHandler startHandler;
-    private GeneralApplicationDirectionsAboutToSubmitHandler submitHandler;
+    private GeneralApplicationDirectionsMHAboutToStartHandler startHandler;
+    private GeneralApplicationDirectionsMHAboutToSubmitHandler aboutToSubmitHandler;
     @Mock
     private GeneralApplicationHelper helper;
     @Mock
@@ -76,6 +66,10 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
     private GeneralApplicationsCategoriser generalApplicationsCategoriser;
+    @Mock
+    private ManageHearingActionService manageHearingActionService;
+    @Mock
+    private PartyService partyService;
 
     private ObjectMapper objectMapper;
 
@@ -85,38 +79,17 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        startHandler = new GeneralApplicationDirectionsAboutToStartHandler(
-            assignCaseAccessService, finremCaseDetailsMapper, helper, service);
-        submitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
-            finremCaseDetailsMapper, helper, service, gaService, generalApplicationsCategoriser);
+        startHandler = new GeneralApplicationDirectionsMHAboutToStartHandler(
+                assignCaseAccessService, finremCaseDetailsMapper, helper, service, partyService);
+        aboutToSubmitHandler = new GeneralApplicationDirectionsMHAboutToSubmitHandler(
+                finremCaseDetailsMapper, helper, service, gaService, manageHearingActionService, generalApplicationsCategoriser);
     }
 
     @Test
-    public void givenCase_whenCorrectConfigSupplied_thenHandlerCanHandle() {
-        assertThat(submitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-            is(true));
-    }
-
-    @Test
-    public void givenCase_whenInCorrectConfigCaseTypeSupplied_thenHandlerCanHandle() {
-        assertThat(submitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-            is(false));
-    }
-
-    @Test
-    public void givenCase_whenInCorrectConfigEventTypeSupplied_thenHandlerCanHandle() {
-        assertThat(submitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
-    }
-
-    @Test
-    public void givenCase_whenInCorrectConfigCallbackTypeSupplied_thenHandlerCanHandle() {
-        assertThat(submitHandler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS),
-            is(false));
+    public void testCanHandle() {
+        assertCanHandle(aboutToSubmitHandler,
+                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
+        );
     }
 
     @Test
@@ -146,6 +119,15 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             generalApplicationItems);
+
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
+
+        //Hearing required document
+        CaseDocument generatedDocument = CaseDocument.builder().documentFilename("HearingNotice.pdf")
+                .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
+                .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
+        when(service.generateGeneralApplicationDirectionsDocument(eq(AUTH_TOKEN), any(FinremCaseDetails.class))).thenReturn(generatedDocument);
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
         FinremCaseData finremCaseData = startHandle.getData();
@@ -155,11 +137,6 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
 
         String collectionId = UUID.randomUUID().toString();
 
-        CaseDocument caseDocument = CaseDocument.builder().documentFilename("migrated_docs.pdf")
-            .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
-            .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
-        when(service.getBulkPrintDocument(details, AUTH_TOKEN)).thenReturn(caseDocument);
-
         when(helper.mapExistingGeneralApplicationToData(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             GeneralApplicationCollectionData.builder()
@@ -167,12 +144,14 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
                 .generalApplicationItems(generalApplicationItems)
                 .build());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
             = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
         assertEquals(1, list.size());
+        verify(manageHearingActionService).performAddHearing(any(FinremCaseDetails.class), any(String.class));
+        verify(manageHearingActionService).updateTabData(any(FinremCaseData.class));
     }
 
     @Test
@@ -202,13 +181,14 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().get(0).getValue());
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(1, dynamicList.getListItems().size());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
@@ -259,7 +239,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
         DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(1, dynamicList.getListItems().size());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
@@ -308,7 +288,7 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
 
         assertEquals(1, dynamicList.getListItems().size());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list = covertToGeneralApplicationData(
@@ -348,13 +328,15 @@ public class GeneralApplicationDirectionsMHAboutToSubmitHandlerTest extends Base
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().get(0).getValue());
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(1, dynamicList.getListItems().size());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
