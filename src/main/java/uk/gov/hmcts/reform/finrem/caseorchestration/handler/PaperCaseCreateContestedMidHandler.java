@@ -20,14 +20,14 @@ import java.util.List;
 public class PaperCaseCreateContestedMidHandler extends FinremCallbackHandler {
 
     private final ExpressCaseService expressCaseService;
-    private final InternationalPostalService postalService;
+    private final InternationalPostalService internationalPostalService;
 
     public PaperCaseCreateContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               ExpressCaseService expressCaseService,
-                                              InternationalPostalService postalService) {
+                                              InternationalPostalService internationalPostalService) {
         super(finremCaseDetailsMapper);
         this.expressCaseService = expressCaseService;
-        this.postalService = postalService;
+        this.internationalPostalService = internationalPostalService;
     }
 
     @Override
@@ -40,16 +40,16 @@ public class PaperCaseCreateContestedMidHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
 
-        List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseDetails.getData());
-        errors.addAll(postalService.validate(callbackRequest.getCaseDetails().getData()));
+        List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
+        errors.addAll(internationalPostalService.validate(caseData));
 
         expressCaseService.setExpressCaseEnrollmentStatus(caseDetails.getData());
 
-        FinremCaseData caseData = caseDetails.getData();
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 }
