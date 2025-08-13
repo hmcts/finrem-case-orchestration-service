@@ -6,7 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.RespondentSolicitorDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -17,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.Arrays;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
@@ -41,13 +45,17 @@ class SolicitorCreateContestedMidHandlerTest {
     @Mock
     private ExpressCaseService expressCaseService;
 
+    @Mock
+    private RespondentSolicitorDetailsValidator respondentSolicitorDetailsValidator;
+
     @BeforeEach
     public void init() {
         handler = new SolicitorCreateContestedMidHandler(
                 finremCaseDetailsMapper,
                 postalService,
                 selectedCourtService,
-                expressCaseService);
+                expressCaseService,
+                respondentSolicitorDetailsValidator);
     }
 
     @Test
@@ -104,6 +112,23 @@ class SolicitorCreateContestedMidHandlerTest {
                 "post err 1",
                 "post err 2"
         );
+    }
+
+    /**
+     * This test checks that the handler will return an error message if the applicant and respondent
+     * have the same solicitor.
+     */
+    @Test
+    void givenConsentedCase_WhenApplicantAndRespondentHaveSameSolicitor_thenHandlerWillShowErrorMessage() {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+
+        String error = "Applicant organisation cannot be the same as respondent organisation";
+        when(respondentSolicitorDetailsValidator.validate(any(FinremCaseData.class)))
+            .thenReturn(List.of(error));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertThat(handle.getErrors()).contains(error);
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
