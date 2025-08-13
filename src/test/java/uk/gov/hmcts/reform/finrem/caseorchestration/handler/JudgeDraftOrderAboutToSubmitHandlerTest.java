@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
@@ -104,7 +103,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
+        verify(hearingOrderService).convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
         verify(uploadedDraftOrderCategoriser).categorise(any(FinremCaseData.class));
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(CaseDetails.class), eq(AUTH_TOKEN));
         verify(documentWarningsHelper).getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN));
@@ -141,9 +140,10 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
 
         verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(CaseDocument.class),
             any(String.class), any(String.class));
-        verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
         verify(uploadedDraftOrderCategoriser).categorise(any(FinremCaseData.class));
-        verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(CaseDetails.class), eq(AUTH_TOKEN));
+        verify(hearingOrderService).convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(
+            any(FinremCaseData.class), eq(AUTH_TOKEN));
+        verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
     }
 
     private FinremCallbackRequest setupTestData(List<DocumentCollectionItem> additionalDocuments) {
@@ -165,7 +165,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = FinremCaseData.builder().build();
         DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
-        draftDirectionWrapper.setDraftDirectionOrderCollection(draftDirectionOrderCollection);
+        draftDirectionWrapper.setJudgeApprovedOrderCollection(draftDirectionOrderCollection);
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
             .id(123L)
