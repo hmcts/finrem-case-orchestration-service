@@ -75,6 +75,7 @@ public class HearingsAppender {
             .hearingType(hearingType == null ? null : HearingType.valueOf(hearingType.name()))
             .hearingTimeEstimate(timeEstimate)
             .hearingTime(hearingTime)
+            // TODO: perform is empty and set to null
             .hearingCourtSelection(hearingRegionWrapper == null ? null : hearingRegionWrapper.toCourt())
             //.hearingMode(null) // Ignore it because existing List for Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
@@ -173,6 +174,10 @@ public class HearingsAppender {
             //.hearingMode(null) // Ignore it because existing List for Interim Hearing doesn't capture hearing mode
             .wasMigrated(YesOrNo.YES)
             .build();
+    }
+
+    public void populateDefaultCourt(Hearing hearing, FinremCaseData caseData) {
+        hearing.setHearingCourtSelection(caseData.getRegionWrapper().getAllocatedRegionWrapper().toCourt());
     }
 
     /**

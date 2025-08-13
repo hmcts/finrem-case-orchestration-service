@@ -73,4 +73,16 @@ public class HearingRegionWrapper {
             .courtListWrapper(courtListWrapper.toDefaultCourtListWrapper())
             .build();
     }
+
+    public boolean isEmpty() {
+        return hearingRegionList == null
+            && hearingMidlandsFrcList == null
+            && hearingLondonFrcList == null
+            && hearingNorthWestFrcList == null
+            && hearingNorthEastFrcList == null
+            && hearingSouthEastFrcList == null
+            && hearingSouthWestFrcList == null
+            && hearingWalesFrcList == null
+            && hearingHighCourtFrcList == null;
+    }
 }
