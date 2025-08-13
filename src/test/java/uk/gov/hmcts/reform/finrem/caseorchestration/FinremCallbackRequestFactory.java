@@ -67,6 +67,15 @@ public class FinremCallbackRequestFactory {
             .build();
     }
 
+    public static FinremCallbackRequest from(EventType eventType, FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBeforeBuilder,
+                                             FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBuilder) {
+        return FinremCallbackRequest.builder()
+            .eventType(eventType)
+            .caseDetails(caseDetailsBuilder.build())
+            .caseDetailsBefore(caseDetailsBeforeBuilder.build())
+            .build();
+    }
+
     public static FinremCallbackRequest from(FinremCaseDetails caseDetails) {
         return FinremCallbackRequest.builder()
             .caseDetails(caseDetails)
