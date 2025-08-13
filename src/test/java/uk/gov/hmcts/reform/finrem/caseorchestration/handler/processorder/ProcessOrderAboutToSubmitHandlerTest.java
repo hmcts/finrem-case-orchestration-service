@@ -52,6 +52,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -101,23 +102,28 @@ class ProcessOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void createAndStoreAdditionalHearingDocumentsHandleException() throws JsonProcessingException {
+    void storeHearingNoticeHandleExceptionDirectionUploadOrder() throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(CASE_ID);
         FinremCaseDetails finremCaseDetails = finremCallbackRequest.getCaseDetails();
+        finremCallbackRequest.setEventType(EventType.DIRECTION_UPLOAD_ORDER);
         doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService)
-            .createAndStoreAdditionalHearingDocuments(finremCaseDetails, AUTH_TOKEN);
+            .storeHearingNotice(finremCaseDetails, AUTH_TOKEN);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(1, res.getErrors().size());
-        assertEquals("There was an unexpected error", res.getErrors().get(0));
-        verify(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+        assertEquals("There was an unexpected error", res.getErrors().getFirst());
+        verify(additionalHearingDocumentService).stampAndCollectOrderCollection(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(additionalHearingDocumentService).storeHearingNotice(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
-    void createAndStoreAdditionalHearingDocuments() throws JsonProcessingException {
+    void stampOrdersAndStoreHearingNoticeDocuments() throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(CASE_ID);
+        finremCallbackRequest.setEventType(EventType.DIRECTION_UPLOAD_ORDER);
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+
+        verify(additionalHearingDocumentService).stampAndCollectOrderCollection(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(additionalHearingDocumentService).storeHearingNotice(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
@@ -441,12 +447,12 @@ class ProcessOrderAboutToSubmitHandlerTest {
 
         lenient().doThrow(new AssertionError("Expected two documents to be processed, but only one was found"))
             .when(additionalHearingDocumentService)
-            .createAndStoreAdditionalHearingDocuments(
+            .stampAndCollectOrderCollection(
                 any(FinremCaseDetails.class),
                 eq(AUTH_TOKEN));
         // mocking the valid invocation on createAndStoreAdditionalHearingDocuments
         lenient().doNothing().when(additionalHearingDocumentService)
-            .createAndStoreAdditionalHearingDocuments(
+            .stampAndCollectOrderCollection(
                 argThat(a -> a.getData().getUploadHearingOrder().size() == 2 && a.getData().getUploadHearingOrder().contains(expectedNewDocument)),
                 eq(AUTH_TOKEN));
 
@@ -457,14 +463,16 @@ class ProcessOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldCallManageHearingServiceForProcessOrderEvent() {
+    void shouldCallManageHearingServiceForProcessOrderEvent() throws JsonProcessingException {
         FinremCaseData caseData = FinremCaseData.builder().build();
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(EventType.PROCESS_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(caseData));
 
-        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+        final var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
+        verify(additionalHearingDocumentService).stampAndCollectOrderCollection(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(additionalHearingDocumentService, never()).storeHearingNotice(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).performAddHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(caseData);
         assertEquals(ManageHearingsAction.ADD_HEARING,
