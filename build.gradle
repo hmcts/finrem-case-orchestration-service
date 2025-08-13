@@ -16,7 +16,7 @@ apply plugin: 'io.spring.dependency-management'
 
 def versions = [
         guava                : '33.4.8-jre',
-        bspCommonLib         : '0.1.2',
+        bspCommonLib         : '0.2.0',
         ccdClient            : '5.2.0',
         commonsIo            : '2.20.0',
         commonsLang3         : '3.18.0',
