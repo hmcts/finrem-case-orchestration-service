@@ -134,7 +134,6 @@ public class GeneralApplicationDirectionsMHAboutToStartHandlerTest {
         verify(service).resetGeneralApplicationDirectionsFields(any());
     }
 
-
     @Test
     public void givenCase_whenHandlerInvoked_thenInitializeWorkingHearing() {
         //Arrange
