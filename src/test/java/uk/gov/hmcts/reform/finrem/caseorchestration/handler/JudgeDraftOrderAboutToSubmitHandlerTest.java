@@ -105,7 +105,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
 
         verify(hearingOrderService).convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
         verify(uploadedDraftOrderCategoriser).categorise(any(FinremCaseData.class));
-        verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(CaseDetails.class), eq(AUTH_TOKEN));
+        verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
         verify(documentWarningsHelper).getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN));
         verifyNoInteractions(genericDocumentService); // Ensure no unnecessary document conversions
     }
