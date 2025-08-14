@@ -6,6 +6,7 @@
     "jurisdiction": "divorce",
     "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2",
+    "version": 13,
     "case_data": {
       "divorceCaseNumber": "DD12D12345",
       "divorceStageReached": "Decree Nisi",
