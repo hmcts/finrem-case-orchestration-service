@@ -74,6 +74,7 @@ public class HearingRegionWrapper {
             .build();
     }
 
+    @JsonIgnore
     public boolean isEmpty() {
         return hearingRegionList == null
             && hearingMidlandsFrcList == null
