@@ -69,7 +69,7 @@ public class ListForHearingWrapperPopulator extends BasePopulator {
     public void populate(FinremCaseData caseData) {
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
         hearingsAppender.appendToHearings(caseData, () -> {
-            var hearing = hearingsAppender.toHearing(listForHearingWrapper);
+            var hearing = hearingsAppender.toHearing(listForHearingWrapper, allocatedRegionWrapper);
             if (listForHearingWrapper.getHearingRegionWrapper().isEmpty()) {
                 hearingsAppender.populateDefaultCourt(hearing, caseData);
             }

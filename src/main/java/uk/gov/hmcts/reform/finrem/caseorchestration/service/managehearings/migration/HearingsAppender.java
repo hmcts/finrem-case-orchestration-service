@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
@@ -56,7 +57,7 @@ public class HearingsAppender {
      * @param listForHearingWrapper the hearing data wrapper to convert
      * @return the constructed {@code Hearing} object
      */
-    public Hearing toHearing(ListForHearingWrapper listForHearingWrapper) {
+    public Hearing toHearing(ListForHearingWrapper listForHearingWrapper, AllocatedRegionWrapper allocatedRegionWrapper) {
         // Type of Hearing
         HearingTypeDirection hearingType = listForHearingWrapper.getHearingType();
         // Hearing Date
@@ -75,8 +76,8 @@ public class HearingsAppender {
             .hearingType(hearingType == null ? null : HearingType.valueOf(hearingType.name()))
             .hearingTimeEstimate(timeEstimate)
             .hearingTime(hearingTime)
-            // TODO: perform is empty and set to null
-            .hearingCourtSelection(hearingRegionWrapper == null ? null : hearingRegionWrapper.toCourt())
+            .hearingCourtSelection(hearingRegionWrapper.isEmpty() ?
+                allocatedRegionWrapper.toCourt() : hearingRegionWrapper.toCourt())
             //.hearingMode(null) // Ignore it because existing List for Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
             .additionalHearingDocs(toAdditionalHearingDocs(listForHearingWrapper))
