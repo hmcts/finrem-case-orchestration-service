@@ -213,7 +213,6 @@ class ManageHearingsMigrationServiceTest {
         verify(hearingDetailsCollectionPopulator).populate(caseData);
     }
 
-
     @Test
     void shouldRunManageHearingMigrationSuccessfully() {
         // Given
