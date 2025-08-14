@@ -113,7 +113,6 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
                 .errors(errors).state(postState).build();
         }
 
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
