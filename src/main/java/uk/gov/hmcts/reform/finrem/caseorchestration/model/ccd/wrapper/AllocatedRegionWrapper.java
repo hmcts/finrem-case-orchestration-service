@@ -60,7 +60,6 @@ public class AllocatedRegionWrapper {
         return courtListWrapper;
     }
 
-    @JsonIgnore
     public Court toCourt() {
         return Court.builder()
             .region(regionList)
