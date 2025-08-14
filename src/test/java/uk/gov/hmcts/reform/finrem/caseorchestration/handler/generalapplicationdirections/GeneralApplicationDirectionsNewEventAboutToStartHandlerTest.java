@@ -1,12 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationdirections;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.CoreMatchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -34,8 +35,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import java.io.InputStream;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,7 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
+class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
 
     private GeneralApplicationDirectionsNewEventAboutToStartHandler handler;
     private GeneralApplicationHelper helper;
@@ -70,8 +71,9 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
     private static final String GA_JSON = "/fixtures/contested/general-application-direction-finrem.json";
     private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application.json";
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
+        MockitoAnnotations.openMocks(this);
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
         handler = new GeneralApplicationDirectionsNewEventAboutToStartHandler(assignCaseAccessService,
@@ -79,14 +81,14 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
     }
 
     @Test
-    public void testCanHandle() {
+    void testCanHandle() {
         assertCanHandle(handler,
             Arguments.of(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
         );
     }
 
     @Test
-    public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
+    void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_NON_COLL_JSON);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -101,7 +103,7 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
     }
 
     @Test
-    public void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
+    void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
             .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
@@ -118,7 +120,7 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
     }
 
     @Test
-    public void givenCase_whenNoApplicationAvailable_thenShowErrorMessage() {
+    void givenCase_whenNoApplicationAvailable_thenShowErrorMessage() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(
@@ -130,12 +132,13 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
             helper.convertToGeneralApplicationsCollection(updatedList));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for issue direction."));
+        assertThat(handle.getErrors())
+            .contains("There are no general application available for issue direction.");
         verify(service).resetGeneralApplicationDirectionsFields(any());
     }
 
     @Test
-    public void givenCase_whenHandlerInvoked_thenInitializeWorkingHearing() {
+    void givenCase_whenHandlerInvoked_thenInitializeWorkingHearing() {
         //Arrange
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
         callbackRequest.setEventType(EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
@@ -159,14 +162,14 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
         verify(service).resetGeneralApplicationDirectionsFields(caseData);
     }
 
-    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+    private DynamicRadioListElement getDynamicListElement(String code, String label) {
         return DynamicRadioListElement.builder()
             .code(code)
             .label(label)
             .build();
     }
 
-    public DynamicRadioList buildDynamicIntervenerList() {
+    private DynamicRadioList buildDynamicIntervenerList() {
 
         List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
             getDynamicListElement(RESPONDENT, RESPONDENT),

@@ -4,11 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -64,7 +65,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
+class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
 
     private GeneralApplicationDirectionsNewEventAboutToStartHandler startHandler;
     private GeneralApplicationDirectionsNewEventAboutToSubmitHandler aboutToSubmitHandler;
@@ -90,8 +91,9 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application-details.json";
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
+        MockitoAnnotations.openMocks(this);
         objectMapper = new ObjectMapper();
         startHandler = new GeneralApplicationDirectionsNewEventAboutToStartHandler(
             assignCaseAccessService, finremCaseDetailsMapper, helper, service, partyService);
@@ -100,7 +102,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
     }
 
     @Test
-    public void testCanHandle() {
+    void testCanHandle() {
         assertCanHandle(aboutToSubmitHandler,
             Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
         );
@@ -112,7 +114,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
      * Then the status is updated to approved and the post state is returned.
      */
     @Test
-    public void givenApplicationIsApproved_whenHandle_thenUpdateStatusToApprovedAndReturnToPostState() {
+    void givenApplicationIsApproved_whenHandle_thenUpdateStatusToApprovedAndReturnToPostState() {
         // Arrange
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         callbackRequest.setEventType(EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
@@ -186,7 +188,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
     }
 
     @Test
-    public void givenCase_whenExistingApplication_thenMigratedAndUpdateStatusApprovedCompleted() {
+    void givenCase_whenExistingApplication_thenMigratedAndUpdateStatusApprovedCompleted() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
             .setGeneralApplications(List.of(GeneralApplicationsCollection.builder().build()));
@@ -248,7 +250,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
     }
 
     @Test
-    public void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompleted() {
+    void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompleted() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
             .getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
@@ -296,7 +298,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
     }
 
     @Test
-    public void givenCase_whenNotApproveAnApplication_thenUpdateStatusNotApproved() {
+    void givenCase_whenNotApproveAnApplication_thenUpdateStatusNotApproved() {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         finremCallbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
             .forEach(ga -> ga.getValue().setGeneralApplicationStatus(DIRECTION_NOT_APPROVED.getId()));
@@ -344,7 +346,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
     }
 
     @Test
-    public void givenCase_whenOtherAnApplication_thenUpdateStatusOther() {
+    void givenCase_whenOtherAnApplication_thenUpdateStatusOther() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications(
         ).forEach(ga -> ga.getValue().setGeneralApplicationStatus(DIRECTION_OTHER.getId()));
@@ -392,7 +394,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
     }
 
     @Test
-    public void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompletedAndReturnToPostState() {
+    void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompletedAndReturnToPostState() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         when(service.getEventPostState(any(), any())).thenReturn(PREPARE_FOR_HEARING_STATE);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(
@@ -439,7 +441,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
         verify(service).submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
-    public DynamicRadioList buildDynamicIntervenerList() {
+    private DynamicRadioList buildDynamicIntervenerList() {
 
         List<DynamicRadioListElement> dynamicListElements = List.of(getDynamicListElement(APPLICANT, APPLICANT),
             getDynamicListElement(RESPONDENT, RESPONDENT),
@@ -451,7 +453,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
             .build();
     }
 
-    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+    private DynamicRadioListElement getDynamicListElement(String code, String label) {
         return DynamicRadioListElement.builder()
             .code(code)
             .label(label)
@@ -517,14 +519,14 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
             .build();
     }
 
-    public DynamicList objectToDynamicList(Object object) {
+    private DynamicList objectToDynamicList(Object object) {
         if (object != null) {
             return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, DynamicList.class);
         }
         return null;
     }
 
-    public List<GeneralApplicationCollectionData> covertToGeneralApplicationData(Object object) {
+    private List<GeneralApplicationCollectionData> covertToGeneralApplicationData(Object object) {
         return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
         });
     }
