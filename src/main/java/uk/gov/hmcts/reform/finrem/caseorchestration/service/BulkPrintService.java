@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.BulkPrintRequestIdGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.LegacyBulkPrintRequestIdGenerator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -167,6 +169,7 @@ public class BulkPrintService {
                                     List<BulkPrintDocument> documents, boolean isInternational, String auth) {
         UUID letterId = genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()
+                .requestId(LegacyBulkPrintRequestIdGenerator.generate(caseDetails, recipientParty))
                 .caseId(String.valueOf(caseDetails.getId()))
                 .letterType(letterType)
                 .bulkPrintDocuments(documents)
@@ -185,6 +188,7 @@ public class BulkPrintService {
                                     List<BulkPrintDocument> documents, boolean isInternational, String auth) {
         UUID letterId = genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()
+                .requestId(BulkPrintRequestIdGenerator.generate(caseDetails, recipientParty))
                 .caseId(String.valueOf(caseDetails.getId()))
                 .letterType(letterType)
                 .bulkPrintDocuments(documents)
