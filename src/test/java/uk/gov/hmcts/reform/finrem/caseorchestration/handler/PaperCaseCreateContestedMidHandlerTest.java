@@ -2,25 +2,27 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.NEW_PAPER_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -33,14 +35,10 @@ class PaperCaseCreateContestedMidHandlerTest {
     private PaperCaseCreateContestedMidHandler handler;
 
     @Mock
-    ExpressCaseService expressCaseService;
-    @Mock
-    InternationalPostalService postalService;
+    private ExpressCaseService expressCaseService;
 
-    private static final String APPLICANT_POSTCODE_ERROR = "Postcode field is required for applicant address.";
-    private static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
-    private static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
-    private static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
+    @Mock
+    private InternationalPostalService internationalPostalService;
 
     @Test
     void testCanHandle() {
@@ -49,243 +47,27 @@ class PaperCaseCreateContestedMidHandlerTest {
 
     @Test
     void testHandle() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(postalService).validate(callbackRequest.getCaseDetails().getData());
-    }
 
-    @ParameterizedTest
-    @NullSource
-    @EnumSource(value = YesOrNo.class, names = {"NO"})
-    void givenContestedCase_WhenNotEmptyPostCode_thenHandlerWillShowNoErrorMessage(YesOrNo resideOutsideUK) {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, NEW_PAPER_CASE, caseData);
 
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
+        // Mock static methods
+        try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
+                .thenReturn(new ArrayList<>(List.of("address error")));
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
+                .thenReturn(new ArrayList<>(List.of("email error")));
 
-        data.getContactDetailsWrapper().setApplicantSolicitorAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            "SW1A 1AA"
-        ));
+            when(internationalPostalService.validate(caseData)).thenReturn(new ArrayList<>(List.of("postal address error")));
 
-        if (resideOutsideUK != null) {
-            data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                handler.handle(callbackRequest, AUTH_TOKEN);
+
+            assertThat(response.getErrors()).containsExactly("address error", "email error", "postal address error");
+
+            verify(internationalPostalService).validate(caseData);
+            verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
         }
-        data.getContactDetailsWrapper().setApplicantAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            "SW1A 1AA"
-        ));
-
-        data.getContactDetailsWrapper().setRespondentSolicitorAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            "SW1A 2AA"
-        ));
-
-        if (resideOutsideUK != null) {
-            data.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
-        }
-        data.getContactDetailsWrapper().setRespondentAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            "SW1A 2AA"
-        ));
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertThat(handle.getErrors()).isEmpty();
-    }
-
-    @Test
-    void givenContestedCase_WhenEmptyApplicantSolicitorPostCode_thenHandlerWillShowErrorMessage() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setApplicantSolicitorAddress(new Address());
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(handle.getErrors()).containsExactly(APPLICANT_SOLICITOR_POSTCODE_ERROR);
-    }
-
-    @ParameterizedTest
-    @NullSource
-    @EnumSource(value = YesOrNo.class, names = {"NO"})
-    void givenContestedCase_WhenEmptyApplicantPostCode_thenHandlerWillShowErrorMessage(YesOrNo resideOutsideUK) {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        if (resideOutsideUK != null) {
-            data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
-        }
-        data.getContactDetailsWrapper().setApplicantAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            null));
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(handle.getErrors()).containsExactly(APPLICANT_POSTCODE_ERROR);
-    }
-
-    @Test
-    void givenContestedCase_WhenEmptyRespondentSolicitorPostCode_thenHandlerWillShowErrorMessage() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setRespondentSolicitorAddress(new Address());
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(handle.getErrors()).containsExactly(RESPONDENT_SOLICITOR_POSTCODE_ERROR);
-    }
-
-    @ParameterizedTest
-    @NullSource
-    @EnumSource(value = YesOrNo.class, names = {"NO"})
-    void givenContestedCase_WhenEmptyRespondentPostCode_thenHandlerWillShowErrorMessage(YesOrNo resideOutsideUK) {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        if (resideOutsideUK != null) {
-            data.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
-        }
-        data.getContactDetailsWrapper().setRespondentAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            null
-        ));
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(handle.getErrors()).containsExactlyInAnyOrder(RESPONDENT_POSTCODE_ERROR);
-    }
-
-    @Test
-    void testGivenExpressPilotEnabled_ThenExpressCaseServiceCalled() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(
-            FinremCaseDetails.builder().data(
-                FinremCaseData.builder().ccdCaseType(CONTESTED).build()
-            ).build()
-        ).build();
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    void givenContestedCase_WhenEmptyPostCodeForInternationalApplicantAndRespondent_thenHandlerWillShowNoErrorMessage(String nullOrEmptyPostCode) {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setApplicantSolicitorAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            "SW1A 1AA"
-        ));
-
-        data.getContactDetailsWrapper().setApplicantResideOutsideUK(YesOrNo.YES);
-        data.getContactDetailsWrapper().setApplicantAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            nullOrEmptyPostCode
-        ));
-
-        data.getContactDetailsWrapper().setRespondentSolicitorAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            "SW1A 2AA"
-        ));
-
-        data.getContactDetailsWrapper().setRespondentResideOutsideUK(YesOrNo.YES);
-        data.getContactDetailsWrapper().setRespondentAddress(new Address(
-            "AddressLine1",
-            "AddressLine2",
-            "AddressLine3",
-            "County",
-            "Country",
-            "Town",
-            nullOrEmptyPostCode
-        ));
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertThat(handle.getErrors()).isEmpty();
-    }
-
-    private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequest
-            .builder()
-            .eventType(EventType.NEW_PAPER_CASE)
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
-            .build();
     }
 }
