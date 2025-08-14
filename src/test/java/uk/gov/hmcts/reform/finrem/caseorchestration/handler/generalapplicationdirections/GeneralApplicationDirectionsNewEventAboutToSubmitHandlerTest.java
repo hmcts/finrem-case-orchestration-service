@@ -526,11 +526,6 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         return null;
     }
 
-    private List<GeneralApplicationCollectionData> covertToGeneralApplicationData(Object object) {
-        return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
-        });
-    }
-
     private CaseDetails buildCaseDetailsFromJson() {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest.GA_JSON)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
