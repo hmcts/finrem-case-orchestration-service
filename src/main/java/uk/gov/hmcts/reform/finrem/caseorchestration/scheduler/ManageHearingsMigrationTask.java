@@ -51,7 +51,7 @@ public class ManageHearingsMigrationTask extends EncryptedCsvFileProcessingTask 
         // It's weird caseData.ccdCaseId is null
         caseData.setCcdCaseId(finremCaseDetails.getId().toString());
 
-        try{
+        try {
             if (rollback) {
                 if (manageHearingsMigrationService.wasMigrated(caseData)) {
                     log.info("{} - Rolling back Manage Hearings migration.", caseData.getCcdCaseId());
