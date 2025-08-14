@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationd
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.params.provider.Arguments;
@@ -45,8 +46,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -93,15 +94,15 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
     public void setup() {
         objectMapper = new ObjectMapper();
         startHandler = new GeneralApplicationDirectionsNewEventAboutToStartHandler(
-                assignCaseAccessService, finremCaseDetailsMapper, helper, service, partyService);
+            assignCaseAccessService, finremCaseDetailsMapper, helper, service, partyService);
         aboutToSubmitHandler = new GeneralApplicationDirectionsNewEventAboutToSubmitHandler(
-                finremCaseDetailsMapper, helper, service, gaService, manageHearingActionService, generalApplicationsCategoriser);
+            finremCaseDetailsMapper, helper, service, gaService, manageHearingActionService, generalApplicationsCategoriser);
     }
 
     @Test
     public void testCanHandle() {
         assertCanHandle(aboutToSubmitHandler,
-                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
         );
     }
 
@@ -179,7 +180,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
         // Assert
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
 
-        assertEquals(1, applications.size());
+        Assertions.assertThat(applications).hasSize(1);
         verify(manageHearingActionService).performAddHearing(any(FinremCaseDetails.class), any(String.class));
         verify(manageHearingActionService).updateTabData(any(FinremCaseData.class));
     }
@@ -216,8 +217,8 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
 
         //Hearing required document
         CaseDocument generatedDocument = CaseDocument.builder().documentFilename("HearingNotice.pdf")
-                .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
-                .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
+            .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
+            .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
         when(service.generateGeneralApplicationDirectionsDocument(eq(AUTH_TOKEN), any(FinremCaseDetails.class))).thenReturn(generatedDocument);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -236,12 +237,12 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
                 .generalApplicationItems(generalApplicationItems)
                 .build());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-        FinremCaseData data = submitHandle.getData();
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> aboutToSubmitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCaseData data = aboutToSubmitHandle.getData();
 
-        List<GeneralApplicationCollectionData> list
-            = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
-        assertEquals(1, list.size());
+        List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
+        Assertions.assertThat(applications).hasSize(1);
+
         verify(manageHearingActionService).performAddHearing(any(FinremCaseDetails.class), any(String.class));
         verify(manageHearingActionService).updateTabData(any(FinremCaseData.class));
     }
@@ -283,12 +284,11 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
-        List<GeneralApplicationCollectionData> list
-            = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
-        assertEquals(2, list.size());
+        List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
+        Assertions.assertThat(applications).hasSize(2);
 
         assertEquals(DIRECTION_APPROVED.getId(),
-            list.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
+            applications.get(1).getValue().getGeneralApplicationStatus());
         assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
 
@@ -334,12 +334,11 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
-        List<GeneralApplicationCollectionData> list
-            = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
-        assertEquals(2, list.size());
+        List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
+        Assertions.assertThat(applications).hasSize(2);
 
         assertEquals(DIRECTION_NOT_APPROVED.getId(),
-            list.getFirst().getGeneralApplicationItems().getGeneralApplicationStatus());
+            applications.get(1).getValue().getGeneralApplicationStatus());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
     }
@@ -383,12 +382,11 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
-        List<GeneralApplicationCollectionData> list = covertToGeneralApplicationData(
-            data.getGeneralApplicationWrapper().getGeneralApplications());
-        assertEquals(2, list.size());
+        List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
+        Assertions.assertThat(applications).hasSize(2);
 
         assertEquals(DIRECTION_OTHER.getId(),
-            list.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
+            applications.get(1).getValue().getGeneralApplicationStatus());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
     }
@@ -430,12 +428,11 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
-        List<GeneralApplicationCollectionData> list
-            = covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
-        assertEquals(2, list.size());
+        List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
+        Assertions.assertThat(applications).hasSize(2);
 
         assertEquals(DIRECTION_APPROVED.getId(),
-            list.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
+            applications.get(1).getValue().getGeneralApplicationStatus());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(PREPARE_FOR_HEARING_STATE, submitHandle.getState());
