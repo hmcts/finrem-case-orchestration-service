@@ -177,10 +177,6 @@ public class HearingsAppender {
             .build();
     }
 
-    public void populateDefaultCourt(Hearing hearing, FinremCaseData caseData) {
-        hearing.setHearingCourtSelection(caseData.getRegionWrapper().getAllocatedRegionWrapper().toCourt());
-    }
-
     /**
      * Converts any additional hearing documents present in the {@link ListForHearingWrapper}
      * to a list of {@link DocumentCollectionItem}.
