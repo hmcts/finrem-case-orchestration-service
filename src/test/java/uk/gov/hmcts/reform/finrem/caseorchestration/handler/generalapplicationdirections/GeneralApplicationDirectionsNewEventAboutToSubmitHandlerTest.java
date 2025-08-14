@@ -49,6 +49,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
@@ -102,6 +103,85 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
         assertCanHandle(aboutToSubmitHandler,
                 Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
         );
+    }
+
+    /**
+     * Given an approved general application,
+     * When the handler processes the application,
+     * Then the status is updated to approved and the post state is returned.
+     */
+    @Test
+    public void givenApplicationIsApproved_whenHandle_thenUpdateStatusToApprovedAndReturnToPostState() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        callbackRequest.setEventType(EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
+
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
+            .setGeneralApplications(List.of(GeneralApplicationsCollection.builder().build()));
+
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
+            .setGeneralApplicationOutcome(GeneralApplicationOutcome.APPROVED);
+
+        DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
+        DynamicListElement listElement = DynamicListElement.builder()
+            .label("General Application 1 - Received from - applicant - Created Date 2023-06-13 -Hearing Required - No")
+            .code("46132d38-259b-467e-bd4e-e4d7431e32f0#Not Approved").build();
+        dynamicListForCaseDetails.setValue(listElement);
+
+        List<DynamicListElement> listItems = new ArrayList<>();
+        listItems.add(listElement);
+        dynamicListForCaseDetails.setListItems(listItems);
+
+        GeneralApplicationItems generalApplicationItems =
+            GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
+                .generalApplicationCreatedBy("Claire Mumford")
+                .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
+                .generalApplicationSpecialMeasures("Special measure").build();
+
+        when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
+            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
+            generalApplicationItems);
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCaseData caseData = startHandle.getData();
+        FinremCaseData finremCaseData = startHandle.getData();
+
+        finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
+        finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
+
+        DynamicList dynamicList = objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
+        assertEquals(1, dynamicList.getListItems().size());
+
+        String collectionId = UUID.randomUUID().toString();
+
+        when(helper.getGeneralApplicationList(any(), any())).thenReturn(
+            List.of(GeneralApplicationCollectionData.builder()
+                .id(collectionId)
+                .generalApplicationItems(generalApplicationItems)
+                .build()));
+
+        when(helper.objectToDynamicList(any())).thenReturn(dynamicList);
+
+        doAnswer(invocation -> {
+            FinremCaseDetails caseDetails = invocation.getArgument(1);
+
+            caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplications()
+                .getFirst()
+                .setValue(generalApplicationItems);
+
+            return null;
+        }).when(gaService).updateGeneralApplicationCollectionData(any(), any());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCaseData data = submitHandle.getData();
+
+        // Assert
+        List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
+
+        assertEquals(1, applications.size());
+        verify(manageHearingActionService).performAddHearing(any(FinremCaseDetails.class), any(String.class));
+        verify(manageHearingActionService).updateTabData(any(FinremCaseData.class));
     }
 
     @Test
@@ -346,7 +426,6 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest extend
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(1, dynamicList.getListItems().size());
-
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
