@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,6 +39,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LiverpoolCourt.LIVERPOOL_CIVIL_FAMILY_COURT;
@@ -51,8 +53,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 class DraftOrdersNotificationRequestMapperTest {
     @Mock
     private CourtDetailsConfiguration courtDetailsConfiguration;
+    @Mock
+    private NotificationRequestBuilderFactory notificationRequestBuilderFactory;
+    @Mock
+    private EmailService emailService;
     @InjectMocks
     private DraftOrdersNotificationRequestMapper mapper;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(notificationRequestBuilderFactory.newInstance()).thenReturn(new NotificationRequestBuilder());
+    }
 
     @Test
     void shouldBuildJudgeNotificationRequestWithValidData() {
@@ -250,6 +261,7 @@ class DraftOrdersNotificationRequestMapperTest {
 
         return FinremCaseDetails.builder()
             .id(caseReference)
+            .caseType(CaseType.CONTESTED)
             .data(caseData)
             .build();
     }
