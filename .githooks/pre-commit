@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#get the staged .java files
+#Get the staged .java files
 stagedFiles=$(git diff --cached --name-only --diff-filter=ACM | grep '\.java$')
 
 if [ -z "$stagedFiles" ]; then
@@ -8,10 +8,17 @@ if [ -z "$stagedFiles" ]; then
 fi
 
 for file in $stagedFiles; do
-    #remove multiple empty lines using sed
+    #Remove multiple empty lines using sed
     sed -i.bak '/^$/N;/^\n$/D' "$file"
+
+    #Ensure file ends with a newline
+    if [ -n "$(tail -c1 "$file")" ]; then
+        echo "" >> "$file"
+    fi
+
     rm "$file.bak"
-    #re-add the cleaned file to the commit
+
+    #Re-add the cleaned file to the commit
     git add "$file"
 done
 
