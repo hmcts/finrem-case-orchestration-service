@@ -14,7 +14,8 @@ public enum Features {
     SECURE_DOC_ENABLED("secure_doc_enabled"),
     INTERVENER_ENABLED("intervener_enabled"),
     CASE_FILE_VIEW_ENABLED("case_file_view_enabled"),
-    EXPRESS_PILOT_ENABLED("express_pilot_enabled");
+    EXPRESS_PILOT_ENABLED("express_pilot_enabled"),
+    MANAGE_HEARING_ENABLED("manage_hearing_enabled");
 
     private final String name;
 }
