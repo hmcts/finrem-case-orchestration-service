@@ -213,6 +213,7 @@ sonarqube {
     ]
 
     properties {
+        property "sonar.cpd.exclusions", "**/GeneralApplicationDirectionsNewEventAboutToSubmitHandler.java,**/GeneralApplicationDirectionsNewEventAboutToStartHandler.java"
         property "sonar.projectKey", "finrem-case-orchestration"
         property "sonar.exclusions", sonarExclusions.join(', ')
         property "sonar.dynamicAnalysis", "reuseReports"

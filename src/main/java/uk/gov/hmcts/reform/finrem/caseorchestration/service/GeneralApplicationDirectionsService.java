@@ -15,10 +15,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -54,6 +56,7 @@ public class GeneralApplicationDirectionsService {
     private final ObjectMapper objectMapper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final CcdService ccdService;
+    private final ManageHearingsDocumentService manageHearingsDocumentService;
 
     private static final String CASE_NUMBER = "ccdCaseNumber";
     private static final String COURT_DETAIL = "courtDetails";
@@ -203,5 +206,26 @@ public class GeneralApplicationDirectionsService {
 
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
+    }
+
+    /**
+     * Generates a General Application Directions document for the new event.
+     * If a hearing is required, it generates a hearing notice document.
+     * Otherwise, it prepares a General Application Directions Order document.
+     * TO DO: Document generation in DFR-3884
+     *
+     * @param authorisationToken the authorisation token for the request
+     * @param finremCaseDetails the details of the case for which the document is being generated
+     * @return the generated CaseDocument
+     */
+    public CaseDocument generateGeneralApplicationDirectionsDocument(String authorisationToken, FinremCaseDetails finremCaseDetails) {
+        if (finremCaseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired() == YesOrNo.YES) {
+            return manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, authorisationToken);
+        } else {
+            CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+            //If no hearing is required, prepare the General Application Directions Order document
+            return prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
+
+        }
     }
 }
