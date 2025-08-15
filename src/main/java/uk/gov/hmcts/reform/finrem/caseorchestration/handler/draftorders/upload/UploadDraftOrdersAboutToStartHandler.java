@@ -82,13 +82,13 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
-        initialDraftOrdersWrapper(draftOrdersWrapper);
+        initialiseDraftOrdersWrapper(draftOrdersWrapper);
         setupDraftOrdersWrapper(draftOrdersWrapper, caseDetails, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
 
-    private void initialDraftOrdersWrapper(DraftOrdersWrapper draftOrdersWrapper) {
+    private void initialiseDraftOrdersWrapper(DraftOrdersWrapper draftOrdersWrapper) {
         draftOrdersWrapper.setTypeOfDraftOrder(null);
     }
 
