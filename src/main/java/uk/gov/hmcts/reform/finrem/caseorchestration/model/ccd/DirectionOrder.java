@@ -19,7 +19,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class DirectionOrder implements HasCaseDocument, WithAttachments {
+public class DirectionOrder implements HasCaseDocument, WithAttachments, HasUploadingDocuments {
     @JsonProperty("uploadDraftDocument")
     CaseDocument uploadDraftDocument;
     @JsonProperty("orderDateTime")
@@ -36,5 +36,11 @@ public class DirectionOrder implements HasCaseDocument, WithAttachments {
     @JsonIgnore
     public List<DocumentCollectionItem> getAttachments() {
         return additionalDocuments;
+    }
+
+    @Override
+    @JsonIgnore
+    public List<CaseDocument> getUploadingDocuments() {
+        return uploadDraftDocument != null ? List.of(uploadDraftDocument) : List.of();
     }
 }

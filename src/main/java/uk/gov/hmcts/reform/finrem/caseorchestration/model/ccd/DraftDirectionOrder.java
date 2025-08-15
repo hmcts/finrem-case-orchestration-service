@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -16,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-public class DraftDirectionOrder implements HasCaseDocument {
+public class DraftDirectionOrder implements HasCaseDocument, HasUploadingDocuments {
 
     @JsonProperty("purposeOfDocument")
     String purposeOfDocument;
@@ -26,4 +27,10 @@ public class DraftDirectionOrder implements HasCaseDocument {
 
     @JsonProperty("additionalDocuments")
     private List<DocumentCollectionItem> additionalDocuments;
+
+    @Override
+    @JsonIgnore
+    public List<CaseDocument> getUploadingDocuments() {
+        return uploadDraftDocument != null ? List.of(uploadDraftDocument) : List.of();
+    }
 }
