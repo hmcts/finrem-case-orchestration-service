@@ -54,6 +54,8 @@ public class HearingService {
 
     private static final String UNKNOWN_TEXT = "unknown";
 
+    private FeatureToggleService featureToggleService;
+
     /**
      * Generates a {@link DynamicList} containing selectable hearings for a given case.
      *
