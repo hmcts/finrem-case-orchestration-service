@@ -6,11 +6,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
@@ -37,10 +37,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.anySup
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.hearing;
 
 @ExtendWith(MockitoExtension.class)
-class DirectionDetailsCollectionPopulatorTest {
+class HearingDirectionDetailsCollectionPopulatorTest {
 
     @TestLogs
-    private final TestLogger logger = new TestLogger(DirectionDetailsCollectionPopulator.class);
+    private final TestLogger logger = new TestLogger(HearingDirectionDetailsCollectionPopulator.class);
 
     @Mock
     private HearingsAppender hearingsAppender;
@@ -49,7 +49,7 @@ class DirectionDetailsCollectionPopulatorTest {
     private PartyService partyService;
 
     @InjectMocks
-    private DirectionDetailsCollectionPopulator underTest;
+    private HearingDirectionDetailsCollectionPopulator underTest;
 
     @Test
     void testShouldPopulate() {
@@ -67,23 +67,23 @@ class DirectionDetailsCollectionPopulatorTest {
             .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because it's not a contested application.");
 
-        // event directionDetailsCollection was not set or empty
+        // event hearingDirectionDetailsCollection was not set or empty
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED).build()))
             .isTrue();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
-            .directionDetailsCollection(Collections.emptyList())
+            .hearingDirectionDetailsCollection(Collections.emptyList())
             .build()))
             .isTrue();
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONTESTED)
-            .mhMigrationWrapper(MhMigrationWrapper.builder().isDirectionDetailsCollectionMigrated(YesOrNo.YES).build())
+            .mhMigrationWrapper(MhMigrationWrapper.builder().isHearingDirectionDetailsCollectionMigrated(YesOrNo.YES).build())
             .build()))
             .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because migration had been done.");
 
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
-            .mhMigrationWrapper(MhMigrationWrapper.builder().isDirectionDetailsCollectionMigrated(YesOrNo.NO).build())
+            .mhMigrationWrapper(MhMigrationWrapper.builder().isGeneralApplicationMigrated(YesOrNo.NO).build())
             .build()))
             .isTrue();
     }
@@ -91,19 +91,19 @@ class DirectionDetailsCollectionPopulatorTest {
     @Test
     void shouldPopulateCaseDataCorrectly() {
         // Arrange
-        DirectionDetail hearingReq1 = DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build();
-        DirectionDetail hearingReq2 = DirectionDetail.builder().isAnotherHearingYN(YesOrNo.NO).build();
-        DirectionDetail hearingReq3 = DirectionDetail.builder().isAnotherHearingYN(null).build();
+        HearingDirectionDetail hearingReq1 = HearingDirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build();
+        HearingDirectionDetail hearingReq2 = HearingDirectionDetail.builder().isAnotherHearingYN(YesOrNo.NO).build();
+        HearingDirectionDetail hearingReq3 = HearingDirectionDetail.builder().isAnotherHearingYN(null).build();
 
         Hearing newHearing1 = hearing("11:00");
         Hearing newHearing2 = hearing("12:00");
         Hearing newHearing3 = hearing("13:00");
 
         FinremCaseData caseData = FinremCaseData.builder()
-            .directionDetailsCollection(List.of(
-                DirectionDetailCollection.builder().value(hearingReq1).build(),
-                DirectionDetailCollection.builder().value(hearingReq2).build(),
-                DirectionDetailCollection.builder().value(hearingReq3).build()
+            .hearingDirectionDetailsCollection(List.of(
+                HearingDirectionDetailsCollection.builder().value(hearingReq1).build(),
+                HearingDirectionDetailsCollection.builder().value(hearingReq2).build(),
+                HearingDirectionDetailsCollection.builder().value(hearingReq3).build()
             ))
             .build();
 
@@ -135,7 +135,7 @@ class DirectionDetailsCollectionPopulatorTest {
         );
         verify(partyService).getAllActivePartyList(caseData);
 
-        assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsDirectionDetailsCollectionMigrated());
+        assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsHearingDirectionDetailsCollectionMigrated());
         assertThat(caseData.getManageHearingsWrapper().getHearings())
             .hasSize(1)
             .extracting(ManageHearingsCollectionItem::getValue)

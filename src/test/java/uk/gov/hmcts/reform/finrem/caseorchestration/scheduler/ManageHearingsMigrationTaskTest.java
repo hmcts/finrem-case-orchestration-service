@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsMigrationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.DirectionDetailsCollectionPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.GeneralApplicationWrapperPopulator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.HearingDirectionDetailsCollectionPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForInterimHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
@@ -94,13 +95,16 @@ class ManageHearingsMigrationTaskTest {
     private DirectionDetailsCollectionPopulator directionDetailsCollectionPopulator;
 
     @Mock
+    private HearingDirectionDetailsCollectionPopulator hearingDirectionDetailsCollectionPopulator;
+
+    @Mock
     private ManageHearingActionService manageHearingActionService;
 
     @BeforeEach
     void setup() {
         spyManageHearingsMigrationService = spy(new ManageHearingsMigrationService(
             listForHearingWrapperPopulator, listForInterimHearingWrapperPopulator, generalApplicationWrapperPopulator,
-            directionDetailsCollectionPopulator, manageHearingActionService
+            directionDetailsCollectionPopulator, hearingDirectionDetailsCollectionPopulator, manageHearingActionService
         ));
 
         underTest = new ManageHearingsMigrationTask(caseReferenceCsvLoader, ccdService, systemUserService,

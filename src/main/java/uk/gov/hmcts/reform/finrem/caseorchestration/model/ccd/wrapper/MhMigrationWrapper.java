@@ -24,6 +24,8 @@ public class MhMigrationWrapper {
 
     private YesOrNo isDirectionDetailsCollectionMigrated;
 
+    private YesOrNo isHearingDirectionDetailsCollectionMigrated;
+
     private String mhMigrationVersion;
 
     /**
@@ -39,6 +41,7 @@ public class MhMigrationWrapper {
         isListForInterimHearingsMigrated = null;
         isGeneralApplicationMigrated = null;
         isDirectionDetailsCollectionMigrated = null;
+        isHearingDirectionDetailsCollectionMigrated = null;
         mhMigrationVersion = null;
     }
 }
