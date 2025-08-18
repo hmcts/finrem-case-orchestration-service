@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CustomRequestScopeAttr;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.ScheduledTaskException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +35,8 @@ public abstract class BaseTask implements Runnable {
     private int bulkPrintWaitTime;
     @Value("${cron.dryRun:false}")
     private boolean dryRun;
+
+    private HashMap<String, String> taskFailures = new HashMap<>();
 
     protected BaseTask(CcdService ccdService, SystemUserService systemUserService,
                        FinremCaseDetailsMapper finremCaseDetailsMapper) {
@@ -96,14 +100,22 @@ public abstract class BaseTask implements Runnable {
                             log.info("[DRY RUN] Updated {} for Case ID: {}", getTaskName(), caseId);
                         }
                     }
-                } catch (InterruptedException | RuntimeException | JsonProcessingException e) {
-                    log.error("Cron task {}: Error processing case {}", getTaskName(), caseId, e);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    handleException(caseId, e, "Interrupted while processing case");
+                } catch (JsonProcessingException e) {
+                    handleException(caseId, e, "JSON processing error");
+                } catch (ScheduledTaskException e) {
+                    handleException(caseId, e, "Scheduled task error");
+                } catch (Exception e) {
+                    handleException(caseId, e, "Unexpected error");
                 } finally {
                     RequestContextHolder.resetRequestAttributes();
                 }
             }
             long endTime = System.currentTimeMillis(); // End the timer
-            log.info("Scheduled task {} completed. Total time taken: {} ms", getTaskName(), (endTime - startTime));
+            log.info("Scheduled task {} completed. Total time taken: {} ms, with {} failures.", getTaskName(),
+                (endTime - startTime), taskFailures.size());
         }
     }
 
@@ -158,4 +170,10 @@ public abstract class BaseTask implements Runnable {
     protected String getDescription(FinremCaseDetails finremCaseDetails) {
         return getSummary();
     }
+
+    private void handleException(String caseId, Exception e, String errorMessage) {
+        log.error("Cron task {}: {} for case {}", getTaskName(), errorMessage, caseId, e);
+        taskFailures.put(caseId, errorMessage);
+    }
+
 }
