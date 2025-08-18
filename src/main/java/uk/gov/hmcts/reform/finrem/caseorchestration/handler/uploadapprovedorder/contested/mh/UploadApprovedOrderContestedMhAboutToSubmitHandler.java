@@ -16,9 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Slf4j
 @Service
 public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCallbackHandler {
@@ -48,7 +45,6 @@ public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCa
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        List<String> errors = new ArrayList<>();
         service.processApprovedOrdersMh(caseDetails, callbackRequest.getCaseDetailsBefore(), userAuthorisation);
 
         if (YesOrNo.YES.equals(caseData.getManageHearingsWrapper().getIsAddHearingChosen())) {
@@ -57,6 +53,6 @@ public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCa
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData()).errors(errors).build();
+            .data(callbackRequest.getCaseDetails().getData()).build();
     }
 }

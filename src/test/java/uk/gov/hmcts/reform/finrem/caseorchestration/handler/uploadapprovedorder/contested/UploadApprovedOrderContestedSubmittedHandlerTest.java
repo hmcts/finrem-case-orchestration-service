@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder.contested;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder.contested.UploadApprovedOrderContestedSubmittedHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder.UploadApprovedOrderBaseHandlerTestSetup;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
