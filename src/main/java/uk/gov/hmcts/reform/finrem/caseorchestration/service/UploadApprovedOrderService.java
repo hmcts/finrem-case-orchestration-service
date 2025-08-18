@@ -23,6 +23,13 @@ public class UploadApprovedOrderService {
     private final AdditionalHearingDocumentService documentService;
     private final ApprovedOrderNoticeOfHearingService noticeService;
 
+    /**
+     * @deprecated This method is deprecated and should not be used.
+     * Use {@link #processApprovedOrdersMh(FinremCaseDetails, FinremCaseDetails, String)} instead.
+     * This method is excluded from SonarQube scans.
+     */
+    @Deprecated(forRemoval = true, since = "30/09/2025")
+    @SuppressWarnings("squid:S1133") // Suppress SonarQube rule for deprecated code
     public void processApprovedOrders(FinremCallbackRequest callbackRequest,
                                       List<String> errors,
                                       String authorisationToken) {
@@ -51,6 +58,12 @@ public class UploadApprovedOrderService {
         documentService.addToFinalOrderCollection(caseDetails, authorisationToken);
     }
 
+    /**
+     * @deprecated This method is deprecated and should not be used.
+     * This method is excluded from SonarQube scans.
+     */
+    @Deprecated(forRemoval = true, since = "18/08/2025")
+    @SuppressWarnings("squid:S1133") //
     private boolean isAnotherHearingToBeListed(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         Optional<List<HearingDirectionDetailsCollection>> latestHearingDirections = Optional.ofNullable(data.getHearingDirectionDetailsCollection());
@@ -62,5 +75,20 @@ public class UploadApprovedOrderService {
             }
         }
         return false;
+    }
+
+    public void processApprovedOrdersMh(FinremCaseDetails caseDetails, FinremCaseDetails detailsBefore, String authorisationToken ) {
+        letterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
+        documentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
+        hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
+
+        List<DirectionOrderCollection> hearingOrderCollectionBefore
+            = documentService.getApprovedHearingOrders(detailsBefore, authorisationToken);
+
+        FinremCaseData caseData = caseDetails.getData();
+        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
+        hearingOrderCollectionBefore.addAll(uploadHearingOrders);
+        caseData.setUploadHearingOrder(hearingOrderCollectionBefore);
+        documentService.addToFinalOrderCollection(caseDetails, authorisationToken);
     }
 }
