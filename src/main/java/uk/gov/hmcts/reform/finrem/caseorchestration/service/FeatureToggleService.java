@@ -90,6 +90,9 @@ public class FeatureToggleService {
         return isFeatureEnabled(EXPRESS_PILOT_ENABLED);
     }
 
+    /*
+     * Used for enable manage hearing feature
+     */
     public boolean isManageHearingEnabled() {
         return isFeatureEnabled(MANAGE_HEARING_ENABLED);
     }
