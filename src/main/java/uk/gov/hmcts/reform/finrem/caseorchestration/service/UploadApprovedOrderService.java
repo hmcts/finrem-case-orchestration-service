@@ -24,9 +24,16 @@ public class UploadApprovedOrderService {
     private final ApprovedOrderNoticeOfHearingService noticeService;
 
     /**
-     * @deprecated This method is deprecated and should not be used.
-     * Use {@link #processApprovedOrdersMh(FinremCaseDetails, FinremCaseDetails, String)} instead.
-     * This method is excluded from SonarQube scans.
+     * Method for processing approved orders in a financial remedy case.
+     * This method generates and stores the contested order approved letter, creates additional order documents,
+     * appends the latest draft direction order, and updates the hearing order collection with approved hearing orders.
+     *
+     * <p>Use {@link #processApprovedOrdersMh(FinremCaseDetails, FinremCaseDetails, String)} instead.</p>
+     *
+     * @param callbackRequest   the callback request containing case details
+     * @param errors            a list to collect error messages encountered during processing
+     * @param authorisationToken the authorisation token for accessing secure resources
+     * @deprecated This method is deprecated and should not be used. Scheduled for removal since 30/09/2025.
      */
     @Deprecated(forRemoval = true, since = "30/09/2025")
     @SuppressWarnings("squid:S1133") // Suppress SonarQube rule for deprecated code
@@ -59,8 +66,12 @@ public class UploadApprovedOrderService {
     }
 
     /**
-     * @deprecated This method is deprecated and should not be used.
+     * Determines if another hearing needs to be listed based on the case details.
      * This method is excluded from SonarQube scans.
+     *
+     * @param caseDetails the details of the financial remedy case
+     * @return {@code true} if another hearing needs to be listed, {@code false} otherwise
+     * @deprecated This method is deprecated and should not be used.
      */
     @Deprecated(forRemoval = true, since = "18/08/2025")
     @SuppressWarnings("squid:S1133") //
@@ -77,7 +88,17 @@ public class UploadApprovedOrderService {
         return false;
     }
 
-    public void processApprovedOrdersMh(FinremCaseDetails caseDetails, FinremCaseDetails detailsBefore, String authorisationToken ) {
+    /**
+     * Processes approved orders for a financial remedy case.
+     * This method generates and stores the contested order approved letter,
+     * creates additional order documents, appends the latest draft direction order,
+     * and updates the hearing order collection with approved hearing orders.
+     *
+     * @param caseDetails       the current state of the financial remedy case
+     * @param detailsBefore     the previous state of the financial remedy case
+     * @param authorisationToken the authorisation token for accessing secure resources
+     */
+    public void processApprovedOrdersMh(FinremCaseDetails caseDetails, FinremCaseDetails detailsBefore, String authorisationToken) {
         letterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
         documentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
