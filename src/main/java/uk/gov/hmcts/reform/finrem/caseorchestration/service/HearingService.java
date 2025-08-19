@@ -212,11 +212,11 @@ public class HearingService {
         ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
         emptyIfNull(manageHearingsWrapper.getHearings())
             .forEach(hearing -> {
-            DynamicListElement dynamicListElement = buildDynamicListElementFromHearing(hearing);
-            dynamicListElements.add(dynamicListElement);
-            elementToSortingKeyMap.put(dynamicListElement, new HearingSortingKey(hearing.getValue().getHearingDate(),
-                hearing.getValue().getHearingTime(), hearing.getId().toString()));
-        });
+                DynamicListElement dynamicListElement = buildDynamicListElementFromHearing(hearing);
+                dynamicListElements.add(dynamicListElement);
+                elementToSortingKeyMap.put(dynamicListElement, new HearingSortingKey(hearing.getValue().getHearingDate(),
+                    hearing.getValue().getHearingTime(), hearing.getId().toString()));
+            });
     }
 
     private void populateTopLevelHearings(FinremCaseData caseData, List<DynamicListElement> dynamicListElements,
