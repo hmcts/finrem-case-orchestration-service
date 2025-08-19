@@ -115,6 +115,5 @@ public class FeatureToggleServiceTest {
         public void isManageHearingEnabled() {
             assertThat(featureToggleService.isManageHearingEnabled(), is(false));
         }
-
     }
 }
