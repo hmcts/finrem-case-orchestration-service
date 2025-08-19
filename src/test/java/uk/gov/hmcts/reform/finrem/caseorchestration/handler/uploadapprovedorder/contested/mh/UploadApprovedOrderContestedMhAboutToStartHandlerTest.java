@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.BaseHandlerTestSetup;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder.contested.UploadApprovedOrderContestedAboutToStartHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
@@ -34,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class UploadApprovedOrderContestedMhAboutToStartHandlerTest extends BaseHandlerTestSetup {
@@ -42,11 +42,11 @@ class UploadApprovedOrderContestedMhAboutToStartHandlerTest extends BaseHandlerT
     private PartyService partyService;
 
     @InjectMocks
-    private UploadApprovedOrderContestedAboutToStartHandler handler;
+    private UploadApprovedOrderMhContestedAboutToStartHandler handler;
 
     @Test
     void canHandle() {
-        assertTrue(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER_MH));
+        assertCanHandle(handler, CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER_MH);
     }
 
     @Test

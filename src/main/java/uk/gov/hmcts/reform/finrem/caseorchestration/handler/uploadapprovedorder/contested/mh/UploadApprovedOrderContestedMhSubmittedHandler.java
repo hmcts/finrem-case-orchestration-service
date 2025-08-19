@@ -39,6 +39,7 @@ public class UploadApprovedOrderContestedMhSubmittedHandler extends FinremCallba
         ManageHearingsWrapper manageHearingsWrapper =
             caseData.getManageHearingsWrapper();
         if (YesOrNo.YES.equals(manageHearingsWrapper.getIsAddHearingChosen())) {
+            log.info("Sending hearing notification for case ID: {}", caseDetails.getId());
             // Collect all documents collected and generated as part of Upload Approved Order
             // (Uploaded Approved Order + additional attachments, hearing generated docs + additional hearing docs)
         }
