@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -41,7 +42,6 @@ class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup 
     private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
     private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
     private static final String FILE_NAME = "abc.pdf";
-    public static final String AUTH_TOKEN = "tokien:)";
 
     @Test
     void canHandle() {

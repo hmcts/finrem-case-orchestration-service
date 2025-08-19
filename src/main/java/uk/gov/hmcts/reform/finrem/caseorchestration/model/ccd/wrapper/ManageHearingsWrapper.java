@@ -27,7 +27,6 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManageHearingsWrapper {
     private YesOrNo isAddHearingChosen;
-    // Could move to order Wrapper if not appropriate here
     private YesOrNo isFinalOrder;
     private ManageHearingsAction manageHearingsActionSelection;
     private WorkingHearing workingHearing;

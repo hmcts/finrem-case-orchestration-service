@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder.contested;
 
 import org.junit.Before;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;

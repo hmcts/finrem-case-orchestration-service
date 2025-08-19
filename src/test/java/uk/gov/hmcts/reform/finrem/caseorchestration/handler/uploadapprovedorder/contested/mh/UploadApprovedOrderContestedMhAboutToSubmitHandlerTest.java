@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,12 +55,10 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
         when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.NO);
 
-        String userAuthorisation = "authToken";
-
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(callbackRequest, userAuthorisation);
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(uploadApprovedOrderService).processApprovedOrdersMh(caseDetails, caseDetailsBefore, userAuthorisation);
+        verify(uploadApprovedOrderService).processApprovedOrdersMh(caseDetails, caseDetailsBefore, AUTH_TOKEN);
         assertNotNull(response);
     }
 
@@ -78,12 +77,10 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
         when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.YES);
 
-        String userAuthorisation = "authToken";
+        var response =
+            handler.handle(callbackRequest, AUTH_TOKEN);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(callbackRequest, userAuthorisation);
-
-        verify(manageHearingActionService).performAddHearing(caseDetails, userAuthorisation);
+        verify(manageHearingActionService).performAddHearing(caseDetails, AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(caseData);
         assertNotNull(response);
     }

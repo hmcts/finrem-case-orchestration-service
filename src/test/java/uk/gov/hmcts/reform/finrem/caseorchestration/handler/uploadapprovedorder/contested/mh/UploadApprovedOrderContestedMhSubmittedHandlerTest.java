@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -40,17 +39,17 @@ class UploadApprovedOrderContestedMhSubmittedHandlerTest {
 
     @Test
     void handle_shouldReturnResponseWhenAddHearingNotChosen() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
-        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        var caseData = mock(FinremCaseData.class);
+        var caseDetails = mock(FinremCaseDetails.class);
+        var callbackRequest = mock(FinremCallbackRequest.class);
+        var manageHearingsWrapper = mock(ManageHearingsWrapper.class);
 
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
         when(caseDetails.getData()).thenReturn(caseData);
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
         when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.NO);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+        var response =
             handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(response);
@@ -59,17 +58,17 @@ class UploadApprovedOrderContestedMhSubmittedHandlerTest {
 
     @Test
     void handle_shouldReturnResponseWhenAddHearingChosen() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
-        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        var caseData = mock(FinremCaseData.class);
+        var caseDetails = mock(FinremCaseDetails.class);
+        var callbackRequest = mock(FinremCallbackRequest.class);
+        var manageHearingsWrapper = mock(ManageHearingsWrapper.class);
 
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
         when(caseDetails.getData()).thenReturn(caseData);
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
         when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.YES);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+        var response =
             handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(response);
