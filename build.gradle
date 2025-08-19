@@ -46,7 +46,7 @@ def versions = [
         loadbalancer         : '4.3.0',
         commonsValidator     : '1.7',
         commonsBeanUtils     : '1.11.0',
-        tomcat               : '10.1.44',
+        tomcat               : '10.1.44'
 ]
 
 project.ext {
