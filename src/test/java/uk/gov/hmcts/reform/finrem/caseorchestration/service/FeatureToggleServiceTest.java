@@ -108,7 +108,7 @@ public class FeatureToggleServiceTest {
 
         @Test
         public void isExpressPilotEnabled() {
-            assertThat(featureToggleService.isCaseFileViewEnabled(), is(false));
+            assertThat(featureToggleService.isExpressPilotEnabled(), is(false));
         }
 
         @Test
