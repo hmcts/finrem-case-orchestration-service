@@ -3,7 +3,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.sonarqube' version '6.2.0.5505'
-    id 'org.springframework.boot' version '3.5.4'
+    id 'org.springframework.boot' version '3.5.4' // TODO remove tomcat dependency once spring boot is upgraded
     id 'com.github.ben-manes.versions' version '0.52.0'
     id 'uk.gov.hmcts.java' version '0.12.67'
     id 'au.com.dius.pact' version '4.6.17'
@@ -45,7 +45,8 @@ def versions = [
         snakeyaml            : '2.4',
         loadbalancer         : '4.3.0',
         commonsValidator     : '1.7',
-        commonsBeanUtils     : '1.11.0'
+        commonsBeanUtils     : '1.11.0',
+        tomcat               : '10.1.44'
 ]
 
 project.ext {
@@ -396,6 +397,9 @@ dependencyManagement {
 }
 
 dependencies {
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: versions.tomcat
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: versions.tomcat
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: versions.tomcat
     implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
