@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
@@ -21,12 +22,12 @@ import java.util.List;
 @Service
 public class UpdateContactDetailsConsentedMidHandler extends FinremCallbackHandler {
 
-    private final InternationalPostalService postalService;
+    private final InternationalPostalService internationalPostalService;
 
     public UpdateContactDetailsConsentedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                   InternationalPostalService postalService) {
+                                                   InternationalPostalService internationalPostalService) {
         super(finremCaseDetailsMapper);
-        this.postalService = postalService;
+        this.internationalPostalService = internationalPostalService;
     }
 
     @Override
@@ -39,16 +40,15 @@ public class UpdateContactDetailsConsentedMidHandler extends FinremCallbackHandl
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking consented event {} mid event callback for case id {}", EventType.UPDATE_CONTACT_DETAILS,
-            finremCaseDetails.getId());
 
         List<String> errors = new ArrayList<>();
         FinremCaseData caseData = finremCaseDetails.getData();
-        errors.addAll(postalService.validate(caseData));
+        errors.addAll(internationalPostalService.validate(caseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 }

@@ -20,6 +20,7 @@ public enum EventType {
     UPLOAD_DOCUMENT_CONTESTED("FR_uploadGeneralDocument"),
     INTERIM_HEARING("FR_listForInterimHearing"),
     SOLICITOR_CREATE("FR_solicitorCreate"),
+    UPDATE_CASE_DETAILS_SOLICITOR("FR_updateCaseDetailsSolicitor"),
     AMEND_APP_DETAILS("FR_amendApplicationDetails"),
     AMEND_CONTESTED_APP_DETAILS("FR_amendApplication"),
     AMEND_CONTESTED_PAPER_APP_DETAILS("FR_amendPaperApplication"),
