@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.ScheduledTaskException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -50,20 +51,24 @@ public class ManageHearingsMigrationTask extends EncryptedCsvFileProcessingTask 
         // It's weird caseData.ccdCaseId is null
         caseData.setCcdCaseId(finremCaseDetails.getId().toString());
 
-        if (rollback) {
-            if (manageHearingsMigrationService.wasMigrated(caseData)) {
-                log.info("{} - Rolling back Manage Hearings migration.", caseData.getCcdCaseId());
-                manageHearingsMigrationService.revertManageHearingMigration(caseData);
+        try {
+            if (rollback) {
+                if (manageHearingsMigrationService.wasMigrated(caseData)) {
+                    log.info("{} - Rolling back Manage Hearings migration.", caseData.getCcdCaseId());
+                    manageHearingsMigrationService.revertManageHearingMigration(caseData);
+                } else {
+                    log.info("{} - Manage Hearings migration not detected. Rollback skipped.", caseData.getCcdCaseId());
+                }
             } else {
-                log.info("{} - Manage Hearings migration not detected. Rollback skipped.", caseData.getCcdCaseId());
+                if (!manageHearingsMigrationService.wasMigrated(caseData)) {
+                    log.info("{} - Starting Manage Hearings migration.", caseData.getCcdCaseId());
+                    manageHearingsMigrationService.runManageHearingMigration(caseData, mhMigrationVersion);
+                } else {
+                    log.info("{} - Manage Hearings migration already applied. Skipping.", caseData.getCcdCaseId());
+                }
             }
-        } else {
-            if (!manageHearingsMigrationService.wasMigrated(caseData)) {
-                log.info("{} - Starting Manage Hearings migration.", caseData.getCcdCaseId());
-                manageHearingsMigrationService.runManageHearingMigration(caseData, mhMigrationVersion);
-            } else {
-                log.info("{} - Manage Hearings migration already applied. Skipping.", caseData.getCcdCaseId());
-            }
+        } catch (Exception e) {
+            throw new ScheduledTaskException(e);
         }
     }
 
