@@ -397,9 +397,9 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation("org.apache.tomcat.embed:tomcat-embed-core:10.1.44")
-    implementation("org.apache.tomcat.embed:tomcat-embed-el:10.1.44")
-    implementation("org.apache.tomcat.embed:tomcat-embed-websocket:10.1.44")
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: versions.tomcat
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: versions.tomcat
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: versions.tomcat
     implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
