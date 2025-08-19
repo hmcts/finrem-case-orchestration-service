@@ -360,6 +360,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(actual.getCaseId(), is(String.valueOf(1234567890)));
         assertThat(actual.getAuthorisationToken(), is(AUTH_TOKEN));
         assertThat(actual.getRecipientParty(), is(expectedRecipientParty));
+        assertThat(actual.getRequestId(), is("1234567890:" + expectedRecipientParty + ":12"));
     }
 
     private void verifyBulkPrintRequest(BulkPrintRequest actual, List<BulkPrintDocument> expectedBulkPrintDocuments,
@@ -369,5 +370,6 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(actual.getCaseId(), is(String.valueOf(caseId)));
         assertThat(actual.getAuthorisationToken(), is(AUTH_TOKEN));
         assertThat(actual.getRecipientParty(), is(expectedRecipientParty));
+        assertThat(actual.getRequestId(), is(caseId + ":" + expectedRecipientParty + ":12"));
     }
 }

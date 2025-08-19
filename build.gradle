@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.67'
     id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1836'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1839'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -16,7 +16,7 @@ apply plugin: 'io.spring.dependency-management'
 
 def versions = [
         guava                : '33.4.8-jre',
-        bspCommonLib         : '0.1.2',
+        bspCommonLib         : '0.2.0',
         ccdClient            : '5.2.0',
         commonsIo            : '2.20.0',
         commonsLang3         : '3.18.0',
@@ -33,7 +33,7 @@ def versions = [
         wiremock             : '3.0.1',
         apacheLogging        : '2.25.1',
         idamClient           : '3.0.4',
-        jjwt                 : '0.12.6',
+        jjwt                 : '0.12.7',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
         tika                 : '3.2.2',

@@ -30,9 +30,9 @@ public class BulkPrintDocumentGeneratorService {
     private static final String FILE_NAMES = "fileNames";
     private static final String RECIPIENTS = "recipients";
     private static final String IS_INTERNATIONAL = "isInternational";
+    private static final String RECIPIENT_PARTY = "recipientParty";
 
     private final AuthTokenGenerator authTokenGenerator;
-    private final FeatureToggleService featureToggleService;
     private final SendLetterApi sendLetterApi;
 
     /**
@@ -57,6 +57,7 @@ public class BulkPrintDocumentGeneratorService {
 
         log.info("Letter service produced the following letter Id {} for party {} and  Case ID: {}",
             sendLetterResponse.letterId, bulkPrintRequest.getRecipientParty(), caseId);
+
         return sendLetterResponse.letterId;
     }
 
@@ -68,18 +69,15 @@ public class BulkPrintDocumentGeneratorService {
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
         additionalData.put(FILE_NAMES, getFileNames(bulkPrintRequest));
-
-        String recipient = bulkPrintRequest.getRecipientParty();
-        log.info("isSendLetterDuplicateCheckEnabled {}, recipient is {} for Case ID: {}",
-            featureToggleService.isSendLetterDuplicateCheckEnabled(), recipient, caseId);
-        if (featureToggleService.isSendLetterDuplicateCheckEnabled()) {
-            additionalData.put(RECIPIENTS, List.of("%s:%s:%d".formatted(recipient, caseId, System.nanoTime())));
-        } else {
-            additionalData.put(RECIPIENTS, List.of(recipient));
-        }
         additionalData.put(IS_INTERNATIONAL, bulkPrintRequest.isInternational());
-        log.info("sending additional data {}  party is {}, isInternational {}, and Case ID: {}",
-            additionalData, recipient, bulkPrintRequest.isInternational(), caseId);
+        additionalData.put(RECIPIENT_PARTY, bulkPrintRequest.getRecipientParty());
+
+        // The send-letter API uses the "recipients" key to identify duplicate print requests.
+        // The value therefore needs to be unique for each event for a case in order that duplicate requests
+        // triggered by CCD retries are correctly identified as duplicates by the send-letter API.
+        additionalData.put(RECIPIENTS, List.of(bulkPrintRequest.getRequestId()));
+
+        log.info("Case ID: {} sending additional data {}", caseId, additionalData);
         return additionalData;
     }
 
