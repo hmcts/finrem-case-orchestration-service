@@ -45,7 +45,8 @@ def versions = [
         snakeyaml            : '2.4',
         loadbalancer         : '4.3.0',
         commonsValidator     : '1.7',
-        commonsBeanUtils     : '1.11.0'
+        commonsBeanUtils     : '1.11.0',
+        tomcat               : '10.1.44',
 ]
 
 project.ext {
@@ -396,6 +397,9 @@ dependencyManagement {
 }
 
 dependencies {
+    implementation("org.apache.tomcat.embed:tomcat-embed-core:10.1.44")
+    implementation("org.apache.tomcat.embed:tomcat-embed-el:10.1.44")
+    implementation("org.apache.tomcat.embed:tomcat-embed-websocket:10.1.44")
     implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
