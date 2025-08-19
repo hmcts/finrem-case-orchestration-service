@@ -15,8 +15,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
@@ -95,8 +97,10 @@ class ListForHearingWrapperPopulatorTest {
     void shouldPopulateCaseDataCorrectly() {
         // Arrange
         ListForHearingWrapper listForHearingWrapper = mock(ListForHearingWrapper.class);
+        AllocatedRegionWrapper allocatedRegionWrapper = mock(AllocatedRegionWrapper.class);
         FinremCaseData caseData = FinremCaseData.builder()
             .listForHearingWrapper(listForHearingWrapper)
+            .regionWrapper(RegionWrapper.builder().allocatedRegionWrapper(allocatedRegionWrapper).build())
             .build();
 
         Hearing hearing = hearing("10:00");
@@ -109,7 +113,7 @@ class ListForHearingWrapperPopulatorTest {
             ))
             .build();
         when(partyService.getAllActivePartyList(caseData)).thenReturn(allActivePartyList);
-        when(hearingsAppender.toHearing(listForHearingWrapper)).thenReturn(hearing);
+        when(hearingsAppender.toHearing(listForHearingWrapper, allocatedRegionWrapper)).thenReturn(hearing);
         doCallRealMethod().when(hearingsAppender).appendToHearings(eq(caseData), anySupplier());
 
         // Act

@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
@@ -86,6 +87,8 @@ class HearingsAppenderTest {
         Court expectedCourt = mock(Court.class);
 
         HearingRegionWrapper hearingRegionWrapper = mock(HearingRegionWrapper.class);
+        AllocatedRegionWrapper allocatedRegionWrapper = mock(AllocatedRegionWrapper.class);
+
         when(hearingRegionWrapper.toCourt()).thenReturn(expectedCourt);
 
         CaseDocument additionalDoc = withAdditionDoc ? spy(CaseDocument.class) : null;
@@ -101,7 +104,7 @@ class HearingsAppenderTest {
             .build();
 
         // Act
-        Hearing result = underTest.toHearing(listForHearingWrapper);
+        Hearing result = underTest.toHearing(listForHearingWrapper, allocatedRegionWrapper);
 
         // Assert
         assertEquals(hearingDate, result.getHearingDate());
@@ -118,6 +121,46 @@ class HearingsAppenderTest {
         } else {
             assertThat(result.getAdditionalHearingDocs()).isNull();
         }
+    }
+
+    @Test
+    void shouldConvertListForHearingUsingAllocatedRegionWrapper_WhenHearingCourtWrapperIsEmpty() {
+        // Arrange
+        LocalDate hearingDate = LocalDate.of(2025, 7, 3);
+        String hearingTime = "10:30 AM";
+        String timeEstimate = "1 hour";
+        String additionalInfo = "Judge prefers early hearing";
+        HearingTypeDirection hearingTypeDirection = HearingTypeDirection.FDA;
+
+        final HearingType expectedHearingType = HearingType.FDA;
+
+        Court expectedCourt = mock(Court.class);
+        HearingRegionWrapper hearingRegionWrapper = mock(HearingRegionWrapper.class);
+        AllocatedRegionWrapper allocatedRegionWrapper = mock(AllocatedRegionWrapper.class);
+
+        when(hearingRegionWrapper.isEmpty()).thenReturn(true);
+        when(allocatedRegionWrapper.toCourt()).thenReturn(expectedCourt);
+
+        ListForHearingWrapper listForHearingWrapper = ListForHearingWrapper.builder()
+            .hearingDate(hearingDate)
+            .hearingTime(hearingTime)
+            .timeEstimate(timeEstimate)
+            .additionalInformationAboutHearing(additionalInfo)
+            .hearingType(hearingTypeDirection)
+            .hearingRegionWrapper(hearingRegionWrapper)
+            .build();
+
+        // Act
+        Hearing result = underTest.toHearing(listForHearingWrapper, allocatedRegionWrapper);
+
+        // Assert
+        assertEquals(hearingDate, result.getHearingDate());
+        assertEquals(expectedHearingType, result.getHearingType());
+        assertEquals(hearingTime, result.getHearingTime());
+        assertEquals(timeEstimate, result.getHearingTimeEstimate());
+        assertEquals(additionalInfo, result.getAdditionalHearingInformation());
+        assertEquals(expectedCourt, result.getHearingCourtSelection());
+        assertEquals(YesOrNo.YES, result.getWasMigrated());
     }
 
     @ValueSource(booleans = {true, false})
