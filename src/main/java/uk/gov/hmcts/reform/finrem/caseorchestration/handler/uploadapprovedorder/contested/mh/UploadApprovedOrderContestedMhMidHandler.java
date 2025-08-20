@@ -35,7 +35,7 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.UPLOAD_APPROVED_ORDER_MH.equals(eventType));
+            && EventType.UPLOAD_APPROVED_ORDER_MH.equals(eventType);
     }
 
     @Override
