@@ -48,7 +48,7 @@ public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCa
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        CallbackHandlerLogger.aboutToSubmit(callbackRequest);
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 

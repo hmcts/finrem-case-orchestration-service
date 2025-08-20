@@ -3,11 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -19,18 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class UploadApprovedOrderContestedMhSubmittedHandlerTest {
 
-    @Mock
-    private FinremCaseDetailsMapper caseDetailsMapper;
-
     @InjectMocks
     private UploadApprovedOrderContestedMhSubmittedHandler handler;
-
-    private static final String AUTH_TOKEN = "authToken";
 
     @Test
     void canHandle() {
@@ -49,8 +43,7 @@ class UploadApprovedOrderContestedMhSubmittedHandlerTest {
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
         when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.NO);
 
-        var response =
-            handler.handle(callbackRequest, AUTH_TOKEN);
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(response);
         assertEquals(caseData, response.getData());
@@ -68,8 +61,7 @@ class UploadApprovedOrderContestedMhSubmittedHandlerTest {
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
         when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.YES);
 
-        var response =
-            handler.handle(callbackRequest, AUTH_TOKEN);
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(response);
         assertEquals(caseData, response.getData());

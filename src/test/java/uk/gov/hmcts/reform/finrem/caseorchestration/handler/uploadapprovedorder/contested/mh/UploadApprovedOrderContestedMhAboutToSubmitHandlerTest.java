@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -68,6 +69,7 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
             handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(uploadApprovedOrderService).processApprovedOrdersMh(caseDetails, caseDetailsBefore, AUTH_TOKEN);
+        verifyNoInteractions(manageHearingActionService);
         assertNotNull(response);
     }
 
@@ -86,8 +88,7 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
         when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.YES);
 
-        var response =
-            handler.handle(callbackRequest, AUTH_TOKEN);
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(manageHearingActionService).performAddHearing(caseDetails, AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(caseData);

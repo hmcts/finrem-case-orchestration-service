@@ -23,12 +23,12 @@ import java.util.List;
 @Service
 public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHandler {
 
-    private final BulkPrintDocumentService service;
+    private final BulkPrintDocumentService bulkPrintDocumentService;
 
     public UploadApprovedOrderContestedMhMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                    BulkPrintDocumentService service) {
+                                                    BulkPrintDocumentService bulkPrintDocumentService) {
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.bulkPrintDocumentService = bulkPrintDocumentService;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        CallbackHandlerLogger.midEvent(callbackRequest);
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
@@ -62,7 +62,7 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
             }
             log.info("No. of hearing orders {} to check for error for case Id {}", uploadHearingOrders.size(), caseId);
             uploadHearingOrders.forEach(doc ->
-                service.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
+                bulkPrintDocumentService.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
                     caseId, errors, userAuthorisation)
             );
         }
@@ -74,7 +74,7 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
                 uploadAdditionalDocument.removeAll(uploadAdditionalBefore);
             }
             uploadAdditionalDocument.forEach(doc ->
-                service.validateEncryptionOnUploadedDocument(doc.getValue().getAdditionalDocuments(),
+                bulkPrintDocumentService.validateEncryptionOnUploadedDocument(doc.getValue().getAdditionalDocuments(),
                     caseId, errors, userAuthorisation)
             );
         }

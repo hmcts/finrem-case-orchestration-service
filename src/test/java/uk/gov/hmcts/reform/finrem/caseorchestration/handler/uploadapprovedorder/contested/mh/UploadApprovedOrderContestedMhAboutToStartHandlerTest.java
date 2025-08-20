@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
@@ -30,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
@@ -50,7 +50,7 @@ class UploadApprovedOrderContestedMhAboutToStartHandlerTest extends BaseHandlerT
     }
 
     @Test
-    void givenContestedCase_whenAboutToStartUploadApprovedOrder_thenHandle() {
+    void handle_shouldInitialiseWorkingValues() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.UPLOAD_APPROVED_ORDER);
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
@@ -70,20 +70,7 @@ class UploadApprovedOrderContestedMhAboutToStartHandlerTest extends BaseHandlerT
         uploadHearingOrder.add(orderCollection);
         caseData.setUploadHearingOrder(uploadHearingOrder);
 
-        DynamicMultiSelectList partiesOnCase = DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement
-                    .builder()
-                    .code("party1")
-                    .label("Party 1")
-                    .build(),
-                DynamicMultiSelectListElement
-                    .builder()
-                    .code("party2")
-                    .label("Party 2")
-                    .build()))
-            .build();
+        var partiesOnCase = mock(DynamicMultiSelectList.class);
 
         when(partyService.getAllActivePartyList(caseData))
             .thenReturn(partiesOnCase);

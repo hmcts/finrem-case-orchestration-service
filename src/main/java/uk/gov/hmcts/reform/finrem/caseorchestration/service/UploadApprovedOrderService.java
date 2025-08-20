@@ -74,7 +74,7 @@ public class UploadApprovedOrderService {
      * @deprecated This method is deprecated and should not be used.
      */
     @Deprecated(forRemoval = true, since = "18/08/2025")
-    @SuppressWarnings("squid:S1133") //
+    @SuppressWarnings("squid:S1133") // Suppress SonarQube rule for deprecated code
     private boolean isAnotherHearingToBeListed(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         Optional<List<HearingDirectionDetailsCollection>> latestHearingDirections = Optional.ofNullable(data.getHearingDirectionDetailsCollection());

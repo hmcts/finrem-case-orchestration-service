@@ -33,11 +33,11 @@ public class UploadApprovedOrderContestedMhSubmittedHandler extends FinremCallba
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        CallbackHandlerLogger.submitted(callbackRequest);
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        ManageHearingsWrapper manageHearingsWrapper =
-            caseData.getManageHearingsWrapper();
+        ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
+
         if (YesOrNo.YES.equals(manageHearingsWrapper.getIsAddHearingChosen())) {
             log.info("Sending hearing notification for case ID: {}", caseDetails.getId());
             // Collect all documents collected and generated as part of Upload Approved Order

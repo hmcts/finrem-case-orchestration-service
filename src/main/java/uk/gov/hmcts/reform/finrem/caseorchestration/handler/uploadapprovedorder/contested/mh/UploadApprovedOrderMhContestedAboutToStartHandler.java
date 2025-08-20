@@ -38,7 +38,7 @@ public class UploadApprovedOrderMhContestedAboutToStartHandler extends FinremCal
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        CallbackHandlerLogger.aboutToStart(callbackRequest);
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
