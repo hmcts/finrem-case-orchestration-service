@@ -98,8 +98,8 @@ class HearingServiceTest {
     }
 
     private static Stream<Arguments> hearingScenarios() {
-        UUID hearingOneId = UUID.randomUUID();
-        UUID hearingTwoId = UUID.randomUUID();
+        final UUID hearingOneId = UUID.randomUUID();
+        final UUID hearingTwoId = UUID.randomUUID();
 
         Hearing hearingOne = mock(Hearing.class);
         when(hearingOne.getHearingType()).thenReturn(HearingType.FH);
