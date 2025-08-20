@@ -25,15 +25,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -44,17 +41,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -63,7 +59,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private static final String GA_DIRECTIONS = "/fixtures/contested/general-application-direction-start-reset.json";
 
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
-    private static final String INTERIM_HEARING_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
+    private static final String HEARING_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
+    private static final String HEARING_DOCUMENT_NAME = "Hearing Notice.pdf";
 
     @Autowired
     private GeneralApplicationDirectionsService generalApplicationDirectionsService;
@@ -76,6 +73,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private BulkPrintService bulkPrintService;
     @MockitoBean
     private GenericDocumentService genericDocumentService;
+    @MockitoBean
+    private ManageHearingsDocumentService manageHearingsDocumentService;
     @MockitoBean
     private CcdService ccdService;
     @MockitoBean
@@ -314,24 +313,64 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             any(IntervenerWrapper.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN), any());
     }
 
-    private void assertCaseDataHasInterimDocument() {
-        assertThat(caseDetails.getData(), hasKey(INTERIM_HEARING_DOCUMENT));
-        assertThat(((CaseDocument) caseDetails.getData().get(INTERIM_HEARING_DOCUMENT)).getDocumentBinaryUrl(),
-            is(INTERIM_HEARING_DOCUMENT_BIN_URL));
+    @Test
+    public void givenHearingRequiredIsNo_whenGenerateGeneralApplicationDirections_shouldGenerateGeneralApplicationOrderDocument() {
+        // Arrange
+        caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, YES_VALUE);
+
+        FinremCaseData caseData = FinremCaseData.builder().generalApplicationWrapper(
+                GeneralApplicationWrapper.builder()
+                    .generalApplicationDirectionsHearingRequired(YesOrNo.NO)
+                    .build())
+            .build();
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .data(caseData)
+            .build();
+
+        CaseDocument expectedDocument = CaseDocument.builder()
+            .documentFilename(FILE_NAME)
+            .documentUrl(DOC_URL)
+            .documentBinaryUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
+            .build();
+
+        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
+
+        // Act
+        CaseDocument result = generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocument(AUTH_TOKEN, finremCaseDetails);
+
+        // Assert
+        assertEquals(expectedDocument, result);
     }
 
-    private void assertCaseDataHasGeneralApplicationDirectionsDocument() {
-        assertThat(caseDetails.getData(), hasKey(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
-        assertThat(((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)).getDocumentBinaryUrl(),
-            is(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
-    }
+    @Test
+    public void givenHearingRequiredIsYes_whenGenerateGeneralApplicationDirections_shouldGenerateGeneralApplicationHearingDocument() {
+        // Arrange
+        FinremCaseData caseData = FinremCaseData.builder().generalApplicationWrapper(
+            GeneralApplicationWrapper.builder()
+                .generalApplicationDirectionsHearingRequired(YesOrNo.YES)
+                .build())
+            .build();
 
-    private void assertDocumentPrintRequestContainsExpectedDocuments() {
-        List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
-        assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-                GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
-            .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).fileName("app_docs.pdf").build())
-            .toArray()));
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .data(caseData)
+            .build();
+
+        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
+        when(manageHearingsDocumentService.generateHearingNotice(any(), any()))
+            .thenReturn(caseDocument(DOC_URL, HEARING_DOCUMENT_NAME, HEARING_DOCUMENT_BIN_URL));
+
+        CaseDocument expectedDocument = CaseDocument.builder()
+            .documentFilename(HEARING_DOCUMENT_NAME)
+            .documentUrl(DOC_URL)
+            .documentBinaryUrl(HEARING_DOCUMENT_BIN_URL)
+            .build();
+
+        // Act
+        CaseDocument result = generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocument(AUTH_TOKEN, finremCaseDetails);
+
+        // Assert
+        assertEquals(expectedDocument, result);
     }
 
     private CaseDocument convertToCaseDocument(Object object) {
