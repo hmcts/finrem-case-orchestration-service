@@ -60,7 +60,7 @@ version = '0.0.1'
 mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 
 checkstyle {
-    toolVersion = '10.26.1'
+    toolVersion = '11.0.0'
     getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
@@ -214,6 +214,7 @@ sonarqube {
     ]
 
     properties {
+        property "sonar.cpd.exclusions", "**/GeneralApplicationDirectionsNewEventAboutToSubmitHandler.java,**/GeneralApplicationDirectionsNewEventAboutToStartHandler.java"
         property "sonar.projectKey", "finrem-case-orchestration"
         property "sonar.exclusions", sonarExclusions.join(', ')
         property "sonar.dynamicAnalysis", "reuseReports"
