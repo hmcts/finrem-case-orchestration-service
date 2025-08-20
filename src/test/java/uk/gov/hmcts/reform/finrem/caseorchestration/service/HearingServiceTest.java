@@ -62,48 +62,79 @@ class HearingServiceTest {
         lenient().when(featureToggleService.isManageHearingEnabled()).thenReturn(false);
     }
 
-    @Test
-    void shouldGenerateSelectableHearingsAsDynamicListFromManageHearingsWhenToggleIsEnabled() {
+    @ParameterizedTest
+    @MethodSource("hearingScenarios")
+    void shouldGenerateSelectableHearingsAsDynamicListFromManageHearingsWhenToggleIsEnabled(
+        List<ManageHearingsCollectionItem> hearings,
+        Map<String, String> expectedDynamicListItems
+    ) {
         // Arrange
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
         FinremCaseData finremCaseData = mock(FinremCaseData.class);
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+
         when(caseDetails.getData()).thenReturn(finremCaseData);
         when(finremCaseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
-
         when(finremCaseData.getListForHearingWrapper()).thenReturn(mock(ListForHearingWrapper.class));
         when(finremCaseData.getInterimWrapper()).thenReturn(mock(InterimWrapper.class));
-
         when(finremCaseData.getDirectionDetailsCollection()).thenReturn(mock(List.class));
         when(finremCaseData.getHearingDirectionDetailsCollection()).thenReturn(mock(List.class));
-
-        final UUID hearingOneId = UUID.randomUUID();
-        Hearing hearingOne = mock(Hearing.class);
-        when(hearingOne.getHearingType()).thenReturn(HearingType.FH);
-        when(hearingOne.getHearingDate()).thenReturn(LocalDate.of(2025, 2, 2));
-        when(hearingOne.getHearingTime()).thenReturn("09:14");
-
         when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
-        when(manageHearingsWrapper.getHearings()).thenReturn(List.of(
-            ManageHearingsCollectionItem.builder().id(hearingOneId).value(hearingOne).build()
-        ));
+        when(manageHearingsWrapper.getHearings()).thenReturn(hearings);
 
         // Act
         DynamicList actualDynamicList = hearingService.generateSelectableHearingsAsDynamicList(caseDetails);
 
         // Assert
-        assertEquals(1, actualDynamicList.getListItems().size());
-        assertDynamicListEquals(
-            createExpectedDynamicList(new LinkedHashMap<>() {
-                {
-                    put(hearingOneId.toString(), "2 Feb 2025 09:14 - Final Hearing (FH)");
-                }
-            }), actualDynamicList);
+        assertEquals(expectedDynamicListItems.size(), actualDynamicList.getListItems().size());
+        assertDynamicListEquals(createExpectedDynamicList(expectedDynamicListItems), actualDynamicList);
+
         verifyNoInteractions(
             finremCaseData.getListForHearingWrapper(),
             finremCaseData.getInterimWrapper(),
             finremCaseData.getDirectionDetailsCollection(),
             finremCaseData.getHearingDirectionDetailsCollection()
+        );
+    }
+
+    private static Stream<Arguments> hearingScenarios() {
+        UUID hearingOneId = UUID.randomUUID();
+        UUID hearingTwoId = UUID.randomUUID();
+
+        Hearing hearingOne = mock(Hearing.class);
+        when(hearingOne.getHearingType()).thenReturn(HearingType.FH);
+        when(hearingOne.getHearingDate()).thenReturn(LocalDate.of(2025, 2, 2));
+        when(hearingOne.getHearingTime()).thenReturn("09:14");
+
+        Hearing hearingTwo = mock(Hearing.class);
+        when(hearingTwo.getHearingType()).thenReturn(HearingType.FDA);
+        when(hearingTwo.getHearingDate()).thenReturn(LocalDate.of(2025, 3, 3));
+        when(hearingTwo.getHearingTime()).thenReturn("10:30");
+
+        LinkedHashMap<String, String> expectedTwoHearings = new LinkedHashMap<>();
+        expectedTwoHearings.put(hearingOneId.toString(), "2 Feb 2025 09:14 - Final Hearing (FH)");
+        expectedTwoHearings.put(hearingTwoId.toString(), "3 Mar 2025 10:30 - First Directions Appointment (FDA)");
+
+        return Stream.of(
+            Arguments.of(
+                List.of(),
+                Map.of()
+            ),
+            Arguments.of(
+                List.of(
+                    ManageHearingsCollectionItem.builder().id(hearingOneId).value(hearingOne).build()
+                ),
+                Map.of(
+                    hearingOneId.toString(), "2 Feb 2025 09:14 - Final Hearing (FH)"
+                )
+            ),
+            Arguments.of(
+                List.of(
+                    ManageHearingsCollectionItem.builder().id(hearingOneId).value(hearingOne).build(),
+                    ManageHearingsCollectionItem.builder().id(hearingTwoId).value(hearingTwo).build()
+                ),
+                expectedTwoHearings
+            )
         );
     }
 
