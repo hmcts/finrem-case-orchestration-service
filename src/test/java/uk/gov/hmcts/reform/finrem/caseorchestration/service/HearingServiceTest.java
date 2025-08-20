@@ -553,6 +553,34 @@ class HearingServiceTest {
         );
     }
 
+    @Test
+    void testGetHearingDateWhenFeatureToggleEnabled() {
+        when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
+
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        DynamicListElement selected = mock(DynamicListElement.class);
+        when(selected.getCode()).thenReturn("11000000-0000-0000-0000-000000000000");
+
+        LocalDate mockedLocalDate = mock(LocalDate.class);
+        Hearing selectedHearing = mock(Hearing.class);
+        when(selectedHearing.getHearingDate()).thenReturn(mockedLocalDate);
+        // Mocking the data structure
+        caseData.getManageHearingsWrapper().setHearings(
+            List.of(
+                ManageHearingsCollectionItem.builder()
+                    .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                    .value(selectedHearing)
+                    .build()
+            )
+        );
+
+        // Act
+        LocalDate result = hearingService.getHearingDate(caseData, selected);
+
+        // Assert
+        assertEquals(mockedLocalDate, result);
+    }
+
     @ParameterizedTest
     @MethodSource("hearingDateCases")
     void testGetHearingDate(String selectedCode, LocalDate expectedDate) {
@@ -604,6 +632,35 @@ class HearingServiceTest {
             Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
             Arguments.of(null, null) // Case with null value in Interim Hearing
         );
+    }
+
+    @Test
+    void testGetHearingTypeWhenFeatureToggleEnabled() {
+        when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
+
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        DynamicListElement selected = mock(DynamicListElement.class);
+        when(selected.getCode()).thenReturn("11000000-0000-0000-0000-000000000000");
+
+        HearingType mockedHearingType = mock(HearingType.class);
+        when(mockedHearingType.getId()).thenReturn("expectedHearingType");
+        Hearing selectedHearing = mock(Hearing.class);
+        when(selectedHearing.getHearingType()).thenReturn(mockedHearingType);
+        // Mocking the data structure
+        caseData.getManageHearingsWrapper().setHearings(
+            List.of(
+                ManageHearingsCollectionItem.builder()
+                    .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                    .value(selectedHearing)
+                    .build()
+            )
+        );
+
+        // Act
+        String result = hearingService.getHearingType(caseData, selected);
+
+        // Assert
+        assertEquals("expectedHearingType", result);
     }
 
     @ParameterizedTest
@@ -658,6 +715,33 @@ class HearingServiceTest {
             Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
             Arguments.of(null, null) // Case with null value in Interim Hearing
         );
+    }
+
+    @Test
+    void testGetHearingTimeWhenFeatureToggleEnabled() {
+        when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
+
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        DynamicListElement selected = mock(DynamicListElement.class);
+        when(selected.getCode()).thenReturn("11000000-0000-0000-0000-000000000000");
+
+        Hearing selectedHearing = mock(Hearing.class);
+        when(selectedHearing.getHearingTime()).thenReturn("expectedHearingTime");
+        // Mocking the data structure
+        caseData.getManageHearingsWrapper().setHearings(
+            List.of(
+                ManageHearingsCollectionItem.builder()
+                    .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                    .value(selectedHearing)
+                    .build()
+            )
+        );
+
+        // Act
+        String result = hearingService.getHearingTime(caseData, selected);
+
+        // Assert
+        assertEquals("expectedHearingTime", result);
     }
 
     @ParameterizedTest
