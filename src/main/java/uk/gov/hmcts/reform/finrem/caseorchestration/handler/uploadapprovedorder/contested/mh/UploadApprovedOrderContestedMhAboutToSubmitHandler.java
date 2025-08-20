@@ -7,27 +7,34 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+
 @Slf4j
 @Service
 public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final UploadApprovedOrderService service;
+    private final DocumentWarningsHelper documentWarningsHelper;
+    private final UploadApprovedOrderService uploadApprovedOrderService;
     private final ManageHearingActionService manageHearingActionService;
 
     public UploadApprovedOrderContestedMhAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                              UploadApprovedOrderService service,
+                                                              DocumentWarningsHelper documentWarningsHelper,
+                                                              UploadApprovedOrderService uploadApprovedOrderService,
                                                               ManageHearingActionService manageHearingActionService) {
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.documentWarningsHelper = documentWarningsHelper;
+        this.uploadApprovedOrderService = uploadApprovedOrderService;
         this.manageHearingActionService = manageHearingActionService;
     }
 
@@ -45,7 +52,7 @@ public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCa
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        service.processApprovedOrdersMh(caseDetails, callbackRequest.getCaseDetailsBefore(), userAuthorisation);
+        uploadApprovedOrderService.processApprovedOrdersMh(caseDetails, callbackRequest.getCaseDetailsBefore(), userAuthorisation);
 
         if (YesOrNo.YES.equals(caseData.getManageHearingsWrapper().getIsAddHearingChosen())) {
             manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
@@ -53,6 +60,10 @@ public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCa
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData()).build();
+            .data(callbackRequest.getCaseDetails().getData())
+            .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, data ->
+                emptyIfNull(data.getUploadHearingOrder()).stream()
+                    .map(DirectionOrderCollection::getValue).toList(), userAuthorisation))
+            .build();
     }
 }
