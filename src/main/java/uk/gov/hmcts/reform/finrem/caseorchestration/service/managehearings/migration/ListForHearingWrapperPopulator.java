@@ -69,7 +69,8 @@ public class ListForHearingWrapperPopulator extends BasePopulator {
     public void populate(FinremCaseData caseData) {
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
         hearingsAppender.appendToHearings(caseData, () -> ManageHearingsCollectionItem.builder().value(
-            applyCommonMigratedValues(caseData, hearingsAppender.toHearing(listForHearingWrapper))).build());
+            applyCommonMigratedValues(caseData, hearingsAppender.toHearing(listForHearingWrapper,
+                caseData.getRegionWrapper().getAllocatedRegionWrapper()))).build());
 
         caseData.getMhMigrationWrapper().setIsListForHearingsMigrated(YesOrNo.YES);
     }
