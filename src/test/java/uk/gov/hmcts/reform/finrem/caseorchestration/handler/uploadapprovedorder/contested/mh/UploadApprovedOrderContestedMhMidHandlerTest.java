@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup {
 
     @Mock
-    private BulkPrintDocumentService service;
+    private BulkPrintDocumentService bulkPrintDocumentService;
     @InjectMocks
     private UploadApprovedOrderContestedMhMidHandler handler;
 
@@ -70,7 +70,7 @@ class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().isEmpty());
-        verify(service, times(2)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(bulkPrintDocumentService, times(2)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
     @Test
@@ -95,7 +95,7 @@ class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().isEmpty());
-        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(bulkPrintDocumentService, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
     @Test
@@ -130,6 +130,6 @@ class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().isEmpty());
-        verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(bulkPrintDocumentService).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 }
