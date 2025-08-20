@@ -23,8 +23,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -40,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService.TOP_LEVEL_HEARING_ID;
 
@@ -55,6 +60,51 @@ class HearingServiceTest {
     @BeforeEach
     void setUp() {
         lenient().when(featureToggleService.isManageHearingEnabled()).thenReturn(false);
+    }
+
+    @Test
+    void shouldGenerateSelectableHearingsAsDynamicListFromManageHearingsWhenToggleIsEnabled() {
+        // Arrange
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData finremCaseData = mock(FinremCaseData.class);
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+        when(caseDetails.getData()).thenReturn(finremCaseData);
+        when(finremCaseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
+
+        when(finremCaseData.getListForHearingWrapper()).thenReturn(mock(ListForHearingWrapper.class));
+        when(finremCaseData.getInterimWrapper()).thenReturn(mock(InterimWrapper.class));
+
+        when(finremCaseData.getDirectionDetailsCollection()).thenReturn(mock(List.class));
+        when(finremCaseData.getHearingDirectionDetailsCollection()).thenReturn(mock(List.class));
+
+        final UUID hearingOneId = UUID.randomUUID();
+        Hearing hearingOne = mock(Hearing.class);
+        when(hearingOne.getHearingType()).thenReturn(HearingType.FH);
+        when(hearingOne.getHearingDate()).thenReturn(LocalDate.of(2025, 2, 2));
+        when(hearingOne.getHearingTime()).thenReturn("09:14");
+
+        when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
+        when(manageHearingsWrapper.getHearings()).thenReturn(List.of(
+            ManageHearingsCollectionItem.builder().id(hearingOneId).value(hearingOne).build()
+        ));
+
+        // Act
+        DynamicList actualDynamicList = hearingService.generateSelectableHearingsAsDynamicList(caseDetails);
+
+        // Assert
+        assertEquals(1, actualDynamicList.getListItems().size());
+        assertDynamicListEquals(
+            createExpectedDynamicList(new LinkedHashMap<>() {
+                {
+                    put(hearingOneId.toString(), "2 Feb 2025 09:14 - Final Hearing (FH)");
+                }
+            }), actualDynamicList);
+        verifyNoInteractions(
+            finremCaseData.getListForHearingWrapper(),
+            finremCaseData.getInterimWrapper(),
+            finremCaseData.getDirectionDetailsCollection(),
+            finremCaseData.getHearingDirectionDetailsCollection()
+        );
     }
 
     @ParameterizedTest
