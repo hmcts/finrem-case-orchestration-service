@@ -30,14 +30,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_URL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EvidenceManagementDeleteServiceTest {
 
-    private static final String EVIDENCE_MANAGEMENT_SERVICE_URL = "http://localhost:8080/documents/";
-
-    public static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
-    public static final String AUTH = "auth";
     public static final String IDAM_OAUTH_TOKEN = "idamOauthToken";
     public static final String SERVICE_AUTH = "serviceAuth";
     public static final String DOC_UUID = "d607c045-878e-475f-ab8e-b2f667d8af64";
@@ -69,13 +67,12 @@ public class EvidenceManagementDeleteServiceTest {
 
     @Test
     public void shouldPassThruDocumentDeletedSuccessfullyState() {
-        setupMockEvidenceManagementService(DOC_URL, HttpStatus.OK);
+        setupMockEvidenceManagementService(FILE_URL, HttpStatus.OK);
 
-        emDeleteService.delete(DOC_URL, "AAAABBBB");
+        emDeleteService.delete(FILE_URL, "AAAABBBB");
         verify(idamAuthService).getUserDetails(anyString());
-        verify(restTemplate).exchange(eq(DOC_URL), eq(HttpMethod.DELETE), any(), eq(String.class));
+        verify(restTemplate).exchange(eq(FILE_URL), eq(HttpMethod.DELETE), any(), eq(String.class));
     }
-
 
     /**
      * This test issues a document delete request that is expected to be rejected due to the caller being unauthorised.
@@ -85,14 +82,13 @@ public class EvidenceManagementDeleteServiceTest {
      */
     @Test
     public void shouldPassThruNotAuthorisedAuthTokenState() {
-        setupMockEvidenceManagementService(DOC_URL, HttpStatus.UNAUTHORIZED);
+        setupMockEvidenceManagementService(FILE_URL, HttpStatus.UNAUTHORIZED);
 
-        emDeleteService.delete(DOC_URL, "CCCCDDDD");
+        emDeleteService.delete(FILE_URL, "CCCCDDDD");
 
         verify(idamAuthService).getUserDetails(anyString());
-        verify(restTemplate).exchange(eq(DOC_URL), eq(HttpMethod.DELETE), any(), eq(String.class));
+        verify(restTemplate).exchange(eq(FILE_URL), eq(HttpMethod.DELETE), any(), eq(String.class));
     }
-
 
     /**
      * This test issues a document delete request that is expected to be rejected due to the caller being unauthenticated.
@@ -102,12 +98,12 @@ public class EvidenceManagementDeleteServiceTest {
      */
     @Test
     public void shouldPassThruNotAuthenticatedAuthTokenState() {
-        setupMockEvidenceManagementService(DOC_URL, HttpStatus.FORBIDDEN);
+        setupMockEvidenceManagementService(FILE_URL, HttpStatus.FORBIDDEN);
 
-        emDeleteService.delete(DOC_URL, "");
+        emDeleteService.delete(FILE_URL, "");
 
         verify(idamAuthService).getUserDetails(anyString());
-        verify(restTemplate).exchange(eq(DOC_URL), eq(HttpMethod.DELETE), any(), eq(String.class));
+        verify(restTemplate).exchange(eq(FILE_URL), eq(HttpMethod.DELETE), any(), eq(String.class));
     }
 
     /**
@@ -120,12 +116,12 @@ public class EvidenceManagementDeleteServiceTest {
 
         doThrow(ResourceAccessException.class)
             .when(restTemplate)
-            .exchange(Mockito.eq(DOC_URL),
+            .exchange(Mockito.eq(FILE_URL),
                 Mockito.eq(HttpMethod.DELETE),
                 any(),
                 any(Class.class));
 
-        emDeleteService.delete(DOC_URL, "AAAABBBB");
+        emDeleteService.delete(FILE_URL, "AAAABBBB");
 
         fail("Failed to receive exception resulting from non-running EM service");
     }
@@ -151,9 +147,9 @@ public class EvidenceManagementDeleteServiceTest {
     @Test
     public void givenUploadResponseReturned_whenUploadIsCalled_thenExpectUploadToSucceed() {
         when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
-        emDeleteService.delete(DOC_URL, AUTH);
+        emDeleteService.delete(FILE_URL, AUTH_TOKEN);
 
-        verify(idamAuthService, times(1)).getIdamToken(AUTH);
+        verify(idamAuthService, times(1)).getIdamToken(AUTH_TOKEN);
         verify(caseDocumentClient, times(1))
             .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID),true);
     }
