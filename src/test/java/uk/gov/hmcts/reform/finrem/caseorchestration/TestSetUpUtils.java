@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrap
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -68,12 +69,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_URL;
 
 public class TestSetUpUtils {
 
+    public static final String DOC_URL = TestResource.FILE_URL;
+    public static final String BINARY_URL = TestResource.BINARY_URL;
+    public static final String FILE_NAME = TestResource.FILE_NAME;
     public static final String DOC_FILE_NAME = "app_docs.docx";
     public static final String VARIATION_FILE_NAME = "ApprovedVariationOrderLetter.pdf";
     public static final String PENSION_TYPE = "Form PPF1";
@@ -521,7 +523,6 @@ public class TestSetUpUtils {
     public static CaseDocument newDocument() {
         return caseDocument();
     }
-
 
     public static Hearing hearing(String hearingTime) {
         return Hearing.builder().hearingTime(hearingTime).build();
