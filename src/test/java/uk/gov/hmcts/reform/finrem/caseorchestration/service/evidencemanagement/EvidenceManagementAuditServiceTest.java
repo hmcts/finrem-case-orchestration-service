@@ -38,13 +38,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_URL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EvidenceManagementAuditServiceTest {
 
+    public static final String AUTH = "auth";
     public static final String IDAM_OAUTH_TOKEN = "idamOauthToken";
     public static final String SERVICE_AUTH = "serviceAuth";
 
@@ -128,7 +128,7 @@ public class EvidenceManagementAuditServiceTest {
         when(caseDocumentClient.getMetadataForDocument(anyString(), anyString(), anyString()))
             .thenReturn(getDocumentMetadata());
         List<String> docUrls = List.of(FILE_URL);
-        List<FileUploadResponse> response = evidenceManagementAuditService.audit(docUrls, AUTH_TOKEN);
+        List<FileUploadResponse> response = evidenceManagementAuditService.audit(docUrls, AUTH);
 
         assertNotNull(response);
         assertThat(response, hasSize(1));
