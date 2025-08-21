@@ -14,13 +14,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 
 @Slf4j
 @Service
 public class UploadApprovedOrderContestedMhSubmittedHandler extends FinremCallbackHandler {
 
-    public UploadApprovedOrderContestedMhSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final ManageHearingsCorresponder manageHearingsCorresponder;
+
+    public UploadApprovedOrderContestedMhSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ManageHearingsCorresponder manageHearingsCorresponder) {
         super(finremCaseDetailsMapper);
+        this.manageHearingsCorresponder = manageHearingsCorresponder;
     }
 
     @Override
@@ -40,8 +44,7 @@ public class UploadApprovedOrderContestedMhSubmittedHandler extends FinremCallba
 
         if (YesOrNo.YES.equals(manageHearingsWrapper.getIsAddHearingChosen())) {
             log.info("Sending hearing notification for case ID: {}", caseDetails.getId());
-            // Collect all documents collected and generated as part of Upload Approved Order
-            // (Uploaded Approved Order + additional attachments, hearing generated docs + additional hearing docs)
+            manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();

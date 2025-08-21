@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -84,6 +85,10 @@ public class WorkingHearing {
                 .toList())
             .hearingType(getHearingType(workingHearing.getHearingTypeDynamicList()))
             .build();
+    }
+
+    public void addDocumentToAdditionalHearingDocs(CaseDocument caseDocument) {
+        additionalHearingDocs.add(DocumentCollectionItem.builder().value(caseDocument).build());
     }
 
     public static class WorkingHearingBuilder {
