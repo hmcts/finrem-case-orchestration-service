@@ -9,20 +9,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +29,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -38,10 +37,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.anySup
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.hearing;
 
 @ExtendWith(MockitoExtension.class)
-class ListForHearingWrapperPopulatorTest {
+class HearingDirectionDetailsCollectionPopulatorTest {
 
     @TestLogs
-    private final TestLogger logger = new TestLogger(ListForHearingWrapperPopulator.class);
+    private final TestLogger logger = new TestLogger(HearingDirectionDetailsCollectionPopulator.class);
 
     @Mock
     private HearingsAppender hearingsAppender;
@@ -50,7 +49,7 @@ class ListForHearingWrapperPopulatorTest {
     private PartyService partyService;
 
     @InjectMocks
-    private ListForHearingWrapperPopulator underTest;
+    private HearingDirectionDetailsCollectionPopulator underTest;
 
     @Test
     void testShouldPopulate() {
@@ -68,27 +67,23 @@ class ListForHearingWrapperPopulatorTest {
             .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because it's not a contested application.");
 
+        // event hearingDirectionDetailsCollection was not set or empty
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED).build()))
-            .isFalse();
+            .isTrue();
+        assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
+            .hearingDirectionDetailsCollection(Collections.emptyList())
+            .build()))
+            .isTrue();
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONTESTED)
-            .mhMigrationWrapper(MhMigrationWrapper.builder().isListForHearingsMigrated(YesOrNo.YES).build())
+            .mhMigrationWrapper(MhMigrationWrapper.builder().isHearingDirectionDetailsCollectionMigrated(YesOrNo.YES).build())
             .build()))
             .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because migration had been done.");
 
-        logger.reset();
-        assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONTESTED)
-            .mhMigrationWrapper(MhMigrationWrapper.builder().isListForHearingsMigrated(YesOrNo.NO).build())
-            .build()))
-            .isFalse();
-        assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because hearing type is null.");
-
-        HearingTypeDirection mockedHearingTypeDirection = mock(HearingTypeDirection.class);
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
-            .mhMigrationWrapper(MhMigrationWrapper.builder().isListForHearingsMigrated(YesOrNo.NO).build())
-            .listForHearingWrapper(ListForHearingWrapper.builder().hearingType(mockedHearingTypeDirection).build())
+            .mhMigrationWrapper(MhMigrationWrapper.builder().isGeneralApplicationMigrated(YesOrNo.NO).build())
             .build()))
             .isTrue();
     }
@@ -96,14 +91,22 @@ class ListForHearingWrapperPopulatorTest {
     @Test
     void shouldPopulateCaseDataCorrectly() {
         // Arrange
-        ListForHearingWrapper listForHearingWrapper = mock(ListForHearingWrapper.class);
-        AllocatedRegionWrapper allocatedRegionWrapper = mock(AllocatedRegionWrapper.class);
+        HearingDirectionDetail hearingReq1 = HearingDirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build();
+        HearingDirectionDetail hearingReq2 = HearingDirectionDetail.builder().isAnotherHearingYN(YesOrNo.NO).build();
+        HearingDirectionDetail hearingReq3 = HearingDirectionDetail.builder().isAnotherHearingYN(null).build();
+
+        Hearing newHearing1 = hearing("11:00");
+        Hearing newHearing2 = hearing("12:00");
+        Hearing newHearing3 = hearing("13:00");
+
         FinremCaseData caseData = FinremCaseData.builder()
-            .listForHearingWrapper(listForHearingWrapper)
-            .regionWrapper(RegionWrapper.builder().allocatedRegionWrapper(allocatedRegionWrapper).build())
+            .hearingDirectionDetailsCollection(List.of(
+                HearingDirectionDetailsCollection.builder().value(hearingReq1).build(),
+                HearingDirectionDetailsCollection.builder().value(hearingReq2).build(),
+                HearingDirectionDetailsCollection.builder().value(hearingReq3).build()
+            ))
             .build();
 
-        Hearing hearing = hearing("10:00");
         DynamicMultiSelectList allActivePartyList = DynamicMultiSelectList.builder()
             .value(List.of(
                 DynamicMultiSelectListElement.builder()
@@ -113,7 +116,9 @@ class ListForHearingWrapperPopulatorTest {
             ))
             .build();
         when(partyService.getAllActivePartyList(caseData)).thenReturn(allActivePartyList);
-        when(hearingsAppender.toHearing(listForHearingWrapper, allocatedRegionWrapper)).thenReturn(hearing);
+        when(hearingsAppender.toHearing(hearingReq1)).thenReturn(newHearing1);
+        lenient().when(hearingsAppender.toHearing(hearingReq2)).thenReturn(newHearing2);
+        lenient().when(hearingsAppender.toHearing(hearingReq3)).thenReturn(newHearing3);
         doCallRealMethod().when(hearingsAppender).appendToHearings(eq(caseData), anySupplier());
 
         // Act
@@ -130,11 +135,11 @@ class ListForHearingWrapperPopulatorTest {
         );
         verify(partyService).getAllActivePartyList(caseData);
 
-        assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
+        assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsHearingDirectionDetailsCollectionMigrated());
         assertThat(caseData.getManageHearingsWrapper().getHearings())
             .hasSize(1)
             .extracting(ManageHearingsCollectionItem::getValue)
             .extracting(Hearing::getWasMigrated, Hearing::getPartiesOnCase, Hearing::getHearingTime)
-            .containsOnly(tuple(YesOrNo.YES, expectedParties, "10:00"));
+            .containsOnly(tuple(YesOrNo.YES, expectedParties, "11:00"));
     }
 }

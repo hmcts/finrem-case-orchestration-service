@@ -9,6 +9,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Up
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,9 +56,10 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
     private GenericDocumentService genericDocumentService;
     @Mock
     private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
-
     @Mock
     private UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
+    @Mock
+    private DocumentWarningsHelper documentWarningsHelper;
     @Spy
     private ObjectMapper objectMapper;
 
@@ -68,13 +71,29 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
             hearingOrderService,
             genericDocumentService,
             contestedOrderApprovedLetterService,
-            uploadedDraftOrderCategoriser
+            uploadedDraftOrderCategoriser,
+            documentWarningsHelper
         );
     }
 
     @Test
     void canHandle() {
         assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.JUDGE_DRAFT_ORDER);
+    }
+
+    @Test
+    void givenDraftOrderUploaded_whenDocumentWarningDetected_thenPopulateWarnings() {
+        //No additional Documents
+        FinremCallbackRequest callbackRequest = setupTestData(Collections.emptyList());
+
+        when(documentWarningsHelper.getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN)))
+            .thenReturn(List.of("warnings 1"));
+
+        assertThat(handler.handle(callbackRequest, AUTH_TOKEN))
+            .extracting(GenericAboutToStartOrSubmitCallbackResponse::getWarnings)
+                .satisfies(warnings -> assertThat(warnings).containsExactly("warnings 1"));
+
+        verify(documentWarningsHelper).getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -87,6 +106,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
         verify(hearingOrderService).convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
         verify(uploadedDraftOrderCategoriser).categorise(any(FinremCaseData.class));
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
+        verify(documentWarningsHelper).getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN));
         verifyNoInteractions(genericDocumentService); // Ensure no unnecessary document conversions
     }
 
