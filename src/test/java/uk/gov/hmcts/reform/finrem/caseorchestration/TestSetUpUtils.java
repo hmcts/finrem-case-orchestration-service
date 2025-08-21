@@ -69,6 +69,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_URL;
 
 public class TestSetUpUtils {
@@ -257,7 +258,7 @@ public class TestSetUpUtils {
 
         return FinremCaseDetails.builder()
             .caseType(CaseType.CONSENTED)
-            .id(123456789L)
+            .id(CASE_ID)
             .state(State.APPLICATION_SUBMITTED)
             .data(caseData)
             .build();
@@ -280,7 +281,7 @@ public class TestSetUpUtils {
 
         return CaseDetails.builder()
             .caseTypeId(CaseType.CONSENTED.getCcdType())
-            .id(123456789L)
+            .id(CASE_ID)
             .data(caseData)
             .build();
     }
@@ -302,7 +303,7 @@ public class TestSetUpUtils {
 
         return CaseDetails.builder()
             .caseTypeId(CaseType.CONTESTED.getCcdType())
-            .id(987654321L)
+            .id(CASE_ID)
             .data(caseData)
             .build();
     }
@@ -504,10 +505,14 @@ public class TestSetUpUtils {
     }
 
     /**
-     * @deprecated This method is deprecated and may be removed in future versions.
-     * Use {@link #caseDocument(String documentUrl, String filename, String binaryUrl)} instead.
+     * Creates a new {@link CaseDocument} instance.
      *
+     * @param documentName the document name or URL
+     * @param filename the file name
+     * @param binaryUrl the binary file URL
      * @return a new {@link CaseDocument} instance
+     * @deprecated Use {@link #caseDocument(String, String, String)} instead.
+     *     This method may be removed in future versions.
      */
     @Deprecated
     public static CaseDocument newDocument(String documentName, String filename, String binaryUrl) {
@@ -515,12 +520,11 @@ public class TestSetUpUtils {
     }
 
     /**
-     * @deprecated This method is deprecated and may be removed in future versions.
-     * Use {@link #caseDocument()} instead.
-     *
-     * <p>Creates a new {@link CaseDocument} instance by delegating to {@code caseDocument()}.</p>
+     * Creates a new {@link CaseDocument} instance by delegating to {@code caseDocument()}.
      *
      * @return a new {@link CaseDocument} instance
+     * @deprecated Use {@link #caseDocument()} instead.
+     *     This method may be removed in future versions.
      */
     @Deprecated
     public static CaseDocument newDocument() {
