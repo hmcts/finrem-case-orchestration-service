@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHear
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.DirectionDetailsCollectionPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.GeneralApplicationWrapperPopulator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.HearingDirectionDetailsCollectionPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForInterimHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
@@ -48,6 +49,9 @@ class ManageHearingsMigrationServiceTest {
 
     @Mock
     private DirectionDetailsCollectionPopulator directionDetailsCollectionPopulator;
+
+    @Mock
+    private HearingDirectionDetailsCollectionPopulator hearingDetailsCollectionPopulator;
 
     @Mock
     private ManageHearingActionService manageHearingActionService;
@@ -185,6 +189,31 @@ class ManageHearingsMigrationServiceTest {
     }
 
     @Test
+    void shouldSkipHearingDetailsCollectionPopulationWhenShouldPopulateReturnsFalse() {
+        FinremCaseData caseData = FinremCaseData.builder().ccdCaseId(CASE_ID).build();
+
+        when(hearingDetailsCollectionPopulator.shouldPopulate(caseData)).thenReturn(false);
+
+        // Act
+        underTest.populateHearingDirectionDetailsCollection(caseData);
+
+        // Assert
+        assertThat(logs.getWarns()).contains(CASE_ID + " - Existing hearings created with Upload Approved Order migration skipped.");
+        verify(hearingDetailsCollectionPopulator, never()).populate(any(FinremCaseData.class));
+    }
+
+    @Test
+    void shouldPopulateHearingDetailsCollectionWhenShouldPopulateReturnsTrue() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+
+        when(hearingDetailsCollectionPopulator.shouldPopulate(caseData)).thenReturn(true);
+
+        underTest.populateHearingDirectionDetailsCollection(caseData);
+
+        verify(hearingDetailsCollectionPopulator).populate(caseData);
+    }
+
+    @Test
     void shouldRunManageHearingMigrationSuccessfully() {
         // Given
         FinremCaseData caseData = mock(FinremCaseData.class);
@@ -195,6 +224,7 @@ class ManageHearingsMigrationServiceTest {
         doNothing().when(underTest).populateListForInterimHearingWrapper(caseData);
         doNothing().when(underTest).populateGeneralApplicationWrapper(caseData);
         doNothing().when(underTest).populateDirectionDetailsCollection(caseData);
+        doNothing().when(underTest).populateHearingDirectionDetailsCollection(caseData);
         doNothing().when(underTest).markCaseDataMigrated(caseData, migrationVersion);
 
         // When
@@ -205,6 +235,7 @@ class ManageHearingsMigrationServiceTest {
         verify(underTest).populateListForInterimHearingWrapper(caseData);
         verify(underTest).populateGeneralApplicationWrapper(caseData);
         verify(underTest).populateDirectionDetailsCollection(caseData);
+        verify(underTest).populateHearingDirectionDetailsCollection(caseData);
         verify(underTest).markCaseDataMigrated(caseData, migrationVersion);
         verify(manageHearingActionService).updateTabData(caseData);
     }

@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
@@ -173,6 +174,30 @@ public class HearingsAppender {
             .hearingTime(hearingTime)
             .hearingCourtSelection(hearingCourtSelection)
             //.hearingMode(null) // Ignore it because existing List for Interim Hearing doesn't capture hearing mode
+            .wasMigrated(YesOrNo.YES)
+            .build();
+    }
+
+    public Hearing toHearing(HearingDirectionDetail hearingDirectionDetail) {
+        // Type of Hearing
+        HearingTypeDirection hearingType = hearingDirectionDetail.getTypeOfHearing();
+        // Hearing Date
+        LocalDate hearingDate = hearingDirectionDetail.getDateOfHearing();
+        // Hearing Time
+        String hearingTime = hearingDirectionDetail.getHearingTime();
+        // Time Estimate
+        String timeEstimate = hearingDirectionDetail.getTimeEstimate();
+        // Additional information about the hearing is not captured
+        // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
+        Court hearingCourtSelection = hearingDirectionDetail.getLocalCourt();
+
+        return Hearing.builder()
+            .hearingDate(hearingDate)
+            .hearingType(hearingType != null ? HearingType.valueOf(hearingType.name()) : null)
+            .hearingTimeEstimate(timeEstimate)
+            .hearingTime(hearingTime)
+            .hearingCourtSelection(hearingCourtSelection)
+            //.hearingMode(null) // Ignore it because existing logic doesn't capture hearing mode
             .wasMigrated(YesOrNo.YES)
             .build();
     }
