@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.DirectionDetailsCollectionPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.GeneralApplicationWrapperPopulator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.HearingDirectionDetailsCollectionPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForInterimHearingWrapperPopulator;
 
@@ -29,6 +30,8 @@ public class ManageHearingsMigrationService {
     private final GeneralApplicationWrapperPopulator generalApplicationWrapperPopulator;
 
     private final DirectionDetailsCollectionPopulator directionDetailsCollectionPopulator;
+
+    private final HearingDirectionDetailsCollectionPopulator hearingDirectionDetailsCollectionPopulator;
 
     private final ManageHearingActionService manageHearingActionService;
 
@@ -122,6 +125,26 @@ public class ManageHearingsMigrationService {
     }
 
     /**
+     * Populates the {@code hearingDirectionDetailsCollection} with hearing-related information extracted from
+     * Upload Approved Order events, if they have not already been migrated.
+     *
+     * <p>
+     * The method checks if migration is needed by calling {@code shouldPopulate()} on the
+     * {@code hearingDirectionDetailsCollectionPopulator}. If migration is necessary, it transforms Upload Approved Order-related
+     * hearing data into direction details entries and adds them to the case data. It also marks the migration flag as complete.
+     *
+     * @param caseData the {@link FinremCaseData} containing hearing direction order information and migration markers
+     */
+    public void populateHearingDirectionDetailsCollection(FinremCaseData caseData) {
+        if (!hearingDirectionDetailsCollectionPopulator.shouldPopulate(caseData)) {
+            log.warn("{} - Existing hearings created with Upload Approved Order migration skipped.", caseData.getCcdCaseId());
+            return;
+        }
+
+        hearingDirectionDetailsCollectionPopulator.populate(caseData);
+    }
+
+    /**
      * Determines whether the case has already undergone Manage Hearings migration.
      *
      * @param caseData the case data to evaluate
@@ -148,6 +171,7 @@ public class ManageHearingsMigrationService {
         populateListForInterimHearingWrapper(caseData);
         populateGeneralApplicationWrapper(caseData);
         populateDirectionDetailsCollection(caseData);
+        populateHearingDirectionDetailsCollection(caseData);
         markCaseDataMigrated(caseData, mhMigrationVersion);
         // updates the hearing tab data accordingly.
         manageHearingActionService.updateTabData(caseData);
