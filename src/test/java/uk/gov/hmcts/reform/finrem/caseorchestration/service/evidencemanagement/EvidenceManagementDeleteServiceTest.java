@@ -30,12 +30,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_URL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EvidenceManagementDeleteServiceTest {
 
+    public static final String AUTH = "auth";
     public static final String IDAM_OAUTH_TOKEN = "idamOauthToken";
     public static final String SERVICE_AUTH = "serviceAuth";
     public static final String DOC_UUID = "d607c045-878e-475f-ab8e-b2f667d8af64";
@@ -147,9 +147,9 @@ public class EvidenceManagementDeleteServiceTest {
     @Test
     public void givenUploadResponseReturned_whenUploadIsCalled_thenExpectUploadToSucceed() {
         when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
-        emDeleteService.delete(FILE_URL, AUTH_TOKEN);
+        emDeleteService.delete(FILE_URL, AUTH);
 
-        verify(idamAuthService, times(1)).getIdamToken(AUTH_TOKEN);
+        verify(idamAuthService, times(1)).getIdamToken(AUTH);
         verify(caseDocumentClient, times(1))
             .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID),true);
     }
