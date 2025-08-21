@@ -7,6 +7,10 @@ if [ -z "$stagedFiles" ]; then
     exit 0
 fi
 
+#Find console message in Git Console
+echo "Cleaning java files before commit (removing extra blank lines)..."
+
+
 for file in $stagedFiles; do
     #Remove multiple empty lines using sed
     sed -i.bak '/^$/N;/^\n$/D' "$file"
@@ -21,5 +25,7 @@ for file in $stagedFiles; do
     #Re-add the cleaned file to the commit
     git add "$file"
 done
+
+echo "Proceeding with commit."
 
 exit 0
