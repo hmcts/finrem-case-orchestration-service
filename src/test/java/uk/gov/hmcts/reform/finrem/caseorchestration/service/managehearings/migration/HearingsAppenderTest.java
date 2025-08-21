@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
@@ -263,6 +264,38 @@ class HearingsAppenderTest {
 
         // Act
         Hearing result = underTest.toHearing(directionDetail);
+
+        // Assert
+        assertEquals(hearingDate, result.getHearingDate());
+        assertEquals(expectedHearingType, result.getHearingType());
+        assertEquals(hearingTime, result.getHearingTime());
+        assertEquals(timeEstimate, result.getHearingTimeEstimate());
+        assertThat(result.getAdditionalHearingInformation()).isNull();
+        assertEquals(expectedCourt, result.getHearingCourtSelection());
+        assertEquals(YesOrNo.YES, result.getWasMigrated());
+        assertThat(result.getAdditionalHearingDocs()).isNull();
+    }
+
+    @Test
+    void shouldConvertHearingDirectionDetailToHearing() {
+        // Arrange
+        LocalDate hearingDate = LocalDate.of(2025, 7, 3);
+        String hearingTime = "10:45 AM";
+        String timeEstimate = "1 hour";
+
+        HearingType expectedHearingType = HearingType.FH;
+        Court expectedCourt = mock(Court.class);
+
+        HearingDirectionDetail hearingDirectionDetail = HearingDirectionDetail.builder()
+            .typeOfHearing(HearingTypeDirection.FH)
+            .dateOfHearing(hearingDate)
+            .hearingTime(hearingTime)
+            .timeEstimate(timeEstimate)
+            .localCourt(expectedCourt)
+            .build();
+
+        // Act
+        Hearing result = underTest.toHearing(hearingDirectionDetail);
 
         // Assert
         assertEquals(hearingDate, result.getHearingDate());
