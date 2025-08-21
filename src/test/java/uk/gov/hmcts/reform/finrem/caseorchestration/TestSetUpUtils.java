@@ -503,12 +503,15 @@ public class TestSetUpUtils {
         return caseData;
     }
 
+    /**
+     * @deprecated This method is deprecated and may be removed in future versions.
+     * Use {@link #caseDocument(String documentUrl, String filename, String binaryUrl)} instead.
+     *
+     * @return a new {@link CaseDocument} instance
+     */
+    @Deprecated
     public static CaseDocument newDocument(String documentName, String filename, String binaryUrl) {
-        return CaseDocument.builder()
-            .documentFilename(filename)
-            .documentUrl(documentName)
-            .documentBinaryUrl(binaryUrl)
-            .build();
+        return caseDocument(documentName, filename, binaryUrl);
     }
 
     /**
