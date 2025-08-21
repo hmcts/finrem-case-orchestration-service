@@ -51,6 +51,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingServic
 @ExtendWith(MockitoExtension.class)
 class HearingServiceTest {
 
+    private static final String SELECTED_UUID = UUID.randomUUID().toString();
+
     @InjectMocks
     private HearingService hearingService;
 
@@ -559,7 +561,7 @@ class HearingServiceTest {
 
         FinremCaseData caseData = spy(FinremCaseData.class);
         DynamicListElement selected = mock(DynamicListElement.class);
-        when(selected.getCode()).thenReturn("11000000-0000-0000-0000-000000000000");
+        when(selected.getCode()).thenReturn(SELECTED_UUID);
 
         LocalDate mockedLocalDate = mock(LocalDate.class);
         Hearing selectedHearing = mock(Hearing.class);
@@ -568,7 +570,7 @@ class HearingServiceTest {
         caseData.getManageHearingsWrapper().setHearings(
             List.of(
                 ManageHearingsCollectionItem.builder()
-                    .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                    .id(UUID.fromString(SELECTED_UUID))
                     .value(selectedHearing)
                     .build()
             )
@@ -640,7 +642,7 @@ class HearingServiceTest {
 
         FinremCaseData caseData = spy(FinremCaseData.class);
         DynamicListElement selected = mock(DynamicListElement.class);
-        when(selected.getCode()).thenReturn("11000000-0000-0000-0000-000000000000");
+        when(selected.getCode()).thenReturn(SELECTED_UUID);
 
         HearingType mockedHearingType = mock(HearingType.class);
         when(mockedHearingType.getId()).thenReturn("expectedHearingType");
@@ -650,7 +652,7 @@ class HearingServiceTest {
         caseData.getManageHearingsWrapper().setHearings(
             List.of(
                 ManageHearingsCollectionItem.builder()
-                    .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                    .id(UUID.fromString(SELECTED_UUID))
                     .value(selectedHearing)
                     .build()
             )
@@ -723,7 +725,7 @@ class HearingServiceTest {
 
         FinremCaseData caseData = spy(FinremCaseData.class);
         DynamicListElement selected = mock(DynamicListElement.class);
-        when(selected.getCode()).thenReturn("11000000-0000-0000-0000-000000000000");
+        when(selected.getCode()).thenReturn(SELECTED_UUID);
 
         Hearing selectedHearing = mock(Hearing.class);
         when(selectedHearing.getHearingTime()).thenReturn("expectedHearingTime");
@@ -731,7 +733,7 @@ class HearingServiceTest {
         caseData.getManageHearingsWrapper().setHearings(
             List.of(
                 ManageHearingsCollectionItem.builder()
-                    .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                    .id(UUID.fromString(SELECTED_UUID))
                     .value(selectedHearing)
                     .build()
             )
