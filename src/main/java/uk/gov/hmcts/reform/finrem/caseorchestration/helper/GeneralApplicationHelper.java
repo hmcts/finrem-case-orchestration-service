@@ -364,6 +364,21 @@ public class GeneralApplicationHelper {
         caseData.getGeneralApplicationWrapper().setGeneralApplications(uniqueGeneralApplicationList);
     }
 
+    /**
+     * Populates the provided {@link GeneralApplicationItems} instance with hearing details, directions document,
+     * and status, then prepares and adds relevant documents to the bulk print list.
+     * <p>
+     * This method updates the general application information for a case, ensuring that
+     * all necessary fields are set and associated documents are converted to PDF and added for bulk printing.
+     * </p>
+     *
+     * @param items              the {@link GeneralApplicationItems} to populate
+     * @param caseDetails        the {@link FinremCaseDetails} containing case data
+     * @param directionsDocument the directions {@link CaseDocument} to associate
+     * @param status             the status to set for the general application
+     * @param bulkPrintDocuments the list of {@link BulkPrintDocument} to add documents to
+     * @param userAuthorisation  the user authorisation token for document conversion
+     */
     public void setGeneralApplicationInformation(
         GeneralApplicationItems items,
         FinremCaseDetails caseDetails,
