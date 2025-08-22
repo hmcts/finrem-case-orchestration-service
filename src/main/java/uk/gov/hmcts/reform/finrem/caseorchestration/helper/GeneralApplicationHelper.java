@@ -8,20 +8,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.core.Tuple;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
@@ -63,6 +69,7 @@ public class GeneralApplicationHelper {
 
     private final ObjectMapper objectMapper;
     private final GenericDocumentService service;
+    private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
 
     public List<GeneralApplicationCollectionData> getGeneralApplicationList(FinremCaseData caseData, String collectionName) {
         GeneralApplicationWrapper wrapper = caseData.getGeneralApplicationWrapper();
@@ -81,7 +88,7 @@ public class GeneralApplicationHelper {
             }
             case INTERVENER4_GENERAL_APPLICATION_COLLECTION -> {
                 return Optional.ofNullable(wrapper.getIntervener4GeneralApplications())
-                        .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
+                    .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
             }
             case APP_RESP_GENERAL_APPLICATION_COLLECTION -> {
                 return Optional.ofNullable(wrapper.getAppRespGeneralApplications())
@@ -181,7 +188,7 @@ public class GeneralApplicationHelper {
             return 0;
         }
         return e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate()
-                .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+            .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate());
     }
 
     public DynamicList objectToDynamicList(Object object) {
@@ -263,7 +270,7 @@ public class GeneralApplicationHelper {
     private void addExistingAppRespGeneralApplications(GeneralApplicationsCollection ga, FinremCaseData caseData) {
         List<GeneralApplicationsCollection> existingAppRespGeneralApplications = new ArrayList<>();
         if (caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null
-                && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
+            && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
             existingAppRespGeneralApplications.addAll(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications());
         }
         existingAppRespGeneralApplications.add(ga);
@@ -344,8 +351,8 @@ public class GeneralApplicationHelper {
             caseData.getCcdCaseId());
 
         List<GeneralApplicationsCollection> uniqueGeneralApplicationList = generalApplicationList.stream().collect(Collectors.groupingBy(ga ->
-                new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(),ga.getValue().getGeneralApplicationCreatedDate()),
-            toList())).entrySet().stream().map(entry -> findBestGeneralApplicationInDuplicate(entry.getValue()))
+                    new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(), ga.getValue().getGeneralApplicationCreatedDate()),
+                toList())).entrySet().stream().map(entry -> findBestGeneralApplicationInDuplicate(entry.getValue()))
             .collect(toList());
 
         Collections.sort(uniqueGeneralApplicationList, (o1, o2) -> o2.getValue().getGeneralApplicationCreatedDate()
@@ -357,9 +364,63 @@ public class GeneralApplicationHelper {
         caseData.getGeneralApplicationWrapper().setGeneralApplications(uniqueGeneralApplicationList);
     }
 
+    public void setGeneralApplicationInformation(GeneralApplicationItems items, FinremCaseDetails caseDetails, CaseDocument caseDocument,
+                                                 String status, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation) {
+
+        HearingTabItem hearingTabItem = hearingCorrespondenceHelper.getHearingInContextFromTab(caseDetails.getData());
+
+        items.setHearingDetailsForGeneralApplication(hearingTabItem);
+        items.setGeneralApplicationDirectionsDocument(caseDocument);
+
+        String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
+
+        String caseId = String.valueOf(caseDetails.getId());
+        log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
+            EventType.GENERAL_APPLICATION_DIRECTIONS);
+
+        switch (gaElementStatus.toLowerCase()) {
+            case "approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
+            case "not approved" ->
+                items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
+            case "other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
+            default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
+        }
+
+        final BulkPrintDocument bpDoc = BulkPrintDocument.builder()
+            .binaryFileUrl(items.getGeneralApplicationDirectionsDocument().getDocumentBinaryUrl())
+            .fileName(items.getGeneralApplicationDirectionsDocument().getDocumentFilename())
+            .build();
+        bulkPrintDocuments.add(bpDoc);
+
+        log.info("items getGeneralApplicationDocument {}, for case ID: {}",
+            items.getGeneralApplicationDocument(), caseId);
+
+        if (items.getGeneralApplicationDocument() != null) {
+            items.setGeneralApplicationDocument(
+                getPdfDocument(items.getGeneralApplicationDocument(), userAuthorisation, caseId));
+            final BulkPrintDocument genDoc = BulkPrintDocument.builder()
+                .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
+                .fileName(items.getGeneralApplicationDocument().getDocumentFilename())
+                .build();
+            log.info("GeneralApplicationDocument {}, BulkPrintDocument {} for Case ID: {}",
+                items.getGeneralApplicationDocument(), genDoc, caseId);
+            bulkPrintDocuments.add(genDoc);
+        }
+
+        if (items.getGeneralApplicationDraftOrder() != null) {
+            items.setGeneralApplicationDraftOrder(
+                getPdfDocument(items.getGeneralApplicationDraftOrder(), userAuthorisation, caseId));
+            final BulkPrintDocument draftDoc = BulkPrintDocument.builder()
+                .binaryFileUrl(items.getGeneralApplicationDraftOrder().getDocumentBinaryUrl())
+                .fileName(items.getGeneralApplicationDraftOrder().getDocumentFilename())
+                .build();
+            bulkPrintDocuments.add(draftDoc);
+        }
+    }
+
     private GeneralApplicationsCollection findBestGeneralApplicationInDuplicate(List<GeneralApplicationsCollection> duplicateGas) {
         return duplicateGas.stream().filter(ga ->
-            !ga.getValue().getGeneralApplicationStatus().equals(CREATED.getId())).findAny()
+                !ga.getValue().getGeneralApplicationStatus().equals(CREATED.getId())).findAny()
             .orElse(duplicateGas.stream().findFirst().orElse(null));
     }
 
@@ -431,11 +492,15 @@ public class GeneralApplicationHelper {
         }
     }
 
+
     private void setStatus(GeneralApplicationItems.GeneralApplicationItemsBuilder builder, String outcome, String directionGiven) {
         switch (outcome) {
-            case "APPROVED" -> builder.generalApplicationStatus(directionGiven == null ? APPROVED.getId() : DIRECTION_APPROVED.getId());
-            case "NOT_APPROVED" -> builder.generalApplicationStatus(directionGiven == null ? NOT_APPROVED.getId() : DIRECTION_NOT_APPROVED.getId());
-            case "OTHER" -> builder.generalApplicationStatus(directionGiven == null ? OTHER.getId() : DIRECTION_OTHER.getId());
+            case "APPROVED" ->
+                builder.generalApplicationStatus(directionGiven == null ? APPROVED.getId() : DIRECTION_APPROVED.getId());
+            case "NOT_APPROVED" ->
+                builder.generalApplicationStatus(directionGiven == null ? NOT_APPROVED.getId() : DIRECTION_NOT_APPROVED.getId());
+            case "OTHER" ->
+                builder.generalApplicationStatus(directionGiven == null ? OTHER.getId() : DIRECTION_OTHER.getId());
             default -> builder.generalApplicationStatus(OTHER.getId());
         }
     }
@@ -445,6 +510,7 @@ public class GeneralApplicationHelper {
      *
      * <p>
      * {@code generationApplicationReceivedFrom} is a field from legacy General Applications.
+     *
      * @param receivedFrom the value to convert
      * @return the converted value
      */
