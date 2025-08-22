@@ -364,19 +364,37 @@ public class GeneralApplicationHelper {
         caseData.getGeneralApplicationWrapper().setGeneralApplications(uniqueGeneralApplicationList);
     }
 
-    public void setGeneralApplicationInformation(GeneralApplicationItems items, FinremCaseDetails caseDetails, CaseDocument caseDocument,
-                                                 String status, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation) {
-
-        HearingTabItem hearingTabItem = hearingCorrespondenceHelper.getHearingInContextFromTab(caseDetails.getData());
-
-        items.setHearingDetailsForGeneralApplication(hearingTabItem);
-        items.setGeneralApplicationDirectionsDocument(caseDocument);
-
-        String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
+    public void setGeneralApplicationInformation(
+        GeneralApplicationItems items,
+        FinremCaseDetails caseDetails,
+        CaseDocument directionsDocument,
+        String status,
+        List<BulkPrintDocument> bulkPrintDocuments,
+        String userAuthorisation
+    ) {
 
         String caseId = String.valueOf(caseDetails.getId());
+
+        setHearingDetails(items, caseDetails);
+        setDirectionsDocument(items, directionsDocument);
+        updateApplicationStatus(items, status, caseId);
+        addBulkPrintDocuments(items, bulkPrintDocuments, userAuthorisation, caseId);
+    }
+
+    private void setHearingDetails(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
+        HearingTabItem hearingTabItem = hearingCorrespondenceHelper.getHearingInContextFromTab(caseDetails.getData());
+        items.setHearingDetailsForGeneralApplication(hearingTabItem);
+    }
+
+    private void setDirectionsDocument(GeneralApplicationItems items, CaseDocument directionsDocument) {
+        items.setGeneralApplicationDirectionsDocument(directionsDocument);
+    }
+
+    private void updateApplicationStatus(GeneralApplicationItems items, String status, String caseId) {
+        String gaElementStatus = Optional.ofNullable(status).orElse(items.getGeneralApplicationStatus());
+
         log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
-            EventType.GENERAL_APPLICATION_DIRECTIONS);
+            EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
 
         switch (gaElementStatus.toLowerCase()) {
             case "approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
@@ -385,36 +403,42 @@ public class GeneralApplicationHelper {
             case "other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
             default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
         }
+    }
 
-        final BulkPrintDocument bpDoc = BulkPrintDocument.builder()
-            .binaryFileUrl(items.getGeneralApplicationDirectionsDocument().getDocumentBinaryUrl())
-            .fileName(items.getGeneralApplicationDirectionsDocument().getDocumentFilename())
-            .build();
-        bulkPrintDocuments.add(bpDoc);
+    private void addBulkPrintDocuments(
+        GeneralApplicationItems items,
+        List<BulkPrintDocument> bulkPrintDocuments,
+        String userAuthorisation,
+        String caseId
+    ) {
+        addBulkPrintDocument(items.getGeneralApplicationDirectionsDocument(), bulkPrintDocuments);
 
-        log.info("items getGeneralApplicationDocument {}, for case ID: {}",
-            items.getGeneralApplicationDocument(), caseId);
+        log.info("items getGeneralApplicationDocument {}, for case ID: {}", items.getGeneralApplicationDocument(), caseId);
 
-        if (items.getGeneralApplicationDocument() != null) {
-            items.setGeneralApplicationDocument(
-                getPdfDocument(items.getGeneralApplicationDocument(), userAuthorisation, caseId));
-            final BulkPrintDocument genDoc = BulkPrintDocument.builder()
-                .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
-                .fileName(items.getGeneralApplicationDocument().getDocumentFilename())
+        Optional.ofNullable(items.getGeneralApplicationDocument())
+            .map(doc -> getPdfDocument(doc, userAuthorisation, caseId))
+            .ifPresent(pdfDoc -> {
+                items.setGeneralApplicationDocument(pdfDoc);
+                addBulkPrintDocument(pdfDoc, bulkPrintDocuments);
+                log.info("GeneralApplicationDocument {}, BulkPrintDocument {} for Case ID: {}",
+                    pdfDoc, bulkPrintDocuments.getLast(), caseId);
+            });
+
+        Optional.ofNullable(items.getGeneralApplicationDraftOrder())
+            .map(doc -> getPdfDocument(doc, userAuthorisation, caseId))
+            .ifPresent(pdfDoc -> {
+                items.setGeneralApplicationDraftOrder(pdfDoc);
+                addBulkPrintDocument(pdfDoc, bulkPrintDocuments);
+            });
+    }
+
+    private void addBulkPrintDocument(CaseDocument document, List<BulkPrintDocument> bulkPrintDocuments) {
+        if (document != null) {
+            BulkPrintDocument bpDoc = BulkPrintDocument.builder()
+                .binaryFileUrl(document.getDocumentBinaryUrl())
+                .fileName(document.getDocumentFilename())
                 .build();
-            log.info("GeneralApplicationDocument {}, BulkPrintDocument {} for Case ID: {}",
-                items.getGeneralApplicationDocument(), genDoc, caseId);
-            bulkPrintDocuments.add(genDoc);
-        }
-
-        if (items.getGeneralApplicationDraftOrder() != null) {
-            items.setGeneralApplicationDraftOrder(
-                getPdfDocument(items.getGeneralApplicationDraftOrder(), userAuthorisation, caseId));
-            final BulkPrintDocument draftDoc = BulkPrintDocument.builder()
-                .binaryFileUrl(items.getGeneralApplicationDraftOrder().getDocumentBinaryUrl())
-                .fileName(items.getGeneralApplicationDraftOrder().getDocumentFilename())
-                .build();
-            bulkPrintDocuments.add(draftDoc);
+            bulkPrintDocuments.add(bpDoc);
         }
     }
 
