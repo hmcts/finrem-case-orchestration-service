@@ -58,7 +58,7 @@ class ConsentOrderInContestedMidHandlerTest {
     }
 
     @Test
-    void handle_shouldValidateEncryptionOnEssentialFilesPlusNewlyUploadedOtherDocument() {
+    void givenNewConsentDocumentsOtherDocument_whenHandle_shouldValidateEncryption() {
         FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
         setupConsentOtherDocumentCollection(finremCallbackRequest);
 
@@ -71,7 +71,7 @@ class ConsentOrderInContestedMidHandlerTest {
     // The following essential documents must be validated, so the expected time is 5.
     // consentOrder, consentD81Joint, consentD81Applicant, consentD81Respondent, consentVariationOrderDocument
     @Test
-    void handle_shouldAlwaysValidateEncryptionOnFiveEssentialFiles() {
+    void givenConsentDocumentsWithoutNewPensionAndOtherDocuments_whenHandle_shouldValidateEncryptionOnEssentialDocuments() {
         FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
         setupConsentOtherDocumentCollection(finremCallbackRequest);
 
@@ -100,7 +100,7 @@ class ConsentOrderInContestedMidHandlerTest {
     }
 
     @Test
-    void handle_shouldValidateEssentialFilesPlusNewlyAddedPensionDocument() {
+    void givenExistingConsentDocumentsAndOneNewPensionDocument_whenHandle_shouldValidateEncryption() {
         FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
         setupConsentOtherDocumentCollection(finremCallbackRequest);
 
@@ -134,7 +134,7 @@ class ConsentOrderInContestedMidHandlerTest {
     }
 
     @Test
-    void handle_shouldValidateEssentialFilesPlusNewlyAddedOtherDocument() {
+    void givenExistingConsentDocumentsAndOneOtherDocument_whenHandle_shouldValidateEncryption() {
         FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
         setupConsentOtherDocumentCollection(finremCallbackRequest);
 
