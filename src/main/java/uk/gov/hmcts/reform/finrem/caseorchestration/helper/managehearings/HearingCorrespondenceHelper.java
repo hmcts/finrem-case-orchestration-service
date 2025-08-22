@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -50,20 +51,40 @@ public class HearingCorrespondenceHelper {
 
         if (hearings == null) {
             throw new IllegalStateException(
-                    "No hearings available to search for. Working hearing ID is: " + hearingId
+                "No hearings available to search for. Working hearing ID is: " + hearingId
             );
         }
 
         return manageHearingsWrapper.getHearings().stream()
-                .filter(h -> hearingId.equals(h.getId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
-                .getValue();
+            .filter(h -> hearingId.equals(h.getId()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
+            .getValue();
+    }
+
+    public HearingTabItem getHearingInContextFromTab(FinremCaseData finremCaseData) {
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
+
+        List<ManageHearingsCollectionItem> hearings = manageHearingsWrapper.getHearings();
+
+        if (hearings == null) {
+            throw new IllegalStateException(
+                "No hearings available to search for. Working hearing ID is: " + hearingId
+            );
+        }
+
+        return manageHearingsWrapper.getHearingTabItems().stream()
+            .filter(h -> hearingId.equals(h.getId()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
+            .getValue();
     }
 
     /**
      * Determines if notifications should not be sent for a hearing.
      * Should return true if the hearing's notice prompt is set to NO or is NULL.
+     *
      * @param hearing The hearing to check.
      * @return true if notification is required, false otherwise.
      */
@@ -73,6 +94,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Wraps {@link PaperNotificationService} logic for readability.
+     *
      * @return true if the applicant solicitor should receive an email notification.
      */
     public boolean shouldEmailToApplicantSolicitor(FinremCaseDetails finremCaseDetails) {
@@ -81,6 +103,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Wraps {@link PaperNotificationService} logic for readability.
+     *
      * @return true if the respondent solicitor should receive an email notification.
      */
     public boolean shouldEmailToRespondentSolicitor(FinremCaseDetails finremCaseDetails) {
@@ -89,6 +112,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Wraps {@link PaperNotificationService} logic for readability.
+     *
      * @return true if the applicant should receive hearing documents by post.
      */
     public boolean shouldPostToApplicant(FinremCaseDetails finremCaseDetails) {
@@ -97,6 +121,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Wraps {@link PaperNotificationService} logic for readability.
+     *
      * @return true if the respondent should receive hearing documents by post.
      */
     public boolean shouldPostToRespondent(FinremCaseDetails finremCaseDetails) {
@@ -109,8 +134,9 @@ public class HearingCorrespondenceHelper {
      * - the Action must be ADD_HEARING.
      * - the HearingType must appear in the noticeOnlyHearingTypes set.
      * - FDR hearings are an exception, they're notice only when the case is NOT an express case.
+     *
      * @param finremCaseDetails case details
-     * @param hearing the hearing to check
+     * @param hearing           the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
      */
     public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, Hearing hearing) {
@@ -145,8 +171,9 @@ public class HearingCorrespondenceHelper {
      * - the Action must be ADD_HEARING.
      * - the HearingType must appear in the hearingTypesThatNeedDocumentsPosted set.
      * FDR hearings are an exception, all hearing documents are posted when the case is an express case only.
+     *
      * @param finremCaseDetails case details
-     * @param hearing the hearing to check
+     * @param hearing           the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
      */
     public boolean shouldPostAllHearingDocuments(FinremCaseDetails finremCaseDetails, Hearing hearing) {
@@ -166,6 +193,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Retrieves the action selection, e.g. ADD_HEARING, from the Manage Hearings Wrapper in the case details.
+     *
      * @param finremCaseDetails the case details containing the Manage Hearings Wrapper
      * @return the ManageHearingsAction or null if not present
      */
@@ -179,6 +207,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Determines if the action selection is to add a hearing.
+     *
      * @param actionSelection the action selection to check
      * @return true if the action selection is ADD_HEARING, false otherwise
      */
