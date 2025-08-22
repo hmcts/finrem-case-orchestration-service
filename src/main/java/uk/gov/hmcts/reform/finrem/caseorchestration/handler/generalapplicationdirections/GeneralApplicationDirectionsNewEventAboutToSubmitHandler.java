@@ -112,6 +112,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                 .errors(errors).state(postState).build();
         }
+        caseData.getManageHearingsWrapper().setWorkingHearing(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }

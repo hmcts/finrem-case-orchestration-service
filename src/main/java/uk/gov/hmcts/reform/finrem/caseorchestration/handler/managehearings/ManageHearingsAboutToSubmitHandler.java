@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 
 @Slf4j
 @Service
-public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
+public class ManageHearingsAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final ManageHearingActionService manageHearingActionService;
 
@@ -48,7 +48,10 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
             manageHearingActionService.performAddHearing(finremCaseDetails, userAuthorisation);
+            // Although the working hearing is cleared, the working hearing ID is retained for use in submitted handler.
+            finremCaseData.getManageHearingsWrapper().setWorkingHearing(null);
         }
+
 
         manageHearingActionService.updateTabData(finremCaseData);
 

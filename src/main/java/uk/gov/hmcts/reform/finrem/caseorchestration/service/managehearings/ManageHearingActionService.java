@@ -105,8 +105,7 @@ public class ManageHearingActionService {
         }
 
         addDocumentsToCollection(documentMap, hearingWrapper);
-        // Although the working hearing is cleared, the working hearing ID is retained for use in submitted handler.
-        hearingWrapper.setWorkingHearing(null);
+
     }
 
     /**
@@ -232,6 +231,7 @@ public class ManageHearingActionService {
         return nullIfEmpty(emptyIfNull(hearings).stream()
             .sorted(Comparator.comparing(hearing -> hearing.getValue().getHearingDate()))
             .map(hearing -> HearingTabCollectionItem.builder()
+                .id(hearing.getId())
                 .value(hearingTabDataMapper.mapHearingToTabData(
                     hearing,
                     caseData.getManageHearingsWrapper().getHearingDocumentsCollection()))
