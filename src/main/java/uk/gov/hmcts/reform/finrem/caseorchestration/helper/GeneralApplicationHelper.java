@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -237,7 +236,7 @@ public class GeneralApplicationHelper {
 
     public DynamicRadioList getDynamicRadioList(List<DynamicRadioListElement> dynamicRadioListElement) {
         return DynamicRadioList.builder()
-            .value(dynamicRadioListElement.get(0))
+            .value(dynamicRadioListElement.getFirst())
             .listItems(dynamicRadioListElement)
             .build();
     }
@@ -351,12 +350,9 @@ public class GeneralApplicationHelper {
             caseData.getCcdCaseId());
 
         List<GeneralApplicationsCollection> uniqueGeneralApplicationList = generalApplicationList.stream().collect(Collectors.groupingBy(ga ->
-                    new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(), ga.getValue().getGeneralApplicationCreatedDate()),
-                toList())).entrySet().stream().map(entry -> findBestGeneralApplicationInDuplicate(entry.getValue()))
-            .collect(toList());
-
-        Collections.sort(uniqueGeneralApplicationList, (o1, o2) -> o2.getValue().getGeneralApplicationCreatedDate()
-            .compareTo(o1.getValue().getGeneralApplicationCreatedDate()));
+                new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(), ga.getValue().getGeneralApplicationCreatedDate()),
+            toList())).values().stream().map(this::findBestGeneralApplicationInDuplicate).sorted((o1, o2) -> o2.getValue().getGeneralApplicationCreatedDate()
+            .compareTo(o1.getValue().getGeneralApplicationCreatedDate())).collect(toList());
 
         log.info("After removing duplicate General application count: {} for Case ID: {} ", uniqueGeneralApplicationList.size(),
             caseData.getCcdCaseId());
