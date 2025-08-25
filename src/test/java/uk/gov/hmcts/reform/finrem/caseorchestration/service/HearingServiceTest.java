@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -7,6 +8,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
@@ -21,8 +23,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -35,16 +41,104 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService.TOP_LEVEL_HEARING_ID;
 
 @ExtendWith(MockitoExtension.class)
 class HearingServiceTest {
 
+    private static final String SELECTED_UUID = UUID.randomUUID().toString();
+
     @InjectMocks
     private HearingService hearingService;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(featureToggleService.isManageHearingEnabled()).thenReturn(false);
+    }
+
+    @ParameterizedTest
+    @MethodSource("hearingScenarios")
+    void shouldGenerateSelectableHearingsAsDynamicListFromManageHearingsWhenToggleIsEnabled(
+        List<ManageHearingsCollectionItem> hearings,
+        Map<String, String> expectedDynamicListItems
+    ) {
+        // Arrange
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData finremCaseData = mock(FinremCaseData.class);
+        ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
+
+        when(caseDetails.getData()).thenReturn(finremCaseData);
+        when(finremCaseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
+        when(finremCaseData.getListForHearingWrapper()).thenReturn(mock(ListForHearingWrapper.class));
+        when(finremCaseData.getInterimWrapper()).thenReturn(mock(InterimWrapper.class));
+        when(finremCaseData.getDirectionDetailsCollection()).thenReturn(mock(List.class));
+        when(finremCaseData.getHearingDirectionDetailsCollection()).thenReturn(mock(List.class));
+        when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
+        when(manageHearingsWrapper.getHearings()).thenReturn(hearings);
+
+        // Act
+        DynamicList actualDynamicList = hearingService.generateSelectableHearingsAsDynamicList(caseDetails);
+
+        // Assert
+        assertEquals(expectedDynamicListItems.size(), actualDynamicList.getListItems().size());
+        assertDynamicListEquals(createExpectedDynamicList(expectedDynamicListItems), actualDynamicList);
+
+        verifyNoInteractions(
+            finremCaseData.getListForHearingWrapper(),
+            finremCaseData.getInterimWrapper(),
+            finremCaseData.getDirectionDetailsCollection(),
+            finremCaseData.getHearingDirectionDetailsCollection()
+        );
+    }
+
+    private static Stream<Arguments> hearingScenarios() {
+        final UUID hearingOneId = UUID.randomUUID();
+        final UUID hearingTwoId = UUID.randomUUID();
+
+        Hearing hearingOne = mock(Hearing.class);
+        when(hearingOne.getHearingType()).thenReturn(HearingType.FH);
+        when(hearingOne.getHearingDate()).thenReturn(LocalDate.of(2025, 2, 2));
+        when(hearingOne.getHearingTime()).thenReturn("09:14");
+
+        Hearing hearingTwo = mock(Hearing.class);
+        when(hearingTwo.getHearingType()).thenReturn(HearingType.FDA);
+        when(hearingTwo.getHearingDate()).thenReturn(LocalDate.of(2025, 3, 3));
+        when(hearingTwo.getHearingTime()).thenReturn("10:30");
+
+        LinkedHashMap<String, String> expectedTwoHearings = new LinkedHashMap<>();
+        expectedTwoHearings.put(hearingOneId.toString(), "2 Feb 2025 09:14 - Final Hearing (FH)");
+        expectedTwoHearings.put(hearingTwoId.toString(), "3 Mar 2025 10:30 - First Directions Appointment (FDA)");
+
+        return Stream.of(
+            Arguments.of(
+                List.of(),
+                Map.of()
+            ),
+            Arguments.of(
+                List.of(
+                    ManageHearingsCollectionItem.builder().id(hearingOneId).value(hearingOne).build()
+                ),
+                Map.of(
+                    hearingOneId.toString(), "2 Feb 2025 09:14 - Final Hearing (FH)"
+                )
+            ),
+            Arguments.of(
+                List.of(
+                    ManageHearingsCollectionItem.builder().id(hearingOneId).value(hearingOne).build(),
+                    ManageHearingsCollectionItem.builder().id(hearingTwoId).value(hearingTwo).build()
+                ),
+                expectedTwoHearings
+            )
+        );
+    }
 
     @ParameterizedTest
     @MethodSource("hearingCases")
@@ -461,6 +555,34 @@ class HearingServiceTest {
         );
     }
 
+    @Test
+    void testGetHearingDateWhenFeatureToggleEnabled() {
+        when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
+
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        DynamicListElement selected = mock(DynamicListElement.class);
+        when(selected.getCode()).thenReturn(SELECTED_UUID);
+
+        LocalDate mockedLocalDate = mock(LocalDate.class);
+        Hearing selectedHearing = mock(Hearing.class);
+        when(selectedHearing.getHearingDate()).thenReturn(mockedLocalDate);
+        // Mocking the data structure
+        caseData.getManageHearingsWrapper().setHearings(
+            List.of(
+                ManageHearingsCollectionItem.builder()
+                    .id(UUID.fromString(SELECTED_UUID))
+                    .value(selectedHearing)
+                    .build()
+            )
+        );
+
+        // Act
+        LocalDate result = hearingService.getHearingDate(caseData, selected);
+
+        // Assert
+        assertEquals(mockedLocalDate, result);
+    }
+
     @ParameterizedTest
     @MethodSource("hearingDateCases")
     void testGetHearingDate(String selectedCode, LocalDate expectedDate) {
@@ -512,6 +634,35 @@ class HearingServiceTest {
             Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
             Arguments.of(null, null) // Case with null value in Interim Hearing
         );
+    }
+
+    @Test
+    void testGetHearingTypeWhenFeatureToggleEnabled() {
+        when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
+
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        DynamicListElement selected = mock(DynamicListElement.class);
+        when(selected.getCode()).thenReturn(SELECTED_UUID);
+
+        HearingType mockedHearingType = mock(HearingType.class);
+        when(mockedHearingType.getId()).thenReturn("expectedHearingType");
+        Hearing selectedHearing = mock(Hearing.class);
+        when(selectedHearing.getHearingType()).thenReturn(mockedHearingType);
+        // Mocking the data structure
+        caseData.getManageHearingsWrapper().setHearings(
+            List.of(
+                ManageHearingsCollectionItem.builder()
+                    .id(UUID.fromString(SELECTED_UUID))
+                    .value(selectedHearing)
+                    .build()
+            )
+        );
+
+        // Act
+        String result = hearingService.getHearingType(caseData, selected);
+
+        // Assert
+        assertEquals("expectedHearingType", result);
     }
 
     @ParameterizedTest
@@ -566,6 +717,33 @@ class HearingServiceTest {
             Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
             Arguments.of(null, null) // Case with null value in Interim Hearing
         );
+    }
+
+    @Test
+    void testGetHearingTimeWhenFeatureToggleEnabled() {
+        when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
+
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        DynamicListElement selected = mock(DynamicListElement.class);
+        when(selected.getCode()).thenReturn(SELECTED_UUID);
+
+        Hearing selectedHearing = mock(Hearing.class);
+        when(selectedHearing.getHearingTime()).thenReturn("expectedHearingTime");
+        // Mocking the data structure
+        caseData.getManageHearingsWrapper().setHearings(
+            List.of(
+                ManageHearingsCollectionItem.builder()
+                    .id(UUID.fromString(SELECTED_UUID))
+                    .value(selectedHearing)
+                    .build()
+            )
+        );
+
+        // Act
+        String result = hearingService.getHearingTime(caseData, selected);
+
+        // Assert
+        assertEquals("expectedHearingTime", result);
     }
 
     @ParameterizedTest
