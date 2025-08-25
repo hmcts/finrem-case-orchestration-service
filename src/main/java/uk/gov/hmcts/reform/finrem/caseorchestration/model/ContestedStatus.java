@@ -6,7 +6,9 @@ public enum ContestedStatus {
 
     APPLICATION_ISSUED("applicationIssued"),
 
-    GATE_KEEPING_AND_ALLOCATION("gateKeepingAndAllocation");
+    GATE_KEEPING_AND_ALLOCATION("gateKeepingAndAllocation"),
+
+    PREPARE_FOR_HEARING("prepareForHearing");
 
     private final String id;
 
@@ -16,6 +18,10 @@ public enum ContestedStatus {
 
     @Override
     public String toString() {
+        return id;
+    }
+
+    public String getId() {
         return id;
     }
 }
