@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -22,21 +20,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
-public class DraftOrdersNotificationRequestMapper {
-    private final CourtDetailsConfiguration courtDetailsConfiguration;
-
+public class DraftOrdersNotificationRequestMapper extends AbstractNotificationRequestMapper {
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
 
-    public NotificationRequest buildJudgeNotificationRequest(FinremCaseDetails caseDetails, LocalDate hearingDate, String judge) {
-        NotificationRequest judgeNotificationRequest = new NotificationRequest();
-        judgeNotificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
-        judgeNotificationRequest.setHearingDate(dateFormatter.format(hearingDate));
-        judgeNotificationRequest.setNotificationEmail(judge);
-        judgeNotificationRequest.setApplicantName(caseDetails.getData().getFullApplicantName());
-        judgeNotificationRequest.setRespondentName(caseDetails.getData().getRespondentFullName());
+    public DraftOrdersNotificationRequestMapper(NotificationRequestBuilderFactory builderFactory) {
+        super(builderFactory);
+    }
 
-        return judgeNotificationRequest;
+    public NotificationRequest buildJudgeNotificationRequest(FinremCaseDetails caseDetails, LocalDate hearingDate, String judge) {
+        return notificationRequestBuilder()
+            .withDefaults(caseDetails)
+            .hearingDate(dateFormatter.format(hearingDate))
+            .notificationEmail(judge)
+            .build();
     }
 
     /**
@@ -47,33 +43,22 @@ public class DraftOrdersNotificationRequestMapper {
      * @return a {@link NotificationRequest} containing all required notification placeholder data
      */
     public NotificationRequest buildAdminReviewNotificationRequest(FinremCaseDetails caseDetails, LocalDate hearingDate) {
-        FinremCaseData caseData = caseDetails.getData();
-        String email = getCourtAdminEmail(caseData);
-
-        return NotificationRequest.builder()
-            .notificationEmail(email)
-            .caseReferenceNumber(String.valueOf(caseDetails.getId()))
-            .applicantName(caseData.getFullApplicantName())
-            .respondentName(caseData.getRespondentFullName())
+        return notificationRequestBuilder()
+            .withDefaults(caseDetails)
+            .withCourtAsEmailDestination(caseDetails)
             .hearingDate(dateFormatter.format(hearingDate))
             .build();
     }
 
     public NotificationRequest buildCaseworkerDraftOrderReviewOverdue(FinremCaseDetails caseDetails,
                                                                       DraftOrdersReview draftOrdersReview) {
-        FinremCaseData caseData = caseDetails.getData();
-        String notificationEmail = getCourtAdminEmail(caseData);
-
-        return NotificationRequest.builder()
-            .notificationEmail(notificationEmail)
-            .caseReferenceNumber(String.valueOf(caseDetails.getId()))
-            .caseType(EmailService.CONTESTED)
-            .applicantName(caseData.getFullApplicantName())
-            .respondentName(caseData.getRespondentFullName())
+        return notificationRequestBuilder()
+            .withDefaults(caseDetails)
+            .withCourtAsEmailDestination(caseDetails)
             .hearingDate(dateFormatter.format(draftOrdersReview.getHearingDate()))
-            .selectedCourt(CourtHelper.getSelectedFrc(caseDetails))
             .judgeName(draftOrdersReview.getHearingJudge())
             .oldestDraftOrderDate(dateFormatter.format(draftOrdersReview.getEarliestToBeReviewedOrderDate()))
+            .selectedCourt(CourtHelper.getSelectedFrc(caseDetails))
             .build();
     }
 
@@ -105,11 +90,6 @@ public class DraftOrdersNotificationRequestMapper {
             .solicitorReferenceNumber(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
             .name(getRefusedOrderName(caseDetails, refusedOrder))
             .build();
-    }
-
-    private String getCourtAdminEmail(FinremCaseData caseData) {
-        String selectedAllocatedCourt = caseData.getSelectedAllocatedCourt();
-        return courtDetailsConfiguration.getCourts().get(selectedAllocatedCourt).getEmail();
     }
 
     private String getRefusedOrderEmail(FinremCaseDetails caseDetails, RefusedOrder refusedOrder) {
