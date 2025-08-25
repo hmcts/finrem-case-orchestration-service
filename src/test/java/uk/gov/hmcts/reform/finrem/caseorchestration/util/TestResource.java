@@ -13,6 +13,10 @@ import static java.lang.String.format;
 
 public class TestResource {
 
+    protected TestResource() {
+        // restrict instantiation
+    }
+
     public static final String FILE_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
     public static final String BINARY_URL = format("%s/binary", FILE_URL);
     public static final String FILE_NAME = "app_docs.pdf";
