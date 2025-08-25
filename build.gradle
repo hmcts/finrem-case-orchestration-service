@@ -33,7 +33,7 @@ def versions = [
         wiremock             : '3.0.1',
         apacheLogging        : '2.25.1',
         idamClient           : '3.0.4',
-        jjwt                 : '0.12.7',
+        jjwt                 : '0.13.0',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
         tika                 : '3.2.2',
