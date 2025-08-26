@@ -132,7 +132,7 @@ public class GeneralApplicationDirectionsService {
      * @return a {@link CaseDocument} containing the generated directions document.
      */
     public CaseDocument generateGeneralApplicationDirectionsDocument(String authorisationToken, FinremCaseDetails finremCaseDetails) {
-        if (isHearingRequired(finremCaseDetails) == YesOrNo.YES) {
+        if (isHearingRequired(finremCaseDetails)) {
             return manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
         } else {
             CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
@@ -141,8 +141,12 @@ public class GeneralApplicationDirectionsService {
         }
     }
 
-    private YesOrNo isHearingRequired(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired();
+    public boolean isHearingRequired(FinremCaseDetails caseDetails) {
+        YesOrNo hearingRequired = caseDetails.getData()
+            .getGeneralApplicationWrapper()
+            .getGeneralApplicationDirectionsHearingRequired();
+
+        return YesOrNo.isYes(hearingRequired);
     }
 
     private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails caseDetails, String authorisationToken,
