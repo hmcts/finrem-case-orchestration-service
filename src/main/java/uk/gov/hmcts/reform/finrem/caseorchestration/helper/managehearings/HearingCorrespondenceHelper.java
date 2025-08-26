@@ -51,7 +51,7 @@ public class HearingCorrespondenceHelper {
 
         if (hearings == null) {
             throw new IllegalStateException(
-                "No hearings available to search for. Working hearing ID is: " + hearingId
+                    "No hearings available to search for. Working hearing ID is: " + hearingId
             );
         }
 

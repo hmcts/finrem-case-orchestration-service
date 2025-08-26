@@ -188,7 +188,7 @@ public class GeneralApplicationHelper {
             return 0;
         }
         return e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate()
-            .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+                .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate());
     }
 
     public DynamicList objectToDynamicList(Object object) {
