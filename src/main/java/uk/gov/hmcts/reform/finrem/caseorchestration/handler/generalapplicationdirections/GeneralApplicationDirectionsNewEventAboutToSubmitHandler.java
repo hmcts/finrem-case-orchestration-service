@@ -186,9 +186,9 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
         helper.setGeneralApplicationInformation(items, finremCaseDetails, caseDocument, status, bulkPrintDocuments, userAuthorisation);
 
         if (items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER1)
-                || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER2)
-                || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER3)
-                || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER4)) {
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER2)
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER3)
+            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER4)) {
             gaService.updateIntervenerDirectionsOrders(items, finremCaseDetails);
         }
 

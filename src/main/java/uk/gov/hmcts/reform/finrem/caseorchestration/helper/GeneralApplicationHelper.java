@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -236,7 +237,7 @@ public class GeneralApplicationHelper {
 
     public DynamicRadioList getDynamicRadioList(List<DynamicRadioListElement> dynamicRadioListElement) {
         return DynamicRadioList.builder()
-            .value(dynamicRadioListElement.getFirst())
+            .value(dynamicRadioListElement.get(0))
             .listItems(dynamicRadioListElement)
             .build();
     }
@@ -339,7 +340,6 @@ public class GeneralApplicationHelper {
 
         buildGeneralApplicationDocuments(caseData, userAuthorisation, caseId, builder);
 
-
         return builder.build();
     }
 
@@ -350,9 +350,12 @@ public class GeneralApplicationHelper {
             caseData.getCcdCaseId());
 
         List<GeneralApplicationsCollection> uniqueGeneralApplicationList = generalApplicationList.stream().collect(Collectors.groupingBy(ga ->
-                new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(), ga.getValue().getGeneralApplicationCreatedDate()),
-            toList())).values().stream().map(this::findBestGeneralApplicationInDuplicate).sorted((o1, o2) -> o2.getValue().getGeneralApplicationCreatedDate()
-            .compareTo(o1.getValue().getGeneralApplicationCreatedDate())).collect(toList());
+                    new Tuple(ga.getValue().getGeneralApplicationSender().getValueCode(),ga.getValue().getGeneralApplicationCreatedDate()),
+                toList())).entrySet().stream().map(entry -> findBestGeneralApplicationInDuplicate(entry.getValue()))
+            .collect(toList());
+
+        Collections.sort(uniqueGeneralApplicationList, (o1, o2) -> o2.getValue().getGeneralApplicationCreatedDate()
+            .compareTo(o1.getValue().getGeneralApplicationCreatedDate()));
 
         log.info("After removing duplicate General application count: {} for Case ID: {} ", uniqueGeneralApplicationList.size(),
             caseData.getCcdCaseId());
@@ -527,15 +530,11 @@ public class GeneralApplicationHelper {
         }
     }
 
-
     private void setStatus(GeneralApplicationItems.GeneralApplicationItemsBuilder builder, String outcome, String directionGiven) {
         switch (outcome) {
-            case "APPROVED" ->
-                builder.generalApplicationStatus(directionGiven == null ? APPROVED.getId() : DIRECTION_APPROVED.getId());
-            case "NOT_APPROVED" ->
-                builder.generalApplicationStatus(directionGiven == null ? NOT_APPROVED.getId() : DIRECTION_NOT_APPROVED.getId());
-            case "OTHER" ->
-                builder.generalApplicationStatus(directionGiven == null ? OTHER.getId() : DIRECTION_OTHER.getId());
+            case "APPROVED" -> builder.generalApplicationStatus(directionGiven == null ? APPROVED.getId() : DIRECTION_APPROVED.getId());
+            case "NOT_APPROVED" -> builder.generalApplicationStatus(directionGiven == null ? NOT_APPROVED.getId() : DIRECTION_NOT_APPROVED.getId());
+            case "OTHER" -> builder.generalApplicationStatus(directionGiven == null ? OTHER.getId() : DIRECTION_OTHER.getId());
             default -> builder.generalApplicationStatus(OTHER.getId());
         }
     }
@@ -545,7 +544,6 @@ public class GeneralApplicationHelper {
      *
      * <p>
      * {@code generationApplicationReceivedFrom} is a field from legacy General Applications.
-     *
      * @param receivedFrom the value to convert
      * @return the converted value
      */
