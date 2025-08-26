@@ -45,8 +45,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Supplier;
 
+import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -147,8 +149,13 @@ public class TestSetUpUtils {
         return caseDocument(FILE_URL, FILE_NAME, BINARY_URL);
     }
 
+    public static CaseDocument caseDocument(String fileName) {
+        String documentUrl = format("http://dm-store:8080/documents/%s", UUID.randomUUID());
+        return caseDocument(documentUrl, fileName);
+    }
+
     public static CaseDocument caseDocument(String documentUrl, String filename) {
-        return caseDocument(documentUrl, filename, documentUrl + "/binary");
+        return caseDocument(documentUrl, filename, format("%s/binary", documentUrl));
     }
 
     public static CaseDocument caseDocument(String documentUrl, String filename, String binaryUrl) {
