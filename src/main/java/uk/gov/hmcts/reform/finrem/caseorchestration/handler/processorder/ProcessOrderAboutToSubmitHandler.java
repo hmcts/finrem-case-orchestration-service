@@ -112,8 +112,6 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())) {
             caseData.getManageHearingsWrapper().setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
             manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
-            // Although the working hearing is cleared, the working hearing ID is retained for use in submitted handler.
-            caseData.getManageHearingsWrapper().setWorkingHearing(null);
             manageHearingActionService.updateTabData(caseData);
         }
 
