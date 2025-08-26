@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder.consented;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
