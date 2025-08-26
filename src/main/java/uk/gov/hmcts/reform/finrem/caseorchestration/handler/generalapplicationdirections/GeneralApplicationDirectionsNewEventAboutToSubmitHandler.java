@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -75,8 +74,14 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
 
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-
         FinremCaseData caseData = caseDetails.getData();
+
+        //Invoke performAddHearing when hearing is required
+        if (service.isHearingRequired(caseDetails)) {
+            manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
+            manageHearingActionService.updateTabData(caseData);
+        }
+
         helper.populateGeneralApplicationSender(caseData,
             caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
@@ -96,12 +101,6 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
             service.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);
         } catch (InvalidCaseDataException invalidCaseDataException) {
             errors.add(invalidCaseDataException.getMessage());
-        }
-
-        //Invoke performAddHearing when hearing is required
-        if (caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired() == YesOrNo.YES) {
-            manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
-            manageHearingActionService.updateTabData(caseData);
         }
 
         String postState = service.getEventPostState(caseDetails, userAuthorisation);
