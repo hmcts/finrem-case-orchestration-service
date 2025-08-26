@@ -56,10 +56,10 @@ public class HearingCorrespondenceHelper {
         }
 
         return manageHearingsWrapper.getHearings().stream()
-            .filter(h -> hearingId.equals(h.getId()))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
-            .getValue();
+                .filter(h -> hearingId.equals(h.getId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
+                .getValue();
     }
 
     public HearingTabItem getHearingInContextFromTab(FinremCaseData finremCaseData) {
