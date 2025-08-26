@@ -215,12 +215,12 @@ public class GeneralApplicationDirectionsService {
      * TO DO: Document generation in DFR-3884
      *
      * @param authorisationToken the authorisation token for the request
-     * @param finremCaseDetails the details of the case for which the document is being generated
+     * @param finremCaseDetails  the details of the case for which the document is being generated
      * @return the generated CaseDocument
      */
     public CaseDocument generateGeneralApplicationDirectionsDocument(String authorisationToken, FinremCaseDetails finremCaseDetails) {
         if (finremCaseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired() == YesOrNo.YES) {
-            return manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, authorisationToken);
+            return manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
         } else {
             CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
             //If no hearing is required, prepare the General Application Directions Order document
