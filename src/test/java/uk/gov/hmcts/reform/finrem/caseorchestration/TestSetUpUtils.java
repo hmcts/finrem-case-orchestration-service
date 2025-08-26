@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrap
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -68,18 +69,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_URL;
 
 public class TestSetUpUtils {
 
-    public static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
-    public static final String BINARY_URL = DOC_URL + "/binary";
-    public static final String FILE_NAME = "app_docs.pdf";
+    public static final String DOC_URL = TestResource.FILE_URL;
+    public static final String BINARY_URL = TestResource.BINARY_URL;
+    public static final String FILE_NAME = TestResource.FILE_NAME;
     public static final String DOC_FILE_NAME = "app_docs.docx";
     public static final String VARIATION_FILE_NAME = "ApprovedVariationOrderLetter.pdf";
-    public static final String INTE_DOC_URL = "http://dm-store/documents/e9ca7c4a-1f75-4b46-b0dc-744abc2dc0d3";
-    public static final String INTE_BINARY_URL = INTE_DOC_URL + "/binary";
-    public static final String INTE_FILE_NAME = "dummy1.pdf";
-    public static final String REJECTED_ORDER_TYPE = "General Order";
     public static final String PENSION_TYPE = "Form PPF1";
     public static final String PENSION_ID = "1";
 
@@ -131,7 +130,7 @@ public class TestSetUpUtils {
         Document document = new Document();
         document.setBinaryUrl(BINARY_URL);
         document.setFileName(FILE_NAME);
-        document.setUrl(DOC_URL);
+        document.setUrl(FILE_URL);
 
         return document;
     }
@@ -140,25 +139,16 @@ public class TestSetUpUtils {
         Document document = new Document();
         document.setBinaryUrl(BINARY_URL);
         document.setFileName(VARIATION_FILE_NAME);
-        document.setUrl(DOC_URL);
+        document.setUrl(FILE_URL);
         return document;
     }
 
     public static CaseDocument caseDocument() {
-        CaseDocument caseDocument = new CaseDocument();
-        caseDocument.setDocumentUrl(DOC_URL);
-        caseDocument.setDocumentFilename(FILE_NAME);
-        caseDocument.setDocumentBinaryUrl(BINARY_URL);
-
-        return caseDocument;
+        return caseDocument(FILE_URL, FILE_NAME, BINARY_URL);
     }
 
     public static CaseDocument caseDocument(String documentUrl, String filename) {
-        CaseDocument caseDocument = new CaseDocument();
-        caseDocument.setDocumentUrl(documentUrl);
-        caseDocument.setDocumentFilename(filename);
-        caseDocument.setDocumentBinaryUrl(documentUrl + "/binary");
-        return caseDocument;
+        return caseDocument(documentUrl, filename, documentUrl + "/binary");
     }
 
     public static CaseDocument caseDocument(String documentUrl, String filename, String binaryUrl) {
@@ -166,7 +156,6 @@ public class TestSetUpUtils {
         caseDocument.setDocumentUrl(documentUrl);
         caseDocument.setDocumentFilename(filename);
         caseDocument.setDocumentBinaryUrl(binaryUrl);
-
         return caseDocument;
     }
 
@@ -206,7 +195,7 @@ public class TestSetUpUtils {
 
     public static void assertCaseDocument(CaseDocument caseDocument, String binaryUrl) {
         assertThat(caseDocument.getDocumentFilename(), is(FILE_NAME));
-        assertThat(caseDocument.getDocumentUrl(), is(DOC_URL));
+        assertThat(caseDocument.getDocumentUrl(), is(FILE_URL));
         assertThat(caseDocument.getDocumentBinaryUrl(), is(binaryUrl));
     }
 
@@ -269,7 +258,7 @@ public class TestSetUpUtils {
 
         return FinremCaseDetails.builder()
             .caseType(CaseType.CONSENTED)
-            .id(123456789L)
+            .id(CASE_ID)
             .state(State.APPLICATION_SUBMITTED)
             .data(caseData)
             .build();
@@ -292,7 +281,7 @@ public class TestSetUpUtils {
 
         return CaseDetails.builder()
             .caseTypeId(CaseType.CONSENTED.getCcdType())
-            .id(123456789L)
+            .id(CASE_ID)
             .data(caseData)
             .build();
     }
@@ -314,7 +303,7 @@ public class TestSetUpUtils {
 
         return CaseDetails.builder()
             .caseTypeId(CaseType.CONTESTED.getCcdType())
-            .id(987654321L)
+            .id(CASE_ID)
             .data(caseData)
             .build();
     }
@@ -515,20 +504,31 @@ public class TestSetUpUtils {
         return caseData;
     }
 
+    /**
+     * Creates a new {@link CaseDocument} instance.
+     *
+     * @param documentName the document name or URL
+     * @param filename the file name
+     * @param binaryUrl the binary file URL
+     * @return a new {@link CaseDocument} instance
+     * @deprecated Use {@link #caseDocument(String, String, String)} instead.
+     *     This method may be removed in future versions.
+     */
+    @Deprecated
     public static CaseDocument newDocument(String documentName, String filename, String binaryUrl) {
-        return CaseDocument.builder()
-            .documentFilename(filename)
-            .documentUrl(documentName)
-            .documentBinaryUrl(binaryUrl)
-            .build();
+        return caseDocument(documentName, filename, binaryUrl);
     }
 
+    /**
+     * Creates a new {@link CaseDocument} instance by delegating to {@code caseDocument()}.
+     *
+     * @return a new {@link CaseDocument} instance
+     * @deprecated Use {@link #caseDocument()} instead.
+     *     This method may be removed in future versions.
+     */
+    @Deprecated
     public static CaseDocument newDocument() {
-        return CaseDocument.builder()
-            .documentFilename(FILE_NAME)
-            .documentUrl(DOC_URL)
-            .documentBinaryUrl(BINARY_URL)
-            .build();
+        return caseDocument();
     }
 
     public static Hearing hearing(String hearingTime) {

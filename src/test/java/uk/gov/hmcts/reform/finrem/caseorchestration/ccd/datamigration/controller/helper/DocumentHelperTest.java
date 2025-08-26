@@ -95,14 +95,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_NAME;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentHelperTest {
 
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
-    private static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
-    private static final String BINARY_URL = DOC_URL + "/binary";
-    private static final String FILE_NAME = "app_docs.docx";
     private ObjectMapper objectMapper;
     private DocumentHelper documentHelper;
     @Mock
