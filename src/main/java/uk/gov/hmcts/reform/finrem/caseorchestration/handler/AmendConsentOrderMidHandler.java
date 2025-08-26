@@ -23,14 +23,14 @@ public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
 
     private final BulkPrintDocumentService bulkPrintDocumentService;
 
-    private final ConsentedApplicationHelper helper;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     public AmendConsentOrderMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                        BulkPrintDocumentService bulkPrintDocumentService,
-                                       ConsentedApplicationHelper helper) {
+                                       ConsentedApplicationHelper consentedApplicationHelper) {
         super(finremCaseDetailsMapper);
         this.bulkPrintDocumentService = bulkPrintDocumentService;
-        this.helper = helper;
+        this.consentedApplicationHelper = consentedApplicationHelper;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
-        helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
+        consentedApplicationHelper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
 
         List<String> errors = new ArrayList<>();
 
