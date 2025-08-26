@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -16,14 +17,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
+import java.util.List;
+import java.util.function.Function;
+
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -94,7 +102,51 @@ class ConsentOrderInContestedAboutToSubmitHandlerTest {
             .extracting(FinremCaseData::getMiniFormA, FinremCaseData::getAssignedToJudge)
             .containsExactly(expectedMiniFormA, "new_application@mailinator.com");
         assertThat(logs.getInfos()).contains(format("Defaulting AssignedToJudge fields for Case ID: %s", CASE_ID));
+        verify(onlineFormDocumentService).generateMiniFormA(AUTH_TOKEN, caseDetails);
         verify(onlineFormDocumentService, never()).generateConsentedInContestedMiniFormA(caseDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    void givenConsentedInContestedCase_whenHandle_thenGenerateConsentedInContestedMiniFormA() {
+        FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        CaseDocument expectedConsentedInContestedMiniFormA = mock(CaseDocument.class);
+
+        when(finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetails())).thenReturn(caseDetails);
+        when(caseDataService.isConsentedInContestedCase(finremCallbackRequest.getCaseDetails())).thenReturn(true);
+        when(onlineFormDocumentService.generateConsentedInContestedMiniFormA(caseDetails, AUTH_TOKEN))
+            .thenReturn(expectedConsentedInContestedMiniFormA);
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        // Assert
+        FinremCaseData actualCaseData = response.getData();
+        assertThat(actualCaseData.getConsentOrderWrapper())
+            .extracting(ConsentOrderWrapper::getConsentMiniFormA)
+            .isEqualTo(expectedConsentedInContestedMiniFormA);
+        verify(onlineFormDocumentService, never()).generateMiniFormA(AUTH_TOKEN, caseDetails);
+        verify(onlineFormDocumentService).generateConsentedInContestedMiniFormA(caseDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    void givenAnyCase_whenHandle_thenDocumentWarningsPopulated() {
+        FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
+
+        when(documentWarningsHelper.getDocumentWarnings(any(), any(), any())).thenReturn(List.of("warning1"));
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertThat(response.getWarnings()).containsExactly("warning1");
+        ArgumentCaptor<Function<FinremCaseData, List<HasUploadingDocuments>>> lambdaCaptor =
+            ArgumentCaptor.forClass(Function.class);
+        verify(documentWarningsHelper).getDocumentWarnings(eq(finremCallbackRequest), lambdaCaptor.capture(), eq(AUTH_TOKEN));
+        CaseDocument consentOrder = mock(CaseDocument.class);
+        assertThat(lambdaCaptor.getValue().apply(FinremCaseData.builder().consentOrder(consentOrder).build())
+            .getFirst().getUploadingDocuments()).contains(consentOrder);
     }
 
     private FinremCallbackRequest buildBaseCallbackRequest() {
