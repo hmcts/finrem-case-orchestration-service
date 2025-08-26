@@ -78,7 +78,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
         FinremCaseData caseData = caseDetails.getData();
 
         //Invoke performAddHearing when hearing is required
-        if (caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired() == YesOrNo.YES) {
+        if (service.isHearingRequired(caseDetails)) {
             manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
             manageHearingActionService.updateTabData(caseData);
         }
