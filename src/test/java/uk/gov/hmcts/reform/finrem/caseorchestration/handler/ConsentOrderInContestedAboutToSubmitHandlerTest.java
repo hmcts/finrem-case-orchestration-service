@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
@@ -50,9 +49,6 @@ class ConsentOrderInContestedAboutToSubmitHandlerTest {
     private final TestLogger logs = new TestLogger(ConsentOrderInContestedAboutToSubmitHandler.class);
 
     private ConsentOrderInContestedAboutToSubmitHandler handler;
-
-    @Mock
-    private BulkPrintDocumentService bulkPrintDocumentService;
 
     @Mock
     private CaseDataService caseDataService;
