@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -130,23 +132,33 @@ class ConsentOrderInContestedAboutToSubmitHandlerTest {
         verify(onlineFormDocumentService).generateConsentedInContestedMiniFormA(caseDetails, AUTH_TOKEN);
     }
 
-    @Test
-    void givenAnyCase_whenHandle_thenDocumentWarningsPopulated() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    @SuppressWarnings("unchecked")
+    void givenAnyCase_whenHandle_thenDocumentWarningsPopulated(boolean noWarnings) {
         FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
 
-        when(documentWarningsHelper.getDocumentWarnings(any(), any(), any())).thenReturn(List.of("warning1"));
+        when(documentWarningsHelper.getDocumentWarnings(any(), any(), any())).thenReturn(noWarnings ? List.of()
+            : List.of("warning1"));
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         // Assert
-        assertThat(response.getWarnings()).containsExactly("warning1");
+        if (noWarnings) {
+            assertThat(response.getWarnings()).isEmpty();
+        } else {
+            assertThat(response.getWarnings()).containsExactly("warning1");
+        }
+
         ArgumentCaptor<Function<FinremCaseData, List<HasUploadingDocuments>>> lambdaCaptor =
             ArgumentCaptor.forClass(Function.class);
         verify(documentWarningsHelper).getDocumentWarnings(eq(finremCallbackRequest), lambdaCaptor.capture(), eq(AUTH_TOKEN));
         CaseDocument consentOrder = mock(CaseDocument.class);
         assertThat(lambdaCaptor.getValue().apply(FinremCaseData.builder().consentOrder(consentOrder).build())
             .getFirst().getUploadingDocuments()).contains(consentOrder);
+        assertThat(lambdaCaptor.getValue().apply(FinremCaseData.builder().consentOrder(null).build())
+                .getFirst().getUploadingDocuments()).isEmpty();
     }
 
     private FinremCallbackRequest buildBaseCallbackRequest() {
