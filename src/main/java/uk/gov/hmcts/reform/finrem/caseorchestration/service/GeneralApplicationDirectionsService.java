@@ -118,6 +118,33 @@ public class GeneralApplicationDirectionsService {
             : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
     }
 
+    public boolean isNotEmpty(String field, Map<String, Object> caseData) {
+        return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
+    }
+
+    /**
+     * Generates a General Application Directions document for the specified case event.
+     * If a hearing is required, this method generates a hearing notice document.
+     * Otherwise, it prepares a General Application Directions Order document.
+     *
+     * @param authorisationToken the authorisation token used for document generation
+     * @param finremCaseDetails the details of the financial remedy case for which the document is generated
+     * @return a {@link CaseDocument} containing the generated directions document.
+     */
+    public CaseDocument generateGeneralApplicationDirectionsDocument(String authorisationToken, FinremCaseDetails finremCaseDetails) {
+        if (isHearingRequired(finremCaseDetails) == YesOrNo.YES) {
+            return manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
+        } else {
+            CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+            //If no hearing is required, prepare the General Application Directions Order document
+            return prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
+        }
+    }
+
+    private YesOrNo isHearingRequired(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired();
+    }
+
     private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails caseDetails, String authorisationToken,
                                                            List<BulkPrintDocument> documents) {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();
@@ -201,29 +228,6 @@ public class GeneralApplicationDirectionsService {
             caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
         } catch (IOException exception) {
             throw new IllegalStateException(exception);
-        }
-    }
-
-    public boolean isNotEmpty(String field, Map<String, Object> caseData) {
-        return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
-    }
-
-    /**
-     * Generates a General Application Directions document for the specified case event.
-     * If a hearing is required, this method generates a hearing notice document.
-     * Otherwise, it prepares a General Application Directions Order document.
-     *
-     * @param authorisationToken the authorisation token used for document generation
-     * @param finremCaseDetails the details of the financial remedy case for which the document is generated
-     * @return a {@link CaseDocument} containing the generated directions document.
-     */
-    public CaseDocument generateGeneralApplicationDirectionsDocument(String authorisationToken, FinremCaseDetails finremCaseDetails) {
-        if (finremCaseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired() == YesOrNo.YES) {
-            return manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
-        } else {
-            CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-            //If no hearing is required, prepare the General Application Directions Order document
-            return prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
         }
     }
 }
