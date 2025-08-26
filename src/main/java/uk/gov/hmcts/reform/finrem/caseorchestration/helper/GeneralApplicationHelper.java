@@ -88,7 +88,7 @@ public class GeneralApplicationHelper {
             }
             case INTERVENER4_GENERAL_APPLICATION_COLLECTION -> {
                 return Optional.ofNullable(wrapper.getIntervener4GeneralApplications())
-                    .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
+                        .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
             }
             case APP_RESP_GENERAL_APPLICATION_COLLECTION -> {
                 return Optional.ofNullable(wrapper.getAppRespGeneralApplications())
@@ -270,7 +270,7 @@ public class GeneralApplicationHelper {
     private void addExistingAppRespGeneralApplications(GeneralApplicationsCollection ga, FinremCaseData caseData) {
         List<GeneralApplicationsCollection> existingAppRespGeneralApplications = new ArrayList<>();
         if (caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications() != null
-            && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
+                && !caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().isEmpty()) {
             existingAppRespGeneralApplications.addAll(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications());
         }
         existingAppRespGeneralApplications.add(ga);
@@ -458,7 +458,7 @@ public class GeneralApplicationHelper {
 
     private GeneralApplicationsCollection findBestGeneralApplicationInDuplicate(List<GeneralApplicationsCollection> duplicateGas) {
         return duplicateGas.stream().filter(ga ->
-                !ga.getValue().getGeneralApplicationStatus().equals(CREATED.getId())).findAny()
+            !ga.getValue().getGeneralApplicationStatus().equals(CREATED.getId())).findAny()
             .orElse(duplicateGas.stream().findFirst().orElse(null));
     }
 
