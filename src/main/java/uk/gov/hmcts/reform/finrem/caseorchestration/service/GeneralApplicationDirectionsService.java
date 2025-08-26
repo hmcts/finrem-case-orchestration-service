@@ -209,14 +209,13 @@ public class GeneralApplicationDirectionsService {
     }
 
     /**
-     * Generates a General Application Directions document for the new event.
-     * If a hearing is required, it generates a hearing notice document.
+     * Generates a General Application Directions document for the specified case event.
+     * If a hearing is required, this method generates a hearing notice document.
      * Otherwise, it prepares a General Application Directions Order document.
-     * TO DO: Document generation in DFR-3884
      *
-     * @param authorisationToken the authorisation token for the request
-     * @param finremCaseDetails  the details of the case for which the document is being generated
-     * @return the generated CaseDocument
+     * @param authorisationToken the authorisation token used for document generation
+     * @param finremCaseDetails the details of the financial remedy case for which the document is generated
+     * @return a {@link CaseDocument} containing the generated directions document.
      */
     public CaseDocument generateGeneralApplicationDirectionsDocument(String authorisationToken, FinremCaseDetails finremCaseDetails) {
         if (finremCaseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired() == YesOrNo.YES) {
@@ -225,7 +224,6 @@ public class GeneralApplicationDirectionsService {
             CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
             //If no hearing is required, prepare the General Application Directions Order document
             return prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
-
         }
     }
 }
