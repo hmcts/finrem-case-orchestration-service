@@ -347,9 +347,9 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     public void givenHearingRequiredIsYes_whenGenerateGeneralApplicationDirections_shouldGenerateGeneralApplicationHearingDocument() {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder().generalApplicationWrapper(
-            GeneralApplicationWrapper.builder()
-                .generalApplicationDirectionsHearingRequired(YesOrNo.YES)
-                .build())
+                GeneralApplicationWrapper.builder()
+                    .generalApplicationDirectionsHearingRequired(YesOrNo.YES)
+                    .build())
             .build();
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
@@ -357,7 +357,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             .build();
 
         when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
-        when(manageHearingsDocumentService.generateHearingNotice(any(), any()))
+        when(manageHearingsDocumentService.getHearingNotice(any(FinremCaseDetails.class)))
             .thenReturn(caseDocument(DOC_URL, HEARING_DOCUMENT_NAME, HEARING_DOCUMENT_BIN_URL));
 
         CaseDocument expectedDocument = CaseDocument.builder()
