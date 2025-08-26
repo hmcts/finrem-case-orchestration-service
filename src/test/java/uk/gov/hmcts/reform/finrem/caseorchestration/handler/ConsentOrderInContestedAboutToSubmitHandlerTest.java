@@ -158,7 +158,7 @@ class ConsentOrderInContestedAboutToSubmitHandlerTest {
         assertThat(lambdaCaptor.getValue().apply(FinremCaseData.builder().consentOrder(consentOrder).build())
             .getFirst().getUploadingDocuments()).contains(consentOrder);
         assertThat(lambdaCaptor.getValue().apply(FinremCaseData.builder().consentOrder(null).build())
-                .getFirst().getUploadingDocuments()).isEmpty();
+            .getFirst().getUploadingDocuments()).isEmpty();
     }
 
     private FinremCallbackRequest buildBaseCallbackRequest() {
