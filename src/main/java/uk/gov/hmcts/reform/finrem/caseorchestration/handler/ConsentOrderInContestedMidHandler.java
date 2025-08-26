@@ -19,32 +19,33 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+
 @Slf4j
 @Service
 public class ConsentOrderInContestedMidHandler extends FinremCallbackHandler {
 
-    private final BulkPrintDocumentService service;
+    private final BulkPrintDocumentService bulkPrintDocumentService;
 
     public ConsentOrderInContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                             BulkPrintDocumentService service) {
+                                             BulkPrintDocumentService bulkPrintDocumentService) {
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.bulkPrintDocumentService = bulkPrintDocumentService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
-                && CaseType.CONTESTED.equals(caseType)
-                && (EventType.CONSENT_ORDER.equals(eventType));
+            && CaseType.CONTESTED.equals(caseType)
+            && EventType.CONSENT_ORDER.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for Case ID: {}",
-                EventType.CONSENT_ORDER, caseId);
+        final String caseId = String.valueOf(caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
 
         List<CaseDocument> caseDocumentList = new ArrayList<>();
@@ -78,8 +79,8 @@ public class ConsentOrderInContestedMidHandler extends FinremCallbackHandler {
         }
 
         List<String> errors = new ArrayList<>();
-        caseDocumentList.forEach(doc -> service.validateEncryptionOnUploadedDocument(doc,
-                caseId, errors, userAuthorisation));
+        caseDocumentList.forEach(doc -> bulkPrintDocumentService
+            .validateEncryptionOnUploadedDocument(doc, caseId, errors, userAuthorisation));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
@@ -88,34 +89,31 @@ public class ConsentOrderInContestedMidHandler extends FinremCallbackHandler {
                                    List<CaseDocument> caseDocumentList,
                                    FinremCaseData caseDataBefore,
                                    ConsentOrderWrapper consentOrderWrapper) {
-        List<OtherDocumentCollection> otherCollection = consentOrderWrapper.getConsentOtherCollection();
-        if (otherCollection != null && !otherCollection.isEmpty()) {
-            log.info("No. of current otherCollection {} for caseId {}", otherCollection.size(), caseId);
-            ConsentOrderWrapper consentOrderWrapperBefore = caseDataBefore.getConsentOrderWrapper();
-            if (consentOrderWrapperBefore != null) {
-                List<OtherDocumentCollection> otherCollectionBefore = consentOrderWrapperBefore.getConsentOtherCollection();
-                if (otherCollectionBefore != null && !otherCollectionBefore.isEmpty()) {
-                    log.info("No. of before otherCollectionBefore {} for caseId {}", otherCollectionBefore.size(), caseId);
-                    otherCollection.removeAll(otherCollectionBefore);
-                }
+        List<OtherDocumentCollection> otherCollection = emptyIfNull(consentOrderWrapper.getConsentOtherCollection());
+
+        log.info("No. of current otherCollection {} for caseId {}", otherCollection.size(), caseId);
+        ConsentOrderWrapper consentOrderWrapperBefore = caseDataBefore.getConsentOrderWrapper();
+        if (consentOrderWrapperBefore != null) {
+            List<OtherDocumentCollection> otherCollectionBefore = consentOrderWrapperBefore.getConsentOtherCollection();
+            if (otherCollectionBefore != null && !otherCollectionBefore.isEmpty()) {
+                log.info("No. of before otherCollectionBefore {} for caseId {}", otherCollectionBefore.size(), caseId);
+                otherCollection.removeAll(otherCollectionBefore);
             }
-            log.info("No. of otherCollection {} to check for caseId {}", otherCollection.size(), caseId);
-            otherCollection.forEach(obj -> caseDocumentList.add(obj.getValue().getUploadedDocument()));
         }
+        log.info("No. of otherCollection {} to check for caseId {}", otherCollection.size(), caseId);
+        otherCollection.forEach(obj -> caseDocumentList.add(obj.getValue().getUploadedDocument()));
     }
 
     private void getPensionDocuments(String caseId, FinremCaseData caseData,
-                                            List<CaseDocument> caseDocumentList, FinremCaseData caseDataBefore) {
-        List<PensionTypeCollection> consentPensionCollection = caseData.getConsentPensionCollection();
-        if (consentPensionCollection != null && !consentPensionCollection.isEmpty()) {
-            log.info("No. of current consentPensionCollection {} for caseId {}", consentPensionCollection.size(), caseId);
-            List<PensionTypeCollection> consentPensionsBefore = caseDataBefore.getConsentPensionCollection();
-            if (consentPensionsBefore != null && !consentPensionsBefore.isEmpty()) {
-                log.info("No. of before consentPensionsBefore {} for caseId {}", consentPensionsBefore.size(), caseId);
-                consentPensionCollection.removeAll(consentPensionsBefore);
-            }
-            log.info("No. of consentPensionCollection {} to check for caseId {}", consentPensionCollection.size(), caseId);
-            consentPensionCollection.forEach(obj -> caseDocumentList.add(obj.getTypedCaseDocument().getPensionDocument()));
+                                     List<CaseDocument> caseDocumentList, FinremCaseData caseDataBefore) {
+        List<PensionTypeCollection> consentPensionCollection = emptyIfNull(caseData.getConsentPensionCollection());
+        log.info("No. of current consentPensionCollection {} for caseId {}", consentPensionCollection.size(), caseId);
+        List<PensionTypeCollection> consentPensionsBefore = caseDataBefore.getConsentPensionCollection();
+        if (consentPensionsBefore != null && !consentPensionsBefore.isEmpty()) {
+            log.info("No. of before consentPensionsBefore {} for caseId {}", consentPensionsBefore.size(), caseId);
+            consentPensionCollection.removeAll(consentPensionsBefore);
         }
+        log.info("No. of consentPensionCollection {} to check for caseId {}", consentPensionCollection.size(), caseId);
+        consentPensionCollection.forEach(obj -> caseDocumentList.add(obj.getTypedCaseDocument().getPensionDocument()));
     }
 }

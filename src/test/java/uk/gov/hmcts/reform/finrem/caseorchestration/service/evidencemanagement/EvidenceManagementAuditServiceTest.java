@@ -38,11 +38,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_URL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EvidenceManagementAuditServiceTest {
 
-    public static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
     public static final String AUTH = "auth";
     public static final String IDAM_OAUTH_TOKEN = "idamOauthToken";
     public static final String SERVICE_AUTH = "serviceAuth";
@@ -79,7 +80,7 @@ public class EvidenceManagementAuditServiceTest {
         List<FileUploadResponse> response = evidenceManagementAuditService.audit(singletonList("mockFileUrl"), "mockToken");
 
         assertThat(response, hasSize(1));
-        assertThat(response.get(0).getFileName(), is("PNGFile.png"));
+        assertThat(response.getFirst().getFileName(), is("PNGFile.png"));
     }
 
     @SneakyThrows
@@ -97,8 +98,8 @@ public class EvidenceManagementAuditServiceTest {
         List<FileUploadResponse> response = evidenceManagementAuditService.audit(singletonList("mockFileUrl"), "mockToken");
 
         assertThat(response, hasSize(1));
-        assertThat(response.get(0).getFileName(), is("PNGFile.png"));
-        assertThat(response.get(0).getLastModifiedBy(), is(""));
+        assertThat(response.getFirst().getFileName(), is("PNGFile.png"));
+        assertThat(response.getFirst().getLastModifiedBy(), is(""));
     }
 
     @Test
@@ -110,9 +111,9 @@ public class EvidenceManagementAuditServiceTest {
         List<FileUploadResponse> response = evidenceManagementAuditService.audit(singletonList("mockFileUrl"), "mockToken");
 
         assertThat(response, hasSize(1));
-        assertThat(response.get(0).getFileName(), is("PNGFile.png"));
-        assertThat(response.get(0).getCreatedBy(), is(""));
-        assertThat(response.get(0).getLastModifiedBy(), is(""));
+        assertThat(response.getFirst().getFileName(), is("PNGFile.png"));
+        assertThat(response.getFirst().getCreatedBy(), is(""));
+        assertThat(response.getFirst().getLastModifiedBy(), is(""));
     }
 
     @SneakyThrows
@@ -126,16 +127,16 @@ public class EvidenceManagementAuditServiceTest {
         when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
         when(caseDocumentClient.getMetadataForDocument(anyString(), anyString(), anyString()))
             .thenReturn(getDocumentMetadata());
-        List<String> docUrls = List.of(DOC_URL);
+        List<String> docUrls = List.of(FILE_URL);
         List<FileUploadResponse> response = evidenceManagementAuditService.audit(docUrls, AUTH);
 
         assertNotNull(response);
         assertThat(response, hasSize(1));
-        assertThat(response.get(0).getFileName(), is("PNGFile.png"));
-        assertThat(response.get(0).getFileUrl(), is(DOC_URL));
-        assertThat(response.get(0).getMimeType(), is("image/png"));
-        assertEquals(response.get(0).getCreatedOn(), FinremDateUtils.getLocalDateTime("2020-12-08T16:27:46"));
-        assertEquals(response.get(0).getModifiedOn(), FinremDateUtils.getLocalDateTime("2020-12-08T16:27:46"));
+        assertThat(response.getFirst().getFileName(), is("PNGFile.png"));
+        assertThat(response.getFirst().getFileUrl(), is(FILE_URL));
+        assertThat(response.getFirst().getMimeType(), is("image/png"));
+        assertEquals(response.getFirst().getCreatedOn(), FinremDateUtils.getLocalDateTime("2020-12-08T16:27:46"));
+        assertEquals(response.getFirst().getModifiedOn(), FinremDateUtils.getLocalDateTime("2020-12-08T16:27:46"));
     }
 
     @SneakyThrows
@@ -143,8 +144,8 @@ public class EvidenceManagementAuditServiceTest {
         Document.Links links = new Document.Links();
         links.self = new Document.Link();
         links.binary = new Document.Link();
-        links.self.href = DOC_URL;
-        links.binary.href = DOC_URL + "/binary";
+        links.self.href = FILE_URL;
+        links.binary.href = BINARY_URL;
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         Document document = Document.builder()
             .links(links)
