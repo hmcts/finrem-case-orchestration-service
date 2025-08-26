@@ -161,8 +161,8 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
                 .id(collectionId)
                 .generalApplicationItems(generalApplicationItems)
                 .build()));
-
         when(helper.objectToDynamicList(any())).thenReturn(dynamicList);
+        when(service.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(true);
 
         doAnswer(invocation -> {
             FinremCaseDetails caseDetails = invocation.getArgument(1);
@@ -212,6 +212,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             generalApplicationItems);
+        when(service.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(true);
 
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
 
