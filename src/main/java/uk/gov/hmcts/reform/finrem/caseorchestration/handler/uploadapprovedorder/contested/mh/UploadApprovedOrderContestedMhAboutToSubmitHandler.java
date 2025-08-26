@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder.contested.mh;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,49 +13,57 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
-
-import java.util.ArrayList;
-import java.util.List;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @Service
-public class UploadApprovedOrderContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final DocumentWarningsHelper documentWarningsHelper;
-
     private final UploadApprovedOrderService uploadApprovedOrderService;
+    private final ManageHearingActionService manageHearingActionService;
 
-    public UploadApprovedOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                            UploadApprovedOrderService uploadApprovedOrderService,
-                                                            DocumentWarningsHelper documentWarningsHelper) {
+    public UploadApprovedOrderContestedMhAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                              DocumentWarningsHelper documentWarningsHelper,
+                                                              UploadApprovedOrderService uploadApprovedOrderService,
+                                                              ManageHearingActionService manageHearingActionService) {
         super(finremCaseDetailsMapper);
-        this.uploadApprovedOrderService = uploadApprovedOrderService;
         this.documentWarningsHelper = documentWarningsHelper;
+        this.uploadApprovedOrderService = uploadApprovedOrderService;
+        this.manageHearingActionService = manageHearingActionService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.UPLOAD_APPROVED_ORDER.equals(eventType);
+            && EventType.UPLOAD_APPROVED_ORDER_MH.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
 
-        List<String> errors = new ArrayList<>();
-        uploadApprovedOrderService.processApprovedOrders(callbackRequest, errors, userAuthorisation);
+        uploadApprovedOrderService.processApprovedOrdersMh(caseDetails, callbackRequest.getCaseDetailsBefore(), userAuthorisation);
+
+        if (YesOrNo.YES.equals(caseData.getManageHearingsWrapper().getIsAddHearingChosen())) {
+            manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
+            manageHearingActionService.updateTabData(caseData);
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
             .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, data ->
                 emptyIfNull(data.getUploadHearingOrder()).stream()
                     .map(DirectionOrderCollection::getValue).toList(), userAuthorisation))
-            .errors(errors).build();
+            .build();
     }
 }

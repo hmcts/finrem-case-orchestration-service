@@ -57,7 +57,7 @@ public class WorkingHearing {
             .hearingNoticePrompt(hearing.getHearingNoticePrompt())
             .additionalHearingDocPrompt(hearing.getAdditionalHearingDocPrompt())
             .additionalHearingDocs(hearing.getAdditionalHearingDocs())
-            .withPartiesOnCase(hearing.getPartiesOnCase())
+            .withPartiesOnCaseSelected(hearing.getPartiesOnCase())
             .withHearingTypes(HearingType.values())
             .withHearingTypeSelected(hearing.getHearingType())
             .build();
@@ -119,7 +119,7 @@ public class WorkingHearing {
             return this;
         }
 
-        public WorkingHearingBuilder withPartiesOnCase(List<PartyOnCaseCollectionItem> partiesOnCaseCollectionItems) {
+        public WorkingHearingBuilder withPartiesOnCaseSelected(List<PartyOnCaseCollectionItem> partiesOnCaseCollectionItems) {
             List<DynamicMultiSelectListElement> listElements = partiesOnCaseCollectionItems.stream()
                 .map(PartyOnCaseCollectionItem::getValue)
                 .map(partyOnCase -> DynamicMultiSelectListElement.builder()
