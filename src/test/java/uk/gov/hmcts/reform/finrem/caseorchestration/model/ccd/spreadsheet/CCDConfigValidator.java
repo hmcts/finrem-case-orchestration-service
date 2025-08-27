@@ -341,11 +341,7 @@ public class CCDConfigValidator {
                         if (fixedListValues.contains(c.getFieldType())) {
                             log.info("In a fixedlist field with ccd parameter type {} and field type {}", c.getFieldTypeParameter(),
                                 vf.getType().getSimpleName());
-                            if (!vf.getType().getSimpleName().equals("String")) {
-                                complexTypeErrors.addAll(validateFixedList(fixedListSheets, vf.getType(), c.getFieldTypeParameter()));
-                            } else {
-                                log.info("Fixed list is a string");
-                            }
+                            log.info("Fixed list is a string");
                         }
 
                     }
@@ -396,14 +392,8 @@ public class CCDConfigValidator {
             valueType = (Class<?>) type;
         }
 
-        if (valueType.getSimpleName().equals("String")) {
-            log.info("Fixed list is a string");
-            return Collections.EMPTY_LIST;
-        } else {
-            log.info("In a fixedlist field with ccd parameter type {} and field type {}", ccdFieldAttributes.getFieldTypeParameter(),
-                valueType.getSimpleName());
-            return validateFixedList(fixedListSheets, valueType, ccdFieldAttributes.getFieldTypeParameter());
-        }
+        log.info("Fixed list is a string");
+        return Collections.EMPTY_LIST;
     }
 
     private List<String> validateFixedList(List<Sheet> fixedListSheets, Class fixedListClass, String fixedListParameterName) {
