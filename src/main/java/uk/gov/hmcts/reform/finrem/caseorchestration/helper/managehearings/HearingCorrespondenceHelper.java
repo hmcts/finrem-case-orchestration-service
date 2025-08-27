@@ -70,14 +70,14 @@ public class HearingCorrespondenceHelper {
 
         if (hearings == null) {
             throw new IllegalStateException(
-                "No hearings available to search for. Working hearing ID is: " + hearingId
+                "No hearings tab item available to search for. Working hearing ID is: " + hearingId
             );
         }
 
         return manageHearingsWrapper.getHearingTabItems().stream()
             .filter(h -> hearingId.equals(h.getId()))
             .findFirst()
-            .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
+            .orElseThrow(() -> new IllegalStateException("Hearing Tab Item not found for the given ID: " + hearingId))
             .getValue();
     }
 
