@@ -15,9 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -76,7 +76,7 @@ public class ConsentOrderInContestedAboutToSubmitHandler extends FinremCallbackH
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData)
             .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, data ->
-                    List.of(() -> Stream.ofNullable(data.getConsentOrder()).toList()),
+                    List.of(() -> ListUtils.safeListWithoutNulls(data.getConsentOrder())),
                 userAuthorisation))
             .build();
     }
