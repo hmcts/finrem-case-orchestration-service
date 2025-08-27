@@ -1,6 +1,10 @@
 {
   "token": "test_token",
   "event_id": "FR_amendedConsentOrder",
+  "case_details_before": {
+    "case_type_id": "FinancialRemedyMVP2",
+    "case_data": {}
+  },
   "case_details": {
     "id": "12345678",
     "jurisdiction": "divorce",
@@ -301,4 +305,4 @@
       ]
     }
   }
-}
+},
