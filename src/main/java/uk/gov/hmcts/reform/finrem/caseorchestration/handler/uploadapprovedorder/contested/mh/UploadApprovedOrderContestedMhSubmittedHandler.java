@@ -22,7 +22,8 @@ public class UploadApprovedOrderContestedMhSubmittedHandler extends FinremCallba
 
     private final ManageHearingsCorresponder manageHearingsCorresponder;
 
-    public UploadApprovedOrderContestedMhSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ManageHearingsCorresponder manageHearingsCorresponder) {
+    public UploadApprovedOrderContestedMhSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                          ManageHearingsCorresponder manageHearingsCorresponder) {
         super(finremCaseDetailsMapper);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
     }
