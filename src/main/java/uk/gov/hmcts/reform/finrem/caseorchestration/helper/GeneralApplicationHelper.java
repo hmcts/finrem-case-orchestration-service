@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
@@ -70,6 +71,7 @@ public class GeneralApplicationHelper {
     private final ObjectMapper objectMapper;
     private final GenericDocumentService service;
     private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
+    private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
 
     public List<GeneralApplicationCollectionData> getGeneralApplicationList(FinremCaseData caseData, String collectionName) {
         GeneralApplicationWrapper wrapper = caseData.getGeneralApplicationWrapper();
@@ -389,7 +391,9 @@ public class GeneralApplicationHelper {
 
         String caseId = String.valueOf(caseDetails.getId());
 
-        setHearingDetails(items, caseDetails);
+        if (generalApplicationDirectionsService.isHearingRequired(caseDetails)){
+            setHearingDetails(items, caseDetails);
+        }
         setDirectionsDocument(items, directionsDocument);
         updateApplicationStatus(items, status, caseId);
         addBulkPrintDocuments(items, bulkPrintDocuments, userAuthorisation, caseId);
@@ -405,7 +409,7 @@ public class GeneralApplicationHelper {
     }
 
     private void updateApplicationStatus(GeneralApplicationItems items, String status, String caseId) {
-        String gaElementStatus = Optional.ofNullable(status).orElse(items.getGeneralApplicationStatus());
+        String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
             EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
