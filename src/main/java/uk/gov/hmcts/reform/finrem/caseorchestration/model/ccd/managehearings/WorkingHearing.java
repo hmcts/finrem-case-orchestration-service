@@ -17,8 +17,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.getHearingType;
@@ -88,6 +90,7 @@ public class WorkingHearing {
     }
 
     public void addDocumentToAdditionalHearingDocs(CaseDocument caseDocument) {
+        additionalHearingDocs = Optional.ofNullable(additionalHearingDocs).orElseGet(ArrayList::new);
         additionalHearingDocs.add(DocumentCollectionItem.builder().value(caseDocument).build());
     }
 
