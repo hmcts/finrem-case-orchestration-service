@@ -24,7 +24,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1Or
 @RequiredArgsConstructor
 public class OnStartDefaultValueService {
 
-
     private final IdamService idamService;
 
     public void defaultCivilPartnershipField(CallbackRequest callbackRequest) {
