@@ -91,7 +91,7 @@ class WorkingHearingTest {
             .toArray(String[]::new);
 
         WorkingHearing workingHearing = WorkingHearing.builder()
-            .withPartiesOnCase(partyOnCaseCollectionItems)
+            .withPartiesOnCaseSelected(partyOnCaseCollectionItems)
             .build();
 
         List<DynamicMultiSelectListElement> listItems = workingHearing.getPartiesOnCaseMultiSelectList().getListItems();
