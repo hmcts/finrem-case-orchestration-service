@@ -42,6 +42,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
 
 @ExtendWith(MockitoExtension.class)
@@ -154,6 +155,7 @@ class HearingsAboutToSubmitHandlerTest {
         assertThat(hearingDocumentAdded.getValue().getHearingCaseDocumentType()).isEqualTo(CaseDocumentType.HEARING_NOTICE);
         assertThat(responseManageHearingsWrapper.getWorkingHearingId()).isEqualTo(hearingId);
         assertThat(responseManageHearingsWrapper.getWorkingHearing()).isNull();
+        assertStateIsPrepareForHearing(response.getData());
 
         //Assert perform tab data
         assertThat(responseManageHearingsWrapper.getApplicantHearingTabItems())
@@ -203,5 +205,13 @@ class HearingsAboutToSubmitHandlerTest {
                     .build()))
                 .build())
             .build();
+    }
+
+    /**
+     * Checks that the value is correct.  And that the expected constant/alias resolves to the same value.
+     */
+    private void assertStateIsPrepareForHearing(FinremCaseData caseData) {
+        assertThat(caseData.getState()).isEqualTo("prepareForHearing");
+        assertThat(caseData.getState()).isEqualTo(PREPARE_FOR_HEARING.getId());
     }
 }
