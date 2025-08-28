@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder.contested;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
