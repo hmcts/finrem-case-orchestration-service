@@ -29,7 +29,7 @@ public class SolicitorCreateConsentedAboutToStartHandlerTest {
     @Before
     public void setup() {
         IdamService idamService = mock(IdamService.class);
-        handler =  new SolicitorCreateConsentedAboutToStartHandler(new OnStartDefaultValueService(idamService));
+        handler = new SolicitorCreateConsentedAboutToStartHandler(new OnStartDefaultValueService(idamService));
     }
 
     @Test
