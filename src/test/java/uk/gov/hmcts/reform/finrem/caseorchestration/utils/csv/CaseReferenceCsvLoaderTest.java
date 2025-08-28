@@ -45,40 +45,34 @@ class CaseReferenceCsvLoaderTest {
     }
 
     @Test
-    void testDecrypt() throws Exception {
+    void givenNullData_whenDecrypt_shouldThrowException() throws Exception {
         String secret = "mySecretKey";
         SecretKey key = CaseReferenceCsvLoader.getKeyFromString(secret);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            CaseReferenceCsvLoader.decrypt(null, key);
-        });
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> CaseReferenceCsvLoader.decrypt(null, key));
 
         String expectedMessage = "Encrypted data cannot be null or empty";
         assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test
-    void testDecryptEmptyString() throws Exception {
+    void givenEmptyData_whenDecrypt_shouldThrowException() throws Exception {
         String secret = "mySecretKey";
         SecretKey key = CaseReferenceCsvLoader.getKeyFromString(secret);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            CaseReferenceCsvLoader.decrypt("", key);
-        });
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> CaseReferenceCsvLoader.decrypt("", key));
 
         String expectedMessage = "Encrypted data cannot be null or empty";
         assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test
-    void testDecryptWrongFormat() throws Exception {
+    void givenDataInWrongFormat_whenDecrypt_shouldThrowException() throws Exception {
         String secret = "mySecretKey";
         SecretKey key = CaseReferenceCsvLoader.getKeyFromString(secret);
         String encryptedData = "invalidFormat";
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            CaseReferenceCsvLoader.decrypt(encryptedData, key);
-        });
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> CaseReferenceCsvLoader.decrypt(encryptedData, key));
 
         String expectedMessage = "Encrypted data must contain at least two parts";
         assertEquals(expectedMessage, exception.getMessage());
