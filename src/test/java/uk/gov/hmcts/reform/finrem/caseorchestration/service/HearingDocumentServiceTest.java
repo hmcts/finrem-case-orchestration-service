@@ -540,6 +540,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));
+        assertThat(data.get("formCCreatedDatePlus28Days"), is(notNullValue()));
         assertThat(data.get("eventDatePlus21Days"), is(notNullValue()));
     }
 
@@ -575,6 +576,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
 
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));
+        assertThat(data.get("formCCreatedDatePlus28Days"), is(notNullValue()));
         assertThat(data.get("hearingDateLess35Days"), is(notNullValue()));
         assertThat(data.get("hearingDateLess14Days"), is(notNullValue()));
     }
