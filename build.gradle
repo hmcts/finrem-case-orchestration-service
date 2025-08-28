@@ -34,7 +34,7 @@ def versions = [
         apacheLogging        : '2.25.1',
         idamClient           : '3.0.4',
         jjwt                 : '0.12.7',
-        jaxbOsgi             : '2.3.9',
+        jaxbOsgi             : '4.0.5',
         springHateoas        : '1.5.6',
         tika                 : '3.2.2',
         amClient             : '1.59.2',
