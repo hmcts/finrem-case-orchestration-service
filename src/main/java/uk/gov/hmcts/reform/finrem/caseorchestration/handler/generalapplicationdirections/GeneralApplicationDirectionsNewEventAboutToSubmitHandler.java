@@ -10,8 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogge
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -20,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -29,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
@@ -45,19 +49,21 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
     private final GeneralApplicationService gaService;
     private final ManageHearingActionService manageHearingActionService;
     private final GeneralApplicationsCategoriser generalApplicationsCategoriser;
+    private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
 
     public GeneralApplicationDirectionsNewEventAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                                     GeneralApplicationHelper helper,
                                                                     GeneralApplicationDirectionsService service,
                                                                     GeneralApplicationService gaService,
                                                                     ManageHearingActionService manageHearingActionService,
-                                                                    GeneralApplicationsCategoriser generalApplicationsCategoriser) {
+                                                                    GeneralApplicationsCategoriser generalApplicationsCategoriser, HearingCorrespondenceHelper hearingCorrespondenceHelper) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;
         this.gaService = gaService;
         this.manageHearingActionService = manageHearingActionService;
         this.generalApplicationsCategoriser = generalApplicationsCategoriser;
+        this.hearingCorrespondenceHelper = hearingCorrespondenceHelper;
     }
 
     @Override
@@ -183,7 +189,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
         //Generate GAD document
         CaseDocument caseDocument = service.generateGeneralApplicationDirectionsDocument(userAuthorisation, finremCaseDetails);
 
-        helper.setGeneralApplicationInformation(items, finremCaseDetails, caseDocument, status, bulkPrintDocuments, userAuthorisation);
+        setGeneralApplicationInformation(items, finremCaseDetails, caseDocument, status, bulkPrintDocuments, userAuthorisation);
 
         if (items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER1)
             || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER2)
@@ -193,5 +199,75 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
         }
 
         return data;
+    }
+
+    public void setGeneralApplicationInformation(GeneralApplicationItems items, FinremCaseDetails caseDetails, CaseDocument
+                                                     directionsDocument, String status, List<BulkPrintDocument> bulkPrintDocuments,
+                                                 String userAuthorisation) {
+        String caseId = String.valueOf(caseDetails.getId());
+
+        if (service.isHearingRequired(caseDetails)){
+            setHearingDetails(items, caseDetails);
+        }
+        setDirectionsDocument(items, directionsDocument);
+        updateApplicationStatus(items, status, caseId);
+        addBulkPrintDocuments(items, bulkPrintDocuments, userAuthorisation, caseId);
+    }
+
+    private void setHearingDetails(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
+        HearingTabItem hearingTabItem = hearingCorrespondenceHelper.getHearingInContextFromTab(caseDetails.getData());
+        items.setHearingDetailsForGeneralApplication(hearingTabItem);
+    }
+
+    private void setDirectionsDocument(GeneralApplicationItems items, CaseDocument directionsDocument) {
+        items.setGeneralApplicationDirectionsDocument(directionsDocument);
+    }
+
+    private void updateApplicationStatus(GeneralApplicationItems items, String status, String caseId) {
+        String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
+
+        log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
+            EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
+
+        switch (gaElementStatus.toLowerCase()) {
+            case "approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
+            case "not approved" ->
+                items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
+            case "other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
+            default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
+        }
+    }
+
+    private void addBulkPrintDocuments(GeneralApplicationItems items, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation,
+                                       String caseId) {
+        addBulkPrintDocument(items.getGeneralApplicationDirectionsDocument(), bulkPrintDocuments);
+
+        log.info("items getGeneralApplicationDocument {}, for case ID: {}", items.getGeneralApplicationDocument(), caseId);
+
+        Optional.ofNullable(items.getGeneralApplicationDocument())
+            .map(doc -> helper.getPdfDocument(doc, userAuthorisation, caseId))
+            .ifPresent(pdfDoc -> {
+                items.setGeneralApplicationDocument(pdfDoc);
+                addBulkPrintDocument(pdfDoc, bulkPrintDocuments);
+                log.info("GeneralApplicationDocument {}, BulkPrintDocument {} for Case ID: {}",
+                    pdfDoc, bulkPrintDocuments.getLast(), caseId);
+            });
+
+        Optional.ofNullable(items.getGeneralApplicationDraftOrder())
+            .map(doc -> helper.getPdfDocument(doc, userAuthorisation, caseId))
+            .ifPresent(pdfDoc -> {
+                items.setGeneralApplicationDraftOrder(pdfDoc);
+                addBulkPrintDocument(pdfDoc, bulkPrintDocuments);
+            });
+    }
+
+    private void addBulkPrintDocument(CaseDocument document, List<BulkPrintDocument> bulkPrintDocuments) {
+        if (document != null) {
+            BulkPrintDocument bpDoc = BulkPrintDocument.builder()
+                .binaryFileUrl(document.getDocumentBinaryUrl())
+                .fileName(document.getDocumentFilename())
+                .build();
+            bulkPrintDocuments.add(bpDoc);
+        }
     }
 }

@@ -70,8 +70,6 @@ public class GeneralApplicationHelper {
 
     private final ObjectMapper objectMapper;
     private final GenericDocumentService service;
-    private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
-    private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
 
     public List<GeneralApplicationCollectionData> getGeneralApplicationList(FinremCaseData caseData, String collectionName) {
         GeneralApplicationWrapper wrapper = caseData.getGeneralApplicationWrapper();
@@ -363,101 +361,6 @@ public class GeneralApplicationHelper {
             caseData.getCcdCaseId());
 
         caseData.getGeneralApplicationWrapper().setGeneralApplications(uniqueGeneralApplicationList);
-    }
-
-    /**
-     * Populates the provided {@link GeneralApplicationItems} instance with hearing details, directions document,
-     * and status, then prepares and adds relevant documents to the bulk print list.
-     * <p>
-     * This method updates the general application information for a case, ensuring that
-     * all necessary fields are set and associated documents are converted to PDF and added for bulk printing.
-     * </p>
-     *
-     * @param items              the {@link GeneralApplicationItems} to populate
-     * @param caseDetails        the {@link FinremCaseDetails} containing case data
-     * @param directionsDocument the directions {@link CaseDocument} to associate
-     * @param status             the status to set for the general application
-     * @param bulkPrintDocuments the list of {@link BulkPrintDocument} to add documents to
-     * @param userAuthorisation  the user authorisation token for document conversion
-     */
-    public void setGeneralApplicationInformation(
-        GeneralApplicationItems items,
-        FinremCaseDetails caseDetails,
-        CaseDocument directionsDocument,
-        String status,
-        List<BulkPrintDocument> bulkPrintDocuments,
-        String userAuthorisation
-    ) {
-
-        String caseId = String.valueOf(caseDetails.getId());
-
-        if (generalApplicationDirectionsService.isHearingRequired(caseDetails)){
-            setHearingDetails(items, caseDetails);
-        }
-        setDirectionsDocument(items, directionsDocument);
-        updateApplicationStatus(items, status, caseId);
-        addBulkPrintDocuments(items, bulkPrintDocuments, userAuthorisation, caseId);
-    }
-
-    private void setHearingDetails(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
-        HearingTabItem hearingTabItem = hearingCorrespondenceHelper.getHearingInContextFromTab(caseDetails.getData());
-        items.setHearingDetailsForGeneralApplication(hearingTabItem);
-    }
-
-    private void setDirectionsDocument(GeneralApplicationItems items, CaseDocument directionsDocument) {
-        items.setGeneralApplicationDirectionsDocument(directionsDocument);
-    }
-
-    private void updateApplicationStatus(GeneralApplicationItems items, String status, String caseId) {
-        String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
-
-        log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
-            EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
-
-        switch (gaElementStatus.toLowerCase()) {
-            case "approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
-            case "not approved" ->
-                items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
-            case "other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
-            default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
-        }
-    }
-
-    private void addBulkPrintDocuments(
-        GeneralApplicationItems items,
-        List<BulkPrintDocument> bulkPrintDocuments,
-        String userAuthorisation,
-        String caseId
-    ) {
-        addBulkPrintDocument(items.getGeneralApplicationDirectionsDocument(), bulkPrintDocuments);
-
-        log.info("items getGeneralApplicationDocument {}, for case ID: {}", items.getGeneralApplicationDocument(), caseId);
-
-        Optional.ofNullable(items.getGeneralApplicationDocument())
-            .map(doc -> getPdfDocument(doc, userAuthorisation, caseId))
-            .ifPresent(pdfDoc -> {
-                items.setGeneralApplicationDocument(pdfDoc);
-                addBulkPrintDocument(pdfDoc, bulkPrintDocuments);
-                log.info("GeneralApplicationDocument {}, BulkPrintDocument {} for Case ID: {}",
-                    pdfDoc, bulkPrintDocuments.getLast(), caseId);
-            });
-
-        Optional.ofNullable(items.getGeneralApplicationDraftOrder())
-            .map(doc -> getPdfDocument(doc, userAuthorisation, caseId))
-            .ifPresent(pdfDoc -> {
-                items.setGeneralApplicationDraftOrder(pdfDoc);
-                addBulkPrintDocument(pdfDoc, bulkPrintDocuments);
-            });
-    }
-
-    private void addBulkPrintDocument(CaseDocument document, List<BulkPrintDocument> bulkPrintDocuments) {
-        if (document != null) {
-            BulkPrintDocument bpDoc = BulkPrintDocument.builder()
-                .binaryFileUrl(document.getDocumentBinaryUrl())
-                .fileName(document.getDocumentFilename())
-                .build();
-            bulkPrintDocuments.add(bpDoc);
-        }
     }
 
     private GeneralApplicationsCollection findBestGeneralApplicationInDuplicate(List<GeneralApplicationsCollection> duplicateGas) {
