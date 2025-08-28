@@ -65,6 +65,7 @@ public class FormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTes
     }
 
     private FormCLetterDetails getExpectedFormCLetterDetails() {
+        LocalDate now = LocalDate.now();
         return FormCLetterDetails.builder()
             .applicantFmName("Test")
             .applicantLName("Applicant")
@@ -83,8 +84,9 @@ public class FormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTes
             .additionalInformationAboutHearing("Test")
             .hearingTime("1pm")
             .timeEstimate("1 hour")
-            .formCCreatedDate(String.valueOf(LocalDate.now()))
-            .eventDatePlus21Days(String.valueOf(LocalDate.now().plusDays(21)))
+            .formCCreatedDate(String.valueOf(now))
+            .formCCreatedDatePlus28Days(String.valueOf(now.plusDays(28)))
+            .eventDatePlus21Days(String.valueOf(now.plusDays(21)))
             .build();
     }
 
