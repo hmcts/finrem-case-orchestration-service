@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -81,9 +82,12 @@ public class CaseReferenceCsvLoader {
     }
 
     public static String decrypt(String encryptedData, SecretKey key) throws Exception {
+        if (encryptedData == null || encryptedData.isEmpty()) {
+            throw new IllegalArgumentException("Encrypted data cannot be null or empty");
+        }
         String[] parts = encryptedData.split(":");
         if (parts.length < 2) {
-            throw new IllegalArgumentException("Invalid encrypted data format");
+            throw new IllegalArgumentException("Encrypted data must contain at least two parts");
         }
         byte[] iv = Base64.getDecoder().decode(parts[0]);
         GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(TAG_LENGTH_BIT, iv);
