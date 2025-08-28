@@ -849,7 +849,6 @@ class DocumentHelperTest {
         Map<String, Object> data = caseDetails.getData();
         CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER), CaseDocument.class);
 
-
         assertThat(caseDocument.getDocumentBinaryUrl()).isEqualTo("http://file1.binary");
         assertThat(caseDocument.getDocumentUrl()).isEqualTo("http://file1");
         assertThat(caseDocument.getDocumentFilename()).isEqualTo("file1");
