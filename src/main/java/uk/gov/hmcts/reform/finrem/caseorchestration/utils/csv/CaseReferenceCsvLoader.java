@@ -5,7 +5,6 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
