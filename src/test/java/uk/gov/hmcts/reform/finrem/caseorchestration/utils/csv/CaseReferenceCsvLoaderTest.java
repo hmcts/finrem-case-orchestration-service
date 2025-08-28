@@ -84,7 +84,6 @@ class CaseReferenceCsvLoaderTest {
         assertEquals(expectedMessage, exception.getMessage());
     }
 
-
     @Test
     void shouldLoadEncryptedCaseRefsCsvFile() {
         String secret = "DUMMY_SECRET";
