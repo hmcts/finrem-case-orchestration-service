@@ -61,6 +61,7 @@ public class FormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTes
         assertThat(actualData.get("applicantLName"), is(expected.getApplicantLName()));
         assertThat(actualData.get("hearingDate"), is(expected.getHearingDate()));
         assertThat(actualData.get("formCCreatedDate"), is(expected.getFormCCreatedDate()));
+        assertThat(actualData.get("formCCreatedDatePlus28Days"), is(expected.getFormCCreatedDatePlus28Days()));
         assertThat(actualData.get("rSolicitorReference"), is(expected.getRespondentSolicitorReference()));
     }
 
