@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 
@@ -26,7 +28,8 @@ public class SolicitorCreateConsentedAboutToStartHandlerTest {
 
     @Before
     public void setup() {
-        handler =  new SolicitorCreateConsentedAboutToStartHandler(new OnStartDefaultValueService());
+        IdamService idamService = mock(IdamService.class);
+        handler = new SolicitorCreateConsentedAboutToStartHandler(new OnStartDefaultValueService(idamService));
     }
 
     @Test

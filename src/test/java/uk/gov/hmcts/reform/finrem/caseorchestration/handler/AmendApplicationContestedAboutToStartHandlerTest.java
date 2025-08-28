@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
@@ -53,8 +54,9 @@ public class AmendApplicationContestedAboutToStartHandlerTest {
     @BeforeEach
     void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = mock(FinremCaseDetailsMapper.class);
+        IdamService idamService = mock(IdamService.class);
         handler = new AmendApplicationContestedAboutToStartHandler(finremCaseDetailsMapper,
-            new OnStartDefaultValueService(),
+            new OnStartDefaultValueService(idamService),
             new MiamLegacyExemptionsService(),
             assignCaseAccessService);
     }

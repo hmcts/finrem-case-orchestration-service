@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -44,7 +45,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @TestPropertySource(locations = "/application.properties")
 public class DocumentConversionServiceTest {
 
-    public static final String PDF_SERVICE_URI = "http://localhost:4001/rs/convert";
+    @Value("${service.pdf-service.convert-uri}")
+    private String pdfServiceUri;
     public static final byte[] CONVERTED_BINARY = "converted".getBytes();
     public static final String AUTH = "auth";
 
@@ -148,7 +150,7 @@ public class DocumentConversionServiceTest {
 
     @Test
     public void convertWordToPdf() {
-        mockServer.expect(requestTo(PDF_SERVICE_URI))
+        mockServer.expect(requestTo(pdfServiceUri))
             .andExpect(method(HttpMethod.POST))
             .andRespond(withSuccess(CONVERTED_BINARY, MediaType.APPLICATION_OCTET_STREAM));
 
@@ -163,7 +165,7 @@ public class DocumentConversionServiceTest {
 
     @Test(expected = DocumentConversionException.class)
     public void convertWordToPdfFailsWhenAlreadyPdf() throws Exception {
-        mockServer.expect(requestTo(PDF_SERVICE_URI))
+        mockServer.expect(requestTo(pdfServiceUri))
             .andExpect(method(HttpMethod.POST))
             .andRespond(withSuccess(CONVERTED_BINARY, MediaType.APPLICATION_OCTET_STREAM));
 
@@ -172,7 +174,7 @@ public class DocumentConversionServiceTest {
             .thenReturn("bytes".getBytes());
 
         documentToConvert.setFileName("file.pdf");
-        byte[] result = documentConversionService.convertDocumentToPdf(documentToConvert, AUTH);
+        documentConversionService.convertDocumentToPdf(documentToConvert, AUTH);
     }
 
     @Test

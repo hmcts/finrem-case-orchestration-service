@@ -81,7 +81,13 @@ public class CaseReferenceCsvLoader {
     }
 
     public static String decrypt(String encryptedData, SecretKey key) throws Exception {
+        if (encryptedData == null || encryptedData.isEmpty()) {
+            throw new IllegalArgumentException("Encrypted data cannot be null or empty");
+        }
         String[] parts = encryptedData.split(":");
+        if (parts.length < 2) {
+            throw new IllegalArgumentException("Encrypted data must contain at least two parts");
+        }
         byte[] iv = Base64.getDecoder().decode(parts[0]);
         GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(TAG_LENGTH_BIT, iv);
         Cipher cipher = Cipher.getInstance(TRANSFORMATION);
