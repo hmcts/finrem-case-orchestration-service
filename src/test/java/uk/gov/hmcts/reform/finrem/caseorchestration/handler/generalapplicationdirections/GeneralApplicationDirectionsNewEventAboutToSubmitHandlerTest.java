@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -30,7 +31,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -82,6 +82,8 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
     @Mock
     private ManageHearingActionService manageHearingActionService;
     @Mock
+    private HearingCorrespondenceHelper hearingCorrespondenceHelper;
+    @Mock
     private PartyService partyService;
 
     private ObjectMapper objectMapper;
@@ -96,7 +98,8 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         startHandler = new GeneralApplicationDirectionsNewEventAboutToStartHandler(
             assignCaseAccessService, finremCaseDetailsMapper, helper, service, partyService);
         aboutToSubmitHandler = new GeneralApplicationDirectionsNewEventAboutToSubmitHandler(
-            finremCaseDetailsMapper, helper, service, gaService, manageHearingActionService, generalApplicationsCategoriser);
+            finremCaseDetailsMapper, helper, service, gaService, manageHearingActionService, generalApplicationsCategoriser,
+            hearingCorrespondenceHelper);
     }
 
     @Test
@@ -149,7 +152,6 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         FinremCaseData finremCaseData = startHandle.getData();
 
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
-        finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
 
         DynamicList dynamicList = objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertEquals(1, dynamicList.getListItems().size());
@@ -162,7 +164,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
                 .generalApplicationItems(generalApplicationItems)
                 .build()));
         when(helper.objectToDynamicList(any())).thenReturn(dynamicList);
-        when(service.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(true);
+        when(service.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(false); //No hearing required
 
         doAnswer(invocation -> {
             FinremCaseDetails caseDetails = invocation.getArgument(1);
@@ -181,8 +183,6 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
 
         Assertions.assertThat(applications).hasSize(1);
-        verify(manageHearingActionService).performAddHearing(any(FinremCaseDetails.class), any(String.class));
-        verify(manageHearingActionService).updateTabData(any(FinremCaseData.class));
     }
 
     @Test
@@ -212,9 +212,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             generalApplicationItems);
-        when(service.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(true);
-
-        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
+        when(service.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(true, true); //Hearing is required
 
         //Hearing required document
         CaseDocument generatedDocument = CaseDocument.builder().documentFilename("HearingNotice.pdf")
