@@ -93,7 +93,7 @@ public class CCDConfigValidator {
             new ArrayList<>(Arrays.asList(workbooks.get(0).getSheet(FIXED_LISTS_SHEET), workbooks.get(1).getSheet(FIXED_LISTS_SHEET)));
         List<CcdFieldAttributes> caseFields = collateCaseFields(workbooks.get(0).getSheet(CASE_FIELD_SHEET));
         List<String> validationErrors =
-            validateCaseFieldsAgainstClassStructure(baseClassToCompareWith, complexTypeSheets.get(0), fixedListSheets.get(0), caseFields);
+            validateCaseFieldsAgainstClassStructure(baseClassToCompareWith, complexTypeSheets.getFirst(), fixedListSheets.getFirst(), caseFields);
         caseFields.addAll(collateCaseFields(workbooks.get(1).getSheet(CASE_FIELD_SHEET)));
         List<String> errors = validateClassStructureAgainstCaseFields(baseClassToCompareWith, complexTypeSheets, fixedListSheets, caseFields);
         errors.forEach(error -> {
@@ -341,7 +341,11 @@ public class CCDConfigValidator {
                         if (fixedListValues.contains(c.getFieldType())) {
                             log.info("In a fixedlist field with ccd parameter type {} and field type {}", c.getFieldTypeParameter(),
                                 vf.getType().getSimpleName());
-                            log.info("Fixed list is a string");
+                            if (vf.getType() != String.class) {
+                                complexTypeErrors.addAll(validateFixedList(fixedListSheets, vf.getType(), c.getFieldTypeParameter()));
+                            } else {
+                                log.info("Fixed list is a string");
+                            }
                         }
 
                     }
@@ -392,8 +396,14 @@ public class CCDConfigValidator {
             valueType = (Class<?>) type;
         }
 
-        log.info("Fixed list is a string");
-        return Collections.EMPTY_LIST;
+        if (valueType == String.class) {
+            log.info("Fixed list is a string");
+            return Collections.EMPTY_LIST;
+        } else {
+            log.info("In a fixedlist field with ccd parameter type {} and field type {}", ccdFieldAttributes.getFieldTypeParameter(),
+                valueType.getSimpleName());
+            return validateFixedList(fixedListSheets, valueType, ccdFieldAttributes.getFieldTypeParameter());
+        }
     }
 
     private List<String> validateFixedList(List<Sheet> fixedListSheets, Class fixedListClass, String fixedListParameterName) {
