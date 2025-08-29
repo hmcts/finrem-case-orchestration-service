@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationd
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
@@ -45,13 +44,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_OTHER;
@@ -154,7 +155,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
 
         DynamicList dynamicList = objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
-        assertEquals(1, dynamicList.getListItems().size());
+        assertThat(dynamicList.getListItems()).hasSize(1);
 
         String collectionId = UUID.randomUUID().toString();
 
@@ -182,7 +183,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         // Assert
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
 
-        Assertions.assertThat(applications).hasSize(1);
+        assertThat(applications).hasSize(1);
     }
 
     @Test
@@ -203,16 +204,26 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         listItems.add(listElement);
         dynamicListForCaseDetails.setListItems(listItems);
         CaseDetails details = buildCaseDetailsFromJson();
+
+        CaseDocument generalApplicationDocument = caseDocument("GeneralApplicationDocument.pdf", "url", "binaryUrl");
+        CaseDocument generalApplicationDraftOrder = caseDocument("GeneralApplicationDraft.pdf", "url", "binaryUrl");
         GeneralApplicationItems generalApplicationItems =
-            GeneralApplicationItems.builder().generalApplicationSender(buildDynamicIntervenerList())
+            GeneralApplicationItems.builder()
+                .generalApplicationSender(buildDynamicIntervenerList())
+                .generalApplicationDocument(generalApplicationDocument)
                 .generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
-                .generalApplicationSpecialMeasures("Special measure").build();
+                .generalApplicationSpecialMeasures("Special measure")
+                .generalApplicationDraftOrder(generalApplicationDraftOrder)
+                .build();
+
         when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             generalApplicationItems);
         when(service.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(true, true); //Hearing is required
+        when(helper.getPdfDocument(any(CaseDocument.class), any(String.class), any(String.class)))
+            .thenReturn(generalApplicationDocument, generalApplicationDraftOrder);
 
         //Hearing required document
         CaseDocument generatedDocument = CaseDocument.builder().documentFilename("HearingNotice.pdf")
@@ -225,7 +236,8 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
-        assertEquals(1, dynamicList.getListItems().size());
+        assertThat(dynamicList.getListItems())
+            .hasSize(1);
 
         String collectionId = UUID.randomUUID().toString();
 
@@ -240,8 +252,9 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         FinremCaseData data = aboutToSubmitHandle.getData();
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
-        Assertions.assertThat(applications).hasSize(1);
+        assertThat(applications).hasSize(1);
 
+        verify(helper, times(2)).getPdfDocument(any(CaseDocument.class), any(String.class), any(String.class));
         verify(manageHearingActionService).performAddHearing(any(FinremCaseDetails.class), any(String.class));
         verify(manageHearingActionService).updateTabData(any(FinremCaseData.class));
     }
@@ -278,16 +291,16 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         FinremCaseData caseData = startHandle.getData();
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
-        assertEquals(1, dynamicList.getListItems().size());
+        assertThat(dynamicList.getListItems()).hasSize(1);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
-        Assertions.assertThat(applications).hasSize(2);
+        assertThat(applications).hasSize(2);
 
-        assertEquals(DIRECTION_APPROVED.getId(),
-            applications.get(1).getValue().getGeneralApplicationStatus());
+        assertThat(applications.get(1).getValue().getGeneralApplicationStatus())
+            .isEqualTo(DIRECTION_APPROVED.getId());
         assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
 
@@ -328,16 +341,17 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
-        assertEquals(1, dynamicList.getListItems().size());
+        assertThat(dynamicList.getListItems())
+            .hasSize(1);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
-        Assertions.assertThat(applications).hasSize(2);
+        assertThat(applications).hasSize(2);
 
-        assertEquals(DIRECTION_NOT_APPROVED.getId(),
-            applications.get(1).getValue().getGeneralApplicationStatus());
+        assertThat(applications.get(1).getValue().getGeneralApplicationStatus())
+            .isEqualTo(DIRECTION_NOT_APPROVED.getId());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
     }
@@ -376,16 +390,17 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
 
-        assertEquals(1, dynamicList.getListItems().size());
+        assertThat(dynamicList.getListItems())
+            .hasSize(1);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
-        Assertions.assertThat(applications).hasSize(2);
+        assertThat(applications).hasSize(2);
 
-        assertEquals(DIRECTION_OTHER.getId(),
-            applications.get(1).getValue().getGeneralApplicationStatus());
+        assertThat(applications.get(1).getValue().getGeneralApplicationStatus())
+            .isEqualTo(DIRECTION_OTHER.getId());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
     }
@@ -422,19 +437,20 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         FinremCaseData finremCaseData = startHandle.getData();
         finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicListForCaseDetails);
         DynamicList dynamicList = objectToDynamicList(finremCaseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
-        assertEquals(1, dynamicList.getListItems().size());
-
+        assertThat(dynamicList.getListItems())
+            .hasSize(1);
+        
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = submitHandle.getData();
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
-        Assertions.assertThat(applications).hasSize(2);
+        assertThat(applications).hasSize(2);
 
-        assertEquals(DIRECTION_APPROVED.getId(),
-            applications.get(1).getValue().getGeneralApplicationStatus());
+        assertThat(applications.get(1).getValue().getGeneralApplicationStatus())
+            .isEqualTo(DIRECTION_APPROVED.getId());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
-        assertEquals(PREPARE_FOR_HEARING_STATE, submitHandle.getState());
+        assertThat(submitHandle.getState()).isEqualTo(PREPARE_FOR_HEARING_STATE);
         verify(service).submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
