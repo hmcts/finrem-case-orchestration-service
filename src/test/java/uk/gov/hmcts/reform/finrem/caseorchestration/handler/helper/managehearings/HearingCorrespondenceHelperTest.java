@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -109,6 +111,49 @@ class HearingCorrespondenceHelperTest {
 
         assertTrue(exception.getMessage().contains(
             String.format("No hearings available to search for. Working hearing ID is: %s",
+                hearingId)));
+    }
+
+    @Test
+    void givenRequestForHearingTabItem_whenInvoked_shouldReturnHearingInContextWhenIdMatches() {
+        UUID hearingId = UUID.randomUUID();
+        HearingTabItem hearingTabItem = HearingTabItem.builder().build();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .hearingTabItems(List.of(HearingTabCollectionItem.builder()
+                .id(hearingId)
+                .value(hearingTabItem)
+                .build()))
+            .workingHearingId(hearingId)
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(wrapper)
+            .build();
+
+        HearingTabItem result = helper.getHearingInContextFromTab(caseData);
+
+        assertEquals(hearingTabItem, result);
+    }
+
+    @Test
+    void givenNoTabItems_whenInvoked_shouldThrowIllegalStateException() {
+        UUID hearingId = UUID.randomUUID();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .hearingTabItems(null)
+            .workingHearingId(hearingId)
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(wrapper)
+            .build();
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+            helper.getHearingInContextFromTab(caseData));
+
+        assertTrue(exception.getMessage().contains(
+            String.format("No hearing tab items available to search for. Working hearing ID is: %s",
                 hearingId)));
     }
 
