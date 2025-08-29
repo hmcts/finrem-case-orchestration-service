@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -46,4 +47,6 @@ public class GeneralApplicationItems implements HasCaseDocument {
     private String generalApplicationOutcomeOther;
     @JsonProperty("generalApplicationDirectionsDocument")
     private CaseDocument generalApplicationDirectionsDocument;
+    @JsonProperty("hearingDetailsForGeneralApplication")
+    private HearingTabItem hearingDetailsForGeneralApplication;
 }

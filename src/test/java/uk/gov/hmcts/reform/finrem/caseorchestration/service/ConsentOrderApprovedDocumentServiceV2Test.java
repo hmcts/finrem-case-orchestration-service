@@ -101,7 +101,6 @@ public class ConsentOrderApprovedDocumentServiceV2Test extends BaseServiceTest {
         builder.orderLetter(caseDocument());
         builder.consentOrder(caseDocument());
 
-
         List<PensionTypeCollection> pensionTypeCollections = new ArrayList<>();
         PensionType pensionType = PensionType.builder().typeOfDocument(PensionDocumentType.FORM_PPF1)
             .pensionDocument(caseDocument()).build();

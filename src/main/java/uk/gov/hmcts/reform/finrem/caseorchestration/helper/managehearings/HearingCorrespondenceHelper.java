@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -59,6 +61,25 @@ public class HearingCorrespondenceHelper {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
                 .getValue();
+    }
+
+    public HearingTabItem getHearingInContextFromTab(FinremCaseData finremCaseData) {
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
+
+        List<HearingTabCollectionItem> hearingTabItems = manageHearingsWrapper.getHearingTabItems();
+
+        if (hearingTabItems == null) {
+            throw new IllegalStateException(
+                "No hearing tab items available to search for. Working hearing ID is: " + hearingId
+            );
+        }
+
+        return manageHearingsWrapper.getHearingTabItems().stream()
+            .filter(h -> hearingId.equals(h.getId()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Hearing Tab Item not found for the given ID: " + hearingId))
+            .getValue();
     }
 
     /**
