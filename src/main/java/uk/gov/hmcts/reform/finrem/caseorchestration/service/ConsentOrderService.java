@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_AMENDED_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_RESPOND_TO_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 
@@ -68,13 +68,12 @@ public class ConsentOrderService {
         return getCaseDocument(caseDetails, callbackRequest.getEventType().getCcdType());
     }
 
-    private CaseDocument getCaseDocument(CaseDetails caseDetails, String callbackRequest) {
+    private CaseDocument getCaseDocument(CaseDetails caseDetails, String eventId) {
         Map<String, Object> caseData = caseDetails.getData();
-        String eventId = callbackRequest;
         if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestRespondToOrderDocuments(caseData)
                 .orElseGet(() -> documentHelper.convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));
-        } else if (FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(eventId)) {
+        } else if (AMEND_CONSENT_ORDER.getCcdType().equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestAmendedConsentOrder(caseData);
         } else {
             return documentHelper.convertToCaseDocument(caseData.get(CONSENT_ORDER));
@@ -86,7 +85,7 @@ public class ConsentOrderService {
         if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestRespondToOrderDocuments(caseData)
                 .orElseGet(caseData::getLatestConsentOrder);
-        } else if (FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(eventId)) {
+        } else if (AMEND_CONSENT_ORDER.getCcdType().equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestAmendedConsentOrder(caseData);
         } else {
             return caseData.getConsentOrder();
