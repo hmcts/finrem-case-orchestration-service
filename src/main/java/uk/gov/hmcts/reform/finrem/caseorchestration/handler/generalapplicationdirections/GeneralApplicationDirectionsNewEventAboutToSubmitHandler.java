@@ -86,11 +86,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
         helper.populateGeneralApplicationSender(caseData,
             caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
-        //Invoke performAddHearing when hearing is required
-        if (gaDirectionService.isHearingRequired(caseDetails)) {
-            manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
-            manageHearingActionService.updateTabData(caseData);
-        }
+        performAddHearingIfNecessary(caseDetails, userAuthorisation);
 
         List<BulkPrintDocument> documents = new ArrayList<>();
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData,
@@ -280,5 +276,12 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
                 || INTERVENER3.equalsIgnoreCase(code)
                 || INTERVENER4.equalsIgnoreCase(code))
             .orElse(false);
+    }
+
+    private void performAddHearingIfNecessary(FinremCaseDetails caseDetails, String userAuthorisation) {
+        if (gaDirectionService.isHearingRequired(caseDetails)) {
+            manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
+            manageHearingActionService.updateTabData(caseDetails.getData());
+        }
     }
 }
