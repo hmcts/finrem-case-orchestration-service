@@ -21,6 +21,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
+
 @RequiredArgsConstructor
 @Slf4j
 @Component
@@ -63,11 +65,26 @@ public class HearingCorrespondenceHelper {
                 .getValue();
     }
 
+    /**
+     * Retrieves the {@link HearingTabItem} currently in context based on the working hearing ID from the case data.
+     *
+     * <p>This method accesses the {@link ManageHearingsWrapper} from the provided {@link FinremCaseData},
+     * and uses the working hearing ID to locate the matching {@link HearingTabItem} in the list of hearing tab items.</p>
+     *
+     * <p>If the hearing tab items list is {@code null}, or if no item matches the working hearing ID,
+     * this method throws an {@link IllegalStateException}.</p>
+     *
+     * <p>A working hearing refers to the {@link HearingTabItem} a user is actively creating or modifying in the UI.</p>
+     *
+     * @param finremCaseData the case data containing the hearing tab items and context
+     * @return the {@link HearingTabItem} associated with the current working hearing ID
+     * @throws IllegalStateException if the hearing tab items list is missing, or no matching item is found
+     */
     public HearingTabItem getHearingInContextFromTab(FinremCaseData finremCaseData) {
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
         UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
 
-        List<HearingTabCollectionItem> hearingTabItems = manageHearingsWrapper.getHearingTabItems();
+        List<HearingTabCollectionItem> hearingTabItems = nullIfEmpty(manageHearingsWrapper.getHearingTabItems());
 
         if (hearingTabItems == null) {
             throw new IllegalStateException(
