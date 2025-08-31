@@ -81,8 +81,8 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
 
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-
         FinremCaseData caseData = caseDetails.getData();
+
         helper.populateGeneralApplicationSender(caseData,
             caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
@@ -200,8 +200,8 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
         return data;
     }
 
-    public void setGeneralApplicationInformation(GeneralApplicationItems items, FinremCaseDetails caseDetails, CaseDocument
-                                                     directionsDocument, String status, List<BulkPrintDocument> bulkPrintDocuments,
+    public void setGeneralApplicationInformation(GeneralApplicationItems items, FinremCaseDetails caseDetails,
+                                                 CaseDocument directionsDocument, String status, List<BulkPrintDocument> bulkPrintDocuments,
                                                  String userAuthorisation) {
         String caseId = String.valueOf(caseDetails.getId());
 
