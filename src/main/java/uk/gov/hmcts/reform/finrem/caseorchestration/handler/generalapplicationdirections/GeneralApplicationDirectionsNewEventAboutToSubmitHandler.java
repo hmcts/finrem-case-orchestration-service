@@ -191,10 +191,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
 
         setGeneralApplicationInformation(items, finremCaseDetails, caseDocument, status, bulkPrintDocuments, userAuthorisation);
 
-        if (items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER1)
-            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER2)
-            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER3)
-            || items.getGeneralApplicationSender().getValue().getCode().equalsIgnoreCase(INTERVENER4)) {
+        if (isIntervener(items)) {
             gaService.updateIntervenerDirectionsOrders(items, finremCaseDetails);
         }
 
@@ -269,5 +266,18 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
                 .build();
             bulkPrintDocuments.add(bpDoc);
         }
+    }
+
+    private boolean isIntervener(GeneralApplicationItems items) {
+        return Optional.ofNullable(items)
+            .map(GeneralApplicationItems::getGeneralApplicationSender)
+            .map(sender -> sender.getValue())
+            .map(value -> value.getCode())
+            .filter(code -> code != null)
+            .map(code -> INTERVENER1.equalsIgnoreCase(code)
+                || INTERVENER2.equalsIgnoreCase(code)
+                || INTERVENER3.equalsIgnoreCase(code)
+                || INTERVENER4.equalsIgnoreCase(code))
+            .orElse(false);
     }
 }
