@@ -160,7 +160,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
         final String valueCode = choice[0];
 
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
-            = existingList.stream().map(ga -> setStatusAndBulkPrintDouments(caseDetails,
+            = existingList.stream().map(ga -> setStatusAndBulkPrintDocuments(caseDetails,
                 ga, valueCode, status, bulkPrintDocuments, userAuthorisation))
             .sorted(helper::getCompareTo).toList();
 
@@ -171,11 +171,11 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(null);
     }
 
-    private GeneralApplicationCollectionData setStatusAndBulkPrintDouments(FinremCaseDetails caseDetails,
-                                                                           GeneralApplicationCollectionData data,
-                                                                           String code, String status,
-                                                                           List<BulkPrintDocument> bulkPrintDocuments,
-                                                                           String userAuthorisation) {
+    private GeneralApplicationCollectionData setStatusAndBulkPrintDocuments(FinremCaseDetails caseDetails,
+                                                                            GeneralApplicationCollectionData data,
+                                                                            String code, String status,
+                                                                            List<BulkPrintDocument> bulkPrintDocuments,
+                                                                            String userAuthorisation) {
         if (code.equals(data.getId())) {
             return setStatusForNonCollAndBulkPrintDocuments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
         }
