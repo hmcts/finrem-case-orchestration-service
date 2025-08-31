@@ -221,7 +221,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             generalApplicationItems);
-        when(service.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(true, true); //Hearing is required
+        when(service.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true); //Hearing is required
         when(helper.getPdfDocument(any(CaseDocument.class), any(String.class), any(String.class)))
             .thenReturn(generalApplicationDocument, generalApplicationDraftOrder);
 
@@ -254,6 +254,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
         assertThat(applications).hasSize(1);
 
+        verify(service, times(2)).isHearingRequired(callbackRequest.getCaseDetails());
         verify(helper, times(2)).getPdfDocument(any(CaseDocument.class), any(String.class), any(String.class));
         verify(manageHearingActionService).performAddHearing(any(FinremCaseDetails.class), any(String.class));
         verify(manageHearingActionService).updateTabData(any(FinremCaseData.class));
