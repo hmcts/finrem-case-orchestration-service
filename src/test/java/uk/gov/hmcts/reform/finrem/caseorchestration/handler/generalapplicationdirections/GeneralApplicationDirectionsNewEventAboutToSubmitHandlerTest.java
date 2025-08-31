@@ -73,7 +73,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
     @Mock
-    private GeneralApplicationDirectionsService service;
+    private GeneralApplicationDirectionsService gaDirectionService;
     @Mock
     private GeneralApplicationService gaService;
     @Mock
@@ -97,9 +97,9 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         MockitoAnnotations.openMocks(this);
         objectMapper = new ObjectMapper();
         startHandler = new GeneralApplicationDirectionsNewEventAboutToStartHandler(
-            assignCaseAccessService, finremCaseDetailsMapper, helper, service, partyService);
+            assignCaseAccessService, finremCaseDetailsMapper, helper, gaDirectionService, partyService);
         aboutToSubmitHandler = new GeneralApplicationDirectionsNewEventAboutToSubmitHandler(
-            finremCaseDetailsMapper, helper, service, gaService, manageHearingActionService, generalApplicationsCategoriser,
+            finremCaseDetailsMapper, helper, gaDirectionService, gaService, manageHearingActionService, generalApplicationsCategoriser,
             hearingCorrespondenceHelper);
     }
 
@@ -165,7 +165,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
                 .generalApplicationItems(generalApplicationItems)
                 .build()));
         when(helper.objectToDynamicList(any())).thenReturn(dynamicList);
-        when(service.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(false); //No hearing required
+        when(gaDirectionService.isHearingRequired(any(FinremCaseDetails.class))).thenReturn(false); //No hearing required
 
         doAnswer(invocation -> {
             FinremCaseDetails caseDetails = invocation.getArgument(1);
@@ -221,7 +221,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
             AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
             generalApplicationItems);
-        when(service.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true); //Hearing is required
+        when(gaDirectionService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true); //Hearing is required
         when(helper.getPdfDocument(any(CaseDocument.class), any(String.class), any(String.class)))
             .thenReturn(generalApplicationDocument, generalApplicationDraftOrder);
 
@@ -229,7 +229,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         CaseDocument generatedDocument = CaseDocument.builder().documentFilename("HearingNotice.pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
-        when(service.generateGeneralApplicationDirectionsDocument(eq(AUTH_TOKEN), any(FinremCaseDetails.class))).thenReturn(generatedDocument);
+        when(gaDirectionService.generateGeneralApplicationDirectionsDocument(eq(AUTH_TOKEN), any(FinremCaseDetails.class))).thenReturn(generatedDocument);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
@@ -254,7 +254,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
         assertThat(applications).hasSize(1);
 
-        verify(service, times(2)).isHearingRequired(callbackRequest.getCaseDetails());
+        verify(gaDirectionService, times(2)).isHearingRequired(callbackRequest.getCaseDetails());
         verify(helper, times(2)).getPdfDocument(any(CaseDocument.class), any(String.class), any(String.class));
         verify(manageHearingActionService).performAddHearing(any(FinremCaseDetails.class), any(String.class));
         verify(manageHearingActionService).updateTabData(any(FinremCaseData.class));
@@ -305,7 +305,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
 
-        verify(service).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
     @Test
@@ -409,7 +409,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
     @Test
     void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompletedAndReturnToPostState() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        when(service.getEventPostState(any(), any())).thenReturn(PREPARE_FOR_HEARING_STATE);
+        when(gaDirectionService.getEventPostState(any(), any())).thenReturn(PREPARE_FOR_HEARING_STATE);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(
             ga -> ga.getValue().setGeneralApplicationStatus(DIRECTION_APPROVED.getId()));
         DynamicList dynamicListForCaseDetails = DynamicList.builder().build();
@@ -452,7 +452,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertThat(submitHandle.getState()).isEqualTo(PREPARE_FOR_HEARING_STATE);
-        verify(service).submitCollectionGeneralApplicationDirections(any(), any(), any());
+        verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
     private DynamicRadioList buildDynamicIntervenerList() {

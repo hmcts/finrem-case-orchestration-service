@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -44,7 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
 
     private final GeneralApplicationHelper helper;
-    private final GeneralApplicationDirectionsService service;
+    private final GeneralApplicationDirectionsService gaDirectionService;
     private final GeneralApplicationService gaService;
     private final ManageHearingActionService manageHearingActionService;
     private final GeneralApplicationsCategoriser generalApplicationsCategoriser;
@@ -52,14 +54,14 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
 
     public GeneralApplicationDirectionsNewEventAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                                     GeneralApplicationHelper helper,
-                                                                    GeneralApplicationDirectionsService service,
+                                                                    GeneralApplicationDirectionsService gaDirectionService,
                                                                     GeneralApplicationService gaService,
                                                                     ManageHearingActionService manageHearingActionService,
                                                                     GeneralApplicationsCategoriser generalApplicationsCategoriser,
                                                                     HearingCorrespondenceHelper hearingCorrespondenceHelper) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
-        this.service = service;
+        this.gaDirectionService = gaDirectionService;
         this.gaService = gaService;
         this.manageHearingActionService = manageHearingActionService;
         this.generalApplicationsCategoriser = generalApplicationsCategoriser;
@@ -85,7 +87,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
             caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
         //Invoke performAddHearing when hearing is required
-        if (service.isHearingRequired(caseDetails)) {
+        if (gaDirectionService.isHearingRequired(caseDetails)) {
             manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
             manageHearingActionService.updateTabData(caseData);
         }
@@ -103,12 +105,12 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
         List<String> errors = new ArrayList<>();
 
         try {
-            service.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);
+            gaDirectionService.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);
         } catch (InvalidCaseDataException invalidCaseDataException) {
             errors.add(invalidCaseDataException.getMessage());
         }
 
-        String postState = service.getEventPostState(caseDetails, userAuthorisation);
+        String postState = gaDirectionService.getEventPostState(caseDetails, userAuthorisation);
 
         log.info("Post state {} for Case ID: {}", postState, caseDetails.getId());
         generalApplicationsCategoriser.categorise(caseData);
@@ -187,7 +189,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
         GeneralApplicationItems items = data.getGeneralApplicationItems();
 
         //Generate GAD document
-        CaseDocument caseDocument = service.generateGeneralApplicationDirectionsDocument(userAuthorisation, finremCaseDetails);
+        CaseDocument caseDocument = gaDirectionService.generateGeneralApplicationDirectionsDocument(userAuthorisation, finremCaseDetails);
 
         setGeneralApplicationInformation(items, finremCaseDetails, caseDocument, status, bulkPrintDocuments, userAuthorisation);
 
@@ -203,7 +205,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
                                                  String userAuthorisation) {
         String caseId = String.valueOf(caseDetails.getId());
 
-        if (service.isHearingRequired(caseDetails)) {
+        if (gaDirectionService.isHearingRequired(caseDetails)) {
             setHearingDetails(items, caseDetails);
         }
         setDirectionsDocument(items, directionsDocument);
@@ -271,9 +273,8 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
     private boolean isIntervener(GeneralApplicationItems items) {
         return Optional.ofNullable(items)
             .map(GeneralApplicationItems::getGeneralApplicationSender)
-            .map(sender -> sender.getValue())
-            .map(value -> value.getCode())
-            .filter(code -> code != null)
+            .map(DynamicRadioList::getValue)
+            .map(DynamicRadioListElement::getCode)
             .map(code -> INTERVENER1.equalsIgnoreCase(code)
                 || INTERVENER2.equalsIgnoreCase(code)
                 || INTERVENER3.equalsIgnoreCase(code)
