@@ -150,8 +150,10 @@ class ManageHearingFormCLetterDetailsMapperTest {
         assertThat(formCLetterDetails.getHearingDateLess21Days()).isEqualTo("2025-07-11");
         assertThat(formCLetterDetails.getHearingDateLess14Days()).isEqualTo("2025-07-18");
         assertThat(formCLetterDetails.getHearingDateLess7Days()).isEqualTo("2025-07-25");
-        assertThat(formCLetterDetails.getFormCCreatedDate()).isEqualTo(LocalDate.now().toString());
-        assertThat(formCLetterDetails.getEventDatePlus21Days()).isEqualTo(LocalDate.now().plusDays(21).toString());
+        LocalDate now = LocalDate.now();
+        assertThat(formCLetterDetails.getFormCCreatedDate()).isEqualTo(now.toString());
+        assertThat(formCLetterDetails.getFormCCreatedDatePlus28Days()).isEqualTo(now.plusDays(28).toString());
+        assertThat(formCLetterDetails.getEventDatePlus21Days()).isEqualTo(now.plusDays(21).toString());
     }
 
     private static Stream<Arguments> provideFormCDetails() {
