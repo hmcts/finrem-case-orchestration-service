@@ -65,4 +65,5 @@ public class NotificationRequest {
     private String judgeFeedback;
     @JsonProperty("documentName")
     private String documentName;
+    private String emailReplyToId;
 }

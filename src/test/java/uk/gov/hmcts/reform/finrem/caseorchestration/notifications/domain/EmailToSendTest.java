@@ -17,7 +17,7 @@ public class EmailToSendTest {
         templateVars = new HashMap<>();
         templateVars.put("abc", "123");
         emailToSend = new EmailToSend("test@test.com", "12345",
-                templateVars, "referenceId");
+                templateVars, "referenceId", "666");
     }
 
     @Test
@@ -26,5 +26,6 @@ public class EmailToSendTest {
         assertEquals("12345", emailToSend.getTemplateId());
         assertEquals("referenceId", emailToSend.getReferenceId());
         assertEquals(templateVars, emailToSend.getTemplateFields());
+        assertEquals("666", emailToSend.getEmailReplyToId());
     }
 }
