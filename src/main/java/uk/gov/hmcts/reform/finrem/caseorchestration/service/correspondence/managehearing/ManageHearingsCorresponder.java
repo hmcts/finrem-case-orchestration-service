@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
@@ -40,6 +41,7 @@ public class ManageHearingsCorresponder {
     private final ManageHearingsDocumentService manageHearingsDocumentService;
     private final DocumentHelper documentHelper;
     private final BulkPrintService bulkPrintService;
+    private final GenericDocumentService genericDocumentService;
 
     /**
      * Begin sending hearing correspondence to parties, included based on the callback request data.
@@ -309,8 +311,11 @@ public class ManageHearingsCorresponder {
         hearingDocuments.addAll(manageHearingsDocumentService
             .getAdditionalHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
 
+        List<CaseDocument> convertedHearingDocuments = convertDocumentsToPdf(
+            hearingDocuments, userAuthorisation, finremCaseDetails.getId().toString());
+
         List<BulkPrintDocument> bulkPrintDocuments =
-            documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocuments);
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(convertedHearingDocuments);
 
         printDocuments(
             finremCaseDetails,
@@ -342,8 +347,11 @@ public class ManageHearingsCorresponder {
             return;
         }
 
+        List<CaseDocument> convertedHearingDocuments = convertDocumentsToPdf(
+            hearingDocuments, userAuthorisation, finremCaseDetails.getId().toString());
+
         List<BulkPrintDocument> bulkPrintDocuments =
-            documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocuments);
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(convertedHearingDocuments);
 
         printDocuments(
             finremCaseDetails,
@@ -400,5 +408,15 @@ public class ManageHearingsCorresponder {
                 )
             );
         }
+    }
+
+    private List<CaseDocument> convertDocumentsToPdf(List<CaseDocument> documents, String userAuthorisation, String caseId) {
+        List<CaseDocument> convertedDocuments = new ArrayList<>();
+        for (CaseDocument document : documents) {
+            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
+                document, userAuthorisation, caseId);
+            convertedDocuments.add(pdfDocument);
+        }
+        return convertedDocuments;
     }
 }
