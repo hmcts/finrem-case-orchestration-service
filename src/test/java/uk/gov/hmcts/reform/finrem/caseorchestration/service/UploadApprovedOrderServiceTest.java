@@ -58,14 +58,14 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
 
         finremCaseData.setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
         finremCaseData.setOrderApprovedJudgeName(JUDGE_NAME);
-        finremCaseData.setOrderApprovedDate(LocalDate.of(2023,11,11));
+        finremCaseData.setOrderApprovedDate(LocalDate.of(2023, 11, 11));
 
         FinremCaseDetails finremCaseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData finremCaseDataBefore = finremCaseDetailsBefore.getData();
 
         finremCaseDataBefore.setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
         finremCaseDataBefore.setOrderApprovedJudgeName(JUDGE_NAME);
-        finremCaseDataBefore.setOrderApprovedDate(LocalDate.of(2023,11,11));
+        finremCaseDataBefore.setOrderApprovedDate(LocalDate.of(2023, 11, 11));
 
         finremCaseData.setUploadHearingOrder(getHearingOrderCollection());
         finremCaseData.setFinalOrderCollection(getHearingOrderCollection());
@@ -152,6 +152,41 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
 
         verify(contestedOrderApprovedLetterService)
             .generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenValidInputs_whenProcessApprovedOrdersMh_thenProcessSuccessfully() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+
+        finremCaseData.setUploadHearingOrder(getHearingOrderCollection());
+
+        List<DirectionOrderCollection> existingOrders = getHearingOrderCollection();
+        List<DirectionOrderCollection> newOrders = List.of(DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                .uploadDraftDocument(caseDocument())
+                .isOrderStamped(YesOrNo.YES)
+                .orderDateTime(LocalDateTime.now())
+                .build())
+            .build());
+
+        finremCaseData.setUploadHearingOrder(newOrders);
+
+        when(additionalHearingDocumentService
+            .getApprovedHearingOrders(caseDetailsBefore, AUTH_TOKEN)).thenReturn(existingOrders);
+
+        // Act
+        uploadApprovedOrderService.processApprovedOrdersMh(finremCaseDetails, caseDetailsBefore, AUTH_TOKEN);
+
+        // Assert
+        assertEquals(2, finremCaseData.getUploadHearingOrder().size());
+        verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
+        verify(additionalHearingDocumentService).createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, finremCaseDetails);
+        verify(hearingOrderService).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(finremCaseDetails);
+        verify(additionalHearingDocumentService).getApprovedHearingOrders(caseDetailsBefore, AUTH_TOKEN);
+        verify(additionalHearingDocumentService).addToFinalOrderCollection(finremCaseDetails, AUTH_TOKEN);
     }
 
     private List<DirectionOrderCollection> getHearingOrderCollection() {
