@@ -24,6 +24,7 @@ public class FormCLetterDetailsMapper extends AbstractLetterDetailsMapper {
         FinremCaseData caseData = caseDetails.getData();
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
         LocalDate hearingDate = listForHearingWrapper.getHearingDate();
+        LocalDate formCCreatedDate = LocalDate.now();
         return FormCLetterDetails.builder()
             .applicantFmName(caseData.getContactDetailsWrapper().getApplicantFmName())
             .applicantLName(caseData.getContactDetailsWrapper().getApplicantLname())
@@ -42,8 +43,9 @@ public class FormCLetterDetailsMapper extends AbstractLetterDetailsMapper {
             .additionalInformationAboutHearing(caseData.getListForHearingWrapper().getAdditionalInformationAboutHearing())
             .hearingTime(listForHearingWrapper.getHearingTime())
             .timeEstimate(listForHearingWrapper.getTimeEstimate())
-            .formCCreatedDate(String.valueOf(LocalDate.now()))
-            .eventDatePlus21Days(String.valueOf(LocalDate.now().plusDays(21)))
+            .formCCreatedDate(String.valueOf(formCCreatedDate))
+            .formCCreatedDatePlus28Days(String.valueOf(formCCreatedDate.plusDays(28)))
+            .eventDatePlus21Days(String.valueOf(formCCreatedDate.plusDays(21)))
             .build();
     }
 }
