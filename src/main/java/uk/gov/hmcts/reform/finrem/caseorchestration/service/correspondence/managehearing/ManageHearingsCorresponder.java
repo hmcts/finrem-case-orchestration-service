@@ -411,12 +411,8 @@ public class ManageHearingsCorresponder {
     }
 
     private List<CaseDocument> convertDocumentsToPdf(List<CaseDocument> documents, String userAuthorisation, String caseId) {
-        List<CaseDocument> convertedDocuments = new ArrayList<>();
-        for (CaseDocument document : documents) {
-            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
-                document, userAuthorisation, caseId);
-            convertedDocuments.add(pdfDocument);
-        }
-        return convertedDocuments;
+        return documents.stream()
+            .map(document -> genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseId))
+            .toList();
     }
 }
