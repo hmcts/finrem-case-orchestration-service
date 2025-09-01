@@ -229,7 +229,8 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         CaseDocument generatedDocument = CaseDocument.builder().documentFilename("HearingNotice.pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
-        when(gaDirectionService.generateGeneralApplicationDirectionsDocument(eq(AUTH_TOKEN), any(FinremCaseDetails.class))).thenReturn(generatedDocument);
+        when(gaDirectionService.generateGeneralApplicationDirectionsDocument(eq(AUTH_TOKEN), any(FinremCaseDetails.class)))
+            .thenReturn(generatedDocument);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = startHandle.getData();
