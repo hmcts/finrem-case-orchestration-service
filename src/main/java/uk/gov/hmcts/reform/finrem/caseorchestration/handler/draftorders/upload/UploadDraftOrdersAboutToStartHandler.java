@@ -79,38 +79,62 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+
+        initialiseDraftOrdersWrapper(draftOrdersWrapper);
+        setupDraftOrdersWrapper(draftOrdersWrapper, caseDetails, userAuthorisation);
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
+    }
+
+    private void initialiseDraftOrdersWrapper(DraftOrdersWrapper draftOrdersWrapper) {
         draftOrdersWrapper.setTypeOfDraftOrder(null);
+    }
 
-        YesOrNo showUploadPartyQuestion = isShowUploadPartyQuestion(caseId, userAuthorisation)
-            ? YesOrNo.YES : YesOrNo.NO;
-        draftOrdersWrapper.setShowUploadPartyQuestion(showUploadPartyQuestion);
+    private void setupDraftOrdersWrapper(DraftOrdersWrapper draftOrdersWrapper,
+                                         FinremCaseDetails finremCaseDetails, String userAuthorisation) {
+        String caseId = String.valueOf(finremCaseDetails.getId());
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
 
-        DynamicMultiSelectList confirmUploadedDocuments = createConfirmUploadDocuments(finremCaseData);
-        DynamicRadioList uploadPartyRadioList = null;
-        if (YesOrNo.YES.equals(showUploadPartyQuestion)) {
-            uploadPartyRadioList = createUploadParty(finremCaseData);
-        }
+        // Set showUploadPartyQuestion
+        boolean showUploadPartyQuestion = isShowUploadPartyQuestion(caseId, userAuthorisation);
+        draftOrdersWrapper.setShowUploadPartyQuestion(showUploadPartyQuestion ? YesOrNo.YES : YesOrNo.NO);
 
-        draftOrdersWrapper.setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
-            .confirmUploadedDocuments(confirmUploadedDocuments)
-            .uploadParty(uploadPartyRadioList)
-            .build());
+        // Set consentApplicationGuidanceText
+        draftOrdersWrapper.setConsentApplicationGuidanceText(
+            getConsentApplicationGuidanceText(caseId, userAuthorisation)
+        );
 
-        draftOrdersWrapper.setUploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+        // Prepare common fields
+        DynamicMultiSelectList confirmUploadedDocuments = createConfirmUploadDocumentsCheckbox(finremCaseData);
+        DynamicRadioList uploadPartyRadioList = showUploadPartyQuestion ? createUploadParty(finremCaseData) : null;
+
+        // Build and set draft orders
+        draftOrdersWrapper.setUploadSuggestedDraftOrder(
+            buildUploadSuggestedDraftOrder(confirmUploadedDocuments, uploadPartyRadioList)
+        );
+        draftOrdersWrapper.setUploadAgreedDraftOrder(
+            buildUploadAgreedDraftOrder(confirmUploadedDocuments, uploadPartyRadioList, finremCaseDetails)
+        );
+    }
+
+    private UploadSuggestedDraftOrder buildUploadSuggestedDraftOrder(DynamicMultiSelectList confirmDocs,
+                                                                     DynamicRadioList uploadParty) {
+        return UploadSuggestedDraftOrder.builder()
+            .confirmUploadedDocuments(confirmDocs)
+            .uploadParty(uploadParty)
+            .build();
+    }
+
+    private UploadAgreedDraftOrder buildUploadAgreedDraftOrder(DynamicMultiSelectList confirmDocs,
+                                                               DynamicRadioList uploadParty,
+                                                               FinremCaseDetails caseDetails) {
+        return UploadAgreedDraftOrder.builder()
             .hearingDetails(hearingService.generateSelectableHearingsAsDynamicList(caseDetails))
-            .confirmUploadedDocuments(confirmUploadedDocuments)
-            .uploadParty(uploadPartyRadioList)
-            .build());
-
-        draftOrdersWrapper.setConsentApplicationGuidanceText(getConsentApplicationGuidanceText(caseId,
-            userAuthorisation));
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).build();
+            .confirmUploadedDocuments(confirmDocs)
+            .uploadParty(uploadParty)
+            .build();
     }
 
     private String getConsentApplicationGuidanceText(String caseId, String authToken) {
@@ -136,7 +160,7 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
             .anyMatch(CONSENT_ORDER_EVENT_LINK_ROLES::contains);
     }
 
-    private DynamicMultiSelectList createConfirmUploadDocuments(FinremCaseData finremCaseData) {
+    private DynamicMultiSelectList createConfirmUploadDocumentsCheckbox(FinremCaseData finremCaseData) {
         String applicantLName = finremCaseData.getApplicantLastName();
         String respondentLName = finremCaseData.getRespondentLastName();
 

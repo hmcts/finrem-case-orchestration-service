@@ -24,6 +24,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class WorkingHearingTest {
 
+    @Test
+    void testAddDocumentToAdditionalHearingDocs() {
+        WorkingHearing workingHearing = WorkingHearing
+            .builder()
+            .build();
+
+        CaseDocument document = CaseDocument.builder()
+            .documentFilename("Test Document.pdf")
+            .documentUrl("https://example.com/document.pdf")
+            .documentBinaryUrl("https://example.com/document-binary.pdf")
+            .build();
+
+        DocumentCollectionItem documentCollectionItem = DocumentCollectionItem.builder()
+            .value(document)
+            .build();
+
+        workingHearing.addDocumentToAdditionalHearingDocs(document);
+
+        assertThat(workingHearing.getAdditionalHearingDocs()).hasSize(1);
+        assertThat(workingHearing.getAdditionalHearingDocs().getFirst())
+            .isEqualTo(documentCollectionItem);
+    }
+
     @ParameterizedTest
     @MethodSource
     void testWithHearingTypes(HearingType... hearingTypes) {
@@ -91,7 +114,7 @@ class WorkingHearingTest {
             .toArray(String[]::new);
 
         WorkingHearing workingHearing = WorkingHearing.builder()
-            .withPartiesOnCase(partyOnCaseCollectionItems)
+            .withPartiesOnCaseSelected(partyOnCaseCollectionItems)
             .build();
 
         List<DynamicMultiSelectListElement> listItems = workingHearing.getPartiesOnCaseMultiSelectList().getListItems();

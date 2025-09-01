@@ -37,6 +37,7 @@ public class FinremCaseDetailsMapper {
             .callbackResponseStatus(caseDetails.getCallbackResponseStatus())
             .lastModified(caseDetails.getLastModified())
             .securityClassification(caseDetails.getSecurityClassification())
+            .version(caseDetails.getVersion())
             .data(data)
             .build();
     }
@@ -64,6 +65,7 @@ public class FinremCaseDetailsMapper {
             .callbackResponseStatus(caseDetails.getCallbackResponseStatus())
             .lastModified(caseDetails.getLastModified())
             .securityClassification(caseDetails.getSecurityClassification())
+            .version(caseDetails.getVersion())
             .data(data)
             .build();
     }

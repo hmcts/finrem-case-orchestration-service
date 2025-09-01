@@ -16,13 +16,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -73,7 +71,8 @@ class DirectionDetailsCollectionPopulatorTest {
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED).build()))
             .isTrue();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
-            .directionDetailsCollection(Collections.emptyList()).build()))
+            .directionDetailsCollection(Collections.emptyList())
+            .build()))
             .isTrue();
 
         logger.reset();
@@ -84,8 +83,7 @@ class DirectionDetailsCollectionPopulatorTest {
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because migration had been done.");
 
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
-            .mhMigrationWrapper(MhMigrationWrapper.builder().isGeneralApplicationMigrated(YesOrNo.NO).build())
-            .generalApplicationWrapper(GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingDate(LocalDate.now()).build())
+            .mhMigrationWrapper(MhMigrationWrapper.builder().isDirectionDetailsCollectionMigrated(YesOrNo.NO).build())
             .build()))
             .isTrue();
     }

@@ -128,8 +128,8 @@ public class GeneralLetterService {
             getGeneralLetterTemplate(caseDetails.getData()), documentConfiguration.getGeneralLetterFileName());
     }
 
-    public void validateEncryptionOnUploadedDocuments(List<DocumentCollectionItem> caseDocuments, String caseId,
-                                                      String auth, List<String> errors) {
+    public void validateEncryptionOnUploadedDocuments(List<DocumentCollectionItem> caseDocuments, String auth,
+                                                      String caseId, List<String> errors) {
         caseDocuments.forEach(doc -> {
             if (doc != null && doc.getValue() != null) {
                 bulkPrintDocumentService.validateEncryptionOnUploadedDocument(

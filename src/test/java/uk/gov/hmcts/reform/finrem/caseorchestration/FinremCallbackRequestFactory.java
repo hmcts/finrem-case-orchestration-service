@@ -37,17 +37,6 @@ public class FinremCallbackRequestFactory {
         return from(FinremCaseDetailsBuilderFactory.from(id, caseType, caseData, state));
     }
 
-    public static FinremCallbackRequest from(Long id, FinremCaseData.FinremCaseDataBuilder caseDataBuilder) {
-        return from(id, null, caseDataBuilder);
-    }
-
-    public static FinremCallbackRequest from(Long id, CaseType caseType, FinremCaseData.FinremCaseDataBuilder caseDataBuilder) {
-        return from(FinremCaseDetails.builder()
-            .id(id)
-            .caseType(caseType)
-            .data(caseDataBuilder.build()));
-    }
-
     public static FinremCallbackRequest from(FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBuilder) {
         return from(caseDetailsBuilder, caseDetailsBuilder);
     }
@@ -64,6 +53,15 @@ public class FinremCallbackRequestFactory {
         return FinremCallbackRequest.builder()
             .eventType(eventType)
             .caseDetails(caseDetailsBuilder.build())
+            .build();
+    }
+
+    public static FinremCallbackRequest from(EventType eventType, FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBeforeBuilder,
+                                             FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBuilder) {
+        return FinremCallbackRequest.builder()
+            .eventType(eventType)
+            .caseDetails(caseDetailsBuilder.build())
+            .caseDetailsBefore(caseDetailsBeforeBuilder.build())
             .build();
     }
 
@@ -86,6 +84,38 @@ public class FinremCallbackRequestFactory {
     public static FinremCallbackRequest create() {
         return FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetailsBuilderFactory.from().build())
+            .build();
+    }
+
+    public static FinremCallbackRequest create(Long id, CaseType caseType, EventType eventType, FinremCaseData caseData) {
+        caseData.setCcdCaseType(caseType);
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(id)
+                .caseType(caseType)
+                .data(caseData)
+                .build())
+            .eventType(eventType)
+            .build();
+    }
+
+    public static FinremCallbackRequest create(Long id, CaseType caseType, EventType eventType, FinremCaseData caseData,
+                                               FinremCaseData caseDataBefore) {
+        caseData.setCcdCaseType(caseType);
+        caseDataBefore.setCcdCaseType(caseType);
+
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(id)
+                .caseType(caseType)
+                .data(caseData)
+                .build())
+            .caseDetailsBefore(FinremCaseDetails.builder()
+                .id(id)
+                .caseType(caseType)
+                .data(caseDataBefore)
+                .build())
+            .eventType(eventType)
             .build();
     }
 }

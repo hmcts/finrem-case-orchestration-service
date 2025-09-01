@@ -14,7 +14,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirecti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +31,7 @@ import java.util.function.Function;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Service
 @Slf4j
@@ -54,31 +58,42 @@ public class HearingService {
 
     private static final String UNKNOWN_TEXT = "unknown";
 
+    private final FeatureToggleService featureToggleService;
+
     /**
-     * Generates a {@link DynamicList} containing selectable hearings for a given case.
+     * Generates a {@link DynamicList} of selectable hearings for the given case.
      *
      * <p>
-     * This method retrieves the hearing type, date, and time from the case details and constructs
-     * a list of {@link DynamicListElement} objects representing the available hearings.
-     * It includes both the top-level hearing, any interim hearings and hearings created from
-     * Process Order event if present.
+     * Depending on the {@code Manage Hearing} feature toggle state, this method either uses the new
+     * manage-hearing data structure to build the list (if enabled) or falls back to the legacy approach.
+     * The legacy approach combines top-level hearings, interim hearings, hearings created from the
+     * Process Order event, and any additional hearings.
      *
      * <p>
-     * The list is sorted based on a {@link HearingSortingKey}, which orders elements
-     * by hearing date, time, and type.
+     * Each hearing entry is represented by a {@link DynamicListElement} containing hearing type, date,
+     * and time, and is associated with a {@link HearingSortingKey} to ensure consistent ordering by
+     * hearing date, time, and type.
      *
-     * @param caseDetails the {@link FinremCaseDetails} containing case data with hearing details
-     * @return a {@link DynamicList} of selectable hearings sorted by hearing attributes
+     * <p>
+     * The returned list is sorted using these sorting keys before being wrapped in a {@link DynamicList}.
+     *
+     * @param caseDetails the {@link FinremCaseDetails} containing hearing-related case data
+     * @return a {@link DynamicList} of hearings, sorted by date, time, and type
      */
     public DynamicList generateSelectableHearingsAsDynamicList(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap = new HashMap<>();
 
-        populateTopLevelHearings(caseData, dynamicListElements, elementToSortingKeyMap);
-        populateInterimHearings(caseData, dynamicListElements, elementToSortingKeyMap);
-        populateHearingsCreatedFromProcessOrder(caseData, dynamicListElements, elementToSortingKeyMap);
-        populateAdditionalHearings(caseData, dynamicListElements, elementToSortingKeyMap);
+        if (featureToggleService.isManageHearingEnabled()) {
+            populateManageHearings(caseData, dynamicListElements, elementToSortingKeyMap);
+        } else {
+            // old-style
+            populateTopLevelHearings(caseData, dynamicListElements, elementToSortingKeyMap);
+            populateInterimHearings(caseData, dynamicListElements, elementToSortingKeyMap);
+            populateHearingsCreatedFromProcessOrder(caseData, dynamicListElements, elementToSortingKeyMap);
+            populateAdditionalHearings(caseData, dynamicListElements, elementToSortingKeyMap);
+        }
 
         // Sort the dynamicListElements using the sorting keys from the map
         dynamicListElements.sort(Comparator.comparing(elementToSortingKeyMap::get));
@@ -91,7 +106,9 @@ public class HearingService {
     }
 
     public LocalDate getHearingDate(FinremCaseData caseData, DynamicListElement selected) {
-        return getHearingInfo(caseData, selected, ListForHearingWrapper::getHearingDate,
+        return getHearingInfo(caseData, selected,
+            e -> e.getValue().getHearingDate(),
+            ListForHearingWrapper::getHearingDate,
             e -> e.getValue().getInterimHearingDate(),
             e -> e.getValue().getDateOfHearing(),
             e -> e.getValue().getDateOfHearing()
@@ -100,6 +117,7 @@ public class HearingService {
 
     public String getHearingType(FinremCaseData caseData, DynamicListElement selected) {
         return getHearingInfo(caseData, selected,
+            e -> e.getValue().getHearingType().getId(),
             e -> e.getHearingType().getId(),
             e -> e.getValue().getInterimHearingType().getId(),
             e -> e.getValue().getTypeOfHearing().getId(),
@@ -109,6 +127,7 @@ public class HearingService {
 
     public String getHearingTime(FinremCaseData caseData, DynamicListElement selected) {
         return getHearingInfo(caseData, selected,
+            e -> e.getValue().getHearingTime(),
             ListForHearingWrapper::getHearingTime,
             e -> e.getValue().getInterimHearingTime(),
             e -> e.getValue().getHearingTime(),
@@ -117,6 +136,7 @@ public class HearingService {
     }
 
     private <T> T getHearingInfo(FinremCaseData caseData, DynamicListElement selected,
+                                 Function<ManageHearingsCollectionItem, T> manageHearingExtractor,
                                  Function<ListForHearingWrapper, T> hearingExtractor,
                                  Function<InterimHearingCollection, T> interimHearingExtractor,
                                  Function<DirectionDetailCollection, T> hearingCreatedFromProcessOrderExtractor,
@@ -125,17 +145,29 @@ public class HearingService {
             return null;
         }
 
-        if (TOP_LEVEL_HEARING_ID.equals(selected.getCode())) {
-            return hearingExtractor.apply(caseData.getListForHearingWrapper());
-        }
+        if (featureToggleService.isManageHearingEnabled()) {
+            return getHearingInfoFromManageHearing(caseData, selected, manageHearingExtractor).orElse(null);
+        } else { // old-style
+            if (TOP_LEVEL_HEARING_ID.equals(selected.getCode())) {
+                return hearingExtractor.apply(caseData.getListForHearingWrapper());
+            }
 
-        // Search for the hearing in InterimHearingCollection, directionDetailCollection or hearingDirectionDetailsCollection
-        return getHearingInfoFromInterimHearing(caseData, selected, interimHearingExtractor)
-            .orElse(getHearingInfoFromHearingCreatedFromProcessOrder(caseData, selected, hearingCreatedFromProcessOrderExtractor)
-                .orElse(getHearingInfoFromAdditionalHearing(caseData, selected, additionalHearingExtractor)
-                    .orElse(null)
-                )
-            );
+            // Search for the hearing in InterimHearingCollection, directionDetailCollection or hearingDirectionDetailsCollection
+            return getHearingInfoFromInterimHearing(caseData, selected, interimHearingExtractor)
+                .orElse(getHearingInfoFromHearingCreatedFromProcessOrder(caseData, selected, hearingCreatedFromProcessOrderExtractor)
+                    .orElse(getHearingInfoFromAdditionalHearing(caseData, selected, additionalHearingExtractor)
+                        .orElse(null)
+                    )
+                );
+        }
+    }
+
+    private <T> Optional<T> getHearingInfoFromManageHearing(FinremCaseData caseData, DynamicListElement selected,
+                                                            Function<ManageHearingsCollectionItem, T> manageHearingExtractor) {
+        return emptyIfNull(caseData.getManageHearingsWrapper().getHearings()).stream()
+            .filter(i -> i.getId().toString().equals(selected.getCode()) && i.getValue() != null)
+            .map(manageHearingExtractor)
+            .findFirst();
     }
 
     private <T> Optional<T> getHearingInfoFromInterimHearing(FinremCaseData caseData, DynamicListElement selected,
@@ -173,6 +205,18 @@ public class HearingService {
                 .orElse("N/A"),
             Optional.ofNullable(hearingTime).orElse("N/A")
         );
+    }
+
+    private void populateManageHearings(FinremCaseData caseData, List<DynamicListElement> dynamicListElements,
+                                        Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap) {
+        ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
+        emptyIfNull(manageHearingsWrapper.getHearings())
+            .forEach(hearing -> {
+                DynamicListElement dynamicListElement = buildDynamicListElementFromHearing(hearing);
+                dynamicListElements.add(dynamicListElement);
+                elementToSortingKeyMap.put(dynamicListElement, new HearingSortingKey(hearing.getValue().getHearingDate(),
+                    hearing.getValue().getHearingTime(), hearing.getId().toString()));
+            });
     }
 
     private void populateTopLevelHearings(FinremCaseData caseData, List<DynamicListElement> dynamicListElements,
@@ -255,6 +299,17 @@ public class HearingService {
             hearingDate == null ? toUnknownDisplayText() : dateFormatter.format(hearingDate),
             StringUtils.isEmpty(hearingTime) ? toUnknownDisplayText() : hearingTime,
             StringUtils.isEmpty(hearingTypeInString) ? toUnknownDisplayText() : hearingTypeInString);
+    }
+
+    private DynamicListElement buildDynamicListElementFromHearing(ManageHearingsCollectionItem manageHearingsCollectionItem) {
+        Hearing hearing = manageHearingsCollectionItem.getValue();
+        String id = manageHearingsCollectionItem.getId().toString();
+
+        return DynamicListElement.builder()
+            .code(id)
+            .label(formatDynamicListElementLabel(hearing.getHearingType().getId(), hearing.getHearingDate(),
+                hearing.getHearingTime()))
+            .build();
     }
 
     private DynamicListElement buildTopLevelHearingDynamicListElement(HearingTypeDirection hearingType, LocalDate hearingDate, String hearingTime) {

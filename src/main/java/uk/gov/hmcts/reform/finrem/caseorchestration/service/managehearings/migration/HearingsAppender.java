@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
@@ -56,7 +58,7 @@ public class HearingsAppender {
      * @param listForHearingWrapper the hearing data wrapper to convert
      * @return the constructed {@code Hearing} object
      */
-    public Hearing toHearing(ListForHearingWrapper listForHearingWrapper) {
+    public Hearing toHearing(ListForHearingWrapper listForHearingWrapper, AllocatedRegionWrapper allocatedRegionWrapper) {
         // Type of Hearing
         HearingTypeDirection hearingType = listForHearingWrapper.getHearingType();
         // Hearing Date
@@ -75,7 +77,8 @@ public class HearingsAppender {
             .hearingType(hearingType == null ? null : HearingType.valueOf(hearingType.name()))
             .hearingTimeEstimate(timeEstimate)
             .hearingTime(hearingTime)
-            .hearingCourtSelection(hearingRegionWrapper == null ? null : hearingRegionWrapper.toCourt())
+            .hearingCourtSelection(hearingRegionWrapper.isEmpty()
+                ? allocatedRegionWrapper.toCourt() : hearingRegionWrapper.toCourt())
             //.hearingMode(null) // Ignore it because existing List for Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
             .additionalHearingDocs(toAdditionalHearingDocs(listForHearingWrapper))
@@ -171,6 +174,30 @@ public class HearingsAppender {
             .hearingTime(hearingTime)
             .hearingCourtSelection(hearingCourtSelection)
             //.hearingMode(null) // Ignore it because existing List for Interim Hearing doesn't capture hearing mode
+            .wasMigrated(YesOrNo.YES)
+            .build();
+    }
+
+    public Hearing toHearing(HearingDirectionDetail hearingDirectionDetail) {
+        // Type of Hearing
+        HearingTypeDirection hearingType = hearingDirectionDetail.getTypeOfHearing();
+        // Hearing Date
+        LocalDate hearingDate = hearingDirectionDetail.getDateOfHearing();
+        // Hearing Time
+        String hearingTime = hearingDirectionDetail.getHearingTime();
+        // Time Estimate
+        String timeEstimate = hearingDirectionDetail.getTimeEstimate();
+        // Additional information about the hearing is not captured
+        // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
+        Court hearingCourtSelection = hearingDirectionDetail.getLocalCourt();
+
+        return Hearing.builder()
+            .hearingDate(hearingDate)
+            .hearingType(hearingType != null ? HearingType.valueOf(hearingType.name()) : null)
+            .hearingTimeEstimate(timeEstimate)
+            .hearingTime(hearingTime)
+            .hearingCourtSelection(hearingCourtSelection)
+            //.hearingMode(null) // Ignore it because existing logic doesn't capture hearing mode
             .wasMigrated(YesOrNo.YES)
             .build();
     }

@@ -266,7 +266,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         String caseId = "1346347334";
         String auth = AUTH_TOKEN;
         List<String> errors = new ArrayList<>();
-        generalLetterService.validateEncryptionOnUploadedDocuments(caseDocuments, caseId, auth, errors);
+        generalLetterService.validateEncryptionOnUploadedDocuments(caseDocuments, auth, caseId, errors);
         verify(bulkPrintDocumentService, times(1)).validateEncryptionOnUploadedDocument(
             doc1.getValue(), caseId, new ArrayList<>(), auth);
     }

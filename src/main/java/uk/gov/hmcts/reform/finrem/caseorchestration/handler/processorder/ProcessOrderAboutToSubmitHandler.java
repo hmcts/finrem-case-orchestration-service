@@ -87,10 +87,14 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         // handleNewDocument must be handled before storeAdditionalHearingDocuments in order to stamp the newly uploaded document.
         handleNewDocumentInUnprocessedApprovedDocuments(caseData);
 
+        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, userAuthorisation);
+
         List<String> errors = new ArrayList<>();
         log.info("Storing Additional Hearing Document for Case ID: {}", caseId);
         try {
-            storeAdditionalHearingDocuments(callbackRequest.getCaseDetails(), userAuthorisation);
+            if (DIRECTION_UPLOAD_ORDER.equals(callbackRequest.getEventType())) {
+                additionalHearingDocumentService.storeHearingNotice(caseDetails, userAuthorisation);
+            }
         } catch (CourtDetailsParseException | JsonProcessingException e) {
             log.error("Case ID: {} {}", callbackRequest.getCaseDetails().getId(), e.getMessage());
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
@@ -112,10 +116,6 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
-    }
-
-    private void storeAdditionalHearingDocuments(FinremCaseDetails caseDetails, String userAuthorisation) throws JsonProcessingException {
-        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, userAuthorisation);
     }
 
     private void handleNewDocumentInUnprocessedApprovedDocuments(FinremCaseData caseData) {

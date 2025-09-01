@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -16,8 +17,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.getHearingType;
@@ -57,7 +60,7 @@ public class WorkingHearing {
             .hearingNoticePrompt(hearing.getHearingNoticePrompt())
             .additionalHearingDocPrompt(hearing.getAdditionalHearingDocPrompt())
             .additionalHearingDocs(hearing.getAdditionalHearingDocs())
-            .withPartiesOnCase(hearing.getPartiesOnCase())
+            .withPartiesOnCaseSelected(hearing.getPartiesOnCase())
             .withHearingTypes(HearingType.values())
             .withHearingTypeSelected(hearing.getHearingType())
             .build();
@@ -84,6 +87,11 @@ public class WorkingHearing {
                 .toList())
             .hearingType(getHearingType(workingHearing.getHearingTypeDynamicList()))
             .build();
+    }
+
+    public void addDocumentToAdditionalHearingDocs(CaseDocument caseDocument) {
+        additionalHearingDocs = Optional.ofNullable(additionalHearingDocs).orElseGet(ArrayList::new);
+        additionalHearingDocs.add(DocumentCollectionItem.builder().value(caseDocument).build());
     }
 
     public static class WorkingHearingBuilder {
@@ -119,7 +127,7 @@ public class WorkingHearing {
             return this;
         }
 
-        public WorkingHearingBuilder withPartiesOnCase(List<PartyOnCaseCollectionItem> partiesOnCaseCollectionItems) {
+        public WorkingHearingBuilder withPartiesOnCaseSelected(List<PartyOnCaseCollectionItem> partiesOnCaseCollectionItems) {
             List<DynamicMultiSelectListElement> listElements = partiesOnCaseCollectionItems.stream()
                 .map(PartyOnCaseCollectionItem::getValue)
                 .map(partyOnCase -> DynamicMultiSelectListElement.builder()
