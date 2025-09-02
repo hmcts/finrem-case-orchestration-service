@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -21,6 +22,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetails
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -90,7 +93,12 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+        List<String> errors = new ArrayList<>();
+        if (CaseType.CONSENTED.equals(finremCaseDetails.getCaseType())) {
+            errors.addAll(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
+        }
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors)
             .data(finremCaseData).build();
     }
 
