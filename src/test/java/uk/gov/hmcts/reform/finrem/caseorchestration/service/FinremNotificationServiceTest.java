@@ -413,7 +413,8 @@ class FinremNotificationServiceTest {
 
     @Test
     void sendGeneralEmailConsented() {
-        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(consentedFinremCaseDetails)).thenReturn(mock(NotificationRequest.class));
+        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(consentedFinremCaseDetails))
+            .thenReturn(mock(NotificationRequest.class));
 
         notificationService.sendConsentGeneralEmail(consentedFinremCaseDetails, anyString());
 
@@ -427,7 +428,8 @@ class FinremNotificationServiceTest {
         defaultFinremCaseData.getGeneralEmailWrapper()
             .setGeneralEmailUploadedDocument(CaseDocument.builder().documentBinaryUrl("binaryUrl").build());
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(defaultFinremCaseData);
-        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails)).thenReturn(mock(NotificationRequest.class));
+        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails))
+            .thenReturn(mock(NotificationRequest.class));
 
         notificationService.sendConsentGeneralEmail(caseDetails, anyString());
 
@@ -441,7 +443,8 @@ class FinremNotificationServiceTest {
         defaultFinremCaseData.getGeneralEmailWrapper()
             .setGeneralEmailUploadedDocument(CaseDocument.builder().documentBinaryUrl("binaryUrl").build());
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(defaultFinremCaseData);
-        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails)).thenReturn(mock(NotificationRequest.class));
+        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails))
+            .thenReturn(mock(NotificationRequest.class));
         doThrow(HttpClientErrorException.class)
             .when(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
 
@@ -454,7 +457,8 @@ class FinremNotificationServiceTest {
 
     @Test
     void sendGeneralEmailContested() {
-        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(contestedFinremCaseDetails)).thenReturn(mock(NotificationRequest.class));
+        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(contestedFinremCaseDetails))
+            .thenReturn(mock(NotificationRequest.class));
         notificationService.sendContestedGeneralEmail(contestedFinremCaseDetails, anyString());
 
         verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(contestedFinremCaseDetails);
