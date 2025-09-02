@@ -69,7 +69,7 @@ class FinremNotificationRequestMapperTest {
     private final FinremCaseDetails contestedFinremCaseDetails = getContestedFinremCaseDetails();
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         // Register the JavaTimeModule for Java 8 Date/Time support
         mapper.registerModule(new JavaTimeModule());
     }
@@ -380,6 +380,37 @@ class FinremNotificationRequestMapperTest {
         assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
         assertEquals("David Goodman", notificationRequest.getRespondentName());
         assertEquals(CTSC_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
+    }
+
+    @Test
+    void givenContestedCaseData_whenGeneralEmail_thenBuildNotificationRequest() {
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForGeneralEmail(contestedFinremCaseDetails);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("contested", notificationRequest.getCaseType());
+        assertEquals("nottingham", notificationRequest.getSelectedCourt());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+    }
+
+    @Test
+    void givenConsentedCaseData_whenGeneralEmail_thenBuildNotificationRequest() {
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForGeneralEmail(consentedFinremCaseDetails);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("consented", notificationRequest.getCaseType());
+        assertEquals("consent", notificationRequest.getCaseOrderType());
+        assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @SneakyThrows

@@ -654,31 +654,40 @@ public class NotificationService {
     }
 
     public void sendConsentGeneralEmail(FinremCaseDetails caseDetails, String auth) {
-        NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
-        final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest, auth);
         log.info("Received request for notification email for consented general email for Case ID: {}",
             caseDetails.getId());
-        final EmailTemplateNames templateName = hasAttachment ? FR_CONSENT_GENERAL_EMAIL_ATTACHMENT : FR_CONSENT_GENERAL_EMAIL;
-        emailService.sendConfirmationEmail(notificationRequest, templateName);
-    }
 
-    private boolean downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails, NotificationRequest notificationRequest, String auth) {
-        CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
-        if (caseDocument != null) {
-            notificationRequest.setDocumentContents(evidenceManagementDownloadService.getByteArray(caseDocument, auth));
-            return true;
-        }
-        return false;
+        final EmailTemplateNames templateName = isGeneralEmailWithAttachment(caseDetails)
+            ? FR_CONSENT_GENERAL_EMAIL_ATTACHMENT : FR_CONSENT_GENERAL_EMAIL;
+        sendGeneralEmail(caseDetails, auth, templateName);
     }
 
     public void sendContestedGeneralEmail(FinremCaseDetails caseDetails, String auth) {
-        NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
-        final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest, auth);
         log.info("Received request for notification email for contested general email for Case ID: {}",
             caseDetails.getId());
-        final EmailTemplateNames templateName = hasAttachment ? FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT : FR_CONTESTED_GENERAL_EMAIL;
+
+        final EmailTemplateNames templateName = isGeneralEmailWithAttachment(caseDetails)
+            ? FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT : FR_CONTESTED_GENERAL_EMAIL;
+        sendGeneralEmail(caseDetails, auth, templateName);
+    }
+
+    private boolean isGeneralEmailWithAttachment(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null;
+    }
+
+    private void addGeneralEmailAttachment(FinremCaseDetails caseDetails, NotificationRequest notificationRequest, String auth) {
+        CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
+        if (caseDocument != null) {
+            notificationRequest.setDocumentContents(evidenceManagementDownloadService.getByteArray(caseDocument, auth));
+        }
+    }
+
+    private void sendGeneralEmail(FinremCaseDetails caseDetails, String authToken, EmailTemplateNames templateName) {
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails);
+        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
+        if (isGeneralEmailWithAttachment(caseDetails)) {
+            addGeneralEmailAttachment(caseDetails, notificationRequest, authToken);
+        }
         emailService.sendConfirmationEmail(notificationRequest, templateName);
     }
 

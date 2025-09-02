@@ -76,6 +76,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
@@ -1075,9 +1076,11 @@ class NotificationServiceTest {
     @Test
     void shouldSendGeneralEmailWithAttachmentConsented() {
         FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONSENTED);
-        notificationService.sendConsentGeneralEmail(finremCaseDetails, anyString());
+        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(finremCaseDetails)).thenReturn(notificationRequest);
 
-        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(finremCaseDetails);
+        notificationService.sendConsentGeneralEmail(finremCaseDetails, AUTH_TOKEN);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(finremCaseDetails);
         verify(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT);
     }
@@ -1085,9 +1088,11 @@ class NotificationServiceTest {
     @Test
     void shouldSendGeneralEmailWithAttachmentContested() {
         FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONTESTED);
-        notificationService.sendContestedGeneralEmail(finremCaseDetails, anyString());
+        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(finremCaseDetails)).thenReturn(notificationRequest);
 
-        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(finremCaseDetails);
+        notificationService.sendContestedGeneralEmail(finremCaseDetails, AUTH_TOKEN);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(finremCaseDetails);
         verify(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT);
     }
