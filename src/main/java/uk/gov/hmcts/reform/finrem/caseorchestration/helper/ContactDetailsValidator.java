@@ -3,11 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -20,6 +23,7 @@ public class ContactDetailsValidator {
     static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
     static final String INVALID_EMAIL_ADDRESS_ERROR_MESSAGE = "%s is not a valid Email address.";
+    static final String ORGANISATION_POLICY_ERROR = "Solicitor can only represent one party.";
 
     private ContactDetailsValidator() {
     }
@@ -176,6 +180,26 @@ public class ContactDetailsValidator {
         checkForRespondentEmail(caseData, wrapper, errors);
 
         return errors;
+    }
+
+    public static List<String> validateOrganisationPolicy(FinremCaseData caseData) {
+        List<String> errors = new ArrayList<>();
+
+        OrganisationPolicy applicantOrganisationPolicy = caseData.getApplicantOrganisationPolicy();
+        OrganisationPolicy respondentOrganisationPolicy = caseData.getRespondentOrganisationPolicy();
+
+        if (getOrganisationId(applicantOrganisationPolicy).equals(getOrganisationId(respondentOrganisationPolicy))) {
+            errors.add(ORGANISATION_POLICY_ERROR);
+        }
+
+        return errors;
+    }
+
+    private static String getOrganisationId(OrganisationPolicy policy) {
+        return Optional.ofNullable(policy)
+            .map(OrganisationPolicy::getOrganisation)
+            .map(Organisation::getOrganisationID)
+            .orElse("");
     }
 
     /**
