@@ -45,6 +45,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -412,9 +413,11 @@ class FinremNotificationServiceTest {
 
     @Test
     void sendGeneralEmailConsented() {
+        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(consentedFinremCaseDetails)).thenReturn(mock(NotificationRequest.class));
+
         notificationService.sendConsentGeneralEmail(consentedFinremCaseDetails, anyString());
 
-        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
+        verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL));
     }
 
@@ -424,9 +427,11 @@ class FinremNotificationServiceTest {
         defaultFinremCaseData.getGeneralEmailWrapper()
             .setGeneralEmailUploadedDocument(CaseDocument.builder().documentBinaryUrl("binaryUrl").build());
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(defaultFinremCaseData);
+        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails)).thenReturn(mock(NotificationRequest.class));
+
         notificationService.sendConsentGeneralEmail(caseDetails, anyString());
 
-        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(caseDetails);
+        verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(caseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL_ATTACHMENT));
     }
 
@@ -436,21 +441,23 @@ class FinremNotificationServiceTest {
         defaultFinremCaseData.getGeneralEmailWrapper()
             .setGeneralEmailUploadedDocument(CaseDocument.builder().documentBinaryUrl("binaryUrl").build());
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(defaultFinremCaseData);
+        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails)).thenReturn(mock(NotificationRequest.class));
         doThrow(HttpClientErrorException.class)
             .when(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
 
         assertThatThrownBy(() -> notificationService.sendConsentGeneralEmail(caseDetails, AUTH_TOKEN))
             .isInstanceOf(HttpClientErrorException.class);
 
-        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(caseDetails);
+        verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(caseDetails);
         verify(emailService, never()).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL));
     }
 
     @Test
     void sendGeneralEmailContested() {
+        when(finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(contestedFinremCaseDetails)).thenReturn(mock(NotificationRequest.class));
         notificationService.sendContestedGeneralEmail(contestedFinremCaseDetails, anyString());
 
-        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
+        verify(finremNotificationRequestMapper).getNotificationRequestForGeneralEmail(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_EMAIL));
     }
 
