@@ -5,15 +5,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
@@ -30,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.ADD_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,21 +79,32 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
 
     @Test
     void handle_shouldInvokeManageHearingActionServiceWhenAddHearingChosen() {
-        var caseData = mock(FinremCaseData.class);
-        var caseDetails = mock(FinremCaseDetails.class);
-        var caseDetailsBefore = mock(FinremCaseDetails.class);
-        var callbackRequest = mock(FinremCallbackRequest.class);
 
-        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
-        when(caseDetails.getData()).thenReturn(caseData);
+        WorkingHearing workingHearing = mock(WorkingHearing.class);
 
-        var manageHearingsWrapper = mock(ManageHearingsWrapper.class);
-        when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
-        when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.YES);
+        ManageHearingsWrapper manageHearingsWrapper = ManageHearingsWrapper.builder()
+            .workingHearing(workingHearing)
+            .isAddHearingChosen(YesOrNo.YES)
+            .build();
+
+        CaseDocument orderDocument = CaseDocument.builder()
+            .documentFilename("order")
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .latestDraftHearingOrder(orderDocument)
+            .manageHearingsWrapper(manageHearingsWrapper)
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(caseData);
+        var caseDetails = callbackRequest.getCaseDetails();
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
+        assertThat(response.getData().getManageHearingsWrapper().getManageHearingsActionSelection())
+            .isEqualTo(ADD_HEARING);
+
+        verify(workingHearing).addDocumentToAdditionalHearingDocs(orderDocument);
         verify(manageHearingActionService).performAddHearing(caseDetails, AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(caseData);
         assertNotNull(response);
@@ -108,10 +123,10 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
 
         var manageHearingsWrapper = mock(ManageHearingsWrapper.class);
         when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
-        when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.YES);
+        when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.NO);
 
         when(documentWarningsHelper.getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN)))
-                .thenReturn(List.of("warning 1"));
+            .thenReturn(List.of("warning 1"));
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getWarnings()).containsExactly("warning 1");

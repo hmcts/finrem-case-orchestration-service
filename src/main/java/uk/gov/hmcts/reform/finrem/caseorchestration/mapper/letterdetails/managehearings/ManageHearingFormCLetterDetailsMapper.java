@@ -31,6 +31,7 @@ public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearing
             buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt());
 
         LocalDate hearingDate = hearing.getHearingDate();
+        LocalDate formCCreatedDate = LocalDate.now();
 
         return FormCLetterDetails.builder()
             .caseNumber(caseData.getDivorceCaseNumber())
@@ -51,8 +52,9 @@ public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearing
             .hearingDateLess7Days(String.valueOf(hearingDate.minusDays(7)))
             .attendance(hearing.getHearingMode() != null ? hearing.getHearingMode().getDisplayValue() : "")
             .additionalInformationAboutHearing(hearing.getAdditionalHearingInformation() != null ? hearing.getAdditionalHearingInformation() : "")
-            .formCCreatedDate(String.valueOf(LocalDate.now()))
-            .eventDatePlus21Days(String.valueOf(LocalDate.now().plusDays(21)))
+            .formCCreatedDate(String.valueOf(formCCreatedDate))
+            .formCCreatedDatePlus28Days(String.valueOf(formCCreatedDate.plusDays(28)))
+            .eventDatePlus21Days(String.valueOf(formCCreatedDate.plusDays(21)))
             .build();
     }
 }

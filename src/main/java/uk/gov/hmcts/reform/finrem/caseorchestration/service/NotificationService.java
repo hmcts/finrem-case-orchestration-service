@@ -36,7 +36,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TRANSFER_COURTS_EMAIL;
@@ -654,23 +653,6 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER);
     }
 
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #sendConsentGeneralEmail(FinremCaseDetails, String)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendConsentGeneralEmail(CaseDetails caseDetails) {
-        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_RECIPIENT)));
-        log.info("Received request for notification email for consented general email for Case ID: {}",
-            caseDetails.getId());
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL);
-    }
-
     public void sendConsentGeneralEmail(FinremCaseDetails caseDetails, String auth) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
@@ -688,23 +670,6 @@ public class NotificationService {
             return true;
         }
         return false;
-    }
-
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #sendContestedGeneralEmail(FinremCaseDetails, String)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendContestedGeneralEmail(CaseDetails caseDetails) {
-        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_RECIPIENT)));
-        log.info("Received request for notification email for contested general email for Case ID: {}",
-            caseDetails.getId());
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL);
     }
 
     public void sendContestedGeneralEmail(FinremCaseDetails caseDetails, String auth) {
