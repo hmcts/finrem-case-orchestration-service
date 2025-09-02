@@ -152,6 +152,34 @@ public class ContactDetailsValidator {
     }
 
     /**
+     * Validates the email addresses present in the given {@link FinremCaseData}.
+     *
+     * <p>
+     * This method checks the following email fields:
+     * <ul>
+     *     <li>Applicant solicitor's email address</li>
+     *     <li>Applicant's email address</li>
+     *     <li>Respondent solicitor's email address</li>
+     *     <li>Respondent's email address</li>
+     * </ul>
+     * Any validation errors found are added to a list and returned.
+     *
+     * @param caseData the case data containing contact details to be validated
+     * @return a list of error messages for invalid email addresses
+     */
+    public static List<String> validateCaseDataEmailAddresses(FinremCaseData caseData) {
+        List<String> errors = new ArrayList<>();
+        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
+
+        checkForApplicantSolicitorEmailAddress(caseData, wrapper, errors);
+        checkForApplicantEmail(wrapper, errors);
+        checkForRespondentSolicitorEmail(caseData, wrapper, errors);
+        checkForRespondentEmail(caseData, wrapper, errors);
+
+        return errors;
+    }
+
+    /**
      * Validates the given solicitor address assuming the solicitor is based in the UK.
      *
      * <p>
@@ -202,34 +230,6 @@ public class ContactDetailsValidator {
         boolean addressMissingRequiredPostcode = address.isEmpty() || isBlank(address.getPostCode());
 
         return livesInUK && addressMissingRequiredPostcode;
-    }
-
-    /**
-     * Validates the email addresses present in the given {@link FinremCaseData}.
-     *
-     * <p>
-     * This method checks the following email fields:
-     * <ul>
-     *     <li>Applicant solicitor's email address</li>
-     *     <li>Applicant's email address</li>
-     *     <li>Respondent solicitor's email address</li>
-     *     <li>Respondent's email address</li>
-     * </ul>
-     * Any validation errors found are added to a list and returned.
-     *
-     * @param caseData the case data containing contact details to be validated
-     * @return a list of error messages for invalid email addresses
-     */
-    public static List<String> validateCaseDataEmailAddresses(FinremCaseData caseData) {
-        List<String> errors = new ArrayList<>();
-        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
-
-        checkForApplicantSolicitorEmailAddress(caseData, wrapper, errors);
-        checkForApplicantEmail(wrapper, errors);
-        checkForRespondentSolicitorEmail(caseData, wrapper, errors);
-        checkForRespondentEmail(caseData, wrapper, errors);
-
-        return errors;
     }
 
     private static void checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
