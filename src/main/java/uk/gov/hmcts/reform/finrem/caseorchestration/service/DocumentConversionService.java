@@ -40,7 +40,7 @@ public class DocumentConversionService {
 
     private static final String PDF_MIME_TYPE = "application/pdf";
 
-    @Value("${service.pdf-service.uri}/rs/convert")
+    @Value("${service.pdf-service.convert-uri}")
     private String documentConversionUrl;
 
     @Value("${service.pdf-service.accessKey}")
