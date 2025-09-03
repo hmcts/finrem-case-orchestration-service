@@ -19,7 +19,6 @@ public class ContactDetailsValidator {
     static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
     static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
-
     static final String INVALID_EMAIL_ADDRESS_ERROR_MESSAGE = "%s is not a valid Email address.";
 
     private ContactDetailsValidator() {
@@ -73,12 +72,12 @@ public class ContactDetailsValidator {
      * @param errors the list to which error messages will be added if validation fails
      */
     public static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
-        if (caseData.getCcdCaseType() == CaseType.CONTESTED) {
+        if (isContested(caseData)) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && postCodeIsInvalid(wrapper.getApplicantSolicitorAddress())) {
                 errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
             }
-        } else if (caseData.getCcdCaseType() == CaseType.CONSENTED) {
+        } else if (isConsented(caseData)) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && postCodeIsInvalid(wrapper.getSolicitorAddress())) {
                 errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
@@ -152,6 +151,34 @@ public class ContactDetailsValidator {
     }
 
     /**
+     * Validates the email addresses present in the given {@link FinremCaseData}.
+     *
+     * <p>
+     * This method checks the following email fields:
+     * <ul>
+     *     <li>Applicant solicitor's email address</li>
+     *     <li>Applicant's email address</li>
+     *     <li>Respondent solicitor's email address</li>
+     *     <li>Respondent's email address</li>
+     * </ul>
+     * Any validation errors found are added to a list and returned.
+     *
+     * @param caseData the case data containing contact details to be validated
+     * @return a list of error messages for invalid email addresses
+     */
+    public static List<String> validateCaseDataEmailAddresses(FinremCaseData caseData) {
+        List<String> errors = new ArrayList<>();
+        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
+
+        checkForApplicantSolicitorEmailAddress(caseData, wrapper, errors);
+        checkForApplicantEmail(wrapper, errors);
+        checkForRespondentSolicitorEmail(caseData, wrapper, errors);
+        checkForRespondentEmail(caseData, wrapper, errors);
+
+        return errors;
+    }
+
+    /**
      * Validates the given solicitor address assuming the solicitor is based in the UK.
      *
      * <p>
@@ -204,42 +231,14 @@ public class ContactDetailsValidator {
         return livesInUK && addressMissingRequiredPostcode;
     }
 
-    /**
-     * Validates the email addresses present in the given {@link FinremCaseData}.
-     *
-     * <p>
-     * This method checks the following email fields:
-     * <ul>
-     *     <li>Applicant solicitor's email address</li>
-     *     <li>Applicant's email address</li>
-     *     <li>Respondent solicitor's email address</li>
-     *     <li>Respondent's email address</li>
-     * </ul>
-     * Any validation errors found are added to a list and returned.
-     *
-     * @param caseData the case data containing contact details to be validated
-     * @return a list of error messages for invalid email addresses
-     */
-    public static List<String> validateCaseDataEmailAddresses(FinremCaseData caseData) {
-        List<String> errors = new ArrayList<>();
-        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
-
-        checkForApplicantSolicitorEmailAddress(caseData, wrapper, errors);
-        checkForApplicantEmail(wrapper, errors);
-        checkForRespondentSolicitorEmail(caseData, wrapper, errors);
-        checkForRespondentEmail(caseData, wrapper, errors);
-
-        return errors;
-    }
-
     private static void checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                                List<String> errors) {
-        if (caseData.getCcdCaseType() == CaseType.CONTESTED) {
+        if (isContested(caseData)) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && !isValidEmailAddress(wrapper.getApplicantSolicitorEmail())) {
                 errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getApplicantSolicitorEmail()));
             }
-        } else if (caseData.getCcdCaseType() == CaseType.CONSENTED) {
+        } else if (isConsented(caseData)) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && !isValidEmailAddress(wrapper.getSolicitorEmail())) {
                 errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getSolicitorEmail()));
@@ -268,5 +267,13 @@ public class ContactDetailsValidator {
                 errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, respondentEmail));
             }
         }
+    }
+
+    private static boolean isContested(FinremCaseData caseData) {
+        return caseData.getCcdCaseType() == CaseType.CONTESTED;
+    }
+
+    private static boolean isConsented(FinremCaseData caseData) {
+        return caseData.getCcdCaseType() == CaseType.CONSENTED;
     }
 }
