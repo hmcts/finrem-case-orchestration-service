@@ -46,6 +46,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService.TOP_LEVEL_HEARING_ID;
 
 @ExtendWith(MockitoExtension.class)
@@ -85,7 +86,7 @@ class HearingServiceTest {
         when(manageHearingsWrapper.getHearings()).thenReturn(hearings);
 
         // Act
-        DynamicList actualDynamicList = hearingService.generateSelectableHearingsAsDynamicList(caseDetails);
+        DynamicList actualDynamicList = hearingService.generateSelectableHearingsAsDynamicList(caseDetails, AUTH_TOKEN);
 
         // Assert
         assertEquals(expectedDynamicListItems.size(), actualDynamicList.getListItems().size());
@@ -438,7 +439,7 @@ class HearingServiceTest {
         when(caseDetails.getData()).thenReturn(caseData);
 
         // Act
-        DynamicList dynamicList = hearingService.generateSelectableHearingsAsDynamicList(caseDetails);
+        DynamicList dynamicList = hearingService.generateSelectableHearingsAsDynamicList(caseDetails, AUTH_TOKEN);
 
         // Assert
         assertEquals(expectedDynamicList.getListItems().size(), dynamicList.getListItems().size());
@@ -537,7 +538,7 @@ class HearingServiceTest {
         when(caseDetails.getData()).thenReturn(caseData);
 
         IllegalStateException e = assertThrows(IllegalStateException.class,
-            () -> hearingService.generateSelectableHearingsAsDynamicList(caseDetails));
+            () -> hearingService.generateSelectableHearingsAsDynamicList(caseDetails, AUTH_TOKEN));
         assertEquals("hearingType is unexpectedly null", e.getMessage());
     }
 

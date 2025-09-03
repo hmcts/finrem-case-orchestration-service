@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
@@ -16,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHeari
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 
@@ -60,6 +66,8 @@ public class HearingService {
 
     private final FeatureToggleService featureToggleService;
 
+
+
     /**
      * Generates a {@link DynamicList} of selectable hearings for the given case.
      *
@@ -78,15 +86,16 @@ public class HearingService {
      * The returned list is sorted using these sorting keys before being wrapped in a {@link DynamicList}.
      *
      * @param caseDetails the {@link FinremCaseDetails} containing hearing-related case data
+     * @param userAuthorisation authorisation token
      * @return a {@link DynamicList} of hearings, sorted by date, time, and type
      */
-    public DynamicList generateSelectableHearingsAsDynamicList(FinremCaseDetails caseDetails) {
+    public DynamicList generateSelectableHearingsAsDynamicList(FinremCaseDetails caseDetails, String userAuthorisation) {
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap = new HashMap<>();
 
         if (featureToggleService.isManageHearingEnabled()) {
-            populateManageHearings(caseData, dynamicListElements, elementToSortingKeyMap);
+            populateManageHearings(caseData, dynamicListElements, elementToSortingKeyMap, userAuthorisation);
         } else {
             // old-style
             populateTopLevelHearings(caseData, dynamicListElements, elementToSortingKeyMap);
@@ -208,9 +217,11 @@ public class HearingService {
     }
 
     private void populateManageHearings(FinremCaseData caseData, List<DynamicListElement> dynamicListElements,
-                                        Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap) {
+                                        Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap,
+                                        String userAuthorisation) {
         ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
-        emptyIfNull(manageHearingsWrapper.getHearings())
+
+        emptyIfNull(applyConfidentiality(caseData.getCcdCaseId(), manageHearingsWrapper.getHearings(), userAuthorisation))
             .forEach(hearing -> {
                 DynamicListElement dynamicListElement = buildDynamicListElementFromHearing(hearing);
                 dynamicListElements.add(dynamicListElement);
@@ -218,6 +229,38 @@ public class HearingService {
                     hearing.getValue().getHearingTime(), hearing.getId().toString()));
             });
     }
+
+    private List<String> getRoles(ManageHearingsCollectionItem hearingItem) {
+        return emptyIfNull(hearingItem.getValue().getPartiesOnCase()).stream()
+            .map(PartyOnCaseCollectionItem::getValue)
+            .map(PartyOnCase::getRole).toList();
+    }
+
+    private final AuthTokenGenerator authTokenGenerator;
+    private final DataStoreClient dataStoreClient;
+
+    private List<CaseAssignedUserRole> getCaseAssignedUserRoles(String authToken, String caseId) {
+        String serviceToken = authTokenGenerator.generate();
+        CaseAssignedUserRolesResource caseAssignedUserRolesResource = dataStoreClient.getUserRoles(authToken,
+            serviceToken, caseId, null);
+
+        return caseAssignedUserRolesResource.getCaseAssignedUserRoles();
+    }
+
+    private List<ManageHearingsCollectionItem> applyConfidentiality(String caseId, List<ManageHearingsCollectionItem> hearings,
+                                                                    String userAuthorisation) {
+        List<CaseAssignedUserRole> roles = getCaseAssignedUserRoles(userAuthorisation, caseId);
+//        IdamToken idamToken = idamAuthService.getIdamToken(userAuthorisation);
+        List<String> userRoles = emptyIfNull(roles.stream().map(CaseAssignedUserRole::getCaseRole).toList());
+
+        return hearings.stream()
+            .filter(hearingItem -> {
+                List<String> hearingRoles = getRoles(hearingItem);
+                return hearingRoles.stream().anyMatch(userRoles::contains);
+            })
+            .toList();
+    }
+
 
     private void populateTopLevelHearings(FinremCaseData caseData, List<DynamicListElement> dynamicListElements,
                                           Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap) {
