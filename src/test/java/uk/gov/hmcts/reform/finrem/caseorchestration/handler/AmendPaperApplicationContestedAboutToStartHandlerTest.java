@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -27,10 +28,11 @@ public class AmendPaperApplicationContestedAboutToStartHandlerTest {
     private AmendPaperApplicationContestedAboutToStartHandler handler;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = mock(FinremCaseDetailsMapper.class);
+        IdamService idamService = mock(IdamService.class);
         handler =  new AmendPaperApplicationContestedAboutToStartHandler(finremCaseDetailsMapper,
-            new OnStartDefaultValueService());
+            new OnStartDefaultValueService(idamService));
     }
 
     @Test
