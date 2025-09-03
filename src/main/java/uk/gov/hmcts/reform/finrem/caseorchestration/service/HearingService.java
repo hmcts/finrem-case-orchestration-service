@@ -66,8 +66,6 @@ public class HearingService {
 
     private final FeatureToggleService featureToggleService;
 
-
-
     /**
      * Generates a {@link DynamicList} of selectable hearings for the given case.
      *
