@@ -232,6 +232,7 @@ public class ManageHearingActionService {
         return nullIfEmpty(emptyIfNull(hearings).stream()
             .sorted(Comparator.comparing(hearing -> hearing.getValue().getHearingDate()))
             .map(hearing -> HearingTabCollectionItem.builder()
+                .id(hearing.getId())
                 .value(hearingTabDataMapper.mapHearingToTabData(
                     hearing,
                     caseData.getManageHearingsWrapper().getHearingDocumentsCollection()))
