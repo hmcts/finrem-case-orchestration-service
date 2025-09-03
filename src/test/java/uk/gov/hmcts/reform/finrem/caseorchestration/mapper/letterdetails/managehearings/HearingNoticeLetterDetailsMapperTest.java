@@ -135,7 +135,7 @@ class HearingNoticeLetterDetailsMapperTest {
         assertThat(hearingNoticeDetails.getCcdCaseNumber()).isEqualTo(CASE_ID);
         assertThat(hearingNoticeDetails.getApplicantName()).isEqualTo("John Doe");
         assertThat(hearingNoticeDetails.getRespondentName()).isEqualTo("Jane Smith");
-        assertThat(hearingNoticeDetails.getHearingType()).isEqualTo("FDR");
+        assertThat(hearingNoticeDetails.getHearingType()).isEqualTo("Financial Dispute Resolution (FDR)");
         assertThat(hearingNoticeDetails.getHearingDate()).isEqualTo("2025-08-01");
         assertThat(hearingNoticeDetails.getHearingTime()).isEqualTo("10:00 AM");
         assertThat(hearingNoticeDetails.getHearingTimeEstimate()).isEqualTo("2 hours");

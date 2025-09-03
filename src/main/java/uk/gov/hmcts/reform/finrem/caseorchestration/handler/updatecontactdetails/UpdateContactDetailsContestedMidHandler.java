@@ -42,13 +42,14 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = caseDetails.getData();
 
-        FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
-        errors.addAll(internationalPostalService.validate(caseData));
-        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
-        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
+        errors.addAll(internationalPostalService.validate(finremCaseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData));
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).errors(errors).build();
+            .data(finremCaseData).errors(errors).build();
     }
 }
