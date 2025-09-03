@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
@@ -78,6 +80,8 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
 
         //Invoke performAddHearing when hearing is required
         if (service.isHearingRequired(caseDetails)) {
+            // Todo: Line below needs a test, consider wrapping in a private method with a descriptive name
+            caseData.getManageHearingsWrapper().setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
             manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
             manageHearingActionService.updateTabData(caseData);
         }
@@ -129,7 +133,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
             String status = Objects.toString(caseData.getGeneralApplicationWrapper()
                 .getGeneralApplicationOutcome(), null);
             log.info("In map outcome decision {} for general application for Case ID: {} Event type {}",
-                status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
+                status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
             setStatusForNonCollAndBulkPrintDocuments(caseDetails,
                 data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
@@ -181,17 +185,13 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
 
         GeneralApplicationItems items = data.getGeneralApplicationItems();
 
-        //Generate GAD document
-        CaseDocument caseDocument = service.generateGeneralApplicationDirectionsDocument(userAuthorisation, finremCaseDetails);
-
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
-        items.setGeneralApplicationDirectionsDocument(caseDocument);
         String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         String caseId = String.valueOf(caseDetails.getId());
         log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
-            EventType.GENERAL_APPLICATION_DIRECTIONS);
+            EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
 
         switch (gaElementStatus.toLowerCase()) {
             case "approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
@@ -201,11 +201,18 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
             default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
         }
 
-        final BulkPrintDocument bpDoc = BulkPrintDocument.builder()
-            .binaryFileUrl(items.getGeneralApplicationDirectionsDocument().getDocumentBinaryUrl())
-            .fileName(items.getGeneralApplicationDirectionsDocument().getDocumentFilename())
-            .build();
-        bulkPrintDocuments.add(bpDoc);
+        Optional<CaseDocument> generateGeneralApplicationDirectionsDocument =
+            service.generateGeneralApplicationDirectionsDocument(userAuthorisation, finremCaseDetails);
+        generateGeneralApplicationDirectionsDocument.ifPresent(gadDoc -> {
+            items.setGeneralApplicationDirectionsDocument(gadDoc);
+
+            final BulkPrintDocument gadBpDoc = BulkPrintDocument.builder()
+                .binaryFileUrl(gadDoc.getDocumentBinaryUrl())
+                .fileName(gadDoc.getDocumentFilename())
+                .build();
+
+            bulkPrintDocuments.add(gadBpDoc);
+        });
 
         log.info("items getGeneralApplicationDocument {}, for case ID: {}",
             items.getGeneralApplicationDocument(), caseId);

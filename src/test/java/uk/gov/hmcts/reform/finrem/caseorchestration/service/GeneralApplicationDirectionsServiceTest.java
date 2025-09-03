@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
@@ -337,7 +338,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
 
         // Act
-        CaseDocument result = generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocument(AUTH_TOKEN, finremCaseDetails);
+        Optional<CaseDocument> result =
+            generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocument(AUTH_TOKEN, finremCaseDetails);
 
         // Assert
         assertEquals(expectedDocument, result);
@@ -367,7 +369,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             .build();
 
         // Act
-        CaseDocument result = generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocument(AUTH_TOKEN, finremCaseDetails);
+        Optional<CaseDocument> result =
+            generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocument(AUTH_TOKEN, finremCaseDetails);
 
         // Assert
         assertEquals(expectedDocument, result);

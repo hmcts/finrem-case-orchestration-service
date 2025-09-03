@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -217,9 +218,9 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.YES);
 
         //Hearing required document
-        CaseDocument generatedDocument = CaseDocument.builder().documentFilename("HearingNotice.pdf")
+        Optional<CaseDocument> generatedDocument = Optional.of(CaseDocument.builder().documentFilename("HearingNotice.pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
-            .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
+            .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build());
         when(service.generateGeneralApplicationDirectionsDocument(eq(AUTH_TOKEN), any(FinremCaseDetails.class))).thenReturn(generatedDocument);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
