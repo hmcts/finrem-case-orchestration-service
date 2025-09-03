@@ -227,7 +227,7 @@ public class CourtDetailsConfiguration {
     }
 
     /**
-     * Adds court details for a consented court id by finding its contested equivalent
+     * Adds court details for a consented court id by finding its contested equivalent.
      *
      * @param courtMap map of consented to contested court ids
      */
