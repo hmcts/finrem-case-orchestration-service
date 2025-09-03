@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
@@ -20,8 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -71,7 +68,7 @@ public class HearingCorrespondenceHelper {
      * <p>This method accesses the {@link ManageHearingsWrapper} from the provided {@link FinremCaseData},
      * and uses the working hearing ID to locate the matching {@link HearingTabItem} in the list of hearing tab items.</p>
      *
-     * <p>If the hearing tab items list is {@code null}, or if no item matches the working hearing ID,
+     * <p>If no item matches the working hearing ID,
      * this method throws an {@link IllegalStateException}.</p>
      *
      * <p>A working hearing refers to the {@link HearingTabItem} a user is actively creating or modifying in the UI.</p>
@@ -83,14 +80,6 @@ public class HearingCorrespondenceHelper {
     public HearingTabItem getHearingInContextFromTab(FinremCaseData finremCaseData) {
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
         UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
-
-        List<HearingTabCollectionItem> hearingTabItems = nullIfEmpty(manageHearingsWrapper.getHearingTabItems());
-
-        if (hearingTabItems == null) {
-            throw new IllegalStateException(
-                "No hearing tab items available to search for. Working hearing ID is: " + hearingId
-            );
-        }
 
         return manageHearingsWrapper.getHearingTabItems().stream()
             .filter(h -> hearingId.equals(h.getId()))

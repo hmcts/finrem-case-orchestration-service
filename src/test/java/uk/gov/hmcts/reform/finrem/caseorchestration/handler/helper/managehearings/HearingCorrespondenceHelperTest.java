@@ -136,27 +136,6 @@ class HearingCorrespondenceHelperTest {
         assertEquals(hearingTabItem, result);
     }
 
-    @Test
-    void givenNoTabItems_whenInvoked_shouldThrowIllegalStateException() {
-        UUID hearingId = UUID.randomUUID();
-
-        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
-            .hearingTabItems(null)
-            .workingHearingId(hearingId)
-            .build();
-
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(wrapper)
-            .build();
-
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-            helper.getHearingInContextFromTab(caseData));
-
-        assertTrue(exception.getMessage().contains(
-            String.format("No hearing tab items available to search for. Working hearing ID is: %s",
-                hearingId)));
-    }
-
     /**
      * shouldEmailToApplicantSolicitor is just a wrapper around the paperNotificationService.shouldPrintForApplicant.
      */
