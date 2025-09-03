@@ -250,7 +250,6 @@ public class HearingService {
     private List<ManageHearingsCollectionItem> applyConfidentiality(String caseId, List<ManageHearingsCollectionItem> hearings,
                                                                     String userAuthorisation) {
         List<CaseAssignedUserRole> roles = getCaseAssignedUserRoles(userAuthorisation, caseId);
-//        IdamToken idamToken = idamAuthService.getIdamToken(userAuthorisation);
         List<String> userRoles = emptyIfNull(roles.stream().map(CaseAssignedUserRole::getCaseRole).toList());
 
         return hearings.stream()

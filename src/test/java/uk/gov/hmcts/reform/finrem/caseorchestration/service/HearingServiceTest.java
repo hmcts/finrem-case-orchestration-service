@@ -10,6 +10,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -26,6 +30,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -47,6 +53,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService.TOP_LEVEL_HEARING_ID;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +67,12 @@ class HearingServiceTest {
 
     @Mock
     private FeatureToggleService featureToggleService;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    DataStoreClient dataStoreClient;
 
     @BeforeEach
     void setUp() {
@@ -76,6 +90,7 @@ class HearingServiceTest {
         FinremCaseData finremCaseData = mock(FinremCaseData.class);
         ManageHearingsWrapper manageHearingsWrapper = mock(ManageHearingsWrapper.class);
 
+        when(finremCaseData.getCcdCaseId()).thenReturn(CASE_ID);
         when(caseDetails.getData()).thenReturn(finremCaseData);
         when(finremCaseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
         when(finremCaseData.getListForHearingWrapper()).thenReturn(mock(ListForHearingWrapper.class));
@@ -84,6 +99,12 @@ class HearingServiceTest {
         when(finremCaseData.getHearingDirectionDetailsCollection()).thenReturn(mock(List.class));
         when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
         when(manageHearingsWrapper.getHearings()).thenReturn(hearings);
+
+        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, null))
+            .thenReturn(CaseAssignedUserRolesResource.builder().caseAssignedUserRoles(List.of(
+                CaseAssignedUserRole.builder().caseRole("[APPSOLICITOR]").build()
+            )).build());
 
         // Act
         DynamicList actualDynamicList = hearingService.generateSelectableHearingsAsDynamicList(caseDetails, AUTH_TOKEN);
@@ -108,11 +129,17 @@ class HearingServiceTest {
         when(hearingOne.getHearingType()).thenReturn(HearingType.FH);
         when(hearingOne.getHearingDate()).thenReturn(LocalDate.of(2025, 2, 2));
         when(hearingOne.getHearingTime()).thenReturn("09:14");
+        when(hearingOne.getPartiesOnCase()).thenReturn(List.of(
+            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role("[APPSOLICITOR]").build()).build()
+        ));
 
         Hearing hearingTwo = mock(Hearing.class);
         when(hearingTwo.getHearingType()).thenReturn(HearingType.FDA);
         when(hearingTwo.getHearingDate()).thenReturn(LocalDate.of(2025, 3, 3));
         when(hearingTwo.getHearingTime()).thenReturn("10:30");
+        when(hearingTwo.getPartiesOnCase()).thenReturn(List.of(
+            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role("[APPSOLICITOR]").build()).build()
+        ));
 
         LinkedHashMap<String, String> expectedTwoHearings = new LinkedHashMap<>();
         expectedTwoHearings.put(hearingOneId.toString(), "2 Feb 2025 09:14 - Final Hearing (FH)");
