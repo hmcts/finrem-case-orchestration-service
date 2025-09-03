@@ -260,7 +260,6 @@ public class HearingService {
             .toList();
     }
 
-
     private void populateTopLevelHearings(FinremCaseData caseData, List<DynamicListElement> dynamicListElements,
                                           Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap) {
         HearingTypeDirection hearingType = caseData.getListForHearingWrapper().getHearingType();
