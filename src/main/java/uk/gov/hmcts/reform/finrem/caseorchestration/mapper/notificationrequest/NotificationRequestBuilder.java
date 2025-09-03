@@ -92,7 +92,7 @@ public class NotificationRequestBuilder {
             setConsentedDefaults(caseData);
         }
 
-        if (caseDetails.getData().isContestedApplication()) {
+        if (caseData.isContestedApplication()) {
             setContestedDefaults(caseDetails);
         }
 
