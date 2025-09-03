@@ -28,7 +28,7 @@ public class DocmosisPdfGenerationService {
     private final RestTemplate restTemplate;
     private final PdfDocumentConfig pdfDocumentConfig;
 
-    @Value("${service.pdf-service.uri}/rs/render")
+    @Value("${service.pdf-service.render-uri}")
     private String pdfServiceEndpoint;
 
     @Value("${service.pdf-service.accessKey}")

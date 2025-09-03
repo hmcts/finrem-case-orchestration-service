@@ -36,7 +36,7 @@ public class LocalEmailService extends EmailService {
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
-                templateVars);
+                templateVars, notificationRequest.getEmailReplyToId());
         log.info("Creating a preview email for Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
         previewEmail(emailToSend, "send Confirmation email for " + template.name());
     }
