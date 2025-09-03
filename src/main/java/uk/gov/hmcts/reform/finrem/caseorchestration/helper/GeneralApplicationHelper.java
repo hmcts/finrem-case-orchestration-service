@@ -333,7 +333,6 @@ public class GeneralApplicationHelper {
 
         buildGeneralApplicationDocuments(caseData, userAuthorisation, caseId, builder);
 
-
         return builder.build();
     }
 
