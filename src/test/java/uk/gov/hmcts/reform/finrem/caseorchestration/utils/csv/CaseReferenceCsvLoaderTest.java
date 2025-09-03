@@ -11,6 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CaseReferenceCsvLoaderTest {
 
@@ -41,6 +42,40 @@ class CaseReferenceCsvLoaderTest {
         String decryptedString = CaseReferenceCsvLoader.decrypt(encryptedString, key);
 
         assertEquals(originalString, decryptedString);
+    }
+
+    @Test
+    void givenNullData_whenDecrypt_shouldThrowException() throws Exception {
+        String secret = "mySecretKey";
+        SecretKey key = CaseReferenceCsvLoader.getKeyFromString(secret);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> CaseReferenceCsvLoader.decrypt(null, key));
+
+        String expectedMessage = "Encrypted data cannot be null or empty";
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    void givenEmptyData_whenDecrypt_shouldThrowException() throws Exception {
+        String secret = "mySecretKey";
+        SecretKey key = CaseReferenceCsvLoader.getKeyFromString(secret);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> CaseReferenceCsvLoader.decrypt("", key));
+
+        String expectedMessage = "Encrypted data cannot be null or empty";
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    void givenDataInWrongFormat_whenDecrypt_shouldThrowException() throws Exception {
+        String secret = "mySecretKey";
+        SecretKey key = CaseReferenceCsvLoader.getKeyFromString(secret);
+        String encryptedData = "invalidFormat";
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> CaseReferenceCsvLoader.decrypt(encryptedData, key));
+
+        String expectedMessage = "Encrypted data must contain at least two parts";
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test

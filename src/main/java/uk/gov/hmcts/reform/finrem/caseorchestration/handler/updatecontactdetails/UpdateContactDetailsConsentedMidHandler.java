@@ -41,14 +41,15 @@ public class UpdateContactDetailsConsentedMidHandler extends FinremCallbackHandl
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
+
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         List<String> errors = new ArrayList<>();
-        FinremCaseData caseData = finremCaseDetails.getData();
-        errors.addAll(internationalPostalService.validate(caseData));
-        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
-        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
+        errors.addAll(internationalPostalService.validate(finremCaseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData));
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).errors(errors).build();
     }
 }
