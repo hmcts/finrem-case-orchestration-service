@@ -26,7 +26,7 @@ import java.util.Map;
 public class CourtDetailsConfiguration {
     private final Map<String, CourtDetails> courts;
 
-    private final Map<String, String> midlandsConsentedCourtMap = Map.ofEntries(
+    private final Map<String, String> midlandsCourtMap = Map.ofEntries(
         Map.entry(NottinghamCourt.CONSENTED_NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT.getId(),
             NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT.getId()),
         Map.entry(NottinghamCourt.CONSENTED_DERBY_COMBINED_COURT_CENTRE.getId(),
@@ -65,7 +65,7 @@ public class CourtDetailsConfiguration {
             BirminghamCourt.HEREFORD_COUNTY_COURT_AND_FAMILY_COURT.getId())
     );
 
-    private final Map<String, String> londonConsentedCourtMap = Map.ofEntries(
+    private final Map<String, String> londonCourtMap = Map.ofEntries(
         Map.entry(LondonCourt.CENTRAL_FAMILY_COURT.getId(),
             CfcCourt.CENTRAL_FAMILY_COURT.getId()),
         Map.entry(LondonCourt.WILLESDEN_COUNTY_COURT_AND_FAMILY_COURT.getId(),
@@ -92,7 +92,7 @@ public class CourtDetailsConfiguration {
             CfcCourt.THE_ROYAL_COURT_OF_JUSTICE.getId())
     );
 
-    private final Map<String, String> northWestConsentedCourtMap = Map.ofEntries(
+    private final Map<String, String> northWestCourtMap = Map.ofEntries(
         Map.entry(LiverpoolCourt.CONSENTED_LIVERPOOL_CIVIL_FAMILY_COURT.getId(),
             LiverpoolCourt.LIVERPOOL_CIVIL_FAMILY_COURT.getId()),
         Map.entry(LiverpoolCourt.CONSENTED_CHESTER_CIVIL_FAMILY_JUSTICE.getId(),
@@ -111,7 +111,7 @@ public class CourtDetailsConfiguration {
             ManchesterCourt.WIGAN_COURT.getId())
     );
 
-    private final Map<String, String> northEastConsentedCourtMap = Map.ofEntries(
+    private final Map<String, String> northEastCourtMap = Map.ofEntries(
         Map.entry(ClevelandCourt.FR_CLEVELAND_LIST_1.getId(),
             ClevelandCourt.FR_CLEVELAND_HC_LIST_1.getId()),
         Map.entry(ClevelandCourt.FR_CLEVELAND_LIST_2.getId(),
@@ -158,7 +158,7 @@ public class CourtDetailsConfiguration {
             HumberCourt.FR_humberList_5.getId())
     );
 
-    private final Map<String, String> southEastConsentedCourtMap = Map.ofEntries(
+    private final Map<String, String> southEastCourtMap = Map.ofEntries(
         Map.entry(KentSurreyCourt.CONSENTED_FR_kent_surreyList_1.getId(),
             KentSurreyCourt.FR_kent_surreyList_1.getId()),
         Map.entry(KentSurreyCourt.CONSENTED_FR_kent_surreyList_2.getId(),
@@ -183,7 +183,7 @@ public class CourtDetailsConfiguration {
             KentSurreyCourt.FR_kent_surreyList_11.getId())
     );
 
-    private final Map<String, String> walesConsentedCourtMap = Map.ofEntries(
+    private final Map<String, String> walesCourtMap = Map.ofEntries(
         Map.entry(NewportCourt.CONSENTED_FR_newportList_1.getId(),
             NewportCourt.FR_newportList_1.getId()),
         Map.entry(NewportCourt.CONSENTED_FR_newportList_2.getId(),
@@ -218,18 +218,23 @@ public class CourtDetailsConfiguration {
     }
 
     private void addConsentedCourts() {
-        addConsentedCourts(midlandsConsentedCourtMap);
-        addConsentedCourts(londonConsentedCourtMap);
-        addConsentedCourts(northWestConsentedCourtMap);
-        addConsentedCourts(northEastConsentedCourtMap);
-        addConsentedCourts(southEastConsentedCourtMap);
-        addConsentedCourts(walesConsentedCourtMap);
+        addConsentedCourts(midlandsCourtMap);
+        addConsentedCourts(londonCourtMap);
+        addConsentedCourts(northWestCourtMap);
+        addConsentedCourts(northEastCourtMap);
+        addConsentedCourts(southEastCourtMap);
+        addConsentedCourts(walesCourtMap);
     }
 
-    private void addConsentedCourts(Map<String, String> consentedCourtMap) {
-        consentedCourtMap.forEach((key, value) -> {
+    /**
+     * Adds court details for a consented court id by finding its contested equivalent
+     *
+     * @param courtMap map of consented to contested court ids
+     */
+    private void addConsentedCourts(Map<String, String> courtMap) {
+        courtMap.forEach((key, value) -> {
             CourtDetails courtDetails = courts.get(value);
-            assert courtDetails != null : "No court details found for key: " + value;
+            assert courtDetails != null : "No contested court details found for id: " + value;
             courts.put(key, courtDetails);
         });
     }
