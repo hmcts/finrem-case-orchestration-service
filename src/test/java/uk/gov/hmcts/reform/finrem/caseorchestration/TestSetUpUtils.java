@@ -366,7 +366,6 @@ public class TestSetUpUtils {
             .postCode("SW1")
             .build();
 
-
         caseData.getContactDetailsWrapper().setApplicantFmName("James");
         caseData.getContactDetailsWrapper().setApplicantLname("Joyce");
         caseData.getContactDetailsWrapper().setApplicantAddress(applicantAddress);

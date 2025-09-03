@@ -19,9 +19,9 @@ import java.util.Optional;
 @Slf4j
 public class UploadApprovedOrderService {
     private final HearingOrderService hearingOrderService;
-    private final ContestedOrderApprovedLetterService letterService;
-    private final AdditionalHearingDocumentService documentService;
-    private final ApprovedOrderNoticeOfHearingService noticeService;
+    private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
+    private final AdditionalHearingDocumentService additionalHearingDocumentService;
+    private final ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
 
     /**
      * Method for processing approved orders in a financial remedy case.
@@ -41,9 +41,9 @@ public class UploadApprovedOrderService {
                                       List<String> errors,
                                       String authorisationToken) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        letterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
         try {
-            documentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
+            additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
         } catch (CourtDetailsParseException e) {
             log.error(e.getMessage());
             errors.add(e.getMessage());
@@ -51,18 +51,18 @@ public class UploadApprovedOrderService {
 
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
         if (isAnotherHearingToBeListed(caseDetails)) {
-            noticeService.createAndStoreHearingNoticeDocumentPack(caseDetails, authorisationToken);
+            approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, authorisationToken);
         }
 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         List<DirectionOrderCollection> hearingOrderCollectionBefore
-            = documentService.getApprovedHearingOrders(caseDetailsBefore, authorisationToken);
+            = additionalHearingDocumentService.getApprovedHearingOrders(caseDetailsBefore, authorisationToken);
 
         FinremCaseData caseData = caseDetails.getData();
         List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
         hearingOrderCollectionBefore.addAll(uploadHearingOrders);
         caseData.setUploadHearingOrder(hearingOrderCollectionBefore);
-        documentService.addToFinalOrderCollection(caseDetails, authorisationToken);
+        additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, authorisationToken);
     }
 
     /**
@@ -99,17 +99,17 @@ public class UploadApprovedOrderService {
      * @param authorisationToken the authorisation token for accessing secure resources
      */
     public void processApprovedOrdersMh(FinremCaseDetails caseDetails, FinremCaseDetails detailsBefore, String authorisationToken) {
-        letterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
-        documentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
+        additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
 
         List<DirectionOrderCollection> hearingOrderCollectionBefore
-            = documentService.getApprovedHearingOrders(detailsBefore, authorisationToken);
+            = additionalHearingDocumentService.getApprovedHearingOrders(detailsBefore, authorisationToken);
 
         FinremCaseData caseData = caseDetails.getData();
         List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
         hearingOrderCollectionBefore.addAll(uploadHearingOrders);
         caseData.setUploadHearingOrder(hearingOrderCollectionBefore);
-        documentService.addToFinalOrderCollection(caseDetails, authorisationToken);
+        additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, authorisationToken);
     }
 }

@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
@@ -65,13 +66,15 @@ class FinremNotificationRequestMapperTest {
     @Mock
     ConsentedApplicationHelper consentedApplicationHelper;
 
-    private final FinremCaseDetails consentedFinremCaseDetails = getConsentedFinremCaseDetails();
-    private final FinremCaseDetails contestedFinremCaseDetails = getContestedFinremCaseDetails();
+    private FinremCaseDetails consentedFinremCaseDetails;
+    private FinremCaseDetails contestedFinremCaseDetails;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         // Register the JavaTimeModule for Java 8 Date/Time support
         mapper.registerModule(new JavaTimeModule());
+        consentedFinremCaseDetails = getConsentedFinremCaseDetails();
+        contestedFinremCaseDetails = getContestedFinremCaseDetails();
     }
 
     @Test
@@ -380,6 +383,47 @@ class FinremNotificationRequestMapperTest {
         assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
         assertEquals("David Goodman", notificationRequest.getRespondentName());
         assertEquals(CTSC_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
+    }
+
+    @Test
+    void givenContestedCaseData_whenGeneralEmail_thenBuildNotificationRequest() {
+        String emailBody = "This is a contested case test email";
+        contestedFinremCaseDetails.getData().setGeneralEmailWrapper(GeneralEmailWrapper.builder()
+            .generalEmailBody(emailBody)
+            .build());
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForGeneralEmail(contestedFinremCaseDetails);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals(emailBody, notificationRequest.getGeneralEmailBody());
+        assertEquals("contested", notificationRequest.getCaseType());
+        assertEquals("nottingham", notificationRequest.getSelectedCourt());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+    }
+
+    @Test
+    void givenConsentedCaseData_whenGeneralEmail_thenBuildNotificationRequest() {
+        String emailBody = "This is a consented case test email";
+        consentedFinremCaseDetails.getData().setGeneralEmailWrapper(GeneralEmailWrapper.builder()
+            .generalEmailBody(emailBody)
+            .build());
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForGeneralEmail(consentedFinremCaseDetails);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals(emailBody, notificationRequest.getGeneralEmailBody());
+        assertEquals("consented", notificationRequest.getCaseType());
+        assertEquals("consent", notificationRequest.getCaseOrderType());
+        assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @SneakyThrows

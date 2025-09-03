@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -59,6 +60,32 @@ public class HearingCorrespondenceHelper {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
                 .getValue();
+    }
+
+    /**
+     * Retrieves the {@link HearingTabItem} currently in context based on the working hearing ID from the case data.
+     *
+     * <p>This method accesses the {@link ManageHearingsWrapper} from the provided {@link FinremCaseData},
+     * and uses the working hearing ID to locate the matching {@link HearingTabItem} in the list of hearing tab items.</p>
+     *
+     * <p>If no item matches the working hearing ID,
+     * this method throws an {@link IllegalStateException}.</p>
+     *
+     * <p>A working hearing refers to the {@link HearingTabItem} a user is actively creating or modifying in the UI.</p>
+     *
+     * @param finremCaseData the case data containing the hearing tab items and context
+     * @return the {@link HearingTabItem} associated with the current working hearing ID
+     * @throws IllegalStateException if the hearing tab items list is missing, or no matching item is found
+     */
+    public HearingTabItem getHearingInContextFromTab(FinremCaseData finremCaseData) {
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
+
+        return manageHearingsWrapper.getHearingTabItems().stream()
+            .filter(h -> hearingId.equals(h.getId()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Hearing Tab Item not found for the given ID: " + hearingId))
+            .getValue();
     }
 
     /**

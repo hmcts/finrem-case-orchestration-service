@@ -33,7 +33,7 @@ public class HearingNoticeLetterDetailsMapper extends AbstractManageHearingsLett
             .applicantName(caseData.getFullApplicantName())
             .respondentName(caseData.getRespondentFullName())
             .letterDate(LocalDate.now().toString())
-            .hearingType(hearing.getHearingType().toString())
+            .hearingType(hearing.getHearingType().getId())
             .hearingDate(hearing.getHearingDate().toString())
             .hearingTime(hearing.getHearingTime())
             .hearingTimeEstimate(hearing.getHearingTimeEstimate())

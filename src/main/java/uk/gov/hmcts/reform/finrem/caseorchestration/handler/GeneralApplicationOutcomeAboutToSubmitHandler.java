@@ -14,10 +14,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 
@@ -122,7 +124,13 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
                                                           GeneralApplicationCollectionData data,
                                                           String status) {
         GeneralApplicationItems items = data.getGeneralApplicationItems();
-        items.setGeneralApplicationOutcomeOther(Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcomeOther(), null));
+
+        String outcomeOther = Optional.ofNullable(caseData)
+            .map(FinremCaseData::getGeneralApplicationWrapper)
+            .map(GeneralApplicationWrapper::getGeneralApplicationOutcomeOther)
+            .orElse(null);
+
+        items.setGeneralApplicationOutcomeOther(outcomeOther);
         switch (status) {
             case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.APPROVED.getId());
             case "Not Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.NOT_APPROVED.getId());

@@ -195,6 +195,16 @@ public class FinremNotificationRequestMapper {
             .build();
     }
 
+    /**
+     * Builds a {@link NotificationRequest} for sending a general email notification.
+     * @param caseDetails the case details
+     * @return the populated notification request
+     */
+    public NotificationRequest getNotificationRequestForGeneralEmail(FinremCaseDetails caseDetails) {
+        SolicitorCaseDataKeysWrapper caseDataKeysWrapper = getApplicantSolicitorCaseData(caseDetails.getData());
+        return buildNotificationRequest(caseDetails, caseDataKeysWrapper);
+    }
+
     private void setCaseOrderType(NotificationRequest notificationRequest, FinremCaseData caseData) {
         if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
             notificationRequest.setCaseOrderType("variation");

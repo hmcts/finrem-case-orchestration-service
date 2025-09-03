@@ -10,4 +10,5 @@ public final class EmailToSend {
     String templateId;
     Map<String, Object> templateFields;
     String referenceId;
+    String emailReplyToId;
 }

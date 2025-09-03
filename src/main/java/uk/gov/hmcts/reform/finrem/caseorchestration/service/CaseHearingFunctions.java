@@ -140,8 +140,10 @@ public final class CaseHearingFunctions {
 
     static UnaryOperator<CaseDetails> addFastTrackFields = caseDetails -> {
         Map<String, Object> data = caseDetails.getData();
-        data.put("formCCreatedDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
-        data.put("eventDatePlus21Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now().plusDays(21)));
+        LocalDate formCCreatedDate = LocalDate.now();
+        data.put("formCCreatedDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(formCCreatedDate));
+        data.put("formCCreatedDatePlus28Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(formCCreatedDate.plusDays(28)));
+        data.put("eventDatePlus21Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(formCCreatedDate.plusDays(21)));
 
         return caseDetails;
     };
@@ -159,7 +161,10 @@ public final class CaseHearingFunctions {
         String hearingDate = Objects.toString(data.get(HEARING_DATE));
         LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
 
-        data.put("formCCreatedDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
+        LocalDate formCCreatedDate = LocalDate.now();
+        LocalDate formCCreatedDatePlus28Days = LocalDate.now().plusDays(28);
+        data.put("formCCreatedDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(formCCreatedDate));
+        data.put("formCCreatedDatePlus28Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(formCCreatedDatePlus28Days));
         data.put("hearingDateLess35Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(hearingLocalDate.minusDays(35)));
         data.put("hearingDateLess28Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(hearingLocalDate.minusDays(28)));
         data.put("hearingDateLess21Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(hearingLocalDate.minusDays(21)));
