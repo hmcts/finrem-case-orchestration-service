@@ -90,11 +90,7 @@ public class EmailService {
         templateVars.put("respondentName", notificationRequest.getRespondentName());
         templateVars.put("hearingType", notificationRequest.getHearingType());
 
-        // Contested emails notifications require the court information, consented does not
-        // This block of code can be removed once all NotificationRequests are updated
-        // to populate contactCourtName and contactCourtEmail.
-        // The code block would only be required if emails needed to show the FRC email address
-        // rather than the court email address
+        //contested emails notifications require the court information, consented does not
         if ((CONTESTED.equals(notificationRequest.getCaseType())
             || CONSENTED_LIST_FOR_HEARING.equals(templateName)) && !isEmpty(notificationRequest.getSelectedCourt())) {
             Map<String, String> courtDetails = contestedContactEmails.get(notificationRequest.getSelectedCourt());

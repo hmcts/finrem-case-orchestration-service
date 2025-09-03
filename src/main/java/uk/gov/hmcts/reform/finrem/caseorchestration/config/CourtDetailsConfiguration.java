@@ -93,7 +93,6 @@ public class CourtDetailsConfiguration {
     );
 
     private final Map<String, String> northWestConsentedCourtMap = Map.ofEntries(
-        // North West
         Map.entry(LiverpoolCourt.CONSENTED_LIVERPOOL_CIVIL_FAMILY_COURT.getId(),
             LiverpoolCourt.LIVERPOOL_CIVIL_FAMILY_COURT.getId()),
         Map.entry(LiverpoolCourt.CONSENTED_CHESTER_CIVIL_FAMILY_JUSTICE.getId(),
