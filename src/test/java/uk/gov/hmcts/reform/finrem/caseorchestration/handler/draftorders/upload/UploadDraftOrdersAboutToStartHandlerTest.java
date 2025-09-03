@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -74,7 +74,7 @@ class UploadDraftOrdersAboutToStartHandlerTest {
         when(caseData.getFullApplicantName()).thenReturn("Hello World");
         when(caseData.getRespondentLastName()).thenReturn("Hey");
         when(caseData.getRespondentFullName()).thenReturn("Hello Respondent");
-        when(hearingService.generateSelectableHearingsAsDynamicList(any(), anyString())).thenReturn(hearingDetails);
+        when(hearingService.generateSelectableHearingsAsDynamicList(any(), eq(AUTH_TOKEN))).thenReturn(hearingDetails);
 
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN)).thenReturn(
             CaseAssignedUserRolesResource.builder()
