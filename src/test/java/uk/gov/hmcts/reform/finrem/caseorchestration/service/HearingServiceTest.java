@@ -51,12 +51,17 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService.TOP_LEVEL_HEARING_ID;
 
 @ExtendWith(MockitoExtension.class)
 class HearingServiceTest {
 
     private static final String SELECTED_UUID = UUID.randomUUID().toString();
+    private static final String HEARING_ONE_SELECTABLE_DISPLAY = "2 Feb 2025 09:14 - Final Hearing (FH)";
+    private static final String HEARING_TWO_SELECTABLE_DISPLAY = "3 Mar 2025 10:30 - First Directions Appointment (FDA)";
 
     @InjectMocks
     private HearingService hearingService;
@@ -73,10 +78,11 @@ class HearingServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("hearingScenarios")
-    void shouldGenerateSelectableHearingsAsDynamicListFromManageHearingsWhenToggleIsEnabled(
+    @MethodSource
+    void givenDiffScenarios_whenToggleIsEnabled_thenReturnExpectedSelectableHearings(
+        CaseRole userCaseRole,
         List<ManageHearingsCollectionItem> hearings,
-        Map<String, String> expectedDynamicListItems
+        Map<String, String> expectedSelectableHearings
     ) {
         // Arrange
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
@@ -93,14 +99,14 @@ class HearingServiceTest {
         when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
         when(manageHearingsWrapper.getHearings()).thenReturn(hearings);
 
-        when(caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(CaseRole.APP_SOLICITOR);
+        when(caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(userCaseRole);
 
         // Act
         DynamicList actualDynamicList = hearingService.generateSelectableHearingsAsDynamicList(caseDetails, AUTH_TOKEN);
 
         // Assert
-        assertEquals(expectedDynamicListItems.size(), actualDynamicList.getListItems().size());
-        assertDynamicListEquals(createExpectedDynamicList(expectedDynamicListItems), actualDynamicList);
+        assertEquals(expectedSelectableHearings.size(), actualDynamicList.getListItems().size());
+        assertDynamicListEquals(createExpectedDynamicList(expectedSelectableHearings), actualDynamicList);
 
         verifyNoInteractions(
             finremCaseData.getListForHearingWrapper(),
@@ -110,7 +116,7 @@ class HearingServiceTest {
         );
     }
 
-    private static Stream<Arguments> hearingScenarios() {
+    private static Stream<Arguments> givenDiffScenarios_whenToggleIsEnabled_thenReturnExpectedSelectableHearings() {
         final UUID hearingOneId = UUID.randomUUID();
         final UUID hearingTwoId = UUID.randomUUID();
 
@@ -119,7 +125,8 @@ class HearingServiceTest {
         when(hearingOne.getHearingDate()).thenReturn(LocalDate.of(2025, 2, 2));
         when(hearingOne.getHearingTime()).thenReturn("09:14");
         when(hearingOne.getPartiesOnCase()).thenReturn(List.of(
-            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role("[APPSOLICITOR]").build()).build()
+            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(APP_SOLICITOR.getCcdCode()).build()).build(),
+            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(RESP_SOLICITOR.getCcdCode()).build()).build()
         ));
 
         Hearing hearingTwo = mock(Hearing.class);
@@ -127,48 +134,51 @@ class HearingServiceTest {
         when(hearingTwo.getHearingDate()).thenReturn(LocalDate.of(2025, 3, 3));
         when(hearingTwo.getHearingTime()).thenReturn("10:30");
         when(hearingTwo.getPartiesOnCase()).thenReturn(List.of(
-            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role("[APPSOLICITOR]").build()).build()
+            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(RESP_SOLICITOR.getCcdCode()).build()).build()
         ));
 
-        LinkedHashMap<String, String> expectedTwoHearings = new LinkedHashMap<>();
-        expectedTwoHearings.put(hearingOneId.toString(), "2 Feb 2025 09:14 - Final Hearing (FH)");
-        expectedTwoHearings.put(hearingTwoId.toString(), "3 Mar 2025 10:30 - First Directions Appointment (FDA)");
+        final LinkedHashMap<String, String> expectedSelectableHearingOneAndTwo = new LinkedHashMap<>();
+        expectedSelectableHearingOneAndTwo.put(hearingOneId.toString(), HEARING_ONE_SELECTABLE_DISPLAY);
+        expectedSelectableHearingOneAndTwo.put(hearingTwoId.toString(), HEARING_TWO_SELECTABLE_DISPLAY);
+
+        final List<ManageHearingsCollectionItem> singleHearingAccessibleByAllParties = List.of(
+            ManageHearingsCollectionItem.builder().id(hearingOneId).value(hearingOne).build()
+        );
+        final List<ManageHearingsCollectionItem> twoHearingsWithDifferentConfidentiality =
+            List.of(
+                ManageHearingsCollectionItem.builder().id(hearingOneId).value(hearingOne).build(),
+                ManageHearingsCollectionItem.builder().id(hearingTwoId).value(hearingTwo).build()
+            );
+        final Map<String, String> expectedSelectableHearingsOneOnly = Map.of(hearingOneId.toString(), HEARING_ONE_SELECTABLE_DISPLAY);
 
         return Stream.of(
-            Arguments.of(
-                List.of(),
-                Map.of()
-            ),
-            Arguments.of(
-                List.of(
-                    ManageHearingsCollectionItem.builder().id(hearingOneId).value(hearingOne).build()
-                ),
-                Map.of(
-                    hearingOneId.toString(), "2 Feb 2025 09:14 - Final Hearing (FH)"
-                )
-            ),
-            Arguments.of(
-                List.of(
-                    ManageHearingsCollectionItem.builder().id(hearingOneId).value(hearingOne).build(),
-                    ManageHearingsCollectionItem.builder().id(hearingTwoId).value(hearingTwo).build()
-                ),
-                expectedTwoHearings
-            )
+            // Case 1: Expecting nothing when empty hearing
+            Arguments.of(CASEWORKER, List.of(), Map.of()),
+            Arguments.of(APP_SOLICITOR, List.of(), Map.of()),
+            Arguments.of(RESP_SOLICITOR, List.of(), Map.of()),
+            // Case 2: Expecting different results depending on user case roles in single hearing condition
+            Arguments.of(CASEWORKER, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(APP_SOLICITOR, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(RESP_SOLICITOR, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            // Case 3: Expecting different results depending on user case roles in multiple hearings condition
+            Arguments.of(CASEWORKER, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingOneAndTwo),
+            Arguments.of(APP_SOLICITOR, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly),
+            Arguments.of(RESP_SOLICITOR, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingOneAndTwo)
         );
     }
 
     @ParameterizedTest
-    @MethodSource("hearingCases")
-    void generateSelectableHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
-                                                 LocalDate topLevelHearingDate,
-                                                 String topLevelHearingTime,
-                                                 List<InterimHearingCollection> interimHearings,
-                                                 DynamicList expectedDynamicList) {
+    @MethodSource
+    void givenOldHearingDataStructures_whenToggleIsDisabled_thenReturnExpectedSelectableHearings(HearingTypeDirection topLevelHearingType,
+                                                                                                 LocalDate topLevelHearingDate,
+                                                                                                 String topLevelHearingTime,
+                                                                                                 List<InterimHearingCollection> interimHearings,
+                                                                                                 DynamicList expectedDynamicList) {
         testGenerateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime,
             interimHearings, null, null, expectedDynamicList);
     }
 
-    static Stream<Arguments> hearingCases() {
+    static Stream<Arguments> givenOldHearingDataStructures_whenToggleIsDisabled_thenReturnExpectedSelectableHearings() {
         return Stream.of(
             // Basic Case: No Interim Hearings
             Arguments.of(
@@ -375,18 +385,19 @@ class HearingServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("hearingCasesWithHearingsCreatedFromProcessOrderEvent")
-    void generateSelectableHearingsAsDynamicListFromProcessOrder(HearingTypeDirection topLevelHearingType,
-                                                 LocalDate topLevelHearingDate,
-                                                 String topLevelHearingTime,
-                                                 List<InterimHearingCollection> interimHearings,
-                                                 List<DirectionDetailCollection> directionDetailCollection,
-                                                 DynamicList expectedDynamicList) {
+    @MethodSource
+    void givenOldHearingDataStructures_whenDirectionDetailsCollectionProvided_thenReturnExpectedSelectableHearings(
+        HearingTypeDirection topLevelHearingType,
+        LocalDate topLevelHearingDate,
+        String topLevelHearingTime,
+        List<InterimHearingCollection> interimHearings,
+        List<DirectionDetailCollection> directionDetailCollection,
+        DynamicList expectedDynamicList) {
         testGenerateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime,
             interimHearings, directionDetailCollection, null, expectedDynamicList);
     }
 
-    static Stream<Arguments> hearingCasesWithHearingsCreatedFromProcessOrderEvent() {
+    static Stream<Arguments> givenOldHearingDataStructures_whenDirectionDetailsCollectionProvided_thenReturnExpectedSelectableHearings() {
         return Stream.of(
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -431,13 +442,15 @@ class HearingServiceTest {
         );
     }
 
-    private void testGenerateSelectableHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
-                                                     LocalDate topLevelHearingDate,
-                                                     String topLevelHearingTime,
-                                                     List<InterimHearingCollection> interimHearings,
-                                                     List<DirectionDetailCollection> directionDetailCollection,
-                                                     List<HearingDirectionDetailsCollection> additionalHearings,
-                                                     DynamicList expectedDynamicList) {
+    //A template for testing the old-style hearings
+    private void testGenerateSelectableHearingsAsDynamicList(
+        HearingTypeDirection topLevelHearingType,
+        LocalDate topLevelHearingDate,
+        String topLevelHearingTime,
+        List<InterimHearingCollection> interimHearings,
+        List<DirectionDetailCollection> directionDetailCollection,
+        List<HearingDirectionDetailsCollection> additionalHearings,
+        DynamicList expectedDynamicList) {
         // Arrange
         FinremCaseData.FinremCaseDataBuilder caseDataBuilder = FinremCaseData.builder()
             .interimWrapper(InterimWrapper.builder().interimHearings(interimHearings).build());
@@ -463,19 +476,20 @@ class HearingServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("additionalHearings")
-    void generateSelectableAdditionalHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
-                                                           LocalDate topLevelHearingDate,
-                                                           String topLevelHearingTime,
-                                                           List<InterimHearingCollection> interimHearings,
-                                                           List<DirectionDetailCollection> directionDetailCollection,
-                                                           List<HearingDirectionDetailsCollection> additionalHearings,
-                                                           DynamicList expectedDynamicList) {
+    @MethodSource
+    void givenOldHearingDataStructures_whenAdditionalHearingsProvided_thenReturnExpectedSelectableHearings(
+        HearingTypeDirection topLevelHearingType,
+        LocalDate topLevelHearingDate,
+        String topLevelHearingTime,
+        List<InterimHearingCollection> interimHearings,
+        List<DirectionDetailCollection> directionDetailCollection,
+        List<HearingDirectionDetailsCollection> additionalHearings,
+        DynamicList expectedDynamicList) {
         testGenerateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime,
             interimHearings, directionDetailCollection, additionalHearings, expectedDynamicList);
     }
 
-    private static Stream<Arguments> additionalHearings() {
+    private static Stream<Arguments> givenOldHearingDataStructures_whenAdditionalHearingsProvided_thenReturnExpectedSelectableHearings() {
         return Stream.of(
             // Single additional hearing
             Arguments.of(
@@ -535,10 +549,11 @@ class HearingServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideShouldThrowIllegalStateExceptionData")
-    void shouldThrowIllegalStateException(HearingTypeDirection topLevelHearingType,
-                                          List<InterimHearingCollection> interimHearings,
-                                          List<DirectionDetailCollection> directionDetailCollection) {
+    @MethodSource
+    void givenDiffScenarios_whenHearingTypeIsNotProvided_thenThrowIllegalStateException(
+        HearingTypeDirection topLevelHearingType,
+        List<InterimHearingCollection> interimHearings,
+        List<DirectionDetailCollection> directionDetailCollection) {
         FinremCaseData.FinremCaseDataBuilder caseDataBuilder = FinremCaseData.builder()
             .interimWrapper(InterimWrapper.builder().interimHearings(interimHearings).build());
 
@@ -558,7 +573,7 @@ class HearingServiceTest {
         assertEquals("hearingType is unexpectedly null", e.getMessage());
     }
 
-    static Stream<Arguments> provideShouldThrowIllegalStateExceptionData() {
+    static Stream<Arguments> givenDiffScenarios_whenHearingTypeIsNotProvided_thenThrowIllegalStateException() {
         return Stream.of(
             Arguments.of(null, List.of(), List.of()),
             Arguments.of(HearingTypeDirection.FH,
@@ -573,7 +588,7 @@ class HearingServiceTest {
     }
 
     @Test
-    void testGetHearingDateWhenFeatureToggleEnabled() {
+    void givenSelectedElement_whenFeatureToggleIsEnabled_thenGetHearingDateFromNewManageHearingStructure() {
         when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
 
         FinremCaseData caseData = spy(FinremCaseData.class);
@@ -601,8 +616,9 @@ class HearingServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("hearingDateCases")
-    void testGetHearingDate(String selectedCode, LocalDate expectedDate) {
+    @MethodSource
+    void givenSelectedElement_whenFeatureToggleIsDisabled_thenGetHearingDateFromOldStyleHearingStructure(
+        String selectedCode, LocalDate expectedDate) {
         Arrays.asList(true, false).forEach(singleInterimHearing -> {
             FinremCaseData caseData = spy(FinremCaseData.class);
             DynamicListElement selected = mock(DynamicListElement.class);
@@ -643,7 +659,7 @@ class HearingServiceTest {
         });
     }
 
-    static Stream<Arguments> hearingDateCases() {
+    static Stream<Arguments> givenSelectedElement_whenFeatureToggleIsDisabled_thenGetHearingDateFromOldStyleHearingStructure() {
         return Stream.of(
             Arguments.of("", null), // Edge case: empty selected code
             Arguments.of(TOP_LEVEL_HEARING_ID, LocalDate.of(2024, 10, 21)), // Top-level hearing
@@ -654,7 +670,7 @@ class HearingServiceTest {
     }
 
     @Test
-    void testGetHearingTypeWhenFeatureToggleEnabled() {
+    void givenSelectedElement_whenFeatureToggleIsEnabled_thenGetHearingTypeFromNewManageHearingStructure() {
         when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
 
         FinremCaseData caseData = spy(FinremCaseData.class);
@@ -683,8 +699,8 @@ class HearingServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("hearingTypeCases")
-    void testGetHearingType(String selectedCode, String expectedType) {
+    @MethodSource
+    void givenSelectedElement_whenFeatureToggleIsDisabled_thenGetHearingTypeFromOldStyleHearingStructure(String selectedCode, String expectedType) {
         Arrays.asList(true, false).forEach(singleInterimHearing -> {
             // Arrange
             FinremCaseData caseData = spy(FinremCaseData.class);
@@ -726,7 +742,7 @@ class HearingServiceTest {
         });
     }
 
-    static Stream<Arguments> hearingTypeCases() {
+    static Stream<Arguments> givenSelectedElement_whenFeatureToggleIsDisabled_thenGetHearingTypeFromOldStyleHearingStructure() {
         return Stream.of(
             Arguments.of("", null), // Edge case: empty selected code
             Arguments.of(TOP_LEVEL_HEARING_ID, HearingTypeDirection.FH.getId()), // Top-level hearing type
@@ -737,7 +753,7 @@ class HearingServiceTest {
     }
 
     @Test
-    void testGetHearingTimeWhenFeatureToggleEnabled() {
+    void givenSelectedElement_whenFeatureToggleIsEnabled_thenGetHearingTimeFromNewManageHearingStructure() {
         when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
 
         FinremCaseData caseData = spy(FinremCaseData.class);
@@ -764,8 +780,9 @@ class HearingServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("hearingTimeCases")
-    void testGetHearingTime(String selectedCode, String expectedTime) {
+    @MethodSource
+    void givenSelectedElement_whenFeatureToggleIsDisabled_thenGetHearingTimeFromOldStyleHearingStructure(
+        String selectedCode, String expectedTime) {
         Arrays.asList(true, false).forEach(singleInterimHearing -> {
             // Arrange
             FinremCaseData caseData = spy(FinremCaseData.class);
@@ -807,7 +824,7 @@ class HearingServiceTest {
         });
     }
 
-    static Stream<Arguments> hearingTimeCases() {
+    static Stream<Arguments> givenSelectedElement_whenFeatureToggleIsDisabled_thenGetHearingTimeFromOldStyleHearingStructure() {
         return Stream.of(
             Arguments.of("", null), // Edge case: empty selected code
             Arguments.of(TOP_LEVEL_HEARING_ID, "09:00 AM"), // Top-level hearing time
@@ -818,7 +835,7 @@ class HearingServiceTest {
     }
 
     @Test
-    void testGetHearingInfosFromHearingsCreatedFromProcessOrder() {
+    void givenSelectedElement_whenFeatureToggleIsDisabled_thenGetHearingInfoFromDirectionDetailCollection() {
         String selectedCode = "11000000-0000-0000-0000-000000000000";
 
         LocalDate expectedDate = LocalDate.of(2024, 10, 22);
@@ -852,7 +869,7 @@ class HearingServiceTest {
     }
 
     @Test
-    void testGetHearingInfosFromAdditionalHearings() {
+    void givenSelectedElement_whenFeatureToggleIsDisabled_thenGetHearingInfoFromAdditionalHearing() {
         FinremCaseData caseData = FinremCaseData.builder()
             .hearingDirectionDetailsCollection(List.of(
                 HearingDirectionDetailsCollection.builder()
@@ -885,7 +902,8 @@ class HearingServiceTest {
         "NULL, NULL, NULL, 'N/A on N/A N/A'",
         "'', '2024-11-10', '', ' on 10 November 2024 '"
     })
-    void formatHearingInfo_shouldReturnExpectedOutput(String hearingType, String hearingDate, String hearingTime, String expectedOutput) {
+    void givenDifferentCases_whenFormatHearingInfoInvoked_thenGetFormattedString(
+        String hearingType, String hearingDate, String hearingTime, String expectedOutput) {
         LocalDate parsedHearingDate = "NULL".equals(hearingDate) ? null : LocalDate.parse(hearingDate);
         String parsedHearingType = "NULL".equals(hearingType) ? null : hearingType;
         String parsedHearingTime = "NULL".equals(hearingTime) ? null : hearingTime;
