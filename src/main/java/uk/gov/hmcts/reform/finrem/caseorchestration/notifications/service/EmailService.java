@@ -73,7 +73,7 @@ public class EmailService {
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
-            templateVars);
+            templateVars, notificationRequest.getEmailReplyToId());
         log.info("Sending confirmation email on Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
         sendEmail(emailToSend, "send Confirmation email for " + template.name());
     }
@@ -182,12 +182,11 @@ public class EmailService {
         templateVars.put("documentName", notificationRequest.getDocumentName());
     }
 
-    protected EmailToSend generateEmail(String destinationAddress,
-                                      String templateName,
-                                      Map<String, Object> templateVars) {
+    protected EmailToSend generateEmail(String destinationAddress, String templateName,
+                                        Map<String, Object> templateVars, String emailReplyToId) {
         String referenceId = UUID.randomUUID().toString();
         String templateId = emailTemplates.get(templateName);
-        return new EmailToSend(destinationAddress, templateId, templateVars, referenceId);
+        return new EmailToSend(destinationAddress, templateId, templateVars, referenceId, emailReplyToId);
     }
 
     private void sendEmail(EmailToSend emailToSend, String emailDescription) {
@@ -199,7 +198,8 @@ public class EmailService {
                 templateId,
                 emailToSend.getEmailAddress(),
                 emailToSend.getTemplateFields(),
-                referenceId
+                referenceId,
+                emailToSend.getEmailReplyToId()
             );
             log.info("Sending email success. Reference ID: {}", referenceId);
         } catch (NotificationClientException e) {

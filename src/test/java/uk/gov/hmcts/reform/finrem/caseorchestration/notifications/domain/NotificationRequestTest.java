@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.NotificationConstants.PHONE_OPENING_HOURS;
@@ -14,12 +16,14 @@ class NotificationRequestTest {
 
     @Test
     void shouldGetHwfNotificationRequestData() {
+        String emailReplyToId = UUID.randomUUID().toString();
         underTest = new NotificationRequest("123456",
             "45623", "D123", "Padmaja", "test@test.com",
             "nottingham", CONTESTED, "body", PHONE_OPENING_HOURS, "consent",
             "Consent",
             "rejectedReason", "app", "res", "1234567890", "", "", "", "", null, null,
-            "2024-01-01", "judgeName", "2024-01-01", "Feedback by Mr. judge", "ABC.doc");
+            "2024-01-01", "judgeName", "2024-01-01", "Feedback by Mr. judge", "ABC.doc",
+            "A Court Name", "test@test.com", emailReplyToId);
         assertEquals("123456", underTest.getCaseReferenceNumber());
         assertEquals("45623", underTest.getSolicitorReferenceNumber());
         assertEquals("D123", underTest.getDivorceCaseNumber());
@@ -38,6 +42,9 @@ class NotificationRequestTest {
         assertEquals("2024-01-01", underTest.getOldestDraftOrderDate());
         assertEquals("Feedback by Mr. judge", underTest.getJudgeFeedback());
         assertEquals("ABC.doc", underTest.getDocumentName());
+        assertEquals("A Court Name", underTest.getContactCourtName());
+        assertEquals("test@test.com", underTest.getContactCourtEmail());
+        assertEquals(emailReplyToId, underTest.getEmailReplyToId());
     }
 
     @Test

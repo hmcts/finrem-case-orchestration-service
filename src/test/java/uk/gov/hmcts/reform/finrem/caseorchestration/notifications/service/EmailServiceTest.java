@@ -29,6 +29,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.NotificationConstants.PHONE_OPENING_HOURS;
@@ -141,7 +142,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_HWF_SUCCESSFUL.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -162,7 +163,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONTESTED_HWF_SUCCESSFUL.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -184,7 +185,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONTESTED_HWF_SUCCESSFUL.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -216,7 +217,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_ASSIGNED_TO_JUDGE.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -238,7 +239,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONTESTED_PREPARE_FOR_HEARING.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -261,7 +262,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -292,7 +293,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONSENT_ORDER_MADE.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -312,7 +313,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONSENT_ORDER_MADE.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -344,7 +345,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONSENT_ORDER_NOT_APPROVED.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -363,7 +364,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONSENT_ORDER_NOT_APPROVED_SENT.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -393,7 +394,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONSENT_ORDER_AVAILABLE.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -411,7 +412,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE.name())),
             eq(TEST_SOLICITOR_EMAIL),
             eq(returnedTemplateVars),
-            anyString());
+            anyString(), isNull());
     }
 
     @Test
@@ -730,7 +731,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE.name())),
             eq("recipient@test.com"),
             templateFieldsArgumentCaptor.capture(),
-            anyString());
+            anyString(), isNull());
 
         Map<String, Object> actualTemplateFields = templateFieldsArgumentCaptor.getValue();
         expectedTemplateFields.forEach((k, v) -> assertEquals(v, actualTemplateFields.get(k)));
@@ -769,7 +770,7 @@ public class EmailServiceTest {
             eq(emailTemplates.get(FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED.name())),
             eq("recipient@test.com"),
             templateFieldsArgumentCaptor.capture(),
-            anyString());
+            anyString(), isNull());
 
         Map<String, Object> actualTemplateFields = templateFieldsArgumentCaptor.getValue();
         expectedTemplateFields.forEach((k, v) -> assertEquals(v, actualTemplateFields.get(k)));
