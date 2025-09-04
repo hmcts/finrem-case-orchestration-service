@@ -169,16 +169,16 @@ class HearingServiceTest {
 
     @ParameterizedTest
     @MethodSource
-    void givenOldHearingDataStructures_whenToggleIsDisabled_thenReturnExpectedSelectableHearings(HearingTypeDirection topLevelHearingType,
-                                                                                                 LocalDate topLevelHearingDate,
-                                                                                                 String topLevelHearingTime,
-                                                                                                 List<InterimHearingCollection> interimHearings,
-                                                                                                 DynamicList expectedDynamicList) {
+    void givenOldStyleHearings_whenToggleIsDisabled_thenReturnExpectedSelectableHearings(HearingTypeDirection topLevelHearingType,
+                                                                                         LocalDate topLevelHearingDate,
+                                                                                         String topLevelHearingTime,
+                                                                                         List<InterimHearingCollection> interimHearings,
+                                                                                         DynamicList expectedDynamicList) {
         testGenerateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime,
             interimHearings, null, null, expectedDynamicList);
     }
 
-    static Stream<Arguments> givenOldHearingDataStructures_whenToggleIsDisabled_thenReturnExpectedSelectableHearings() {
+    static Stream<Arguments> givenOldStyleHearings_whenToggleIsDisabled_thenReturnExpectedSelectableHearings() {
         return Stream.of(
             // Basic Case: No Interim Hearings
             Arguments.of(
@@ -386,7 +386,7 @@ class HearingServiceTest {
 
     @ParameterizedTest
     @MethodSource
-    void givenOldHearingDataStructures_whenDirectionDetailsCollectionProvided_thenReturnExpectedSelectableHearings(
+    void givenOldStyleHearings_whenDirectionDetailsCollectionProvided_thenReturnExpectedSelectableHearings(
         HearingTypeDirection topLevelHearingType,
         LocalDate topLevelHearingDate,
         String topLevelHearingTime,
@@ -397,7 +397,7 @@ class HearingServiceTest {
             interimHearings, directionDetailCollection, null, expectedDynamicList);
     }
 
-    static Stream<Arguments> givenOldHearingDataStructures_whenDirectionDetailsCollectionProvided_thenReturnExpectedSelectableHearings() {
+    static Stream<Arguments> givenOldStyleHearings_whenDirectionDetailsCollectionProvided_thenReturnExpectedSelectableHearings() {
         return Stream.of(
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -477,7 +477,7 @@ class HearingServiceTest {
 
     @ParameterizedTest
     @MethodSource
-    void givenOldHearingDataStructures_whenAdditionalHearingsProvided_thenReturnExpectedSelectableHearings(
+    void givenOldStyleHearings_whenAdditionalHearingsProvided_thenReturnExpectedSelectableHearings(
         HearingTypeDirection topLevelHearingType,
         LocalDate topLevelHearingDate,
         String topLevelHearingTime,
@@ -489,7 +489,7 @@ class HearingServiceTest {
             interimHearings, directionDetailCollection, additionalHearings, expectedDynamicList);
     }
 
-    private static Stream<Arguments> givenOldHearingDataStructures_whenAdditionalHearingsProvided_thenReturnExpectedSelectableHearings() {
+    private static Stream<Arguments> givenOldStyleHearings_whenAdditionalHearingsProvided_thenReturnExpectedSelectableHearings() {
         return Stream.of(
             // Single additional hearing
             Arguments.of(
