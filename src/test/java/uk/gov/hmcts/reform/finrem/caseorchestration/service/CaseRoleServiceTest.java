@@ -69,6 +69,6 @@ class CaseRoleServiceTest {
         CaseRole result = caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN);
 
         // then
-        assertThat(result).isEqualTo(CaseRole.forValue("[APPSOLICITOR]"));
+        assertThat(result).isEqualTo(APP_SOLICITOR);
     }
 }
