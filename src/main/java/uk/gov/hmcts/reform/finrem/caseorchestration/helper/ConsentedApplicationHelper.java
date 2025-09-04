@@ -59,7 +59,7 @@ public class ConsentedApplicationHelper {
         }
     }
 
-    public Boolean isVariationOrder(final FinremCaseData caseData) {
+    public boolean isVariationOrder(final FinremCaseData caseData) {
         List<NatureApplication> natureOfApplicationList = caseData.getNatureApplicationWrapper().getNatureOfApplication2();
         log.info("Nature list {}", natureOfApplicationList);
         return (!CollectionUtils.isEmpty(natureOfApplicationList)
