@@ -35,7 +35,7 @@ public class CaseAssignedRoleService {
                                                        String authToken) {
 
         CaseAssignedUserRolesResource resource = getCaseAssignedUserRole(caseDetails.getId().toString(), authToken);
-        String caseRole = resource.getCaseAssignedUserRoles().getFirst().getCaseRole();
+        String caseRole = resource.getCaseAssignedUserRoles().get(0).getCaseRole();
 
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
 
