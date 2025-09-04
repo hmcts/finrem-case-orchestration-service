@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -100,10 +101,10 @@ public class EmailService {
         }
 
         // Override court name/email address values if present in the request
-        if (notificationRequest.getContactCourtName() != null) {
+        if (StringUtils.isNotBlank(notificationRequest.getContactCourtName())) {
             templateVars.put("courtName", notificationRequest.getContactCourtName());
         }
-        if (notificationRequest.getContactCourtEmail() != null) {
+        if (StringUtils.isNotBlank(notificationRequest.getContactCourtEmail())) {
             templateVars.put("courtEmail", notificationRequest.getContactCourtEmail());
         }
 
