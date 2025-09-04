@@ -35,7 +35,6 @@ import java.util.function.Function;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
 
 @Service
 @Slf4j
@@ -238,7 +237,7 @@ public class HearingService {
         List<ManageHearingsCollectionItem> hearings, String userAuthorisation) {
 
         CaseRole currentCaseRole = caseRoleService.getUserCaseRole(caseId, userAuthorisation);
-        if (currentCaseRole == CASEWORKER) {
+        if (currentCaseRole == null) {
             return hearings;
         }
         return hearings.stream()

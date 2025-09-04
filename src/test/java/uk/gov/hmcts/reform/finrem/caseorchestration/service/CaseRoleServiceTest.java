@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
 
 @ExtendWith(MockitoExtension.class)
 class CaseRoleServiceTest {
@@ -28,7 +27,7 @@ class CaseRoleServiceTest {
     private CaseAssignedRoleService caseAssignedRoleService;
 
     @Test
-    void shouldReturnCaseworkerWhenNoRolesAssigned() {
+    void shouldReturnNullWhenNoRolesAssigned() {
         // given
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(null);
@@ -37,11 +36,11 @@ class CaseRoleServiceTest {
         CaseRole result = caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN);
 
         // then
-        assertThat(result).isEqualTo(CASEWORKER);
+        assertThat(result).isNull();
     }
 
     @Test
-    void shouldReturnCaseworkerWhenRoleListIsEmpty() {
+    void shouldReturnNullWhenRoleListIsEmpty() {
         // given
         CaseAssignedUserRolesResource resource = new CaseAssignedUserRolesResource();
         resource.setCaseAssignedUserRoles(List.of());
@@ -52,7 +51,7 @@ class CaseRoleServiceTest {
         CaseRole result = caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN);
 
         // then
-        assertThat(result).isEqualTo(CASEWORKER);
+        assertThat(result).isNull();
     }
 
     @Test

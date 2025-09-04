@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -19,15 +17,19 @@ public class CaseRoleService {
     private final CaseAssignedRoleService caseAssignedRoleService;
 
     /**
-     * Retrieves the case role of the logged-in user for a given case ID.
+     * Retrieves the case role of the logged-in user for a given case.
      *
      * <p>
-     * If the user has an assigned case role, the first one found is returned.
-     * Otherwise, the default {@link CaseRole#CASEWORKER} is returned.
+     * This method calls {@code caseAssignedRoleService} to fetch the list of
+     * case-user-role assignments for the specified case ID and authorisation token.
+     * If roles are returned, the first case role is mapped to a {@link CaseRole}
+     * and returned. If no roles are found, or the resource is {@code null}, the
+     * method returns {@code null}.
+     * </p>
      *
-     * @param id   the case identifier
-     * @param auth the user authorisation token
-     * @return the user's {@link CaseRole}, or {@link CaseRole#CASEWORKER} if none is assigned
+     * @param id   the case ID
+     * @param auth the authorisation token of the logged-in user
+     * @return the {@link CaseRole} of the logged-in user, or {@code null} if no role is found
      */
     public CaseRole getUserCaseRole(String id, String auth) {
         CaseAssignedUserRolesResource caseAssignedUserRole = caseAssignedRoleService.getCaseAssignedUserRole(id, auth);
@@ -41,6 +43,6 @@ public class CaseRoleService {
             }
         }
 
-        return CASEWORKER;
+        return null;
     }
 }
