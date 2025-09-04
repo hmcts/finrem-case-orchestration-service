@@ -238,7 +238,8 @@ class CourtDetailsMapperTest {
         // Mocking the court details map
         when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of(
             "FR_s_CFCList_2", new CourtDetails("Croydon County Court And Family Court",
-                "Croydon County Court, Altyre Road, Croydon, CR9 5AB", "0300 123 5577", "FRCLondon@justice.gov.uk")
+                "Croydon County Court, Altyre Road, Croydon, CR9 5AB", "0300 123 5577",
+                "FRCLondon@justice.gov.uk", "42b18e70-18e8-4290-bb85-9c5254548345")
         ));
 
         // Setting up the test data
@@ -263,6 +264,7 @@ class CourtDetailsMapperTest {
         assertEquals("Croydon County Court, Altyre Road, Croydon, CR9 5AB", courtDetails.getCourtAddress());
         assertEquals("FRCLondon@justice.gov.uk", courtDetails.getEmail());
         assertEquals("0300 123 5577", courtDetails.getPhoneNumber());
+        assertEquals("42b18e70-18e8-4290-bb85-9c5254548345", courtDetails.getEmailReplyToId());
     }
 
     @Test
