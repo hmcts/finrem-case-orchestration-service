@@ -20,6 +20,7 @@ public class CaseRoleService {
 
     /**
      * Retrieves the case role of the logged-in user for a given case ID.
+     *
      * <p>
      * If the user has an assigned case role, the first one found is returned.
      * Otherwise, the default {@link CaseRole#CASEWORKER} is returned.
