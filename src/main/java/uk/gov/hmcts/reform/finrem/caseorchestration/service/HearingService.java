@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
@@ -38,6 +35,7 @@ import java.util.function.Function;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
 
 @Service
 @Slf4j
@@ -234,27 +232,17 @@ public class HearingService {
             .map(PartyOnCase::getRole).toList();
     }
 
-    private final AuthTokenGenerator authTokenGenerator;
-    private final DataStoreClient dataStoreClient;
+    private final CaseRoleService caseRoleService;
 
-    private List<CaseAssignedUserRole> getCaseAssignedUserRoles(String authToken, String caseId) {
-        String serviceToken = authTokenGenerator.generate();
-        CaseAssignedUserRolesResource caseAssignedUserRolesResource = dataStoreClient.getUserRoles(authToken,
-            serviceToken, caseId, null);
+    private List<ManageHearingsCollectionItem> applyConfidentiality(String caseId,
+        List<ManageHearingsCollectionItem> hearings, String userAuthorisation) {
 
-        return caseAssignedUserRolesResource.getCaseAssignedUserRoles();
-    }
-
-    private List<ManageHearingsCollectionItem> applyConfidentiality(String caseId, List<ManageHearingsCollectionItem> hearings,
-                                                                    String userAuthorisation) {
-        List<CaseAssignedUserRole> roles = getCaseAssignedUserRoles(userAuthorisation, caseId);
-        List<String> userRoles = emptyIfNull(roles.stream().map(CaseAssignedUserRole::getCaseRole).toList());
-
+        CaseRole currentCaseRole = caseRoleService.getUserCaseRole(caseId, userAuthorisation);
+        if (currentCaseRole == CASEWORKER) {
+            return hearings;
+        }
         return hearings.stream()
-            .filter(hearingItem -> {
-                List<String> hearingRoles = getRoles(hearingItem);
-                return hearingRoles.stream().anyMatch(userRoles::contains);
-            })
+            .filter(item -> getRoles(item).contains(currentCaseRole.getCcdCode()))
             .toList();
     }
 

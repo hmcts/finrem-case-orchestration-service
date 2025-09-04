@@ -10,10 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -54,7 +51,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService.TOP_LEVEL_HEARING_ID;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,10 +65,7 @@ class HearingServiceTest {
     private FeatureToggleService featureToggleService;
 
     @Mock
-    private AuthTokenGenerator authTokenGenerator;
-
-    @Mock
-    DataStoreClient dataStoreClient;
+    private CaseRoleService caseRoleService;
 
     @BeforeEach
     void setUp() {
@@ -100,11 +93,7 @@ class HearingServiceTest {
         when(featureToggleService.isManageHearingEnabled()).thenReturn(true);
         when(manageHearingsWrapper.getHearings()).thenReturn(hearings);
 
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, null))
-            .thenReturn(CaseAssignedUserRolesResource.builder().caseAssignedUserRoles(List.of(
-                CaseAssignedUserRole.builder().caseRole("[APPSOLICITOR]").build()
-            )).build());
+        when(caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(CaseRole.APP_SOLICITOR);
 
         // Act
         DynamicList actualDynamicList = hearingService.generateSelectableHearingsAsDynamicList(caseDetails, AUTH_TOKEN);
