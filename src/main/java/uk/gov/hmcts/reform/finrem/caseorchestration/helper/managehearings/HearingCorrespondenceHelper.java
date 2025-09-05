@@ -104,7 +104,6 @@ public class HearingCorrespondenceHelper {
     }
 
     /**
-     * TODO: Update tests for application hearing
      * Determines if a hearing should only send a notice. And should NOT send additional hearing documents.
      * To return true:
      * - the Action must be ADD_HEARING.

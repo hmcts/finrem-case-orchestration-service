@@ -362,11 +362,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         when(manageHearingsDocumentService.getHearingNotice(any(FinremCaseDetails.class)))
             .thenReturn(caseDocument(DOC_URL, HEARING_DOCUMENT_NAME, HEARING_DOCUMENT_BIN_URL));
 
-        CaseDocument expectedDocument = CaseDocument.builder()
-            .documentFilename(HEARING_DOCUMENT_NAME)
-            .documentUrl(DOC_URL)
-            .documentBinaryUrl(HEARING_DOCUMENT_BIN_URL)
-            .build();
+        CaseDocument expectedDocument = Optional.empty();
 
         // Act
         Optional<CaseDocument> result =

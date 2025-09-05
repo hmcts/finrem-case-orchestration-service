@@ -41,9 +41,7 @@ public class GeneralApplicationDirectionsNewEventSubmittedHandler extends Finrem
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-
-        // Todo: test for this
-        // Send hearing notice or notification if hearing is required
+        // Hearings are optional, so send hearing correspondence if a hearing was added in the event.
         if (generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())) {
             manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }

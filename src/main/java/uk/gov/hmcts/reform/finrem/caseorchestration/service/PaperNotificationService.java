@@ -57,7 +57,6 @@ public class PaperNotificationService {
     }
 
     /**
-     * TODO: Needs test
      * Determines if a case should print correspondence for posting to an applicant.
      * Note: Unlike the shouldPrintForApplicant method, this disregards whether the initial application was paper or not.
      * DFR-4076 explores whether approaches between this and shouldPrintForApplicant can be consistent.

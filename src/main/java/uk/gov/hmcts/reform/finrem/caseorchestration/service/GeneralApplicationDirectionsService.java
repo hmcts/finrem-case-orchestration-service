@@ -122,7 +122,6 @@ public class GeneralApplicationDirectionsService {
     }
 
     /**
-     * Todo: A test should fail, because hearing notice not returned here anymore. Amend test to look for optional empty when hearing required.
      * Generates a General Application Directions Order document when a hearing is not required.
      * If a hearing is required, returns an empty {@link Optional}.
      *
@@ -152,6 +151,12 @@ public class GeneralApplicationDirectionsService {
         return YesOrNo.isYes(hearingRequired);
     }
 
+    /*
+    If any referdetail is present, applicant and respondent are send correspondence via Bulk Print.
+    If referdetail indicates that the GA came from an intervener, that intervener will receive correspondence too.
+    referDetail comes from a label created when the General Application is created, can look like this:
+    "Received from - Intervener1 - Created Date - 2025-09-04 - Hearing Required - Yes" (reads applicant or respondent for these parties)
+     */
     private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails caseDetails, String authorisationToken,
                                                            List<BulkPrintDocument> documents) {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();

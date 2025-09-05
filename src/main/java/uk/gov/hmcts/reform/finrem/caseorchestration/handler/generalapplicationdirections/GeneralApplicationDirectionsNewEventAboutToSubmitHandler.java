@@ -80,7 +80,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
 
         //Invoke performAddHearing when hearing is required
         if (service.isHearingRequired(caseDetails)) {
-            // Todo: Line below needs a test, consider wrapping in a private method with a descriptive name
+            // Todo pt: Line below needs a test, consider wrapping in a private method with a descriptive name
             caseData.getManageHearingsWrapper().setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
             manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
             manageHearingActionService.updateTabData(caseData);
