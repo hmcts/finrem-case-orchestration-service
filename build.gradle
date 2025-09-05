@@ -33,7 +33,6 @@ def versions = [
         wiremock             : '3.0.1',
         apacheLogging        : '2.25.1',
         idamClient           : '3.0.4',
-        jjwt                 : '0.12.7',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
         tika                 : '3.2.2',
@@ -498,7 +497,6 @@ dependencies {
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured'
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
-    functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: versions.jjwt
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
