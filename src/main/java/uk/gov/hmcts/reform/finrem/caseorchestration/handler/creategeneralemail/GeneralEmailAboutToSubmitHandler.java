@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -13,10 +14,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.InvalidEmailAddressException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.SendEmailException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralEmailDocumentCategoriser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -50,10 +56,9 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Received request to send general email for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        CallbackHandlerLogger.aboutToSubmit(callbackRequest);
         validateCaseData(callbackRequest);
 
-        log.info("Sending general email notification for Case ID: {}", callbackRequest.getCaseDetails().getId());
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseDocument generalEmailUploadedDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         if (generalEmailUploadedDocument != null) {
@@ -63,15 +68,25 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
         }
         generalEmailService.storeGeneralEmail(caseDetails);
 
-        if (caseDetails.isConsentedApplication()) {
-            notificationService.sendConsentGeneralEmail(caseDetails, userAuthorisation);
-        } else {
-            notificationService.sendContestedGeneralEmail(caseDetails, userAuthorisation);
-            generalEmailCategoriser.categorise(caseDetails.getData());
+        List<String> errors = new ArrayList<>();
+        try {
+            if (caseDetails.isConsentedApplication()) {
+                notificationService.sendConsentGeneralEmail(caseDetails, userAuthorisation);
+            } else {
+                notificationService.sendContestedGeneralEmail(caseDetails, userAuthorisation);
+                generalEmailCategoriser.categorise(caseDetails.getData());
+            }
+
+            caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailValuesToNull();
+        } catch (InvalidEmailAddressException e) {
+            errors.add("Not a valid email address");
+        } catch (SendEmailException e) {
+            errors.add("An error occurred when sending the email");
         }
 
-        caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailValuesToNull();
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseDetails.getData())
+            .errors(errors)
+            .build();
     }
 }
