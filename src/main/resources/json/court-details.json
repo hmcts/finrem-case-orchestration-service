@@ -123,7 +123,8 @@
     "courtName": "Birmingham Civil And Family Justice Centre",
     "courtAddress": "Priory Courts, 33 Bull Street, Birmingham, B4 6DS",
     "phoneNumber": "0300 123 5577",
-    "email": "FRCBirmingham@justice.gov.uk"
+    "email": "FRCBirmingham@justice.gov.uk",
+    "emailReplyToId": "22a13617-b938-433e-a2d3-6390354f8c4d"
   },
   "FR_birmingham_hc_list_2": {
     "courtName": "Coventry Combined Court Centre",
@@ -225,7 +226,8 @@
     "courtName": "Darlington County Court and Family Court",
     "courtAddress": "4 Coniscliffe Road, Darlington, DL3 7RL",
     "phoneNumber": "0300 123 5577",
-    "email": "Family.newcastle.countycourt@justice.gov.uk"
+    "email": "Family.newcastle.countycourt@justice.gov.uk",
+    "emailReplyToId": "88906b91-2295-4887-8ffc-848f2c84171e"
   },
   "FR_cleaveland_hc_list_9": {
     "courtName": "Darlington Magistrates Court",
@@ -591,7 +593,8 @@
     "courtName": "Bedford County Court and Family Hearing Centre",
     "courtAddress": "Shire Hall, 3 St Paul's square, Bedford, MK40 1SQ",
     "phoneNumber": "0300 123 5577",
-    "email": "Lutoncountyfamily@Justice.gov.uk"
+    "email": "Lutoncountyfamily@Justice.gov.uk",
+    "emailReplyToId": "ec36ee15-3191-42c6-b0ee-7ce94fd0bf58"
   },
   "FR_bedfordshireList_9": {
     "courtName": "Luton Justice Centre",
@@ -759,7 +762,8 @@
     "courtName": "Bath Law Courts",
     "courtAddress": "The Law Courts, North Parade Road, Bath, BA1 5AF",
     "phoneNumber": "0300 123 5577",
-    "email": "BristolFRC.bristol.countycourt@justice.gov.uk"
+    "email": "BristolFRC.bristol.countycourt@justice.gov.uk",
+    "emailReplyToId": "06eb50b8-dacc-41d7-a688-0d227309435b"
   },
   "FR_bristolList_6": {
     "courtName": "Weston Super Mare County and Family Court",
