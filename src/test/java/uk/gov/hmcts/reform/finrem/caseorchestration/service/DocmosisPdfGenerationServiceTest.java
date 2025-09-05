@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -41,7 +42,8 @@ public class DocmosisPdfGenerationServiceTest {
     public static final ImmutableMap<String, Object> PLACEHOLDERS =
         ImmutableMap.of("caseDetails", CaseDetails.builder().data(caseDataMap()).build());
     public static final String TEMPLATE_NAME = "template name";
-    public static final String PDF_SERVICE_URI = "http://localhost:4001/rs/render";
+    @Value("${service.pdf-service.render-uri}")
+    private String pdfServiceUri;
 
     @Autowired
     private DocmosisPdfGenerationService pdfGenerationService;
@@ -68,7 +70,7 @@ public class DocmosisPdfGenerationServiceTest {
 
     @Test
     public void generatePdfDocument() {
-        mockServer.expect(requestTo(PDF_SERVICE_URI))
+        mockServer.expect(requestTo(pdfServiceUri))
             .andExpect(method(HttpMethod.POST))
             .andRespond(withSuccess(FILE_CONTENT, MediaType.APPLICATION_OCTET_STREAM));
 
@@ -79,7 +81,7 @@ public class DocmosisPdfGenerationServiceTest {
 
     @Test
     public void generatePdfDocument400() {
-        mockServer.expect(requestTo(PDF_SERVICE_URI))
+        mockServer.expect(requestTo(pdfServiceUri))
             .andExpect(method(HttpMethod.POST))
             .andRespond(withBadRequest());
 

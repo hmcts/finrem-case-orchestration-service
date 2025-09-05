@@ -33,5 +33,6 @@ public class FormCLetterDetails implements DocumentTemplateDetails {
     private String timeEstimate;
     private String additionalInformationAboutHearing;
     private String formCCreatedDate;
+    private String formCCreatedDatePlus28Days;
     private String eventDatePlus21Days;
 }
