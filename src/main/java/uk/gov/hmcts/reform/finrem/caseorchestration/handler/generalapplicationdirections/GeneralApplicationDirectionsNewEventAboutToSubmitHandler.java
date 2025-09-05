@@ -286,11 +286,10 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
     }
 
     /*
-    ManageHearingAction influences how notifications sent when submitted handler called.
+     * ManageHearingAction, ADD_HEARING, influences how notifications sent when submitted handler called.
      */
     private void performAddHearingIfNecessary(FinremCaseDetails caseDetails, String userAuthorisation) {
         if (gaDirectionService.isHearingRequired(caseDetails)) {
-            // Todo pt: Line below needs a test
             caseDetails.getData().getManageHearingsWrapper().setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
             manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
             manageHearingActionService.updateTabData(caseDetails.getData());

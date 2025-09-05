@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -40,6 +41,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Ge
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -455,6 +458,32 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         assertNull(data.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList());
         assertThat(submitHandle.getState()).isEqualTo(PREPARE_FOR_HEARING_STATE);
         verify(gaDirectionService).submitCollectionGeneralApplicationDirections(any(), any(), any());
+    }
+
+    /*
+     * Opted for reflection to test performAddHearingIfNecessary.  Avoids complex setup to test this private method.
+     * Test written to ensure that ManageHearingsAction.ADD_HEARING is set by performAddHearingIfNecessary.
+     */
+    @Test
+    void givenCase_whenPerformAddHearingIfNecessary_thenCaseWithHearingHasAddHearingAction()
+        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
+        // Arrange
+        FinremCaseDetails caseDetails = buildFinremCallbackRequest().getCaseDetails();
+        when(gaDirectionService.isHearingRequired(caseDetails)).thenReturn(true);
+        String userAuthorisation = "Bearer test-token";
+
+        // Act, call performAddHearingIfNecessary using reflection
+        Method method = GeneralApplicationDirectionsNewEventAboutToSubmitHandler.class.getDeclaredMethod(
+            "performAddHearingIfNecessary", FinremCaseDetails.class, String.class);
+        method.setAccessible(true);
+        method.invoke(aboutToSubmitHandler, caseDetails, userAuthorisation);
+
+        // Assert
+        assertThat(caseDetails.getData().getManageHearingsWrapper().getManageHearingsActionSelection())
+            .isEqualTo(ManageHearingsAction.ADD_HEARING);
+        verify(manageHearingActionService).performAddHearing(eq(caseDetails), eq(userAuthorisation));
+        verify(manageHearingActionService).updateTabData(eq(caseDetails.getData()));
     }
 
     private DynamicRadioList buildDynamicIntervenerList() {
