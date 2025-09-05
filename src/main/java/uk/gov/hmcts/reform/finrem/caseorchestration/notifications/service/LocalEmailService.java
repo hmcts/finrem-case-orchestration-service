@@ -20,8 +20,8 @@ import java.util.Map;
 public class LocalEmailService extends EmailService {
 
     @Autowired
-    public LocalEmailService(EmailClient emailClient) {
-        super(emailClient);
+    public LocalEmailService(EmailClient emailClient, NotificationClientExceptionResolver exceptionResolver) {
+        super(emailClient, exceptionResolver);
     }
 
     /**
