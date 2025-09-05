@@ -14,4 +14,5 @@ public class CourtDetails {
     private String courtAddress;
     private String phoneNumber;
     private String email;
+    private String emailReplyToId;
 }
