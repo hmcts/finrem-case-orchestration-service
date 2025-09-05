@@ -202,7 +202,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
         }
 
         Optional<CaseDocument> generateGeneralApplicationDirectionsDocument =
-            service.generateGeneralApplicationDirectionsDocument(userAuthorisation, finremCaseDetails);
+            service.generateGeneralApplicationDirectionsDocumentIfNeeded(userAuthorisation, finremCaseDetails);
         generateGeneralApplicationDirectionsDocument.ifPresent(gadDoc -> {
             items.setGeneralApplicationDirectionsDocument(gadDoc);
 
@@ -212,6 +212,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
                 .build();
 
             bulkPrintDocuments.add(gadBpDoc);
+            log.info("General Applications Directions document sent to Bulk Print, for case ID: {}", caseId);
         });
 
         log.info("items getGeneralApplicationDocument {}, for case ID: {}",

@@ -129,7 +129,7 @@ public class GeneralApplicationDirectionsService {
      * @param finremCaseDetails the details of the financial remedy case for which the document is generated
      * @return an {@link Optional} containing the generated {@link CaseDocument} if created; otherwise {@link Optional#empty()}.
      */
-    public Optional<CaseDocument> generateGeneralApplicationDirectionsDocument(
+    public Optional<CaseDocument> generateGeneralApplicationDirectionsDocumentIfNeeded(
         String authorisationToken, FinremCaseDetails finremCaseDetails) {
 
         if (isHearingRequired(finremCaseDetails)) {

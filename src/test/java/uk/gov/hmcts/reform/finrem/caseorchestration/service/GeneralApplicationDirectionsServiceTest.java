@@ -329,17 +329,19 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             .data(caseData)
             .build();
 
-        CaseDocument expectedDocument = CaseDocument.builder()
-            .documentFilename(FILE_NAME)
-            .documentUrl(DOC_URL)
-            .documentBinaryUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
-            .build();
+        Optional<CaseDocument> expectedDocument = Optional.of(
+            CaseDocument.builder()
+                .documentFilename(FILE_NAME)
+                .documentUrl(DOC_URL)
+                .documentBinaryUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
+                .build()
+        );
 
         when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
 
         // Act
         Optional<CaseDocument> result =
-            generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocument(AUTH_TOKEN, finremCaseDetails);
+            generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocumentIfNeeded(AUTH_TOKEN, finremCaseDetails);
 
         // Assert
         assertEquals(expectedDocument, result);
@@ -362,11 +364,12 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         when(manageHearingsDocumentService.getHearingNotice(any(FinremCaseDetails.class)))
             .thenReturn(caseDocument(DOC_URL, HEARING_DOCUMENT_NAME, HEARING_DOCUMENT_BIN_URL));
 
-        CaseDocument expectedDocument = Optional.empty();
+        // When a hearing is required, the general application directions document should not be generated
+        Optional<CaseDocument> expectedDocument = Optional.empty();
 
         // Act
         Optional<CaseDocument> result =
-            generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocument(AUTH_TOKEN, finremCaseDetails);
+            generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocumentIfNeeded(AUTH_TOKEN, finremCaseDetails);
 
         // Assert
         assertEquals(expectedDocument, result);
