@@ -52,6 +52,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService.TOP_LEVEL_HEARING_ID;
 
@@ -153,14 +154,17 @@ class HearingServiceTest {
         return Stream.of(
             // Case 1: Expecting nothing when empty hearing
             Arguments.of(null, List.of(), Map.of()),
+            Arguments.of(CASEWORKER, List.of(), Map.of()),
             Arguments.of(APP_SOLICITOR, List.of(), Map.of()),
             Arguments.of(RESP_SOLICITOR, List.of(), Map.of()),
             // Case 2: Expecting different results depending on user case roles in single hearing condition
             Arguments.of(null, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(CASEWORKER, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
             Arguments.of(APP_SOLICITOR, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
             Arguments.of(RESP_SOLICITOR, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
             // Case 3: Expecting different results depending on user case roles in multiple hearings condition
             Arguments.of(null, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingOneAndTwo),
+            Arguments.of(CASEWORKER, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingOneAndTwo),
             Arguments.of(APP_SOLICITOR, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly),
             Arguments.of(RESP_SOLICITOR, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingOneAndTwo)
         );
