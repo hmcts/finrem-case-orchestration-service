@@ -44,7 +44,7 @@ class ContactDetailsValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideCaseDataWithInvalidPostcodes")
+    @MethodSource
     void shouldValidatePostcodeConditionsAndReturnExpectedErrors(FinremCaseData caseData, String expectedError) {
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         if (expectedError != null) {
@@ -54,7 +54,7 @@ class ContactDetailsValidatorTest {
         }
     }
 
-    private static Stream<Object[]> provideCaseDataWithInvalidPostcodes() {
+    private static Stream<Object[]> shouldValidatePostcodeConditionsAndReturnExpectedErrors() {
         return Stream.of(
             new Object[] {
                 createConsentedCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null),
