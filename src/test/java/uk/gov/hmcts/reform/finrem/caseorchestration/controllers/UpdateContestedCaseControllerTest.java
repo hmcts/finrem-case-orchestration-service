@@ -53,8 +53,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @WebMvcTest(UpdateContestedCaseController.class)
-@ContextConfiguration(classes = {UpdateContestedCaseControllerTest.TestConfig.class, UpdateRepresentationWorkflowService.class}
-)
+@ContextConfiguration(classes = {UpdateContestedCaseControllerTest.TestConfig.class, UpdateRepresentationWorkflowService.class})
 @Import(MiamLegacyExemptionsService.class)
 class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
@@ -302,7 +301,8 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.rSolicitorPhone").doesNotExist())
             .andExpect(jsonPath("$.data.rSolicitorEmail").doesNotExist())
             .andExpect(jsonPath("$.data.rSolicitorDXnumber").doesNotExist())
-            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.OrgPolicyCaseAssignedRole").value(CaseRole.RESP_SOLICITOR.getCcdCode()))
+            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.OrgPolicyCaseAssignedRole")
+                .value(CaseRole.RESP_SOLICITOR.getCcdCode()))
             .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.Organisation").isEmpty());
     }
 

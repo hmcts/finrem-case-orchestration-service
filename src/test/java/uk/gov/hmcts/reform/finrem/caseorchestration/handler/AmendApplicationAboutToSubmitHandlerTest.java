@@ -192,7 +192,8 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorDxNumber());
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorEmail());
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorPhone());
-        assertThat(responseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole()).isEqualTo(CaseRole.RESP_SOLICITOR.getCcdCode());
+        assertThat(responseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole())
+            .isEqualTo(CaseRole.RESP_SOLICITOR.getCcdCode());
         assertThat(responseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID()).isNull();
     }
 
