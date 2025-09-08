@@ -32,8 +32,8 @@ public class XuiSandboxMidHandler extends FinremCallbackHandler {
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return MID_EVENT.equals(callbackType) && CONSENTED.equals(caseType) &&
-            (XUI_SANDBOX.equals(eventType) || XUI_SANDBOX_ONE.equals(eventType) || XUI_SANDBOX_TWO.equals(eventType));
+        return MID_EVENT.equals(callbackType) && CONSENTED.equals(caseType)
+                && (XUI_SANDBOX.equals(eventType) || XUI_SANDBOX_ONE.equals(eventType) || XUI_SANDBOX_TWO.equals(eventType));
     }
 
     @Override
@@ -43,8 +43,6 @@ public class XuiSandboxMidHandler extends FinremCallbackHandler {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
-
-        List<String> errors = new ArrayList<>();
 
         boolean isApplicantOrganisationPolicyNull = finremCaseData.getApplicantOrganisationPolicy() == null;
         log.debug(format("DEBUG (%s): Is ApplicantOrganisationPolicy null? %s", callbackRequest.getEventType(),
@@ -59,6 +57,7 @@ public class XuiSandboxMidHandler extends FinremCallbackHandler {
             throw new IllegalStateException("RespondentOrganisationPolicy is null");
         }
 
+        List<String> errors = new ArrayList<>();
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).errors(errors).build();
     }
 }

@@ -30,8 +30,8 @@ public class XuiSandboxAboutToStartHandler extends FinremCallbackHandler {
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return ABOUT_TO_START.equals(callbackType) && CONSENTED.equals(caseType) &&
-            (XUI_SANDBOX.equals(eventType) || XUI_SANDBOX_ONE.equals(eventType) || XUI_SANDBOX_TWO.equals(eventType));
+        return ABOUT_TO_START.equals(callbackType) && CONSENTED.equals(caseType)
+                && (XUI_SANDBOX.equals(eventType) || XUI_SANDBOX_ONE.equals(eventType) || XUI_SANDBOX_TWO.equals(eventType));
     }
 
     @Override
