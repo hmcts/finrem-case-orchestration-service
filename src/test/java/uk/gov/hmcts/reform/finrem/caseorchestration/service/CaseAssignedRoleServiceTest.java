@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
@@ -15,10 +15,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
@@ -26,10 +31,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CaseAssignedRoleServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CaseAssignedRoleServiceTest {
 
-    private static final String SERVICE_AUTH_TOKEN = "serviceAuthToken";
     private CaseAssignedRoleService caseAssignedRoleService;
     private static final String OTHER_ROLES = "otherRoles";
 
@@ -57,82 +61,78 @@ public class CaseAssignedRoleServiceTest {
     @Mock
     private IdamService idamService;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         Map<String, Object> caseData = new HashMap<>();
-        caseDetails = CaseDetails.builder().id(1234L).data(caseData).build();
+        caseDetails = CaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
         caseAssignedRoleService = new CaseAssignedRoleService(dataStoreClient, caseDataService, authTokenGenerator, idamService);
     }
 
     @Test
-    public void setCaseAssignedRoleSuccessAppSolicitor() {
-
+    void setCaseAssignedRoleSuccessAppSolicitor() {
         mockMethodCalls(APP_SOLICITOR_POLICY, false);
 
         Map<String, Object> returnedValue = caseAssignedRoleService.setCaseAssignedUserRole(caseDetails, AUTH_TOKEN);
-        assertEquals(2, returnedValue.size());
-        assertEquals(YES_VALUE, returnedValue.get(APPLICANT_REPRESENTED));
-        assertEquals(APP_SOLICITOR_POLICY, returnedValue.get(CASE_ROLE));
+        assertThat(returnedValue).hasSize(2)
+            .containsEntry(APPLICANT_REPRESENTED, YES_VALUE)
+            .containsEntry(CASE_ROLE, APP_SOLICITOR_POLICY);
     }
 
     @Test
-    public void setCaseAssignedRoleSuccessRespSolicitorConsented() {
-
+    void setCaseAssignedRoleSuccessRespSolicitorConsented() {
         mockMethodCalls(RESP_SOLICITOR_POLICY, true);
 
         Map<String, Object> returnedValue = caseAssignedRoleService.setCaseAssignedUserRole(caseDetails, AUTH_TOKEN);
-        assertEquals(2, returnedValue.size());
-        assertEquals(YES_VALUE, returnedValue.get(CONSENTED_RESPONDENT_REPRESENTED));
-        assertEquals(RESP_SOLICITOR_POLICY, returnedValue.get(CASE_ROLE));
+        assertThat(returnedValue).hasSize(2)
+            .containsEntry(CONSENTED_RESPONDENT_REPRESENTED, YES_VALUE)
+            .containsEntry(CASE_ROLE, RESP_SOLICITOR_POLICY);
     }
 
     @Test
-    public void setCaseAssignedRoleSuccessRespSolicitorContested() {
-
+    void setCaseAssignedRoleSuccessRespSolicitorContested() {
         mockMethodCalls(RESP_SOLICITOR_POLICY, false);
 
         Map<String, Object> returnedValue = caseAssignedRoleService.setCaseAssignedUserRole(caseDetails, AUTH_TOKEN);
-        assertEquals(2, returnedValue.size());
-        assertEquals(YES_VALUE, returnedValue.get(CONTESTED_RESPONDENT_REPRESENTED));
-        assertEquals(RESP_SOLICITOR_POLICY, returnedValue.get(CASE_ROLE));
+        assertThat(returnedValue).hasSize(2)
+            .containsEntry(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE)
+            .containsEntry(CASE_ROLE, RESP_SOLICITOR_POLICY);
     }
 
     @Test
-    public void setCaseAssignedRoleReturningOtherRoles() {
-
+    void setCaseAssignedRoleReturningOtherRoles() {
         mockMethodCalls(OTHER_ROLES, false);
 
         Map<String, Object> returnedValue = caseAssignedRoleService.setCaseAssignedUserRole(caseDetails, AUTH_TOKEN);
-        assertEquals(1, returnedValue.size());
-        assertEquals(OTHER_ROLES, returnedValue.get(CASE_ROLE));
+        assertThat(returnedValue).hasSize(1)
+            .containsEntry(CASE_ROLE, OTHER_ROLES);
     }
 
     @Test
-    public void getCaseAssignedUserRoleWhenCaseIdPassed() {
+    void getCaseAssignedUserRoleWhenCaseIdPassed() {
         mockMethodCalls(OTHER_ROLES, false);
 
         CaseAssignedUserRolesResource caseAssignedUserRole1 =
             caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN);
-        assertEquals(OTHER_ROLES, caseAssignedUserRole1.getCaseAssignedUserRoles().get(0).getCaseRole());
+        assertEquals(OTHER_ROLES, caseAssignedUserRole1.getCaseAssignedUserRoles().getFirst().getCaseRole());
     }
 
     @Test
-    public void getCaseAssignedUserRole() {
+    void getCaseAssignedUserRole() {
         mockMethodCalls(OTHER_ROLES, false);
 
         CaseAssignedUserRolesResource caseAssignedUserRole1 =
             caseAssignedRoleService.getCaseAssignedUserRole(caseDetails.getId().toString(), AUTH_TOKEN);
-        assertEquals(OTHER_ROLES, caseAssignedUserRole1.getCaseAssignedUserRoles().get(0).getCaseRole());
+        assertEquals(OTHER_ROLES, caseAssignedUserRole1.getCaseAssignedUserRoles().getFirst().getCaseRole());
     }
 
     private void mockMethodCalls(String role, boolean isConsentedApplication) {
-        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
-        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn("123");
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, caseDetails.getId().toString(), "123"))
+        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, caseDetails.getId().toString(), TEST_USER_ID))
             .thenReturn(caseAssignedUserRolesResource);
         when(caseAssignedUserRolesResource.getCaseAssignedUserRoles()).thenReturn(userRoles);
-        when(userRoles.get(0)).thenReturn(caseAssignedUserRole);
+        when(userRoles.getFirst()).thenReturn(caseAssignedUserRole);
         when(caseAssignedUserRole.getCaseRole()).thenReturn(role);
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(isConsentedApplication);
+        lenient().when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(isConsentedApplication);
     }
 }
