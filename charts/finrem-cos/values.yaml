@@ -1,14 +1,18 @@
 java:
-  cpuRequests: 250m
-  memoryRequests: 1Gi
-  cpuLimits: 1
-  memoryLimits: 2Gi
   aadIdentityName: finrem
   ingressHost: "finrem-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
   applicationPort: '9000'
-  spotInstances:
-    enabled: false
   image: 'hmctspublic.azurecr.io/finrem-cos:latest'
+  memoryRequests: '1536Mi'
+  memoryLimits: '2048Mi'
+  cpuRequests: '250m'
+  cpuLimits: '1500m'
+  autoscaling:
+    enabled: true
+    maxReplicas: 4
+    minReplicas: 2
+    targetCPUUtilizationPercentage: 80 # Default is 80% target CPU utilization
+    targetMemoryUtilizationPercentage: 80
   environment:
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL : "http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     IDAM_API_URL: "https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net"
@@ -25,12 +29,6 @@ java:
     FEES_API_URL: "http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     CASE_DOCUMENT_AM_URL: "http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     MANAGE_CASE_UI_BASE_URL: "https://manage-case.platform.hmcts.net"
-  autoscaling:
-    enabled: true
-    maxReplicas: 4
-    minReplicas: 2
-    targetCPUUtilizationPercentage: 80 # Default is 80% target CPU utilization
-    targetMemoryUtilizationPercentage: 98
   keyVaults:
     finrem:
       secrets:
