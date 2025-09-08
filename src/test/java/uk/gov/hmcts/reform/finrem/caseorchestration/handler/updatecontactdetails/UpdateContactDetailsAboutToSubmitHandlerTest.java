@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -67,8 +68,8 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     @Test
     void shouldHandleContestedAndConsentedCaseTypes() {
         assertCanHandle(handler,
-                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPDATE_CONTACT_DETAILS),
-                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPDATE_CONTACT_DETAILS)
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPDATE_CONTACT_DETAILS),
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPDATE_CONTACT_DETAILS)
         );
     }
 
@@ -97,7 +98,6 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         verify(onlineFormDocumentService, never()).generateContestedMiniForm(any(), any());
         verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(), any(), any());
     }
-
 
     /*
      * Passed CONTESTED, CONSENTED and UNKNOWN Case types.
@@ -200,7 +200,6 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         verify(updateContactDetailsService, never()).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
 
         checkGenerateContestedMiniFormCalledForContested(caseType, request);
-
     }
 
     @Test
@@ -219,8 +218,9 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void givenConsentedCase_whenApplicantAndRespondentOrganisationPolicyAreTheSame_thenShowError(boolean happyPath) {
+    @MethodSource
+    void givenAnyCase_whenApplicantAndRespondentOrganisationPolicyAreTheSame_thenShowError(CaseType caseType, boolean happyPath) {
+
         FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
         FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
@@ -228,7 +228,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         when(callbackRequest.getCaseDetailsBefore()).thenReturn(finremCaseDetailsBefore);
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
         when(finremCaseDetails.getData()).thenReturn(finremCaseData);
-        when(finremCaseDetails.getCaseType()).thenReturn(CaseType.CONSENTED);
+        when(finremCaseDetails.getCaseType()).thenReturn(caseType);
 
         when(finremCaseData.getApplicantOrganisationPolicy()).thenReturn(OrganisationPolicy
             .builder().organisation(Organisation.builder().organisationID("APPLICANT_ORG").build())
@@ -245,15 +245,26 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         }
     }
 
+    private static Stream<Arguments> givenAnyCase_whenApplicantAndRespondentOrganisationPolicyAreTheSame_thenShowError() {
+
+        return Stream.of(
+            Arguments.of(CaseType.CONTESTED, true),
+            Arguments.of(CaseType.CONTESTED, false),
+            Arguments.of(CaseType.CONSENTED, true),
+            Arguments.of(CaseType.CONSENTED, false)
+        );
+    }
+
     private FinremCallbackRequest buildCallbackRequest() {
+
         return FinremCallbackRequest
-                .builder()
-                .eventType(EventType.UPDATE_CONTACT_DETAILS)
-                .caseDetails(FinremCaseDetails.builder().id(123L)
-                        .data(new FinremCaseData()).build())
-                .caseDetailsBefore(FinremCaseDetails.builder().id(123L)
+            .builder()
+            .eventType(EventType.UPDATE_CONTACT_DETAILS)
+            .caseDetails(FinremCaseDetails.builder().id(123L)
                     .data(new FinremCaseData()).build())
-                .build();
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L)
+                .data(new FinremCaseData()).build())
+            .build();
     }
 
     private FinremCallbackRequest createRequest(CaseType caseType, FinremCaseData finremCaseData) {
@@ -275,6 +286,5 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         } else {
             verify(onlineFormDocumentService, never()).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
         }
-
     }
 }
