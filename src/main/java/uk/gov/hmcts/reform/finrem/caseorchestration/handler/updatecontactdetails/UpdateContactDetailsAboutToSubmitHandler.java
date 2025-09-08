@@ -93,10 +93,7 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
         }
 
-        List<String> errors = new ArrayList<>();
-        if (CaseType.CONSENTED.equals(finremCaseDetails.getCaseType())) {
-            errors.addAll(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
-        }
+        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors)
             .data(finremCaseData).build();
