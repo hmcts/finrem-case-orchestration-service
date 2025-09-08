@@ -182,6 +182,16 @@ public class ContactDetailsValidator {
         return errors;
     }
 
+    /**
+     * Validates the organisation policies of the applicant and respondent in a financial remedy case.
+     *
+     * <p>
+     * This method checks whether the applicant and respondent are associated with the same organisation.
+     * If they are, it adds a predefined error message to the list of validation errors.
+     *
+     * @param caseData the {@link FinremCaseData} object containing organisation policies for both parties
+     * @return a list of validation error messages; empty if no errors are found
+     */
     public static List<String> validateOrganisationPolicy(FinremCaseData caseData) {
         List<String> errors = new ArrayList<>();
 
