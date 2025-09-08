@@ -33,8 +33,6 @@ def versions = [
         wiremock             : '3.0.1',
         apacheLogging        : '2.25.1',
         idamClient           : '3.0.4',
-        jjwt                 : '0.12.7',
-        jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
         tika                 : '3.2.2',
         amClient             : '1.59.2',
@@ -413,7 +411,6 @@ dependencies {
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
     implementation group: 'org.springframework.retry', name: 'spring-retry', version: versions.retry
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
-    implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: versions.springDoc
@@ -498,7 +495,6 @@ dependencies {
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured'
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
-    functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: versions.jjwt
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
