@@ -8,6 +8,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
@@ -16,6 +18,9 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_SOLICITOR_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.RESPONDENT_POSTCODE_ERROR;
@@ -26,6 +31,7 @@ class ContactDetailsValidatorTest {
     private static final String INVALID_EMAIL = "invalid-email";
     private static final String VALID_EMAIL = "valid@email.com";
     private static final String ERROR_MSG = "%s is not a valid Email address.";
+    private static final String DIFFERENT_ORG_ID = "ORG456";
 
     private static class PostCodeModifier {
 
@@ -41,6 +47,48 @@ class ContactDetailsValidatorTest {
             this.postCode = postCode;
             this.resideOutsideUK = YesOrNo.forValue(resideOutsideUK);
         }
+    }
+
+    @Test
+    void shouldReturnErrorWhenOrganisationIdsAreEqual() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        OrganisationPolicy applicantPolicy = mockOrganisationPolicy(TEST_ORG_ID);
+        OrganisationPolicy respondentPolicy = mockOrganisationPolicy(TEST_ORG_ID);
+
+        when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
+        when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
+
+        List<String> errors = ContactDetailsValidator.validateOrganisationPolicy(caseData);
+
+        assertThat(errors).containsExactly("Solicitor can only represent one party.");
+    }
+
+    @Test
+    void shouldNotReturnErrorWhenOrganisationIdsAreDifferent() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        OrganisationPolicy applicantPolicy = mockOrganisationPolicy(TEST_ORG_ID);
+        OrganisationPolicy respondentPolicy = mockOrganisationPolicy(DIFFERENT_ORG_ID);
+
+        when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
+        when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
+
+        List<String> errors = ContactDetailsValidator.validateOrganisationPolicy(caseData);
+
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void shouldNotReturnErrorWhenOneOrganisationIsNull() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        OrganisationPolicy applicantPolicy = mockOrganisationPolicy(null);
+        OrganisationPolicy respondentPolicy = mockOrganisationPolicy(TEST_ORG_ID);
+
+        when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
+        when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
+
+        List<String> errors = ContactDetailsValidator.validateOrganisationPolicy(caseData);
+
+        assertThat(errors).isEmpty();
     }
 
     @ParameterizedTest
@@ -481,5 +529,15 @@ class ContactDetailsValidatorTest {
                 List.of()
             )
         );
+    }
+
+    private OrganisationPolicy mockOrganisationPolicy(String organisationId) {
+        Organisation organisation = mock(Organisation.class);
+        when(organisation.getOrganisationID()).thenReturn(organisationId);
+
+        OrganisationPolicy policy = mock(OrganisationPolicy.class);
+        when(policy.getOrganisation()).thenReturn(organisation);
+
+        return policy;
     }
 }
