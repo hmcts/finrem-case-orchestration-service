@@ -236,15 +236,6 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         }
     }
 
-    private static Stream<Arguments> givenAnyCase_whenApplicantAndRespondentOrganisationPolicyAreTheSame_thenShowError() {
-        return Stream.of(
-            Arguments.of(CaseType.CONTESTED, true),
-            Arguments.of(CaseType.CONTESTED, false),
-            Arguments.of(CaseType.CONSENTED, true),
-            Arguments.of(CaseType.CONSENTED, false)
-        );
-    }
-
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()
