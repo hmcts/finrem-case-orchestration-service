@@ -5,7 +5,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -16,14 +15,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
@@ -32,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -217,30 +216,23 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         }
     }
 
-    @ParameterizedTest
-    @MethodSource
-    void givenAnyCase_whenApplicantAndRespondentOrganisationPolicyAreTheSame_thenShowError(CaseType caseType, boolean happyPath) {
+    @Test
+    void givenInvalidOrganisationPolicy_whenHandle_thenReturnsValidationError() {
         FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
-        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
-        FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
-        when(callbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
-        when(callbackRequest.getCaseDetailsBefore()).thenReturn(finremCaseDetailsBefore);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseDetails caseDetailsBefore = mock(FinremCaseDetails.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
-        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
-        when(finremCaseDetails.getCaseType()).thenReturn(caseType);
+        when(caseDetails.getData()).thenReturn(finremCaseData);
 
-        when(finremCaseData.getApplicantOrganisationPolicy()).thenReturn(OrganisationPolicy
-            .builder().organisation(Organisation.builder().organisationID("APPLICANT_ORG").build())
-            .build());
-        when(finremCaseData.getRespondentOrganisationPolicy()).thenReturn(OrganisationPolicy
-            .builder().organisation(Organisation.builder().organisationID(happyPath ? "RESPONSE_ORG" : "APPLICANT_ORG").build())
-            .build());
+        try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class)) {
+            mockedStatic.when(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData))
+                .thenReturn(List.of("VALIDATION FAILED"));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        if (happyPath) {
-            assertThat(response.getErrors()).isEmpty();
-        } else {
-            assertThat(response.getErrors()).contains("Solicitor can only represent one party.");
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+            mockedStatic.verify(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
+            assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
         }
     }
 
