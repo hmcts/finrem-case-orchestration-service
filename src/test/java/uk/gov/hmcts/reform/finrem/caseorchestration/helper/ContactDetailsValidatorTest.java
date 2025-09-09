@@ -50,7 +50,7 @@ class ContactDetailsValidatorTest {
     }
 
     @Test
-    void shouldReturnErrorWhenOrganisationIdsAreEqual() {
+    void givenEqualOrganisationIds_whenValidated_thenErrorIsReturned() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         OrganisationPolicy applicantPolicy = mockOrganisationPolicy(TEST_ORG_ID);
         OrganisationPolicy respondentPolicy = mockOrganisationPolicy(TEST_ORG_ID);
@@ -64,7 +64,7 @@ class ContactDetailsValidatorTest {
     }
 
     @Test
-    void shouldNotReturnErrorWhenOrganisationIdsAreDifferent() {
+    void givenDistinctOrganisationIds_whenValidated_thenNoErrorIsReturned() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         OrganisationPolicy applicantPolicy = mockOrganisationPolicy(TEST_ORG_ID);
         OrganisationPolicy respondentPolicy = mockOrganisationPolicy(DIFFERENT_ORG_ID);
@@ -78,7 +78,7 @@ class ContactDetailsValidatorTest {
     }
 
     @Test
-    void shouldNotReturnErrorWhenOneOrganisationIsNull() {
+    void givenOneOrganisationIsNull_whenValidated_thenNoErrorIsReturned() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         OrganisationPolicy applicantPolicy = mockOrganisationPolicy(null);
         OrganisationPolicy respondentPolicy = mockOrganisationPolicy(TEST_ORG_ID);
