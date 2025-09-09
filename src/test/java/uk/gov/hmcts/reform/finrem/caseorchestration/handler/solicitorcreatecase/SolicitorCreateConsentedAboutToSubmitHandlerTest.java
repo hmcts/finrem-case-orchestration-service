@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
@@ -27,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -110,6 +115,22 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
         verify(updateRepresentationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
+    }
+
+    @Test
+    void givenEqualOrganisationId_whenHandle_thenReturnsAnError() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(caseDetails.getData()).thenReturn(finremCaseData);
+        when(finremCaseData.getApplicantOrganisationPolicy())
+            .thenReturn(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("FinRem-2-Org").build()).build());
+        when(finremCaseData.getRespondentOrganisationPolicy())
+            .thenReturn(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("FinRem-2-Org").build()).build());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).containsExactly("Solicitor can only represent one party.");
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
