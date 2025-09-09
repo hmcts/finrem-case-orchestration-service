@@ -44,6 +44,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG2_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -190,10 +192,10 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
         when(finremCaseDetails.getCaseType()).thenReturn(CaseType.CONTESTED);
 
         when(finremCaseData.getApplicantOrganisationPolicy()).thenReturn(OrganisationPolicy
-            .builder().organisation(Organisation.builder().organisationID("APPLICANT_ORG").build())
+            .builder().organisation(Organisation.builder().organisationID(TEST_ORG_ID).build())
             .build());
         when(finremCaseData.getRespondentOrganisationPolicy()).thenReturn(OrganisationPolicy
-            .builder().organisation(Organisation.builder().organisationID(happyPath ? "RESPONSE_ORG" : "APPLICANT_ORG").build())
+            .builder().organisation(Organisation.builder().organisationID(happyPath ? TEST_ORG2_ID : TEST_ORG_ID).build())
             .build());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
