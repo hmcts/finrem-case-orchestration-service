@@ -181,7 +181,6 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenContestedCase_whenApplicantAndRespondentOrganisationPolicyAreTheSame_thenShowError(boolean happyPath) {
-
         FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
         when(callbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
