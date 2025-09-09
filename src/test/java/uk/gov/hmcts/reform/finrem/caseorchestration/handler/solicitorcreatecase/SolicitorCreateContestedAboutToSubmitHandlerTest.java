@@ -43,13 +43,13 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
-    public static final String AUTH_TOKEN = "tokien:)";
     private SolicitorCreateContestedAboutToSubmitHandler handler;
 
     @Mock
@@ -70,7 +70,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     @BeforeEach
-    public void init() {
+    void init() {
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
             finremCaseDetailsMapper,
             onlineFormDocumentService,
@@ -135,7 +135,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
         Assertions.assertThat(response.getErrors()).hasSize(1);
-        Assertions.assertThat(response.getErrors().get(0)).isEqualTo("Validation failed");
+        Assertions.assertThat(response.getErrors().getFirst()).isEqualTo("Validation failed");
         Assertions.assertThat(response.getData()).isNotNull();
     }
 
@@ -185,7 +185,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         assertNull(responseCaseData.getContactDetailsWrapper().getApplicantRepresented());
         assertEquals(caseDocument(), responseCaseData.getMiniFormA());
         assertEquals(DocumentCategory.APPLICATIONS_MAIN_APPLICATION.getDocumentCategoryId(),
-            responseCaseData.getUploadAdditionalDocument().get(0).getValue().getAdditionalDocuments().getCategoryId()
+            responseCaseData.getUploadAdditionalDocument().getFirst().getValue().getAdditionalDocuments().getCategoryId()
         );
     }
 
@@ -196,7 +196,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         assertEquals(YesOrNo.NO, responseCaseData.getPromptForUrgentCaseQuestion());
         assertEquals(YesOrNo.YES, responseCaseData.getContactDetailsWrapper().getApplicantRepresented());
         assertEquals(caseDocument(), responseCaseData.getMiniFormA());
-        assertNull(responseCaseData.getUploadAdditionalDocument().get(0)
+        assertNull(responseCaseData.getUploadAdditionalDocument().getFirst()
             .getValue().getAdditionalDocuments().getCategoryId());
     }
 
