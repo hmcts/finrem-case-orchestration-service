@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
@@ -183,10 +184,9 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
 
         FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
-        FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
         when(callbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
-        when(callbackRequest.getCaseDetailsBefore()).thenReturn(finremCaseDetailsBefore);
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseDetails.getState()).thenReturn(State.APPLICATION_SUBMITTED);
         when(finremCaseDetails.getData()).thenReturn(finremCaseData);
         when(finremCaseDetails.getCaseType()).thenReturn(CaseType.CONTESTED);
 
