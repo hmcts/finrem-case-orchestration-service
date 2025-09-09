@@ -60,6 +60,7 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallback
                                                                               String userAuthorisation) {
 
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+
         validateCaseData(callbackRequest);
         caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
 
