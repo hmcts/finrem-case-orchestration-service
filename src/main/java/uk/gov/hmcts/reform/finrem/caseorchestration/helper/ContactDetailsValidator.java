@@ -187,7 +187,8 @@ public class ContactDetailsValidator {
      *
      * <p>
      * This method checks whether the applicant and respondent are associated with the same organisation.
-     * If they are, it adds a predefined error message to the list of validation errors.
+     * An error is added if both organisation IDs are non-empty and equal. If either or both IDs are empty,
+     * no error will be returned.
      *
      * @param caseData the {@link FinremCaseData} object containing organisation policies for both parties
      * @return a list of validation error messages; empty if no errors are found
@@ -198,7 +199,12 @@ public class ContactDetailsValidator {
         OrganisationPolicy applicantOrganisationPolicy = caseData.getApplicantOrganisationPolicy();
         OrganisationPolicy respondentOrganisationPolicy = caseData.getRespondentOrganisationPolicy();
 
-        if (getOrganisationId(applicantOrganisationPolicy).equals(getOrganisationId(respondentOrganisationPolicy))) {
+        String applicantOrgId = getOrganisationId(applicantOrganisationPolicy);
+        String respondentOrgId = getOrganisationId(respondentOrganisationPolicy);
+
+        if (!applicantOrgId.isEmpty()
+            && !respondentOrgId.isEmpty()
+            && applicantOrgId.equals(respondentOrgId)) {
             errors.add(ORGANISATION_POLICY_ERROR);
         }
 
