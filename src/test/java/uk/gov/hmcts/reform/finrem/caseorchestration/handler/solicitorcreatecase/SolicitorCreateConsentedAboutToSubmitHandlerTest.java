@@ -35,6 +35,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SOLICITOR_CREATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -125,15 +127,15 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
         when(caseDetails.getData()).thenReturn(finremCaseData);
         when(finremCaseData.getApplicantOrganisationPolicy())
-            .thenReturn(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("FinRem-2-Org").build()).build());
+            .thenReturn(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(TEST_ORG_ID).build()).build());
         when(finremCaseData.getRespondentOrganisationPolicy())
-            .thenReturn(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("FinRem-2-Org").build()).build());
+            .thenReturn(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(TEST_ORG_ID).build()).build());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).containsExactly("Solicitor can only represent one party.");
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequestFactory.from(SOLICITOR_CREATE, FinremCaseDetailsBuilderFactory.from(123L, CONSENTED));
+        return FinremCallbackRequestFactory.from(SOLICITOR_CREATE, FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CONSENTED));
     }
 }
