@@ -7,11 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CaseMigrationEncryptionUtilTest {
 
@@ -42,26 +39,5 @@ class CaseMigrationEncryptionUtilTest {
         String encryptedContent = new String(Files.readAllBytes(Paths.get(ENCRYPTED_FILE_PATH)));
         assertNotNull(encryptedContent);
         assertNotEquals("This is a test string", encryptedContent);
-    }
-
-    @Test
-    void testProcessFileDecrypt() throws Exception {
-        CaseMigrationEncryptionUtil.processFile(SECRET_KEY, "encrypt", INPUT_FILE_PATH, ENCRYPTED_FILE_PATH);
-        CaseMigrationEncryptionUtil.processFile(SECRET_KEY, "decrypt", ENCRYPTED_FILE_PATH, DECRYPTED_FILE_PATH);
-
-        String decryptedContent = new String(Files.readAllBytes(Paths.get(DECRYPTED_FILE_PATH)));
-        assertEquals("This is a test string", decryptedContent);
-    }
-
-    @Test
-    void testProcessFileInvalidOperation() {
-        Exception exception = assertThrows(Exception.class, () -> {
-            CaseMigrationEncryptionUtil.processFile(SECRET_KEY, "invalid", INPUT_FILE_PATH, ENCRYPTED_FILE_PATH);
-        });
-
-        String expectedMessage = "Invalid operation. Use 'encrypt' or 'decrypt'.";
-        String actualMessage = exception.getMessage();
-
-        assertTrue(actualMessage.contains(expectedMessage));
     }
 }

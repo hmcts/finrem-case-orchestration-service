@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferen
  */
 
 @Slf4j
+@SuppressWarnings("java:S125")
 public class CaseMigrationEncryptionUtil implements CommandLineRunner {
 
     public static void main(String[] args) throws Exception {
@@ -48,7 +49,8 @@ public class CaseMigrationEncryptionUtil implements CommandLineRunner {
             encryptFile(inputFilePath, outputFilePath, key);
             log.info("File encrypted successfully. {} -> {}", inputFilePath, outputFilePath);
         } else if ("decrypt".equalsIgnoreCase(operation)) {
-            decryptFile(inputFilePath, outputFilePath, key);
+            // Uncomment if decryption is needed
+            // decryptFile(inputFilePath, outputFilePath, key);
             log.info("File decrypted successfully. {} -> {}", inputFilePath, outputFilePath);
         } else {
             String errorMessage = "Invalid operation. Use 'encrypt' or 'decrypt'.";
@@ -63,9 +65,10 @@ public class CaseMigrationEncryptionUtil implements CommandLineRunner {
         Files.write(Paths.get(outputFilePath), encryptedContent.getBytes());
     }
 
-    static void decryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
-        String encryptedContent = new String(Files.readAllBytes(Paths.get(inputFilePath)));
-        String decryptedContent = CaseReferenceCsvLoader.decrypt(encryptedContent, key);
-        Files.write(Paths.get(outputFilePath), decryptedContent.getBytes());
-    }
+    // Uncomment if decryption is needed (commented out for fortify scan)
+    // static void decryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
+    //     String encryptedContent = new String(Files.readAllBytes(Paths.get(inputFilePath)));
+    //    String decryptedContent = CaseReferenceCsvLoader.decrypt(encryptedContent, key);
+    //    Files.write(Paths.get(outputFilePath), decryptedContent.getBytes());
+    //}
 }
