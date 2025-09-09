@@ -64,6 +64,18 @@ class ContactDetailsValidatorTest {
     }
 
     @Test
+    void givenBothOrganisationPolicyNull_whenValidated_thenNoErrorIsReturned() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+
+        when(caseData.getApplicantOrganisationPolicy()).thenReturn(null);
+        when(caseData.getRespondentOrganisationPolicy()).thenReturn(null);
+
+        List<String> errors = ContactDetailsValidator.validateOrganisationPolicy(caseData);
+
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
     void givenEqualOrganisationIds_whenValidated_thenErrorIsReturned() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         OrganisationPolicy applicantPolicy = mockOrganisationPolicy(TEST_ORG_ID);
