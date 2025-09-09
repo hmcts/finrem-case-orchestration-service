@@ -48,19 +48,20 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallback
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.NEW_PAPER_CASE.equals(eventType));
+            && EventType.NEW_PAPER_CASE.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+
         validateCaseData(callbackRequest);
         caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-
-        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
 
         if (idamService.isUserRoleAdmin(userAuthorisation)) {
             caseData.getContactDetailsWrapper().setIsAdmin(YES_VALUE);
