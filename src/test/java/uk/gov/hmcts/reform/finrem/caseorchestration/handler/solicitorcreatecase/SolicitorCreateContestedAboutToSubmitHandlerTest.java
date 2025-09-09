@@ -45,10 +45,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -152,7 +153,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
             handler.handle(callbackRequest, AUTH_TOKEN);
             // Check that updateRespondentInRefugeTab is called with our case details instance
-            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails), times(1));
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails));
         }
     }
 
@@ -166,7 +167,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
             handler.handle(callbackRequest, AUTH_TOKEN);
             // Check that updateApplicantInRefugeTab is called with our case details instance
-            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails));
         }
     }
 
@@ -188,9 +189,9 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
         when(caseDetails.getData()).thenReturn(finremCaseData);
         when(finremCaseData.getApplicantOrganisationPolicy())
-            .thenReturn(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("FinRem-2-Org").build()).build());
+            .thenReturn(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(TEST_ORG_ID).build()).build());
         when(finremCaseData.getRespondentOrganisationPolicy())
-            .thenReturn(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("FinRem-2-Org").build()).build());
+            .thenReturn(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(TEST_ORG_ID).build()).build());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).containsExactly("Solicitor can only represent one party.");
@@ -221,7 +222,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
         return CallbackRequest.builder().eventId(EventType.UPLOAD_APPROVED_ORDER.getCcdType()).caseDetails(caseDetails).build();
     }
 
@@ -233,7 +234,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = FinremCaseData.builder().civilPartnership(YesOrNo.NO)
             .promptForUrgentCaseQuestion(YesOrNo.NO).uploadAdditionalDocument(List.of(collection))
             .scheduleOneWrapper(wrapper).build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
         return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
     }
 }
