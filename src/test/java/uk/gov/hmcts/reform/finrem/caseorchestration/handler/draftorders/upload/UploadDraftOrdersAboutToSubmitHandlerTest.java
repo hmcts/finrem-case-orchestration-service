@@ -591,7 +591,11 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     }
 
     private void mockCaseRole(String caseId, CaseRole userCaseRole) {
-        when(caseRoleService.getUserCaseRole(caseId, AUTH_TOKEN)).thenReturn(userCaseRole);
+        if (CASEWORKER == userCaseRole) {
+            when(caseRoleService.getUserCaseRole(caseId, AUTH_TOKEN)).thenReturn(null);
+        } else {
+            when(caseRoleService.getUserCaseRole(caseId, AUTH_TOKEN)).thenReturn(userCaseRole);
+        }
     }
 
     private static List<AgreedDraftOrderCollection> agreedDraftOrdersCollection(
