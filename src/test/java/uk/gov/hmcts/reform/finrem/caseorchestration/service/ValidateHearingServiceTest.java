@@ -418,8 +418,8 @@ class ValidateHearingServiceTest {
     void validateGeneralApplicationDirectionsNoticeSelection_whenNotYes_showErrors(boolean validInput) {
         // arrange
         if (validInput) {
-         caseData.getManageHearingsWrapper().setWorkingHearing(
-            WorkingHearing.builder().hearingNoticePrompt(YesOrNo.NO).build());
+            caseData.getManageHearingsWrapper().setWorkingHearing(
+                WorkingHearing.builder().hearingNoticePrompt(YesOrNo.NO).build());
         } else {
             caseData.getManageHearingsWrapper().setWorkingHearing(
                 WorkingHearing.builder().hearingNoticePrompt(null).build());
@@ -457,8 +457,8 @@ class ValidateHearingServiceTest {
 
         // Assert warnings.  GA created by intervener, but no intervener party selected for correspondence.
         assertThat(warnings).containsExactly(
-            "An Intervener created this general application. " +
-                "Consider if an Intervener should be selected in \"Who should see this order?\"");
+            "An Intervener created this general application. "
+                + "Consider if an Intervener should be selected in \"Who should see this order?\"");
     }
 
     /*
@@ -577,7 +577,7 @@ class ValidateHearingServiceTest {
             .build());
     }
 
-    private static Stream<Arguments>provideWorkingHearingsThatFailGadPartyChecks() {
+    private static Stream<Arguments> provideWorkingHearingsThatFailGadPartyChecks() {
         return Stream.of(
             // Respondent not selected
             Arguments.of(WorkingHearing.builder().partiesOnCaseMultiSelectList(

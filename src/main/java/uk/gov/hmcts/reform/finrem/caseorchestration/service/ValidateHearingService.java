@@ -45,7 +45,7 @@ public class ValidateHearingService {
         "Date of the express pilot hearing should be between 16 and 20 weeks.";
     public static final String REQUIRED_FIELD_EMPTY_ERROR =
         "Issue Date, fast track decision or hearing date is empty";
-        public static final String GENERAL_APPLICATION_DIRECTIONS_INTERVENER_WARNING =
+    public static final String GENERAL_APPLICATION_DIRECTIONS_INTERVENER_WARNING =
         "An Intervener created this general application. Consider if an Intervener should be selected in \"Who should see this order?\"";
     public static final String GENERAL_APPLICATION_DIRECTIONS_PARTY_ERROR =
         "Select Applicant and Respondent for \"Who should see this order?\"";
@@ -179,8 +179,8 @@ public class ValidateHearingService {
                 INTVR_SOLICITOR_2.getCcdCode(),
                 INTVR_SOLICITOR_3.getCcdCode(),
                 INTVR_SOLICITOR_4.getCcdCode());
-            boolean anIntervenerIsSelectedForGAHearing = selectedHearingParties.stream().anyMatch(intervenerPartyList::contains);
-            return anIntervenerIsSelectedForGAHearing ? List.of() : List.of(GENERAL_APPLICATION_DIRECTIONS_INTERVENER_WARNING);
+            boolean anIntervenerIsSelectedForGaHearing = selectedHearingParties.stream().anyMatch(intervenerPartyList::contains);
+            return anIntervenerIsSelectedForGaHearing ? List.of() : List.of(GENERAL_APPLICATION_DIRECTIONS_INTERVENER_WARNING);
         }
 
         return List.of();
