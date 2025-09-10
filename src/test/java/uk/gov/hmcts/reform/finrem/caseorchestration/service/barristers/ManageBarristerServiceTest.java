@@ -83,7 +83,6 @@ class ManageBarristerServiceTest {
     private static final String SYS_USER_TOKEN = "sysUserToken";
     private static final String CLIENT_NAME = "Client Name";
     private static final String SOME_ORG_ID = "someOrgId";
-    static final String CASEWORKER_POLICY = "[CASEWORKER]";
     private static final Barrister DEFAULT_BARRISTER = Barrister.builder()
         .email("someEmail")
         .build();
@@ -115,7 +114,7 @@ class ManageBarristerServiceTest {
     private CaseDetails caseDetails;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         Map<String, Object> caseData = new HashMap<>();
         caseDetails = CaseDetails.builder().id(CASE_ID).data(caseData).build();
     }
@@ -345,7 +344,7 @@ class ManageBarristerServiceTest {
 
         List<Element<RepresentationUpdate>> representationUpdateHistory =
             objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
-        RepresentationUpdate update = representationUpdateHistory.get(0).getValue();
+        RepresentationUpdate update = representationUpdateHistory.getFirst().getValue();
         assertThat(update.getBy(), is(APP_SOLICITOR));
         assertThat(update.getAdded().getEmail(), is(APP_BARRISTER_EMAIL_ONE));
         assertThat(update.getParty(), is(APPLICANT));
@@ -375,7 +374,7 @@ class ManageBarristerServiceTest {
 
         List<Element<RepresentationUpdate>> representationUpdateHistory =
             objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
-        RepresentationUpdate update = representationUpdateHistory.get(0).getValue();
+        RepresentationUpdate update = representationUpdateHistory.getFirst().getValue();
         assertThat(update.getBy(), is(CASEWORKER_NAME));
         assertThat(update.getAdded().getEmail(), is(APP_BARRISTER_EMAIL_ONE));
         assertThat(update.getParty(), is(APPLICANT));
@@ -418,8 +417,8 @@ class ManageBarristerServiceTest {
             List.of(DEFAULT_BARRISTER),
             AUTH_TOKEN);
 
-        Barrister expectedAdded = barristerChange.getAdded().stream().toList().get(0);
-        Barrister expectedRemoved = barristerChange.getRemoved().stream().toList().get(0);
+        Barrister expectedAdded = barristerChange.getAdded().stream().toList().getFirst();
+        Barrister expectedRemoved = barristerChange.getRemoved().stream().toList().getFirst();
 
         verify(notificationService).sendBarristerAddedEmail(caseDetails, expectedAdded);
         verify(notificationService).sendBarristerRemovedEmail(caseDetails, expectedRemoved);
@@ -449,7 +448,7 @@ class ManageBarristerServiceTest {
 
         List<Element<RepresentationUpdate>> representationUpdateHistory =
             objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
-        RepresentationUpdate update = representationUpdateHistory.get(0).getValue();
+        RepresentationUpdate update = representationUpdateHistory.getFirst().getValue();
         assertThat(update.getBy(), is(APP_SOLICITOR));
         assertThat(update.getRemoved().getEmail(), is(APP_BARRISTER_EMAIL_ONE));
         assertThat(update.getParty(), is(APPLICANT));
