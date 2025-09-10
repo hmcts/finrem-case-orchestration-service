@@ -11,12 +11,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -29,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.Callback
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached.DECREE_ABSOLUTE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached.DECREE_NISI;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached.PETITION_ISSUED;
@@ -106,8 +111,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
 
     // Merged from {@code UpdateContestedCaseControllerTest.shouldDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested}
     @Test
-    void givenDecreeAbsoluteSelectedBySolicitor_whenHandled_thenDeleteNoDecreeNisi() throws Exception {
-        final CaseDocument generatedMiniFormA = mock(CaseDocument.class);
+    void givenDecreeAbsoluteSelectedBySolicitor_whenHandled_thenDeleteNoDecreeNisi() {
         final CaseDocument divorceUploadEvidence1 = mock(CaseDocument.class);
         final LocalDate divorceDecreeNisiDate = mock(LocalDate.class);
         final LocalDate divorceDecreeAbsoluteDate = mock(LocalDate.class);
@@ -126,8 +130,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         when(finremCaseDetails.getData()).thenReturn(finremCaseData);
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
-        when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), eq(finremCaseDetails)))
-            .thenReturn(generatedMiniFormA);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
@@ -135,20 +137,13 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             FinremCaseData::getDivorceUploadEvidence1,
             FinremCaseData::getDivorceDecreeNisiDate
         ).containsOnlyNulls();
-        assertThat(response.getData()).extracting(
-            FinremCaseData::getDivorcePetitionIssuedDate,
-            FinremCaseData::getMiniFormA
-        )
-        .containsExactly(
-            divorcePetitionIssuedDate,
-            generatedMiniFormA
-        );
+        assertThat(response.getData()).extracting(FinremCaseData::getDivorcePetitionIssuedDate)
+        .isEqualTo(divorcePetitionIssuedDate);
     }
 
     // Merged from {@code UpdateContestedCaseControllerTest.shouldDeleteDecreeAbsoluteWhenSolicitorChooseToPetitionIssuedForContested}
     @Test
-    void givenPetitionIssuedSelectedBySolicitor_whenHandled_thenDeleteNoDecreeNisi() throws Exception {
-        final CaseDocument generatedMiniFormA = mock(CaseDocument.class);
+    void givenPetitionIssuedSelectedBySolicitor_whenHandled_thenDeleteNoDecreeNisi() {
         final CaseDocument divorceUploadEvidence1 = mock(CaseDocument.class);
         final CaseDocument divorceUploadPetition = mock(CaseDocument.class);
         final LocalDate divorceDecreeNisiDate = mock(LocalDate.class);
@@ -168,8 +163,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         when(finremCaseDetails.getData()).thenReturn(finremCaseData);
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
-        when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), eq(finremCaseDetails)))
-            .thenReturn(generatedMiniFormA);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData()).extracting(
@@ -180,13 +173,49 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         ).containsOnlyNulls();
         assertThat(response.getData()).extracting(
             FinremCaseData::getDivorcePetitionIssuedDate,
-            FinremCaseData::getDivorceUploadPetition,
-            FinremCaseData::getMiniFormA
-        )
-        .containsExactly(
+            FinremCaseData::getDivorceUploadPetition
+        ).containsExactly(
             divorcePetitionIssuedDate,
-            divorceUploadPetition,
-            generatedMiniFormA
+            divorceUploadPetition
         );
+    }
+
+    // Merged from {@code UpdateContestedCaseControllerTest.shouldRemovePropertyAdjustmentOrderDetailsWhenSolicitorUncheckedForContested}
+    // Merged from {@code UpdateContestedCaseControllerTest.shouldUpdatePropertyAdjustmentOrderDecisionDetailForContested}
+    @Test
+    void givenSolicitorUnchecked_whenHandled_thenRemovePropertyAdjustmentOrderDetails() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        finremCaseData.setDivorceStageReached(DECREE_NISI);
+        finremCaseData.getScheduleOneWrapper().setTypeOfApplication(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS);
+        finremCaseData.setPropertyAddress("102");
+        finremCaseData.setMortgageDetail("HSBC");
+        finremCaseData.setPropertyAdjustmentOrderDetail(List.of(
+            PropertyAdjustmentOrderCollection.builder()
+                .value(PropertyAdjustmentOrder.builder()
+                    .nameForProperty("HSBC")
+                    .propertyAddress("103")
+                    .build())
+                .build()
+        ));
+        finremCaseData.getNatureApplicationWrapper().setNatureOfApplicationChecklist(
+            List.of(NatureApplication.LUMP_SUM_ORDER,
+                NatureApplication.PENSION_SHARING_ORDER,
+                NatureApplication.PENSION_ATTACHMENT_ORDER,
+                NatureApplication.PENSION_COMPENSATION_SHARING_ORDER,
+                NatureApplication.PENSION_COMPENSATION_ATTACHMENT_ORDER,
+                NatureApplication.PERIODICAL_PAYMENT_ORDER)
+        );
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertThat(response.getData()).extracting(
+            FinremCaseData::getPropertyAddress,
+            FinremCaseData::getMortgageDetail,
+            FinremCaseData::getPropertyAdjustmentOrderDetail
+        ).containsOnlyNulls();
     }
 }
