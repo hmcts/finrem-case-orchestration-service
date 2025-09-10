@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -17,11 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
@@ -203,16 +200,11 @@ public class ValidateHearingService {
      * @return a set of selected party codes; never {@code null}
      */
     private static Set<String> getSelectedPartyCodesForWorkingHearing(FinremCaseData caseData) {
-        List<DynamicMultiSelectListElement> selected = Optional.ofNullable(caseData)
+        return Optional.ofNullable(caseData)
             .map(FinremCaseData::getManageHearingsWrapper)
             .map(ManageHearingsWrapper::getWorkingHearing)
-            .map(WorkingHearing::getPartiesOnCaseMultiSelectList)
-            .map(DynamicMultiSelectList::getValue)
-            .orElse(Collections.emptyList());
-
-        return selected.stream()
-            .map(DynamicMultiSelectListElement::getCode)
-            .collect(Collectors.toSet());
+            .map(WorkingHearing::getSelectedPartyCodesForWorkingHearing)
+            .orElse(Set.of());
     }
 
     /*

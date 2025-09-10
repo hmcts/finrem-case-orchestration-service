@@ -52,7 +52,6 @@ public class GeneralApplicationDirectionsNewMidHandler extends FinremCallbackHan
         List<String> errors = new ArrayList<>();
 
         if (generalApplicationDirectionsService.isHearingRequired(finremCaseDetails)) {
-
             errors.addAll(validateHearingService.validateGeneralApplicationDirectionsMandatoryParties(finremCaseData));
             errors.addAll(validateHearingService.validateGeneralApplicationDirectionsNoticeSelection(finremCaseData));
             warnings.addAll(validateHearingService.validateGeneralApplicationDirectionsIntervenerParties(finremCaseData));
