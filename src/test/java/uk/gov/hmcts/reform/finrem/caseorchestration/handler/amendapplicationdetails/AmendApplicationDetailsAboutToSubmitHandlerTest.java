@@ -36,7 +36,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
     private ExpressCaseService expressCaseService;
 
     @Test
-    void shouldHandleContestedAndConsentedCaseTypes() {
+    void testCanHandle() {
         assertCanHandle(handler,
                 Arguments.of(ABOUT_TO_SUBMIT, CONTESTED, AMEND_CONTESTED_PAPER_APP_DETAILS),
                 Arguments.of(ABOUT_TO_SUBMIT, CONTESTED, AMEND_CONTESTED_APP_DETAILS)
