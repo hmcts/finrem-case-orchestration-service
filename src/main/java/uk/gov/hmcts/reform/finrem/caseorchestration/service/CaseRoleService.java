@@ -27,6 +27,9 @@ public class CaseRoleService {
      * method returns {@code null}.
      * </p>
      *
+     * <p><b>Note:</b> If the logged-in user has the {@code CASEWORKER} role, this method
+     * will return {@code null}.</p>
+     *
      * @param id   the case ID
      * @param auth the authorisation token of the logged-in user
      * @return the {@link CaseRole} of the logged-in user, or {@code null} if no role is found
