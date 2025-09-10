@@ -49,8 +49,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 /**
+ * Unit tests for UpdateContestedCaseControllerTest.
+ *
  * @deprecated This controller will be removed in favour of using
- * {@link AmendApplicationDetailsAboutToSubmitHandler}.
+ *     {@link AmendApplicationDetailsAboutToSubmitHandler}.
  */
 @WebMvcTest(UpdateContestedCaseController.class)
 @ContextConfiguration(classes = {UpdateContestedCaseControllerTest.TestConfig.class})
