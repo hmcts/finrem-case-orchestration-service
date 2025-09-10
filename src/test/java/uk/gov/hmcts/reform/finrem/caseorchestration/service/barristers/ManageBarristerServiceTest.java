@@ -39,10 +39,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -394,14 +394,10 @@ class ManageBarristerServiceTest {
             buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.empty());
 
-        try {
-            manageBarristerService.updateBarristerAccess(caseDetails,
-                    List.of(DEFAULT_BARRISTER),
-                    Collections.emptyList(), AUTH_TOKEN);
-        } catch (NoSuchUserException nue) {
-            String expectedMessage = "Could not find barrister with provided email";
-            assertEquals(expectedMessage, nue.getMessage());
-        }
+        assertThatThrownBy(() -> manageBarristerService.updateBarristerAccess(caseDetails, List.of(DEFAULT_BARRISTER),
+            Collections.emptyList(), AUTH_TOKEN)
+        ).isInstanceOf(NoSuchUserException.class)
+            .hasMessage("Could not find barrister with provided email");
     }
 
     @Test
