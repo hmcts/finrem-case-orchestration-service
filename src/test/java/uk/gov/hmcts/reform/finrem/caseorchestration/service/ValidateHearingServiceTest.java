@@ -3,11 +3,18 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -21,9 +28,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
@@ -354,6 +367,161 @@ class ValidateHearingServiceTest {
         assertThat(errors).isEmpty();
     }
 
+    @Test
+    void validateGeneralApplicationDirectionsMandatoryParties_whenPartiesPresent_noErrors() {
+        // arrange
+        WorkingHearing workingHearing = WorkingHearing.builder().partiesOnCaseMultiSelectList(
+            DynamicMultiSelectList.builder()
+                .value(List.of(
+                    DynamicMultiSelectListElement.builder().code(CaseRole.APP_SOLICITOR.getCcdCode()).build(),
+                    DynamicMultiSelectListElement.builder().code(CaseRole.RESP_SOLICITOR.getCcdCode()).build()))
+                .listItems(List.of()).build()
+        ).build();
+
+        caseData.getManageHearingsWrapper().setWorkingHearing(workingHearing);
+
+        // act
+        List<String> errors = service.validateGeneralApplicationDirectionsMandatoryParties(caseData);
+
+        // assert no errors when applicant and respondent selected for hearing correspondence
+        assertThat(errors).isEmpty();
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideWorkingHearingsThatFailGadPartyChecks")
+    void validateGeneralApplicationDirectionsMandatoryParties_whenPartiesMissing_showErrors(WorkingHearing workingHearing) {
+        // arrange
+        caseData.getManageHearingsWrapper().setWorkingHearing(workingHearing);
+
+        // act
+        List<String> errors = service.validateGeneralApplicationDirectionsMandatoryParties(caseData);
+
+        // assert errors when selected parties don't include applicant and respondent for hearing correspondence
+        assertThat(errors).contains("Select Applicant and Respondent for \"Who should see this order?\"");
+    }
+
+    @Test
+    void validateGeneralApplicationDirectionsNoticeSelection_whenYes_noErrors() {
+        // arrange
+        caseData.getManageHearingsWrapper().setWorkingHearing(
+            WorkingHearing.builder().hearingNoticePrompt(YesOrNo.YES).build());
+
+        // act
+        List<String> errors = service.validateGeneralApplicationDirectionsNoticeSelection(caseData);
+
+        // assert
+        assertThat(errors).isEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void validateGeneralApplicationDirectionsNoticeSelection_whenNotYes_showErrors(boolean validInput) {
+        // arrange
+        if (validInput) {
+         caseData.getManageHearingsWrapper().setWorkingHearing(
+            WorkingHearing.builder().hearingNoticePrompt(YesOrNo.NO).build());
+        } else {
+            caseData.getManageHearingsWrapper().setWorkingHearing(
+                WorkingHearing.builder().hearingNoticePrompt(null).build());
+        }
+
+        // act
+        List<String> errors = service.validateGeneralApplicationDirectionsNoticeSelection(caseData);
+
+        // assert
+        assertThat(errors).contains("Select \"Yes\" for \"Do you want to send a notice of hearing?\"");
+    }
+
+    @Test
+    void validateGeneralApplicationDirectionsIntervenerParties_whenIntervenerCreatedGaButNotSelected_showErrors() {
+        // arrange - label selected for a General Application created by an intervener
+        String label = "General Application 1 - Received from - Intervener 1 - Created Date - 2025-09-04 - Hearing Required - Yes";
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(
+            DynamicList.builder()
+                .value(DynamicListElement.builder().label(label).build()
+                ).build()
+        );
+
+        // arrange - omit intervener parties from working hearing notice selection
+        caseData.getManageHearingsWrapper()
+            .setWorkingHearing(WorkingHearing.builder().partiesOnCaseMultiSelectList(
+                DynamicMultiSelectList.builder()
+                    .value(List.of(
+                        DynamicMultiSelectListElement.builder().code(APP_SOLICITOR.getCcdCode()).build(),
+                        DynamicMultiSelectListElement.builder().code(CaseRole.RESP_SOLICITOR.getCcdCode()).build()))
+                    .listItems(List.of()).build()
+            ).build());
+
+        // Act
+        List<String> warnings = service.validateGeneralApplicationDirectionsIntervenerParties(caseData);
+
+        // Assert warnings.  GA created by intervener, but no intervener party selected for correspondence.
+        assertThat(warnings).containsExactly(
+            "An Intervener created this general application. " +
+                "Consider if an Intervener should be selected in \"Who should see this order?\"");
+    }
+
+    /*
+     * Any intervener party selected will satisfy the validation.  Manage Interveners can modify the list of interveners
+     * on the case after the GA is created, so don't validate against a specific intervener.
+     */
+    @ParameterizedTest
+    @EnumSource(value = CaseRole.class, names = {
+        "INTVR_SOLICITOR_1", "INTVR_SOLICITOR_2", "INTVR_SOLICITOR_3", "INTVR_SOLICITOR_4"
+    })
+    void validateGeneralApplicationDirectionsIntervenerParties_whenIntervenerCreatedGaAndSelected_NoErrors(CaseRole intervenerCaseRole) {
+        // arrange - label selected for a General Application created by an intervener
+        String label = "General Application 1 - Received from - Intervener 2 - Created Date - 2025-09-04 - Hearing Required - Yes";
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(
+            DynamicList.builder()
+                .value(DynamicListElement.builder().label(label).build()
+                ).build()
+        );
+
+        // arrange - add parameterised intervener party to working hearing
+        caseData.getManageHearingsWrapper()
+            .setWorkingHearing(
+                WorkingHearing.builder().partiesOnCaseMultiSelectList(
+                    DynamicMultiSelectList.builder()
+                        .value(List.of(
+                            DynamicMultiSelectListElement.builder().code(intervenerCaseRole.getCcdCode()).build()))
+                        .listItems(List.of()).build()
+                ).build());
+
+        // Act
+        List<String> warnings = service.validateGeneralApplicationDirectionsIntervenerParties(caseData);
+
+        // Assert that no warnings.  GA created by intervener, and one of the parameterised intervener parties selected.
+        assertThat(warnings).isEmpty();
+    }
+
+    @Test
+    void validateGeneralApplicationDirectionsIntervenerParties_whenApplicantCreatedGa_NoErrors() {
+        // arrange - label selected for a General Application created by an applicant
+        String label = "General Application 1 - Received from - Applicant - Created Date - 2025-09-04 - Hearing Required - Yes";
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(
+            DynamicList.builder()
+                .value(DynamicListElement.builder().label(label).build()
+                ).build()
+        );
+
+        // arrange - omit intervener parties from working hearing notice selection
+        caseData.getManageHearingsWrapper()
+            .setWorkingHearing(WorkingHearing.builder().partiesOnCaseMultiSelectList(
+                DynamicMultiSelectList.builder()
+                    .value(List.of(
+                        DynamicMultiSelectListElement.builder().code(APP_SOLICITOR.getCcdCode()).build(),
+                        DynamicMultiSelectListElement.builder().code(CaseRole.RESP_SOLICITOR.getCcdCode()).build()))
+                    .listItems(List.of()).build()
+            ).build());
+
+        // Act
+        List<String> warnings = service.validateGeneralApplicationDirectionsIntervenerParties(caseData);
+
+        // Assert that no warnings.  GA created by applicant, so not selecting intervener party for correspondence OK.
+        assertThat(warnings).isEmpty();
+    }
+
     private List<String> doTestWarnings() {
         return service.validateHearingWarnings(caseDetails);
     }
@@ -379,16 +547,16 @@ class ValidateHearingServiceTest {
         List<DynamicMultiSelectListElement> activeParties = new ArrayList<>(
             List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getCcdCode()),
                 getDynamicElementList(CaseRole.RESP_SOLICITOR.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getCcdCode())));
+                getDynamicElementList(INTVR_SOLICITOR_1.getCcdCode()),
+                getDynamicElementList(INTVR_SOLICITOR_2.getCcdCode()),
+                getDynamicElementList(INTVR_SOLICITOR_3.getCcdCode()),
+                getDynamicElementList(INTVR_SOLICITOR_4.getCcdCode())));
 
         List<DynamicMultiSelectListElement> selectedParties = new ArrayList<>(
-            List.of(getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getCcdCode())));
+            List.of(getDynamicElementList(INTVR_SOLICITOR_1.getCcdCode()),
+                getDynamicElementList(INTVR_SOLICITOR_2.getCcdCode()),
+                getDynamicElementList(INTVR_SOLICITOR_3.getCcdCode()),
+                getDynamicElementList(INTVR_SOLICITOR_4.getCcdCode())));
         return DynamicMultiSelectList.builder()
             .value(selectedParties)
             .listItems(activeParties)
@@ -409,4 +577,24 @@ class ValidateHearingServiceTest {
             .build());
     }
 
+    private static Stream<Arguments>provideWorkingHearingsThatFailGadPartyChecks() {
+        return Stream.of(
+            // Respondent not selected
+            Arguments.of(WorkingHearing.builder().partiesOnCaseMultiSelectList(
+                DynamicMultiSelectList.builder()
+                    .value(List.of(
+                        DynamicMultiSelectListElement.builder().code(CaseRole.APP_SOLICITOR.getCcdCode()).build()))
+                    .listItems(List.of()).build()
+            ).build()),
+            // Applicant not selected
+            Arguments.of(WorkingHearing.builder().partiesOnCaseMultiSelectList(
+                DynamicMultiSelectList.builder()
+                    .value(List.of(
+                        DynamicMultiSelectListElement.builder().code(CaseRole.RESP_SOLICITOR.getCcdCode()).build()))
+                    .listItems(List.of()).build()
+            ).build()),
+            // No Parties selected
+            Arguments.of(WorkingHearing.builder().build())
+        );
+    }
 }

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -22,6 +23,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
 
 @Service
@@ -128,67 +136,51 @@ public class ValidateHearingService {
         return List.of();
     }
 
-    // todo docs
-    // todo tests
+    /*
+     * Used by the General Application Directions mid-event Handler.
+     * Validates that if a hearing is required for the general application, the user has selected both
+     * applicant and respondent parties.
+     */
     public List<String> validateGeneralApplicationDirectionsMandatoryParties(FinremCaseData caseData) {
-
         Set<String> codes = getSelectedPartyCodesForWorkingHearing(caseData);
 
-        boolean bothSelected = codes.contains("[APPSOLICITOR]") && codes.contains("[RESPSOLICITOR]");
+        boolean bothSelected = codes.contains(APP_SOLICITOR.getCcdCode()) && codes.contains(RESP_SOLICITOR.getCcdCode());
+
         return bothSelected ? List.of() : List.of(GENERAL_APPLICATION_DIRECTIONS_PARTY_ERROR);
     }
 
-    // todo docs
-    // todo tests
+    /*
+     * Used by the General Application Directions mid-event Handler.
+     * Validates that if a hearing is required for the general application, the user has selected to send a notice of hearing.
+     */
     public List<String> validateGeneralApplicationDirectionsNoticeSelection(FinremCaseData caseData) {
-        // todo - null safe
-        boolean sendingHearingNotice = YesOrNo.YES.equals(caseData.getManageHearingsWrapper().getWorkingHearing().getHearingNoticePrompt());
-        return sendingHearingNotice ? List.of() : List.of(GENERAL_APPLICATION_DIRECTIONS_NOTICE_ERROR);
+        boolean yesChosenForSendHearingNotice = Optional.ofNullable(caseData.getManageHearingsWrapper().getWorkingHearing())
+            .map(h -> YesOrNo.YES.equals(h.getHearingNoticePrompt()))
+            .orElse(false);
+
+        return yesChosenForSendHearingNotice ? List.of() : List.of(GENERAL_APPLICATION_DIRECTIONS_NOTICE_ERROR);
     }
 
-    // todo docs
-    // todo tests
-    // From a data perspective, for each General Application there is generalApplicationSender.  This is the party that
-    // created the hearing. This party can be Applicant, Respondent or Intervener1-4.  This party is used to build a label
-    // so that the current user can select the correct General Application from a dropdown list.
+    /*
+     * Used by the General Application Directions mid-event Handler.
+     * Validates that if an intervener created the selected general application, at least one intervener party is selected
+     * to see the hearing correspondence.  Manage interveners can run after GA creation, which is why this is a lenient warning.
+     * @param caseData the case data containing hearing and general application details to validate
+     * @return a list of warning messages if no intervener party is selected for an intervener-created general application,
+                otherwise an empty list
+     */
     public List<String> validateGeneralApplicationDirectionsIntervenerParties(FinremCaseData caseData) {
-
-        // todo - look for consts
-        final Set <String> intervenerStrings = Set.of(
-            "INTERVENER1",
-            "INTERVENER2",
-            "INTERVENER3",
-            "INTERVENER4",
-            "INTERVENER5"
-        );
-
-        // todo - null safe
-        String selectedGeneralApplicationLabel = caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList().getValue().getLabel().toUpperCase();
-
-        boolean intervenerCreatedGeneralApplication = false;
-
-        // todo - consider redundant null check
-        if (selectedGeneralApplicationLabel != null) {
-            for (String intervener : intervenerStrings) {
-                if (selectedGeneralApplicationLabel.contains(intervener)) {
-                    intervenerCreatedGeneralApplication = true;
-                    break;
-                }
-            }
-        }
+        boolean intervenerCreatedGeneralApplication = didIntervenerCreateSelectedGeneralApplication(caseData);
 
         if (intervenerCreatedGeneralApplication) {
-
-            Set<String> codes = getSelectedPartyCodesForWorkingHearing(caseData);
-
-            // todo - look for consts
-            boolean anIntervenerIsSelected =
-                codes.contains("[INTVRSOLICITOR1]") ||
-                codes.contains("[INTVRSOLICITOR2]") ||
-                codes.contains("[INTVRSOLICITOR3]") ||
-                codes.contains("[INTVRSOLICITOR4]");
-
-            return anIntervenerIsSelected ? List.of() : List.of(GENERAL_APPLICATION_DIRECTIONS_INTERVENER_WARNING);
+            Set<String> selectedHearingParties = getSelectedPartyCodesForWorkingHearing(caseData);
+            Set<String> intervenerPartyList = Set.of(
+                INTVR_SOLICITOR_1.getCcdCode(),
+                INTVR_SOLICITOR_2.getCcdCode(),
+                INTVR_SOLICITOR_3.getCcdCode(),
+                INTVR_SOLICITOR_4.getCcdCode());
+            boolean anIntervenerIsSelectedForGAHearing = selectedHearingParties.stream().anyMatch(intervenerPartyList::contains);
+            return anIntervenerIsSelectedForGAHearing ? List.of() : List.of(GENERAL_APPLICATION_DIRECTIONS_INTERVENER_WARNING);
         }
 
         return List.of();
@@ -200,12 +192,9 @@ public class ValidateHearingService {
     }
 
     /**
-     * Retrieves the set of party codes selected for the working hearing in the provided case data.
-     * <p>
+     * Retrieves the set of party codes selected for the working hearing in the provided event data.
      * Firstly, creates a list of {@link DynamicMultiSelectListElement} objects for the selected parties.
      * Secondly, get the codes for these parties, then returns that in a set.
-     * </p>
-     *
      * @param caseData the case data containing the manage hearings wrapper and working hearing details
      * @return a set of selected party codes; never {@code null}
      */
@@ -220,5 +209,25 @@ public class ValidateHearingService {
         return selected.stream()
             .map(DynamicMultiSelectListElement::getCode)
             .collect(Collectors.toSet());
+    }
+
+    /*
+     * Specific to case data from the General Application Directions mid-event Handler.
+     * Used to see if passed event data has a general application selected in the dynamic list called generalApplicationDirectionsList.
+     * If so, check if the label for the value selected.  If the uppercase label contains the word "INTERVENER".  Then the
+     * General Application was created by an intervener.
+     * @param caseData the case data
+     * @return true if the selected general application was created by an Intervener
+     */
+    private static boolean didIntervenerCreateSelectedGeneralApplication(FinremCaseData caseData) {
+        String selectedGeneralApplicationLabel = "";
+        DynamicList generalApplicationDirectionsList = caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsList();
+
+        if (generalApplicationDirectionsList != null && generalApplicationDirectionsList.getValue() != null) {
+            selectedGeneralApplicationLabel =
+                generalApplicationDirectionsList.getValue().getLabel();
+        }
+
+        return containsIgnoreCase(selectedGeneralApplicationLabel, "intervener");
     }
 }
