@@ -22,7 +22,7 @@ def versions = [
         commonsLang3         : '3.18.0',
         hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
-        lombok               : '1.18.38',
+        lombok               : '1.18.40',
         mockito              : '5.19.0',
         pact                 : '4.6.17',
         pdfbox               : '3.0.5',
@@ -44,7 +44,7 @@ def versions = [
         loadbalancer         : '4.3.0',
         commonsValidator     : '1.7',
         commonsBeanUtils     : '1.11.0',
-        tomcat               : '10.1.44'
+        tomcat               : '10.1.45'
 ]
 
 project.ext {
