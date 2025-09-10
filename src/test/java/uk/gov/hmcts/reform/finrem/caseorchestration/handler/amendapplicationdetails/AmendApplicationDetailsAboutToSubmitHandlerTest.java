@@ -29,7 +29,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.Callback
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached.DECREE_ABSOLUTE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached.DECREE_NISI;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached.PETITION_ISSUED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -98,6 +100,92 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             divorcePetitionIssuedDate,
             divorceUploadEvidence1,
             divorceDecreeNisiDate,
+            generatedMiniFormA
+        );
+    }
+
+    // Merged from {@code UpdateContestedCaseControllerTest.shouldDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested}
+    @Test
+    void givenDecreeAbsoluteSelectedBySolicitor_whenHandled_thenDeleteNoDecreeNisi() throws Exception {
+        final CaseDocument generatedMiniFormA = mock(CaseDocument.class);
+        final CaseDocument divorceUploadEvidence1 = mock(CaseDocument.class);
+        final LocalDate divorceDecreeNisiDate = mock(LocalDate.class);
+        final LocalDate divorceDecreeAbsoluteDate = mock(LocalDate.class);
+        final LocalDate divorcePetitionIssuedDate = mock(LocalDate.class);
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        finremCaseData.setDivorceStageReached(DECREE_ABSOLUTE);
+        finremCaseData.setDivorceUploadEvidence1(divorceUploadEvidence1);
+        finremCaseData.setDivorceUploadEvidence2(caseDocument("DivorceUploadEvidence2.pdf"));
+        finremCaseData.setDivorceDecreeNisiDate(divorceDecreeNisiDate);
+        finremCaseData.setDivorceDecreeAbsoluteDate(divorceDecreeAbsoluteDate);
+        finremCaseData.setDivorceUploadPetition(caseDocument("DivorceUploadPetition.pdf"));
+        finremCaseData.setDivorcePetitionIssuedDate(divorcePetitionIssuedDate);
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+        when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), eq(finremCaseDetails)))
+            .thenReturn(generatedMiniFormA);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertThat(response.getData()).extracting(
+            FinremCaseData::getDivorceUploadPetition,
+            FinremCaseData::getDivorceUploadEvidence1,
+            FinremCaseData::getDivorceDecreeNisiDate
+        ).containsOnlyNulls();
+        assertThat(response.getData()).extracting(
+            FinremCaseData::getDivorcePetitionIssuedDate,
+            FinremCaseData::getMiniFormA
+        )
+        .containsExactly(
+            divorcePetitionIssuedDate,
+            generatedMiniFormA
+        );
+    }
+
+    // Merged from {@code UpdateContestedCaseControllerTest.shouldDeleteDecreeAbsoluteWhenSolicitorChooseToPetitionIssuedForContested}
+    @Test
+    void givenPetitionIssuedSelectedBySolicitor_whenHandled_thenDeleteNoDecreeNisi() throws Exception {
+        final CaseDocument generatedMiniFormA = mock(CaseDocument.class);
+        final CaseDocument divorceUploadEvidence1 = mock(CaseDocument.class);
+        final CaseDocument divorceUploadPetition = mock(CaseDocument.class);
+        final LocalDate divorceDecreeNisiDate = mock(LocalDate.class);
+        final LocalDate divorceDecreeAbsoluteDate = mock(LocalDate.class);
+        final LocalDate divorcePetitionIssuedDate = mock(LocalDate.class);
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        finremCaseData.setDivorceStageReached(PETITION_ISSUED);
+        finremCaseData.setDivorceUploadEvidence1(divorceUploadEvidence1);
+        finremCaseData.setDivorceUploadEvidence2(caseDocument("DivorceUploadEvidence2.pdf"));
+        finremCaseData.setDivorceDecreeNisiDate(divorceDecreeNisiDate);
+        finremCaseData.setDivorceDecreeAbsoluteDate(divorceDecreeAbsoluteDate);
+        finremCaseData.setDivorceUploadPetition(divorceUploadPetition);
+        finremCaseData.setDivorcePetitionIssuedDate(divorcePetitionIssuedDate);
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+        when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), eq(finremCaseDetails)))
+            .thenReturn(generatedMiniFormA);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertThat(response.getData()).extracting(
+            FinremCaseData::getDivorceUploadEvidence1,
+            FinremCaseData::getDivorceUploadEvidence2,
+            FinremCaseData::getDivorceDecreeNisiDate,
+            FinremCaseData::getDivorceDecreeAbsoluteDate
+        ).containsOnlyNulls();
+        assertThat(response.getData()).extracting(
+            FinremCaseData::getDivorcePetitionIssuedDate,
+            FinremCaseData::getDivorceUploadPetition,
+            FinremCaseData::getMiniFormA
+        )
+        .containsExactly(
+            divorcePetitionIssuedDate,
+            divorceUploadPetition,
             generatedMiniFormA
         );
     }
