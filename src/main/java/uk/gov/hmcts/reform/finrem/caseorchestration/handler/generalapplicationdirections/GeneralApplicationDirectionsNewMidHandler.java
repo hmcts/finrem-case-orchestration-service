@@ -53,7 +53,6 @@ public class GeneralApplicationDirectionsNewMidHandler extends FinremCallbackHan
 
         if (generalApplicationDirectionsService.isHearingRequired(finremCaseDetails)) {
 
-            // Todo: all the handler tests are missing for this class
             errors.addAll(validateHearingService.validateGeneralApplicationDirectionsMandatoryParties(finremCaseData));
             errors.addAll(validateHearingService.validateGeneralApplicationDirectionsNoticeSelection(finremCaseData));
             warnings.addAll(validateHearingService.validateGeneralApplicationDirectionsIntervenerParties(finremCaseData));

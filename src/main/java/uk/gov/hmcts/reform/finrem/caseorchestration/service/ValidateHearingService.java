@@ -140,6 +140,8 @@ public class ValidateHearingService {
      * Used by the General Application Directions mid-event Handler.
      * Validates that if a hearing is required for the general application, the user has selected both
      * applicant and respondent parties.
+     * @param caseData the case data containing hearing and general application details to validate
+     * @return a list of error messages if either applicant or respondent party is not selected,
      */
     public List<String> validateGeneralApplicationDirectionsMandatoryParties(FinremCaseData caseData) {
         Set<String> codes = getSelectedPartyCodesForWorkingHearing(caseData);
@@ -152,6 +154,8 @@ public class ValidateHearingService {
     /*
      * Used by the General Application Directions mid-event Handler.
      * Validates that if a hearing is required for the general application, the user has selected to send a notice of hearing.
+     * @param caseData the case data containing hearing and general application details to validate
+     * @return a list of error messages if the user has not selected to send a notice
      */
     public List<String> validateGeneralApplicationDirectionsNoticeSelection(FinremCaseData caseData) {
         boolean yesChosenForSendHearingNotice = Optional.ofNullable(caseData.getManageHearingsWrapper().getWorkingHearing())
