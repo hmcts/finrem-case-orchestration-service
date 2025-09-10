@@ -63,8 +63,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
 
 /**
+ * Unit tests for UpdateContestedCaseControllerTest.
+ *
  * @deprecated This controller will be removed in favour of using
- * {@link AmendApplicationDetailsAboutToSubmitHandler}.
+ *     {@link AmendApplicationDetailsAboutToSubmitHandler}.
  */
 @Deprecated
 @RestController
