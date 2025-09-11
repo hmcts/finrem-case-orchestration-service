@@ -243,6 +243,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
             }
         }
     }
+
     private void clearPropertyAdjustmentOrderFields(FinremCaseData finremCaseData) {
         finremCaseData.setPropertyAddress(null);
         finremCaseData.setMortgageDetail(null);
