@@ -169,7 +169,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
     }
 
     private void clearUnwantedRespondentDetails(FinremCaseData caseData) {
-        if (caseData.isRespondentRepresentedByASolicitor()) {
+        if (!caseData.isRespondentRepresentedByASolicitor()) {
             caseData.getContactDetailsWrapper().setRespondentSolicitorName(null);
             caseData.getContactDetailsWrapper().setRespondentSolicitorFirm(null);
             caseData.getContactDetailsWrapper().setRespondentSolicitorReference(null);

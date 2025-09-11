@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails;
 
+import org.assertj.core.api.ObjectEnumerableAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,6 +13,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustment
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
@@ -341,6 +344,76 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             assertThat(response.getData()).extracting(
                 FinremCaseData::getPropertyAdjustmentOrderDetail
             ).isNotNull();
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenRespondentRepresented_whenHandled_thenClearUnwantedRespondentFields(boolean respondentRepresented) {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+        when(finremCaseData.isRespondentRepresentedByASolicitor()).thenReturn(respondentRepresented);
+        YesOrNo respSolNotificationsEmailConsent = mock(YesOrNo.class);
+        finremCaseData.setRespSolNotificationsEmailConsent(respSolNotificationsEmailConsent);
+        ContactDetailsWrapper contactDetailsWrapper = spy(ContactDetailsWrapper.class);
+        contactDetailsWrapper.setRespondentSolicitorName("respondentSolicitorName");
+        contactDetailsWrapper.setRespondentSolicitorFirm("respondentSolicitorFirm");
+        contactDetailsWrapper.setRespondentSolicitorReference("respondentSolicitorReference");
+        Address respondentSolicitorAddress = mock(Address.class);
+        contactDetailsWrapper.setRespondentSolicitorAddress(respondentSolicitorAddress);
+        contactDetailsWrapper.setRespondentSolicitorPhone("respondentSolicitorPhone");
+        contactDetailsWrapper.setRespondentSolicitorEmail("respondentSolicitorEmail");
+        contactDetailsWrapper.setRespondentSolicitorDxNumber("respondentSolicitorDxNumber");
+        Address respondentAddress = mock(Address.class);
+        contactDetailsWrapper.setRespondentAddress(respondentAddress);
+        contactDetailsWrapper.setRespondentPhone("respondentPhone");
+        contactDetailsWrapper.setRespondentEmail("respondentEmail");
+        finremCaseData.setContactDetailsWrapper(contactDetailsWrapper);
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        ObjectEnumerableAssert respondentSolicitorContactFields = assertThat(contactDetailsWrapper).extracting(
+            ContactDetailsWrapper::getRespondentSolicitorName,
+            ContactDetailsWrapper::getRespondentSolicitorFirm,
+            ContactDetailsWrapper::getRespondentSolicitorReference,
+            ContactDetailsWrapper::getRespondentSolicitorAddress,
+            ContactDetailsWrapper::getRespondentSolicitorPhone,
+            ContactDetailsWrapper::getRespondentSolicitorEmail,
+            ContactDetailsWrapper::getRespondentSolicitorDxNumber
+        );
+        ObjectEnumerableAssert respondentContactFields = assertThat(contactDetailsWrapper).extracting(
+            ContactDetailsWrapper::getRespondentAddress,
+            ContactDetailsWrapper::getRespondentPhone,
+            ContactDetailsWrapper::getRespondentEmail
+        );
+
+        if (respondentRepresented) {
+            respondentContactFields.containsOnlyNulls();
+            respondentSolicitorContactFields.containsExactly(
+                "respondentSolicitorName",
+                "respondentSolicitorFirm",
+                "respondentSolicitorReference",
+                respondentSolicitorAddress,
+                "respondentSolicitorPhone",
+                "respondentSolicitorEmail",
+                "respondentSolicitorDxNumber"
+            );
+            assertThat(response.getData()).extracting(
+                FinremCaseData::getRespSolNotificationsEmailConsent).isEqualTo(respSolNotificationsEmailConsent);
+        } else {
+            respondentContactFields.containsExactly(
+                respondentAddress, "respondentPhone", "respondentEmail"
+            );
+            respondentSolicitorContactFields.containsOnlyNulls();
+            assertThat(response.getData()).extracting(
+                FinremCaseData::getRespSolNotificationsEmailConsent
+            ).isNull();
         }
     }
 }
