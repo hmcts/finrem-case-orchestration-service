@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -199,5 +200,29 @@ class PaperNotificationServiceTest {
 
         // Assert
         assertEquals(expected, result);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "true, true, false",  // Applicant represented, agrees to email, should not print
+        "true, false, true",  // Applicant represented, does not agree to email, should print
+        "false, true, true",  // Applicant not represented, agrees to email, should print
+        "false, false, true", // Applicant not represented, does not agree to email, should print
+    })
+    void testShouldPrintForApplicantDisregardApplicationType(boolean isApplicantRepresented, boolean agreesToEmails, boolean expected) {
+        // Arrange
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+
+        when(caseDetails.getData()).thenReturn(caseData);
+        when(caseDataService.isApplicantRepresentedByASolicitor(caseData)).thenReturn(isApplicantRepresented);
+        lenient().when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(agreesToEmails);
+
+        // Act
+        boolean result = paperNotificationService.shouldPrintForApplicantDisregardApplicationType(caseDetails);
+
+        // Assert
+        assertEquals(expected, result);
+        verify(caseDataService, never()).isPaperApplication(caseData);
     }
 }
