@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,8 +9,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -35,21 +36,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
-    public static final String AUTH_TOKEN = "tokien:)";
     private SolicitorCreateContestedAboutToSubmitHandler handler;
 
     @Mock
@@ -70,7 +74,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     @BeforeEach
-    public void init() {
+    void init() {
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
             finremCaseDetailsMapper,
             onlineFormDocumentService,
@@ -134,9 +138,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             .thenReturn(List.of("Validation failed"));
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
-        Assertions.assertThat(response.getErrors()).hasSize(1);
-        Assertions.assertThat(response.getErrors().get(0)).isEqualTo("Validation failed");
-        Assertions.assertThat(response.getData()).isNotNull();
+        assertThat(response.getErrors()).containsExactly("Validation failed");
     }
 
     @Test
@@ -149,7 +151,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
             handler.handle(callbackRequest, AUTH_TOKEN);
             // Check that updateRespondentInRefugeTab is called with our case details instance
-            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails), times(1));
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails));
         }
     }
 
@@ -163,7 +165,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
             handler.handle(callbackRequest, AUTH_TOKEN);
             // Check that updateApplicantInRefugeTab is called with our case details instance
-            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails));
         }
     }
 
@@ -177,6 +179,24 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
     }
 
+    @Test
+    void givenInvalidOrganisationPolicy_whenHandle_thenReturnsValidationError() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(caseDetails.getData()).thenReturn(finremCaseData);
+
+        try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class)) {
+            mockedStatic.when(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData))
+                .thenReturn(List.of("VALIDATION FAILED"));
+
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+            mockedStatic.verify(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
+            assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
+        }
+    }
+
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {
         assertEquals(YesOrNo.NO, responseCaseData.getCivilPartnership());
         assertEquals(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS,
@@ -185,7 +205,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         assertNull(responseCaseData.getContactDetailsWrapper().getApplicantRepresented());
         assertEquals(caseDocument(), responseCaseData.getMiniFormA());
         assertEquals(DocumentCategory.APPLICATIONS_MAIN_APPLICATION.getDocumentCategoryId(),
-            responseCaseData.getUploadAdditionalDocument().get(0).getValue().getAdditionalDocuments().getCategoryId()
+            responseCaseData.getUploadAdditionalDocument().getFirst().getValue().getAdditionalDocuments().getCategoryId()
         );
     }
 
@@ -196,13 +216,13 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         assertEquals(YesOrNo.NO, responseCaseData.getPromptForUrgentCaseQuestion());
         assertEquals(YesOrNo.YES, responseCaseData.getContactDetailsWrapper().getApplicantRepresented());
         assertEquals(caseDocument(), responseCaseData.getMiniFormA());
-        assertNull(responseCaseData.getUploadAdditionalDocument().get(0)
+        assertNull(responseCaseData.getUploadAdditionalDocument().getFirst()
             .getValue().getAdditionalDocuments().getCategoryId());
     }
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
         return CallbackRequest.builder().eventId(EventType.UPLOAD_APPROVED_ORDER.getCcdType()).caseDetails(caseDetails).build();
     }
 
@@ -214,7 +234,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = FinremCaseData.builder().civilPartnership(YesOrNo.NO)
             .promptForUrgentCaseQuestion(YesOrNo.NO).uploadAdditionalDocument(List.of(collection))
             .scheduleOneWrapper(wrapper).build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
         return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
     }
 }
