@@ -75,10 +75,10 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         caseFlagsService.setCaseFlagInformation(finremCaseDetails);
-        updateDivorceDetails(finremCaseData);
+        clearDivorceDetailsFields(finremCaseData);
         updateRespondentDetails(finremCaseData);
         updatePeriodicPaymentOrder(finremCaseData);
-        updatePropertyAdjustmentOrder(finremCaseData);
+        clearPropertyAdjustmentOrderRelatedFields(finremCaseData);
         updateFastTrackProcedureDetail(finremCaseData);
         updateComplexityDetails(finremCaseData);
         clearReasonForLocalCourt(finremCaseData);
@@ -110,6 +110,11 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
 
     private boolean isInConnectionToMatrimonialAndCivilPartnershipProceedings(FinremCaseData finremCaseData) {
         return MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.equals(getTypeOfApplication(finremCaseData));
+    }
+
+    private boolean isPropertyAdjustmentOrderNotSelected(FinremCaseData finremCaseData) {
+        return !emptyIfNull(finremCaseData.getNatureApplicationWrapper().getNatureOfApplicationChecklist())
+            .contains(NatureApplication.PROPERTY_ADJUSTMENT_ORDER);
     }
 
     private void clearAllocatedToBeHeardAtHighCourtJudgeLevelText(FinremCaseData finremCaseData) {
@@ -147,12 +152,6 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
     }
 
-    private void removePropertyAdjustmentOrder(FinremCaseData finremCaseData) {
-        finremCaseData.setPropertyAddress(null);
-        finremCaseData.setMortgageDetail(null);
-        finremCaseData.setPropertyAdjustmentOrderDetail(null);
-    }
-
     private void removeAllMiamExceptionDetails(FinremCaseData finremCaseData) {
         MiamWrapper miamWrapper = finremCaseData.getMiamWrapper();
         miamWrapper.setClaimingExemptionMiam(null);
@@ -167,29 +166,6 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         miamWrapper.setEvidenceUnavailablePreviousAttendanceMiam(null);
         miamWrapper.setEvidenceUnavailableOtherGroundsMiam(null);
         miamWrapper.setAdditionalInfoOtherGroundsMiam(null);
-    }
-
-    private void updateDivorceDetails(FinremCaseData caseData) {
-        StageReached divorceStageReached = caseData.getDivorceStageReached();
-
-        switch (divorceStageReached) {
-            case DECREE_NISI -> {
-                caseData.setDivorceUploadEvidence2(null);
-                caseData.setDivorceDecreeAbsoluteDate(null);
-                caseData.setDivorceUploadPetition(null);
-            }
-            case DECREE_ABSOLUTE -> {
-                caseData.setDivorceUploadEvidence1(null);
-                caseData.setDivorceDecreeNisiDate(null);
-                caseData.setDivorceUploadPetition(null);
-            }
-            default -> {
-                caseData.setDivorceUploadEvidence1(null);
-                caseData.setDivorceDecreeNisiDate(null);
-                caseData.setDivorceUploadEvidence2(null);
-                caseData.setDivorceDecreeAbsoluteDate(null);
-            }
-        }
     }
 
     private void updateRespondentDetails(FinremCaseData caseData) {
@@ -223,12 +199,6 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
     }
 
-    private void updatePropertyAdjustmentOrderDetails(FinremCaseData finremCaseData) {
-        if (YesOrNo.NO.equals(finremCaseData.getAdditionalPropertyOrderDecision())) {
-            finremCaseData.setPropertyAdjustmentOrderDetail(null);
-        }
-    }
-
     private void updatePeriodicPaymentDetails(FinremCaseData finremCaseData) {
         YesOrNo paymentForChildrenDecision = finremCaseData.getPaymentForChildrenDecision();
         YesOrNo benefitForChildrenDecision = finremCaseData.getBenefitForChildrenDecision();
@@ -241,14 +211,47 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
     }
 
-    private void updatePropertyAdjustmentOrder(FinremCaseData finremCaseData) {
-        if (isInConnectionToMatrimonialAndCivilPartnershipProceedings(finremCaseData)) {
-            if (!emptyIfNull(finremCaseData.getNatureApplicationWrapper().getNatureOfApplicationChecklist())
-                .contains(NatureApplication.PROPERTY_ADJUSTMENT_ORDER)) {
-                removePropertyAdjustmentOrder(finremCaseData);
-            } else {
-                updatePropertyAdjustmentOrderDetails(finremCaseData);
+    private void clearDivorceDetailsFields(FinremCaseData caseData) {
+        StageReached divorceStageReached = caseData.getDivorceStageReached();
+
+        switch (divorceStageReached) {
+            case DECREE_NISI -> {
+                caseData.setDivorceUploadEvidence2(null);
+                caseData.setDivorceDecreeAbsoluteDate(null);
+                caseData.setDivorceUploadPetition(null);
             }
+            case DECREE_ABSOLUTE -> {
+                caseData.setDivorceUploadEvidence1(null);
+                caseData.setDivorceDecreeNisiDate(null);
+                caseData.setDivorceUploadPetition(null);
+            }
+            default -> {
+                caseData.setDivorceUploadEvidence1(null);
+                caseData.setDivorceDecreeNisiDate(null);
+                caseData.setDivorceUploadEvidence2(null);
+                caseData.setDivorceDecreeAbsoluteDate(null);
+            }
+        }
+    }
+
+    private void clearPropertyAdjustmentOrderRelatedFields(FinremCaseData finremCaseData) {
+        if (isInConnectionToMatrimonialAndCivilPartnershipProceedings(finremCaseData)) {
+            if (isPropertyAdjustmentOrderNotSelected(finremCaseData)) {
+                clearPropertyAdjustmentOrderFields(finremCaseData);
+            } else {
+                clearPropertyAdjustmentOrderDetail(finremCaseData);
+            }
+        }
+    }
+    private void clearPropertyAdjustmentOrderFields(FinremCaseData finremCaseData) {
+        finremCaseData.setPropertyAddress(null);
+        finremCaseData.setMortgageDetail(null);
+        finremCaseData.setPropertyAdjustmentOrderDetail(null);
+    }
+
+    private void clearPropertyAdjustmentOrderDetail(FinremCaseData finremCaseData) {
+        if (YesOrNo.NO.equals(finremCaseData.getAdditionalPropertyOrderDecision())) {
+            finremCaseData.setPropertyAdjustmentOrderDetail(null);
         }
     }
 

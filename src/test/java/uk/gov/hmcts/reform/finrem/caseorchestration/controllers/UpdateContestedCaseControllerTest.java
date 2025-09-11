@@ -54,6 +54,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
  * @deprecated This controller will be removed in favour of using
  *     {@link AmendApplicationDetailsAboutToSubmitHandler}.
  */
+@Deprecated
 @WebMvcTest(UpdateContestedCaseController.class)
 @ContextConfiguration(classes = {UpdateContestedCaseControllerTest.TestConfig.class})
 @Import(MiamLegacyExemptionsService.class)
@@ -173,6 +174,7 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.propertyAdjutmentOrderDetail").doesNotExist());
     }
 
+    // same as shouldRemovePropertyAdjustmentOrderDetailsWhenSolicitorUncheckedForContested
     @Test
     void shouldUpdatePropertyAdjustmentOrderDecisionDetailForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
