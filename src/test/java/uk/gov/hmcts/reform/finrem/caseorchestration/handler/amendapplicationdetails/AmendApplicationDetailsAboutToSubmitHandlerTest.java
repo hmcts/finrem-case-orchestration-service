@@ -357,18 +357,18 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         YesOrNo respSolNotificationsEmailConsent = mock(YesOrNo.class);
         finremCaseData.setRespSolNotificationsEmailConsent(respSolNotificationsEmailConsent);
         ContactDetailsWrapper contactDetailsWrapper = spy(ContactDetailsWrapper.class);
-        contactDetailsWrapper.setRespondentSolicitorName("respondentSolicitorName");
-        contactDetailsWrapper.setRespondentSolicitorFirm("respondentSolicitorFirm");
-        contactDetailsWrapper.setRespondentSolicitorReference("respondentSolicitorReference");
+        contactDetailsWrapper.setRespondentSolicitorName("ABC");
+        contactDetailsWrapper.setRespondentSolicitorFirm("ABC Solicitor");
+        contactDetailsWrapper.setRespondentSolicitorReference("REFXXXXASDASDSA");
         Address respondentSolicitorAddress = mock(Address.class);
         contactDetailsWrapper.setRespondentSolicitorAddress(respondentSolicitorAddress);
-        contactDetailsWrapper.setRespondentSolicitorPhone("respondentSolicitorPhone");
-        contactDetailsWrapper.setRespondentSolicitorEmail("respondentSolicitorEmail");
-        contactDetailsWrapper.setRespondentSolicitorDxNumber("respondentSolicitorDxNumber");
+        contactDetailsWrapper.setRespondentSolicitorPhone("02255666444");
+        contactDetailsWrapper.setRespondentSolicitorEmail("respondentSolicitorEmail@abc.com");
+        contactDetailsWrapper.setRespondentSolicitorDxNumber("XXXX1111");
         Address respondentAddress = mock(Address.class);
         contactDetailsWrapper.setRespondentAddress(respondentAddress);
-        contactDetailsWrapper.setRespondentPhone("respondentPhone");
-        contactDetailsWrapper.setRespondentEmail("respondentEmail");
+        contactDetailsWrapper.setRespondentPhone("02255666333");
+        contactDetailsWrapper.setRespondentEmail("respondent@email.com");
         finremCaseData.setContactDetailsWrapper(contactDetailsWrapper);
 
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
@@ -396,19 +396,19 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         if (respondentRepresented) {
             respondentContactFields.containsOnlyNulls();
             respondentSolicitorContactFields.containsExactly(
-                "respondentSolicitorName",
-                "respondentSolicitorFirm",
-                "respondentSolicitorReference",
+                "ABC",
+                "ABC Solicitor",
+                "REFXXXXASDASDSA",
                 respondentSolicitorAddress,
-                "respondentSolicitorPhone",
-                "respondentSolicitorEmail",
-                "respondentSolicitorDxNumber"
+                "02255666444",
+                "respondentSolicitorEmail@abc.com",
+                "XXXX1111"
             );
             assertThat(response.getData()).extracting(
                 FinremCaseData::getRespSolNotificationsEmailConsent).isEqualTo(respSolNotificationsEmailConsent);
         } else {
             respondentContactFields.containsExactly(
-                respondentAddress, "respondentPhone", "respondentEmail"
+                respondentAddress, "02255666333", "respondent@email.com"
             );
             respondentSolicitorContactFields.containsOnlyNulls();
             assertThat(response.getData()).extracting(
