@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,6 +33,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -89,6 +92,22 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         assertThat(response.getData()).extracting(FinremCaseData::getMiniFormA).isEqualTo(generatedMiniFormA);
         verify(onlineFormDocumentService).generateDraftContestedMiniFormA(eq(AUTH_TOKEN), eq(finremCaseDetails));
         verify(caseFlagsService).setCaseFlagInformation(finremCaseDetails);
+    }
+
+    @Test
+    void givenAnyCases_whenHandled_thenRefugeTabsUpdated() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        try (MockedStatic<RefugeWrapperUtils> mockedStatic = mockStatic(RefugeWrapperUtils.class)) {
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(finremCaseDetails));
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(finremCaseDetails));
+        }
     }
 
     @ParameterizedTest
