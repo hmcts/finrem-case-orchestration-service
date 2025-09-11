@@ -75,8 +75,8 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         caseFlagsService.setCaseFlagInformation(finremCaseDetails);
-        clearDivorceDetailsFields(finremCaseData);
-        updateRespondentDetails(finremCaseData);
+        clearUnwantedDivorceDetailsFields(finremCaseData);
+        clearUnwantedRespondentDetails(finremCaseData);
         updatePeriodicPaymentOrder(finremCaseData);
         clearPropertyAdjustmentOrderRelatedFields(finremCaseData);
         updateFastTrackProcedureDetail(finremCaseData);
@@ -168,7 +168,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         miamWrapper.setAdditionalInfoOtherGroundsMiam(null);
     }
 
-    private void updateRespondentDetails(FinremCaseData caseData) {
+    private void clearUnwantedRespondentDetails(FinremCaseData caseData) {
         if (caseData.isRespondentRepresentedByASolicitor()) {
             caseData.getContactDetailsWrapper().setRespondentSolicitorName(null);
             caseData.getContactDetailsWrapper().setRespondentSolicitorFirm(null);
@@ -211,7 +211,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
     }
 
-    private void clearDivorceDetailsFields(FinremCaseData caseData) {
+    private void clearUnwantedDivorceDetailsFields(FinremCaseData caseData) {
         StageReached divorceStageReached = caseData.getDivorceStageReached();
 
         switch (divorceStageReached) {
