@@ -75,16 +75,20 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         caseFlagsService.setCaseFlagInformation(finremCaseDetails);
-        clearUnwantedDivorceDetailsFields(finremCaseData);
-        clearUnwantedRespondentDetails(finremCaseData);
-        clearUnwantedPeriodicPaymentOrderRelatedFields(finremCaseData);
-        clearPropertyAdjustmentOrderRelatedFields(finremCaseData);
+
+        clearUnusedDivorceDetailsFields(finremCaseData);
+        clearUnusedRespondentDetails(finremCaseData);
+        clearUnusedPeriodicPaymentOrderRelatedFields(finremCaseData);
+        clearUnusedPropertyAdjustmentOrderRelatedFields(finremCaseData);
+
+        // TODO
         updateFastTrackProcedureDetail(finremCaseData);
         updateComplexityDetails(finremCaseData);
         clearReasonForLocalCourt(finremCaseData);
         clearAllocatedToBeHeardAtHighCourtJudgeLevelText(finremCaseData);
         updateMiamDetails(finremCaseData);
         cleanupAdditionalDocuments(finremCaseData);
+
         generateMiniFormA(finremCaseDetails, userAuthorisation);
 
         RefugeWrapperUtils.updateApplicantInRefugeTab(finremCaseDetails);
@@ -176,7 +180,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         miamWrapper.setAdditionalInfoOtherGroundsMiam(null);
     }
 
-    private void clearUnwantedRespondentDetails(FinremCaseData caseData) {
+    private void clearUnusedRespondentDetails(FinremCaseData caseData) {
         if (!caseData.isRespondentRepresentedByASolicitor()) {
             caseData.getContactDetailsWrapper().setRespondentSolicitorName(null);
             caseData.getContactDetailsWrapper().setRespondentSolicitorFirm(null);
@@ -193,7 +197,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
     }
 
-    private void clearUnwantedPeriodicPaymentOrderRelatedFields(FinremCaseData finremCaseData) {
+    private void clearUnusedPeriodicPaymentOrderRelatedFields(FinremCaseData finremCaseData) {
         if (isPeriodicalPaymentOrderNotSelected(finremCaseData)) {
             clearFieldsWhenPeriodicalPaymentOrderNotSelected(finremCaseData);
         } else {
@@ -213,7 +217,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
     }
 
-    private void clearUnwantedDivorceDetailsFields(FinremCaseData caseData) {
+    private void clearUnusedDivorceDetailsFields(FinremCaseData caseData) {
         StageReached divorceStageReached = caseData.getDivorceStageReached();
 
         switch (divorceStageReached) {
@@ -236,7 +240,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
     }
 
-    private void clearPropertyAdjustmentOrderRelatedFields(FinremCaseData finremCaseData) {
+    private void clearUnusedPropertyAdjustmentOrderRelatedFields(FinremCaseData finremCaseData) {
         if (isInConnectionToMatrimonialAndCivilPartnershipProceedings(finremCaseData)) {
             if (isPropertyAdjustmentOrderNotSelected(finremCaseData)) {
                 clearAllPropertyAdjustmentOrderFields(finremCaseData);
