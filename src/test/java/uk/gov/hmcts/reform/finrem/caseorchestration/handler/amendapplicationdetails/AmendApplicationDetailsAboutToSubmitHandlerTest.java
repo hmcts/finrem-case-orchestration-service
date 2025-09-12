@@ -14,10 +14,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureOfApplicationSchedule;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
@@ -32,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUt
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,6 +51,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.Callback
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached.DECREE_ABSOLUTE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached.DECREE_NISI;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached.PETITION_ISSUED;
@@ -414,6 +419,189 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             assertThat(response.getData()).extracting(
                 FinremCaseData::getRespSolNotificationsEmailConsent
             ).isNull();
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS",
+        "N/A"
+    }, nullValues = "N/A")
+    void givenPeriodicalPaymentOrderNotSelected_whenHandled_thenClearUnwantedFields(Schedule1OrMatrimonialAndCpList typeOfApplication) {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+        if (typeOfApplication != null) {
+            finremCaseData.getScheduleOneWrapper().setTypeOfApplication(typeOfApplication);
+            finremCaseData.getNatureApplicationWrapper().setNatureOfApplicationChecklist(List.of(
+                NatureApplication.LUMP_SUM_ORDER,
+                NatureApplication.PENSION_SHARING_ORDER,
+                NatureApplication.PENSION_ATTACHMENT_ORDER,
+                NatureApplication.PENSION_COMPENSATION_SHARING_ORDER,
+                NatureApplication.PENSION_COMPENSATION_ATTACHMENT_ORDER
+            ));
+        } else {
+            finremCaseData.getScheduleOneWrapper().setTypeOfApplication(mock(Schedule1OrMatrimonialAndCpList.class));
+            finremCaseData.getScheduleOneWrapper().setNatureOfApplicationChecklistSchedule(List.of(
+                NatureOfApplicationSchedule.LUMP_SUM_ORDER,
+                NatureOfApplicationSchedule.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY
+            ));
+        }
+        YesOrNo paymentForChildrenDecision = mock(YesOrNo.class);
+        finremCaseData.setPaymentForChildrenDecision(paymentForChildrenDecision);
+
+        YesOrNo benefitForChildrenDecision = mock(YesOrNo.class);
+        finremCaseData.setBenefitForChildrenDecision(benefitForChildrenDecision);
+        List<BenefitPayment> benefitPaymentChecklist = mock(List.class);
+        finremCaseData.setBenefitPaymentChecklist(benefitPaymentChecklist);
+
+        YesOrNo benefitForChildrenDecisionSchedule = mock(YesOrNo.class);
+        finremCaseData.setBenefitForChildrenDecisionSchedule(benefitForChildrenDecisionSchedule);
+        List<BenefitPaymentChecklist> benefitPaymentChecklistSchedule = mock(List.class);
+        finremCaseData.setBenefitPaymentChecklistSchedule(benefitPaymentChecklistSchedule);
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertThat(response.getData()).extracting(FinremCaseData::getPaymentForChildrenDecision).isNull();
+        if (typeOfApplication == MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS) {
+            assertThat(response.getData())
+                .extracting(FinremCaseData::getBenefitForChildrenDecision,
+                    FinremCaseData::getBenefitPaymentChecklist)
+                .containsOnlyNulls();
+            assertThat(response.getData())
+                .extracting(FinremCaseData::getBenefitForChildrenDecisionSchedule,
+                    FinremCaseData::getBenefitPaymentChecklistSchedule)
+                .containsExactly(
+                    benefitForChildrenDecisionSchedule,
+                    benefitPaymentChecklistSchedule
+                );
+        } else {
+            assertThat(response.getData())
+                .extracting(FinremCaseData::getBenefitForChildrenDecision,
+                    FinremCaseData::getBenefitPaymentChecklist)
+                .containsExactly(benefitForChildrenDecision, benefitPaymentChecklist);
+            assertThat(response.getData())
+                .extracting(FinremCaseData::getBenefitForChildrenDecisionSchedule,
+                    FinremCaseData::getBenefitPaymentChecklistSchedule)
+                .containsOnlyNulls();
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS, YES, YES",
+        "MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS, YES, NO",
+        "MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS, NO, YES",
+        "MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS, NO, NO",
+        "N/A, YES, YES",
+        "N/A, YES, NO",
+        "N/A, NO, YES",
+        "N/A, NO, NO"
+    }, nullValues = "N/A")
+    void givenPeriodicalPaymentOrderSelected_whenHandled_thenClearUnwantedFields(
+        Schedule1OrMatrimonialAndCpList typeOfApplication, // null for other typeOfApplication
+        YesOrNo paymentForChildrenDecision,
+        YesOrNo benefitForChildrenDecision
+    ) {
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+        if (typeOfApplication != null) {
+            finremCaseData.getScheduleOneWrapper().setTypeOfApplication(typeOfApplication);
+            finremCaseData.getNatureApplicationWrapper().setNatureOfApplicationChecklist(List.of(
+                NatureApplication.PERIODICAL_PAYMENT_ORDER
+            ));
+        } else {
+            finremCaseData.getScheduleOneWrapper().setTypeOfApplication(mock(Schedule1OrMatrimonialAndCpList.class));
+            finremCaseData.getScheduleOneWrapper().setNatureOfApplicationChecklistSchedule(List.of(
+                NatureOfApplicationSchedule.PERIODICAL_PAYMENT_ORDER
+            ));
+        }
+
+        finremCaseData.setPaymentForChildrenDecision(paymentForChildrenDecision);
+        finremCaseData.setBenefitForChildrenDecision(benefitForChildrenDecision);
+        finremCaseData.setBenefitPaymentChecklist(mock(List.class));
+        finremCaseData.setBenefitForChildrenDecisionSchedule(mock(YesOrNo.class));
+        finremCaseData.setBenefitPaymentChecklistSchedule(mock(List.class));
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        List<Function<FinremCaseData, ?>> fieldsAreNullExtractors = List.of();
+        List<Function<FinremCaseData, ?>> fieldsAreNotNullExtractors = List.of(
+            FinremCaseData::getBenefitForChildrenDecision,
+            FinremCaseData::getBenefitPaymentChecklist,
+            FinremCaseData::getDivorceStageReached,
+            FinremCaseData::getPaymentForChildrenDecision,
+            FinremCaseData::getBenefitForChildrenDecisionSchedule,
+            FinremCaseData::getBenefitPaymentChecklistSchedule
+        );
+
+        if (YesOrNo.NO.equals(paymentForChildrenDecision)) {
+            if (typeOfApplication == MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS) {
+                fieldsAreNullExtractors = List.of(
+                    FinremCaseData::getBenefitForChildrenDecision,
+                    FinremCaseData::getBenefitPaymentChecklist
+                );
+                fieldsAreNotNullExtractors = List.of(
+                    FinremCaseData::getDivorceStageReached,
+                    FinremCaseData::getPaymentForChildrenDecision,
+                    FinremCaseData::getBenefitForChildrenDecisionSchedule,
+                    FinremCaseData::getBenefitPaymentChecklistSchedule
+                );
+            } else {
+                fieldsAreNullExtractors = List.of(
+                    FinremCaseData::getBenefitForChildrenDecisionSchedule,
+                    FinremCaseData::getBenefitPaymentChecklistSchedule
+                );
+                fieldsAreNotNullExtractors = List.of(
+                    FinremCaseData::getBenefitForChildrenDecision,
+                    FinremCaseData::getBenefitPaymentChecklist,
+                    FinremCaseData::getDivorceStageReached,
+                    FinremCaseData::getPaymentForChildrenDecision
+                );
+            }
+        }
+        if (YesOrNo.YES.equals(benefitForChildrenDecision) && YesOrNo.YES.equals(paymentForChildrenDecision)) {
+            if (typeOfApplication == MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS) {
+                fieldsAreNullExtractors = List.of(
+                    FinremCaseData::getBenefitPaymentChecklist
+                );
+                fieldsAreNotNullExtractors = List.of(
+                    FinremCaseData::getBenefitForChildrenDecision,
+                    FinremCaseData::getDivorceStageReached,
+                    FinremCaseData::getPaymentForChildrenDecision,
+                    FinremCaseData::getBenefitForChildrenDecisionSchedule,
+                    FinremCaseData::getBenefitPaymentChecklistSchedule
+                );
+            } else {
+                fieldsAreNullExtractors = List.of(
+                    FinremCaseData::getBenefitPaymentChecklistSchedule
+                );
+                fieldsAreNotNullExtractors = List.of(
+                    FinremCaseData::getBenefitForChildrenDecision,
+                    FinremCaseData::getBenefitPaymentChecklist,
+                    FinremCaseData::getDivorceStageReached,
+                    FinremCaseData::getPaymentForChildrenDecision,
+                    FinremCaseData::getBenefitForChildrenDecisionSchedule
+                );
+            }
+        }
+        // check all fields
+        if (!fieldsAreNullExtractors.isEmpty()) {
+            assertThat(response.getData()).extracting(fieldsAreNullExtractors.toArray(new Function[0]))
+                .containsOnlyNulls();
+        }
+        if (!fieldsAreNotNullExtractors.isEmpty()) {
+            assertThat(response.getData()).extracting(fieldsAreNotNullExtractors.toArray(new Function[0]))
+                .doesNotContainNull();
         }
     }
 }
