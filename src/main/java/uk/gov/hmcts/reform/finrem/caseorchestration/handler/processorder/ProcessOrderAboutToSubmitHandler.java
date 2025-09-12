@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -109,8 +110,11 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         handleAgreedDraftOrdersCollection(caseData, stampedDocuments, additionalDocsConverted);
         clearTemporaryFields(caseData);
 
-        if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())) {
-            caseData.getManageHearingsWrapper().setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
+        ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
+
+        if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())
+            && hearingsWrapper.getWorkingHearing() != null) {
+            hearingsWrapper.setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
             manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
             manageHearingActionService.updateTabData(caseData);
         }
