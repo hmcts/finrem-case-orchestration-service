@@ -82,8 +82,8 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         clearUnusedPropertyAdjustmentOrderRelatedFields(finremCaseData);
         clearFastTrackDecisionReason(finremCaseData);
         clearOtherReasonForComplexityText(finremCaseData);
-        // TODO
         clearReasonForLocalCourt(finremCaseData);
+        // TODO
         clearAllocatedToBeHeardAtHighCourtJudgeLevelText(finremCaseData);
         updateMiamDetails(finremCaseData);
         cleanupAdditionalDocuments(finremCaseData);

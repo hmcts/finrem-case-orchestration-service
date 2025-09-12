@@ -683,4 +683,32 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
                 .isEqualTo(reasonForLocalCourt);
         }
     }
+
+    @ParameterizedTest
+    @EnumSource(value = YesOrNo.class, names = {"NO", "YES"})
+    @NullSource
+    void givenAllocatedToBeHeardAtHighCourtJudgeLevel_whenHandled_thenClearAllocatedToBeHeardAtHighCourtJudgeLevelText(
+            YesOrNo allocatedToBeHeardAtHighCourtJudgeLevel) {
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        String allocatedToBeHeardAtHighCourtJudgeLevelText = "allocatedToBeHeardAtHighCourtJudgeLevelText";
+        finremCaseData.setAllocatedToBeHeardAtHighCourtJudgeLevel(allocatedToBeHeardAtHighCourtJudgeLevel);
+        finremCaseData.setAllocatedToBeHeardAtHighCourtJudgeLevelText(allocatedToBeHeardAtHighCourtJudgeLevelText);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        if (YesOrNo.NO.equals(allocatedToBeHeardAtHighCourtJudgeLevel)) {
+            assertThat(response.getData()).extracting(FinremCaseData::getAllocatedToBeHeardAtHighCourtJudgeLevelText)
+                    .isNull();
+        } else {
+            assertThat(response.getData()).extracting(FinremCaseData::getAllocatedToBeHeardAtHighCourtJudgeLevelText)
+                    .isEqualTo(allocatedToBeHeardAtHighCourtJudgeLevelText);
+        }
+    }
 }
