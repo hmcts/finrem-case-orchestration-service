@@ -80,6 +80,7 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = caseDetails.getData();
+        finremCaseData.setCcdCaseId(String.valueOf(caseDetails.getId()));
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
         initialiseDraftOrdersWrapper(draftOrdersWrapper);
@@ -115,7 +116,7 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
             buildUploadSuggestedDraftOrder(confirmUploadedDocuments, uploadPartyRadioList)
         );
         draftOrdersWrapper.setUploadAgreedDraftOrder(
-            buildUploadAgreedDraftOrder(confirmUploadedDocuments, uploadPartyRadioList, finremCaseDetails)
+            buildUploadAgreedDraftOrder(confirmUploadedDocuments, uploadPartyRadioList, finremCaseDetails, userAuthorisation)
         );
     }
 
@@ -129,9 +130,9 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
 
     private UploadAgreedDraftOrder buildUploadAgreedDraftOrder(DynamicMultiSelectList confirmDocs,
                                                                DynamicRadioList uploadParty,
-                                                               FinremCaseDetails caseDetails) {
+                                                               FinremCaseDetails caseDetails, String userAuthorisation) {
         return UploadAgreedDraftOrder.builder()
-            .hearingDetails(hearingService.generateSelectableHearingsAsDynamicList(caseDetails))
+            .hearingDetails(hearingService.generateSelectableHearingsAsDynamicList(caseDetails, userAuthorisation))
             .confirmUploadedDocuments(confirmDocs)
             .uploadParty(uploadParty)
             .build();

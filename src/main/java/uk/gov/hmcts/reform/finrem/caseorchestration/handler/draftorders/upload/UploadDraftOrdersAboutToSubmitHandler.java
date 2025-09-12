@@ -11,8 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -35,7 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
 
@@ -47,7 +45,6 @@ import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DRAFT_ORDERS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
@@ -58,18 +55,18 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
     private final DraftOrdersCategoriser draftOrdersCategoriser;
 
-    private final CaseAssignedRoleService caseAssignedRoleService;
+    private final CaseRoleService caseRoleService;
 
     private final DraftOrderService draftOrderService;
 
     private final DocumentWarningsHelper documentWarningsHelper;
 
     public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrdersCategoriser draftOrdersCategoriser,
-                                                 CaseAssignedRoleService caseAssignedRoleService, DraftOrderService draftOrderService,
+                                                 CaseRoleService caseRoleService, DraftOrderService draftOrderService,
                                                  DocumentWarningsHelper documentWarningsHelper) {
         super(finremCaseDetailsMapper);
         this.draftOrdersCategoriser = draftOrdersCategoriser;
-        this.caseAssignedRoleService = caseAssignedRoleService;
+        this.caseRoleService = caseRoleService;
         this.draftOrderService = draftOrderService;
         this.documentWarningsHelper = documentWarningsHelper;
     }
@@ -114,7 +111,10 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
     }
 
     private OrderFiledBy getOrderFiledBy(FinremCaseDetails caseDetails, String userAuthorisation) {
-        CaseRole userCaseRole = getUserCaseRole(caseDetails.getId().toString(), userAuthorisation);
+        CaseRole userCaseRole = caseRoleService.getUserCaseRole(caseDetails.getId().toString(), userAuthorisation);
+        if (userCaseRole == null) {
+            userCaseRole = CaseRole.CASEWORKER;
+        }
 
         return switch (userCaseRole) {
             case APP_SOLICITOR -> OrderFiledBy.APPLICANT;
@@ -271,22 +271,6 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             existingSuggestedDraftOrderCollections = new ArrayList<>();
         }
         return existingSuggestedDraftOrderCollections;
-    }
-
-    private CaseRole getUserCaseRole(String id, String auth) {
-        CaseAssignedUserRolesResource caseAssignedUserRole =
-            caseAssignedRoleService.getCaseAssignedUserRole(id, auth);
-
-        if (caseAssignedUserRole != null) {
-            List<CaseAssignedUserRole> caseAssignedUserRoleList = caseAssignedUserRole.getCaseAssignedUserRoles();
-
-            if (!caseAssignedUserRoleList.isEmpty()) {
-                String loggedInUserCaseRole = caseAssignedUserRoleList.get(0).getCaseRole();
-                return CaseRole.forValue(loggedInUserCaseRole);
-            }
-        }
-
-        return CASEWORKER;
     }
 
     private <T extends HasSubmittedInfo> T applySubmittedInfo(String userAuthorisation, T submittedInfo) {
