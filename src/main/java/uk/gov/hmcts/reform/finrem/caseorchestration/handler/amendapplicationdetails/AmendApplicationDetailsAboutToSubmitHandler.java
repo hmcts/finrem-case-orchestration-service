@@ -80,10 +80,9 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         clearUnusedRespondentDetails(finremCaseData);
         clearUnusedPeriodicPaymentOrderRelatedFields(finremCaseData);
         clearUnusedPropertyAdjustmentOrderRelatedFields(finremCaseData);
-
+        clearFastTrackDecisionReason(finremCaseData);
+        clearOtherReasonForComplexityText(finremCaseData);
         // TODO
-        updateFastTrackProcedureDetail(finremCaseData);
-        updateComplexityDetails(finremCaseData);
         clearReasonForLocalCourt(finremCaseData);
         clearAllocatedToBeHeardAtHighCourtJudgeLevelText(finremCaseData);
         updateMiamDetails(finremCaseData);
@@ -262,13 +261,13 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
     }
 
-    private void updateFastTrackProcedureDetail(FinremCaseData finremCaseData) {
+    private void clearFastTrackDecisionReason(FinremCaseData finremCaseData) {
         if (YesOrNo.NO.equals(finremCaseData.getFastTrackDecision())) {
             finremCaseData.setFastTrackDecisionReason(null);
         }
     }
 
-    private void updateComplexityDetails(FinremCaseData finremCaseData) {
+    private void clearOtherReasonForComplexityText(FinremCaseData finremCaseData) {
         if (YesOrNo.NO.equals(finremCaseData.getOtherReasonForComplexity())) {
             finremCaseData.setOtherReasonForComplexityText(null);
         }

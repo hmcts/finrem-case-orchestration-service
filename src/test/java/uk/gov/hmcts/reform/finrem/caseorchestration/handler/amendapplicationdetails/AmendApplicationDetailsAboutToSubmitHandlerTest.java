@@ -626,8 +626,61 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
                 .isNull();
         } else {
             assertThat(response.getData()).extracting(FinremCaseData::getFastTrackDecisionReason)
-                .isNotNull()
                 .isEqualTo(fastTrackDecisionReason);
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = YesOrNo.class, names = {"NO", "YES"})
+    @NullSource
+    void givenOtherReasonForComplexity_whenHandled_thenClearOtherReasonForComplexityText(YesOrNo otherReasonForComplexity) {
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        String otherReasonForComplexityText = "otherReasonForComplexityText";
+        finremCaseData.setOtherReasonForComplexity(otherReasonForComplexity);
+        finremCaseData.setOtherReasonForComplexityText(otherReasonForComplexityText);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        if (YesOrNo.NO.equals(otherReasonForComplexity)) {
+            assertThat(response.getData()).extracting(FinremCaseData::getOtherReasonForComplexityText)
+                .isNull();
+        } else {
+            assertThat(response.getData()).extracting(FinremCaseData::getOtherReasonForComplexityText)
+                .isEqualTo(otherReasonForComplexityText);
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = YesOrNo.class, names = {"NO", "YES"})
+    @NullSource
+    void givenApplicantsHomeCourt_whenHandled_thenClearReasonForLocalCourt(YesOrNo isApplicantsHomeCourt) {
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        String reasonForLocalCourt = "reasonForLocalCourt";
+        finremCaseData.setIsApplicantsHomeCourt(isApplicantsHomeCourt);
+        finremCaseData.setReasonForLocalCourt(reasonForLocalCourt);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        if (YesOrNo.NO.equals(isApplicantsHomeCourt)) {
+            assertThat(response.getData()).extracting(FinremCaseData::getReasonForLocalCourt)
+                .isNull();
+        } else {
+            assertThat(response.getData()).extracting(FinremCaseData::getReasonForLocalCourt)
+                .isEqualTo(reasonForLocalCourt);
         }
     }
 }
