@@ -28,6 +28,7 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AssignToJudgeReason.DRAFT_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A_CONSENTED_IN_CONTESTED;
 
@@ -38,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class MiniFormAController extends BaseController {
 
     public static final String ASSIGNED_TO_JUDGE_REASON = "assignedToJudgeReason";
-    public static final String ASSIGNED_TO_JUDGE_REASON_DEFAULT = "Draft consent order";
+    public static final String ASSIGNED_TO_JUDGE_REASON_DEFAULT = DRAFT_CONSENT_ORDER.getValue();
     public static final String ASSIGNED_TO_JUDGE = "assignedToJudge";
     public static final String REFER_TO_JUDGE_DATE = "referToJudgeDate";
     public static final String REFER_TO_JUDGE_TEXT = "referToJudgeText";
