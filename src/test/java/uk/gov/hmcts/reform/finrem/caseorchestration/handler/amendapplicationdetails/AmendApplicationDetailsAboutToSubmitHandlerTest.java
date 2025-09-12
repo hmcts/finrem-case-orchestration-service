@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FastTrackReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
@@ -597,6 +600,34 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         if (!fieldsAreNotNullExtractors.isEmpty()) {
             assertThat(response.getData()).extracting(fieldsAreNotNullExtractors.toArray(new Function[0]))
                 .doesNotContainNull();
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = YesOrNo.class, names = {"NO", "YES"})
+    @NullSource
+    void givenFastTrackDecision_whenHandled_thenClearFastTrackDecisionReason(YesOrNo fastTrackDecision) {
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        List<FastTrackReason> fastTrackDecisionReason = mock(List.class);
+        finremCaseData.setFastTrackDecision(fastTrackDecision);
+        finremCaseData.setFastTrackDecisionReason(fastTrackDecisionReason);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        if (YesOrNo.NO.equals(fastTrackDecision)) {
+            assertThat(response.getData()).extracting(FinremCaseData::getFastTrackDecisionReason)
+                .isNull();
+        } else {
+            assertThat(response.getData()).extracting(FinremCaseData::getFastTrackDecisionReason)
+                .isNotNull()
+                .isEqualTo(fastTrackDecisionReason);
         }
     }
 }

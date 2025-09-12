@@ -264,7 +264,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
 
     private void updateFastTrackProcedureDetail(FinremCaseData finremCaseData) {
         if (YesOrNo.NO.equals(finremCaseData.getFastTrackDecision())) {
-            finremCaseData.setFastTrackDecision(null);
+            finremCaseData.setFastTrackDecisionReason(null);
         }
     }
 
