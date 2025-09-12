@@ -538,7 +538,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         List<Function<FinremCaseData, ?>> fieldsAreNotNullExtractors = List.of(
             FinremCaseData::getBenefitForChildrenDecision,
             FinremCaseData::getBenefitPaymentChecklist,
-            FinremCaseData::getDivorceStageReached,
             FinremCaseData::getPaymentForChildrenDecision,
             FinremCaseData::getBenefitForChildrenDecisionSchedule,
             FinremCaseData::getBenefitPaymentChecklistSchedule
@@ -551,7 +550,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
                     FinremCaseData::getBenefitPaymentChecklist
                 );
                 fieldsAreNotNullExtractors = List.of(
-                    FinremCaseData::getDivorceStageReached,
                     FinremCaseData::getPaymentForChildrenDecision,
                     FinremCaseData::getBenefitForChildrenDecisionSchedule,
                     FinremCaseData::getBenefitPaymentChecklistSchedule
@@ -564,7 +562,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
                 fieldsAreNotNullExtractors = List.of(
                     FinremCaseData::getBenefitForChildrenDecision,
                     FinremCaseData::getBenefitPaymentChecklist,
-                    FinremCaseData::getDivorceStageReached,
                     FinremCaseData::getPaymentForChildrenDecision
                 );
             }
@@ -576,7 +573,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
                 );
                 fieldsAreNotNullExtractors = List.of(
                     FinremCaseData::getBenefitForChildrenDecision,
-                    FinremCaseData::getDivorceStageReached,
                     FinremCaseData::getPaymentForChildrenDecision,
                     FinremCaseData::getBenefitForChildrenDecisionSchedule,
                     FinremCaseData::getBenefitPaymentChecklistSchedule
@@ -588,7 +584,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
                 fieldsAreNotNullExtractors = List.of(
                     FinremCaseData::getBenefitForChildrenDecision,
                     FinremCaseData::getBenefitPaymentChecklist,
-                    FinremCaseData::getDivorceStageReached,
                     FinremCaseData::getPaymentForChildrenDecision,
                     FinremCaseData::getBenefitForChildrenDecisionSchedule
                 );
