@@ -193,8 +193,4 @@ class RespondentSolicitorDetailsValidatorTest {
             .postCode("N13 4BF")
             .build();
     }
-
-
 }
-
-
