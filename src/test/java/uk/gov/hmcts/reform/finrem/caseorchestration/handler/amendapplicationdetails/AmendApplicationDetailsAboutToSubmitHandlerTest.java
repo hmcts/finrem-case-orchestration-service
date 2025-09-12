@@ -705,10 +705,10 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         if (YesOrNo.NO.equals(allocatedToBeHeardAtHighCourtJudgeLevel)) {
             assertThat(response.getData()).extracting(FinremCaseData::getAllocatedToBeHeardAtHighCourtJudgeLevelText)
-                    .isNull();
+                .isNull();
         } else {
             assertThat(response.getData()).extracting(FinremCaseData::getAllocatedToBeHeardAtHighCourtJudgeLevelText)
-                    .isEqualTo(allocatedToBeHeardAtHighCourtJudgeLevelText);
+                .isEqualTo(allocatedToBeHeardAtHighCourtJudgeLevelText);
         }
     }
 }
