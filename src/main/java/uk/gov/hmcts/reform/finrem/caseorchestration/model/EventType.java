@@ -96,6 +96,9 @@ public enum EventType {
     APPROVE_ORDERS("FR_approveOrders"),
     MANAGE_EXPRESS_CASE("FR_manageExpressCase"),
     MANAGE_HEARINGS_MIGRATION("FR_manageHearingsMigration"),
+    XUI_SANDBOX("FR_exuiSandbox"),
+    XUI_SANDBOX_ONE("FR_exuiSandboxOne"),
+    XUI_SANDBOX_TWO("FR_exuiSandboxTwo"),
     @JsonEnumDefaultValue
     NONE("");
 
