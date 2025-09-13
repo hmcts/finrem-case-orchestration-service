@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FastTrackReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureOfApplicationSchedule;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrder;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
@@ -592,15 +595,9 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
                 );
             }
         }
-        // check all fields
-        if (!fieldsAreNullExtractors.isEmpty()) {
-            assertThat(response.getData()).extracting(fieldsAreNullExtractors.toArray(new Function[0]))
-                .containsOnlyNulls();
-        }
-        if (!fieldsAreNotNullExtractors.isEmpty()) {
-            assertThat(response.getData()).extracting(fieldsAreNotNullExtractors.toArray(new Function[0]))
-                .doesNotContainNull();
-        }
+
+        assertContainsOnlyNulls(response.getData(), fieldsAreNullExtractors);
+        assertDoesNotContainNull(response.getData(), fieldsAreNotNullExtractors);
     }
 
     @ParameterizedTest
@@ -709,6 +706,108 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         } else {
             assertThat(response.getData()).extracting(FinremCaseData::getAllocatedToBeHeardAtHighCourtJudgeLevelText)
                 .isEqualTo(allocatedToBeHeardAtHighCourtJudgeLevelText);
+        }
+    }
+
+    // updateContestedMiamDetails
+    @Test
+    void givenAnyCases_whenHandled_thenClearMiamFields() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        finremCaseData.getMiamWrapper().setFamilyMediatorMiam(YesOrNo.YES);
+        finremCaseData.getMiamWrapper().setMiamPreviousAttendanceChecklist(mock(MiamPreviousAttendance.class));
+        finremCaseData.getMiamWrapper().setMiamOtherGroundsChecklist(mock(MiamOtherGrounds.class));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertThat(response.getData().getMiamWrapper())
+            .extracting(
+                MiamWrapper::getFamilyMediatorMiam,
+                MiamWrapper::getMiamPreviousAttendanceChecklist,
+                MiamWrapper::getMiamOtherGroundsChecklist
+            )
+            .containsOnlyNulls();
+    }
+
+    // updateContestedMiamDetails
+    @Test
+    void givenApplicantAttendedMiam_whenHandled_thenClearMiamExceptionDetails() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        // Condition
+        finremCaseData.getMiamWrapper().setApplicantAttendedMiam(YesOrNo.YES);
+
+        finremCaseData.getMiamWrapper().setClaimingExemptionMiam(mock(YesOrNo.class));
+        finremCaseData.getMiamWrapper().setFamilyMediatorMiam(mock(YesOrNo.class));
+        finremCaseData.getMiamWrapper().setMiamExemptionsChecklist(mock(List.class));
+        finremCaseData.getMiamWrapper().setMiamDomesticViolenceChecklist(mock(List.class));
+        finremCaseData.getMiamWrapper().setMiamUrgencyReasonChecklist(mock(List.class));
+        finremCaseData.getMiamWrapper().setMiamPreviousAttendanceChecklist(mock(MiamPreviousAttendance.class));
+        finremCaseData.getMiamWrapper().setMiamOtherGroundsChecklist(mock(MiamOtherGrounds.class));
+        finremCaseData.getMiamWrapper().setEvidenceUnavailableDomesticAbuseMiam("evidenceUnavailableDomesticAbuseMiam");
+        finremCaseData.getMiamWrapper().setEvidenceUnavailableUrgencyMiam("evidenceUnavailableUrgencyMiam");
+        finremCaseData.getMiamWrapper().setEvidenceUnavailablePreviousAttendanceMiam("evidenceUnavailablePreviousAttendanceMiam");
+        finremCaseData.getMiamWrapper().setEvidenceUnavailableOtherGroundsMiam("evidenceUnavailableOtherGroundsMiam");
+        finremCaseData.getMiamWrapper().setAdditionalInfoOtherGroundsMiam("additionalInfoOtherGroundsMiam");
+
+        finremCaseData.setSoleTraderName1("soleTraderName1");
+        finremCaseData.setFamilyMediatorServiceName1("familyMediatorServiceName1");
+        finremCaseData.setMediatorRegistrationNumber1("mediatorRegistrationNumber1");
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        final List<Function<MiamWrapper, ?>> fieldsAreNotNullExtractors  = List.of();
+        final List<Function<MiamWrapper, ?>> fieldsAreNullExtractors = List.of(
+            MiamWrapper::getClaimingExemptionMiam,
+            MiamWrapper::getFamilyMediatorMiam,
+            MiamWrapper::getMiamExemptionsChecklist,
+            MiamWrapper::getMiamDomesticViolenceChecklist,
+            MiamWrapper::getMiamUrgencyReasonChecklist,
+            MiamWrapper::getMiamPreviousAttendanceChecklist,
+            MiamWrapper::getMiamOtherGroundsChecklist,
+            MiamWrapper::getEvidenceUnavailableDomesticAbuseMiam,
+            MiamWrapper::getEvidenceUnavailableUrgencyMiam,
+            MiamWrapper::getEvidenceUnavailablePreviousAttendanceMiam,
+            MiamWrapper::getEvidenceUnavailableOtherGroundsMiam,
+            MiamWrapper::getAdditionalInfoOtherGroundsMiam
+        );
+        final List<Function<FinremCaseData, ?>> finremCaseDataFieldsAreNullExtractors = List.of(
+            FinremCaseData::getSoleTraderName1,
+            FinremCaseData::getFamilyMediatorServiceName1,
+            FinremCaseData::getMediatorRegistrationNumber1
+        );
+        final List<Function<FinremCaseData, ?>> finremCaseDataFieldsAreNotNullExtractors = List.of();
+
+        // check all fields
+        assertContainsOnlyNulls(response.getData().getMiamWrapper(), fieldsAreNullExtractors);
+        assertContainsOnlyNulls(response.getData(), finremCaseDataFieldsAreNullExtractors);
+
+        assertDoesNotContainNull(response.getData().getMiamWrapper(), fieldsAreNotNullExtractors);
+        assertDoesNotContainNull(response.getData().getMiamWrapper(), finremCaseDataFieldsAreNotNullExtractors);
+    }
+
+    private <T> void assertContainsOnlyNulls(T target, List<?> functions) {
+        if (!functions.isEmpty()) {
+            assertThat(target).extracting(functions.toArray(new Function[0]))
+                .containsOnlyNulls();
+        }
+    }
+
+    private <T> void assertDoesNotContainNull(T target, List<?> functions) {
+        if (!functions.isEmpty()) {
+            assertThat(target).extracting(functions.toArray(new Function[0]))
+                .doesNotContainNull();
         }
     }
 }

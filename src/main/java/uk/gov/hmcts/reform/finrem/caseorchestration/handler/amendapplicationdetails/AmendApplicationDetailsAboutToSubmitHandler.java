@@ -83,9 +83,9 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         clearFastTrackDecisionReason(finremCaseData);
         clearOtherReasonForComplexityText(finremCaseData);
         clearReasonForLocalCourt(finremCaseData);
-        // TODO
         clearAllocatedToBeHeardAtHighCourtJudgeLevelText(finremCaseData);
-        updateMiamDetails(finremCaseData);
+        // TODO
+        clearUnusedMiamDetailsFields(finremCaseData);
         cleanupAdditionalDocuments(finremCaseData);
 
         generateMiniFormA(finremCaseDetails, userAuthorisation);
@@ -294,7 +294,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         miamWrapper.setMiamOtherGroundsChecklist(null);
     }
 
-    private void updateMiamDetails(FinremCaseData finremCaseData) {
+    private void clearUnusedMiamDetailsFields(FinremCaseData finremCaseData) {
         finremCaseData.getMiamWrapper().setFamilyMediatorMiam(null);
 
         if (YesOrNo.YES.equals(finremCaseData.getMiamWrapper().getApplicantAttendedMiam())) {
