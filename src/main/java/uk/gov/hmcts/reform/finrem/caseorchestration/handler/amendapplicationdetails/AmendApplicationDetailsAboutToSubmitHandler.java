@@ -84,9 +84,8 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         clearOtherReasonForComplexityText(finremCaseData);
         clearReasonForLocalCourt(finremCaseData);
         clearAllocatedToBeHeardAtHighCourtJudgeLevelText(finremCaseData);
-        // TODO
         clearUnusedMiamDetailsFields(finremCaseData);
-        cleanupAdditionalDocuments(finremCaseData);
+        clearUnusedUploadAdditionalDocuments(finremCaseData);
 
         generateMiniFormA(finremCaseDetails, userAuthorisation);
 
@@ -163,14 +162,14 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
     }
 
-    private void removeAllMiamExceptionDetails(FinremCaseData finremCaseData) {
+    private void clearAllMiamExceptionDetails(FinremCaseData finremCaseData) {
         MiamWrapper miamWrapper = finremCaseData.getMiamWrapper();
         miamWrapper.setClaimingExemptionMiam(null);
         miamWrapper.setFamilyMediatorMiam(null);
         miamWrapper.setMiamExemptionsChecklist(null);
         miamWrapper.setMiamDomesticViolenceChecklist(null);
         miamWrapper.setMiamUrgencyReasonChecklist(null);
-        miamWrapper.setMiamPreviousAttendanceChecklist(null);
+        miamWrapper.setMiamPreviousAttendanceChecklist(null); // It's also set by removeLegacyExemptions
         miamWrapper.setMiamOtherGroundsChecklist(null);
         miamWrapper.setEvidenceUnavailableDomesticAbuseMiam(null);
         miamWrapper.setEvidenceUnavailableUrgencyMiam(null);
@@ -273,22 +272,20 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
     }
 
-    private void removeMiamCertificationDetailsForApplicantAttendedMiam(FinremCaseData finremCaseData) {
+    private void clearMiamCertificationDetailsForApplicantAttendedMiam(FinremCaseData finremCaseData) {
         finremCaseData.setSoleTraderName1(null);
         finremCaseData.setFamilyMediatorServiceName1(null);
         finremCaseData.setMediatorRegistrationNumber1(null);
     }
 
-    private void removeMiamCertificationDetails(FinremCaseData finremCaseData) {
-        removeMiamCertificationDetailsForApplicantAttendedMiam(finremCaseData);
-
+    private void clearMiamCertificationDetails(FinremCaseData finremCaseData) {
         finremCaseData.setSoleTraderName(null);
         finremCaseData.setFamilyMediatorServiceName(null);
         finremCaseData.setMediatorRegistrationNumber(null);
         finremCaseData.setUploadMediatorDocument(null);
     }
 
-    private void removeLegacyExemptions(FinremCaseData finremCaseData) {
+    private void clearLegacyExemptionFields(FinremCaseData finremCaseData) {
         MiamWrapper miamWrapper = finremCaseData.getMiamWrapper();
         miamWrapper.setMiamPreviousAttendanceChecklist(null);
         miamWrapper.setMiamOtherGroundsChecklist(null);
@@ -298,15 +295,15 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         finremCaseData.getMiamWrapper().setFamilyMediatorMiam(null);
 
         if (YesOrNo.YES.equals(finremCaseData.getMiamWrapper().getApplicantAttendedMiam())) {
-            removeAllMiamExceptionDetails(finremCaseData);
-            removeMiamCertificationDetailsForApplicantAttendedMiam(finremCaseData);
+            clearAllMiamExceptionDetails(finremCaseData);
         } else {
-            removeMiamCertificationDetails(finremCaseData);
+            clearMiamCertificationDetails(finremCaseData);
         }
-        removeLegacyExemptions(finremCaseData);
+        clearMiamCertificationDetailsForApplicantAttendedMiam(finremCaseData);
+        clearLegacyExemptionFields(finremCaseData);
     }
 
-    private void cleanupAdditionalDocuments(FinremCaseData finremCaseData) {
+    private void clearUnusedUploadAdditionalDocuments(FinremCaseData finremCaseData) {
         if (YesOrNo.NO.equals(finremCaseData.getPromptForAnyDocument())) {
             finremCaseData.setUploadAdditionalDocument(null);
         }

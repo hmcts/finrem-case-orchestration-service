@@ -709,7 +709,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         }
     }
 
-    // updateContestedMiamDetails
     @Test
     void givenAnyCases_whenHandled_thenClearMiamFields() {
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
@@ -724,6 +723,10 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.getMiamWrapper().setMiamPreviousAttendanceChecklist(mock(MiamPreviousAttendance.class));
         finremCaseData.getMiamWrapper().setMiamOtherGroundsChecklist(mock(MiamOtherGrounds.class));
 
+        finremCaseData.setSoleTraderName1("soleTraderName1");
+        finremCaseData.setFamilyMediatorServiceName1("familyMediatorServiceName1");
+        finremCaseData.setMediatorRegistrationNumber1("mediatorRegistrationNumber1");
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData().getMiamWrapper())
             .extracting(
@@ -732,11 +735,20 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
                 MiamWrapper::getMiamOtherGroundsChecklist
             )
             .containsOnlyNulls();
+
+        final List<Function<FinremCaseData, ?>> finremCaseDataFieldsAreNullExtractors = List.of(
+                FinremCaseData::getSoleTraderName1,
+                FinremCaseData::getFamilyMediatorServiceName1,
+                FinremCaseData::getMediatorRegistrationNumber1
+        );
+
+        // check all fields
+        assertContainsOnlyNulls(response.getData(), finremCaseDataFieldsAreNullExtractors);
     }
 
     // updateContestedMiamDetails
     @Test
-    void givenApplicantAttendedMiam_whenHandled_thenClearMiamExceptionDetails() {
+    void givenApplicantAttendedMiamIsYes_whenHandled_thenClearMiamExceptionDetails() {
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
         when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
 
@@ -761,13 +773,20 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         finremCaseData.getMiamWrapper().setEvidenceUnavailableOtherGroundsMiam("evidenceUnavailableOtherGroundsMiam");
         finremCaseData.getMiamWrapper().setAdditionalInfoOtherGroundsMiam("additionalInfoOtherGroundsMiam");
 
-        finremCaseData.setSoleTraderName1("soleTraderName1");
-        finremCaseData.setFamilyMediatorServiceName1("familyMediatorServiceName1");
-        finremCaseData.setMediatorRegistrationNumber1("mediatorRegistrationNumber1");
+        finremCaseData.setSoleTraderName("soleTraderName");
+        finremCaseData.setFamilyMediatorServiceName("familyMediatorServiceName");
+        finremCaseData.setMediatorRegistrationNumber("mediatorRegistrationNumber");
+        finremCaseData.setUploadMediatorDocument(mock(CaseDocument.class));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        final List<Function<MiamWrapper, ?>> fieldsAreNotNullExtractors  = List.of();
+        final List<Function<MiamWrapper, ?>> fieldsAreNotNullExtractors = List.of();
+        final List<Function<FinremCaseData, ?>> finremCaseDataFieldsAreNullExtractors = List.of(
+            FinremCaseData::getSoleTraderName,
+            FinremCaseData::getFamilyMediatorServiceName,
+            FinremCaseData::getMediatorRegistrationNumber,
+            FinremCaseData::getUploadMediatorDocument
+        );
         final List<Function<MiamWrapper, ?>> fieldsAreNullExtractors = List.of(
             MiamWrapper::getClaimingExemptionMiam,
             MiamWrapper::getFamilyMediatorMiam,
@@ -782,19 +801,103 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             MiamWrapper::getEvidenceUnavailableOtherGroundsMiam,
             MiamWrapper::getAdditionalInfoOtherGroundsMiam
         );
-        final List<Function<FinremCaseData, ?>> finremCaseDataFieldsAreNullExtractors = List.of(
-            FinremCaseData::getSoleTraderName1,
-            FinremCaseData::getFamilyMediatorServiceName1,
-            FinremCaseData::getMediatorRegistrationNumber1
+
+        // check all fields
+        assertContainsOnlyNulls(response.getData().getMiamWrapper(), fieldsAreNullExtractors);
+        assertDoesNotContainNull(response.getData().getMiamWrapper(), fieldsAreNotNullExtractors);
+        assertDoesNotContainNull(response.getData(), finremCaseDataFieldsAreNullExtractors);
+    }
+
+    // updateContestedMiamDetails
+    @Test
+    void givenApplicantAttendedMiamIsNo_whenHandled_thenClearMiamExceptionDetails() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        // Condition
+        finremCaseData.getMiamWrapper().setApplicantAttendedMiam(YesOrNo.NO);
+
+        finremCaseData.getMiamWrapper().setClaimingExemptionMiam(mock(YesOrNo.class));
+        finremCaseData.getMiamWrapper().setFamilyMediatorMiam(mock(YesOrNo.class));
+        finremCaseData.getMiamWrapper().setMiamExemptionsChecklist(mock(List.class));
+        finremCaseData.getMiamWrapper().setMiamDomesticViolenceChecklist(mock(List.class));
+        finremCaseData.getMiamWrapper().setMiamUrgencyReasonChecklist(mock(List.class));
+        finremCaseData.getMiamWrapper().setMiamPreviousAttendanceChecklist(mock(MiamPreviousAttendance.class));
+        finremCaseData.getMiamWrapper().setMiamOtherGroundsChecklist(mock(MiamOtherGrounds.class));
+        finremCaseData.getMiamWrapper().setEvidenceUnavailableDomesticAbuseMiam("evidenceUnavailableDomesticAbuseMiam");
+        finremCaseData.getMiamWrapper().setEvidenceUnavailableUrgencyMiam("evidenceUnavailableUrgencyMiam");
+        finremCaseData.getMiamWrapper().setEvidenceUnavailablePreviousAttendanceMiam("evidenceUnavailablePreviousAttendanceMiam");
+        finremCaseData.getMiamWrapper().setEvidenceUnavailableOtherGroundsMiam("evidenceUnavailableOtherGroundsMiam");
+        finremCaseData.getMiamWrapper().setAdditionalInfoOtherGroundsMiam("additionalInfoOtherGroundsMiam");
+
+        finremCaseData.setSoleTraderName("soleTraderName");
+        finremCaseData.setFamilyMediatorServiceName("familyMediatorServiceName");
+        finremCaseData.setMediatorRegistrationNumber("mediatorRegistrationNumber");
+        finremCaseData.setUploadMediatorDocument(mock(CaseDocument.class));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        // Setting to null
+        final List<Function<MiamWrapper, ?>> fieldsAreNullExtractors = List.of(
+            MiamWrapper::getFamilyMediatorMiam,
+            MiamWrapper::getMiamPreviousAttendanceChecklist, // by miamLegacyExemptionsService.removeLegacyExemptions
+            MiamWrapper::getMiamOtherGroundsChecklist// by miamLegacyExemptionsService.removeLegacyExemptions
         );
-        final List<Function<FinremCaseData, ?>> finremCaseDataFieldsAreNotNullExtractors = List.of();
+        final List<Function<FinremCaseData, ?>> finremCaseDataFieldsAreNullExtractors = List.of(
+            FinremCaseData::getSoleTraderName,
+            FinremCaseData::getFamilyMediatorServiceName,
+            FinremCaseData::getMediatorRegistrationNumber,
+            FinremCaseData::getUploadMediatorDocument
+        );
+
+        final List<Function<MiamWrapper, ?>> fieldsAreNotNullExtractors = List.of(
+            MiamWrapper::getClaimingExemptionMiam,
+            MiamWrapper::getMiamExemptionsChecklist,
+            MiamWrapper::getMiamDomesticViolenceChecklist,
+            MiamWrapper::getMiamUrgencyReasonChecklist,
+            MiamWrapper::getEvidenceUnavailableDomesticAbuseMiam,
+            MiamWrapper::getEvidenceUnavailableUrgencyMiam,
+            MiamWrapper::getEvidenceUnavailablePreviousAttendanceMiam,
+            MiamWrapper::getEvidenceUnavailableOtherGroundsMiam,
+            MiamWrapper::getAdditionalInfoOtherGroundsMiam
+        );
 
         // check all fields
         assertContainsOnlyNulls(response.getData().getMiamWrapper(), fieldsAreNullExtractors);
         assertContainsOnlyNulls(response.getData(), finremCaseDataFieldsAreNullExtractors);
-
         assertDoesNotContainNull(response.getData().getMiamWrapper(), fieldsAreNotNullExtractors);
-        assertDoesNotContainNull(response.getData().getMiamWrapper(), finremCaseDataFieldsAreNotNullExtractors);
+    }
+
+    @ParameterizedTest
+    @EnumSource(YesOrNo.class)
+    void givenPromptForAnyDocument_whenHandled_thenClearMiamExceptionDetails(YesOrNo promptForAnyDocument) {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        // Condition
+        finremCaseData.setPromptForAnyDocument(promptForAnyDocument);
+
+        finremCaseData.setUploadAdditionalDocument(mock(List.class));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        if (promptForAnyDocument == YesOrNo.YES) {
+            assertThat(response.getData()).extracting(FinremCaseData::getUploadAdditionalDocument)
+                .isNotNull();
+        } else {
+            assertThat(response.getData()).extracting(FinremCaseData::getUploadAdditionalDocument)
+                .isNull();
+        }
     }
 
     private <T> void assertContainsOnlyNulls(T target, List<?> functions) {
