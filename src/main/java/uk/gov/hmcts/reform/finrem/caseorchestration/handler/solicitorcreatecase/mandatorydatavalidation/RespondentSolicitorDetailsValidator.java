@@ -23,7 +23,7 @@ class RespondentSolicitorDetailsValidator implements MandatoryDataValidator {
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
         List<String> ret = new ArrayList<>();
 
-        if (shouldSkipRespondentSolicitorValidation(contactDetailsWrapper, caseData, ret)) {
+        if (shouldSkipRespondentSolicitorValidation(contactDetailsWrapper)) {
             return ret;
         }
 
@@ -41,16 +41,9 @@ class RespondentSolicitorDetailsValidator implements MandatoryDataValidator {
         return ret;
     }
 
-    private boolean shouldSkipRespondentSolicitorValidation(ContactDetailsWrapper contactDetailsWrapper,
-                                                            FinremCaseData caseData, List<String> errors) {
-
-        if (YesOrNo.NO.equals(contactDetailsWrapper.getConsentedRespondentRepresented())
-            || YesOrNo.NO.equals(contactDetailsWrapper.getContestedRespondentRepresented())) {
-            log.info("{} - Skip validating respondent solicitor details since the respondent is not represented",
-                caseData.getCcdCaseId());
-            return true;
-        }
-        return false;
+    private boolean shouldSkipRespondentSolicitorValidation(ContactDetailsWrapper contactDetailsWrapper) {
+        return YesOrNo.NO.equals(contactDetailsWrapper.getConsentedRespondentRepresented())
+            || YesOrNo.NO.equals(contactDetailsWrapper.getContestedRespondentRepresented());
     }
 
     private void checkRespondentOrganisationPolicy(FinremCaseData caseData, List<String> errors) {
