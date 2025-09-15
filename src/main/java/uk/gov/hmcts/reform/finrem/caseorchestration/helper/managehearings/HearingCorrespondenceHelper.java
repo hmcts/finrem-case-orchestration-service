@@ -148,6 +148,7 @@ public class HearingCorrespondenceHelper {
             HearingType.MENTION,
             HearingType.PERMISSION_TO_APPEAL,
             HearingType.APPEAL_HEARING,
+            HearingType.APPLICATION_HEARING,
             HearingType.RETRIAL_HEARING,
             HearingType.PTR
         );
