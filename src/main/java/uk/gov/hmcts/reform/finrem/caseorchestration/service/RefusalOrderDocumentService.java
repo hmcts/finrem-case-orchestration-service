@@ -173,7 +173,7 @@ public class RefusalOrderDocumentService {
     public FinremCaseData setDefaults(FinremCaseData caseData, String userAuthorisation) {
         OrderRefusalHolder refusalHolder = OrderRefusalHolder.builder()
                 .orderRefusalDate(LocalDate.now())
-                .orderRefusalJudgeName(idamService.getIdamFullName(userAuthorisation))
+                .orderRefusalJudgeName(idamService.getIdamSurname(userAuthorisation))
             .build();
         caseData.setOrderRefusalOnScreen(refusalHolder);
         return caseData;
