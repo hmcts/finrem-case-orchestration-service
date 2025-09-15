@@ -182,7 +182,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyRemovePropertyAdjustmentOrderDetailsWhenSolicitorUncheckedForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-property-adjustment-order-details1.json");
+            "remove-property-adjustment-order-details1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         String message = " associated with property details";
         String[] fields = {
             "propertyAddress",
@@ -197,14 +197,14 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyRemoveAdditionalPropertyDetailsForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-additional-property-details1.json");
+            "remove-additional-property-details1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         checkIsNull("propertyAdjutmentOrderDetail", " associated with additional property details", jsonPathEvaluator);
     }
 
     @Test
     public void verifyRemovePeriodicPaymentOrderDetailsWhenSolicitorUncheckedForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-periodic-payment-order-details1.json");
+            "remove-periodic-payment-order-details1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         String message = " associated with periodic payment details";
         String[] fields = {
             "paymentForChildrenDecision",
@@ -219,7 +219,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyUpdatePeriodicPaymentDetailsWhenPaymentForChildrenIsUncheckedForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "update-periodic-payment-details-for-no-payment-for-children1.json");
+            "update-periodic-payment-details-for-no-payment-for-children1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         String message = " associated with the periodic payment details, even after payment for children is unchecked,";
         checkIsNull("benefitForChildrenDecision", message, jsonPathEvaluator);
         checkIsNull("benefitPaymentChecklist", message, jsonPathEvaluator);
@@ -228,14 +228,14 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyUpdatePeriodicPaymentDetailsWhenBenefitsForChildrenForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "update-periodic-payment-details-with-benefits-for-children1.json");
+            "update-periodic-payment-details-with-benefits-for-children1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         checkIsNull("benefitPaymentChecklist", null, jsonPathEvaluator);
     }
 
     @Test
     public void verifyRemoveSolicitorDetailsWhenRespondentIsNotRepresentedBySolicitorForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-respondent-solicitor-details1.json");
+            "remove-respondent-solicitor-details1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         String message = " associated with the respondent solicitor details";
         String[] fields = {
             RESP_SOLICITOR_NAME,
@@ -254,7 +254,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyRemoveRespondentAddressWhenRespondentIsRepresentedBySolicitorForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-respondent-address-details1.json");
+            "remove-respondent-address-details1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         String message = " associated with the respondent solicitor address details";
         String[] fields = {
             RESPONDENT_ADDRESS,
@@ -269,7 +269,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyUpdateFastTrackDetailsForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-respondent-address-details1.json");
+            "remove-respondent-address-details1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         checkIsNull("fastTrackDecisionReason", null, jsonPathEvaluator);
     }
 
@@ -301,14 +301,14 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyShouldRemoveAdditionalReasonForComplexityForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-other-reason-for-complexity1.json");
+            "remove-other-reason-for-complexity1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         checkIsNull("otherReasonForComplexityText", null, jsonPathEvaluator);
     }
 
     @Test
     public void verifyShouldRemoveReasonForLocalCourtForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "is-applicant-home-court1.json");
+            "is-applicant-home-court1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         checkIsNull("reasonForLocalCourt", null, jsonPathEvaluator);
     }
 
