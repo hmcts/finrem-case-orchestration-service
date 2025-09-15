@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
@@ -64,6 +65,9 @@ class ManageHearingsCorresponderTest {
 
     @Mock
     private DocumentHelper documentHelper;
+
+    @Mock
+    private GenericDocumentService genericDocumentService;
 
     @InjectMocks
     private ManageHearingsCorresponder corresponder;
@@ -267,7 +271,6 @@ class ManageHearingsCorresponderTest {
         );
     }
 
-
     /**
      * Checks that sendHearingNotificationToApplicant is called when.
      * - CaseRole is APP_SOLICITOR
@@ -298,6 +301,7 @@ class ManageHearingsCorresponderTest {
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
         verify(bulkPrintService).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
+        verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(), any(), any());
         assertThat(logs.getInfos()).contains("Request sent to Bulk Print to post notice to the APP_SOLICITOR party. Request sent for case ID: 123");
     }
 
@@ -330,6 +334,7 @@ class ManageHearingsCorresponderTest {
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
         assertThat(logs.getInfos()).contains("Request sent to Bulk Print to post notice to the RESP_SOLICITOR party. Request sent for case ID: 123");
     }
@@ -370,6 +375,7 @@ class ManageHearingsCorresponderTest {
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        verify(genericDocumentService, times(8)).convertDocumentIfNotPdfAlready(any(), any(), any());
         verify(bulkPrintService, times(4)).printIntervenerDocuments(any(), any(FinremCaseDetails.class), any(), any());
 
         caseRoles.forEach(role -> {
@@ -405,12 +411,12 @@ class ManageHearingsCorresponderTest {
         when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
-
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(), any(), any());
         verify(bulkPrintService).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
         assertThat(logs.getInfos())
             .contains("Request sent to Bulk Print to post hearing documents to the APP_SOLICITOR party. Request sent for case ID: 123");
@@ -448,6 +454,7 @@ class ManageHearingsCorresponderTest {
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
         assertThat(logs.getInfos())
             .contains("Request sent to Bulk Print to post hearing documents to the RESP_SOLICITOR party. Request sent for case ID: 123");
@@ -492,6 +499,7 @@ class ManageHearingsCorresponderTest {
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        verify(genericDocumentService, times(8)).convertDocumentIfNotPdfAlready(any(), any(), any());
         verify(bulkPrintService, times(4)).printIntervenerDocuments(any(), (FinremCaseDetails) any(), any(), any());
 
         caseRoles.forEach(role -> {
@@ -528,6 +536,7 @@ class ManageHearingsCorresponderTest {
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        verify(genericDocumentService, never()).convertDocumentIfNotPdfAlready(any(), any(), any());
         assertThat(logs.getWarns()).contains("Hearing notice is null. No document sent to APP_SOLICITOR for case ID: 123");
     }
 
@@ -560,6 +569,7 @@ class ManageHearingsCorresponderTest {
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        verify(genericDocumentService, never()).convertDocumentIfNotPdfAlready(any(), any(), any());
         assertThat(Collections.frequency(
             logs.getWarns(),
             "No hearing documents found. No documents sent for case ID: 123")
@@ -594,6 +604,7 @@ class ManageHearingsCorresponderTest {
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        verify(genericDocumentService, never()).convertDocumentIfNotPdfAlready(any(), any(), any());
         assertThat(logs.getWarns()).contains("Hearing notice is null. No document sent to RESP_SOLICITOR for case ID: 123");
     }
 
@@ -633,6 +644,7 @@ class ManageHearingsCorresponderTest {
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        verify(genericDocumentService, never()).convertDocumentIfNotPdfAlready(any(), any(), any());
         caseRoles.forEach(
             role -> assertThat(logs.getWarns()).contains(
                 "Hearing notice is null. No document sent to " + role + " for case ID: 123"
@@ -671,6 +683,7 @@ class ManageHearingsCorresponderTest {
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        verify(genericDocumentService, never()).convertDocumentIfNotPdfAlready(any(), any(), any());
         verify(bulkPrintService, never()).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
         verify(bulkPrintService, never()).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
 

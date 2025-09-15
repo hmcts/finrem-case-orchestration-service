@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -354,6 +355,24 @@ class HearingCorrespondenceHelperTest {
                 finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDR).build()
             )
         );
+    }
+
+    /**
+     * Test fails if both methods return false.  This would mean no correspondence is sent for a hearing.
+     * Either shouldPostAllHearingDocuments or shouldPostHearingNoticeOnly must return true.
+     * If the test fails, it's likely that a new HearingType has been added and the logic in one of the methods
+     * needs updating.
+     */
+    @ParameterizedTest
+    @EnumSource(HearingType.class)
+    void shouldAlwaysPostSomeHearingCorrespondence(HearingType hearingType) {
+        // Arrange. The hearing uses the parameterised hearing type.
+        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADD_HEARING);
+        Hearing hearing = Hearing.builder().hearingType(hearingType).build();
+
+        // Assert that at least one of the methods returns true.
+        assertTrue(helper.shouldPostAllHearingDocuments(finremCaseDetails, hearing)
+            || helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing));
     }
 
     private static FinremCaseDetails finremCaseDetails(ManageHearingsAction action) {
