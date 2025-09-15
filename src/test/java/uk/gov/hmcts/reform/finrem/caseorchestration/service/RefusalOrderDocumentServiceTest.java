@@ -230,7 +230,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         //When
         FinremCaseData caseData = refusalOrderDocumentService.setDefaults(finremCaseData, AUTH_TOKEN);
 
-        //Then
+        //Assert
         OrderRefusalHolder orderRefusalCollectionNew = caseData.getOrderRefusalOnScreen();
         Assertions.assertThat(orderRefusalCollectionNew)
                 .returns(judgeSurname, OrderRefusalHolder::getOrderRefusalJudgeName)
