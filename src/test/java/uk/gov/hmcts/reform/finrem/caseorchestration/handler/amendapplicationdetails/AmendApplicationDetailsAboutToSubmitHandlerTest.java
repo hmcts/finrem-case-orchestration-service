@@ -747,7 +747,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         assertContainsOnlyNulls(response.getData(), finremCaseDataFieldsAreNullExtractors);
     }
 
-    // updateContestedMiamDetails
     @Test
     void givenApplicantAttendedMiamIsYes_whenHandled_thenClearMiamExceptionDetails() {
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
@@ -809,7 +808,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         assertDoesNotContainNull(response.getData(), finremCaseDataFieldsAreNullExtractors);
     }
 
-    // updateContestedMiamDetails
     @Test
     void givenApplicantAttendedMiamIsNo_whenHandled_thenClearMiamExceptionDetails() {
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
