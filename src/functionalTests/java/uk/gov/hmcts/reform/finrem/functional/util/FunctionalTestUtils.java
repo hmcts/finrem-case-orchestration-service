@@ -59,8 +59,7 @@ public class FunctionalTestUtils {
         try {
             File file = ResourceUtils.getFile(this.getClass().getResource(directory + fileName));
             String ret = new String(Files.readAllBytes(file.toPath()));
-            return ArrayUtils.isEmpty(replacingEventId) ||
-                Arrays.stream(replacingEventId).allMatch(Objects::isNull)
+            return ArrayUtils.isEmpty(replacingEventId) || Arrays.stream(replacingEventId).allMatch(Objects::isNull)
                 ? ret : replaceEventId(ret, replacingEventId[0]);
         } catch (IOException e) {
             e.printStackTrace();
