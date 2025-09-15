@@ -1,5 +1,9 @@
 package uk.gov.hmcts.reform.finrem.functional.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
@@ -8,6 +12,7 @@ import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -25,6 +30,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -48,10 +55,13 @@ public class FunctionalTestUtils {
     @Value("${idam.userpassword}")
     private String idamUserPassword;
 
-    public String getJsonFromFile(String fileName, String directory) {
+    public String getJsonFromFile(String fileName, String directory, String... replacingEventId) {
         try {
             File file = ResourceUtils.getFile(this.getClass().getResource(directory + fileName));
-            return new String(Files.readAllBytes(file.toPath()));
+            String ret = new String(Files.readAllBytes(file.toPath()));
+            return ArrayUtils.isEmpty(replacingEventId) ||
+                Arrays.stream(replacingEventId).allMatch(Objects::isNull)
+                ? ret : replaceEventId(ret, replacingEventId[0]);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -167,5 +177,14 @@ public class FunctionalTestUtils {
             .headers(getHeaders())
             .body(getJsonFromFile(jsonFileName, journeyType))
             .when().post(url).getStatusCode();
+    }
+
+    private String replaceEventId(String json, String eventId) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonNode root = mapper.readTree(json);
+        ((ObjectNode) root).put("event_id", eventId);
+
+        return mapper.writeValueAsString(root);
     }
 }

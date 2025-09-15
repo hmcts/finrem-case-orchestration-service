@@ -7,13 +7,16 @@ import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
+import static java.util.Optional.ofNullable;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLAIMING_EXEMPTION_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAMILY_MEDIATOR_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
@@ -50,8 +53,8 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     private String amendContestedCaseDetailsUrl;
 
     private JsonPath jsonPathEvaluator;
-    private String contestedDir = "/json/contested/";
-    private String consentedDir = "/json/consented/";
+    private final String contestedDir = "/json/contested/";
+    private final String consentedDir = "/json/consented/";
 
     @Test
     public void verifyAmendDivorceDetailsD81Individual() {
@@ -92,7 +95,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyAmendPeriodicPaymentOrderwithoutagreement() {
+    public void verifyAmendPeriodicPaymentOrderWithoutAgreement() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "amend-periodic-payment-order-without-agreement1.json");
         String message = " associated with periodic payment details and written agreement for children";
@@ -273,14 +276,14 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyShouldNotUpdateFastTrackDetailsForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-respondent-solicitor-details1.json");
+            "remove-respondent-solicitor-details1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         checkNotNull("fastTrackDecisionReason", null, jsonPathEvaluator);
     }
 
     @Test
     public void verifyShouldUpdateComplexityDetailsForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-complexity-details1.json");
+            "remove-complexity-details1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         String message = ", associated with the complexity details,";
         String[] fields = {
             "estimatedAssetsChecklist",
@@ -312,7 +315,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyShouldRemoveMiamExemptionsAndCertificationWhenApplicantAttendedMiamForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-exceptions-when-applicant-attended-miam1.json");
+            "remove-exceptions-when-applicant-attended-miam1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         String message = " associated with the Miam exemption or certification details";
         String[] fields = {
             CLAIMING_EXEMPTION_MIAM,
@@ -339,7 +342,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyShouldNotRemoveMiamCheckListsForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "do-not-remove-checklists1.json");
+            "do-not-remove-checklists1.json", AMEND_CONTESTED_PAPER_APP_DETAILS);
         String message = " associated with Miam exemptions when the applicant did not attend a Miam and is claiming exemption";
         checkExemptionFieldsNotNull(message);
         checkIsNull("familyMediatorMIAM", " which is a legacy field", jsonPathEvaluator);
@@ -390,10 +393,14 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     private JsonPath amendCaseDetails(String url, String journeyType, String jsonFileName) {
+        return amendCaseDetails(url, journeyType, jsonFileName, null);
+    }
+
+    private JsonPath amendCaseDetails(String url, String journeyType, String jsonFileName, EventType eventType) {
         Response response = SerenityRest.given()
             .relaxedHTTPSValidation()
             .headers(utils.getHeaders())
-            .body(utils.getJsonFromFile(jsonFileName, journeyType))
+            .body(utils.getJsonFromFile(jsonFileName, journeyType, eventType == null ? null : eventType.getCcdType()))
             .when().post(url).andReturn();
 
         assertEquals(200, response.getStatusCode());
@@ -407,11 +414,11 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     private void checkNotNull(String field, String message, JsonPath jsonPathEvaluator) {
-        assertNotNull("The field " + field + message + " is not showing in the result.", jsonPathEvaluator.get(field));
+        assertNotNull("The field " + field + ofNullable(message).orElse("") + " is not showing in the result.", jsonPathEvaluator.get(field));
     }
 
     private void checkIsNull(String field, String message, JsonPath jsonPathEvaluator) {
-        assertNull("The field " + field + message + " is still showing in the result.", jsonPathEvaluator.get(field));
+        assertNull("The field " + field + ofNullable(message).orElse("") + " is still showing in the result.", jsonPathEvaluator.get(field));
     }
 
     private String[] getMiamExemptionFields() {
