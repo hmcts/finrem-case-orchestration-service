@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -25,13 +26,12 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASEWORKER_ROLE_FIELD_SHOW_LABEL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class ManageBarristerAboutToStartHandlerTest {
-
-    private static final long CASE_ID = 1234567890L;
 
     @InjectMocks
     private ManageBarristerAboutToStartHandler manageBarristerAboutToStartHandler;
@@ -75,17 +75,18 @@ class ManageBarristerAboutToStartHandlerTest {
             .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder()
                 .userId("testUserId")
                 .caseRole(caseRole.getCcdCode())
-                .caseDataId(String.valueOf(CASE_ID))
+                .caseDataId(CASE_ID)
                 .build()))
             .build();
 
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(CASE_ID), AUTH_TOKEN))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(caseAssignedUserRolesResource);
     }
 
     private FinremCallbackRequest createCallbackRequest() {
         FinremCaseData caseData = FinremCaseData.builder()
             .build();
-        return FinremCallbackRequestFactory.create(CASE_ID, CaseType.CONTESTED, EventType.MANAGE_BARRISTER, caseData);
+        return FinremCallbackRequestFactory.create(Long.valueOf(TestConstants.CASE_ID), CaseType.CONTESTED,
+            EventType.MANAGE_BARRISTER, caseData);
     }
 }
