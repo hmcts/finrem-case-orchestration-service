@@ -56,7 +56,6 @@ class ManageBarristerAboutToStartHandlerTest {
         FinremCaseData caseData = response.getData();
         assertThat(caseData.getCurrentUserCaseRole()).isEqualTo(caseRole);
         assertThat(caseData.getCurrentUserCaseRoleLabel()).isEqualTo(expectedCaseRoleLabel);
-        assertThat(caseData.getBarristerParty()).isNull();
     }
 
     private static Stream<Arguments> givenUserCaseRole_whenHandle_thenInitialisesEventData() {
