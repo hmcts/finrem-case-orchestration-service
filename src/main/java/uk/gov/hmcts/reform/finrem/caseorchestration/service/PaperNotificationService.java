@@ -49,12 +49,24 @@ public class PaperNotificationService {
      *
      * @param caseDetails the {@link FinremCaseDetails} containing the case data
      * @return true if the case should print for the applicant, otherwise false
-     *
      */
     public boolean shouldPrintForApplicant(FinremCaseDetails caseDetails) {
         return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
             || !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
             || caseDataService.isPaperApplication(caseDetails.getData());
+    }
+
+    /**
+     * Determines if a case should print correspondence for posting to an applicant.
+     * Note: Unlike the shouldPrintForApplicant method, this disregards whether the initial application was paper or not.
+     * DFR-4076 explores whether approaches between this and shouldPrintForApplicant can be consistent.
+     *
+     * @param caseDetails the {@link FinremCaseDetails} containing the case data
+     * @return true if the case should print for the applicant, otherwise false
+     */
+    public boolean shouldPrintForApplicantDisregardApplicationType(FinremCaseDetails caseDetails) {
+        return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
+            || !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
     }
 
     /**
