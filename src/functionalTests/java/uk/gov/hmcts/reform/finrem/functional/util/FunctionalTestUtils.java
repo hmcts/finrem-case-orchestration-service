@@ -12,10 +12,10 @@ import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.tika.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -30,8 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -55,12 +53,15 @@ public class FunctionalTestUtils {
     @Value("${idam.userpassword}")
     private String idamUserPassword;
 
-    public String getJsonFromFile(String fileName, String directory, String... replacingEventId) {
+    public String getJsonFromFile(String fileName, String directory) {
+        return getJsonFromFile(fileName, directory, null);
+    }
+
+    public String getJsonFromFile(String fileName, String directory, String replacingEventId) {
         try {
             File file = ResourceUtils.getFile(this.getClass().getResource(directory + fileName));
             String ret = new String(Files.readAllBytes(file.toPath()));
-            return ArrayUtils.isEmpty(replacingEventId) || Arrays.stream(replacingEventId).allMatch(Objects::isNull)
-                ? ret : replaceEventId(ret, replacingEventId[0]);
+            return StringUtils.isEmpty(replacingEventId) ? ret : replaceEventId(ret, replacingEventId);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -91,10 +92,6 @@ public class FunctionalTestUtils {
                 + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
     }
 
-    public String getAuthToken() {
-        return "Bearer " + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword);
-    }
-
     public String downloadPdfAndParseToString(String documentUrl) {
         Response document = SerenityRest.given()
             .relaxedHTTPSValidation()
@@ -119,21 +116,6 @@ public class FunctionalTestUtils {
     public void validatePostSuccess(String url, String filename, String journeyType) {
         int statusCode = getResponse(url, filename, journeyType).getStatusCode();
         assertEquals(HttpStatus.OK.value(), statusCode);
-    }
-
-    public JsonPath getResponseData(String url, String jsonBody, String dataPath) {
-        Response response = SerenityRest.given()
-            .relaxedHTTPSValidation()
-            .headers(getHeader())
-            .contentType("application/json")
-            .body(jsonBody)
-            .when().post(url)
-            .andReturn();
-
-        assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatusCode()));
-
-        JsonPath jsonPath = response.jsonPath().setRoot(dataPath);
-        return jsonPath;
     }
 
     public JsonPath getResponseData(String url, String filename, String journeyType, String dataPath) {
