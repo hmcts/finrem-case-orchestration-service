@@ -170,14 +170,6 @@ public class FunctionalTestUtils {
             .when().post(url).andReturn();
     }
 
-    public int getStatusCode(String url, String jsonFileName, String journeyType) {
-        return SerenityRest.given()
-            .relaxedHTTPSValidation()
-            .headers(getHeaders())
-            .body(getJsonFromFile(jsonFileName, journeyType))
-            .when().post(url).getStatusCode();
-    }
-
     private String replaceEventId(String json, String eventId) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
 
