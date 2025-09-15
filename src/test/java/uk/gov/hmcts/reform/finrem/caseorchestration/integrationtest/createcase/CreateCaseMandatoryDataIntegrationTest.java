@@ -90,6 +90,5 @@ class CreateCaseMandatoryDataIntegrationTest {
                 hasItem("Applicant's Local Court is required. Update Please choose the Region in which the Applicant resides")))
             .andExpect(jsonPath("$.errors",
                 hasItem("Respondent organisation policy is missing.")));
-
     }
 }
