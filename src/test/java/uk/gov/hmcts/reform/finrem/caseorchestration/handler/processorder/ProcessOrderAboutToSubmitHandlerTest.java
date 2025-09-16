@@ -497,18 +497,23 @@ class ProcessOrderAboutToSubmitHandlerTest {
             .manageHearingsWrapper(ManageHearingsWrapper
                 .builder()
                 .isAddHearingChosen(YesOrNo.NO)
+                .workingHearing(WorkingHearing
+                    .builder()
+                    .hearingTime("12:40")
+                    .build())
                 .build())
             .build();
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(EventType.PROCESS_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(caseData));
 
-        underTest.handle(callbackRequest, AUTH_TOKEN);
+        final var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         verify(additionalHearingDocumentService).stampAndCollectOrderCollection(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(additionalHearingDocumentService, never()).storeHearingNotice(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService, never()).performAddHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService, never()).updateTabData(caseData);
+        assertThat(response.getData().getManageHearingsWrapper().getWorkingHearing()).isNull();
     }
 
     private void mockDocumentStamping(CaseDocument originalDocument, CaseDocument stampedDocument) {

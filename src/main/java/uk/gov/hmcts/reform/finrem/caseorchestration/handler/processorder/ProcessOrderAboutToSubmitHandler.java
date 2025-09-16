@@ -120,6 +120,7 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
             manageHearingActionService.updateTabData(caseData);
         }
 
+        hearingsWrapper.setWorkingHearing(null);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
