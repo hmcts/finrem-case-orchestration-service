@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
@@ -11,7 +11,7 @@ import java.util.Arrays;
  * Fixed list options for MIAM Other Grounds.
  * Replaces {@link MiamOtherGrounds} for new cases.
  */
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum MiamOtherGroundsV2 {
     FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_V2_VALUE_5("FR_ms_MIAMOtherGroundsChecklistV2_Value_5",
