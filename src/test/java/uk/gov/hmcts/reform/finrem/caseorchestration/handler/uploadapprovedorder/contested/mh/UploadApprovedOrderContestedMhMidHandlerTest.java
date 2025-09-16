@@ -125,8 +125,6 @@ class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup 
                 .uploadDraftDocument(newUploadDocument).build()).build()
         )));
 
-        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
-
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
         when(finremCaseDetails.getId()).thenReturn(Long.valueOf(CASE_ID));
         when(finremCaseDetails.getData()).thenReturn(finremCaseData);
@@ -141,6 +139,7 @@ class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup 
         FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
         when(finremCaseDetailsBefore.getData()).thenReturn(finremCaseDataBefore);
 
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
         when(finremCallbackRequest.getCaseDetailsBefore()).thenReturn(finremCaseDetailsBefore);
 
@@ -154,12 +153,11 @@ class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup 
             .validateEncryptionOnUploadedDocument(eq(newUploadDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
         lenient(). // should not be invoked
             doAnswer(invocation -> {
-            List<String> errors = invocation.getArgument(2);
-            errors.add("Mocked encryption error for existing document");
-            return null;
-        }).when(bulkPrintDocumentService)
+                List<String> errors = invocation.getArgument(2);
+                errors.add("Mocked encryption error for existing document");
+                return null;
+            }).when(bulkPrintDocumentService)
             .validateEncryptionOnUploadedDocument(eq(existingUploadedDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
-
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         if (!valid) {
