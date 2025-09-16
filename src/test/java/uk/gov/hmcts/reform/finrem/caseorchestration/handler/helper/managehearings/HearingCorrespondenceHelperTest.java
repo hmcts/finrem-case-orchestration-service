@@ -144,10 +144,10 @@ class HearingCorrespondenceHelperTest {
     void shouldReturnCorrectValueForShouldEmailToApplicantSolicitor() {
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
 
-        when(paperNotificationService.shouldPrintForApplicant(finremCaseDetails)).thenReturn(false);
+        when(paperNotificationService.shouldPrintForApplicantDisregardApplicationType(finremCaseDetails)).thenReturn(false);
         assertTrue(helper.shouldEmailToApplicantSolicitor(finremCaseDetails));
 
-        when(paperNotificationService.shouldPrintForApplicant(finremCaseDetails)).thenReturn(true);
+        when(paperNotificationService.shouldPrintForApplicantDisregardApplicationType(finremCaseDetails)).thenReturn(true);
         assertFalse(helper.shouldEmailToApplicantSolicitor(finremCaseDetails));
     }
 
@@ -172,10 +172,10 @@ class HearingCorrespondenceHelperTest {
     void shouldReturnCorrectValueForShouldPostToApplicant() {
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
 
-        when(paperNotificationService.shouldPrintForApplicant(finremCaseDetails)).thenReturn(true);
+        when(paperNotificationService.shouldPrintForApplicantDisregardApplicationType(finremCaseDetails)).thenReturn(true);
         assertTrue(helper.shouldPostToApplicant(finremCaseDetails));
 
-        when(paperNotificationService.shouldPrintForApplicant(finremCaseDetails)).thenReturn(false);
+        when(paperNotificationService.shouldPrintForApplicantDisregardApplicationType(finremCaseDetails)).thenReturn(false);
         assertFalse(helper.shouldPostToApplicant(finremCaseDetails));
     }
 
@@ -241,6 +241,9 @@ class HearingCorrespondenceHelperTest {
             ),
             arguments(
                 Hearing.builder().hearingType(HearingType.PTR).build()
+            ),
+            arguments(
+                Hearing.builder().hearingType(HearingType.APPLICATION_HEARING).build()
             ),
             // Test should mock that this FDR is not an express case to pass.
             arguments(
