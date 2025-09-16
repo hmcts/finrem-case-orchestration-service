@@ -1,28 +1,34 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managebarrister;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeNotifier;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
-
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class ManageBarristerSubmittedHandler implements CallbackHandler<Map<String, Object>> {
+public class ManageBarristerSubmittedHandler extends FinremCallbackHandler {
 
     private final ManageBarristerService manageBarristerService;
+    private final BarristerChangeNotifier barristerChangeNotifier;
+
+    public ManageBarristerSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                           ManageBarristerService manageBarristerService,
+                                           BarristerChangeNotifier barristerChangeNotifier) {
+        super(finremCaseDetailsMapper);
+        this.manageBarristerService = manageBarristerService;
+        this.barristerChangeNotifier = barristerChangeNotifier;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -32,26 +38,17 @@ public class ManageBarristerSubmittedHandler implements CallbackHandler<Map<Stri
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest, String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        List<Barrister> barristers = manageBarristerService
-            .getBarristersForParty(caseDetails, userAuthorisation).stream()
-            .map(BarristerData::getBarrister).toList();
+        BarristerChange barristerChange = manageBarristerService.getBarristerChange(callbackRequest.getCaseDetails(),
+            callbackRequest.getCaseDetailsBefore().getData(), userAuthorisation);
+        barristerChangeNotifier.notify(new BarristerChangeNotifier.NotifierRequest(callbackRequest.getCaseDetails(),
+            userAuthorisation, barristerChange));
 
-        List<Barrister> barristersBeforeEvent = manageBarristerService
-            .getBarristersForParty(caseDetailsBefore, userAuthorisation).stream()
-            .map(BarristerData::getBarrister).toList();
-
-        log.info("Current barristers: {}", barristers.toString());
-        log.info("Original Barristers: {}", barristersBeforeEvent.toString());
-
-        manageBarristerService.notifyBarristerAccess(caseDetails,
-            barristers,
-            barristersBeforeEvent,
-            userAuthorisation);
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(callbackRequest.getCaseDetails().getData())
+            .build();
     }
 }
