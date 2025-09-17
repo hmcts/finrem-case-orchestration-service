@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
@@ -66,7 +67,9 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
 
         // Initialise Working Hearings if the event is PROCESS_ORDER
         if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())) {
-            caseData.getManageHearingsWrapper().setWorkingHearing(
+            ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
+            manageHearingsWrapper.setIsAddHearingChosen(null);
+            manageHearingsWrapper.setWorkingHearing(
                 WorkingHearing.builder()
                     .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
                     .withHearingTypes(HearingType.values())
