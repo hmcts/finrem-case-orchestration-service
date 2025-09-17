@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -28,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
@@ -56,7 +56,6 @@ public class GeneralApplicationDirectionsService {
     private final ObjectMapper objectMapper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final CcdService ccdService;
-    private final ManageHearingsDocumentService manageHearingsDocumentService;
 
     private static final String CASE_NUMBER = "ccdCaseNumber";
     private static final String COURT_DETAIL = "courtDetails";
@@ -123,22 +122,25 @@ public class GeneralApplicationDirectionsService {
     }
 
     /**
-     * Generates a General Application Directions document for the specified case event.
-     * If a hearing is required, this method generates a hearing notice document.
-     * Otherwise, it prepares a General Application Directions Order document.
+     * Generates a General Application Directions Order document when a hearing is not required.
+     * If a hearing is required, returns an empty {@link Optional}.
      *
      * @param authorisationToken the authorisation token used for document generation
      * @param finremCaseDetails the details of the financial remedy case for which the document is generated
-     * @return a {@link CaseDocument} containing the generated directions document.
+     * @return an {@link Optional} containing the generated {@link CaseDocument} if created; otherwise {@link Optional#empty()}.
      */
-    public CaseDocument generateGeneralApplicationDirectionsDocument(String authorisationToken, FinremCaseDetails finremCaseDetails) {
+    public Optional<CaseDocument> generateGeneralApplicationDirectionsDocumentIfNeeded(
+        String authorisationToken, FinremCaseDetails finremCaseDetails) {
+
         if (isHearingRequired(finremCaseDetails)) {
-            return manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
-        } else {
-            CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-            //If no hearing is required, prepare the General Application Directions Order document
-            return prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
+            return Optional.empty();
         }
+
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        CaseDocument generalApplicationDirectionsOrderDocument =
+            prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
+
+        return Optional.of(generalApplicationDirectionsOrderDocument);
     }
 
     public boolean isHearingRequired(FinremCaseDetails caseDetails) {
@@ -149,6 +151,12 @@ public class GeneralApplicationDirectionsService {
         return YesOrNo.isYes(hearingRequired);
     }
 
+    /*
+    If any referdetail is present, applicant and respondent are send correspondence via Bulk Print.
+    If referdetail indicates that the GA came from an intervener, that intervener will receive correspondence too.
+    referDetail comes from a label created when the General Application is created, can look like this:
+    "Received from - Intervener1 - Created Date - 2025-09-04 - Hearing Required - Yes" (reads applicant or respondent for these parties)
+     */
     private void printDocumentPackAndSendToRelevantParties(FinremCaseDetails caseDetails, String authorisationToken,
                                                            List<BulkPrintDocument> documents) {
         String referDetail = caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferDetail();

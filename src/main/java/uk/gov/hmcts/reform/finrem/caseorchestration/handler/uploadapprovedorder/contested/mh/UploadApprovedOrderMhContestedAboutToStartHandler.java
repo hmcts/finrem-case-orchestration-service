@@ -49,6 +49,8 @@ public class UploadApprovedOrderMhContestedAboutToStartHandler extends FinremCal
             .withHearingTypes(HearingType.values())
             .build());
 
+        manageHearingsWrapper.setIsFinalOrder(null);
+        manageHearingsWrapper.setIsAddHearingChosen(null);
         caseData.setOrderApprovedJudgeName(null);
         caseData.setOrderApprovedJudgeType(null);
         caseData.setOrderApprovedDate(null);
