@@ -147,7 +147,7 @@ public class ManageBarristerService {
         log.info("Case assigned role resource is: {}", caseRoleResource.toString());
         String caseRole = isCaseRoleResourceNullOrEmpty(caseRoleResource)
             ? CASEWORKER_ROLE
-            : caseRoleResource.getCaseAssignedUserRoles().get(0).getCaseRole();
+            : caseRoleResource.getCaseAssignedUserRoles().getFirst().getCaseRole();
 
         if (!List.of(APP_SOLICITOR_POLICY, RESP_SOLICITOR_POLICY, INTVR_SOLICITOR_1_POLICY, INTVR_SOLICITOR_2_POLICY,
             INTVR_SOLICITOR_3_POLICY, INTVR_SOLICITOR_4_POLICY).contains(caseRole)) {

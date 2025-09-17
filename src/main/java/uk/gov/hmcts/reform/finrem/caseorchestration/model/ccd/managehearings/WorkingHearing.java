@@ -19,8 +19,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.getHearingType;
@@ -92,6 +95,24 @@ public class WorkingHearing {
     public void addDocumentToAdditionalHearingDocs(CaseDocument caseDocument) {
         additionalHearingDocs = Optional.ofNullable(additionalHearingDocs).orElseGet(ArrayList::new);
         additionalHearingDocs.add(DocumentCollectionItem.builder().value(caseDocument).build());
+    }
+
+    /*
+     * Retrieves the set of party codes selected for the working hearing.
+     * Firstly, creates a list of {@link DynamicMultiSelectListElement} objects for the selected parties.
+     * Secondly, get the codes for these parties, then return that in a set.
+     * @param workingHearing to check for selected party codes
+     * @return a set of strings of selected party codes; never {@code null}
+     */
+    public static Set<String> getSelectedPartyCodesForWorkingHearing(WorkingHearing workingHearing) {
+        List<DynamicMultiSelectListElement> selected = Optional.ofNullable(workingHearing)
+            .map(WorkingHearing::getPartiesOnCaseMultiSelectList)
+            .map(DynamicMultiSelectList::getValue)
+            .orElse(Collections.emptyList());
+
+        return selected.stream()
+            .map(DynamicMultiSelectListElement::getCode)
+            .collect(Collectors.toSet());
     }
 
     public static class WorkingHearingBuilder {
