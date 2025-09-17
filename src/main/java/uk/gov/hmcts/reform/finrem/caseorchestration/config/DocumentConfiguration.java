@@ -102,7 +102,7 @@ public class DocumentConfiguration {
     @Getter(AccessLevel.NONE)
     private String manageHearingFormCTemplate;
     @Getter(AccessLevel.NONE)
-    private String manageHearingHCFromCTemplate;
+    private String manageHearingHCFormCTemplate;
     private String manageHearingExpressFormCTemplate;
     @Getter(AccessLevel.NONE)
     private String manageHearingFastTrackFormCTemplate;
@@ -164,7 +164,7 @@ public class DocumentConfiguration {
     }
 
     public String getFormCStandardTemplate(FinremCaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? manageHearingHCFromCTemplate : manageHearingFormCTemplate;
+        return isHighCourtSelected(caseDetails) ? manageHearingHCFormCTemplate : manageHearingFormCTemplate;
     }
 
     public String getFormCFastTrackTemplate(CaseDetails caseDetails) {
