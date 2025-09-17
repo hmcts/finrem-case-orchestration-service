@@ -5,10 +5,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -230,5 +233,33 @@ class WorkingHearingTest {
                     .build())
                 .build()))
             .build();
+    }
+
+    @Test
+    void testGetSelectedPartyCodesForWorkingHearing() {
+        WorkingHearing workingHearing = WorkingHearing.builder().partiesOnCaseMultiSelectList(
+            DynamicMultiSelectList.builder()
+                .value(List.of(
+                    DynamicMultiSelectListElement.builder().code(CaseRole.APP_SOLICITOR.getCcdCode()).build(),
+                    DynamicMultiSelectListElement.builder().code(CaseRole.RESP_SOLICITOR.getCcdCode()).build(),
+                    DynamicMultiSelectListElement.builder().code(CaseRole.INTVR_SOLICITOR_1.getCcdCode()).build(),
+                    DynamicMultiSelectListElement.builder().code(CaseRole.INTVR_SOLICITOR_2.getCcdCode()).build(),
+                    DynamicMultiSelectListElement.builder().code(CaseRole.INTVR_SOLICITOR_3.getCcdCode()).build(),
+                    DynamicMultiSelectListElement.builder().code(CaseRole.INTVR_SOLICITOR_4.getCcdCode()).build())
+                )
+                .listItems(List.of()).build()
+        ).build();
+
+        Set<String> result = WorkingHearing.getSelectedPartyCodesForWorkingHearing(workingHearing);
+
+        assertThat(result).isEqualTo(Set.of("[APPSOLICITOR]", "[RESPSOLICITOR]", "[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]",
+            "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]"));
+    }
+
+    @Test
+    void nulltestGetSelectedPartyCodesForWorkingHearing() {
+        WorkingHearing workingHearing = null;
+        Set<String> result = WorkingHearing.getSelectedPartyCodesForWorkingHearing(workingHearing);
+        assertThat(result).isEmpty();
     }
 }
