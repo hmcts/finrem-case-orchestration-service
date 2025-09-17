@@ -97,17 +97,17 @@ public class DocumentConfiguration {
     @Getter(AccessLevel.NONE)
     private String manageHearingNoticeTemplate;
     @Getter(AccessLevel.NONE)
-    private String manageHearingHCNoticeTemplate;
+    private String manageHearingHighCourtNoticeTemplate;
     private String manageHearingNoticeFileName;
     @Getter(AccessLevel.NONE)
     private String manageHearingFormCTemplate;
     @Getter(AccessLevel.NONE)
-    private String manageHearingHCFormCTemplate;
+    private String manageHearingHighCourtFormCTemplate;
     private String manageHearingExpressFormCTemplate;
     @Getter(AccessLevel.NONE)
     private String manageHearingFastTrackFormCTemplate;
     @Getter(AccessLevel.NONE)
-    private String manageHearingFastTrackHCFormCTemplate;
+    private String manageHearingFastTrackHighCourtFormCTemplate;
     @Getter(AccessLevel.NONE)
     private String generalApplicationOrderTemplate;
     private String generalApplicationOrderHighCourtTemplate;
@@ -164,7 +164,7 @@ public class DocumentConfiguration {
     }
 
     public String getFormCStandardTemplate(FinremCaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? manageHearingHCFormCTemplate : manageHearingFormCTemplate;
+        return isHighCourtSelected(caseDetails) ? manageHearingHighCourtFormCTemplate : manageHearingFormCTemplate;
     }
 
     public String getFormCFastTrackTemplate(CaseDetails caseDetails) {
@@ -172,7 +172,7 @@ public class DocumentConfiguration {
     }
 
     public String getFormCFastTrackTemplate(FinremCaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? manageHearingFastTrackHCFormCTemplate : manageHearingFastTrackFormCTemplate;
+        return isHighCourtSelected(caseDetails) ? manageHearingFastTrackHighCourtFormCTemplate : manageHearingFastTrackFormCTemplate;
     }
 
     public String getFormCNonFastTrackTemplate(CaseDetails caseDetails) {
@@ -248,7 +248,7 @@ public class DocumentConfiguration {
     }
 
     public String getManageHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
-        return isHighCourtSelected(finremCaseDetails) ? manageHearingHCNoticeTemplate
+        return isHighCourtSelected(finremCaseDetails) ? manageHearingHighCourtNoticeTemplate
             : manageHearingNoticeTemplate;
     }
 
