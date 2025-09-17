@@ -111,28 +111,30 @@ public class ValidateHearingService {
      *         otherwise an empty list
      */
     public List<String> validateManageHearingWarnings(FinremCaseData caseData, HearingType hearingType) {
-        Optional<LocalDate> issueDate = Optional.ofNullable(caseData.getIssueDate());
+        Optional<LocalDate> issueDateOptional = Optional.ofNullable(caseData.getIssueDate());
         LocalDate hearingDate = caseData.getManageHearingsWrapper().getWorkingHearing().getHearingDate();
 
-        if (issueDate.isEmpty()) {
+        if (issueDateOptional.isEmpty()) {
             return List.of();
         }
 
-        if (hearingType.equals(HearingType.FDA)
+        LocalDate issueDate = issueDateOptional.get();
+
+        if (HearingType.FDA.equals(hearingType)
             && !expressCaseService.isExpressCase(caseData)) {
             // Validate Standard hearing timeline
             if (!caseData.isFastTrackApplication()
-                && isHearingOutsideOfTimeline(issueDate.get().plusWeeks(12), issueDate.get().plusWeeks(16), hearingDate)) {
+                && isHearingOutsideOfTimeline(issueDate.plusWeeks(12), issueDate.plusWeeks(16), hearingDate)) {
                 return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
             // Validate Fast Track hearing timeline
             } else if (caseData.isFastTrackApplication()
-                && isHearingOutsideOfTimeline(issueDate.get().plusWeeks(6), issueDate.get().plusWeeks(10), hearingDate)) {
+                && isHearingOutsideOfTimeline(issueDate.plusWeeks(6), issueDate.plusWeeks(10), hearingDate)) {
                 return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
             // Validate Express hearing timeline
-        } else if (hearingType.equals(HearingType.FDR)
+        } else if (HearingType.FDR.equals(hearingType)
             && expressCaseService.isExpressCase(caseData)
-            && isHearingOutsideOfTimeline(issueDate.get().plusWeeks(16), issueDate.get().plusWeeks(20), hearingDate)) {
+            && isHearingOutsideOfTimeline(issueDate.plusWeeks(16), issueDate.plusWeeks(20), hearingDate)) {
             return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
         }
 
