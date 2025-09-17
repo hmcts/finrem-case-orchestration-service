@@ -103,7 +103,7 @@ public class HearingCorrespondenceHelper {
      * @return true if the applicant solicitor should receive an email notification.
      */
     public boolean shouldEmailToApplicantSolicitor(FinremCaseDetails finremCaseDetails) {
-        return !paperNotificationService.shouldPrintForApplicant(finremCaseDetails);
+        return !paperNotificationService.shouldPrintForApplicantDisregardApplicationType(finremCaseDetails);
     }
 
     /**
@@ -119,7 +119,7 @@ public class HearingCorrespondenceHelper {
      * @return true if the applicant should receive hearing documents by post.
      */
     public boolean shouldPostToApplicant(FinremCaseDetails finremCaseDetails) {
-        return paperNotificationService.shouldPrintForApplicant(finremCaseDetails);
+        return paperNotificationService.shouldPrintForApplicantDisregardApplicationType(finremCaseDetails);
     }
 
     /**
@@ -171,8 +171,9 @@ public class HearingCorrespondenceHelper {
      * Determines if a hearing should send a full set of hearing documents (not just a notice).
      * To return true:
      * - the Action must be ADD_HEARING.
-     * - the HearingType must appear in the hearingTypesThatNeedDocumentsPosted set.
-     * FDR hearings are an exception, all hearing documents are posted when the case is an express case only.
+     * - the HearingType must be FDA (First Directions Appointment).
+     * - OR this is an express case and the hearingType is FDR.
+     * Express cases don't require an FDA hearing, so documents are posted for the FDR instead.
      * @param finremCaseDetails case details
      * @param hearing the hearing to check
      * @return true if the hearing should only send a notice, false otherwise

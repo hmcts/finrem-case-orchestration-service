@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
@@ -132,7 +133,7 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
             String status = Objects.toString(caseData.getGeneralApplicationWrapper()
                 .getGeneralApplicationOutcome(), null);
             log.info("In map outcome decision {} for general application for Case ID: {} Event type {}",
-                status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS);
+                status, caseId, EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
             setStatusForNonCollAndBulkPrintDocuments(caseDetails,
                 data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
@@ -184,10 +185,17 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
 
         GeneralApplicationItems items = data.getGeneralApplicationItems();
 
-        //Generate GAD document
-        CaseDocument caseDocument = gaDirectionService.generateGeneralApplicationDirectionsDocument(userAuthorisation, finremCaseDetails);
+        Optional<CaseDocument> generalApplicationDirectionsDocument =
+            gaDirectionService.generateGeneralApplicationDirectionsDocumentIfNeeded(userAuthorisation, finremCaseDetails);
 
-        setGeneralApplicationInformation(items, finremCaseDetails, caseDocument, status, bulkPrintDocuments, userAuthorisation);
+        setGeneralApplicationInformation(
+            items,
+            finremCaseDetails,
+            generalApplicationDirectionsDocument,
+            status,
+            bulkPrintDocuments,
+            userAuthorisation
+        );
 
         if (isIntervener(items)) {
             gaService.updateIntervenerDirectionsOrders(items, finremCaseDetails);
@@ -197,14 +205,15 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
     }
 
     public void setGeneralApplicationInformation(GeneralApplicationItems items, FinremCaseDetails caseDetails,
-                                                 CaseDocument directionsDocument, String status, List<BulkPrintDocument> bulkPrintDocuments,
+                                                 Optional<CaseDocument> directionsDocument, String status, List<BulkPrintDocument> bulkPrintDocuments,
                                                  String userAuthorisation) {
         String caseId = String.valueOf(caseDetails.getId());
 
         if (gaDirectionService.isHearingRequired(caseDetails)) {
             setHearingDetails(items, caseDetails);
         }
-        setDirectionsDocument(items, directionsDocument);
+
+        directionsDocument.ifPresent(items::setGeneralApplicationDirectionsDocument);
         updateApplicationStatus(items, status, caseId);
         addBulkPrintDocuments(items, bulkPrintDocuments, userAuthorisation, caseId);
     }
@@ -212,10 +221,6 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
     private void setHearingDetails(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
         HearingTabItem hearingTabItem = hearingCorrespondenceHelper.getHearingInContextFromTab(caseDetails.getData());
         items.setHearingDetailsForGeneralApplication(hearingTabItem);
-    }
-
-    private void setDirectionsDocument(GeneralApplicationItems items, CaseDocument directionsDocument) {
-        items.setGeneralApplicationDirectionsDocument(directionsDocument);
     }
 
     private void updateApplicationStatus(GeneralApplicationItems items, String status, String caseId) {
@@ -235,7 +240,9 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
 
     private void addBulkPrintDocuments(GeneralApplicationItems items, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation,
                                        String caseId) {
+
         addBulkPrintDocument(items.getGeneralApplicationDirectionsDocument(), bulkPrintDocuments);
+        log.info("General Applications Directions document sent to Bulk Print, for case ID: {}", caseId);
 
         log.info("items getGeneralApplicationDocument {}, for case ID: {}", items.getGeneralApplicationDocument(), caseId);
 
@@ -278,8 +285,12 @@ public class GeneralApplicationDirectionsNewEventAboutToSubmitHandler extends Fi
             .orElse(false);
     }
 
+    /*
+     * ManageHearingAction, ADD_HEARING, influences how notifications sent when submitted handler called.
+     */
     private void performAddHearingIfNecessary(FinremCaseDetails caseDetails, String userAuthorisation) {
         if (gaDirectionService.isHearingRequired(caseDetails)) {
+            caseDetails.getData().getManageHearingsWrapper().setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
             manageHearingActionService.performAddHearing(caseDetails, userAuthorisation);
             manageHearingActionService.updateTabData(caseDetails.getData());
         }
