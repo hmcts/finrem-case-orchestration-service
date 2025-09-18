@@ -1,7 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -14,64 +17,59 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 
+@ExtendWith(MockitoExtension.class)
 public class AmendCaseContestedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     private AmendCaseContestedAboutToStartHandler handler;
 
-    @Before
+    @Mock
+    private IdamService idamService;
+
+    @BeforeEach
     public void setup() {
-        IdamService idamService = mock(IdamService.class);
         handler = new AmendCaseContestedAboutToStartHandler(new OnStartDefaultValueService(idamService));
     }
 
     @Test
     public void givenConsentedCase_whenEventIsAmend_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.AMEND_CASE),
-            is(true));
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.AMEND_CASE)).isTrue();
     }
 
     @Test
     public void givenConsentedCase_whenEventIsIssueApplication_thenHandlerCanNotCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.ISSUE_APPLICATION),
-            is(false));
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.ISSUE_APPLICATION)).isFalse();
     }
 
     @Test
     public void givenConsentedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.AMEND_CASE),
-            is(false));
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.AMEND_CASE)).isFalse();
     }
 
     @Test
     public void givenConsentedCase_whenEventIsAmendAndCaseTypeIsConsented_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.AMEND_CASE),
-            is(false));
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.AMEND_CASE)).isFalse();
     }
 
     @Test
     public void givenConsentedCase_whenEventIsSolCreate_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
-            is(false));
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.SOLICITOR_CREATE)).isFalse();
     }
 
     @Test
     public void handle() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertEquals(NO_VALUE, response.getData().get(CIVIL_PARTNERSHIP));
+        assertThat(response.getData().get(CIVIL_PARTNERSHIP)).isEqualTo(NO_VALUE);
     }
 
     private CallbackRequest buildCallbackRequest() {
