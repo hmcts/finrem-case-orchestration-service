@@ -186,8 +186,8 @@ class HearingTabDataMapperTest {
             .build();
 
         // Create a situation resulting in a Null Pointer Exception (document item missing values)
-        ManageHearingDocumentsCollectionItem item = new ManageHearingDocumentsCollectionItem();
-        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection = List.of(item);
+        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection =
+            List.of(new ManageHearingDocumentsCollectionItem());
 
         // Act
         HearingTabItem result = hearingTabDataMapper.mapHearingToTabData(hearingCollectionItem, hearingDocumentsCollection);
@@ -195,7 +195,7 @@ class HearingTabDataMapperTest {
         // Assert - default values returned when exceptions handled
         assertEquals("Court name not available", result.getTabCourtSelection());
         // Hearing had 1 valid document, but empty list returned when there is an exception.
-        assertEquals(0, result.getTabHearingDocuments().size());
+        assertThat(result.getTabHearingDocuments().isEmpty());
 
         // assert logs
         assertThat(logs.getErrors()).contains("Caught an exception when retrieving court name. 'Court name not available' provided instead.");
