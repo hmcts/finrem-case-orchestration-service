@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
 import java.util.ArrayList;
@@ -53,7 +53,9 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
         FinremCaseData beforeData = caseDetailsBefore.getData();
 
         List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
-        if (uploadHearingOrders != null) {
+        if (CollectionUtils.isEmpty(uploadHearingOrders)) {
+            errors.add("No upload approved order found");
+        } else {
             log.info("Latest no. of hearing orders {} for case Id {}", uploadHearingOrders.size(), caseId);
             List<DirectionOrderCollection> uploadHearingOrdersBefore = beforeData.getUploadHearingOrder();
             if (uploadHearingOrdersBefore != null && !uploadHearingOrdersBefore.isEmpty()) {
@@ -63,18 +65,6 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
             log.info("No. of hearing orders {} to check for error for case Id {}", uploadHearingOrders.size(), caseId);
             uploadHearingOrders.forEach(doc ->
                 bulkPrintDocumentService.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
-                    caseId, errors, userAuthorisation)
-            );
-        }
-
-        List<UploadAdditionalDocumentCollection> uploadAdditionalDocument = caseData.getUploadAdditionalDocument();
-        if (uploadAdditionalDocument != null) {
-            List<UploadAdditionalDocumentCollection> uploadAdditionalBefore = beforeData.getUploadAdditionalDocument();
-            if (uploadAdditionalBefore != null && !uploadAdditionalBefore.isEmpty()) {
-                uploadAdditionalDocument.removeAll(uploadAdditionalBefore);
-            }
-            uploadAdditionalDocument.forEach(doc ->
-                bulkPrintDocumentService.validateEncryptionOnUploadedDocument(doc.getValue().getAdditionalDocuments(),
                     caseId, errors, userAuthorisation)
             );
         }
