@@ -18,13 +18,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 
 @ExtendWith(MockitoExtension.class)
 public class AmendCaseContestedAboutToStartHandlerTest {
 
-    public static final String AUTH_TOKEN = "tokien:)";
     private AmendCaseContestedAboutToStartHandler handler;
 
     @Mock
@@ -36,37 +37,12 @@ public class AmendCaseContestedAboutToStartHandlerTest {
     }
 
     @Test
-    public void givenConsentedCase_whenEventIsAmend_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.AMEND_CASE)).isTrue();
+    void canHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.AMEND_CASE);
     }
 
     @Test
-    public void givenConsentedCase_whenEventIsIssueApplication_thenHandlerCanNotCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.ISSUE_APPLICATION)).isFalse();
-    }
-
-    @Test
-    public void givenConsentedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.AMEND_CASE)).isFalse();
-    }
-
-    @Test
-    public void givenConsentedCase_whenEventIsAmendAndCaseTypeIsConsented_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.AMEND_CASE)).isFalse();
-    }
-
-    @Test
-    public void givenConsentedCase_whenEventIsSolCreate_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.SOLICITOR_CREATE)).isFalse();
-    }
-
-    @Test
-    public void handle() {
+    void handle() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getData().get(CIVIL_PARTNERSHIP)).isEqualTo(NO_VALUE);
