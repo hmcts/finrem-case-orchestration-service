@@ -107,7 +107,6 @@ class ValidateHearingServiceTest {
         when(selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(
             caseData, HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE)).thenReturn(List.of(HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE));
 
-
         caseData.setPartiesOnCase(partiesOnCase);
         List<String> errors = doTestErrors();
         assertThat(errors).containsExactly(HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE);
@@ -225,18 +224,18 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageFastTrackHearingDatesWarningFdr() {
+    void manageFastTrackHearingDates_DoesNotValidateFdr() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3));
 
         List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDR);
 
-        assertThat(errors).containsExactly(DATE_BETWEEN_6_AND_10_WEEKS);
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    void manageFastTrackHearingDatesWarningFda() {
+    void manageFastTrackHearingDates_WarningOnInvalidFda() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3));
@@ -246,17 +245,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingFastTrackHearingDatesNoWarningFdr() {
-        caseData.setIssueDate(LocalDate.now());
-        caseData.setFastTrackDecision(YesOrNo.YES);
-        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(7));
-
-        List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDR);
-        assertThat(errors).isEmpty();
-    }
-
-    @Test
-    void manageHearingHearingFastTrackHearingDatesNoWarningFda() {
+    void manageHearingHearingFastTrackHearing_NoWarningsOnValidFdaDates() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(7));
@@ -266,7 +255,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingExpressPilotDatesFdr() {
+    void manageHearingHearingExpressPilot_WarningOnInvalidFdrDates() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
@@ -278,7 +267,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingExpressPilotDatesFda() {
+    void manageHearingHearingExpressPilot_DoesNotValidateFda() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
@@ -286,11 +275,11 @@ class ValidateHearingServiceTest {
         when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
 
         List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDA);
-        assertThat(errors).containsExactly(DATE_BETWEEN_16_AND_20_WEEKS);
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    void manageHearingHearingExpressPilotDatesNoWarningFdr() {
+    void manageHearingHearingExpress_NoWarningsOnValidFdrDates() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
@@ -302,28 +291,16 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingExpressPilotDatesNoWarningFda() {
-        caseData.setIssueDate(LocalDate.now());
-        caseData.setFastTrackDecision(YesOrNo.NO);
-        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
-        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(17));
-        when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
-
-        List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDA);
-        assertThat(errors).isEmpty();
-    }
-
-    @Test
-    void manageHearingHearingNonFastTrackHearingDatesWarningFdr() {
+    void manageHearingHearingStandardTrack_DoesNotValidateFdr() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3));
         List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDR);
-        assertThat(errors).containsExactly(DATE_BETWEEN_12_AND_16_WEEKS);
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    void manageHearingHearingNonFastTrackHearingDatesWarningFda() {
+    void manageHearingHearingStandardTrack_WarningOnInvalidFdaDates() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3));
@@ -332,16 +309,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingNonFastTrackHearingDatesNoWarningFdr() {
-        caseData.setIssueDate(LocalDate.now());
-        caseData.setFastTrackDecision(YesOrNo.NO);
-        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13));
-        List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDR);
-        assertThat(errors).isEmpty();
-    }
-
-    @Test
-    void manageHearingHearingNonFastTrackHearingDatesNoWarningFda() {
+    void manageHearingHearingStandardTrack_NoWarningsOnValidFdrDates() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13));
@@ -350,7 +318,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingDatesWarningOtherHearingType() {
+    void manageHearingHearingDates_NoValidationOnOtherHearingType() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13));
@@ -359,7 +327,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingDatesWarningNoIssueDate() {
+    void manageHearingHearingDates_NoValidationWhenNoIssueDate() {
         caseData.setIssueDate(null);
         caseData.setFastTrackDecision(YesOrNo.NO);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13));
