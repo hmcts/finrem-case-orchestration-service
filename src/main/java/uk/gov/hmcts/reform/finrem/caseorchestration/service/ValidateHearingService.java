@@ -65,7 +65,7 @@ public class ValidateHearingService {
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
         errors.addAll(selectablePartiesCorrespondenceService
             .validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseDetails.getData(),
-            HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE));
+                HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE));
         return errors;
     }
 
@@ -111,23 +111,31 @@ public class ValidateHearingService {
      *         otherwise an empty list
      */
     public List<String> validateManageHearingWarnings(FinremCaseData caseData, HearingType hearingType) {
-        Optional<LocalDate> issueDate = Optional.ofNullable(caseData.getIssueDate());
+        Optional<LocalDate> issueDateOptional = Optional.ofNullable(caseData.getIssueDate());
         LocalDate hearingDate = caseData.getManageHearingsWrapper().getWorkingHearing().getHearingDate();
 
-        if (issueDate.isEmpty() || !(hearingType.equals(HearingType.FDA) || hearingType.equals(HearingType.FDR))) {
+        if (issueDateOptional.isEmpty()) {
             return List.of();
         }
 
-        if (caseData.isFastTrackApplication()) {
-            if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(6), issueDate.get().plusWeeks(10), hearingDate)) {
+        LocalDate issueDate = issueDateOptional.get();
+
+        if (HearingType.FDA.equals(hearingType)
+            && !expressCaseService.isExpressCase(caseData)) {
+            // Validate Standard hearing timeline
+            if (!caseData.isFastTrackApplication()
+                && isHearingOutsideOfTimeline(issueDate.plusWeeks(12), issueDate.plusWeeks(16), hearingDate)) {
+                return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
+            // Validate Fast Track hearing timeline
+            } else if (caseData.isFastTrackApplication()
+                && isHearingOutsideOfTimeline(issueDate.plusWeeks(6), issueDate.plusWeeks(10), hearingDate)) {
                 return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
-        } else if (expressCaseService.isExpressCase(caseData)) {
-            if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(16), issueDate.get().plusWeeks(20), hearingDate)) {
-                return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
-            }
-        } else if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(12), issueDate.get().plusWeeks(16), hearingDate)) {
-            return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
+            // Validate Express hearing timeline
+        } else if (HearingType.FDR.equals(hearingType)
+            && expressCaseService.isExpressCase(caseData)
+            && isHearingOutsideOfTimeline(issueDate.plusWeeks(16), issueDate.plusWeeks(20), hearingDate)) {
+            return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
         }
 
         return List.of();
@@ -188,7 +196,7 @@ public class ValidateHearingService {
     }
 
     private boolean isHearingOutsideOfTimeline(final LocalDate min, final LocalDate max,
-                                                      final LocalDate date) {
+                                               final LocalDate date) {
         return date.isBefore(min) || date.isAfter(max);
     }
 
@@ -196,6 +204,7 @@ public class ValidateHearingService {
      * Retrieves the set of party codes selected for the working hearing in the provided event data.
      * Firstly, creates a list of {@link DynamicMultiSelectListElement} objects for the selected parties.
      * Secondly, get the codes for these parties, then returns that in a set.
+     *
      * @param caseData the case data containing the manage hearings wrapper and working hearing details
      * @return a set of selected party codes; never {@code null}
      */
