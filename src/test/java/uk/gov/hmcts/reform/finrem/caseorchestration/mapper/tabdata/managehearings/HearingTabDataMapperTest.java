@@ -153,4 +153,7 @@ class HearingTabDataMapperTest {
         assertEquals(" ", result.getTabAdditionalInformation());
         assertThat(result.getTabHearingDocuments()).isEmpty();
     }
+
+    // todo tests for exceptions
+
 }
