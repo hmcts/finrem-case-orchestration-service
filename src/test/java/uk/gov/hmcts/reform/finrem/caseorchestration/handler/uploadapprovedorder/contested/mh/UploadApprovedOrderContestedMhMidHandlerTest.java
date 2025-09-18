@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,20 +18,24 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,97 +46,129 @@ class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup 
     @InjectMocks
     private UploadApprovedOrderContestedMhMidHandler handler;
 
-    private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
-    private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
-    private static final String FILE_NAME = "abc.pdf";
-
     @Test
     void canHandle() {
         assertCanHandle(handler, CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER_MH);
     }
 
-    @Test
-    void givenContestedCase_whenApprovedUploadOrderButNonEncryptedFileShouldNotGetError() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
-        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+    @ParameterizedTest
+    @NullAndEmptySource
+    void givenMissingUploadHearingOrder_whenHandle_thenReturnAnError(List<DirectionOrderCollection> uploadHearingOrder) {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        finremCaseData.setUploadHearingOrder(uploadHearingOrder);
 
-        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
 
-        DirectionOrder order = DirectionOrder.builder().uploadDraftDocument(caseDocument).build();
-        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(order).build();
-        List<DirectionOrderCollection> uploadHearingOrders = new ArrayList<>();
-        uploadHearingOrders.add(orderCollection);
-        caseData.setUploadHearingOrder(uploadHearingOrders);
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
 
-        UploadAdditionalDocumentCollection documentCollection = UploadAdditionalDocumentCollection.builder()
-            .value(UploadAdditionalDocument.builder().additionalDocuments(caseDocument).build()).build();
-        List<UploadAdditionalDocumentCollection> uploadAdditionalDocument = new ArrayList<>();
-        uploadAdditionalDocument.add(documentCollection);
-        caseData.setUploadAdditionalDocument(uploadAdditionalDocument);
+        FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        when(finremCallbackRequest.getCaseDetailsBefore()).thenReturn(finremCaseDetailsBefore);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertTrue(response.getErrors().isEmpty());
-        verify(bulkPrintDocumentService, times(2)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        assertThat(response.getErrors()).containsExactly("No upload approved order found");
     }
 
-    @Test
-    void givenContestedCase_whenApprovedUploadOrderButNonEncryptedFileButIfAlreadyOrderInCollectionShouldNotCheckForExisting() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
-        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
-        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
-        DirectionOrder order = DirectionOrder.builder().uploadDraftDocument(caseDocument).build();
-        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(order).build();
-        List<DirectionOrderCollection> uploadHearingOrders = new ArrayList<>();
-        uploadHearingOrders.add(orderCollection);
-        caseData.setUploadHearingOrder(uploadHearingOrders);
-        finremCallbackRequest.getCaseDetailsBefore().getData().setUploadHearingOrder(uploadHearingOrders);
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenCaseWithNewUploadHearingOrders_whenHandle_thenUploadedDocumentValidated(boolean valid) {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        CaseDocument newUploadDocument = mock(CaseDocument.class);
+        finremCaseData.setUploadHearingOrder(List.of(
+            DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                .uploadDraftDocument(newUploadDocument).build()).build()
+        ));
 
-        UploadAdditionalDocumentCollection documentCollection = UploadAdditionalDocumentCollection.builder()
-            .value(UploadAdditionalDocument.builder().additionalDocuments(caseDocument).build()).build();
-        List<UploadAdditionalDocumentCollection> uploadAdditionalDocument = new ArrayList<>();
-        uploadAdditionalDocument.add(documentCollection);
-        caseData.setUploadAdditionalDocument(uploadAdditionalDocument);
-        finremCallbackRequest.getCaseDetailsBefore().getData().setUploadAdditionalDocument(uploadAdditionalDocument);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getId()).thenReturn(Long.valueOf(CASE_ID));
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+
+        FinremCaseData finremCaseDataBefore = spy(FinremCaseData.class);
+
+        FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
+        when(finremCaseDetailsBefore.getData()).thenReturn(finremCaseDataBefore);
+
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+        when(finremCallbackRequest.getCaseDetailsBefore()).thenReturn(finremCaseDetailsBefore);
+
+        doAnswer(invocation -> {
+            if (!valid) {
+                List<String> errors = invocation.getArgument(2);
+                errors.add("Mocked encryption error for testing");
+            }
+            return null;
+        }).when(bulkPrintDocumentService)
+            .validateEncryptionOnUploadedDocument(eq(newUploadDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        if (!valid) {
+            assertThat(response.getErrors()).containsExactly("Mocked encryption error for testing");
+        } else {
+            assertThat(response.getErrors()).isEmpty();
+        }
 
-        assertTrue(response.getErrors().isEmpty());
-        verify(bulkPrintDocumentService, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(bulkPrintDocumentService)
+            .validateEncryptionOnUploadedDocument(eq(newUploadDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
     }
 
-    @Test
-    void givenContestedCase_whenApprovedUploadOrderButNonEncryptedFileButIfAlreadyOrderInCollectionShouldNotCheckForExistingButCheckNew() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
-        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
-        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
-        DirectionOrder order = DirectionOrder.builder().uploadDraftDocument(caseDocument).build();
-        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(order).build();
-        List<DirectionOrderCollection> uploadHearingOrders = new ArrayList<>();
-        uploadHearingOrders.add(orderCollection);
-        CaseDocument caseDocument1 = caseDocument("fileurl", "abc.pdf", "fileurl/binary");
-        DirectionOrder order1 = DirectionOrder.builder().uploadDraftDocument(caseDocument1).build();
-        DirectionOrderCollection orderCollection1 = DirectionOrderCollection.builder().value(order1).build();
-        uploadHearingOrders.add(orderCollection1);
-        caseData.setUploadHearingOrder(uploadHearingOrders);
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenExistingUploadHearingOrderWithNewUploadHearingOrders_whenHandle_thenUploadedDocumentValidated(boolean valid) {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        CaseDocument newUploadDocument = mock(CaseDocument.class);
+        finremCaseData.setUploadHearingOrder(new ArrayList(List.of(
+            DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                .uploadDraftDocument(newUploadDocument).build()).build()
+        )));
 
-        DirectionOrder order2 = DirectionOrder.builder().uploadDraftDocument(caseDocument).build();
-        DirectionOrderCollection orderCollection2 = DirectionOrderCollection.builder().value(order2).build();
-        List<DirectionOrderCollection> uploadHearingOrders2 = new ArrayList<>();
-        uploadHearingOrders2.add(orderCollection2);
-        finremCallbackRequest.getCaseDetailsBefore().getData().setUploadHearingOrder(uploadHearingOrders2);
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getId()).thenReturn(Long.valueOf(CASE_ID));
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
 
-        UploadAdditionalDocumentCollection documentCollection = UploadAdditionalDocumentCollection.builder()
-            .value(UploadAdditionalDocument.builder().additionalDocuments(caseDocument).build()).build();
-        List<UploadAdditionalDocumentCollection> uploadAdditionalDocument = new ArrayList<>();
-        uploadAdditionalDocument.add(documentCollection);
-        uploadAdditionalDocument.add(documentCollection);
-        caseData.setUploadAdditionalDocument(uploadAdditionalDocument);
-        finremCallbackRequest.getCaseDetailsBefore().getData().setUploadAdditionalDocument(uploadAdditionalDocument);
+        FinremCaseData finremCaseDataBefore = spy(FinremCaseData.class);
+        CaseDocument existingUploadedDocument = mock(CaseDocument.class);
+        finremCaseDataBefore.setUploadHearingOrder(List.of(
+            DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                .uploadDraftDocument(existingUploadedDocument).build()).build()
+        ));
+
+        FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
+        when(finremCaseDetailsBefore.getData()).thenReturn(finremCaseDataBefore);
+
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+        when(finremCallbackRequest.getCaseDetailsBefore()).thenReturn(finremCaseDetailsBefore);
+
+        doAnswer(invocation -> {
+            if (!valid) {
+                List<String> errors = invocation.getArgument(2);
+                errors.add("Mocked encryption error for testing");
+            }
+            return null;
+        }).when(bulkPrintDocumentService)
+            .validateEncryptionOnUploadedDocument(eq(newUploadDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
+        lenient(). // should not be invoked
+            doAnswer(invocation -> {
+                List<String> errors = invocation.getArgument(2);
+                errors.add("Mocked encryption error for existing document");
+                return null;
+            }).when(bulkPrintDocumentService)
+            .validateEncryptionOnUploadedDocument(eq(existingUploadedDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        if (!valid) {
+            assertThat(response.getErrors()).containsExactly("Mocked encryption error for testing");
+        } else {
+            assertThat(response.getErrors()).isEmpty();
+        }
 
-        assertTrue(response.getErrors().isEmpty());
-        verify(bulkPrintDocumentService).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(bulkPrintDocumentService)
+            .validateEncryptionOnUploadedDocument(eq(newUploadDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
+        verify(bulkPrintDocumentService, never())
+            .validateEncryptionOnUploadedDocument(eq(existingUploadedDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
     }
 }
