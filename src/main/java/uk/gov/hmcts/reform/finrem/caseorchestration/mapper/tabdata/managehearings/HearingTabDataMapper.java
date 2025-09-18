@@ -63,8 +63,9 @@ public class HearingTabDataMapper {
         final String courtNameNotAvailable = "Court name not available";
         try {
             return courtDetailsMapper.convertToFrcCourtDetails(court).getCourtName();
-        } catch (IllegalStateException e) {
-            log.error("Caught exception when retrieving court name. '{}' provided instead.", courtNameNotAvailable, e);
+        } catch (IllegalStateException | NullPointerException e) {
+            log.error("Caught an exception when retrieving court name. '{}' provided instead.",
+                courtNameNotAvailable, e);
             return courtNameNotAvailable;
         }
     }
@@ -82,21 +83,15 @@ public class HearingTabDataMapper {
     /**
      * Formats the given hearing date and time into a human-readable string.
      * If the date is {@code null}, returns a default value.
-     * If an exception occurs during formatting, logs the error and returns the default value.
      *
      * @param hearingDate the hearing date to format
      * @param hearingTime the hearing time to append to the date
      * @return a formatted date-time string (e.g., "27 Jun 2025 10:00 AM"), or a default value if the date is null
      */
     public String getFormattedDateTime(LocalDate hearingDate, String hearingTime) {
-        try {
-            return hearingDate != null
-                ? hearingDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy")) + " " + hearingTime
-                : DEFAULT_DATE_TIME;
-        } catch (Exception e) {
-            log.error("Error formatting date and time: {}", e.getMessage());
-            return DEFAULT_DATE_TIME;
-        }
+        return hearingDate != null
+            ? hearingDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy")) + " " + hearingTime
+            : DEFAULT_DATE_TIME;
     }
 
     /**
@@ -162,9 +157,9 @@ public class HearingTabDataMapper {
         UUID hearingId,
         Hearing hearing) {
         try {
-            return mapHearingDocumentsToTabData(hearingDocumentsCollection, hearingId, new Hearing());
-        } catch (Exception e) {
-            log.error("Error mapping hearing documents to tab data: {}", e.getMessage());
+            return mapHearingDocumentsToTabData(hearingDocumentsCollection, hearingId, hearing);
+        } catch (NullPointerException npe) {
+            log.error("NullPointerException mapping hearing documents to tab data.", npe);
             return List.of();
         }
     }
