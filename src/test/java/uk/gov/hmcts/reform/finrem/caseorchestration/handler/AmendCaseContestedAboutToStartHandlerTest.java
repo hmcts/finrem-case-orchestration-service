@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-
 @ExtendWith(MockitoExtension.class)
 public class AmendCaseContestedAboutToStartHandlerTest {
 

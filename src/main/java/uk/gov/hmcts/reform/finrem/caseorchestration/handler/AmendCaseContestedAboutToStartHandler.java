@@ -16,7 +16,6 @@ public class AmendCaseContestedAboutToStartHandler extends FinremCallbackHandler
 
     private final OnStartDefaultValueService service;
 
-
     public AmendCaseContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                  OnStartDefaultValueService service) {
 
