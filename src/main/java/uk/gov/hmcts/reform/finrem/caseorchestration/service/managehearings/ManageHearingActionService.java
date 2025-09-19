@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.ArrayList;
@@ -53,6 +55,8 @@ public class ManageHearingActionService {
     private final ManageHearingsDocumentService manageHearingsDocumentService;
     private final ExpressCaseService expressCaseService;
     private final HearingTabDataMapper hearingTabDataMapper;
+    private final GenerateCoverSheetService generateCoverSheetService;
+    private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
 
     private record DocumentRecord(CaseDocument caseDocument, CaseDocumentType caseDocumentType) {
     }
@@ -103,6 +107,9 @@ public class ManageHearingActionService {
 
             generateOutOfCourtResolution(finremCaseDetails, authToken, documentMap);
         }
+
+        //Set cover sheet values
+        setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
 
         addDocumentsToCollection(documentMap, hearingWrapper);
         // Although the working hearing is cleared, the working hearing ID is retained for use in submitted handler.
@@ -286,5 +293,16 @@ public class ManageHearingActionService {
                 CaseDocumentType.OUT_OF_COURT_RESOLUTION
             )
         );
+    }
+
+    private void setApplicantAndRespondentCoverSheets(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
+        if(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)) {
+            generateCoverSheetService.generateAndSetApplicantCoverSheet(finremCaseDetails, userAuthorisation);
+
+        }
+
+        if(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)) {
+            generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
+        }
     }
 }
