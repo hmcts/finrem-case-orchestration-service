@@ -1,113 +1,60 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managebarrister;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeNotifier;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ManageBarristerSubmittedHandlerTest {
-
-    public static final String CASE_ID = "1234567890";
-
-    @Mock
-    private ManageBarristerService manageBarristerService;
+@ExtendWith(MockitoExtension.class)
+class ManageBarristerSubmittedHandlerTest {
 
     @InjectMocks
     private ManageBarristerSubmittedHandler manageBarristerSubmittedHandler;
+    @Mock
+    private ManageBarristerService manageBarristerService;
+    @Mock
+    private BarristerChangeNotifier barristerChangeNotifier;
 
-    private CallbackRequest callbackRequest;
+    @Test
+    void testCanHandler() {
+        Assertions.assertCanHandle(manageBarristerSubmittedHandler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.MANAGE_BARRISTER);
+    }
 
-    @Before
-    public void setUp() {
-        Map<String, Object> caseData = new HashMap<>();
-        Map<String, Object> caseDataBefore = new HashMap<>();
-        callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().id(Long.parseLong(CASE_ID)).data(caseData).build())
-            .caseDetailsBefore(CaseDetails.builder().id(Long.parseLong(CASE_ID)).data(caseDataBefore).build())
+    @Test
+    void testHandle() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .data(FinremCaseData.builder().build())
+                .build())
+            .caseDetailsBefore(FinremCaseDetails.builder().build())
             .build();
-    }
 
-    @Test
-    public void givenHandlerCanHandleCallback_whenCanHandle_thenReturnTrue() {
-        assertThat(manageBarristerSubmittedHandler.canHandle(
-                CallbackType.SUBMITTED,
-                CaseType.CONTESTED,
-                EventType.MANAGE_BARRISTER),
-            is(true));
-    }
+        BarristerChange barristerChange = BarristerChange.builder().build();
+        when(manageBarristerService.getBarristerChange(callbackRequest.getCaseDetails(),
+            callbackRequest.getCaseDetailsBefore().getData(), AUTH_TOKEN)).thenReturn(barristerChange);
 
-    @Test
-    public void givenInvalidCallbackType_whenCanHandle_thenReturnFalse() {
-        assertThat(manageBarristerSubmittedHandler.canHandle(
-                CallbackType.ABOUT_TO_SUBMIT,
-                CaseType.CONTESTED,
-                EventType.MANAGE_BARRISTER),
-            is(false));
-    }
+        var response = manageBarristerSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-    @Test
-    public void givenInvalidCaseType_whenCanHandle_thenReturnFalse() {
-        assertThat(manageBarristerSubmittedHandler.canHandle(
-                CallbackType.SUBMITTED,
-                CaseType.CONSENTED,
-                EventType.MANAGE_BARRISTER),
-            is(false));
-    }
-
-    @Test
-    public void givenInvalidEventType_whenCanHandle_thenReturnFalse() {
-        assertThat(manageBarristerSubmittedHandler.canHandle(
-                CallbackType.SUBMITTED,
-                CaseType.CONTESTED,
-                EventType.UPLOAD_APPROVED_ORDER),
-            is(false));
-    }
-
-    @Test
-    public void givenValidData_whenHandle_thenReturnResponseAndCallNotify() {
-        List<BarristerData> barristerCollection = getBarristers();
-        when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetails(), AUTH_TOKEN))
-            .thenReturn(barristerCollection);
-        when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN))
-            .thenReturn(barristerCollection);
-        List<Barrister> barristers = getBarristers().stream().map(BarristerData::getBarrister).toList();
-
-        manageBarristerSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(manageBarristerService).notifyBarristerAccess(callbackRequest.getCaseDetails(), barristers, barristers, AUTH_TOKEN);
-    }
-
-    private List<BarristerData> getBarristers() {
-        return List.of(
-            BarristerData.builder()
-                .barrister(Barrister.builder()
-                    .name("Barrister Name")
-                    .email("barrister@gmail.com")
-                    .organisation(Organisation.builder().build())
-                    .build())
-                .build()
-        );
+        assertThat(response.getData()).isNotNull();
+        assertThat(response.getErrors()).isEmpty();
+        assertThat(response.getWarnings()).isEmpty();
+        verify(barristerChangeNotifier).notify(any(BarristerChangeNotifier.NotifierRequest.class));
     }
 }
