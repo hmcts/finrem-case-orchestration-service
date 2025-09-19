@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,10 +17,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -39,6 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 
 public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
@@ -52,6 +61,9 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
     @MockitoBean
     private GenericDocumentService genericDocumentService;
+
+    @MockitoBean
+    private BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
 
     @Captor
     private ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor;
@@ -179,6 +191,111 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
         assertCoversheetAddressFromMap("Intervener 1 Address Line 1\nIntervener 1 Address Line 2"
             + "\nIntervener 1 Address Line 3\nIntervener 1 County\nIntervener 1 Post Town\nIntervener 1 Post Code");
+    }
+
+    @Test
+    public void givenApplicantNotConfidential_whenGenerateAndSetApplicantCoverSheet_thenSetsStandardField() {
+        // given
+        FinremCaseData data = new FinremCaseData();
+        data.setContactDetailsWrapper(new ContactDetailsWrapper());
+        data.getContactDetailsWrapper().setApplicantAddressHiddenFromRespondent(YesOrNo.NO);
+
+        FinremCaseDetails details = FinremCaseDetails.builder()
+            .id(CASE_ID)
+            .data(data)
+            .build();
+
+        when(bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(any(FinremCaseDetails.class),
+            any(DocumentHelper.PaperNotificationRecipient.class), any(CourtListWrapper.class)))
+            .thenReturn(new HashMap<>());
+
+        // when
+        generateCoverSheetService.generateAndSetApplicantCoverSheet(details, AUTH_TOKEN);
+
+        // then
+        Assertions.assertThat(details.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp())
+            .isNotNull();
+        Assertions.assertThat(details.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential())
+            .isNull();
+    }
+
+    @Test
+    public void givenApplicantConfidential_whenGenerateAndSetApplicantCoverSheet_thenSetsConfidentialFieldAndClearsStandard() {
+        // given
+        FinremCaseData data = new FinremCaseData();
+        data.setContactDetailsWrapper(new ContactDetailsWrapper());
+        data.getContactDetailsWrapper().setApplicantAddressHiddenFromRespondent(YesOrNo.YES);
+
+        FinremCaseDetails details = FinremCaseDetails.builder()
+            .id(CASE_ID)
+            .data(data)
+            .build();
+
+        when(bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(any(FinremCaseDetails.class),
+            any(DocumentHelper.PaperNotificationRecipient.class), any(CourtListWrapper.class)))
+            .thenReturn(new HashMap<>());
+
+        // when
+        generateCoverSheetService.generateAndSetApplicantCoverSheet(details, AUTH_TOKEN);
+
+        // then
+        Assertions.assertThat(details.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp())
+            .isNull();
+        Assertions.assertThat(details.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential())
+            .isNotNull();
+    }
+
+    @Test
+    public void givenRespondentNotConfidential_whenGenerateAndSetRespondentCoverSheet_thenSetsStandardField() {
+        // given
+        FinremCaseData data = new FinremCaseData();
+        data.setContactDetailsWrapper(new ContactDetailsWrapper());
+        data.getContactDetailsWrapper().setRespondentAddressHiddenFromApplicant(YesOrNo.NO);
+
+        FinremCaseDetails details = FinremCaseDetails.builder()
+            .id(CASE_ID)
+            .data(data)
+            .build();
+
+        when(bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(any(FinremCaseDetails.class),
+            any(DocumentHelper.PaperNotificationRecipient.class), any(CourtListWrapper.class)))
+            .thenReturn(new HashMap<>());
+
+        // when
+        generateCoverSheetService.generateAndSetRespondentCoverSheet(details, AUTH_TOKEN);
+
+        // then
+        Assertions.assertThat(details.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes())
+            .isNotNull();
+        Assertions.assertThat(details.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential())
+            .isNull();
+    }
+
+    @Test
+    public void givenRespondentConfidential_whenGenerateAndSetRespondentCoverSheet_thenSetsConfidentialFieldAndClearsStandard() {
+        // given
+        FinremCaseData data = new FinremCaseData();
+        data.setContactDetailsWrapper(new ContactDetailsWrapper());
+        data.getContactDetailsWrapper().setRespondentAddressHiddenFromApplicant(YesOrNo.YES);
+        data.setBulkPrintCoversheetWrapper(new BulkPrintCoversheetWrapper());
+
+        FinremCaseDetails details = FinremCaseDetails.builder()
+            .id(CASE_ID)
+            .data(data)
+            .build();
+
+        when(bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(any(FinremCaseDetails.class),
+            any(DocumentHelper.PaperNotificationRecipient.class), any(CourtListWrapper.class)))
+            .thenReturn(new HashMap<>());
+
+        // when
+        generateCoverSheetService.generateAndSetRespondentCoverSheet(details, AUTH_TOKEN);
+
+        // then
+        Assertions.assertThat(details.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes())
+            .isNull();
+        Assertions.assertThat(details.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential())
+            .isNotNull();
     }
 
     private CaseDetails caseDetailsConsented() throws Exception {
