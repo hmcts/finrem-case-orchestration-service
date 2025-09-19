@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -218,18 +219,23 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void setDefaults() {
+    public void givenRefusalOrder_whenSetDefaults_thenSetsJudgeSurnameAndRefusalDate() {
+        //Given
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.REJECT_ORDER, CaseType.CONSENTED);
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = caseDetails.getData();
+        String judgeSurname = "Taylor";
+        when(idamService.getIdamSurname(AUTH_TOKEN)).thenReturn("Taylor");
 
-        when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("moj moj");
-
+        //When
         FinremCaseData caseData = refusalOrderDocumentService.setDefaults(finremCaseData, AUTH_TOKEN);
-        OrderRefusalHolder orderRefusalCollectionNew = caseData.getOrderRefusalOnScreen();
-        assertEquals("moj moj", orderRefusalCollectionNew.getOrderRefusalJudgeName());
-        assertEquals(LocalDate.now(), orderRefusalCollectionNew.getOrderRefusalDate());
 
+        //Assert
+        OrderRefusalHolder orderRefusalCollectionNew = caseData.getOrderRefusalOnScreen();
+        Assertions.assertThat(orderRefusalCollectionNew)
+                .returns(judgeSurname, OrderRefusalHolder::getOrderRefusalJudgeName)
+                .returns(LocalDate.now(), OrderRefusalHolder::getOrderRefusalDate);
+        verify(idamService).getIdamSurname(AUTH_TOKEN);
     }
 
     private void assertCaseDataExtraFields() {
