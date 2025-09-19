@@ -137,27 +137,6 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
 
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #generateIntervenerCoverSheet(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link final CaseDetails caseDetails,
-     *                                                      final String authorisationToken,
-     *                                                      DocumentHelper.PaperNotificationRecipient recipient}
-     */
-    @Deprecated(since = "15-june-2023")
-    public CaseDocument generateIntervenerCoverSheet(final CaseDetails caseDetails,
-                                                     final String authorisationToken,
-                                                     DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate());
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        return generateCoverSheet(finremCaseDetails, authorisationToken, recipient);
-
-    }
-
     public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
                                                      final String authorisationToken,
                                                      DocumentHelper.PaperNotificationRecipient recipient) {
