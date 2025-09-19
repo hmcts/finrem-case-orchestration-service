@@ -17,11 +17,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-public class AmendCaseContestedAboutToStartHandlerTest {
+class AmendCaseContestedAboutToStartHandlerTest {
 
     @Mock
     private IdamService idamService;
@@ -41,7 +42,22 @@ public class AmendCaseContestedAboutToStartHandlerTest {
     }
 
     @Test
-    void handle() {
+    void givenContestedCase_whenHandle_thenCallsDefaultCivilPartnershipField() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .civilPartnership(YesOrNo.NO)
+                    .build())
+                .build())
+            .build();
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(onStartDefaultValueService).defaultCivilPartnershipField(callbackRequest);
+    }
+
+    @Test
+    void givenContestedCase_whenHandle_thenPrepopulateCivilPartnership() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
                 .data(FinremCaseData.builder()

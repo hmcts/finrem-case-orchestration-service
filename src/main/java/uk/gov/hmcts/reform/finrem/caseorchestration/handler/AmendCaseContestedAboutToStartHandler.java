@@ -14,13 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 @Service
 public class AmendCaseContestedAboutToStartHandler extends FinremCallbackHandler {
 
-    private final OnStartDefaultValueService service;
+    private final OnStartDefaultValueService onStartDefaultValueService;
 
     public AmendCaseContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                 OnStartDefaultValueService service) {
+                                                 OnStartDefaultValueService onStartDefaultValueService) {
 
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.onStartDefaultValueService = onStartDefaultValueService;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class AmendCaseContestedAboutToStartHandler extends FinremCallbackHandler
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        service.defaultCivilPartnershipField(callbackRequest);
+        onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
             .build();
