@@ -296,12 +296,12 @@ public class ManageHearingActionService {
     }
 
     private void setApplicantAndRespondentCoverSheets(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
-        if(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)) {
+        if (hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)) {
             generateCoverSheetService.generateAndSetApplicantCoverSheet(finremCaseDetails, userAuthorisation);
 
         }
 
-        if(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)) {
+        if (hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)) {
             generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
         }
     }

@@ -77,6 +77,13 @@ public class GenerateCoverSheetService {
             );
     }
 
+    public CaseDocument generateApplicantCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
+        log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+
+        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+    }
+
     public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
         CaseDocument applicantCoverSheet = generateApplicantCoverSheet(caseDetails, authorisationToken);
 
@@ -87,13 +94,6 @@ public class GenerateCoverSheetService {
         } else {
             caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(applicantCoverSheet);
         }
-    }
-
-    public CaseDocument generateApplicantCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
-        log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate());
-
-        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT);
     }
 
     /**
@@ -118,6 +118,13 @@ public class GenerateCoverSheetService {
             postalService.isRespondentResideOutsideOfUK(caseDetails.getData()));
     }
 
+    public CaseDocument generateRespondentCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
+        log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+
+        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+    }
+
     public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
         CaseDocument respondentCoverSheet = generateRespondentCoverSheet(caseDetails, authorisationToken);
 
@@ -128,13 +135,6 @@ public class GenerateCoverSheetService {
         } else {
             caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
         }
-    }
-
-    public CaseDocument generateRespondentCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
-        log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate());
-
-        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
 
     public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
