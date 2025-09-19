@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.Map;
 
@@ -76,6 +77,18 @@ public class GenerateCoverSheetService {
             );
     }
 
+    public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
+        CaseDocument applicantCoverSheet = generateApplicantCoverSheet(caseDetails, authorisationToken);
+
+        if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent())) {
+            log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
+        } else {
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(applicantCoverSheet);
+        }
+    }
+
     public CaseDocument generateApplicantCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
@@ -105,13 +118,24 @@ public class GenerateCoverSheetService {
             postalService.isRespondentResideOutsideOfUK(caseDetails.getData()));
     }
 
+    public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
+        CaseDocument respondentCoverSheet = generateRespondentCoverSheet(caseDetails, authorisationToken);
+
+        if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant())) {
+            log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(null);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
+        } else {
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
+        }
+    }
+
     public CaseDocument generateRespondentCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
 
         return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
-
 
     /**
      * No Return.
