@@ -7,12 +7,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
@@ -22,11 +24,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus
 public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
 
     private final ManageHearingActionService manageHearingActionService;
+    private final GenerateCoverSheetService generateCoverSheetService;
+    private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
 
     public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                              ManageHearingActionService manageHearingActionService) {
+                                              ManageHearingActionService manageHearingActionService,
+                                              GenerateCoverSheetService generateCoverSheetService,
+                                              HearingCorrespondenceHelper hearingCorrespondenceHelper) {
         super(finremCaseDetailsMapper);
         this.manageHearingActionService = manageHearingActionService;
+        this.generateCoverSheetService = generateCoverSheetService;
+        this.hearingCorrespondenceHelper = hearingCorrespondenceHelper;
     }
 
     @Override
@@ -59,6 +67,7 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
             manageHearingActionService.performAddHearing(finremCaseDetails, userAuthorisation);
+            setApplicantAndRespondentCoverSheets(finremCaseDetails, userAuthorisation);
             finremCaseData.setState(PREPARE_FOR_HEARING.getId());
         }
 
@@ -67,4 +76,16 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
     }
+
+    private void setApplicantAndRespondentCoverSheets(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
+        if(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)) {
+            generateCoverSheetService.generateAndSetApplicantCoverSheet(finremCaseDetails, userAuthorisation);
+
+        }
+
+        if(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)) {
+            generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
+        }
+    }
+
 }
