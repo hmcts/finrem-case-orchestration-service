@@ -434,9 +434,21 @@ public class EmailServiceTest {
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL.name());
 
-
         assertEquals("Nottingham FRC", returnedTemplateVars.get("courtName"));
         assertEquals("FRCNottingham@justice.gov.uk", returnedTemplateVars.get("courtEmail"));
+        assertNull(returnedTemplateVars.get("generalEmailBody"));
+    }
+
+    @Test
+    public void shouldBuildTemplateVarsWithCourtDataForContested() {
+        setContestedData();
+        notificationRequest.setContactCourtEmail("contact.court@test.com");
+        notificationRequest.setContactCourtName("Local Court");
+
+        Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL.name());
+
+        assertEquals("Local Court", returnedTemplateVars.get("courtName"));
+        assertEquals("contact.court@test.com", returnedTemplateVars.get("courtEmail"));
         assertNull(returnedTemplateVars.get("generalEmailBody"));
     }
 
@@ -446,8 +458,19 @@ public class EmailServiceTest {
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_HWF_SUCCESSFUL.name());
 
-
         assertContestedTemplateVariablesAreAbsent(returnedTemplateVars);
+    }
+
+    @Test
+    public void shouldBuildTemplateVarsWithCourtDataForConsented() {
+        setConsentedData();
+        notificationRequest.setContactCourtEmail("contact.court@test.com");
+        notificationRequest.setContactCourtName("Local Court");
+
+        Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_HWF_SUCCESSFUL.name());
+
+        assertEquals("Local Court", returnedTemplateVars.get("courtName"));
+        assertEquals("contact.court@test.com", returnedTemplateVars.get("courtEmail"));
     }
 
     @Test
@@ -455,9 +478,7 @@ public class EmailServiceTest {
         setContestedData();
         notificationRequest.setGeneralEmailBody("test email body");
 
-        Map<String, Object> returnedTemplateVars =
-
-            emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_GENERAL_EMAIL.name());
+        Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_GENERAL_EMAIL.name());
 
         assertEquals("Nottingham FRC", returnedTemplateVars.get("courtName"));
         assertEquals("FRCNottingham@justice.gov.uk", returnedTemplateVars.get("courtEmail"));
