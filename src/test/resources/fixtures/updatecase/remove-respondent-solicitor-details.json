@@ -55,6 +55,13 @@
       "respondentEmail": "test@test.com",
       "respondentPhone": "9963472494",
       "appRespondentRep": "No",
+      "RespondentOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "Y707HZM",
+          "OrganisationName" : "FinRem-2-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[RESPSOLICITOR]"
+      },
       "rSolicitorAddress": {
         "AddressLine1": "Line1",
         "AddressLine2": "Line2",

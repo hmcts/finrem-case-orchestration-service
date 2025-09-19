@@ -20,10 +20,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
 @Service
 @RequiredArgsConstructor
@@ -123,19 +121,11 @@ public class UpdateRepresentationWorkflowService {
     }
 
     private void persistDefaultApplicantOrganisationPolicy(CaseDetails caseDetails) {
-        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY,
-            OrganisationPolicy.builder()
-                .orgPolicyReference(null)
-                .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
-                .build());
+        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, getOrganisationPolicy(CaseRole.APP_SOLICITOR));
     }
 
     private void persistDefaultRespondentOrganisationPolicy(CaseDetails caseDetails) {
-        caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY,
-            OrganisationPolicy.builder()
-                .orgPolicyReference(null)
-                .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
-                .build());
+        caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY, getOrganisationPolicy(CaseRole.RESP_SOLICITOR));
     }
 
     private OrganisationPolicy getOrganisationPolicy(CaseRole role) {
