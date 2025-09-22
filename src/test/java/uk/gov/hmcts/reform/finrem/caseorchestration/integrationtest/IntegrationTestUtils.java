@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SY
 
 /**
  * Utility class for integration tests providing helper methods to perform common operations.
+ * Methods assume the case ID used in tests is 1758091882065221.
  */
 public class IntegrationTestUtils {
 
