@@ -108,7 +108,6 @@ public class ManageHearingActionService {
             generateOutOfCourtResolution(finremCaseDetails, authToken, documentMap);
         }
 
-        //Set cover sheet values
         setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
 
         addDocumentsToCollection(documentMap, hearingWrapper);
@@ -298,7 +297,6 @@ public class ManageHearingActionService {
     private void setApplicantAndRespondentCoverSheets(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
         if (hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)) {
             generateCoverSheetService.generateAndSetApplicantCoverSheet(finremCaseDetails, userAuthorisation);
-
         }
 
         if (hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)) {
