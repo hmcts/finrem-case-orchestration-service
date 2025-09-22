@@ -6,6 +6,11 @@ public class TestConstants {
         // restrict instantiation
     }
 
+    public static final String ABOUT_TO_START_URL = "/case-orchestration/ccdAboutToStartEvent";
+    public static final String MID_EVENT_URL = "/case-orchestration/ccdMidEvent";
+    public static final String ABOUT_TO_SUBMIT_URL = "/case-orchestration/ccdAboutToSubmitEvent";
+    public static final String SUBMITTED_URL = "/case-orchestration/ccdSubmittedEvent";
+
     public static final String TEST_CASE_ID = "test.case.id";
     public static final String TEST_USER_ID = "test.user.id";
     public static final String TEST_ORG_ID = "test.org.id";
