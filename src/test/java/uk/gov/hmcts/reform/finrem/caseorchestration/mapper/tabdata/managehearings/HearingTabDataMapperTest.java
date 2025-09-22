@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -45,6 +47,9 @@ class HearingTabDataMapperTest {
     private static final String ADDITIONAL_INFO = "Additional Info";
     private static final String DOCUMENT_1_FILENAME = "From1.pdf";
     private static final String DOCUMENT_2_FILENAME = "Form2.pdf";
+
+    @TestLogs
+    private final TestLogger logs = new TestLogger(HearingTabDataMapper.class);
 
     @InjectMocks
     private HearingTabDataMapper hearingTabDataMapper;
@@ -152,5 +157,48 @@ class HearingTabDataMapperTest {
         assertEquals(DEFAULT_CONFIDENTIAL_PARTIES, result.getTabConfidentialParties());
         assertEquals(" ", result.getTabAdditionalInformation());
         assertThat(result.getTabHearingDocuments()).isEmpty();
+    }
+
+    /*
+     * mapHearingDocumentsToTabData and convertToFrcCourtDetails methods can throw exceptions with invalid data.
+     * this test is mocked to confirm that calls to these methods handle the expected exceptions.
+     * Assertions made to check the information returned when these exceptions are handled.
+     * Also asserts that expected log messages are produced.
+     */
+    @Test
+    void mapHearingToTabDataWithExceptions() {
+        // Arrange
+        when(courtDetailsMapper.convertToFrcCourtDetails(any())).thenThrow(new IllegalStateException("a message"));
+
+        Hearing hearing = Hearing.builder()
+            .hearingType(HearingType.FDR)
+            .additionalHearingDocs(List.of(DocumentCollectionItem
+                .builder()
+                .value(CaseDocument.builder()
+                    .documentFilename(DOCUMENT_1_FILENAME)
+                    .build())
+                .build()))
+            .build();
+
+        ManageHearingsCollectionItem hearingCollectionItem = ManageHearingsCollectionItem.builder()
+            .id(UUID.randomUUID())
+            .value(hearing)
+            .build();
+
+        // Create a situation resulting in a Null Pointer Exception (document item missing values)
+        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection =
+            List.of(new ManageHearingDocumentsCollectionItem());
+
+        // Act
+        HearingTabItem result = hearingTabDataMapper.mapHearingToTabData(hearingCollectionItem, hearingDocumentsCollection);
+
+        // Assert - default values returned when exceptions handled
+        assertEquals("Court name not available", result.getTabCourtSelection());
+        // Hearing had 1 valid document, but empty list returned when there is an exception.
+        assertThat(result.getTabHearingDocuments().isEmpty());
+
+        // assert logs
+        assertThat(logs.getErrors()).contains("Caught an exception when retrieving court name. 'Court name not available' provided instead.");
+        assertThat(logs.getErrors()).contains("NullPointerException mapping hearing documents to tab data.");
     }
 }
