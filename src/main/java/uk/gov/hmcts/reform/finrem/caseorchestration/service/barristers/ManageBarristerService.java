@@ -17,8 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
-import java.util.Collections;
 import java.util.List;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -88,7 +89,7 @@ public class ManageBarristerService {
             case INTERVENER4 -> wrapper.getIntvr4Barristers();
         };
 
-        return barristers != null ? barristers : Collections.emptyList();
+        return emptyIfNull(barristers);
     }
 
     /**
