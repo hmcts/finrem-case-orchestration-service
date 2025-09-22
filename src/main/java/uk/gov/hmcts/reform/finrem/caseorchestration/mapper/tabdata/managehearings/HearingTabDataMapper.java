@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_NOTICES;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class HearingTabDataMapper {
@@ -45,19 +47,27 @@ public class HearingTabDataMapper {
             .tabTimeEstimate(hearing.getHearingTimeEstimate())
             .tabConfidentialParties(getConfidentialParties(hearing))
             .tabAdditionalInformation(getAdditionalInformation(hearing))
-            .tabHearingDocuments(mapHearingDocumentsToTabData(
+            .tabHearingDocuments(tryToMapHearingDocumentsToTabData(
                 hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
             .build();
     }
 
     /**
      * Retrieves the name of the court associated with the given {@link Court} object.
+     * Resilient method; If the court details cannot be mapped, handles with a generic message.
      *
      * @param court the {@link Court} object to retrieve the court name for
      * @return the name of the court
      */
     public String getCourtName(Court court) {
-        return courtDetailsMapper.convertToFrcCourtDetails(court).getCourtName();
+        final String courtNameNotAvailable = "Court name not available";
+        try {
+            return courtDetailsMapper.convertToFrcCourtDetails(court).getCourtName();
+        } catch (IllegalStateException | NullPointerException e) {
+            log.error("Caught an exception when retrieving court name. '{}' provided instead.",
+                courtNameNotAvailable, e);
+            return courtNameNotAvailable;
+        }
     }
 
     /**
@@ -135,6 +145,26 @@ public class HearingTabDataMapper {
     }
 
     /**
+     * Wraps the call to map hearing documents to tab data with error handling.
+     * If an exception occurs during the mapping process, logs the error and returns an empty list
+     * @param hearingDocumentsCollection the collection of hearing documents to filter and process
+     * @param hearingId                  the unique identifier of the hearing to match documents against
+     * @return a list of {@link DocumentCollectionItem} representing documents associated with the hearing,
+     *         or an empty list if an error occurs
+     */
+    private List<DocumentCollectionItem> tryToMapHearingDocumentsToTabData(
+        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
+        UUID hearingId,
+        Hearing hearing) {
+        try {
+            return mapHearingDocumentsToTabData(hearingDocumentsCollection, hearingId, hearing);
+        } catch (NullPointerException npe) {
+            log.error("NullPointerException mapping hearing documents to tab data.", npe);
+            return List.of();
+        }
+    }
+
+    /**
      * Constructs a concatenated list of all documents associated with a hearing.
      * This method combines two sources of documents related to a hearing:
      * 1. Documents from the `hearingDocumentsCollection` that match the given `hearingId`.
@@ -185,7 +215,7 @@ public class HearingTabDataMapper {
                     ).build())
             .toList()
             : List.of();
-        
+
         return Stream.concat(
             hearingDocuments.stream(),
             additionalDocs.stream()
