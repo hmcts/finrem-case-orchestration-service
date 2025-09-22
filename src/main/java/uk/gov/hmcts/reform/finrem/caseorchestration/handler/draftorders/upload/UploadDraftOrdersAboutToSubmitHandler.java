@@ -111,7 +111,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
     }
 
     private OrderFiledBy getOrderFiledBy(FinremCaseDetails caseDetails, String userAuthorisation) {
-        CaseRole userCaseRole = caseRoleService.getUserOrCaseworkerCaseRole(caseDetails.getId().toString(), userAuthorisation);
+        CaseRole userCaseRole = caseRoleService.getUserOrCaseworkerCaseRole(caseDetails.getCaseIdAsString(), userAuthorisation);
 
         return switch (userCaseRole) {
             case APP_SOLICITOR -> OrderFiledBy.APPLICANT;
