@@ -130,6 +130,7 @@ public class IntegrationTestUtils {
      */
     public static void givenCurrentUserHasRole(CaseAssignedRoleService caseAssignedRoleService, CaseRole currentUserCaseRole) {
         if (currentUserCaseRole == CaseRole.CASEWORKER) {
+            // Caseworkers are not assigned an explicit user role for a case so return an empty list
             mockCurrentUserCaseAccess(caseAssignedRoleService, Collections.emptyList());
         } else {
             List<CaseAssignedUserRole> caseAssignedUserRoles = List.of(
