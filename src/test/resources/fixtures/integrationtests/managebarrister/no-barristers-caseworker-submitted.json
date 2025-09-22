@@ -1,0 +1,853 @@
+{
+  "case_details" : {
+    "id" : 1758091882065221,
+    "jurisdiction" : "DIVORCE",
+    "state" : "applicationIssued",
+    "version" : 4,
+    "case_type_id" : "FinancialRemedyContested",
+    "created_date" : [
+      2025,
+      9,
+      17,
+      10,
+      12,
+      32,
+      311843000
+    ],
+    "last_modified" : [
+      2025,
+      9,
+      17,
+      10,
+      14,
+      27,
+      57934000
+    ],
+    "last_state_modified_date" : [
+      2025,
+      9,
+      17,
+      10,
+      12,
+      41,
+      314947000
+    ],
+    "security_classification" : "PUBLIC",
+    "case_data" : {
+      "amountToPay" : "31300",
+      "rSolicitorAddress" : {
+        "County" : "",
+        "Country" : "United Kingdom",
+        "PostCode" : "EC3A 2AD",
+        "PostTown" : "London",
+        "AddressLine1" : "Coral, 65-68",
+        "AddressLine2" : "Leadenhall Street",
+        "AddressLine3" : ""
+      },
+      "divorcePetitionIssuedDate" : "2025-09-17",
+      "rSolicitorName" : "Sauron",
+      "divorceStageReached" : "Petition Issued",
+      "authorisationName" : "Sauron",
+      "otherReasonForComplexity" : "No",
+      "applicantFMName" : "Frodo",
+      "divorceDecreeNisiDate" : "2024-01-01",
+      "fastTrackDecision" : "No",
+      "appBarristerCollection" : [
+        {
+          "value" : {
+            "name" : "Applicant Barrister",
+            "email" : "fr_applicant_barrister1@mailinator.com",
+            "phoneNumber" : "07452680645",
+            "Organisation" : {
+              "OrganisationID" : "Y707HZM",
+              "OrganisationName" : "FinRem-1-Org"
+            }
+          },
+          "id" : "87aa46a9-a52f-4e08-8e1b-e5f165e087bd"
+        }
+      ],
+      "authorisation3" : "2025-03-13",
+      "potentialAllegationChecklist" : [
+        "potentialAllegationChecklist_1"
+      ],
+      "applicantAddressConfidential" : "Yes",
+      "applicantSolicitorAddress" : {
+        "County" : "Greater London",
+        "PostCode" : "EC3A 2AD",
+        "PostTown" : "London",
+        "AddressLine1" : "3rd Floor, 65-68 Leadenhall St"
+      },
+      "applicantSolicitorFirm" : "FinRem-1-Org",
+      "nameOfCourtDivorceCentre" : "Shire Court",
+      "RespondentOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "95V5X7X",
+          "OrganisationName" : "FinRem-2-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[RESPSOLICITOR]"
+      },
+      "netValueOfHome" : "125000",
+      "dateOfSepration" : "2022-01-01",
+      "promptForAnyDocument" : "No",
+      "applicantLName" : "Baggins",
+      "rSolicitorEmail" : "fr_respondent_solicitor1@mailinator.com",
+      "solicitorFirm" : "Mnt Doom Sol",
+      "natureOfApplicationChecklist" : [
+        "Maintenance Pending Suit"
+      ],
+      "applicantSolicitorConsentForEmails" : "Yes",
+      "isAdmin" : "No",
+      "caseFlags" : {
+        "details" : [],
+        "partyName" : "Case",
+        "roleOnCase" : "Case"
+      },
+      "orderSummary" : {
+        "Fees" : [
+          {
+            "value" : {
+              "FeeCode" : "FEE0229",
+              "FeeAmount" : "31300",
+              "FeeVersion" : "5",
+              "FeeDescription" : "Application for a financial order"
+            },
+            "id" : "02e19760-7a15-4cb0-8622-7eef5ceac8f1"
+          }
+        ],
+        "PaymentTotal" : "31300",
+        "PaymentReference" : null
+      },
+      "applicantSolicitorName" : "Bilbo Baggins",
+      "applicantSolicitorEmail" : "fr_applicant_solicitor1@mailinator.com",
+      "expressCaseParticipation" : "Does not qualify",
+      "barristerParty" : "applicant",
+      "HWFNumber" : "HWF1234",
+      "promptForUrgentCaseQuestion" : "No",
+      "familyMediatorServiceName" : "Gandalf the Great Div",
+      "specificArrangementsRequired" : "N/A",
+      "respondentRepresented" : "Yes",
+      "miniFormA" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/5e02a6bc-c16c-43cb-baa3-0ff700cbaffc",
+        "upload_timestamp" : "2025-09-17T10:12:41.314238000",
+        "document_filename" : "OnlineForm.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/5e02a6bc-c16c-43cb-baa3-0ff700cbaffc/binary"
+      },
+      "applicantFlags" : {
+        "details" : [],
+        "partyName" : "Frodo Baggins",
+        "roleOnCase" : "Applicant"
+      },
+      "ApplicantOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "Y707HZM",
+          "OrganisationName" : "FinRem-1-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[APPSOLICITOR]"
+      },
+      "respondentLName" : "Gollum",
+      "applicantRepresented" : "Yes",
+      "consentOrderFRCAddress" : "Tapton Lane, Chesterfield S41 7TW",
+      "midlandsFRCList" : "birmingham",
+      "rSolicitorPhone" : "07821 639001",
+      "birminghamCourtList" : "FR_birmingham_hc_list_2",
+      "applicantAttendedMIAM" : "Yes",
+      "specialAssistanceRequired" : "N/A",
+      "consentOrderFRCPhone" : "0300 123 5577",
+      "rSolicitorFirm" : "Mnt Doom Sols",
+      "uploadMediatorDocument" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "upload_timestamp" : "2025-09-17T10:12:33.595446",
+        "document_filename" : "test.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "isApplicantsHomeCourt" : "No",
+      "applicantSolicitorPhone" : "07777777777",
+      "solicitorReference" : "Y707HZM",
+      "soleTraderName" : "Wizard Divorce",
+      "authorisation2b" : "Boss",
+      "divorceUploadPetition" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "upload_timestamp" : "2025-01-16T09:46:21.592232195",
+        "document_filename" : "PETITION FORM A.docx",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "issueDate" : "2025-03-06",
+      "mediatorRegistrationNumber" : "MIAM12345",
+      "detailPotentialAllegation" : "Stealing ring",
+      "regionList" : "midlands",
+      "RepresentationUpdateHistory" : [
+        {
+          "value" : {
+            "party" : "Applicant",
+            "name" : "Frodo Baggins",
+            "date" : "2025-09-17T11:14:27.007651",
+            "by" : "Claire Mumford",
+            "via" : "Manage Barristers",
+            "added" : {
+              "name" : "Applicant Barrister",
+              "email" : "fr_applicant_barrister1@mailinator.com",
+              "organisation" : {
+                "OrganisationID" : "Y707HZM",
+                "OrganisationName" : "FinRem-1-Org"
+              }
+            }
+          },
+          "id" : "e2f46aac-d5c9-4d10-9b7b-8f10d84c403b"
+        }
+      ],
+      "applicantAddress" : {
+        "County" : "",
+        "Country" : "United Kingdom",
+        "PostCode" : "EC3A 2AD",
+        "PostTown" : "London",
+        "AddressLine1" : "Water Unite, 65-68",
+        "AddressLine2" : "Leadenhall Street",
+        "AddressLine3" : ""
+      },
+      "allocatedToBeHeardAtHighCourtJudgeLevel" : "No",
+      "dateOfMarriage" : "1999-01-01",
+      "divorceCaseNumber" : "LV12D12345",
+      "applicantInRefugeTab" : "Yes",
+      "respondentFlags" : {
+        "details" : [],
+        "partyName" : "Smeagol Gollum",
+        "roleOnCase" : "Respondent"
+      },
+      "typeOfApplication" : "In connection to matrimonial and civil partnership proceedings",
+      "civilPartnership" : "No",
+      "consentOrderFRCName" : "Chesterfield County Court",
+      "respondentFMName" : "Smeagol",
+      "consentOrderFRCEmail" : "FRCNottingham@justice.gov.uk",
+      "estimatedAssetsChecklistV2" : "underTwoHundredAndFiftyThousandPounds",
+      "helpWithFeesQuestion" : "Yes",
+      "applicantResideOutsideUK" : "No",
+      "addToComplexityListOfCourts" : "falseNo"
+    },
+    "data_classification" : {
+      "amountToPay" : "PUBLIC",
+      "rSolicitorAddress" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "County" : "PUBLIC",
+          "Country" : "PUBLIC",
+          "PostCode" : "PUBLIC",
+          "PostTown" : "PUBLIC",
+          "AddressLine1" : "PUBLIC",
+          "AddressLine2" : "PUBLIC",
+          "AddressLine3" : "PUBLIC"
+        }
+      },
+      "divorcePetitionIssuedDate" : "PUBLIC",
+      "rSolicitorName" : "PUBLIC",
+      "divorceStageReached" : "PUBLIC",
+      "authorisationName" : "PUBLIC",
+      "otherReasonForComplexity" : "PUBLIC",
+      "applicantFMName" : "PUBLIC",
+      "divorceDecreeNisiDate" : "PUBLIC",
+      "fastTrackDecision" : "PUBLIC",
+      "appBarristerCollection" : {
+        "classification" : "PUBLIC",
+        "value" : [
+          {
+            "value" : {
+              "name" : "PUBLIC",
+              "email" : "PUBLIC",
+              "phoneNumber" : "PUBLIC",
+              "Organisation" : {
+                "classification" : "PUBLIC",
+                "value" : {
+                  "OrganisationID" : "PUBLIC",
+                  "OrganisationName" : "PUBLIC"
+                }
+              }
+            },
+            "id" : "87aa46a9-a52f-4e08-8e1b-e5f165e087bd"
+          }
+        ]
+      },
+      "authorisation3" : "PUBLIC",
+      "potentialAllegationChecklist" : "PUBLIC",
+      "applicantAddressConfidential" : "PUBLIC",
+      "applicantSolicitorAddress" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "County" : "PUBLIC",
+          "PostCode" : "PUBLIC",
+          "PostTown" : "PUBLIC",
+          "AddressLine1" : "PUBLIC"
+        }
+      },
+      "applicantSolicitorFirm" : "PUBLIC",
+      "nameOfCourtDivorceCentre" : "PUBLIC",
+      "RespondentOrganisationPolicy" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "Organisation" : {
+            "classification" : "PUBLIC",
+            "value" : {
+              "OrganisationID" : "PUBLIC",
+              "OrganisationName" : "PUBLIC"
+            }
+          },
+          "OrgPolicyCaseAssignedRole" : "PUBLIC"
+        }
+      },
+      "netValueOfHome" : "PUBLIC",
+      "dateOfSepration" : "PUBLIC",
+      "promptForAnyDocument" : "PUBLIC",
+      "applicantLName" : "PUBLIC",
+      "rSolicitorEmail" : "PUBLIC",
+      "solicitorFirm" : "PUBLIC",
+      "natureOfApplicationChecklist" : "PUBLIC",
+      "applicantSolicitorConsentForEmails" : "PUBLIC",
+      "isAdmin" : "PUBLIC",
+      "caseFlags" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "details" : {
+            "classification" : "PUBLIC",
+            "value" : []
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        }
+      },
+      "orderSummary" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "Fees" : {
+            "classification" : "PUBLIC",
+            "value" : [
+              {
+                "value" : {
+                  "FeeCode" : "PUBLIC",
+                  "FeeAmount" : "PUBLIC",
+                  "FeeVersion" : "PUBLIC",
+                  "FeeDescription" : "PUBLIC"
+                },
+                "id" : "02e19760-7a15-4cb0-8622-7eef5ceac8f1"
+              }
+            ]
+          },
+          "PaymentTotal" : "PUBLIC",
+          "PaymentReference" : "PUBLIC"
+        }
+      },
+      "applicantSolicitorName" : "PUBLIC",
+      "applicantSolicitorEmail" : "PUBLIC",
+      "expressCaseParticipation" : "PUBLIC",
+      "barristerParty" : "PUBLIC",
+      "HWFNumber" : "PUBLIC",
+      "promptForUrgentCaseQuestion" : "PUBLIC",
+      "familyMediatorServiceName" : "PUBLIC",
+      "specificArrangementsRequired" : "PUBLIC",
+      "respondentRepresented" : "PUBLIC",
+      "miniFormA" : "PUBLIC",
+      "applicantFlags" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "details" : {
+            "classification" : "PUBLIC",
+            "value" : []
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        }
+      },
+      "ApplicantOrganisationPolicy" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "Organisation" : {
+            "classification" : "PUBLIC",
+            "value" : {
+              "OrganisationID" : "PUBLIC",
+              "OrganisationName" : "PUBLIC"
+            }
+          },
+          "OrgPolicyCaseAssignedRole" : "PUBLIC"
+        }
+      },
+      "respondentLName" : "PUBLIC",
+      "applicantRepresented" : "PUBLIC",
+      "consentOrderFRCAddress" : "PUBLIC",
+      "midlandsFRCList" : "PUBLIC",
+      "rSolicitorPhone" : "PUBLIC",
+      "birminghamCourtList" : "PUBLIC",
+      "applicantAttendedMIAM" : "PUBLIC",
+      "specialAssistanceRequired" : "PUBLIC",
+      "consentOrderFRCPhone" : "PUBLIC",
+      "rSolicitorFirm" : "PUBLIC",
+      "uploadMediatorDocument" : "PUBLIC",
+      "isApplicantsHomeCourt" : "PUBLIC",
+      "applicantSolicitorPhone" : "PUBLIC",
+      "solicitorReference" : "PUBLIC",
+      "soleTraderName" : "PUBLIC",
+      "authorisation2b" : "PUBLIC",
+      "divorceUploadPetition" : "PUBLIC",
+      "issueDate" : "PUBLIC",
+      "mediatorRegistrationNumber" : "PUBLIC",
+      "detailPotentialAllegation" : "PUBLIC",
+      "regionList" : "PUBLIC",
+      "RepresentationUpdateHistory" : {
+        "classification" : "PUBLIC",
+        "value" : [
+          {
+            "value" : {
+              "party" : "PUBLIC",
+              "name" : "PUBLIC",
+              "date" : "PUBLIC",
+              "by" : "PUBLIC",
+              "via" : "PUBLIC",
+              "added" : {
+                "classification" : "PUBLIC",
+                "value" : {
+                  "name" : "PUBLIC",
+                  "email" : "PUBLIC",
+                  "organisation" : {
+                    "classification" : "PUBLIC",
+                    "value" : {
+                      "OrganisationID" : "PUBLIC",
+                      "OrganisationName" : "PUBLIC"
+                    }
+                  }
+                }
+              }
+            },
+            "id" : "e2f46aac-d5c9-4d10-9b7b-8f10d84c403b"
+          }
+        ]
+      },
+      "applicantAddress" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "County" : "PUBLIC",
+          "Country" : "PUBLIC",
+          "PostCode" : "PUBLIC",
+          "PostTown" : "PUBLIC",
+          "AddressLine1" : "PUBLIC",
+          "AddressLine2" : "PUBLIC",
+          "AddressLine3" : "PUBLIC"
+        }
+      },
+      "allocatedToBeHeardAtHighCourtJudgeLevel" : "PUBLIC",
+      "dateOfMarriage" : "PUBLIC",
+      "divorceCaseNumber" : "PUBLIC",
+      "applicantInRefugeTab" : "PUBLIC",
+      "respondentFlags" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "details" : {
+            "classification" : "PUBLIC",
+            "value" : []
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        }
+      },
+      "typeOfApplication" : "PUBLIC",
+      "civilPartnership" : "PUBLIC",
+      "consentOrderFRCName" : "PUBLIC",
+      "respondentFMName" : "PUBLIC",
+      "consentOrderFRCEmail" : "PUBLIC",
+      "estimatedAssetsChecklistV2" : "PUBLIC",
+      "helpWithFeesQuestion" : "PUBLIC",
+      "applicantResideOutsideUK" : "PUBLIC",
+      "addToComplexityListOfCourts" : "PUBLIC"
+    },
+    "supplementary_data" : {
+      "HMCTSServiceId" : "ABA2",
+      "orgs_assigned_users" : {
+        "Y707HZM" : 1
+      }
+    },
+    "after_submit_callback_response" : null,
+    "callback_response_status_code" : null,
+    "callback_response_status" : null,
+    "delete_draft_response_status_code" : null,
+    "delete_draft_response_status" : null
+  },
+  "case_details_before" : {
+    "id" : 1758091882065221,
+    "jurisdiction" : "DIVORCE",
+    "state" : "applicationIssued",
+    "version" : 3,
+    "case_type_id" : "FinancialRemedyContested",
+    "created_date" : [
+      2025,
+      9,
+      17,
+      10,
+      12,
+      32,
+      311843000
+    ],
+    "last_modified" : [
+      2025,
+      9,
+      17,
+      10,
+      12,
+      41,
+      315087000
+    ],
+    "last_state_modified_date" : [
+      2025,
+      9,
+      17,
+      10,
+      12,
+      41,
+      314947000
+    ],
+    "security_classification" : "PUBLIC",
+    "case_data" : {
+      "amountToPay" : "31300",
+      "rSolicitorAddress" : {
+        "County" : "",
+        "Country" : "United Kingdom",
+        "PostCode" : "EC3A 2AD",
+        "PostTown" : "London",
+        "AddressLine1" : "Coral, 65-68",
+        "AddressLine2" : "Leadenhall Street",
+        "AddressLine3" : ""
+      },
+      "divorcePetitionIssuedDate" : "2025-09-17",
+      "rSolicitorName" : "Sauron",
+      "divorceStageReached" : "Petition Issued",
+      "authorisationName" : "Sauron",
+      "otherReasonForComplexity" : "No",
+      "applicantFMName" : "Frodo",
+      "divorceDecreeNisiDate" : "2024-01-01",
+      "fastTrackDecision" : "No",
+      "authorisation3" : "2025-03-13",
+      "potentialAllegationChecklist" : [
+        "potentialAllegationChecklist_1"
+      ],
+      "applicantAddressConfidential" : "Yes",
+      "applicantSolicitorAddress" : {
+        "County" : "Greater London",
+        "PostCode" : "EC3A 2AD",
+        "PostTown" : "London",
+        "AddressLine1" : "3rd Floor, 65-68 Leadenhall St"
+      },
+      "applicantSolicitorFirm" : "FinRem-1-Org",
+      "nameOfCourtDivorceCentre" : "Shire Court",
+      "RespondentOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "95V5X7X",
+          "OrganisationName" : "FinRem-2-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[RESPSOLICITOR]"
+      },
+      "netValueOfHome" : "125000",
+      "dateOfSepration" : "2022-01-01",
+      "promptForAnyDocument" : "No",
+      "applicantLName" : "Baggins",
+      "rSolicitorEmail" : "fr_respondent_solicitor1@mailinator.com",
+      "solicitorFirm" : "Mnt Doom Sol",
+      "natureOfApplicationChecklist" : [
+        "Maintenance Pending Suit"
+      ],
+      "applicantSolicitorConsentForEmails" : "Yes",
+      "isAdmin" : "No",
+      "caseFlags" : {
+        "details" : [],
+        "partyName" : "Case",
+        "roleOnCase" : "Case"
+      },
+      "orderSummary" : {
+        "Fees" : [
+          {
+            "id" : "02e19760-7a15-4cb0-8622-7eef5ceac8f1",
+            "value" : {
+              "FeeCode" : "FEE0229",
+              "FeeAmount" : "31300",
+              "FeeVersion" : "5",
+              "FeeDescription" : "Application for a financial order"
+            }
+          }
+        ],
+        "PaymentTotal" : "31300",
+        "PaymentReference" : null
+      },
+      "applicantSolicitorName" : "Bilbo Baggins",
+      "applicantSolicitorEmail" : "fr_applicant_solicitor1@mailinator.com",
+      "expressCaseParticipation" : "Does not qualify",
+      "HWFNumber" : "HWF1234",
+      "promptForUrgentCaseQuestion" : "No",
+      "familyMediatorServiceName" : "Gandalf the Great Div",
+      "specificArrangementsRequired" : "N/A",
+      "respondentRepresented" : "Yes",
+      "miniFormA" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/5e02a6bc-c16c-43cb-baa3-0ff700cbaffc",
+        "upload_timestamp" : "2025-09-17T10:12:41.314238000",
+        "document_filename" : "OnlineForm.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/5e02a6bc-c16c-43cb-baa3-0ff700cbaffc/binary"
+      },
+      "applicantFlags" : {
+        "details" : [],
+        "partyName" : "Frodo Baggins",
+        "roleOnCase" : "Applicant"
+      },
+      "ApplicantOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "Y707HZM",
+          "OrganisationName" : "FinRem-1-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[APPSOLICITOR]"
+      },
+      "respondentLName" : "Gollum",
+      "applicantRepresented" : "Yes",
+      "consentOrderFRCAddress" : "Tapton Lane, Chesterfield S41 7TW",
+      "midlandsFRCList" : "birmingham",
+      "rSolicitorPhone" : "07821 639001",
+      "birminghamCourtList" : "FR_birmingham_hc_list_2",
+      "applicantAttendedMIAM" : "Yes",
+      "specialAssistanceRequired" : "N/A",
+      "consentOrderFRCPhone" : "0300 123 5577",
+      "rSolicitorFirm" : "Mnt Doom Sols",
+      "uploadMediatorDocument" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "upload_timestamp" : "2025-09-17T10:12:33.595446",
+        "document_filename" : "test.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "isApplicantsHomeCourt" : "No",
+      "applicantSolicitorPhone" : "07777777777",
+      "solicitorReference" : "Y707HZM",
+      "soleTraderName" : "Wizard Divorce",
+      "authorisation2b" : "Boss",
+      "divorceUploadPetition" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "upload_timestamp" : "2025-01-16T09:46:21.592232195",
+        "document_filename" : "PETITION FORM A.docx",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "issueDate" : "2025-03-06",
+      "mediatorRegistrationNumber" : "MIAM12345",
+      "detailPotentialAllegation" : "Stealing ring",
+      "regionList" : "midlands",
+      "applicantAddress" : {
+        "County" : "",
+        "Country" : "United Kingdom",
+        "PostCode" : "EC3A 2AD",
+        "PostTown" : "London",
+        "AddressLine1" : "Water Unite, 65-68",
+        "AddressLine2" : "Leadenhall Street",
+        "AddressLine3" : ""
+      },
+      "allocatedToBeHeardAtHighCourtJudgeLevel" : "No",
+      "dateOfMarriage" : "1999-01-01",
+      "divorceCaseNumber" : "LV12D12345",
+      "applicantInRefugeTab" : "Yes",
+      "respondentFlags" : {
+        "details" : [],
+        "partyName" : "Smeagol Gollum",
+        "roleOnCase" : "Respondent"
+      },
+      "typeOfApplication" : "In connection to matrimonial and civil partnership proceedings",
+      "civilPartnership" : "No",
+      "consentOrderFRCName" : "Chesterfield County Court",
+      "respondentFMName" : "Smeagol",
+      "consentOrderFRCEmail" : "FRCNottingham@justice.gov.uk",
+      "estimatedAssetsChecklistV2" : "underTwoHundredAndFiftyThousandPounds",
+      "helpWithFeesQuestion" : "Yes",
+      "applicantResideOutsideUK" : "No",
+      "addToComplexityListOfCourts" : "falseNo"
+    },
+    "data_classification" : {
+      "amountToPay" : "PUBLIC",
+      "rSolicitorAddress" : {
+        "value" : {
+          "County" : "PUBLIC",
+          "Country" : "PUBLIC",
+          "PostCode" : "PUBLIC",
+          "PostTown" : "PUBLIC",
+          "AddressLine1" : "PUBLIC",
+          "AddressLine2" : "PUBLIC",
+          "AddressLine3" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "divorcePetitionIssuedDate" : "PUBLIC",
+      "rSolicitorName" : "PUBLIC",
+      "divorceStageReached" : "PUBLIC",
+      "authorisationName" : "PUBLIC",
+      "otherReasonForComplexity" : "PUBLIC",
+      "applicantFMName" : "PUBLIC",
+      "divorceDecreeNisiDate" : "PUBLIC",
+      "fastTrackDecision" : "PUBLIC",
+      "authorisation3" : "PUBLIC",
+      "potentialAllegationChecklist" : "PUBLIC",
+      "applicantAddressConfidential" : "PUBLIC",
+      "applicantSolicitorAddress" : {
+        "value" : {
+          "County" : "PUBLIC",
+          "PostCode" : "PUBLIC",
+          "PostTown" : "PUBLIC",
+          "AddressLine1" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "applicantSolicitorFirm" : "PUBLIC",
+      "nameOfCourtDivorceCentre" : "PUBLIC",
+      "RespondentOrganisationPolicy" : {
+        "value" : {
+          "Organisation" : {
+            "value" : {
+              "OrganisationID" : "PUBLIC",
+              "OrganisationName" : "PUBLIC"
+            },
+            "classification" : "PUBLIC"
+          },
+          "OrgPolicyCaseAssignedRole" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "netValueOfHome" : "PUBLIC",
+      "dateOfSepration" : "PUBLIC",
+      "promptForAnyDocument" : "PUBLIC",
+      "applicantLName" : "PUBLIC",
+      "rSolicitorEmail" : "PUBLIC",
+      "solicitorFirm" : "PUBLIC",
+      "natureOfApplicationChecklist" : "PUBLIC",
+      "applicantSolicitorConsentForEmails" : "PUBLIC",
+      "isAdmin" : "PUBLIC",
+      "caseFlags" : {
+        "value" : {
+          "details" : {
+            "value" : [],
+            "classification" : "PUBLIC"
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "orderSummary" : {
+        "value" : {
+          "Fees" : {
+            "value" : [
+              {
+                "id" : "02e19760-7a15-4cb0-8622-7eef5ceac8f1",
+                "value" : {
+                  "FeeCode" : "PUBLIC",
+                  "FeeAmount" : "PUBLIC",
+                  "FeeVersion" : "PUBLIC",
+                  "FeeDescription" : "PUBLIC"
+                }
+              }
+            ],
+            "classification" : "PUBLIC"
+          },
+          "PaymentTotal" : "PUBLIC",
+          "PaymentReference" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "applicantSolicitorName" : "PUBLIC",
+      "applicantSolicitorEmail" : "PUBLIC",
+      "expressCaseParticipation" : "PUBLIC",
+      "HWFNumber" : "PUBLIC",
+      "promptForUrgentCaseQuestion" : "PUBLIC",
+      "familyMediatorServiceName" : "PUBLIC",
+      "specificArrangementsRequired" : "PUBLIC",
+      "respondentRepresented" : "PUBLIC",
+      "miniFormA" : "PUBLIC",
+      "applicantFlags" : {
+        "value" : {
+          "details" : {
+            "value" : [],
+            "classification" : "PUBLIC"
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "ApplicantOrganisationPolicy" : {
+        "value" : {
+          "Organisation" : {
+            "value" : {
+              "OrganisationID" : "PUBLIC",
+              "OrganisationName" : "PUBLIC"
+            },
+            "classification" : "PUBLIC"
+          },
+          "OrgPolicyCaseAssignedRole" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "respondentLName" : "PUBLIC",
+      "applicantRepresented" : "PUBLIC",
+      "consentOrderFRCAddress" : "PUBLIC",
+      "midlandsFRCList" : "PUBLIC",
+      "rSolicitorPhone" : "PUBLIC",
+      "birminghamCourtList" : "PUBLIC",
+      "applicantAttendedMIAM" : "PUBLIC",
+      "specialAssistanceRequired" : "PUBLIC",
+      "consentOrderFRCPhone" : "PUBLIC",
+      "rSolicitorFirm" : "PUBLIC",
+      "uploadMediatorDocument" : "PUBLIC",
+      "isApplicantsHomeCourt" : "PUBLIC",
+      "applicantSolicitorPhone" : "PUBLIC",
+      "solicitorReference" : "PUBLIC",
+      "soleTraderName" : "PUBLIC",
+      "authorisation2b" : "PUBLIC",
+      "divorceUploadPetition" : "PUBLIC",
+      "issueDate" : "PUBLIC",
+      "mediatorRegistrationNumber" : "PUBLIC",
+      "detailPotentialAllegation" : "PUBLIC",
+      "regionList" : "PUBLIC",
+      "applicantAddress" : {
+        "value" : {
+          "County" : "PUBLIC",
+          "Country" : "PUBLIC",
+          "PostCode" : "PUBLIC",
+          "PostTown" : "PUBLIC",
+          "AddressLine1" : "PUBLIC",
+          "AddressLine2" : "PUBLIC",
+          "AddressLine3" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "allocatedToBeHeardAtHighCourtJudgeLevel" : "PUBLIC",
+      "dateOfMarriage" : "PUBLIC",
+      "divorceCaseNumber" : "PUBLIC",
+      "applicantInRefugeTab" : "PUBLIC",
+      "respondentFlags" : {
+        "value" : {
+          "details" : {
+            "value" : [],
+            "classification" : "PUBLIC"
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "typeOfApplication" : "PUBLIC",
+      "civilPartnership" : "PUBLIC",
+      "consentOrderFRCName" : "PUBLIC",
+      "respondentFMName" : "PUBLIC",
+      "consentOrderFRCEmail" : "PUBLIC",
+      "estimatedAssetsChecklistV2" : "PUBLIC",
+      "helpWithFeesQuestion" : "PUBLIC",
+      "applicantResideOutsideUK" : "PUBLIC",
+      "addToComplexityListOfCourts" : "PUBLIC"
+    },
+    "supplementary_data" : {
+      "HMCTSServiceId" : "ABA2",
+      "orgs_assigned_users" : {
+        "Y707HZM" : 1
+      }
+    },
+    "after_submit_callback_response" : null,
+    "callback_response_status_code" : null,
+    "callback_response_status" : null,
+    "delete_draft_response_status_code" : null,
+    "delete_draft_response_status" : null
+  },
+  "event_id" : "FR_manageBarrister",
+  "ignore_warning" : null
+}
