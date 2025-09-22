@@ -99,11 +99,11 @@ public class ManageBarristerService {
      */
     public void addUserIdToBarristerData(List<BarristerCollectionItem> barristers) {
         String authToken = systemUserService.getSysUserToken();
-        barristers.forEach(barristerCollectionItem -> {
-            Barrister barrister = barristerCollectionItem.getValue();
-            organisationService.findUserByEmail(barrister.getEmail(), authToken)
-                .ifPresent(barrister::setUserId);
-        });
+
+        barristers.stream()
+            .map(BarristerCollectionItem::getValue)
+            .forEach(barrister -> organisationService.findUserByEmail(barrister.getEmail(), authToken)
+                .ifPresent(barrister::setUserId));
     }
 
     /**
