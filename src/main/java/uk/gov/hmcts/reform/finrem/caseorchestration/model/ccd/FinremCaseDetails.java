@@ -52,6 +52,11 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     private Integer version;
 
     @JsonIgnore
+    public String getCaseIdAsString() {
+        return Optional.ofNullable(id).map(String::valueOf).orElse(null);
+    }
+
+    @JsonIgnore
     public boolean isConsentedApplication() {
         return CaseType.CONSENTED.equals(caseType);
     }
