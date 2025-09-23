@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -18,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -46,19 +50,14 @@ class ManageBarristerAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseSubmission_whenHandle_thenUpdatesCaseAccess() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .id(Long.valueOf(CASE_ID))
-                .data(FinremCaseData.builder().build())
-                .build())
-            .caseDetailsBefore(FinremCaseDetails.builder()
-                .data(FinremCaseData.builder().build())
-                .build())
-            .build();
+        FinremCallbackRequest callbackRequest = createCallbackRequest();
 
         when(caseRoleService.getUserOrCaseworkerCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(CaseRole.CASEWORKER);
         when(manageBarristerService.getManageBarristerParty(callbackRequest.getCaseDetails(), CaseRole.CASEWORKER))
             .thenReturn(BarristerParty.APPLICANT);
+        List<BarristerCollectionItem> eventBarristers = createEventBarristers();
+        when(manageBarristerService.getEventBarristers(callbackRequest.getCaseDetails().getData(),
+            BarristerParty.APPLICANT)).thenReturn(eventBarristers);
 
         BarristerChange barristerChange = BarristerChange.builder().build();
         when(manageBarristerService.getBarristerChange(callbackRequest.getCaseDetails(),
@@ -70,20 +69,13 @@ class ManageBarristerAboutToSubmitHandlerTest {
         assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isEmpty();
         assertThat(response.getWarnings()).isEmpty();
+        verify(manageBarristerService).addUserIdToBarristerData(eventBarristers);
         verify(barristerChangeCaseAccessUpdater).update(callbackRequest.getCaseDetails(), AUTH_TOKEN, barristerChange);
     }
 
     @Test
     void givenNoBarristerPartySet_whenHandle_thenReturnsError() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .id(Long.valueOf(CASE_ID))
-                .data(FinremCaseData.builder().build())
-                .build())
-            .caseDetailsBefore(FinremCaseDetails.builder()
-                .data(FinremCaseData.builder().build())
-                .build())
-            .build();
+        FinremCallbackRequest callbackRequest = createCallbackRequest();
 
         when(caseRoleService.getUserOrCaseworkerCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(CaseRole.CASEWORKER);
         when(manageBarristerService.getManageBarristerParty(callbackRequest.getCaseDetails(), CaseRole.CASEWORKER))
@@ -96,5 +88,24 @@ class ManageBarristerAboutToSubmitHandlerTest {
         assertThat(response.getWarnings()).isEmpty();
 
         verifyNoInteractions(barristerChangeCaseAccessUpdater);
+    }
+
+    private FinremCallbackRequest createCallbackRequest() {
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(Long.valueOf(CASE_ID))
+                .data(FinremCaseData.builder().build())
+                .build())
+            .caseDetailsBefore(FinremCaseDetails.builder()
+                .data(FinremCaseData.builder().build())
+                .build())
+            .build();
+    }
+
+    private List<BarristerCollectionItem> createEventBarristers() {
+        return List.of(BarristerCollectionItem.builder()
+            .id("1")
+            .value(Barrister.builder().build())
+            .build());
     }
 }
