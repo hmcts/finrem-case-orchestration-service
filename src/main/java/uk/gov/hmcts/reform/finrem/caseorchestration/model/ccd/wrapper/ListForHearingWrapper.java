@@ -43,4 +43,8 @@ public class ListForHearingWrapper implements HasCaseDocument {
     private CaseDocument pfdNcdrComplianceLetter;
     private CaseDocument pfdNcdrCoverLetter;
     private List<AdditionalHearingDocumentCollection> additionalHearingDocuments;
+
+    public CaseDocument getFormC() {
+        return formC;
+    }
 }
