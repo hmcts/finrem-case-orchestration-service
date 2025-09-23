@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -47,5 +48,18 @@ public class CaseRoleService {
         }
 
         return null;
+    }
+
+    /**
+     * Retrieves the case role of the logged-in user for a given case.
+     * If the user has no specific case role, defaults to {@code CASEWORKER}.
+     *
+     * @param id   the case ID
+     * @param auth the authorisation token of the logged-in user
+     * @return the {@link CaseRole} of the logged-in user, or {@code CASEWORKER} if no specific role is found
+     */
+    public CaseRole getUserOrCaseworkerCaseRole(String id, String auth) {
+        return Optional.ofNullable(getUserCaseRole(id, auth))
+            .orElse(CaseRole.CASEWORKER);
     }
 }
