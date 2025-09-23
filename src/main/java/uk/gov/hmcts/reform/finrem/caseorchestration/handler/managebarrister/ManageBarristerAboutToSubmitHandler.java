@@ -12,9 +12,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 
@@ -24,13 +26,16 @@ import java.util.List;
 @Service
 public class ManageBarristerAboutToSubmitHandler extends FinremCallbackHandler {
 
+    private final CaseRoleService caseRoleService;
     private final ManageBarristerService manageBarristerService;
     private final BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
 
     public ManageBarristerAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                               CaseRoleService caseRoleService,
                                                ManageBarristerService manageBarristerService,
                                                BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater) {
         super(finremCaseDetailsMapper);
+        this.caseRoleService = caseRoleService;
         this.manageBarristerService = manageBarristerService;
         this.barristerChangeCaseAccessUpdater = barristerChangeCaseAccessUpdater;
     }
@@ -50,7 +55,9 @@ public class ManageBarristerAboutToSubmitHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        BarristerParty barristerParty = manageBarristerService.getManageBarristerParty(caseDetails, userAuthorisation);
+        CaseRole userCaseRole = caseRoleService.getUserOrCaseworkerCaseRole(caseDetails.getCaseIdAsString(),
+            userAuthorisation);
+        BarristerParty barristerParty = manageBarristerService.getManageBarristerParty(caseDetails, userCaseRole);
 
         List<BarristerCollectionItem> eventBarristers = manageBarristerService.getEventBarristers(caseData, barristerParty);
 
@@ -61,7 +68,7 @@ public class ManageBarristerAboutToSubmitHandler extends FinremCallbackHandler {
 
         // Add or remove barrister case access to reflect the changes made in the event
         BarristerChange barristerChange = manageBarristerService.getBarristerChange(caseDetails,
-            callbackRequest.getCaseDetailsBefore().getData(), userAuthorisation);
+            callbackRequest.getCaseDetailsBefore().getData(), userCaseRole);
         barristerChangeCaseAccessUpdater.update(caseDetails, userAuthorisation, barristerChange);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

@@ -13,13 +13,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
@@ -40,22 +37,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerSer
 class ManageBarristerServiceTest {
 
     @InjectMocks
-    ManageBarristerService manageBarristerService;
+    private ManageBarristerService manageBarristerService;
     @Mock
     private BarristerUpdateDifferenceCalculator barristerUpdateDifferenceCalculator;
     @Mock
     private PrdOrganisationService organisationService;
-    @Mock
-    private CaseAssignedRoleService caseAssignedRoleService;
     @Mock
     private SystemUserService systemUserService;
 
     @Test
     void givenCaseWorkerRunsManageBarristerEvent_whenGetManageBarristerParty_thenReturnSelectedParty() {
         FinremCaseDetails caseDetails = createCaseDetails(BarristerParty.APPLICANT);
-        mockCaseworker();
 
-        BarristerParty barristerParty = manageBarristerService.getManageBarristerParty(caseDetails, AUTH_TOKEN);
+        BarristerParty barristerParty = manageBarristerService.getManageBarristerParty(caseDetails, CaseRole.CASEWORKER);
 
         assertThat(barristerParty).isEqualTo(BarristerParty.APPLICANT);
     }
@@ -65,9 +59,8 @@ class ManageBarristerServiceTest {
     void givenSolicitorRunsManageBarristerEvent_whenGetManageBarristerParty_thenReturnPartyFromUserRole(
         CaseRole caseRole, BarristerParty expectedBarristerParty) {
         FinremCaseDetails caseDetails = createCaseDetails(null);
-        mockSolicitor(caseRole);
 
-        BarristerParty barristerParty = manageBarristerService.getManageBarristerParty(caseDetails, AUTH_TOKEN);
+        BarristerParty barristerParty = manageBarristerService.getManageBarristerParty(caseDetails, caseRole);
 
         assertThat(barristerParty).isEqualTo(expectedBarristerParty);
     }
@@ -86,10 +79,8 @@ class ManageBarristerServiceTest {
     @Test
     void givenUnexpectedCaseRoleRunsManageBarristerEvent_whenGetManageBarristerParty_thenThrowsException() {
         FinremCaseDetails caseDetails = createCaseDetails(null);
-        // A barrister user is not expected to run the Manage Barrister event
-        mockSolicitor(CaseRole.APP_BARRISTER);
 
-        assertThatThrownBy(() -> manageBarristerService.getManageBarristerParty(caseDetails, AUTH_TOKEN))
+        assertThatThrownBy(() -> manageBarristerService.getManageBarristerParty(caseDetails, CaseRole.APP_BARRISTER))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Case ID 123: Unexpected case role value APP_BARRISTER");
     }
@@ -178,7 +169,6 @@ class ManageBarristerServiceTest {
 
     @Test
     void testGetBarristerChange() {
-        mockCaseworker();
         FinremCaseDetails caseDetails = createCaseDetails(BarristerParty.APPLICANT);
         FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder()
             .data(FinremCaseData.builder().build())
@@ -193,25 +183,9 @@ class ManageBarristerServiceTest {
             .thenReturn(calculatedBarristerChange);
 
         BarristerChange barristerChange = manageBarristerService.getBarristerChange(caseDetails,
-            caseDetailsBefore.getData(), AUTH_TOKEN);
+            caseDetailsBefore.getData(), CaseRole.CASEWORKER);
 
         assertThat(barristerChange).isEqualTo(calculatedBarristerChange);
-    }
-
-    @Test
-    void givenCaseworkerUser_whenGetCaseRole_thenReturnCaseRole() {
-        mockCaseworker();
-
-        CaseRole caseRole = manageBarristerService.getCaseRole(CASE_ID, AUTH_TOKEN);
-        assertThat(caseRole).isEqualTo(CaseRole.CASEWORKER);
-    }
-
-    @Test
-    void givenSolicitorUser_whenGetCaseRole_thenReturnCaseRole() {
-        mockSolicitor(CaseRole.APP_SOLICITOR);
-
-        CaseRole caseRole = manageBarristerService.getCaseRole(CASE_ID, AUTH_TOKEN);
-        assertThat(caseRole).isEqualTo(CaseRole.APP_SOLICITOR);
     }
 
     private FinremCaseDetails createCaseDetails(BarristerParty barristerParty) {
@@ -240,26 +214,5 @@ class ManageBarristerServiceTest {
                     .build())
                 .build()
         );
-    }
-
-    private void mockCaseworker() {
-        CaseAssignedUserRolesResource userRolesResource = CaseAssignedUserRolesResource.builder()
-            .caseAssignedUserRoles(Collections.emptyList())
-            .build();
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(CASE_ID), AUTH_TOKEN))
-            .thenReturn(userRolesResource);
-    }
-
-    private void mockSolicitor(CaseRole caseRole) {
-        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID.toString(), AUTH_TOKEN))
-            .thenReturn(buildCaseAssignedUserRolesResource(caseRole));
-    }
-
-    private CaseAssignedUserRolesResource buildCaseAssignedUserRolesResource(CaseRole caseRole) {
-        return CaseAssignedUserRolesResource.builder()
-            .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder()
-                .caseRole(caseRole.getCcdCode())
-                .build()))
-            .build();
     }
 }

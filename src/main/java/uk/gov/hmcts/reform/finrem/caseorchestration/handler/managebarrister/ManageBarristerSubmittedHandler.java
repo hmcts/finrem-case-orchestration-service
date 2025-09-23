@@ -10,8 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeNotifier;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 
@@ -19,13 +21,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBar
 @Service
 public class ManageBarristerSubmittedHandler extends FinremCallbackHandler {
 
+    private final CaseRoleService caseRoleService;
     private final ManageBarristerService manageBarristerService;
     private final BarristerChangeNotifier barristerChangeNotifier;
 
     public ManageBarristerSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                           CaseRoleService caseRoleService,
                                            ManageBarristerService manageBarristerService,
                                            BarristerChangeNotifier barristerChangeNotifier) {
         super(finremCaseDetailsMapper);
+        this.caseRoleService = caseRoleService;
         this.manageBarristerService = manageBarristerService;
         this.barristerChangeNotifier = barristerChangeNotifier;
     }
@@ -42,8 +47,10 @@ public class ManageBarristerSubmittedHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
+        CaseRole userCaseRole = caseRoleService.getUserOrCaseworkerCaseRole(
+            callbackRequest.getCaseDetails().getCaseIdAsString(), userAuthorisation);
         BarristerChange barristerChange = manageBarristerService.getBarristerChange(callbackRequest.getCaseDetails(),
-            callbackRequest.getCaseDetailsBefore().getData(), userAuthorisation);
+            callbackRequest.getCaseDetailsBefore().getData(), userCaseRole);
         barristerChangeNotifier.notify(new BarristerChangeNotifier.NotifierRequest(callbackRequest.getCaseDetails(),
             userAuthorisation, barristerChange));
 

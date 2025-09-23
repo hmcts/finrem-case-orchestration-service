@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerValidationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
@@ -27,7 +28,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class ManageBarristerMidEventHandlerTest {
@@ -40,6 +42,8 @@ class ManageBarristerMidEventHandlerTest {
     private BarristerValidationService barristerValidationService;
     @Mock
     private SystemUserService systemUserService;
+    @Mock
+    private CaseRoleService caseRoleService;
 
     @Test
     void testCanHandle() {
@@ -50,11 +54,10 @@ class ManageBarristerMidEventHandlerTest {
     @Test
     void givenBarristerEmailsAreValid_whenHandle_thenReturnResponseWithNoErrors() {
         FinremCallbackRequest callbackRequest = createCallbackRequest(BarristerParty.APPLICANT);
-        mockManageBarristerService(callbackRequest);
-        when(systemUserService.getSysUserToken()).thenReturn("systemUserToken");
-        when(barristerValidationService.validateBarristerEmails(anyList(), eq("systemUserToken"),
-            eq(String.valueOf(CASE_ID)), eq(CaseRole.APP_SOLICITOR.getCcdCode())))
-            .thenReturn(Collections.emptyList());
+        mockCaseRoleService(CaseRole.CASEWORKER);
+        mockManageBarristerService(callbackRequest, CaseRole.CASEWORKER);
+        mockBarristerValidationServiceNoErrors(CaseRole.CASEWORKER, TEST_SYSTEM_TOKEN);
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
 
         var response = manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -64,11 +67,10 @@ class ManageBarristerMidEventHandlerTest {
     @Test
     void givenBarristerEmailsAreInvalid_whenHandle_thenReturnResponseWithErrors() {
         FinremCallbackRequest callbackRequest = createCallbackRequest(BarristerParty.APPLICANT);
-        mockManageBarristerService(callbackRequest);
-        when(systemUserService.getSysUserToken()).thenReturn("systemUserToken");
-        when(barristerValidationService.validateBarristerEmails(anyList(), eq("systemUserToken"),
-            eq(String.valueOf(CASE_ID)), eq(CaseRole.APP_SOLICITOR.getCcdCode())))
-            .thenReturn(List.of("Invalid email"));
+        mockCaseRoleService(CaseRole.CASEWORKER);
+        mockManageBarristerService(callbackRequest, CaseRole.CASEWORKER);
+        mockBarristerValidationServiceErrors();
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
 
         var response = manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -78,11 +80,10 @@ class ManageBarristerMidEventHandlerTest {
     @Test
     void givenBarristerPartySet_whenHandle_thenUsesSystemAuthToken() {
         FinremCallbackRequest callbackRequest = createCallbackRequest(BarristerParty.APPLICANT);
-        mockManageBarristerService(callbackRequest);
-        when(systemUserService.getSysUserToken()).thenReturn("systemUserToken");
-        when(barristerValidationService.validateBarristerEmails(anyList(), eq("systemUserToken"),
-            eq(String.valueOf(CASE_ID)), eq(CaseRole.APP_SOLICITOR.getCcdCode())))
-            .thenReturn(List.of("Invalid email"));
+        mockCaseRoleService(CaseRole.CASEWORKER);
+        mockManageBarristerService(callbackRequest, CaseRole.CASEWORKER);
+        mockBarristerValidationServiceNoErrors(CaseRole.CASEWORKER, TEST_SYSTEM_TOKEN);
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
 
         var response = manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -92,10 +93,9 @@ class ManageBarristerMidEventHandlerTest {
     @Test
     void givenBarristerPartyNotSet_whenHandle_thenDoesNotUseSystemAuthToken() {
         FinremCallbackRequest callbackRequest = createCallbackRequest(null);
-        mockManageBarristerService(callbackRequest);
-        when(barristerValidationService.validateBarristerEmails(anyList(), eq(AUTH_TOKEN),
-            eq(String.valueOf(CASE_ID)), eq(CaseRole.APP_SOLICITOR.getCcdCode())))
-            .thenReturn(List.of("Invalid email"));
+        mockCaseRoleService(CaseRole.APP_SOLICITOR);
+        mockManageBarristerService(callbackRequest, CaseRole.APP_SOLICITOR);
+        mockBarristerValidationServiceNoErrors(CaseRole.APP_SOLICITOR, AUTH_TOKEN);
 
         var response = manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -107,14 +107,29 @@ class ManageBarristerMidEventHandlerTest {
         FinremCaseData caseData = FinremCaseData.builder()
             .barristerParty(barristerParty)
             .build();
-        return FinremCallbackRequestFactory.from(CASE_ID, caseData);
+        return FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
     }
 
-    private void mockManageBarristerService(FinremCallbackRequest callbackRequest) {
-        when(manageBarristerService.getManageBarristerParty(callbackRequest.getCaseDetails(), AUTH_TOKEN))
+    private void mockManageBarristerService(FinremCallbackRequest callbackRequest, CaseRole userCaseRole) {
+        when(manageBarristerService.getManageBarristerParty(callbackRequest.getCaseDetails(), userCaseRole))
             .thenReturn(BarristerParty.APPLICANT);
         when(manageBarristerService.getEventBarristers(callbackRequest.getCaseDetails().getData(), BarristerParty.APPLICANT))
             .thenReturn(List.of());
-        when(manageBarristerService.getCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(CaseRole.APP_SOLICITOR);
+    }
+
+    private void mockCaseRoleService(CaseRole caseRole) {
+        when(caseRoleService.getUserOrCaseworkerCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(caseRole);
+    }
+
+    private void mockBarristerValidationServiceNoErrors(CaseRole caseRole, String authToken) {
+        when(barristerValidationService.validateBarristerEmails(anyList(), eq(authToken),
+            eq(CASE_ID), eq(caseRole.getCcdCode())))
+            .thenReturn(Collections.emptyList());
+    }
+
+    private void mockBarristerValidationServiceErrors() {
+        when(barristerValidationService.validateBarristerEmails(anyList(), eq(TEST_SYSTEM_TOKEN),
+            eq(CASE_ID), eq(CaseRole.CASEWORKER.getCcdCode())))
+            .thenReturn(List.of("Invalid email"));
     }
 }

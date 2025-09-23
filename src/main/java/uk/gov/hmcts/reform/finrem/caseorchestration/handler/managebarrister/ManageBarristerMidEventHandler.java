@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerValidationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
@@ -28,15 +29,17 @@ public class ManageBarristerMidEventHandler extends FinremCallbackHandler {
     private final ManageBarristerService manageBarristerService;
     private final BarristerValidationService barristerValidationService;
     private final SystemUserService systemUserService;
+    private final CaseRoleService caseRoleService;
 
     public ManageBarristerMidEventHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                           ManageBarristerService manageBarristerService,
                                           BarristerValidationService barristerValidationService,
-                                          SystemUserService systemUserService) {
+                                          SystemUserService systemUserService, CaseRoleService caseRoleService) {
         super(finremCaseDetailsMapper);
         this.manageBarristerService = manageBarristerService;
         this.barristerValidationService = barristerValidationService;
         this.systemUserService = systemUserService;
+        this.caseRoleService = caseRoleService;
     }
 
     @Override
@@ -53,16 +56,16 @@ public class ManageBarristerMidEventHandler extends FinremCallbackHandler {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        BarristerParty barristerParty = manageBarristerService.getManageBarristerParty(caseDetails, userAuthorisation);
+        CaseRole userCaseRole = caseRoleService.getUserOrCaseworkerCaseRole(String.valueOf(caseDetails.getId()), userAuthorisation);
+        BarristerParty barristerParty = manageBarristerService.getManageBarristerParty(caseDetails, userCaseRole);
         List<BarristerData> barristers = manageBarristerService.getEventBarristers(caseDetails.getData(), barristerParty)
             .stream()
             .map(item -> BarristerData.builder().barrister(item.getValue()).build())
             .toList();
-        CaseRole barristerCaseRole = manageBarristerService.getCaseRole(caseDetails.getId(), userAuthorisation);
 
         String authTokenToUse = getAuthTokenToUse(caseDetails, userAuthorisation);
         List<String> errors = barristerValidationService.validateBarristerEmails(barristers,
-            authTokenToUse, caseDetails.getId().toString(), barristerCaseRole.getCcdCode());
+            authTokenToUse, caseDetails.getCaseIdAsString(), userCaseRole.getCcdCode());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseDetails.getData())

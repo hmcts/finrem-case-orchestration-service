@@ -8,12 +8,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
@@ -26,7 +24,6 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 @Service
 public class ManageBarristerService {
 
-    private final CaseAssignedRoleService caseAssignedRoleService;
     private final BarristerUpdateDifferenceCalculator barristerUpdateDifferenceCalculator;
     private final PrdOrganisationService organisationService;
     private final SystemUserService systemUserService;
@@ -34,13 +31,11 @@ public class ManageBarristerService {
     /**
      * Gets the party that a barrister is being added or removed for in the Manage Barrister event.
      *
-     * @param caseDetails       the case details
-     * @param userAuthorisation the user authorisation token
+     * @param caseDetails the case details
+     * @param caseRole    the case role of the logged-in user
      * @return the barrister party
      */
-    public BarristerParty getManageBarristerParty(FinremCaseDetails caseDetails, String userAuthorisation) {
-        CaseRole caseRole = getCaseRole(caseDetails.getId(), userAuthorisation);
-
+    public BarristerParty getManageBarristerParty(FinremCaseDetails caseDetails, CaseRole caseRole) {
         return switch (caseRole) {
             case CASEWORKER -> caseDetails.getData().getBarristerParty();
             case APP_SOLICITOR -> BarristerParty.APPLICANT;
@@ -111,12 +106,12 @@ public class ManageBarristerService {
      *
      * @param caseDetails    the current case details
      * @param caseDataBefore the case data before the event
-     * @param authToken      the authorisation token
+     * @param caseRole       the case role of the logged-in user
      * @return the barrister changes
      */
     public BarristerChange getBarristerChange(FinremCaseDetails caseDetails, FinremCaseData caseDataBefore,
-                                              String authToken) {
-        BarristerParty barristerParty = getManageBarristerParty(caseDetails, authToken);
+                                              CaseRole caseRole) {
+        BarristerParty barristerParty = getManageBarristerParty(caseDetails, caseRole);
         List<Barrister> barristers = getEventBarristers(caseDetails.getData(), barristerParty)
             .stream()
             .map(BarristerCollectionItem::getValue)
@@ -127,22 +122,5 @@ public class ManageBarristerService {
             .toList();
 
         return barristerUpdateDifferenceCalculator.calculate(barristerParty, barristersBefore, barristers);
-    }
-
-    /**
-     * Gets the case role for the user making the request based on their authorisation token.
-     *
-     * @param caseId            the case ID
-     * @param userAuthorisation the user authorisation token
-     * @return the case role
-     */
-    public CaseRole getCaseRole(long caseId, String userAuthorisation) {
-        CaseAssignedUserRolesResource userCaseRole = caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseId),
-            userAuthorisation);
-        if (userCaseRole.getCaseAssignedUserRoles().isEmpty()) {
-            return CaseRole.CASEWORKER;
-        } else {
-            return CaseRole.forValue(userCaseRole.getCaseAssignedUserRoles().getFirst().getCaseRole());
-        }
     }
 }
