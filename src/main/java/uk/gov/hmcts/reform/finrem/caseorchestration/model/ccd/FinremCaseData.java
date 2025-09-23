@@ -1108,4 +1108,8 @@ public class FinremCaseData implements HasCaseDocument {
         }
         return paymentDetailsWrapper;
     }
+
+    public CaseDocument getApprovedConsentOrderLetter() {
+        return null;
+    }
 }
