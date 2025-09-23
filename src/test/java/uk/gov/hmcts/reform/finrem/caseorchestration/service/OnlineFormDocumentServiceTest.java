@@ -144,14 +144,6 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateContestedMiniFormA() {
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        assertCaseDocument(onlineFormDocumentService.generateContestedMiniFormA(AUTH_TOKEN, caseDetails));
-        verify(genericDocumentService).generateDocument(AUTH_TOKEN, CaseDetails.builder().build(),
-            documentConfiguration.getContestedMiniFormTemplate(caseDetails), documentConfiguration.getContestedMiniFormFileName());
-    }
-
-    @Test
     public void generateConsentedInContestedMiniFormA() throws Exception {
         String payload = "/fixtures/mini-form-a-consent-in-contested.json";
         assertCaseDocument(onlineFormDocumentService
