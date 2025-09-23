@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -53,13 +54,28 @@ public class ManageBarristerAboutToSubmitHandler extends FinremCallbackHandler {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
 
         CaseRole userCaseRole = caseRoleService.getUserOrCaseworkerCaseRole(caseDetails.getCaseIdAsString(),
             userAuthorisation);
         BarristerParty barristerParty = manageBarristerService.getManageBarristerParty(caseDetails, userCaseRole);
+        List<String> errors = new ArrayList<>();
+        if (barristerParty == null) {
+            errors.add("Select which party's barrister you want to manage");
+        } else {
+            updateCase(callbackRequest, userAuthorisation, barristerParty, userCaseRole);
+        }
 
-        List<BarristerCollectionItem> eventBarristers = manageBarristerService.getEventBarristers(caseData, barristerParty);
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseDetails.getData())
+            .errors(errors)
+            .build();
+    }
+
+    private void updateCase(FinremCallbackRequest callbackRequest, String authToken, BarristerParty barristerParty,
+                            CaseRole userCaseRole) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        List<BarristerCollectionItem> eventBarristers = manageBarristerService.getEventBarristers(caseDetails.getData(),
+            barristerParty);
 
         // The UI only captures the email address of added barristers so we need to look up the userId here.
         // Storing the userId in the case data means we can use it in the future to remove barrister access
@@ -69,10 +85,6 @@ public class ManageBarristerAboutToSubmitHandler extends FinremCallbackHandler {
         // Add or remove barrister case access to reflect the changes made in the event
         BarristerChange barristerChange = manageBarristerService.getBarristerChange(caseDetails,
             callbackRequest.getCaseDetailsBefore().getData(), userCaseRole);
-        barristerChangeCaseAccessUpdater.update(caseDetails, userAuthorisation, barristerChange);
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseDetails.getData())
-            .build();
+        barristerChangeCaseAccessUpdater.update(caseDetails, authToken, barristerChange);
     }
 }

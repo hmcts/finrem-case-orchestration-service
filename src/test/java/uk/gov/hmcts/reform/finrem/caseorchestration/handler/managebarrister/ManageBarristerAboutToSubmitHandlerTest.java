@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -43,7 +45,7 @@ class ManageBarristerAboutToSubmitHandlerTest {
     }
 
     @Test
-    void testHandle() {
+    void givenValidCaseSubmission_whenHandle_thenUpdatesCaseAccess() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
                 .id(Long.valueOf(CASE_ID))
@@ -55,6 +57,8 @@ class ManageBarristerAboutToSubmitHandlerTest {
             .build();
 
         when(caseRoleService.getUserOrCaseworkerCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(CaseRole.CASEWORKER);
+        when(manageBarristerService.getManageBarristerParty(callbackRequest.getCaseDetails(), CaseRole.CASEWORKER))
+            .thenReturn(BarristerParty.APPLICANT);
 
         BarristerChange barristerChange = BarristerChange.builder().build();
         when(manageBarristerService.getBarristerChange(callbackRequest.getCaseDetails(),
@@ -67,5 +71,30 @@ class ManageBarristerAboutToSubmitHandlerTest {
         assertThat(response.getErrors()).isEmpty();
         assertThat(response.getWarnings()).isEmpty();
         verify(barristerChangeCaseAccessUpdater).update(callbackRequest.getCaseDetails(), AUTH_TOKEN, barristerChange);
+    }
+
+    @Test
+    void givenNoBarristerPartySet_whenHandle_thenReturnsError() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(Long.valueOf(CASE_ID))
+                .data(FinremCaseData.builder().build())
+                .build())
+            .caseDetailsBefore(FinremCaseDetails.builder()
+                .data(FinremCaseData.builder().build())
+                .build())
+            .build();
+
+        when(caseRoleService.getUserOrCaseworkerCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(CaseRole.CASEWORKER);
+        when(manageBarristerService.getManageBarristerParty(callbackRequest.getCaseDetails(), CaseRole.CASEWORKER))
+            .thenReturn(null);
+
+        var response = manageBarristerAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getData()).isNotNull();
+        assertThat(response.getErrors()).containsExactly("Select which party's barrister you want to manage");
+        assertThat(response.getWarnings()).isEmpty();
+
+        verifyNoInteractions(barristerChangeCaseAccessUpdater);
     }
 }

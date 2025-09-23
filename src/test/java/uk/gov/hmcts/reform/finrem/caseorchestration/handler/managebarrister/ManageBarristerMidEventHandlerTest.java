@@ -91,7 +91,7 @@ class ManageBarristerMidEventHandlerTest {
     }
 
     @Test
-    void givenBarristerPartyNotSet_whenHandle_thenDoesNotUseSystemAuthToken() {
+    void givenUserIsSolicitorAndBarristerPartyNotSet_whenHandle_thenDoesNotReturnError() {
         FinremCallbackRequest callbackRequest = createCallbackRequest(null);
         mockCaseRoleService(CaseRole.APP_SOLICITOR);
         mockManageBarristerService(callbackRequest, CaseRole.APP_SOLICITOR);
@@ -99,8 +99,20 @@ class ManageBarristerMidEventHandlerTest {
 
         var response = manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response).isNotNull();
+        assertThat(response.getErrors()).isEmpty();
         verifyNoInteractions(systemUserService);
+    }
+
+    @Test
+    void givenUserIsCaseworkerAndBarristerPartyNotSet_whenHandle_thenReturnsError() {
+        FinremCallbackRequest callbackRequest = createCallbackRequest(null);
+        mockCaseRoleService(CaseRole.CASEWORKER);
+        when(manageBarristerService.getManageBarristerParty(callbackRequest.getCaseDetails(), CaseRole.CASEWORKER))
+            .thenReturn(null);
+
+        var response = manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).containsExactly("Select which party's barrister you want to manage");
     }
 
     private FinremCallbackRequest createCallbackRequest(BarristerParty barristerParty) {

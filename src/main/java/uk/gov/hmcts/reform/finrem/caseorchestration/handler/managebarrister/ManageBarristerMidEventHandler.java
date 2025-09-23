@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerValidationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -57,20 +58,31 @@ public class ManageBarristerMidEventHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         CaseRole userCaseRole = caseRoleService.getUserOrCaseworkerCaseRole(String.valueOf(caseDetails.getId()), userAuthorisation);
-        BarristerParty barristerParty = manageBarristerService.getManageBarristerParty(caseDetails, userCaseRole);
-        List<BarristerData> barristers = manageBarristerService.getEventBarristers(caseDetails.getData(), barristerParty)
-            .stream()
-            .map(item -> BarristerData.builder().barrister(item.getValue()).build())
-            .toList();
 
-        String authTokenToUse = getAuthTokenToUse(caseDetails, userAuthorisation);
-        List<String> errors = barristerValidationService.validateBarristerEmails(barristers,
-            authTokenToUse, caseDetails.getCaseIdAsString(), userCaseRole.getCcdCode());
+        List<String> errors = new ArrayList<>();
+        BarristerParty barristerParty = manageBarristerService.getManageBarristerParty(caseDetails, userCaseRole);
+        if (barristerParty == null) {
+            errors.add("Select which party's barrister you want to manage");
+        } else {
+            errors.addAll(getValidationErrors(caseDetails, userCaseRole, barristerParty, userAuthorisation));
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseDetails.getData())
             .errors(errors)
             .build();
+    }
+
+    private List<String> getValidationErrors(FinremCaseDetails caseDetails, CaseRole userCaseRole,
+                                             BarristerParty barristerParty, String authToken) {
+        List<BarristerData> barristers = manageBarristerService.getEventBarristers(caseDetails.getData(), barristerParty)
+            .stream()
+            .map(item -> BarristerData.builder().barrister(item.getValue()).build())
+            .toList();
+
+        String authTokenToUse = getAuthTokenToUse(caseDetails, authToken);
+        return barristerValidationService.validateBarristerEmails(barristers,
+            authTokenToUse, caseDetails.getCaseIdAsString(), userCaseRole.getCcdCode());
     }
 
     /**
