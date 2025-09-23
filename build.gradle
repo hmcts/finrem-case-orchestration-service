@@ -213,8 +213,8 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/csv/CaseReference.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/csv/CaseReferenceKeyValue.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/SystemUserService.java',
-                           '**/uk.gov.hmcts.reform.finrem.caseorchestration.filter.HttpRequestBodyLoggerFilter.java',
-                           '**/uk.gov.hmcts.reform.finrem.caseorchestration.filter.BufferedBodyHttpServletRequestWrapper.java'
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/filter/HttpRequestBodyLoggerFilter.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/filter/BufferedBodyHttpServletRequestWrapper.java'
     ]
 
     properties {
