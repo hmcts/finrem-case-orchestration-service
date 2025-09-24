@@ -55,6 +55,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NOTTINGHAM_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_COURT_DETAILS_ADDRESS_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_COURT_DETAILS_EMAIL_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_COURT_DETAILS_NAME_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_COURT_DETAILS_PHONE_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_PREFIX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_REGION_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
@@ -508,6 +515,30 @@ class CaseHearingFunctionsTest {
         Map<String, Object> caseData = new HashMap<>();
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildInterimHearingFrcCourtDetails(caseData);
         assertEquals(true, stringObjectMap.isEmpty());
+    }
+
+    @Test
+    void shouldPopulateHearingCourtDetails() {
+        // arrange
+        Map<String, Object> caseData = Map.of(
+            HEARING_REGION_LIST, NORTHWEST,
+            HEARING_NORTHWEST_FRC_LIST, LANCASHIRE,
+            HEARING_PREFIX + LANCASHIRE_COURTLIST, REEDLEY);
+
+        // act
+        Map<String, Object> hearingCourtDetails = CaseHearingFunctions.buildHearingCourtDetails(caseData);
+
+        // assert
+        assertEquals("Reedley Family Hearing Centre", hearingCourtDetails.get(COURT_DETAILS_NAME_KEY));
+        assertEquals("The Court House, Colne Road (Junction with Swaledale Avenue), Reedley, Burnely, BB10 2LJ",
+            hearingCourtDetails.get(COURT_DETAILS_ADDRESS_KEY));
+        assertEquals("0300 123 5577", hearingCourtDetails.get(COURT_DETAILS_PHONE_KEY));
+        assertEquals("LancashireandCumbriaFRC@justice.gov.uk", hearingCourtDetails.get(COURT_DETAILS_EMAIL_KEY));
+        assertEquals("Reedley Family Hearing Centre", hearingCourtDetails.get(HEARING_COURT_DETAILS_NAME_KEY));
+        assertEquals("The Court House, Colne Road (Junction with Swaledale Avenue), Reedley, Burnely, BB10 2LJ",
+            hearingCourtDetails.get(HEARING_COURT_DETAILS_ADDRESS_KEY));
+        assertEquals("0300 123 5577", hearingCourtDetails.get(HEARING_COURT_DETAILS_PHONE_KEY));
+        assertEquals("LancashireandCumbriaFRC@justice.gov.uk", hearingCourtDetails.get(HEARING_COURT_DETAILS_EMAIL_KEY));
     }
 
     private FinremCaseData getFinremCaseData(AllocatedRegionWrapper regionWrapper) {
