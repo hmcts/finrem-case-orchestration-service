@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.Map;
 
@@ -83,6 +84,18 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT);
     }
 
+    public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
+        CaseDocument applicantCoverSheet = generateApplicantCoverSheet(caseDetails, authorisationToken);
+
+        if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent())) {
+            log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
+        } else {
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(applicantCoverSheet);
+        }
+    }
+
     /**
      * No Return.
      *
@@ -112,26 +125,16 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
 
+    public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
+        CaseDocument respondentCoverSheet = generateRespondentCoverSheet(caseDetails, authorisationToken);
 
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #generateIntervenerCoverSheet(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link final CaseDetails caseDetails,
-     *                                                      final String authorisationToken,
-     *                                                      DocumentHelper.PaperNotificationRecipient recipient}
-     */
-    @Deprecated(since = "15-june-2023")
-    public CaseDocument generateIntervenerCoverSheet(final CaseDetails caseDetails,
-                                                     final String authorisationToken,
-                                                     DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate());
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        return generateCoverSheet(finremCaseDetails, authorisationToken, recipient);
-
+        if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant())) {
+            log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(null);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
+        } else {
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
+        }
     }
 
     public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
