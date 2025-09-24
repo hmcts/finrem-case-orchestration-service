@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLet
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DocumentCategoriser;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -64,6 +65,7 @@ public class CreateGeneralLetterDocumentCategoriser extends DocumentCategoriser 
             .ifPresent(generalLetters -> generalLetters.stream()
                 .map(GeneralLetterCollection::getValue)
                 .map(GeneralLetter::getGeneratedLetter)
+                .filter(Objects::nonNull)
                 .filter(generatedLetter -> generatedLetter.getCategoryId() == null)
                 .forEach(generatedLetter -> generatedLetter.setCategoryId(
                     getGeneratedLetterCategoryId(getSelectedRoleCode(wrapper)))));
