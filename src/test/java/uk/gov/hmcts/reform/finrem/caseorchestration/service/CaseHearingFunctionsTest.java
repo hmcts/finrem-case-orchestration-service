@@ -519,7 +519,7 @@ class CaseHearingFunctionsTest {
     }
 
     @Test
-    void shouldPopulateHearingCourtDetails() {
+    void givenValidData_whenBuildHearingCourtDetailsIsInvoked_shouldPopulateHearingCourtDetails() {
         // arrange
         Map<String, Object> caseData = Map.of(
             HEARING_REGION_LIST, NORTHWEST,
@@ -541,6 +541,21 @@ class CaseHearingFunctionsTest {
                 "The Court House, Colne Road (Junction with Swaledale Avenue), Reedley, Burnely, BB10 2LJ")
             .containsEntry(HEARING_COURT_DETAILS_PHONE_KEY, "0300 123 5577")
             .containsEntry(HEARING_COURT_DETAILS_EMAIL_KEY, "LancashireandCumbriaFRC@justice.gov.uk");
+    }
+
+    @Test
+    void givenIncorrectHighCourtDetails_whenBuildHearingCourtDetailsIsInvoked_shouldReturnEmptyMap() {
+        // arrange
+        Map<String, Object> caseData = Map.of(
+            REGION, HIGHCOURT,
+            HIGHCOURT_FRC_LIST, LONDON,
+            HIGHCOURT_COURTLIST, HIGHCOURT_COURT);
+
+        // act
+        Map<String, Object> hearingCourtDetails = CaseHearingFunctions.buildHearingCourtDetails(caseData);
+
+        // assert
+        assertThat(hearingCourtDetails).isEmpty();
     }
 
     private FinremCaseData getFinremCaseData(AllocatedRegionWrapper regionWrapper) {
