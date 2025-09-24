@@ -76,14 +76,6 @@ public class OnlineFormDocumentService {
             documentConfiguration.getMiniFormFileName());
     }
 
-    public CaseDocument generateContestedMiniFormA(String authorisationToken, CaseDetails caseDetails) {
-
-        log.info("Generating Contested Mini Form A for Case ID : {}", caseDetails.getId());
-        return genericDocumentService.generateDocument(authorisationToken, translateOptions(caseDetails),
-            documentConfiguration.getContestedMiniFormTemplate(caseDetails),
-            documentConfiguration.getContestedMiniFormFileName());
-    }
-
     public CaseDocument generateContestedMiniForm(String authorisationToken, FinremCaseDetails caseDetails) {
 
         log.info("Generating Contested Mini Form A for Case ID : {}", caseDetails.getId());

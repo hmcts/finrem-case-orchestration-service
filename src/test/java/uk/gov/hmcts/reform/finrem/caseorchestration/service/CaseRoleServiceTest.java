@@ -41,6 +41,19 @@ class CaseRoleServiceTest {
     }
 
     @Test
+    void givenNullAssignedRoles_whenGetUserOrCaseworkerCaseRole_thenReturnCaseworker() {
+        // given
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
+            .thenReturn(null);
+
+        // when
+        CaseRole result = caseRoleService.getUserOrCaseworkerCaseRole(CASE_ID, AUTH_TOKEN);
+
+        // then
+        assertThat(result).isEqualTo(CaseRole.CASEWORKER);
+    }
+
+    @Test
     void givenEmptyAssignedRoles_whenGetUserCaseRole_thenReturnNull() {
         // given
         CaseAssignedUserRolesResource resource = new CaseAssignedUserRolesResource();
@@ -56,6 +69,21 @@ class CaseRoleServiceTest {
     }
 
     @Test
+    void givenEmptyAssignedRoles_whenGetUserOrCaseworkerCaseRole_thenReturnCaseworker() {
+        // given
+        CaseAssignedUserRolesResource resource = new CaseAssignedUserRolesResource();
+        resource.setCaseAssignedUserRoles(List.of());
+
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN)).thenReturn(resource);
+
+        // when
+        CaseRole result = caseRoleService.getUserOrCaseworkerCaseRole(CASE_ID, AUTH_TOKEN);
+
+        // then
+        assertThat(result).isEqualTo(CaseRole.CASEWORKER);
+    }
+
+    @Test
     void givenSingleRoleAssigned_whenGetUserCaseRole_thenReturnCaseRole() {
         // given
         CaseAssignedUserRole userRole = CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR.getCcdCode()).build();
@@ -67,6 +95,23 @@ class CaseRoleServiceTest {
 
         // when
         CaseRole result = caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN);
+
+        // then
+        assertThat(result).isEqualTo(APP_SOLICITOR);
+    }
+
+    @Test
+    void givenSingleRoleAssigned_whenGetUserOrCaseworkerCaseRole_thenReturnCaseRole() {
+        // given
+        CaseAssignedUserRole userRole = CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR.getCcdCode()).build();
+
+        CaseAssignedUserRolesResource resource = new CaseAssignedUserRolesResource();
+        resource.setCaseAssignedUserRoles(List.of(userRole));
+
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN)).thenReturn(resource);
+
+        // when
+        CaseRole result = caseRoleService.getUserOrCaseworkerCaseRole(CASE_ID, AUTH_TOKEN);
 
         // then
         assertThat(result).isEqualTo(APP_SOLICITOR);
@@ -89,4 +134,23 @@ class CaseRoleServiceTest {
         // then
         assertThat(result).isEqualTo(APP_SOLICITOR);
     }
+
+    @Test
+    void givenMultipleRolesAssigned_whenGetUserOrCaseworkerCaseRole_thenReturnFirstCaseRole() {
+        // given
+        CaseAssignedUserRole appSolicitor = CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR.getCcdCode()).build();
+        CaseAssignedUserRole respSolicitor = CaseAssignedUserRole.builder().caseRole(RESP_SOLICITOR.getCcdCode()).build();
+
+        CaseAssignedUserRolesResource resource = new CaseAssignedUserRolesResource();
+        resource.setCaseAssignedUserRoles(List.of(appSolicitor, respSolicitor));
+
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN)).thenReturn(resource);
+
+        // when
+        CaseRole result = caseRoleService.getUserOrCaseworkerCaseRole(CASE_ID, AUTH_TOKEN);
+
+        // then
+        assertThat(result).isEqualTo(APP_SOLICITOR);
+    }
+
 }
