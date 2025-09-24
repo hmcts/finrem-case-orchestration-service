@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCou
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
@@ -529,16 +530,17 @@ class CaseHearingFunctionsTest {
         Map<String, Object> hearingCourtDetails = CaseHearingFunctions.buildHearingCourtDetails(caseData);
 
         // assert
-        assertEquals("Reedley Family Hearing Centre", hearingCourtDetails.get(COURT_DETAILS_NAME_KEY));
-        assertEquals("The Court House, Colne Road (Junction with Swaledale Avenue), Reedley, Burnely, BB10 2LJ",
-            hearingCourtDetails.get(COURT_DETAILS_ADDRESS_KEY));
-        assertEquals("0300 123 5577", hearingCourtDetails.get(COURT_DETAILS_PHONE_KEY));
-        assertEquals("LancashireandCumbriaFRC@justice.gov.uk", hearingCourtDetails.get(COURT_DETAILS_EMAIL_KEY));
-        assertEquals("Reedley Family Hearing Centre", hearingCourtDetails.get(HEARING_COURT_DETAILS_NAME_KEY));
-        assertEquals("The Court House, Colne Road (Junction with Swaledale Avenue), Reedley, Burnely, BB10 2LJ",
-            hearingCourtDetails.get(HEARING_COURT_DETAILS_ADDRESS_KEY));
-        assertEquals("0300 123 5577", hearingCourtDetails.get(HEARING_COURT_DETAILS_PHONE_KEY));
-        assertEquals("LancashireandCumbriaFRC@justice.gov.uk", hearingCourtDetails.get(HEARING_COURT_DETAILS_EMAIL_KEY));
+        assertThat(hearingCourtDetails)
+            .containsEntry(COURT_DETAILS_NAME_KEY, "Reedley Family Hearing Centre")
+            .containsEntry(COURT_DETAILS_ADDRESS_KEY,
+                "The Court House, Colne Road (Junction with Swaledale Avenue), Reedley, Burnely, BB10 2LJ")
+            .containsEntry(COURT_DETAILS_PHONE_KEY, "0300 123 5577")
+            .containsEntry(COURT_DETAILS_EMAIL_KEY, "LancashireandCumbriaFRC@justice.gov.uk")
+            .containsEntry(HEARING_COURT_DETAILS_NAME_KEY, "Reedley Family Hearing Centre")
+            .containsEntry(HEARING_COURT_DETAILS_ADDRESS_KEY,
+                "The Court House, Colne Road (Junction with Swaledale Avenue), Reedley, Burnely, BB10 2LJ")
+            .containsEntry(HEARING_COURT_DETAILS_PHONE_KEY, "0300 123 5577")
+            .containsEntry(HEARING_COURT_DETAILS_EMAIL_KEY, "LancashireandCumbriaFRC@justice.gov.uk");
     }
 
     private FinremCaseData getFinremCaseData(AllocatedRegionWrapper regionWrapper) {
