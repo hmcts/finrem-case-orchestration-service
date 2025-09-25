@@ -371,14 +371,13 @@ public final class CaseHearingFunctions {
     public static Map<String, Object> buildHearingCourtDetails(Map<String, Object> data) {
         try {
             Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> allocatedCourtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourt(data)));
             Map<String, Object> hearingCourtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedHearingCourt(data)));
 
             return new ObjectMapper().convertValue(CourtDetailsTemplateFields.builder()
-                .courtName((String) allocatedCourtDetails.get(COURT_DETAILS_NAME_KEY))
-                .courtAddress((String) allocatedCourtDetails.get(COURT_DETAILS_ADDRESS_KEY))
-                .phoneNumber((String) allocatedCourtDetails.get(COURT_DETAILS_PHONE_KEY))
-                .email((String) allocatedCourtDetails.get(COURT_DETAILS_EMAIL_KEY))
+                .courtName((String) hearingCourtDetails.get(COURT_DETAILS_NAME_KEY))
+                .courtAddress((String) hearingCourtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+                .phoneNumber((String) hearingCourtDetails.get(COURT_DETAILS_PHONE_KEY))
+                .email((String) hearingCourtDetails.get(COURT_DETAILS_EMAIL_KEY))
                 .hearingCourtName((String) hearingCourtDetails.get(COURT_DETAILS_NAME_KEY))
                 .hearingCourtAddress((String) hearingCourtDetails.get(COURT_DETAILS_ADDRESS_KEY))
                 .hearingCourtPhoneNumber((String) hearingCourtDetails.get(COURT_DETAILS_PHONE_KEY))
