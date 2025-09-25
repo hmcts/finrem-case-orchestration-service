@@ -40,11 +40,11 @@ class ManageHearingBundlesAboutToSubmitHandlerTest {
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @InjectMocks
-    private ManageHearingBundlesAboutToSubmitHandler handler;
+    private ManageHearingBundlesAboutToSubmitHandler manageHearingBundlesAboutToSubmitHandler;
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANAGE_HEARING_BUNDLES);
+        assertCanHandle(manageHearingBundlesAboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANAGE_HEARING_BUNDLES);
     }
 
     @Test
@@ -70,7 +70,7 @@ class ManageHearingBundlesAboutToSubmitHandlerTest {
         List<HearingUploadBundleCollection> hearingUploadBundleCollections =
             Arrays.asList(hearingUploadBundleCollectionEarliest, hearingUploadBundleCollectionLatest);
 
-        handler.sortHearingBundlesAndValidateForErrors(new ArrayList<>(), hearingUploadBundleCollections);
+        manageHearingBundlesAboutToSubmitHandler.sortHearingBundlesAndValidateForErrors(new ArrayList<>(), hearingUploadBundleCollections);
 
         assertThat(hearingUploadBundleCollections.getFirst().getValue().getHearingBundleDocuments().getFirst().getValue().getBundleUploadDate())
             .isEqualTo(LocalDateTime.of(2021, 1, 1, 1, 1));
@@ -111,7 +111,7 @@ class ManageHearingBundlesAboutToSubmitHandlerTest {
         hearingUploadBundleCollections.add(hearingUploadBundleCollection2);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(FinremCallbackRequestFactory.from(
+            manageHearingBundlesAboutToSubmitHandler.handle(FinremCallbackRequestFactory.from(
                 FinremCaseData.builder()
                     .hearingUploadBundle(hearingUploadBundleCollections)
                     .build()), AUTH_TOKEN);
@@ -150,7 +150,7 @@ class ManageHearingBundlesAboutToSubmitHandlerTest {
         hearingUploadBundleCollections.add(hearingUploadBundleCollection2);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(FinremCallbackRequestFactory.from(
+            manageHearingBundlesAboutToSubmitHandler.handle(FinremCallbackRequestFactory.from(
                 FinremCaseData.builder()
                     .hearingUploadBundle(hearingUploadBundleCollections)
                     .build()), AUTH_TOKEN);
