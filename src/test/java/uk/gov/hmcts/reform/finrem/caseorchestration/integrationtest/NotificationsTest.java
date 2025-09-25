@@ -49,6 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -70,6 +71,7 @@ public class NotificationsTest extends BaseTest {
     @MockitoBean
     EmailService emailService;
 
+    private static final String HWF_SUCCESSFUL_URL = "/case-orchestration/notify/hwf-successful";
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
     private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/order-not-approved";
     private static final String NOTICE_OF_CHANGE_URL = "/case-orchestration/notify/notice-of-change";
@@ -90,6 +92,21 @@ public class NotificationsTest extends BaseTest {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/consented-ccd-request-with-solicitor-agreed-to-emails.json")) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
+    }
+
+    @Test
+    public void notifyHwfSuccessful() throws Exception {
+        when(assignCaseAccessService.searchUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
+            .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
+            .build());
+        webClient.perform(MockMvcRequestBuilders.post(HWF_SUCCESSFUL_URL)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(content().json(expectedCaseData()));
+        Mockito.verify(emailService).sendConfirmationEmail(any(), eq(FR_HWF_SUCCESSFUL));
     }
 
     @Test
