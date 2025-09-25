@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+
 @Component
 @Slf4j
 @SuppressWarnings({"java:S110","java:S1068","java:S2387"})
@@ -26,7 +28,7 @@ public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearin
 
     @Override
     public List<CaseDocument> getCaseDocuments(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getHearingNoticeDocumentPack().stream()
+        return emptyIfNull(caseDetails.getData().getHearingNoticeDocumentPack()).stream()
             .map(DocumentCollectionItem::getValue)
             .toList();
     }

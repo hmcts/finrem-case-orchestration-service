@@ -16,11 +16,16 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.AmendApplicationDetailsAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.io.File;
@@ -55,7 +60,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
  *     {@link AmendApplicationDetailsAboutToSubmitHandler}.
  */
 @WebMvcTest(UpdateContestedCaseController.class)
-@ContextConfiguration(classes = {UpdateContestedCaseControllerTest.TestConfig.class})
+@ContextConfiguration(classes = {UpdateContestedCaseControllerTest.TestConfig.class, UpdateRepresentationWorkflowService.class})
 @Import(MiamLegacyExemptionsService.class)
 class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
@@ -81,6 +86,12 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
     private FeatureToggleService featureToggleService;
     @Autowired
     private MiamLegacyExemptionsService miamLegacyExemptionsService;
+    @MockitoBean
+    private SystemUserService systemUserService;
+    @MockitoBean
+    private AssignCaseAccessService assignCaseAccessService;
+    @MockitoBean
+    private NoticeOfChangeService noticeOfChangeService;
 
     @Configuration
     static class TestConfig {
@@ -280,6 +291,8 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     @Test
     void shouldRemoveSolicitorDetailsWhenRespondentIsNotRepresentedBySolicitorForContested() throws Exception {
+        when(noticeOfChangeService.hasInvalidOrgPolicy(any(CaseDetails.class), eq(false))).thenReturn(true);
+
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-respondent-solicitor-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -294,7 +307,10 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.rSolicitorAddress").doesNotExist())
             .andExpect(jsonPath("$.data.rSolicitorPhone").doesNotExist())
             .andExpect(jsonPath("$.data.rSolicitorEmail").doesNotExist())
-            .andExpect(jsonPath("$.data.rSolicitorDXnumber").doesNotExist());
+            .andExpect(jsonPath("$.data.rSolicitorDXnumber").doesNotExist())
+            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.OrgPolicyCaseAssignedRole")
+                .value(CaseRole.RESP_SOLICITOR.getCcdCode()))
+            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.Organisation").isEmpty());
     }
 
     @Test
