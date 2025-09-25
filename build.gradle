@@ -15,14 +15,14 @@ apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'io.spring.dependency-management'
 
 def versions = [
-        guava                : '33.4.8-jre',
+        guava                : '33.5.0-jre',
         bspCommonLib         : '0.2.0',
         ccdClient            : '5.2.0',
         commonsIo            : '2.20.0',
         commonsLang3         : '3.18.0',
         hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
-        lombok               : '1.18.40',
+        lombok               : '1.18.42',
         mockito              : '5.19.0',
         pact                 : '4.6.17',
         pdfbox               : '3.0.5',
@@ -212,7 +212,9 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/GenericAboutToStartOrSubmitCallbackResponse.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/csv/CaseReference.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/csv/CaseReferenceKeyValue.java',
-                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/SystemUserService.java'
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/SystemUserService.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/filter/HttpRequestBodyLoggerFilter.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/filter/BufferedBodyHttpServletRequestWrapper.java'
     ]
 
     properties {
