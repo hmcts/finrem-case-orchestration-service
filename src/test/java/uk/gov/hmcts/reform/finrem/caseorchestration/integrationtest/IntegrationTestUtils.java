@@ -91,7 +91,7 @@ public class IntegrationTestUtils {
         return performCallback(mockMvc, SUBMITTED_URL, jsonResource);
     }
 
-    private static ResultActions performCallback(MockMvc mockMvc, String url, String jsonResource) throws Exception {
+    public static ResultActions performCallback(MockMvc mockMvc, String url, String jsonResource) throws Exception {
         String request = getJsonFromFile(jsonResource);
 
         return mockMvc.perform(post(url)
@@ -119,6 +119,28 @@ public class IntegrationTestUtils {
             .build();
 
         when(assignCaseAccessService.getUserRoles(INTEGRATION_TEST_CASE_ID))
+            .thenReturn(caseAssignmentUserRolesResource);
+    }
+
+    /**
+     * Helper method to mock the AssignCaseAccessService.searchUserRoles to return specified case roles.
+     *
+     * @param assignCaseAccessService the AssignCaseAccessService to mock
+     * @param caseRoles               the case roles to return for the search
+     */
+    public static void givenSearchUserRoles(AssignCaseAccessService assignCaseAccessService, CaseRole... caseRoles) {
+        List<CaseAssignmentUserRole> caseAssignmentUserRoles = Arrays.stream(caseRoles)
+            .map(caseRole -> CaseAssignmentUserRole.builder()
+                .userId(UUID.randomUUID().toString())
+                .caseRole(caseRole.getCcdCode())
+                .build())
+            .toList();
+
+        CaseAssignmentUserRolesResource caseAssignmentUserRolesResource = CaseAssignmentUserRolesResource.builder()
+            .caseAssignmentUserRoles(caseAssignmentUserRoles)
+            .build();
+
+        when(assignCaseAccessService.searchUserRoles(INTEGRATION_TEST_CASE_ID))
             .thenReturn(caseAssignmentUserRolesResource);
     }
 
