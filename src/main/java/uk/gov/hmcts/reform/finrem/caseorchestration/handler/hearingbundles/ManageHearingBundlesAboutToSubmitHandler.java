@@ -4,10 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocumentCollection;
@@ -20,7 +22,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -44,7 +47,7 @@ public class ManageHearingBundlesAboutToSubmitHandler extends FinremCallbackHand
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Handling manage hearing bundles about to submit callback for case id: {}", callbackRequest.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         validateCaseData(callbackRequest);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
@@ -53,7 +56,7 @@ public class ManageHearingBundlesAboutToSubmitHandler extends FinremCallbackHand
         sortHearingBundlesAndValidateForErrors(errors, hearingUploadBundleCollection);
 
         List<HearingUploadBundleCollection> fdrHearingUploadBundleCollections =
-            Optional.ofNullable(caseData.getFdrHearingBundleCollections()).orElse(new ArrayList<>());
+            ofNullable(caseData.getFdrHearingBundleCollections()).orElse(new ArrayList<>());
         fdrHearingUploadBundleCollections.clear();
 
         hearingUploadBundleCollection.forEach(hearingUploadBundle -> {
@@ -93,7 +96,10 @@ public class ManageHearingBundlesAboutToSubmitHandler extends FinremCallbackHand
         if (hearingUploadBundleData.getValue().getBundleUploadDate() == null) {
             hearingUploadBundleData.getValue().setBundleUploadDate(LocalDateTime.now());
         }
-        String documentFilename = hearingUploadBundleData.getValue().getBundleDocuments().getDocumentFilename();
+        String documentFilename = ofNullable(hearingUploadBundleData.getValue().getBundleDocuments())
+            .map(CaseDocument::getDocumentFilename)
+            .orElse("");
+
         if (!documentFilename
             .toUpperCase(Locale.ENGLISH).endsWith(".PDF")) {
             errors.add(String.format("Uploaded bundle %s is not in expected format. Please upload bundle in pdf format.",

@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
+
 @Component
 @Slf4j
 public class HearingBundleDocumentCategoriser extends DocumentCategoriser {
@@ -30,11 +32,11 @@ public class HearingBundleDocumentCategoriser extends DocumentCategoriser {
     }
 
     private static void applyBundleCategory(List<HearingUploadBundleCollection> finremCaseData, DocumentCategory hearingBundle) {
-        finremCaseData.forEach(hearingUploadBundle -> {
+        finremCaseData.forEach(hearingUploadBundle ->
             hearingUploadBundle.getValue().getHearingBundleDocuments().forEach(hearingBundleDocument -> {
-                hearingBundleDocument.getValue().getBundleDocuments()
-                    .setCategoryId(hearingBundle.getDocumentCategoryId());
-            });
-        });
+                ofNullable(hearingBundleDocument.getValue().getBundleDocuments()).ifPresent(d ->
+                    d.setCategoryId(hearingBundle.getDocumentCategoryId()));
+            })
+        );
     }
 }
