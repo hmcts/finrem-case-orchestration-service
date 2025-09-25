@@ -72,15 +72,21 @@ class ManageHearingBundlesAboutToSubmitHandlerTest {
 
         manageHearingBundlesAboutToSubmitHandler.sortHearingBundlesAndValidateForErrors(new ArrayList<>(), hearingUploadBundleCollections);
 
-        assertThat(hearingUploadBundleCollections.getFirst().getValue().getHearingBundleDocuments().getFirst().getValue().getBundleUploadDate())
-            .isEqualTo(LocalDateTime.of(2021, 1, 1, 1, 1));
-        assertThat(hearingUploadBundleCollections.getFirst().getValue().getHearingBundleDocuments().get(1).getValue().getBundleUploadDate())
-            .isEqualTo(LocalDateTime.of(2020, 1, 1, 1, 1));
+        assertThat(hearingUploadBundleCollections.getFirst().getValue().getHearingBundleDocuments())
+            .map(HearingBundleDocumentCollection::getValue)
+            .map(HearingBundleDocument::getBundleUploadDate)
+            .containsExactly(
+                LocalDateTime.of(2021, 1, 1, 1, 1),
+                LocalDateTime.of(2020, 1, 1, 1, 1)
+            );
 
-        assertThat(hearingUploadBundleCollections.get(1).getValue().getHearingBundleDocuments().getFirst().getValue().getBundleUploadDate())
-            .isEqualTo(LocalDateTime.of(2023, 1, 1, 1, 1));
-        assertThat(hearingUploadBundleCollections.get(1).getValue().getHearingBundleDocuments().get(1).getValue().getBundleUploadDate())
-            .isEqualTo(LocalDateTime.of(2019, 1, 1, 1, 1));
+        assertThat(hearingUploadBundleCollections.get(1).getValue().getHearingBundleDocuments())
+            .map(HearingBundleDocumentCollection::getValue)
+            .map(HearingBundleDocument::getBundleUploadDate)
+            .containsExactly(
+                LocalDateTime.of(2023, 1, 1, 1, 1),
+                LocalDateTime.of(2019, 1, 1, 1, 1)
+            );
     }
 
     @Test
@@ -116,10 +122,17 @@ class ManageHearingBundlesAboutToSubmitHandlerTest {
                     .hearingUploadBundle(hearingUploadBundleCollections)
                     .build()), AUTH_TOKEN);
 
-        assertThat(response.getData().getHearingUploadBundle()).hasSize(1);
-        assertThat(response.getData().getHearingUploadBundle().getFirst().getValue().getHearingBundleFdr()).isEqualTo(YesOrNo.NO);
-        assertThat(response.getData().getFdrHearingBundleCollections()).hasSize(1);
-        assertThat(response.getData().getFdrHearingBundleCollections().getFirst().getValue().getHearingBundleFdr()).isEqualTo(YesOrNo.YES);
+        var data = response.getData();
+        assertThat(data.getHearingUploadBundle())
+            .map(HearingUploadBundleCollection::getValue)
+            .map(HearingUploadBundleHolder::getHearingBundleFdr)
+            .singleElement()
+            .isEqualTo(YesOrNo.NO);
+        assertThat(data.getFdrHearingBundleCollections())
+            .map(HearingUploadBundleCollection::getValue)
+            .map(HearingUploadBundleHolder::getHearingBundleFdr)
+            .singleElement()
+            .isEqualTo(YesOrNo.YES);
     }
 
     @Test
