@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_SOLICITOR_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.RESPONDENT_POSTCODE_ERROR;
@@ -55,56 +57,11 @@ class ContactDetailsValidatorTest {
     }
 
     private static Stream<Object[]> provideCaseDataWithInvalidPostcodes() {
+        return Stream.concat(provideContestedCaseDataWithInvalidPostcodes(), provideConsentedCaseDataWithInvalidPostcodes());
+    }
+
+    private static Stream<Object[]> provideContestedCaseDataWithInvalidPostcodes() {
         return Stream.of(
-            new Object[] {
-                createConsentedCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null),
-                APPLICANT_SOLICITOR_POSTCODE_ERROR },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null),
-                APPLICANT_POSTCODE_ERROR },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(null, false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
-                APPLICANT_POSTCODE_ERROR },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
-                APPLICANT_POSTCODE_ERROR },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(" ", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
-                APPLICANT_POSTCODE_ERROR },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(null, true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
-                null },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
-                null },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(" ", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
-                null },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES),
-                RESPONDENT_SOLICITOR_POSTCODE_ERROR },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES),
-                RESPONDENT_SOLICITOR_POSTCODE_ERROR },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null), null, null),
-                RESPONDENT_POSTCODE_ERROR },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(""), null, null),
-                RESPONDENT_POSTCODE_ERROR },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" "), null, null),
-                RESPONDENT_POSTCODE_ERROR },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier("", true), null, null),
-                null },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" ", true), null, null),
-                null },
-            new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null, true), null, null),
-                null },
-            // Contested
             new Object[] {
                 createContestedCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null),
                 APPLICANT_SOLICITOR_POSTCODE_ERROR },
@@ -156,6 +113,59 @@ class ContactDetailsValidatorTest {
         );
     }
 
+    private static Stream<Object[]> provideConsentedCaseDataWithInvalidPostcodes() {
+        return Stream.of(
+            new Object[] {
+                createConsentedCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null),
+                APPLICANT_SOLICITOR_POSTCODE_ERROR },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null),
+                APPLICANT_POSTCODE_ERROR },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(null, false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                APPLICANT_POSTCODE_ERROR },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                APPLICANT_POSTCODE_ERROR },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(" ", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                APPLICANT_POSTCODE_ERROR },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(null, true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                null },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                null },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(" ", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                null },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES),
+                RESPONDENT_SOLICITOR_POSTCODE_ERROR },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES),
+                RESPONDENT_SOLICITOR_POSTCODE_ERROR },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null), null, null),
+                RESPONDENT_POSTCODE_ERROR },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(""), null, null),
+                RESPONDENT_POSTCODE_ERROR },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" "), null, null),
+                RESPONDENT_POSTCODE_ERROR },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier("", true), null, null),
+                null },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" ", true), null, null),
+                null },
+            new Object[] {
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null, true), null, null),
+                null }
+        );
+    }
+
     @Test
     void shouldReturnNoErrorsForValidCaseData() {
         FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null);
@@ -194,6 +204,33 @@ class ContactDetailsValidatorTest {
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
+
+    @ParameterizedTest
+    @MethodSource("provideConsentedCaseDataWithInvalidPostcodes")
+    void shouldValidatePostcodesByRepresentationAndReturnExpectedErrors(FinremCaseData caseData, String expectedError) {
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(caseData).build();
+        List<String> errors = ContactDetailsValidator.validatePostcodesByRepresentation(finremCaseDetails);
+        if (expectedError != null) {
+            assertThat(errors).containsOnly(expectedError);
+        } else {
+            assertThat(errors).isEmpty();
+        }
+    }
+
+    @Test
+    void shouldValidatePostcodesByRepresentationUsingCorrectMethods() {
+
+//        ContactDetailsValidator.validatePostcodesByRepresentation(FinremCaseData.builder().contactDetailsWrapper().bul.build());
+
+    }
+
+    @Test
+    void givenContestedCase_whenValidatePostcodesByRepresentation_thenExceptionRaised() {
+        assertThrows(IllegalArgumentException.class, () ->
+            ContactDetailsValidator.validatePostcodesByRepresentation(FinremCaseDetails.builder().caseType(CaseType.CONTESTED).build()));
+    }
+
+
 
     private static FinremCaseData createContestedCaseData(String applicantSolicitorPostcode, String applicantPostcode,
                                                           String respondentSolicitorPostcode, String respondentPostcode,
