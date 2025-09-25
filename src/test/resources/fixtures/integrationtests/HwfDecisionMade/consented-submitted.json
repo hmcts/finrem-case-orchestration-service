@@ -1,0 +1,560 @@
+{
+  "case_details" : {
+    "id" : 1758091882065221,
+    "jurisdiction" : "DIVORCE",
+    "state" : "applicationSubmitted",
+    "version" : 2,
+    "case_type_id" : "FinancialRemedyMVP2",
+    "created_date" : [ 2025, 9, 24, 13, 41, 5, 493222000 ],
+    "last_modified" : [ 2025, 9, 24, 13, 41, 9, 627465000 ],
+    "last_state_modified_date" : [ 2025, 9, 24, 13, 41, 9, 627293000 ],
+    "security_classification" : "PUBLIC",
+    "case_data" : {
+      "amountToPay" : "6000",
+      "applicantFlags" : {
+        "details" : [ ],
+        "partyName" : "Frodo Baggins",
+        "roleOnCase" : "Applicant"
+      },
+      "divorceUploadEvidence1" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "document_filename" : "test.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "ApplicantOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "Y707HZM",
+          "OrganisationName" : "FinRem-1-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[APPSOLICITOR]"
+      },
+      "rSolicitorAddress" : {
+        "County" : "",
+        "Country" : "United Kingdom",
+        "PostCode" : "EC3A 2AD",
+        "PostTown" : "London",
+        "AddressLine1" : "Water Unite, 65-68",
+        "AddressLine2" : "Leadenhall Street",
+        "AddressLine3" : ""
+      },
+      "applicantRepresented" : "Yes",
+      "midlandsFRCList" : "nottingham",
+      "solicitorAgreeToReceiveEmails" : "Yes",
+      "solicitorEmail" : "fr_applicant_solicitor1@mailinator.com",
+      "rSolicitorPhone" : "07821 639001",
+      "natureOfApplication2" : [ "Maintenance Pending Suit" ],
+      "rSolicitorName" : "Sauron",
+      "divorceStageReached" : "Decree Nisi",
+      "authorisationName" : "test",
+      "applicantFMName" : "Frodo",
+      "divorceDecreeNisiDate" : "2024-01-01",
+      "rSolicitorFirm" : "Finrem Org 2",
+      "solicitorName" : "Bilbo Baggins",
+      "authorisation3" : "2025-06-03",
+      "otherDocLabel" : "Upload other order documentation related to your application",
+      "appRespondentRep" : "Yes",
+      "solicitorReference" : "Y707HZM",
+      "RespondentOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "95V5X7X",
+          "OrganisationName" : "FinRem-2-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[RESPSOLICITOR]"
+      },
+      "d81Joint" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "document_filename" : "test.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "authorisation2b" : "test",
+      "applicantLName" : "Baggins",
+      "rSolicitorEmail" : "fr_respondent_solicitor1@mailinator.com",
+      "solicitorAddress" : {
+        "County" : "Greater London",
+        "PostCode" : "EC3A 2AD",
+        "PostTown" : "London",
+        "AddressLine1" : "3rd Floor, 65-68 Leadenhall St"
+      },
+      "nottinghamCourtList" : "FR_nottinghamList_3",
+      "solicitorFirm" : "FinRem-1-Org",
+      "appRespondentLName" : "Gollum",
+      "regionList" : "midlands",
+      "isAdmin" : "No",
+      "caseFlags" : {
+        "details" : [ ],
+        "partyName" : "Case",
+        "roleOnCase" : "Case"
+      },
+      "orderSummary" : {
+        "Fees" : [ {
+          "value" : {
+            "FeeCode" : "FEE0228",
+            "FeeAmount" : "6000",
+            "FeeVersion" : "5",
+            "FeeDescription" : "Application (without notice)"
+          },
+          "id" : "c8dd1258-f0c1-4b0f-adcf-1128de520e74"
+        } ],
+        "PaymentTotal" : "6000",
+        "PaymentReference" : null
+      },
+      "divorceCaseNumber" : "ZZ21D47302",
+      "latestConsentOrder" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "document_filename" : "test.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "respondentFlags" : {
+        "details" : [ ],
+        "partyName" : "Smeagol Gollum",
+        "roleOnCase" : "Respondent"
+      },
+      "solicitorPhone" : "01626 777514",
+      "civilPartnership" : "No",
+      "consentVariationOrderLabelC" : "Consent Order",
+      "HWFNumber" : "HWF1234",
+      "consentOrder" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "document_filename" : "test.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "helpWithFeesQuestion" : "Yes",
+      "authorisationFirm" : "test",
+      "d81Question" : "Yes",
+      "appRespondentFMName" : "Smeagol",
+      "consentVariationOrderLabelL" : "consent order"
+    },
+    "data_classification" : {
+      "amountToPay" : "PUBLIC",
+      "applicantFlags" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "details" : {
+            "classification" : "PUBLIC",
+            "value" : [ ]
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        }
+      },
+      "divorceUploadEvidence1" : "PUBLIC",
+      "ApplicantOrganisationPolicy" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "Organisation" : {
+            "classification" : "PUBLIC",
+            "value" : {
+              "OrganisationID" : "PUBLIC",
+              "OrganisationName" : "PUBLIC"
+            }
+          },
+          "OrgPolicyCaseAssignedRole" : "PUBLIC"
+        }
+      },
+      "rSolicitorAddress" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "County" : "PUBLIC",
+          "Country" : "PUBLIC",
+          "PostCode" : "PUBLIC",
+          "PostTown" : "PUBLIC",
+          "AddressLine1" : "PUBLIC",
+          "AddressLine2" : "PUBLIC",
+          "AddressLine3" : "PUBLIC"
+        }
+      },
+      "applicantRepresented" : "PUBLIC",
+      "midlandsFRCList" : "PUBLIC",
+      "solicitorAgreeToReceiveEmails" : "PUBLIC",
+      "solicitorEmail" : "PUBLIC",
+      "rSolicitorPhone" : "PUBLIC",
+      "natureOfApplication2" : "PUBLIC",
+      "rSolicitorName" : "PUBLIC",
+      "divorceStageReached" : "PUBLIC",
+      "authorisationName" : "PUBLIC",
+      "applicantFMName" : "PUBLIC",
+      "divorceDecreeNisiDate" : "PUBLIC",
+      "rSolicitorFirm" : "PUBLIC",
+      "solicitorName" : "PUBLIC",
+      "authorisation3" : "PUBLIC",
+      "otherDocLabel" : "PUBLIC",
+      "appRespondentRep" : "PUBLIC",
+      "solicitorReference" : "PUBLIC",
+      "RespondentOrganisationPolicy" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "Organisation" : {
+            "classification" : "PUBLIC",
+            "value" : {
+              "OrganisationID" : "PUBLIC",
+              "OrganisationName" : "PUBLIC"
+            }
+          },
+          "OrgPolicyCaseAssignedRole" : "PUBLIC"
+        }
+      },
+      "d81Joint" : "PUBLIC",
+      "authorisation2b" : "PUBLIC",
+      "applicantLName" : "PUBLIC",
+      "rSolicitorEmail" : "PUBLIC",
+      "solicitorAddress" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "County" : "PUBLIC",
+          "PostCode" : "PUBLIC",
+          "PostTown" : "PUBLIC",
+          "AddressLine1" : "PUBLIC"
+        }
+      },
+      "nottinghamCourtList" : "PUBLIC",
+      "solicitorFirm" : "PUBLIC",
+      "appRespondentLName" : "PUBLIC",
+      "regionList" : "PUBLIC",
+      "isAdmin" : "PUBLIC",
+      "caseFlags" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "details" : {
+            "classification" : "PUBLIC",
+            "value" : [ ]
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        }
+      },
+      "orderSummary" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "Fees" : {
+            "classification" : "PUBLIC",
+            "value" : [ {
+              "value" : {
+                "FeeCode" : "PUBLIC",
+                "FeeAmount" : "PUBLIC",
+                "FeeVersion" : "PUBLIC",
+                "FeeDescription" : "PUBLIC"
+              },
+              "id" : "c8dd1258-f0c1-4b0f-adcf-1128de520e74"
+            } ]
+          },
+          "PaymentTotal" : "PUBLIC",
+          "PaymentReference" : "PUBLIC"
+        }
+      },
+      "divorceCaseNumber" : "PUBLIC",
+      "latestConsentOrder" : "PUBLIC",
+      "respondentFlags" : {
+        "classification" : "PUBLIC",
+        "value" : {
+          "details" : {
+            "classification" : "PUBLIC",
+            "value" : [ ]
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        }
+      },
+      "solicitorPhone" : "PUBLIC",
+      "civilPartnership" : "PUBLIC",
+      "consentVariationOrderLabelC" : "PUBLIC",
+      "HWFNumber" : "PUBLIC",
+      "consentOrder" : "PUBLIC",
+      "helpWithFeesQuestion" : "PUBLIC",
+      "authorisationFirm" : "PUBLIC",
+      "d81Question" : "PUBLIC",
+      "appRespondentFMName" : "PUBLIC",
+      "consentVariationOrderLabelL" : "PUBLIC"
+    },
+    "supplementary_data" : {
+      "HMCTSServiceId" : "ABA2",
+      "orgs_assigned_users" : {
+        "Y707HZM" : 1
+      }
+    },
+    "after_submit_callback_response" : null,
+    "callback_response_status_code" : null,
+    "callback_response_status" : null,
+    "delete_draft_response_status_code" : null,
+    "delete_draft_response_status" : null
+  },
+  "case_details_before" : {
+    "id" : 1758091882065221,
+    "jurisdiction" : "DIVORCE",
+    "state" : "awaitingHWFDecision",
+    "version" : 1,
+    "case_type_id" : "FinancialRemedyMVP2",
+    "created_date" : [ 2025, 9, 24, 13, 41, 5, 493222000 ],
+    "last_modified" : [ 2025, 9, 24, 13, 41, 9, 126837000 ],
+    "last_state_modified_date" : [ 2025, 9, 24, 13, 41, 9, 126554000 ],
+    "security_classification" : "PUBLIC",
+    "case_data" : {
+      "amountToPay" : "6000",
+      "applicantFlags" : {
+        "details" : [ ],
+        "partyName" : "Frodo Baggins",
+        "roleOnCase" : "Applicant"
+      },
+      "divorceUploadEvidence1" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "document_filename" : "test.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "ApplicantOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "Y707HZM",
+          "OrganisationName" : "FinRem-1-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[APPSOLICITOR]"
+      },
+      "rSolicitorAddress" : {
+        "County" : "",
+        "Country" : "United Kingdom",
+        "PostCode" : "EC3A 2AD",
+        "PostTown" : "London",
+        "AddressLine1" : "Water Unite, 65-68",
+        "AddressLine2" : "Leadenhall Street",
+        "AddressLine3" : ""
+      },
+      "applicantRepresented" : "Yes",
+      "midlandsFRCList" : "nottingham",
+      "solicitorAgreeToReceiveEmails" : "Yes",
+      "solicitorEmail" : "fr_applicant_solicitor1@mailinator.com",
+      "rSolicitorPhone" : "07821 639001",
+      "natureOfApplication2" : [ "Maintenance Pending Suit" ],
+      "rSolicitorName" : "Sauron",
+      "divorceStageReached" : "Decree Nisi",
+      "authorisationName" : "test",
+      "applicantFMName" : "Frodo",
+      "divorceDecreeNisiDate" : "2024-01-01",
+      "rSolicitorFirm" : "Finrem Org 2",
+      "solicitorName" : "Bilbo Baggins",
+      "authorisation3" : "2025-06-03",
+      "otherDocLabel" : "Upload other order documentation related to your application",
+      "appRespondentRep" : "Yes",
+      "solicitorReference" : "Y707HZM",
+      "RespondentOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "95V5X7X",
+          "OrganisationName" : "FinRem-2-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[RESPSOLICITOR]"
+      },
+      "d81Joint" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "document_filename" : "test.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "authorisation2b" : "test",
+      "applicantLName" : "Baggins",
+      "rSolicitorEmail" : "fr_respondent_solicitor1@mailinator.com",
+      "solicitorAddress" : {
+        "County" : "Greater London",
+        "PostCode" : "EC3A 2AD",
+        "PostTown" : "London",
+        "AddressLine1" : "3rd Floor, 65-68 Leadenhall St"
+      },
+      "nottinghamCourtList" : "FR_nottinghamList_3",
+      "solicitorFirm" : "FinRem-1-Org",
+      "appRespondentLName" : "Gollum",
+      "regionList" : "midlands",
+      "isAdmin" : "No",
+      "caseFlags" : {
+        "details" : [ ],
+        "partyName" : "Case",
+        "roleOnCase" : "Case"
+      },
+      "orderSummary" : {
+        "Fees" : [ {
+          "id" : "c8dd1258-f0c1-4b0f-adcf-1128de520e74",
+          "value" : {
+            "FeeCode" : "FEE0228",
+            "FeeAmount" : "6000",
+            "FeeVersion" : "5",
+            "FeeDescription" : "Application (without notice)"
+          }
+        } ],
+        "PaymentTotal" : "6000",
+        "PaymentReference" : null
+      },
+      "divorceCaseNumber" : "ZZ21D47302",
+      "latestConsentOrder" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "document_filename" : "test.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "respondentFlags" : {
+        "details" : [ ],
+        "partyName" : "Smeagol Gollum",
+        "roleOnCase" : "Respondent"
+      },
+      "solicitorPhone" : "01626 777514",
+      "civilPartnership" : "No",
+      "consentVariationOrderLabelC" : "Consent Order",
+      "HWFNumber" : "HWF1234",
+      "consentOrder" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31",
+        "document_filename" : "test.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/1011d179-4d65-420b-85d7-2c6387016a31/binary"
+      },
+      "helpWithFeesQuestion" : "Yes",
+      "authorisationFirm" : "test",
+      "d81Question" : "Yes",
+      "appRespondentFMName" : "Smeagol",
+      "consentVariationOrderLabelL" : "consent order"
+    },
+    "data_classification" : {
+      "amountToPay" : "PUBLIC",
+      "applicantFlags" : {
+        "value" : {
+          "details" : {
+            "value" : [ ],
+            "classification" : "PUBLIC"
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "divorceUploadEvidence1" : "PUBLIC",
+      "ApplicantOrganisationPolicy" : {
+        "value" : {
+          "Organisation" : {
+            "value" : {
+              "OrganisationID" : "PUBLIC",
+              "OrganisationName" : "PUBLIC"
+            },
+            "classification" : "PUBLIC"
+          },
+          "OrgPolicyCaseAssignedRole" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "rSolicitorAddress" : {
+        "value" : {
+          "County" : "PUBLIC",
+          "Country" : "PUBLIC",
+          "PostCode" : "PUBLIC",
+          "PostTown" : "PUBLIC",
+          "AddressLine1" : "PUBLIC",
+          "AddressLine2" : "PUBLIC",
+          "AddressLine3" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "applicantRepresented" : "PUBLIC",
+      "midlandsFRCList" : "PUBLIC",
+      "solicitorAgreeToReceiveEmails" : "PUBLIC",
+      "solicitorEmail" : "PUBLIC",
+      "rSolicitorPhone" : "PUBLIC",
+      "natureOfApplication2" : "PUBLIC",
+      "rSolicitorName" : "PUBLIC",
+      "divorceStageReached" : "PUBLIC",
+      "authorisationName" : "PUBLIC",
+      "applicantFMName" : "PUBLIC",
+      "divorceDecreeNisiDate" : "PUBLIC",
+      "rSolicitorFirm" : "PUBLIC",
+      "solicitorName" : "PUBLIC",
+      "authorisation3" : "PUBLIC",
+      "otherDocLabel" : "PUBLIC",
+      "appRespondentRep" : "PUBLIC",
+      "solicitorReference" : "PUBLIC",
+      "RespondentOrganisationPolicy" : {
+        "value" : {
+          "Organisation" : {
+            "value" : {
+              "OrganisationID" : "PUBLIC",
+              "OrganisationName" : "PUBLIC"
+            },
+            "classification" : "PUBLIC"
+          },
+          "OrgPolicyCaseAssignedRole" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "d81Joint" : "PUBLIC",
+      "authorisation2b" : "PUBLIC",
+      "applicantLName" : "PUBLIC",
+      "rSolicitorEmail" : "PUBLIC",
+      "solicitorAddress" : {
+        "value" : {
+          "County" : "PUBLIC",
+          "PostCode" : "PUBLIC",
+          "PostTown" : "PUBLIC",
+          "AddressLine1" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "nottinghamCourtList" : "PUBLIC",
+      "solicitorFirm" : "PUBLIC",
+      "appRespondentLName" : "PUBLIC",
+      "regionList" : "PUBLIC",
+      "isAdmin" : "PUBLIC",
+      "caseFlags" : {
+        "value" : {
+          "details" : {
+            "value" : [ ],
+            "classification" : "PUBLIC"
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "orderSummary" : {
+        "value" : {
+          "Fees" : {
+            "value" : [ {
+              "id" : "c8dd1258-f0c1-4b0f-adcf-1128de520e74",
+              "value" : {
+                "FeeCode" : "PUBLIC",
+                "FeeAmount" : "PUBLIC",
+                "FeeVersion" : "PUBLIC",
+                "FeeDescription" : "PUBLIC"
+              }
+            } ],
+            "classification" : "PUBLIC"
+          },
+          "PaymentTotal" : "PUBLIC",
+          "PaymentReference" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "divorceCaseNumber" : "PUBLIC",
+      "latestConsentOrder" : "PUBLIC",
+      "respondentFlags" : {
+        "value" : {
+          "details" : {
+            "value" : [ ],
+            "classification" : "PUBLIC"
+          },
+          "partyName" : "PUBLIC",
+          "roleOnCase" : "PUBLIC"
+        },
+        "classification" : "PUBLIC"
+      },
+      "solicitorPhone" : "PUBLIC",
+      "civilPartnership" : "PUBLIC",
+      "consentVariationOrderLabelC" : "PUBLIC",
+      "HWFNumber" : "PUBLIC",
+      "consentOrder" : "PUBLIC",
+      "helpWithFeesQuestion" : "PUBLIC",
+      "authorisationFirm" : "PUBLIC",
+      "d81Question" : "PUBLIC",
+      "appRespondentFMName" : "PUBLIC",
+      "consentVariationOrderLabelL" : "PUBLIC"
+    },
+    "supplementary_data" : {
+      "HMCTSServiceId" : "ABA2",
+      "orgs_assigned_users" : {
+        "Y707HZM" : 1
+      }
+    },
+    "after_submit_callback_response" : null,
+    "callback_response_status_code" : null,
+    "callback_response_status" : null,
+    "delete_draft_response_status_code" : null,
+    "delete_draft_response_status" : null
+  },
+  "event_id" : "FR_HWFDecisionMade",
+  "ignore_warning" : null
+}
