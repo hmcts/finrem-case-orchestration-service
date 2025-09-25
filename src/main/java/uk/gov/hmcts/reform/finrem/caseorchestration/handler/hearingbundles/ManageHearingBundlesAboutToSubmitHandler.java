@@ -41,7 +41,7 @@ public class ManageHearingBundlesAboutToSubmitHandler extends FinremCallbackHand
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.MANAGE_HEARING_BUNDLES.equals(eventType));
+            && EventType.MANAGE_HEARING_BUNDLES.equals(eventType);
     }
 
     @Override
@@ -62,7 +62,6 @@ public class ManageHearingBundlesAboutToSubmitHandler extends FinremCallbackHand
         hearingUploadBundleCollection.forEach(hearingUploadBundle -> {
             if (hearingUploadBundle.getValue().getHearingBundleFdr() == YesOrNo.YES) {
                 fdrHearingUploadBundleCollections.add(hearingUploadBundle);
-
             }
         });
 
@@ -70,7 +69,6 @@ public class ManageHearingBundlesAboutToSubmitHandler extends FinremCallbackHand
         caseData.setFdrHearingBundleCollections(fdrHearingUploadBundleCollections);
         hearingBundleDocumentCategoriser.categorise(caseData);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).data(caseData).build();
-
     }
 
     protected void sortHearingBundlesAndValidateForErrors(List<String> errors, List<HearingUploadBundleCollection> hearingUploadBundleCollection) {
@@ -87,7 +85,6 @@ public class ManageHearingBundlesAboutToSubmitHandler extends FinremCallbackHand
                 hearingBundleDocuments.sort(Comparator.nullsLast((e1, e2) -> e2.getValue().getBundleUploadDate()
                     .compareTo(e1.getValue().getBundleUploadDate())));
                 log.info("Sorted hearing bundle documents for case id: {}", hearingUploadBundle.getValue().getHearingBundleDate());
-
             });
         }
     }
