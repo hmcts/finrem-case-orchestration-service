@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcategory;
 
 import org.junit.Before;
 import org.junit.Test;

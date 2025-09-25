@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.HearingBundleDocumentCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcategory.HearingBundleDocumentCategoriser;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
