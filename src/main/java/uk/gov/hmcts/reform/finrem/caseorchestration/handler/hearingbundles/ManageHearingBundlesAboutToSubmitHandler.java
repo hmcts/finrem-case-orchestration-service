@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.hearingbundles;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -97,7 +98,7 @@ public class ManageHearingBundlesAboutToSubmitHandler extends FinremCallbackHand
             .map(CaseDocument::getDocumentFilename)
             .orElse("");
 
-        if (!documentFilename
+        if (!StringUtils.isBlank(documentFilename) && !documentFilename
             .toUpperCase(Locale.ENGLISH).endsWith(".PDF")) {
             errors.add(String.format("Uploaded bundle %s is not in expected format. Please upload bundle in pdf format.",
                 documentFilename));

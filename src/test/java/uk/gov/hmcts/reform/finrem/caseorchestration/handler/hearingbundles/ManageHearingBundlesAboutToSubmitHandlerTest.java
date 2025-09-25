@@ -1,20 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.hearingbundles;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleCollection;
@@ -28,42 +26,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ManageHearingBundlesAboutToSubmitHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class ManageHearingBundlesAboutToSubmitHandlerTest {
 
     @Mock
     private HearingBundleDocumentCategoriser hearingBundleDocumentCategoriser;
 
-    ManageHearingBundlesAboutToSubmitHandler manageHearingBundlesAboutToSubmitHandler;
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    @Before
-    public void setUp() {
-        manageHearingBundlesAboutToSubmitHandler =
-            new ManageHearingBundlesAboutToSubmitHandler(new FinremCaseDetailsMapper(new ObjectMapper()), hearingBundleDocumentCategoriser);
+    @InjectMocks
+    private ManageHearingBundlesAboutToSubmitHandler handler;
+
+    @Test
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANAGE_HEARING_BUNDLES);
     }
 
     @Test
-    public void givenHandlerCanHandleCallback_whenCanHandle_thenReturnTrue() {
-        assertThat(manageHearingBundlesAboutToSubmitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANAGE_HEARING_BUNDLES),
-            is(true));
-    }
-
-    @Test
-    public void givenInvalidCallbackType_whenCanHandle_thenReturnFalse() {
-        assertThat(manageHearingBundlesAboutToSubmitHandler.canHandle(
-                CallbackType.ABOUT_TO_SUBMIT,
-                CaseType.CONTESTED,
-                EventType.MANAGE_BARRISTER),
-            is(false));
-    }
-
-    @Test
-    public void givenHearingBundlesShouldSortByBundleDateAndUploadedDate() {
-
+    void givenHearingBundlesShouldSortByBundleDateAndUploadedDate() {
         List<HearingBundleDocumentCollection> hearingBundleDocumentCollections1 =
             Arrays.asList(getHearingBundleDocumentCollection(2019, "file3.pdf"), getHearingBundleDocumentCollection(2023, "file4.pdf"));
         HearingUploadBundleCollection hearingUploadBundleCollectionEarliest = HearingUploadBundleCollection.builder()
@@ -72,7 +57,6 @@ public class ManageHearingBundlesAboutToSubmitHandlerTest {
                 .hearingBundleDocuments(hearingBundleDocumentCollections1)
                 .build())
             .build();
-
 
         List<HearingBundleDocumentCollection> hearingBundleDocumentCollections2 =
             Arrays.asList(getHearingBundleDocumentCollection(2021, "file5.pdf"), getHearingBundleDocumentCollection(2020, "file6.pdf"));
@@ -86,22 +70,21 @@ public class ManageHearingBundlesAboutToSubmitHandlerTest {
         List<HearingUploadBundleCollection> hearingUploadBundleCollections =
             Arrays.asList(hearingUploadBundleCollectionEarliest, hearingUploadBundleCollectionLatest);
 
-        manageHearingBundlesAboutToSubmitHandler.sortHearingBundlesAndValidateForErrors(new ArrayList<>(), hearingUploadBundleCollections);
+        handler.sortHearingBundlesAndValidateForErrors(new ArrayList<>(), hearingUploadBundleCollections);
 
-        assertThat(hearingUploadBundleCollections.get(0).getValue().getHearingBundleDocuments().get(0).getValue().getBundleUploadDate(),
-            is(LocalDateTime.of(2021, 1, 1, 1, 1)));
-        assertThat(hearingUploadBundleCollections.get(0).getValue().getHearingBundleDocuments().get(1).getValue().getBundleUploadDate(),
-            is(LocalDateTime.of(2020, 1, 1, 1, 1)));
+        assertThat(hearingUploadBundleCollections.getFirst().getValue().getHearingBundleDocuments().getFirst().getValue().getBundleUploadDate())
+            .isEqualTo(LocalDateTime.of(2021, 1, 1, 1, 1));
+        assertThat(hearingUploadBundleCollections.getFirst().getValue().getHearingBundleDocuments().get(1).getValue().getBundleUploadDate())
+            .isEqualTo(LocalDateTime.of(2020, 1, 1, 1, 1));
 
-        assertThat(hearingUploadBundleCollections.get(1).getValue().getHearingBundleDocuments().get(0).getValue().getBundleUploadDate(),
-            is(LocalDateTime.of(2023, 1, 1, 1, 1)));
-        assertThat(hearingUploadBundleCollections.get(1).getValue().getHearingBundleDocuments().get(1).getValue().getBundleUploadDate(),
-            is(LocalDateTime.of(2019, 1, 1, 1, 1)));
-
+        assertThat(hearingUploadBundleCollections.get(1).getValue().getHearingBundleDocuments().getFirst().getValue().getBundleUploadDate())
+            .isEqualTo(LocalDateTime.of(2023, 1, 1, 1, 1));
+        assertThat(hearingUploadBundleCollections.get(1).getValue().getHearingBundleDocuments().get(1).getValue().getBundleUploadDate())
+            .isEqualTo(LocalDateTime.of(2019, 1, 1, 1, 1));
     }
 
     @Test
-    public void shouldMoveHearingBundleToFdrCollections() {
+    void shouldMoveHearingBundleToFdrCollections() {
         List<HearingBundleDocumentCollection> hearingBundleDocumentCollections1 =
             Arrays.asList(getHearingBundleDocumentCollection(2019, "file1.pdf"), getHearingBundleDocumentCollection(2023, "file4.pdf"));
 
@@ -123,36 +106,74 @@ public class ManageHearingBundlesAboutToSubmitHandlerTest {
                 .build())
             .build();
 
+        List<HearingUploadBundleCollection> hearingUploadBundleCollections = new ArrayList<>();
+        hearingUploadBundleCollections.add(hearingUploadBundleCollection);
+        hearingUploadBundleCollections.add(hearingUploadBundleCollection2);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(
+                FinremCaseData.builder()
+                    .hearingUploadBundle(hearingUploadBundleCollections)
+                    .build()), AUTH_TOKEN);
+
+        assertThat(response.getData().getHearingUploadBundle()).hasSize(1);
+        assertThat(response.getData().getHearingUploadBundle().getFirst().getValue().getHearingBundleFdr()).isEqualTo(YesOrNo.NO);
+        assertThat(response.getData().getFdrHearingBundleCollections()).hasSize(1);
+        assertThat(response.getData().getFdrHearingBundleCollections().getFirst().getValue().getHearingBundleFdr()).isEqualTo(YesOrNo.YES);
+    }
+
+    @Test
+    void givenNonPdfFileUploaded_whenHandle_thenReturnErrors() {
+        List<HearingBundleDocumentCollection> hearingBundleDocumentCollections1 =
+            Arrays.asList(getHearingBundleDocumentCollection(2019, "file1.doc"), getHearingBundleDocumentCollectionWitDeletedBundleDocuments(2023));
+
+        HearingUploadBundleCollection hearingUploadBundleCollection = HearingUploadBundleCollection.builder()
+            .value(HearingUploadBundleHolder.builder()
+                .hearingBundleDate(LocalDate.of(2019, 1, 1))
+                .hearingBundleDocuments(hearingBundleDocumentCollections1)
+                .hearingBundleFdr(YesOrNo.YES)
+                .build())
+            .build();
+
+        List<HearingBundleDocumentCollection> hearingBundleDocumentCollections2 =
+            Arrays.asList(getHearingBundleDocumentCollection(2020, "file2.pdf"), getHearingBundleDocumentCollection(2022, "file4.pdf"));
+        HearingUploadBundleCollection hearingUploadBundleCollection2 = HearingUploadBundleCollection.builder()
+            .value(HearingUploadBundleHolder.builder()
+                .hearingBundleDate(LocalDate.of(2020, 1, 1))
+                .hearingBundleDocuments(hearingBundleDocumentCollections2)
+                .hearingBundleFdr(YesOrNo.NO)
+                .build())
+            .build();
 
         List<HearingUploadBundleCollection> hearingUploadBundleCollections = new ArrayList<>();
         hearingUploadBundleCollections.add(hearingUploadBundleCollection);
         hearingUploadBundleCollections.add(hearingUploadBundleCollection2);
 
-
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            manageHearingBundlesAboutToSubmitHandler.handle(FinremCallbackRequest.builder()
-                .caseDetails(FinremCaseDetails.builder()
-                    .data(FinremCaseData.builder()
-                        .hearingUploadBundle(hearingUploadBundleCollections)
-                        .build())
-                    .build())
-                .build(), "auth");
+            handler.handle(FinremCallbackRequestFactory.from(
+                FinremCaseData.builder()
+                    .hearingUploadBundle(hearingUploadBundleCollections)
+                    .build()), AUTH_TOKEN);
 
-        assertThat(response.getData().getHearingUploadBundle().size(), is(1));
-        assertThat(response.getData().getHearingUploadBundle().get(0).getValue().getHearingBundleFdr(), is(YesOrNo.NO));
-        assertThat(response.getData().getFdrHearingBundleCollections().size(), is(1));
-        assertThat(response.getData().getFdrHearingBundleCollections().get(0).getValue().getHearingBundleFdr(), is(YesOrNo.YES));
-
+        assertThat(response.getErrors()).containsExactly(
+            "Uploaded bundle file1.doc is not in expected format. Please upload bundle in pdf format."
+        );
     }
 
     private static HearingBundleDocumentCollection getHearingBundleDocumentCollection(int year, String filename) {
-        HearingBundleDocumentCollection hearingBundleDocumentCollection1 = HearingBundleDocumentCollection.builder()
+        return HearingBundleDocumentCollection.builder()
             .value(HearingBundleDocument.builder()
                 .bundleDocuments(CaseDocument.builder().documentFilename(filename).build())
                 .bundleUploadDate(LocalDateTime.of(year, 1, 1, 1, 1))
                 .build())
             .build();
-        return hearingBundleDocumentCollection1;
     }
 
+    private static HearingBundleDocumentCollection getHearingBundleDocumentCollectionWitDeletedBundleDocuments(int year) {
+        return HearingBundleDocumentCollection.builder()
+            .value(HearingBundleDocument.builder()
+                .bundleUploadDate(LocalDateTime.of(year, 1, 1, 1, 1))
+                .build())
+            .build();
+    }
 }
