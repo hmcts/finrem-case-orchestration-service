@@ -16,13 +16,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocument
 @Service
 public class RejectedConsentOrderInContestedAboutToStartHandler extends FinremCallbackHandler {
 
-    private final RefusalOrderDocumentService service;
+    private final RefusalOrderDocumentService refusalOrderDocumentService;
 
     @Autowired
     public RejectedConsentOrderInContestedAboutToStartHandler(FinremCaseDetailsMapper mapper,
-                                                              RefusalOrderDocumentService service) {
+                                                              RefusalOrderDocumentService refusalOrderDocumentService) {
         super(mapper);
-        this.service = service;
+        this.refusalOrderDocumentService = refusalOrderDocumentService;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class RejectedConsentOrderInContestedAboutToStartHandler extends FinremCa
             EventType.CONSENT_ORDER_NOT_APPROVED, caseDetails.getId());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(service.setDefaults(caseDetails.getData(), userAuthorisation))
+            .data(refusalOrderDocumentService.setDefaults(caseDetails.getData(), userAuthorisation))
             .build();
     }
 }
