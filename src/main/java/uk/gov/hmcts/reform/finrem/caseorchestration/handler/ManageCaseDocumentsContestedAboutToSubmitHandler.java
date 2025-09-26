@@ -71,6 +71,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         List<String> warnings = new ArrayList<>();
 

@@ -36,6 +36,7 @@ public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallb
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         caseData.setManageCaseDocumentCollection(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
