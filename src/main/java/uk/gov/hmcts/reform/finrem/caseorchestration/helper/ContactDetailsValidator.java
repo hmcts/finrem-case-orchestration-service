@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
@@ -20,6 +21,8 @@ public class ContactDetailsValidator {
     static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
     static final String INVALID_EMAIL_ADDRESS_ERROR_MESSAGE = "%s is not a valid Email address.";
+    static final String INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE = "%s. Method validatePostcodesByRepresentation is only for "
+        + "updating contact details on consented cases. Use validateCaseDataAddresses whenever possible.";
 
     private ContactDetailsValidator() {
     }
@@ -50,6 +53,43 @@ public class ContactDetailsValidator {
         checkForEmptyApplicantPostcode(wrapper, errors);
         checkForEmptyRespondentSolicitorPostcode(caseData, wrapper, errors);
         checkForEmptyRespondentPostcode(wrapper, errors);
+
+        return errors;
+    }
+
+    /**
+     * Checks EITHER a party, or their representative, for missing or empty postcode fields.
+     * Used by the consented "Update contact details" event, which hides addresses depending on representation.
+     * If a party is represented, only the representative address is shown to the admin.
+     * If a party is unrepresented, only the party address is shown to the admin.
+     * This method only validates the address that is shown to the admin.
+     * This also stops validation failing for older case data that is already stored with errors (such as applicantAddress = {}).
+     * @param finremCaseDetails the {@link FinremCaseDetails} containing contact details to validate
+     * @return a list of validation error messages for any missing or invalid postcode fields
+     */
+    public static List<String> validatePostcodesByRepresentation(FinremCaseDetails finremCaseDetails) {
+
+        if (CaseType.CONTESTED.equals(finremCaseDetails.getCaseType())) {
+            throw new IllegalArgumentException(
+                format(INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE, finremCaseDetails.getCaseIdAsString()));
+        }
+
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
+
+        List<String> errors = new ArrayList<>();
+        ContactDetailsWrapper wrapper = finremCaseData.getContactDetailsWrapper();
+
+        if (YesOrNo.YES.equals(wrapper.getApplicantRepresented())) {
+            ContactDetailsValidator.checkForEmptyApplicantSolicitorPostcode(finremCaseData, wrapper, errors);
+        } else {
+            ContactDetailsValidator.checkForEmptyApplicantPostcode(wrapper, errors);
+        }
+
+        if (YesOrNo.YES.equals(wrapper.getConsentedRespondentRepresented())) {
+            ContactDetailsValidator.checkForEmptyRespondentSolicitorPostcode(finremCaseData, wrapper, errors);
+        } else {
+            ContactDetailsValidator.checkForEmptyRespondentPostcode(wrapper, errors);
+        }
 
         return errors;
     }

@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -16,11 +17,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -32,16 +36,19 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     private final UpdateContactDetailsService updateContactDetailsService;
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final UpdateRepresentationWorkflowService nocWorkflowService;
+    private final InternationalPostalService internationalPostalService;
 
     public UpdateContactDetailsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     UpdateContactDetailsService updateContactDetailsService,
                                                     OnlineFormDocumentService onlineFormDocumentService,
-                                                    UpdateRepresentationWorkflowService nocWorkflowService
+                                                    UpdateRepresentationWorkflowService nocWorkflowService,
+                                                    InternationalPostalService internationalPostalService
     ) {
         super(finremCaseDetailsMapper);
         this.updateContactDetailsService = updateContactDetailsService;
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.nocWorkflowService = nocWorkflowService;
+        this.internationalPostalService = internationalPostalService;
     }
 
     @Override
@@ -91,7 +98,9 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).build();
+            .data(finremCaseData)
+            .errors(getPostCodeErrors(finremCaseDetails))
+            .build();
     }
 
     private void considerContestedMiniFormA(FinremCaseDetails finremCaseDetails,
@@ -112,5 +121,28 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
             CaseDocument document = onlineFormDocumentService.generateContestedMiniForm(userAuthorisation, finremCaseDetails);
             finremCaseDetails.getData().setMiniFormA(document);
         }
+    }
+
+    /*
+     * Distinct mid-event handlers validate postcodes for Consented and Contested cases.
+     * This blends validation from each, to protect Users from skipping validation with browser controls.
+     * @param finremCaseDetails case details
+     * @return list of errors
+     */
+    private List<String> getPostCodeErrors(FinremCaseDetails finremCaseDetails) {
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
+        List<String> errors = new ArrayList<>();
+        errors.addAll(internationalPostalService.validate(finremCaseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData));
+
+        if (CaseType.CONSENTED.equals(finremCaseDetails.getCaseType())) {
+            errors.addAll(ContactDetailsValidator.validatePostcodesByRepresentation(finremCaseDetails));
+        }
+
+        if (CaseType.CONTESTED.equals(finremCaseDetails.getCaseType())) {
+            errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseData));
+        }
+
+        return errors;
     }
 }
