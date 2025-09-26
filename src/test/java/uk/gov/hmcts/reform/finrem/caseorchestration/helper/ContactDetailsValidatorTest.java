@@ -4,7 +4,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -16,8 +18,13 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_SOLICITOR_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.RESPONDENT_POSTCODE_ERROR;
@@ -217,20 +224,45 @@ class ContactDetailsValidatorTest {
         }
     }
 
-    @Test
-    void shouldValidatePostcodesByRepresentationUsingCorrectMethods() {
+    @ParameterizedTest
+    @EnumSource(YesOrNo.class)
+    void shouldValidatePostcodesByRepresentationUsingCorrectMethods(YesOrNo isRepresented) {
 
-//        ContactDetailsValidator.validatePostcodesByRepresentation(FinremCaseData.builder().contactDetailsWrapper().bul.build());
+        // arrange
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .caseType(CaseType.CONSENTED)
+            .data(createConsentedCaseData("", "", "", "", isRepresented, isRepresented)).build();
 
+        int timesToCallSolicitorMethods = (isRepresented == YesOrNo.YES) ? 1 : 0;
+        int timesToCallPartyMethods = (isRepresented == YesOrNo.NO) ? 1 : 0;
+
+        try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class, CALLS_REAL_METHODS)) {
+            // call
+            ContactDetailsValidator.validatePostcodesByRepresentation(finremCaseDetails);
+
+            // assert
+            mockedStatic.verify(() -> ContactDetailsValidator.checkForEmptyApplicantSolicitorPostcode(
+                any(FinremCaseData.class), any(ContactDetailsWrapper.class), anyList()), times(timesToCallSolicitorMethods));
+            mockedStatic.verify(() -> ContactDetailsValidator.checkForEmptyRespondentSolicitorPostcode(
+                any(FinremCaseData.class), any(ContactDetailsWrapper.class), anyList()), times(timesToCallSolicitorMethods));
+            mockedStatic.verify(() -> ContactDetailsValidator.checkForEmptyApplicantPostcode(any(ContactDetailsWrapper.class), anyList()),
+                times(timesToCallPartyMethods));
+            mockedStatic.verify(() -> ContactDetailsValidator.checkForEmptyRespondentPostcode(any(ContactDetailsWrapper.class), anyList()),
+                times(timesToCallPartyMethods));
+        }
     }
 
     @Test
     void givenContestedCase_whenValidatePostcodesByRepresentation_thenExceptionRaised() {
-        assertThrows(IllegalArgumentException.class, () ->
-            ContactDetailsValidator.validatePostcodesByRepresentation(FinremCaseDetails.builder().caseType(CaseType.CONTESTED).build()));
+        assertThatThrownBy(() -> ContactDetailsValidator.validatePostcodesByRepresentation(
+            FinremCaseDetails.builder()
+                .caseType(CaseType.CONTESTED)
+                .id(1234L)
+                .build()
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(String.format(ContactDetailsValidator.INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE, "1234"));
     }
-
-
 
     private static FinremCaseData createContestedCaseData(String applicantSolicitorPostcode, String applicantPostcode,
                                                           String respondentSolicitorPostcode, String respondentPostcode,

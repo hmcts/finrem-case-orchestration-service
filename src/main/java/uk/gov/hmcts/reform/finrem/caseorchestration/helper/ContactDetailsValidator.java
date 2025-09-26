@@ -21,6 +21,8 @@ public class ContactDetailsValidator {
     static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
     static final String INVALID_EMAIL_ADDRESS_ERROR_MESSAGE = "%s is not a valid Email address.";
+    static final String INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE = "%s. Method validatePostcodesByRepresentation is only for "
+        + "updating contact details on consented cases. Use validateCaseDataAddresses whenever possible.";
 
     private ContactDetailsValidator() {
     }
@@ -69,9 +71,9 @@ public class ContactDetailsValidator {
 
         if (CaseType.CONTESTED.equals(finremCaseDetails.getCaseType())) {
             throw new IllegalArgumentException(
-                String.format("{}.validatePostcodesByRepresentation is only for consented cases",
-                finremCaseDetails.getCaseIdAsString()));
+                format(INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE, finremCaseDetails.getCaseIdAsString()));
         }
+
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         List<String> errors = new ArrayList<>();
