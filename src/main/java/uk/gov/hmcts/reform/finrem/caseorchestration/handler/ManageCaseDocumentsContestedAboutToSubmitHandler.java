@@ -141,7 +141,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
 
     private void addDefaultsToAdministrativeDocuments(List<UploadCaseDocumentCollection> managedCollections) {
 
-        managedCollections.stream().forEach(document -> setDefaultsForDocumentTypes(document));
+        managedCollections.forEach(this::setDefaultsForDocumentTypes);
     }
 
     private void setDefaultsForDocumentTypes(UploadCaseDocumentCollection document) {
