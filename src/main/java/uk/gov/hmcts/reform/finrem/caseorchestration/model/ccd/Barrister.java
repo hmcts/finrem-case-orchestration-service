@@ -26,4 +26,6 @@ public class Barrister {
 
     @JsonProperty("Organisation")
     private Organisation organisation;
+
+    private String userId;
 }

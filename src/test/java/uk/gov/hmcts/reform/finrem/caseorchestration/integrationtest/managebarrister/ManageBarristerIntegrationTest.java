@@ -121,6 +121,7 @@ class ManageBarristerIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.barristerParty").value(BarristerParty.APPLICANT.getValue()))
             .andExpect(jsonPath("$.data.appBarristerCollection", hasSize(1)))
+            .andExpect(jsonPath("$.data.appBarristerCollection[0].value.userId").isNotEmpty())
             .andExpect(jsonPath("$.data.respBarristerCollection").doesNotExist())
             .andExpect(jsonPath("$.data.RepresentationUpdateHistory[0].value.party").value("Applicant"))
             .andExpect(jsonPath("$.data.RepresentationUpdateHistory[0].value.name").value("Frodo Baggins"))
