@@ -40,7 +40,6 @@ public class UpdateContactDetailsConsentedMidHandler extends FinremCallbackHandl
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
