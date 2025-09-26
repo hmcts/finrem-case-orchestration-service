@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -17,94 +18,151 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class AmendConsentOrderMidHandlerTest extends BaseHandlerTestSetup {
+class AmendConsentOrderMidHandlerTest {
 
     private AmendConsentOrderMidHandler handler;
+
     @Mock
-    private BulkPrintDocumentService service;
+    private BulkPrintDocumentService bulkPrintDocumentService;
+
     @Mock
-    private ConsentedApplicationHelper helper;
-    private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
-    private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
-    private static final String FILE_NAME = "abc.pdf";
-    public static final String AUTH_TOKEN = "tokien:)";
+    private ConsentedApplicationHelper consentedApplicationHelper;
 
     @BeforeEach
     void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        handler = new AmendConsentOrderMidHandler(finremCaseDetailsMapper, service, helper);
+        handler = new AmendConsentOrderMidHandler(finremCaseDetailsMapper, bulkPrintDocumentService, consentedApplicationHelper);
     }
 
     @Test
-    void canHandle() {
-        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.AMEND_CONSENT_ORDER));
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.AMEND_CONSENT_ORDER);
     }
 
     @Test
-    void canNotHandleWrongEventType() {
-        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE));
-    }
-
-    @Test
-    void canNotHandleWrongCallbackType() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.AMEND_CONSENT_ORDER));
-    }
-
-    @Test
-    void givenContestedCase_whenAmendedConsentOrderUploadedNonEncryptedFileShouldNotGetError() {
-        FinremCallbackRequest finremCallbackRequest = buildConsentCallbackRequest(EventType.AMEND_CONSENT_ORDER);
+    void givenNoAmendedConsentOrderUploaded_whenHandle_thenPopulateConsentVariationOrderLabelField() {
+        FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
-        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+        caseData.setAmendedConsentOrderCollection(List.of());
 
-        List<AmendedConsentOrderCollection> amendedCollection = new  ArrayList<>();
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        AmendedConsentOrderCollection order = AmendedConsentOrderCollection.builder()
-            .value(AmendedConsentOrder.builder().amendedConsentOrder(caseDocument).build()).build();
+        verify(consentedApplicationHelper).setConsentVariationOrderLabelField(caseData);
+        verifyNoMoreInteractions(bulkPrintDocumentService);
+    }
 
-        amendedCollection.add(order);
-        caseData.setAmendedConsentOrderCollection(amendedCollection);
+    @Test
+    void givenNewlyUploadedAmendedConsentOrder_whenHandle_thenValidateAndPopulateConsentVariationOrderLabelField() {
+        FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+
+        CaseDocument amendedConsentOrder = mock(CaseDocument.class);
+        AmendedConsentOrderCollection amendedConsentOrderCollection = AmendedConsentOrderCollection.builder()
+            .value(AmendedConsentOrder.builder().amendedConsentOrder(amendedConsentOrder).build()).build();
+        caseData.setAmendedConsentOrderCollection(List.of(amendedConsentOrderCollection));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertTrue(response.getErrors().isEmpty());
-        verify(service).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
-        verify(helper).setConsentVariationOrderLabelField(caseData);
+        verify(consentedApplicationHelper).setConsentVariationOrderLabelField(caseData);
+        verifyValidateEncryptionOnUploadedDocument(amendedConsentOrder, response.getErrors());
     }
 
     @Test
-    void givenContestedCase_whenAmendedConsentOrderUploadedNonEncryptedFileButThereIsAlreadySameDocument_thenDoNotCheck() {
-        FinremCallbackRequest finremCallbackRequest = buildConsentCallbackRequest(EventType.AMEND_CONSENT_ORDER);
+    void givenNewlyUploadedAmendedConsentOrders_whenHandle_thenValidateAndPopulateConsentVariationOrderLabelField() {
+        FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
-        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+        CaseDocument amendedConsentOrder = mock(CaseDocument.class);
+        CaseDocument amendedConsentOrder2 = mock(CaseDocument.class);
 
-        List<AmendedConsentOrderCollection> amendedCollection = new  ArrayList<>();
-
-        AmendedConsentOrderCollection order = AmendedConsentOrderCollection.builder()
-            .value(AmendedConsentOrder.builder().amendedConsentOrder(caseDocument).build()).build();
-
-        amendedCollection.add(order);
-        caseData.setAmendedConsentOrderCollection(amendedCollection);
-        finremCallbackRequest.getCaseDetailsBefore().getData().setAmendedConsentOrderCollection(amendedCollection);;
+        caseData.setAmendedConsentOrderCollection(List.of(
+            AmendedConsentOrderCollection.builder()
+                .value(AmendedConsentOrder.builder().amendedConsentOrder(amendedConsentOrder).build()).build(),
+            AmendedConsentOrderCollection.builder()
+                .value(AmendedConsentOrder.builder().amendedConsentOrder(amendedConsentOrder2).build()).build()
+        ));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertTrue(response.getErrors().isEmpty());
-        verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
-        verify(helper).setConsentVariationOrderLabelField(caseData);
+        verify(consentedApplicationHelper).setConsentVariationOrderLabelField(caseData);
+        verifyValidateEncryptionOnUploadedDocument(amendedConsentOrder, response.getErrors());
+        verifyValidateEncryptionOnUploadedDocument(amendedConsentOrder2, response.getErrors());
+    }
+
+    @Test
+    void givenExistingAmendedConsentOrder_whenHandle_thenOnlyValidateNewlyUploadedAndPopulateConsentVariationOrderLabelField() {
+        FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+
+        CaseDocument amendedConsentOrder = mock(CaseDocument.class);
+        CaseDocument amendedConsentOrder2 = mock(CaseDocument.class);
+
+        AmendedConsentOrderCollection existing = AmendedConsentOrderCollection.builder()
+            .value(AmendedConsentOrder.builder().amendedConsentOrder(amendedConsentOrder).build()).build();
+        caseDataBefore.setAmendedConsentOrderCollection(List.of(existing));
+        caseData.setAmendedConsentOrderCollection(new ArrayList<>(List.of(
+            existing,
+            AmendedConsentOrderCollection.builder()
+                .value(AmendedConsentOrder.builder().amendedConsentOrder(amendedConsentOrder2).build()).build()
+        )));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        verify(consentedApplicationHelper).setConsentVariationOrderLabelField(caseData);
+        verifyNotValidateEncryptionOnUploadedDocument(amendedConsentOrder);
+        verifyValidateEncryptionOnUploadedDocument(amendedConsentOrder2, response.getErrors());
+    }
+
+    private FinremCallbackRequest buildBaseCallbackRequest() {
+        FinremCallbackRequest mockedCallbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails mockedCaseDetails = mock(FinremCaseDetails.class);
+        FinremCaseDetails mockedCaseDetailsBefore = mock(FinremCaseDetails.class);
+        when(mockedCallbackRequest.getCaseDetails()).thenReturn(mockedCaseDetails);
+        lenient().when(mockedCallbackRequest.getCaseDetailsBefore()).thenReturn(mockedCaseDetailsBefore);
+
+        FinremCaseData mockedCaseData = spy(FinremCaseData.class);
+        when(mockedCaseDetails.getData()).thenReturn(mockedCaseData);
+        when(mockedCaseDetails.getId()).thenReturn(Long.valueOf(CASE_ID));
+
+        FinremCaseData mockedCaseDataBefore = spy(FinremCaseData.class);
+        lenient().when(mockedCaseDetailsBefore.getData()).thenReturn(mockedCaseDataBefore);
+        return mockedCallbackRequest;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void verifyValidateEncryptionOnUploadedDocument(CaseDocument amendedConsentOrder, List<String> responseErrors) {
+        ArgumentCaptor<List<String>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(bulkPrintDocumentService)
+            .validateEncryptionOnUploadedDocument(eq(amendedConsentOrder), anyString(), argumentCaptor.capture(), eq(AUTH_TOKEN));
+        assertThat(argumentCaptor.getValue()).isEqualTo(responseErrors);
+    }
+
+    private void verifyNotValidateEncryptionOnUploadedDocument(CaseDocument amendedConsentOrder) {
+        verify(bulkPrintDocumentService, never())
+            .validateEncryptionOnUploadedDocument(eq(amendedConsentOrder), anyString(), anyList(), eq(AUTH_TOKEN));
     }
 }
