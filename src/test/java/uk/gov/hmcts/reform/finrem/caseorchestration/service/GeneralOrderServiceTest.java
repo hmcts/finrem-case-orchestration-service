@@ -449,6 +449,15 @@ class GeneralOrderServiceTest {
     }
 
     @Test
+    void givenAdditionalDocumentDeleted_whenIsSelectedGeneralOrderMatchesCalled_thenReturnFalse() {
+        List<OrderToShare> selectList = new ArrayList<>();
+        toOrdersToSend(caseDocument(), selectList);
+        ContestedGeneralOrder contestedGeneralOrder
+            = ContestedGeneralOrder.builder().additionalDocument(null).build();
+        assertFalse(generalOrderService.isSelectedOrderMatches(selectList, contestedGeneralOrder));
+    }
+
+    @Test
     void isSelectedGeneralOrderNotMatchesSelectedDocumentIsNullReturnFalse() {
         List<OrderToShare> selectList = new ArrayList<>();
         toOrdersToSend(caseDocument(), selectList);

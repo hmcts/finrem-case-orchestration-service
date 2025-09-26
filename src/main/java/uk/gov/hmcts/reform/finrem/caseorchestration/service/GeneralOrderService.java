@@ -461,7 +461,8 @@ public class GeneralOrderService {
     public boolean isSelectedOrderMatches(List<OrderToShare> selectedDocs, ContestedGeneralOrder order) {
         if (order != null) {
             Optional<OrderToShare> listElement = selectedDocs.stream()
-                .filter(e -> e.getDocumentId().equals(getDocumentId(order.getAdditionalDocument()))).findAny();
+                .filter(e -> order.getAdditionalDocument() != null && e.getDocumentId().equals(getDocumentId(order.getAdditionalDocument())))
+                .findAny();
             return listElement.isPresent();
         }
         return false;
