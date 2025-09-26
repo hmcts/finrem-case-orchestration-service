@@ -124,7 +124,8 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     }
 
     /*
-     * Repeat mid-event validation to protect Users navigating with browser controls.
+     * Distinct mid-event handlers validate postcodes for Consented and Contested cases.
+     * This blends validation from each, to protect Users from skipping validation with browser controls.
      * @param finremCaseDetails case details
      * @return list of errors
      */
