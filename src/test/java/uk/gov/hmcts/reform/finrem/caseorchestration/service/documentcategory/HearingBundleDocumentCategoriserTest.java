@@ -6,22 +6,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleHolder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
 class HearingBundleDocumentCategoriserTest {
@@ -32,13 +30,9 @@ class HearingBundleDocumentCategoriserTest {
     @Mock
     private FeatureToggleService featureToggleService;
 
-    @BeforeEach
-    void setUp() {
-        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
-    }
-
     @Test
     void testCategoriseDocuments() {
+        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCaseData finremCaseData = buildFinremCaseDataWithBundles();
         hearingBundleDocumentCategoriser.categorise(finremCaseData);
 
@@ -84,23 +78,21 @@ class HearingBundleDocumentCategoriserTest {
 
     private static HearingUploadBundleCollection getHearingUploadBundleCollection() {
         List<HearingBundleDocumentCollection> hearingBundleDocumentCollections =
-            Arrays.asList(getHearingBundleDocumentCollection("file2.pdf"),
-                getHearingBundleDocumentCollection("file4.pdf"),
+            Arrays.asList(getHearingBundleDocumentCollection(),
+                getHearingBundleDocumentCollection(),
                 getHearingBundleDocumentCollectionWithDeletedBundleDocuments());
 
         return HearingUploadBundleCollection.builder()
             .value(HearingUploadBundleHolder.builder()
-                .hearingBundleDate(LocalDate.of(2020, 1, 1))
                 .hearingBundleDocuments(hearingBundleDocumentCollections)
-                .hearingBundleFdr(YesOrNo.NO)
                 .build())
             .build();
     }
 
-    private static HearingBundleDocumentCollection getHearingBundleDocumentCollection(String filename) {
+    private static HearingBundleDocumentCollection getHearingBundleDocumentCollection() {
         return HearingBundleDocumentCollection.builder()
             .value(HearingBundleDocument.builder()
-                .bundleDocuments(CaseDocument.builder().documentFilename(filename).build())
+                .bundleDocuments(caseDocument())
                 .build())
             .build();
     }
