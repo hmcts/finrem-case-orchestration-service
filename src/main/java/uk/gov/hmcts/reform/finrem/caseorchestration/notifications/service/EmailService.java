@@ -213,7 +213,7 @@ public class EmailService {
             );
             log.info("Sending email success. Reference ID: {}", referenceId);
         } catch (NotificationClientException e) {
-            log.warn("Failed to send email. Reference ID: {}. Reason:", referenceId, e);
+            log.warn("Failed to send email. Reference ID: {}. Reason: {}", referenceId, e.getMessage(), e);
             notificationClientExceptionResolver.resolve(e);
         }
     }
