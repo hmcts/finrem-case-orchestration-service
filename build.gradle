@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.67'
     id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1857'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1874'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -23,7 +23,7 @@ def versions = [
         hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
         lombok               : '1.18.42',
-        mockito              : '5.19.0',
+        mockito              : '5.20.0',
         pact                 : '4.6.17',
         pdfbox               : '3.0.5',
         reformLogging        : '6.1.9',
@@ -34,7 +34,7 @@ def versions = [
         apacheLogging        : '2.25.1',
         idamClient           : '3.0.4',
         springHateoas        : '1.5.6',
-        tika                 : '3.2.2',
+        tika                 : '3.2.3',
         amClient             : '1.59.2',
         sendLetterClient     : '5.1.1',
         elasticSearch        : '7.17.29',
@@ -212,7 +212,9 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/GenericAboutToStartOrSubmitCallbackResponse.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/csv/CaseReference.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/csv/CaseReferenceKeyValue.java',
-                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/SystemUserService.java'
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/SystemUserService.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/filter/HttpRequestBodyLoggerFilter.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/filter/BufferedBodyHttpServletRequestWrapper.java'
     ]
 
     properties {
