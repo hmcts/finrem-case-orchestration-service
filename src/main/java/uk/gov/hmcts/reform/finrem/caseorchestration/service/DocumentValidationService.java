@@ -17,9 +17,9 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_AMENDED_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_RESPOND_TO_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_RESPOND_TO_ORDER;
@@ -92,7 +92,7 @@ public class DocumentValidationService {
     }
 
     private boolean amendConsentOrder(CallbackRequest callbackRequest) {
-        return FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(callbackRequest.getEventId());
+        return AMEND_CONSENT_ORDER.getCcdType().equalsIgnoreCase(callbackRequest.getEventId());
     }
 
     private boolean consentInContestedEvent(CallbackRequest callbackRequest) {
