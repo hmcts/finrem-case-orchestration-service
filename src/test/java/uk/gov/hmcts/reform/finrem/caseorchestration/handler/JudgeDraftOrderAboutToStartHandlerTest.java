@@ -58,7 +58,7 @@ class JudgeDraftOrderAboutToStartHandlerTest {
             .draftDirectionOrderCollection(List.of(
                 legacyDraftOrder("1"),
                 legacyDraftOrder("2"),
-                previousJudgeApprovedOrder("1")
+                previousJudgeApprovedOrder()
             ))
             .build());
 
@@ -122,7 +122,8 @@ class JudgeDraftOrderAboutToStartHandlerTest {
             .build();
     }
 
-    private DraftDirectionOrderCollection previousJudgeApprovedOrder(String id) {
+    private DraftDirectionOrderCollection previousJudgeApprovedOrder() {
+        String id = "previousId";
         return DraftDirectionOrderCollection.builder()
             .value(DraftDirectionOrder.builder()
                 .purposeOfDocument(null) // null means judge's approved order
