@@ -120,7 +120,6 @@ class HearingOrderServiceTest {
             = DraftDirectionOrder.builder().uploadDraftDocument(caseDocument()).purposeOfDocument("Other").build();
         finremCaseData.getDraftDirectionWrapper().setLatestDraftDirectionOrder(other);
 
-
         underTest.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
 
         List<DraftDirectionOrderCollection> judgesAmendedOrderCollection
