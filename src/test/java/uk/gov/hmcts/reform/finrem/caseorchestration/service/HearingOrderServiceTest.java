@@ -232,14 +232,11 @@ class HearingOrderServiceTest {
     void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders() {
         DraftDirectionOrder latestDraftDirectionOrder = makeDraftDirectionOrder();
 
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
-                .draftDirectionWrapper(
-                    DraftDirectionWrapper.builder()
-                        .latestDraftDirectionOrder(latestDraftDirectionOrder)
-                        .build())
-                .build())
-            .build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(
+            FinremCaseData.builder().draftDirectionWrapper(DraftDirectionWrapper.builder()
+                .latestDraftDirectionOrder(latestDraftDirectionOrder)
+                .build()).build()
+        ).build();
 
         underTest.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(finremCaseDetails);
 
