@@ -110,8 +110,7 @@ public class HearingOrderService {
 
     private void appendStampedDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder,
                                                            List<DocumentCollectionItem> additionalDocs) {
-        List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder())
-            .orElse(new ArrayList<>());
+        List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder()).orElse(new ArrayList<>());
 
         directionOrders.add(
             DirectionOrderCollection.builder()
