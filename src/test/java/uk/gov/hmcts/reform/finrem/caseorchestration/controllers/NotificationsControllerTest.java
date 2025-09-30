@@ -60,8 +60,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -135,40 +133,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
-        when(caseDataService.isConsentedApplication(any(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
-
-        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService).sendConsentedHWFSuccessfulConfirmationEmail(any(FinremCaseDetails.class));
-        verifyNoInteractions(helpWithFeesDocumentService);
-    }
-
-    @Test
-    public void shouldNotSendHwfSuccessfulConfirmationEmail() {
-        when(caseDataService.isConsentedApplication(any(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
-
-        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
-        verifyNoMoreInteractions(notificationService);
-    }
-
-    @Test
-    public void sendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication() {
-        when(caseDataService.isConsentedApplication(any(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
-
-        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
-        verifyNoMoreInteractions(notificationService);
-        verify(bulkPrintService).sendDocumentForPrint(any(), any(FinremCaseDetails.class), anyString(), any());
-    }
-
-    @Test
     public void sendConsentOrderNotApprovedEmail() {
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
@@ -209,25 +173,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any(CaseDetails.class));
         verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulConfirmationEmail() {
-        when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
-        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService).sendContestedHwfSuccessfulConfirmationEmail(any(FinremCaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendContestedHwfSuccessfulEmail() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
-
-        verifyNoInteractions(notificationService);
     }
 
     @Test
