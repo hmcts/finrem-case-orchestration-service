@@ -3,7 +3,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.sonarqube' version '6.3.1.5724'
-    id 'org.springframework.boot' version '3.5.5' // TODO remove tomcat dependency once spring boot is upgraded
+    id 'org.springframework.boot' version '3.5.6' // TODO remove tomcat dependency once spring boot is upgraded
     id 'com.github.ben-manes.versions' version '0.52.0'
     id 'uk.gov.hmcts.java' version '0.12.67'
     id 'au.com.dius.pact' version '4.6.17'
