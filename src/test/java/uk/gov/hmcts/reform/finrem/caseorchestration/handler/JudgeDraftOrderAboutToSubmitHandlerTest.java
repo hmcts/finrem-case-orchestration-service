@@ -140,7 +140,9 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
 
     @ParameterizedTest
     @MethodSource
-    void givenAdditionalDocsUploaded_whenHandle_thenConvertAdditionalDocsToPdf(BiFunction<CaseDocument, CaseDocument, List<List<DocumentCollectionItem>>> builder) {
+    void givenAdditionalDocsUploaded_whenHandle_thenConvertAdditionalDocsToPdf(
+        BiFunction<CaseDocument, CaseDocument, List<List<DocumentCollectionItem>>> builder) {
+
         CaseDocument additionalDoc1 = caseDocument("additional doc 1.docx");
         CaseDocument additionalDoc2 = caseDocument("additional doc 2.docx");
         CaseDocument pdfConverted1 = caseDocument("additional doc 1.pdf");
