@@ -112,6 +112,22 @@ public class HearingOrderService {
         finremCaseData.setLatestDraftHearingOrder(stampedOrder);
     }
 
+    private void appendStampedDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder,
+                                                           List<DocumentCollectionItem> additionalDocs) {
+        List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder())
+            .orElse(new ArrayList<>());
+
+        directionOrders.add(
+            DirectionOrderCollection.builder()
+                .value(DirectionOrder.builder()
+                    .uploadDraftDocument(stampedOrder)
+                    .additionalDocuments(additionalDocs)
+                    .build())
+                .build()
+        );
+        finremCaseData.setUploadHearingOrder(directionOrders);
+    }
+
     private void appendStampedOrderToFinalOrderCollection(FinremCaseData finremCaseData,
                                                           CaseDocument stampedOrder,
                                                           List<DocumentCollectionItem> additionalDocs,
@@ -133,21 +149,5 @@ public class HearingOrderService {
             finalDatedCollection.add(latestOrder);
         }
         finremCaseData.setFinalOrderCollection(finalDatedCollection);
-    }
-
-    private void appendStampedDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder,
-                                                           List<DocumentCollectionItem> additionalDocs) {
-        List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder())
-            .orElse(new ArrayList<>());
-
-        directionOrders.add(
-            DirectionOrderCollection.builder()
-                .value(DirectionOrder.builder()
-                    .uploadDraftDocument(stampedOrder)
-                    .additionalDocuments(additionalDocs)
-                    .build())
-                .build()
-        );
-        finremCaseData.setUploadHearingOrder(directionOrders);
     }
 }
