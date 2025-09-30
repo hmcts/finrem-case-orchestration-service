@@ -1,12 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -29,13 +27,13 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
@@ -73,7 +71,7 @@ class HearingOrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new HearingOrderService(genericDocumentService, documentHelper, new ObjectMapper(), orderDateService,
+        underTest = new HearingOrderService(genericDocumentService, documentHelper, orderDateService,
             uploadedDraftOrderCategoriser);
     }
 
@@ -86,7 +84,7 @@ class HearingOrderServiceTest {
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(anyList(), any())).thenReturn(false);
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
 
-        FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder().ccdCaseId("123");
+        FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder().ccdCaseId(CASE_ID);
         builder.draftDirectionWrapper(DraftDirectionWrapper.builder()
             .judgeApprovedOrderCollection(makeDraftDirectionOrderCollectionWithOneElement())
             .build());
@@ -94,9 +92,9 @@ class HearingOrderServiceTest {
         FinremCaseData finremCaseData = builder.build();
 
         // Act
-        underTest.convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(finremCaseData, AUTH_TOKEN);
+        underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any());
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), eq(CASE_ID));
 
         CaseDocument latestDraftHearingOrder = finremCaseData.getLatestDraftHearingOrder();
         assertThat(latestDraftHearingOrder)
@@ -111,47 +109,6 @@ class HearingOrderServiceTest {
             .extracting(DirectionOrder::getUploadDraftDocument)
             .extracting(CaseDocument::getDocumentBinaryUrl)
             .containsOnly(BINARY_URL);
-    }
-
-    @Test
-    void shouldThrowsExceptionIfNoJudgeApprovedOrderUploaded() {
-        FinremCaseData finremCaseData = FinremCaseData.builder().ccdCaseId("123").build();
-
-        assertThrows(InvalidCaseDataException.class, () ->
-            underTest.convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(finremCaseData, AUTH_TOKEN)
-        );
-    }
-
-    @Test
-    void whenLatestDraftDirOrderIsSameAsLastDraftOrder_itDoesntOverrideIt() {
-        List<DraftDirectionOrderCollection> draftDirectionOrders = makeDraftDirectionOrderCollectionWithOneElement();
-        FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder().ccdCaseId("123");
-        builder.draftDirectionWrapper(DraftDirectionWrapper.builder()
-            .latestDraftDirectionOrder(DraftDirectionOrder.builder()
-                .uploadDraftDocument(draftDirectionOrders.getFirst().getValue().getUploadDraftDocument())
-                .purposeOfDocument(draftDirectionOrders.getFirst().getValue().getPurposeOfDocument())
-                .build())
-            .judgeApprovedOrderCollection(draftDirectionOrders)
-            .build());
-        builder.uploadHearingOrder(null);
-
-        assertThat(underTest.latestDraftDirectionOrderOverridesSolicitorCollection(builder.build(), AUTH_TOKEN)).isTrue();
-    }
-
-    @Test
-    void whenLatestDraftDirOrderIsDifferentThanLastDraftOrder_itDoesOverrideIt() {
-        List<DraftDirectionOrderCollection> draftDirectionOrders = makeDraftDirectionOrderCollectionWithOneElement();
-        FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder().ccdCaseId("123");
-        builder.draftDirectionWrapper(DraftDirectionWrapper.builder()
-            .latestDraftDirectionOrder(DraftDirectionOrder.builder()
-                .uploadDraftDocument(caseDocument())
-                .purposeOfDocument("other purpose")
-                .build())
-            .judgeApprovedOrderCollection(draftDirectionOrders)
-            .build());
-        builder.uploadHearingOrder(null);
-
-        assertThat(underTest.latestDraftDirectionOrderOverridesSolicitorCollection(builder.build(), AUTH_TOKEN)).isTrue();
     }
 
     @Test
@@ -190,11 +147,14 @@ class HearingOrderServiceTest {
     void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders() {
         DraftDirectionOrder latestDraftDirectionOrder = makeDraftDirectionOrder();
 
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(
-                FinremCaseData.builder().draftDirectionWrapper(DraftDirectionWrapper.builder()
-                    .latestDraftDirectionOrder(latestDraftDirectionOrder)
-                    .build()).build()
-            ).build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftDirectionWrapper(
+                    DraftDirectionWrapper.builder()
+                        .latestDraftDirectionOrder(latestDraftDirectionOrder)
+                        .build())
+                .build())
+            .build();
 
         underTest.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(finremCaseDetails);
 
@@ -207,9 +167,11 @@ class HearingOrderServiceTest {
     private List<DraftDirectionOrderCollection> makeDraftDirectionOrderCollectionWithOneElement() {
         List<DraftDirectionOrderCollection> draftDirectionOrderCollection = new ArrayList<>();
 
-        draftDirectionOrderCollection.add(DraftDirectionOrderCollection.builder()
-            .value(makeDraftDirectionOrder())
-            .build());
+        draftDirectionOrderCollection.add(
+            DraftDirectionOrderCollection.builder()
+                .value(makeDraftDirectionOrder())
+                .build()
+        );
         return draftDirectionOrderCollection;
     }
 
@@ -228,7 +190,7 @@ class HearingOrderServiceTest {
         return FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
                 .caseType(CaseType.CONTESTED)
-                .id(12345L)
+                .id(Long.valueOf(CASE_ID))
                 .data(caseData)
                 .build())
             .build();

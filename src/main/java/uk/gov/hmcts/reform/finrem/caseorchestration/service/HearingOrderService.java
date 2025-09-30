@@ -1,11 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
@@ -25,7 +22,6 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 @Slf4j
@@ -34,39 +30,41 @@ public class HearingOrderService {
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
     private final OrderDateService orderDateService;
     private final UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
 
-    public void convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(FinremCaseData finremCaseData, String authorisationToken) {
-        Optional<DraftDirectionOrder> judgeApprovedHearingOrder = getJudgeApprovedLastHearingOrder(finremCaseData, authorisationToken);
+    /**
+     * Converts judge-approved draft hearing orders to PDF if required,
+     * stamps them with the appropriate court seal, and stores the results in the case data.
+     *
+     * <p>
+     * Processing steps:
+     * - Retrieves all judge-approved draft hearing orders from the case
+     * - Ensures each order document is in PDF format
+     * - Stamps the order document with the correct {@link StampType}
+     * - Updates the latest draft hearing order in the case
+     * - Appends the stamped order and any additional documents to the
+     *   final orders and hearing orders collections
+     *
+     * @param finremCaseData     the financial remedy case data containing judge-approved orders
+     * @param authorisationToken the service authorization token used for document conversion and stamping
+     */
+    public void stampAndStoreJudgeApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
+        List<DraftDirectionOrder> judgeApprovedHearingOrders = convertJudgeApprovedOrdersToPdfIfNeeded(finremCaseData, authorisationToken);
 
         String caseId = finremCaseData.getCcdCaseId();
-        if (judgeApprovedHearingOrder.isPresent()) {
-            DraftDirectionOrder order = judgeApprovedHearingOrder.get();
-            CaseDocument latestDraftDirectionOrderDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
-                order.getUploadDraftDocument(),
-                authorisationToken, caseId);
-            CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument,
-                authorisationToken, documentHelper.getStampType(finremCaseData), caseId);
-            updateCaseDataForLatestDraftHearingOrder(finremCaseData, stampedHearingOrder);
-            List<DocumentCollectionItem> additionalDocs = order.getAdditionalDocuments();
-            updateCaseDataForLatestHearingOrderCollection(finremCaseData, stampedHearingOrder, authorisationToken, additionalDocs);
-            appendDocumentToHearingOrderCollection(finremCaseData, stampedHearingOrder, additionalDocs);
-        } else {
-            throw new InvalidCaseDataException(BAD_REQUEST.value(),
-                "Missing data from callbackRequest for Case ID: " + caseId);
+        StampType stampType = documentHelper.getStampType(finremCaseData);
+
+        for (DraftDirectionOrder ddo : judgeApprovedHearingOrders) {
+            CaseDocument stampedDocument = genericDocumentService.stampDocument(ddo.getUploadDraftDocument(),
+                authorisationToken, stampType, caseId);
+
+            // Store
+            setLatestDraftHearingOrder(finremCaseData, stampedDocument);
+            List<DocumentCollectionItem> additionalDocs = ddo.getAdditionalDocuments();
+            appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs, authorisationToken);
+            appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
         }
-    }
-
-    public boolean latestDraftDirectionOrderOverridesSolicitorCollection(FinremCaseData finremCaseData, String authorisationToken) {
-        DraftDirectionOrder draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(finremCaseData, authorisationToken)
-            .orElseThrow(IllegalArgumentException::new);
-
-        Optional<DraftDirectionOrder> latestDraftDirectionOrder = ofNullable(finremCaseData.getDraftDirectionWrapper().getLatestDraftDirectionOrder())
-            .map(this::convertToDraftDirectionOrder);
-
-        return latestDraftDirectionOrder.isPresent() && !latestDraftDirectionOrder.get().equals(draftDirectionOrderCollectionTail);
     }
 
     public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(FinremCaseDetails caseDetails) {
@@ -91,64 +89,42 @@ public class HearingOrderService {
         }
     }
 
-    // The other uploaded orders should be processed which will be covered by DFR-3655
-    public Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail(FinremCaseData finremCaseData, String authorisationToken) {
-        List<DraftDirectionOrderCollection> draftDirectionOrders
-            = emptyIfNull(finremCaseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection());
-
-        Optional<DraftDirectionOrder> draftDirectionOrder = draftDirectionOrders.isEmpty()
-            ? Optional.empty()
-            : Optional.of(draftDirectionOrders.getLast().getValue());
-
-        if (draftDirectionOrder.isPresent()) {
-            DraftDirectionOrder draftOrder = draftDirectionOrder.get();
-            String caseId = finremCaseData.getCcdCaseId();
-            return Optional.of(DraftDirectionOrder.builder().purposeOfDocument(draftOrder.getPurposeOfDocument())
-                .uploadDraftDocument(
-                    genericDocumentService.convertDocumentIfNotPdfAlready(
-                        draftOrder.getUploadDraftDocument(),
-                        authorisationToken, caseId))
-                .additionalDocuments(draftOrder.getAdditionalDocuments())
-                .build());
-        }
-        return Optional.empty();
+    private List<DraftDirectionOrder> convertJudgeApprovedOrdersToPdfIfNeeded(FinremCaseData caseData, String authorisationToken) {
+        final String caseId = caseData.getCcdCaseId();
+        return emptyIfNull(caseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection())
+            .stream()
+            .map(orderCollection -> {
+                DraftDirectionOrder draftOrder = orderCollection.getValue();
+                return DraftDirectionOrder.builder()
+                    .purposeOfDocument(draftOrder.getPurposeOfDocument())
+                    .uploadDraftDocument(
+                        genericDocumentService.convertDocumentIfNotPdfAlready(
+                            draftOrder.getUploadDraftDocument(),
+                            authorisationToken,
+                            caseId))
+                    .additionalDocuments(draftOrder.getAdditionalDocuments())
+                    .build();
+            })
+            .toList();
     }
 
-    private Optional<DraftDirectionOrder> getJudgeApprovedLastHearingOrder(FinremCaseData finremCaseData, String authorisationToken) {
-        Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(finremCaseData, authorisationToken);
-
-        return draftDirectionOrderCollectionTail.isEmpty()
-            ? Optional.empty()
-            : latestDraftDirectionOrderOverridesSolicitorCollection(finremCaseData, authorisationToken)
-            ? ofNullable(finremCaseData.getDraftDirectionWrapper().getLatestDraftDirectionOrder()).map(this::convertToDraftDirectionOrder)
-            : draftDirectionOrderCollectionTail;
+    private void setLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder) {
+        finremCaseData.setLatestDraftHearingOrder(stampedOrder);
     }
 
-    private void appendDocumentToHearingOrderCollection(FinremCaseData finremCaseData, CaseDocument document,
-                                                        List<DocumentCollectionItem> additionalDocs) {
-        List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder()).orElse(new ArrayList<>());
-
-        DirectionOrder newDirectionOrder = DirectionOrder.builder().uploadDraftDocument(document).additionalDocuments(additionalDocs).build();
-        directionOrders.add(DirectionOrderCollection.builder().value(newDirectionOrder).build());
-
-        finremCaseData.setUploadHearingOrder(directionOrders);
-    }
-
-    private void updateCaseDataForLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedHearingOrder) {
-        finremCaseData.setLatestDraftHearingOrder(stampedHearingOrder);
-    }
-
-    public void updateCaseDataForLatestHearingOrderCollection(FinremCaseData finremCaseData,
-                                                              CaseDocument stampedHearingOrder,
-                                                              String authorisationToken,
-                                                              List<DocumentCollectionItem> additionalDocs) {
+    private void appendStampedOrderToFinalOrderCollection(FinremCaseData finremCaseData,
+                                                          CaseDocument stampedOrder,
+                                                          List<DocumentCollectionItem> additionalDocs,
+                                                          String authorisationToken) {
         List<DirectionOrderCollection> finalOrderCollection = finremCaseData.getFinalOrderCollection();
         List<DirectionOrderCollection> finalDatedCollection = orderDateService.syncCreatedDateAndMarkDocumentStamped(
             finalOrderCollection, authorisationToken);
-        if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalDatedCollection, stampedHearingOrder)) {
+
+        // It's weird that it's determined by the file name.
+        if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalDatedCollection, stampedOrder)) {
             DirectionOrderCollection latestOrder = DirectionOrderCollection.builder()
                 .value(DirectionOrder.builder()
-                    .uploadDraftDocument(stampedHearingOrder)
+                    .uploadDraftDocument(stampedOrder)
                     .additionalDocuments(additionalDocs)
                     .orderDateTime(LocalDateTime.now())
                     .isOrderStamped(YesOrNo.YES)
@@ -159,8 +135,19 @@ public class HearingOrderService {
         finremCaseData.setFinalOrderCollection(finalDatedCollection);
     }
 
-    private DraftDirectionOrder convertToDraftDirectionOrder(Object value) {
-        return objectMapper.convertValue(value, new TypeReference<>() {
-        });
+    private void appendStampedDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder,
+                                                           List<DocumentCollectionItem> additionalDocs) {
+        List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder())
+            .orElse(new ArrayList<>());
+
+        directionOrders.add(
+            DirectionOrderCollection.builder()
+                .value(DirectionOrder.builder()
+                    .uploadDraftDocument(stampedOrder)
+                    .additionalDocuments(additionalDocs)
+                    .build())
+                .build()
+        );
+        finremCaseData.setUploadHearingOrder(directionOrders);
     }
 }
