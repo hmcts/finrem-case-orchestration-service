@@ -1,9 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -11,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -18,19 +25,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -42,11 +48,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType.FAMILY_COURT_STAMP;
 
 @ExtendWith(MockitoExtension.class)
 class HearingOrderServiceTest {
@@ -55,7 +58,7 @@ class HearingOrderServiceTest {
 
     private static final String FILENAME_ENDING_WITH_DOCX = "filename_ending_with.docx";
 
-    HearingOrderService underTest;
+    private HearingOrderService underTest;
 
     @Mock
     private GenericDocumentService genericDocumentService;
@@ -75,40 +78,123 @@ class HearingOrderServiceTest {
             uploadedDraftOrderCategoriser);
     }
 
-    @Test
-    void shouldConvertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder() {
-        // Arrange
-        when(genericDocumentService.stampDocument(any(), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any()))
-            .thenReturn(caseDocument());
-        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(any(), any())).thenReturn(new ArrayList<>());
-        when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(anyList(), any())).thenReturn(false);
-        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+    @Nested
+    class StampAndStoreJudgeApprovedOrders {
+        LocalDateTime fixedDateTime = LocalDateTime.of(2025, 10, 1, 0, 0);
+        CaseDocument uao1Docx = caseDocument("UAO1.docx");
+        CaseDocument uao1Pdf = caseDocument("UAO1.pdf");
+        CaseDocument stampedUao1Pdf = caseDocument("StampedUAO1.pdf");
 
-        FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder().ccdCaseId(CASE_ID);
-        builder.draftDirectionWrapper(DraftDirectionWrapper.builder()
-            .judgeApprovedOrderCollection(makeDraftDirectionOrderCollectionWithOneElement())
-            .build());
-        builder.uploadHearingOrder(null);
-        FinremCaseData finremCaseData = builder.build();
+        // Mocks
+        List<DirectionOrderCollection> originalFinalOrderCollection = mock(ArrayList.class);
+        StampType mockedStampType = mock(StampType.class);
 
-        // Act
-        underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        void givenSingleApprovedOrder_whenJudgeUploads_thenStoredInExpectedProperties(boolean doesExistInFinalOrderCollection) {
+            // Arrange
+            FinremCaseData finremCaseData = setupFinremCaseData(DraftDirectionWrapper.builder()
+                .judgeApprovedOrderCollection(List.of(
+                    createJudgeApprovedOrder(uao1Docx)
+                ))
+                .build());
 
-        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), eq(CASE_ID));
+            when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
+            when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
+            when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
+            List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>(List.of(
+                createStampedDirectionOrderCollection(
+                    caseDocument("existingFinalOrderOne.pdf"),
+                    LocalDateTime.of(2025, 6, 4, 11, 59))
+            ));
+            when(orderDateService.syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN))
+                .thenReturn(createdDateSyncedFinalOrderCollection);
+            when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(createdDateSyncedFinalOrderCollection, stampedUao1Pdf))
+                .thenReturn(doesExistInFinalOrderCollection);
 
-        CaseDocument latestDraftHearingOrder = finremCaseData.getLatestDraftHearingOrder();
-        assertThat(latestDraftHearingOrder)
-            .isNotNull()
-            .extracting(CaseDocument::getDocumentFilename, CaseDocument::getDocumentBinaryUrl)
-            .containsOnly(FILE_NAME, BINARY_URL);
+            try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+                mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+                // Act
+                underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
 
-        List<DirectionOrderCollection> hearingOrderCollection = finremCaseData.getUploadHearingOrder();
-        assertThat(finremCaseData.getFinalOrderCollection()).hasSize(1);
-        assertThat(hearingOrderCollection).hasSize(1)
-            .extracting(DirectionOrderCollection::getValue)
-            .extracting(DirectionOrder::getUploadDraftDocument)
-            .extracting(CaseDocument::getDocumentBinaryUrl)
-            .containsOnly(BINARY_URL);
+                InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
+                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
+                inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
+                inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
+                inOrder.verify(documentHelper).checkIfOrderAlreadyInFinalOrderCollection(createdDateSyncedFinalOrderCollection, stampedUao1Pdf);
+
+                assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
+                if (doesExistInFinalOrderCollection) {
+                    assertFinalOrderCollection(finremCaseData,
+                        createdDateSyncedFinalOrderCollection.getFirst());
+                } else {
+                    assertFinalOrderCollection(finremCaseData,
+                        createdDateSyncedFinalOrderCollection.getFirst(),
+                        createStampedDirectionOrderCollection(stampedUao1Pdf, fixedDateTime));
+                }
+                assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(stampedUao1Pdf));
+            }
+        }
+
+        private void assertLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument expectedOrder) {
+            assertThat(finremCaseData.getLatestDraftHearingOrder()).isEqualTo(expectedOrder);
+        }
+
+        private void assertUploadHearingOrder(FinremCaseData finremCaseData, DirectionOrderCollection... expectedOrder) {
+            assertThat(finremCaseData.getUploadHearingOrder()).containsExactly(expectedOrder);
+        }
+
+        private void assertFinalOrderCollection(FinremCaseData finremCaseData, DirectionOrderCollection... expectedOrder) {
+            assertThat(finremCaseData.getFinalOrderCollection()).containsExactly(expectedOrder);
+        }
+
+        private FinremCaseData setupFinremCaseData(DraftDirectionWrapper draftDirectionWrapper) {
+            return FinremCaseData.builder()
+                .ccdCaseId(CASE_ID)
+                .finalOrderCollection(originalFinalOrderCollection)
+                .draftDirectionWrapper(draftDirectionWrapper)
+                .build();
+        }
+
+        private DirectionOrderCollection createUploadHearingEntry(CaseDocument uploadDraftDocument) {
+            return createUploadHearingEntry(uploadDraftDocument, null);
+        }
+
+        private DirectionOrderCollection createUploadHearingEntry(CaseDocument uploadDraftDocument,
+                                                                  List<DocumentCollectionItem> additionalDocs) {
+            return DirectionOrderCollection.builder()
+                .value(DirectionOrder.builder()
+                    .uploadDraftDocument(uploadDraftDocument)
+                    .additionalDocuments(additionalDocs)
+                    .build())
+                .build();
+        }
+
+        private DirectionOrderCollection createStampedDirectionOrderCollection(CaseDocument uploadDraftDocument,
+                                                                               LocalDateTime orderDateTime) {
+            return createStampedDirectionOrderCollection(uploadDraftDocument, orderDateTime, null);
+        }
+
+        private DirectionOrderCollection createStampedDirectionOrderCollection(CaseDocument uploadDraftDocument,
+                                                                               LocalDateTime orderDateTime,
+                                                                               List<DocumentCollectionItem> additionalDocs) {
+            return DirectionOrderCollection.builder()
+                .value(DirectionOrder.builder()
+                    .isOrderStamped(YesOrNo.YES)
+                    .orderDateTime(orderDateTime)
+                    .uploadDraftDocument(uploadDraftDocument)
+                    .additionalDocuments(additionalDocs)
+                    .build())
+                .build();
+        }
+
+        private DraftDirectionOrderCollection createJudgeApprovedOrder(CaseDocument uploadDraftDocument) {
+            return DraftDirectionOrderCollection.builder()
+                .value(DraftDirectionOrder.builder()
+                    .uploadDraftDocument(uploadDraftDocument)
+                    .build())
+                .build();
+        }
     }
 
     @Test
@@ -161,17 +247,6 @@ class HearingOrderServiceTest {
             .extracting(DraftDirectionWrapper::getJudgesAmendedOrderCollection)
             .extracting(List::getFirst)
             .extracting(DraftDirectionOrderCollection::getValue).isEqualTo(latestDraftDirectionOrder);
-    }
-
-    private List<DraftDirectionOrderCollection> makeDraftDirectionOrderCollectionWithOneElement() {
-        List<DraftDirectionOrderCollection> draftDirectionOrderCollection = new ArrayList<>();
-
-        draftDirectionOrderCollection.add(
-            DraftDirectionOrderCollection.builder()
-                .value(makeDraftDirectionOrder())
-                .build()
-        );
-        return draftDirectionOrderCollection;
     }
 
     private DraftDirectionOrder makeDraftDirectionOrder() {
