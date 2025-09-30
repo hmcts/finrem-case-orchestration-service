@@ -64,7 +64,7 @@ public class ManageBarristerMidEventHandler extends FinremCallbackHandler {
         if (barristerParty == null) {
             errors.add("Select which party's barrister you want to manage");
         } else {
-            errors.addAll(getValidationErrors(caseDetails, userCaseRole, barristerParty, userAuthorisation));
+            errors.addAll(getValidationErrors(caseDetails, barristerParty, userAuthorisation));
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
@@ -73,16 +73,18 @@ public class ManageBarristerMidEventHandler extends FinremCallbackHandler {
             .build();
     }
 
-    private List<String> getValidationErrors(FinremCaseDetails caseDetails, CaseRole userCaseRole,
-                                             BarristerParty barristerParty, String authToken) {
+    private List<String> getValidationErrors(FinremCaseDetails caseDetails, BarristerParty barristerParty, String authToken) {
         List<BarristerData> barristers = manageBarristerService.getEventBarristers(caseDetails.getData(), barristerParty)
             .stream()
             .map(item -> BarristerData.builder().barrister(item.getValue()).build())
             .toList();
 
         String authTokenToUse = getAuthTokenToUse(caseDetails, authToken);
+
+        CaseRole barristerCaseRole = manageBarristerService.getBarristerCaseRole(barristerParty);
+
         return barristerValidationService.validateBarristerEmails(barristers,
-            authTokenToUse, caseDetails.getCaseIdAsString(), userCaseRole.getCcdCode());
+            authTokenToUse, caseDetails.getCaseIdAsString(), barristerCaseRole);
     }
 
     /**
