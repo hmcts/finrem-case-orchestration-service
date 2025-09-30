@@ -52,7 +52,7 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.JUDGE_DRAFT_ORDER.equals(eventType);
+            && EventType.JUDGE_DRAFT_ORDER.equals(eventType); // Event: Upload approved order
     }
 
     @Override
@@ -68,10 +68,10 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         finremCaseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
         convertAdditionalDocumentsToPdf(finremCaseDetails, userAuthorisation);
 
-        hearingOrderService.convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(finremCaseData, userAuthorisation);
+        hearingOrderService.stampAndStoreJudgeApprovedOrders(finremCaseData, userAuthorisation);
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, userAuthorisation);
         uploadedDraftOrderCategoriser.categorise(finremCaseData);
-        moveJudgeUploadedOrdersToDraftDirectionOrderCollection(finremCaseData);
+        moveJudgeUploadedApprovedOrdersToDraftDirectionOrderCollection(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)
@@ -97,7 +97,7 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
             });
     }
 
-    private void moveJudgeUploadedOrdersToDraftDirectionOrderCollection(FinremCaseData finremCaseData) {
+    private void moveJudgeUploadedApprovedOrdersToDraftDirectionOrderCollection(FinremCaseData finremCaseData) {
         DraftDirectionWrapper draftDirectionWrapper = finremCaseData.getDraftDirectionWrapper();
         if (draftDirectionWrapper.getDraftDirectionOrderCollection() == null) {
             draftDirectionWrapper.setDraftDirectionOrderCollection(new ArrayList<>());
@@ -105,6 +105,8 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         draftDirectionWrapper.getDraftDirectionOrderCollection().addAll(
             emptyIfNull(draftDirectionWrapper.getJudgeApprovedOrderCollection()
         ));
+
+        // Clear the collection used to capture input from the "Upload approved order" event.
         finremCaseData.getDraftDirectionWrapper().setJudgeApprovedOrderCollection(null);
     }
 }
