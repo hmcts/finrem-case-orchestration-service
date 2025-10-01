@@ -98,6 +98,7 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
     }
 
     private void moveJudgeUploadedApprovedOrdersToDraftDirectionOrderCollection(FinremCaseData finremCaseData) {
+        // it moves the uploaded original copies (raw) to draftDirectionOrderCollection
         DraftDirectionWrapper draftDirectionWrapper = finremCaseData.getDraftDirectionWrapper();
         if (draftDirectionWrapper.getDraftDirectionOrderCollection() == null) {
             draftDirectionWrapper.setDraftDirectionOrderCollection(new ArrayList<>());
