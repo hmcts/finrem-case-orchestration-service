@@ -55,6 +55,9 @@ public class HearingOrderService {
         String caseId = finremCaseData.getCcdCaseId();
         StampType stampType = documentHelper.getStampType(finremCaseData);
 
+        finremCaseData.setFinalOrderCollection(orderDateService.syncCreatedDateAndMarkDocumentStamped(
+            finremCaseData.getFinalOrderCollection(), authorisationToken));
+
         for (DraftDirectionOrder ddo : judgeApprovedHearingOrders) {
             CaseDocument stampedDocument = genericDocumentService.stampDocument(ddo.getUploadDraftDocument(),
                 authorisationToken, stampType, caseId);
@@ -62,7 +65,7 @@ public class HearingOrderService {
             // Store
             setLatestDraftHearingOrder(finremCaseData, stampedDocument);
             List<DocumentCollectionItem> additionalDocs = ddo.getAdditionalDocuments();
-            appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs, authorisationToken);
+            appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
             appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
         }
     }
@@ -111,7 +114,6 @@ public class HearingOrderService {
     private void appendStampedDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder,
                                                            List<DocumentCollectionItem> additionalDocs) {
         List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder()).orElse(new ArrayList<>());
-
         directionOrders.add(
             DirectionOrderCollection.builder()
                 .value(DirectionOrder.builder()
@@ -129,12 +131,8 @@ public class HearingOrderService {
 
     private void appendStampedOrderToFinalOrderCollection(FinremCaseData finremCaseData,
                                                           CaseDocument stampedOrder,
-                                                          List<DocumentCollectionItem> additionalDocs,
-                                                          String authorisationToken) {
+                                                          List<DocumentCollectionItem> additionalDocs) {
         List<DirectionOrderCollection> finalOrderCollection = finremCaseData.getFinalOrderCollection();
-        List<DirectionOrderCollection> finalDatedCollection = orderDateService.syncCreatedDateAndMarkDocumentStamped(
-            finalOrderCollection, authorisationToken);
-
         DirectionOrderCollection latestOrder = DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
                 .uploadDraftDocument(stampedOrder)
@@ -143,7 +141,7 @@ public class HearingOrderService {
                 .isOrderStamped(YesOrNo.YES)
                 .build())
             .build();
-        finalDatedCollection.add(latestOrder);
-        finremCaseData.setFinalOrderCollection(finalDatedCollection);
+        finalOrderCollection.add(latestOrder);
+        finremCaseData.setFinalOrderCollection(finalOrderCollection);
     }
 }

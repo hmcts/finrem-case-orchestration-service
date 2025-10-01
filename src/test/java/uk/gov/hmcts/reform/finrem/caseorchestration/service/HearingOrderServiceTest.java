@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -82,8 +83,11 @@ class HearingOrderServiceTest {
         CaseDocument uao1Docx = caseDocument("UAO1.docx");
         CaseDocument uao1Pdf = caseDocument("UAO1.pdf");
         CaseDocument stampedUao1Pdf = caseDocument("StampedUAO1.pdf");
+        CaseDocument uao2Docx = caseDocument("UAO2.docx");
+        CaseDocument uao2Pdf = caseDocument("UAO2.pdf");
+        CaseDocument stampedUao2Pdf = caseDocument("StampedUAO2.pdf");
 
-        private List<DocumentCollectionItem> additionalDocs = List.of(
+        private final List<DocumentCollectionItem> additionalDocs = List.of(
             DocumentCollectionItem.fromCaseDocument(caseDocument("AdditionalDoc.docx"))
         );
 
@@ -118,8 +122,8 @@ class HearingOrderServiceTest {
 
                 InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
                 inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
-                inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
+                inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
 
                 assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
                 assertFinalOrderCollection(finremCaseData,
@@ -156,15 +160,97 @@ class HearingOrderServiceTest {
 
                 InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
                 inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
-                inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
+                inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
 
                 assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
                 assertFinalOrderCollection(finremCaseData,
                     createdDateSyncedFinalOrderCollection.getFirst(),
                     createStampedDirectionOrderCollection(stampedUao1Pdf, fixedDateTime, additionalDocs));
-                assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(stampedUao1Pdf,
-                    additionalDocs));
+                assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(stampedUao1Pdf, additionalDocs));
+            }
+        }
+
+        @Test
+        void givenMultipleApprovedOrders_whenJudgeUploads_thenStoredInExpectedProperties() {
+            // Arrange
+            FinremCaseData finremCaseData = setupFinremCaseData(DraftDirectionWrapper.builder()
+                .judgeApprovedOrderCollection(List.of(
+                    createJudgeApprovedOrder(uao1Docx, additionalDocs),
+                    createJudgeApprovedOrder(uao2Docx)
+                ))
+                .build());
+
+            when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
+            when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
+            when(genericDocumentService.convertDocumentIfNotPdfAlready(uao2Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao2Pdf);
+            when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
+            when(genericDocumentService.stampDocument(uao2Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao2Pdf);
+            List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>(List.of(
+                createStampedDirectionOrderCollection(
+                    caseDocument("existingFinalOrderOne.pdf"),
+                    LocalDateTime.of(2025, 6, 4, 11, 59))
+            ));
+            when(orderDateService.syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN))
+                .thenReturn(createdDateSyncedFinalOrderCollection);
+
+            try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+                mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+                // Act
+                underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
+
+                InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
+                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
+                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao2Docx, AUTH_TOKEN, CASE_ID);
+                inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
+                inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
+                inOrder.verify(genericDocumentService).stampDocument(uao2Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
+
+                assertLatestDraftHearingOrder(finremCaseData, stampedUao2Pdf);
+                assertFinalOrderCollection(finremCaseData,
+                    createdDateSyncedFinalOrderCollection.getFirst(),
+                    createStampedDirectionOrderCollection(stampedUao1Pdf, fixedDateTime, additionalDocs),
+                    createStampedDirectionOrderCollection(stampedUao2Pdf, fixedDateTime));
+                assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(stampedUao1Pdf, additionalDocs),
+                    createUploadHearingEntry(stampedUao2Pdf));
+            }
+        }
+
+        @Test
+        void givenMultipleApprovedOrdersWithSameFilename_whenJudgeUploads_thenStoredInExpectedProperties() {
+            // Arrange
+            FinremCaseData finremCaseData = setupFinremCaseData(DraftDirectionWrapper.builder()
+                .judgeApprovedOrderCollection(List.of(
+                    createJudgeApprovedOrder(uao1Docx, additionalDocs),
+                    createJudgeApprovedOrder(uao1Docx)
+                ))
+                .build());
+
+            when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
+            when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
+            when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
+            when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
+            when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
+            List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>();
+            when(orderDateService.syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN))
+                .thenReturn(createdDateSyncedFinalOrderCollection);
+
+            try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+                mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+                // Act
+                underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
+
+                InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
+                inOrder.verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
+                inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
+                inOrder.verify(genericDocumentService, times(2)).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
+
+                assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
+                assertFinalOrderCollection(finremCaseData,
+                    createStampedDirectionOrderCollection(stampedUao1Pdf, fixedDateTime, additionalDocs),
+                    createStampedDirectionOrderCollection(stampedUao1Pdf, fixedDateTime));
+                assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(stampedUao1Pdf, additionalDocs),
+                    createUploadHearingEntry(stampedUao1Pdf));
             }
         }
 
