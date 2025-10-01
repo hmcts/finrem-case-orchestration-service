@@ -79,7 +79,6 @@ public class ProcessOrderSubmittedHandler extends FinremCallbackHandler {
             manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }
 
-
         return GenericAboutToStartOrSubmitCallbackResponse
             .<FinremCaseData>builder()
             .data(caseDetails.getData())
