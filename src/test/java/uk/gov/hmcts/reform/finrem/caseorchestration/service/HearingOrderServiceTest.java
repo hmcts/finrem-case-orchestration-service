@@ -4,8 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -85,13 +83,16 @@ class HearingOrderServiceTest {
         CaseDocument uao1Pdf = caseDocument("UAO1.pdf");
         CaseDocument stampedUao1Pdf = caseDocument("StampedUAO1.pdf");
 
+        private List<DocumentCollectionItem> additionalDocs = List.of(
+            DocumentCollectionItem.fromCaseDocument(caseDocument("AdditionalDoc.docx"))
+        );
+
         // Mocks
         List<DirectionOrderCollection> originalFinalOrderCollection = mock(ArrayList.class);
         StampType mockedStampType = mock(StampType.class);
 
-        @ParameterizedTest
-        @ValueSource(booleans = {true, false})
-        void givenSingleApprovedOrder_whenJudgeUploads_thenStoredInExpectedProperties(boolean doesExistInFinalOrderCollection) {
+        @Test
+        void givenSingleApprovedOrder_whenJudgeUploads_thenStoredInExpectedProperties() {
             // Arrange
             FinremCaseData finremCaseData = setupFinremCaseData(DraftDirectionWrapper.builder()
                 .judgeApprovedOrderCollection(List.of(
@@ -109,8 +110,6 @@ class HearingOrderServiceTest {
             ));
             when(orderDateService.syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN))
                 .thenReturn(createdDateSyncedFinalOrderCollection);
-            when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(createdDateSyncedFinalOrderCollection, stampedUao1Pdf))
-                .thenReturn(doesExistInFinalOrderCollection);
 
             try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
                 mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
@@ -121,18 +120,51 @@ class HearingOrderServiceTest {
                 inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
-                inOrder.verify(documentHelper).checkIfOrderAlreadyInFinalOrderCollection(createdDateSyncedFinalOrderCollection, stampedUao1Pdf);
 
                 assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
-                if (doesExistInFinalOrderCollection) {
-                    assertFinalOrderCollection(finremCaseData,
-                        createdDateSyncedFinalOrderCollection.getFirst());
-                } else {
-                    assertFinalOrderCollection(finremCaseData,
-                        createdDateSyncedFinalOrderCollection.getFirst(),
-                        createStampedDirectionOrderCollection(stampedUao1Pdf, fixedDateTime));
-                }
+                assertFinalOrderCollection(finremCaseData,
+                    createdDateSyncedFinalOrderCollection.getFirst(),
+                    createStampedDirectionOrderCollection(stampedUao1Pdf, fixedDateTime));
                 assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(stampedUao1Pdf));
+            }
+        }
+
+        @Test
+        void givenSingleApprovedOrderWithAdditionalDocs_whenJudgeUploads_thenStoredInExpectedProperties() {
+            // Arrange
+            FinremCaseData finremCaseData = setupFinremCaseData(DraftDirectionWrapper.builder()
+                .judgeApprovedOrderCollection(List.of(
+                    createJudgeApprovedOrder(uao1Docx, additionalDocs)
+                ))
+                .build());
+
+            when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
+            when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
+            when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
+            List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>(List.of(
+                createStampedDirectionOrderCollection(
+                    caseDocument("existingFinalOrderOne.pdf"),
+                    LocalDateTime.of(2025, 6, 4, 11, 59))
+            ));
+            when(orderDateService.syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN))
+                .thenReturn(createdDateSyncedFinalOrderCollection);
+
+            try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+                mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+                // Act
+                underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
+
+                InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
+                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
+                inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
+                inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
+
+                assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
+                assertFinalOrderCollection(finremCaseData,
+                    createdDateSyncedFinalOrderCollection.getFirst(),
+                    createStampedDirectionOrderCollection(stampedUao1Pdf, fixedDateTime, additionalDocs));
+                assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(stampedUao1Pdf,
+                    additionalDocs));
             }
         }
 
@@ -189,9 +221,15 @@ class HearingOrderServiceTest {
         }
 
         private DraftDirectionOrderCollection createJudgeApprovedOrder(CaseDocument uploadDraftDocument) {
+            return createJudgeApprovedOrder(uploadDraftDocument, null);
+        }
+
+        private DraftDirectionOrderCollection createJudgeApprovedOrder(CaseDocument uploadDraftDocument,
+                                                                       List<DocumentCollectionItem> additionalDocs) {
             return DraftDirectionOrderCollection.builder()
                 .value(DraftDirectionOrder.builder()
                     .uploadDraftDocument(uploadDraftDocument)
+                    .additionalDocuments(additionalDocs)
                     .build())
                 .build();
         }

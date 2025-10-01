@@ -135,18 +135,15 @@ public class HearingOrderService {
         List<DirectionOrderCollection> finalDatedCollection = orderDateService.syncCreatedDateAndMarkDocumentStamped(
             finalOrderCollection, authorisationToken);
 
-        // It's weird that it's determined by the file name. Maybe fixed by DFR-4126
-        if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalDatedCollection, stampedOrder)) {
-            DirectionOrderCollection latestOrder = DirectionOrderCollection.builder()
-                .value(DirectionOrder.builder()
-                    .uploadDraftDocument(stampedOrder)
-                    .additionalDocuments(additionalDocs)
-                    .orderDateTime(LocalDateTime.now())
-                    .isOrderStamped(YesOrNo.YES)
-                    .build())
-                .build();
-            finalDatedCollection.add(latestOrder);
-        }
+        DirectionOrderCollection latestOrder = DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(stampedOrder)
+                .additionalDocuments(additionalDocs)
+                .orderDateTime(LocalDateTime.now())
+                .isOrderStamped(YesOrNo.YES)
+                .build())
+            .build();
+        finalDatedCollection.add(latestOrder);
         finremCaseData.setFinalOrderCollection(finalDatedCollection);
     }
 }
