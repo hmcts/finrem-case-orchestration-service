@@ -75,8 +75,8 @@ public class ProcessOrderSubmittedHandler extends FinremCallbackHandler {
                     }
                 }
             }
-        } else if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType()) &&
-            YesOrNo.YES.equals(caseData.getManageHearingsWrapper().getIsAddHearingChosen())) {
+        } else if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())
+            && YesOrNo.YES.equals(caseData.getManageHearingsWrapper().getIsAddHearingChosen())) {
             log.info("Handling process order notifications for contested case id: {}", caseDetails.getId());
             manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }
