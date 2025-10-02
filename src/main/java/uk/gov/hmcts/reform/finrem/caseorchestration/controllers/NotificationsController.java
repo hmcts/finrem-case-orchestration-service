@@ -51,32 +51,10 @@ public class NotificationsController extends BaseController {
     private final CaseDataService caseDataService;
     private final TransferCourtService transferCourtService;
     private final NocLetterNotificationService nocLetterNotificationService;
-    private final HwfCorrespondenceService hwfNotificationsService;
     private final UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
     private final ConsentOrderNotApprovedCorresponder consentOrderNotApprovedCorresponder;
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final ConsentOrderNotApprovedSentCorresponder consentOrderNotApprovedSentCorresponder;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
-
-    @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "HWFSuccessful notification sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationNotification(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request to send email for HWF Successful for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        hwfNotificationsService.sendCorrespondence(finremCaseDetails, authToken);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
 
     @PostMapping(value = "/order-not-approved", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for consent/contest order not approved.")

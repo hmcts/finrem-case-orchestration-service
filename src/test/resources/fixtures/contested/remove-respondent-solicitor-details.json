@@ -27,6 +27,13 @@
       "divorceCaseNumber": "EZ17D80124",
       "fastTrackDecision": "Yes",
       "currentUserCaseRole": "[RESPSOLICITOR]",
+      "RespondentOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "Y707HZM",
+          "OrganisationName" : "FinRem-2-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[RESPSOLICITOR]"
+      },
       "rSolicitorAddress": {
         "County": "Essex",
         "Country": "",
