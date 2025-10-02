@@ -71,7 +71,7 @@ public class HearingOrderService {
                 CaseDocument stampedDocument = genericDocumentService.stampDocument(cwApprovedOrder.getUploadDraftDocument(),
                     authorisationToken, stampType, caseId);
 
-                // Store
+                // Store "Latest draft hearing order" field which is under "Scheduling and Listing" tabs
                 setLatestDraftHearingOrder(finremCaseData, stampedDocument);
                 List<DocumentCollectionItem> additionalDocs = cwApprovedOrder.getAdditionalDocuments();
 
@@ -112,7 +112,7 @@ public class HearingOrderService {
                 CaseDocument stampedDocument = genericDocumentService.stampDocument(judgeApprovedOrder.getUploadDraftDocument(),
                     authorisationToken, stampType, caseId);
 
-                // Store
+                // Store "Latest draft hearing order" field which is under "Scheduling and Listing" tabs
                 setLatestDraftHearingOrder(finremCaseData, stampedDocument);
                 List<DocumentCollectionItem> additionalDocs = judgeApprovedOrder.getAdditionalDocuments();
 
