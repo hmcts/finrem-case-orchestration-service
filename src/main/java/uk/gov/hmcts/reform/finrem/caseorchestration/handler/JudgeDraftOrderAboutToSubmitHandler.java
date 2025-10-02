@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
@@ -26,19 +25,16 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final HearingOrderService hearingOrderService;
-    private final GenericDocumentService genericDocumentService;
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
     private final UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
     private final DocumentWarningsHelper documentWarningsHelper;
 
     public JudgeDraftOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingOrderService hearingOrderService,
-                                               GenericDocumentService genericDocumentService,
                                                ContestedOrderApprovedLetterService contestedOrderApprovedLetterService,
                                                UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser,
                                                DocumentWarningsHelper documentWarningsHelper) {
         super(finremCaseDetailsMapper);
         this.hearingOrderService = hearingOrderService;
-        this.genericDocumentService = genericDocumentService;
         this.contestedOrderApprovedLetterService = contestedOrderApprovedLetterService;
         this.uploadedDraftOrderCategoriser = uploadedDraftOrderCategoriser;
         this.documentWarningsHelper = documentWarningsHelper;

@@ -74,7 +74,6 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
         handler = new JudgeDraftOrderAboutToSubmitHandler(
             finremCaseDetailsMapper,
             hearingOrderService,
-            genericDocumentService,
             contestedOrderApprovedLetterService,
             uploadedDraftOrderCategoriser,
             documentWarningsHelper
