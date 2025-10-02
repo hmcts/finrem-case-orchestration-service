@@ -100,10 +100,12 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
     /**
      * Moves the judge-uploaded approved orders to the draft direction order collection.
+     *
      * <p>
      * This method transfers the uploaded original copies (raw) from the judge-approved
      * order collection to the {@code draftDirectionOrderCollection}, which is displayed
      * under the "Upload approved order" section in the Case Documents tab.
+     *
      * <p>
      * If the {@code draftDirectionOrderCollection} is {@code null}, it will be
      * initialised as an empty list before adding the orders.
