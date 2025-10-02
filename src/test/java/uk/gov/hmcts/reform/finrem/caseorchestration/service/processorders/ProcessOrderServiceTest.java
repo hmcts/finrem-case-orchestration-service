@@ -273,6 +273,56 @@ class ProcessOrderServiceTest {
         assertTrue(result, "Expected all draft orders (excluding PSA) to have .doc or .docx extensions");
     }
 
+    @ParameterizedTest()
+    @MethodSource("approvedOrderCollectionsToProcess")
+    void testHasNoApprovedOrdersToProcess(String scenario, FinremCaseData input, boolean expected) {
+        boolean actual = underTest.hasNoApprovedOrdersToProcess(input);
+        assertThat(actual).as(scenario).isEqualTo(expected);
+    }
+
+    private static Stream<Arguments> approvedOrderCollectionsToProcess() {
+        return Stream.of(
+            Arguments.of("both unprocessedApprovedDocuments and uploadHearingOrder(legacy) are null",
+                FinremCaseData.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .unprocessedApprovedDocuments(null)
+                        .build())
+                    .uploadHearingOrder(null)
+                    .build(),
+                false),
+            Arguments.of("has unprocessedApprovedDocuments only",
+                FinremCaseData.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .unprocessedApprovedDocuments(
+                            List.of(DirectionOrderCollection.builder().build()))
+                        .build())
+                    .uploadHearingOrder(List.of())
+                    .build(),
+                false),
+
+            Arguments.of("has uploadHearingOrder(legacy) only",
+                FinremCaseData.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .unprocessedApprovedDocuments(List.of())
+                        .build())
+                    .uploadHearingOrder(
+                        List.of(DirectionOrderCollection.builder().build()))
+                    .build(),
+                false),
+
+            Arguments.of("has both unprocessedApprovedDocuments and uploadHearingOrder(legacy)",
+                FinremCaseData.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .unprocessedApprovedDocuments(
+                            List.of(DirectionOrderCollection.builder().build()))
+                        .build())
+                    .uploadHearingOrder(
+                        List.of(DirectionOrderCollection.builder().build()))
+                    .build(),
+                false)
+        );
+    }
+
     private static String extractFileName(String url) {
         if (url == null || url.isEmpty()) {
             return null; // or throw an exception if you prefer
