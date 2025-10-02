@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
@@ -20,15 +19,15 @@ import java.util.Optional;
 public class UploadApprovedOrderService {
     private final HearingOrderService hearingOrderService;
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
-    private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
+    private final OrderDateService orderDateService;
 
     /**
      * Method for processing approved orders in a financial remedy case.
      * This method generates and stores the contested order approved letter, creates additional order documents,
      * appends the latest draft direction order, and updates the hearing order collection with approved hearing orders.
      *
-     * <p>Use {@link #processApprovedOrdersMh(FinremCaseDetails, FinremCaseDetails, String)} instead.</p>
+     * <p>Use {@link #processApprovedOrdersMh(FinremCaseDetails, String)} instead.</p>
      *
      * @param callbackRequest   the callback request containing case details
      * @param errors            a list to collect error messages encountered during processing
@@ -42,27 +41,22 @@ public class UploadApprovedOrderService {
                                       String authorisationToken) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
+
         try {
-            additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
+            processCaseworkerUploadedApprovedOrders(caseDetails.getData(), authorisationToken);
         } catch (CourtDetailsParseException e) {
             log.error(e.getMessage());
             errors.add(e.getMessage());
         }
 
+        // TODO Looks like the following logic is not needed. Remove it later.
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
+
         if (isAnotherHearingToBeListed(caseDetails)) {
             approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, authorisationToken);
         }
 
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        List<DirectionOrderCollection> hearingOrderCollectionBefore
-            = additionalHearingDocumentService.getApprovedHearingOrders(caseDetailsBefore, authorisationToken);
-
-        FinremCaseData caseData = caseDetails.getData();
-        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
-        hearingOrderCollectionBefore.addAll(uploadHearingOrders);
-        caseData.setUploadHearingOrder(hearingOrderCollectionBefore);
-        additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, authorisationToken);
+        clearCwApprovedOrderCollection(caseDetails.getData());
     }
 
     /**
@@ -95,21 +89,25 @@ public class UploadApprovedOrderService {
      * and updates the hearing order collection with approved hearing orders.
      *
      * @param caseDetails       the current state of the financial remedy case
-     * @param detailsBefore     the previous state of the financial remedy case
      * @param authorisationToken the authorisation token for accessing secure resources
      */
-    public void processApprovedOrdersMh(FinremCaseDetails caseDetails, FinremCaseDetails detailsBefore, String authorisationToken) {
+    public void processApprovedOrdersMh(FinremCaseDetails caseDetails, String authorisationToken) {
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
-        additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
+
+        processCaseworkerUploadedApprovedOrders(caseDetails.getData(), authorisationToken);
+
+        // TODO Looks like the following logic is not needed anymore. Remove it later.
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
 
-        List<DirectionOrderCollection> hearingOrderCollectionBefore
-            = additionalHearingDocumentService.getApprovedHearingOrders(detailsBefore, authorisationToken);
+        clearCwApprovedOrderCollection(caseDetails.getData());
+    }
 
-        FinremCaseData caseData = caseDetails.getData();
-        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
-        hearingOrderCollectionBefore.addAll(uploadHearingOrders);
-        caseData.setUploadHearingOrder(hearingOrderCollectionBefore);
-        additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, authorisationToken);
+    private void clearCwApprovedOrderCollection(FinremCaseData caseData) {
+        caseData.getDraftDirectionWrapper().setCwApprovedOrderCollection(null);
+    }
+
+    private void processCaseworkerUploadedApprovedOrders(FinremCaseData caseData, String authorisationToken) {
+//        synchroniseExistingApprovedOrder(caseData, authorisationToken);
+        hearingOrderService.stampAndStoreCwApprovedOrders(caseData, authorisationToken);
     }
 }

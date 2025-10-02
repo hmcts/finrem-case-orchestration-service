@@ -95,15 +95,18 @@ public class AdditionalHearingDocumentService {
 
     public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken,
                                                                           FinremCaseDetails caseDetails) {
+        // TODO Remove me
         String caseId = String.valueOf(caseDetails.getId());
         log.info("dealing upload approve order for Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
         StampType stampType = documentHelper.getStampType(caseData);
-        List<DirectionOrderCollection> uploadHearingOrder = toPdf(caseData.getUploadHearingOrder(), stampType, caseId, authorisationToken);
+        List<DirectionOrderCollection> cwUploadedApprovedOrders = toPdf(caseData.getDraftDirectionWrapper().getCwApprovedOrderCollection(),
+            stampType, caseId, authorisationToken);
 
-        if (!uploadHearingOrder.isEmpty()) {
-            caseData.setUploadHearingOrder(uploadHearingOrder);
-            DirectionOrderCollection orderCollection = uploadHearingOrder.get(uploadHearingOrder.size() - 1);
+        if (!cwUploadedApprovedOrders.isEmpty()) {
+            caseData.setUploadHearingOrder(cwUploadedApprovedOrders);
+            // TODO should append to uploadHearingOrder which is used in Process Order event
+            DirectionOrderCollection orderCollection = cwUploadedApprovedOrders.getLast();
             caseData.setLatestDraftHearingOrder(orderCollection.getValue().getUploadDraftDocument());
         }
     }

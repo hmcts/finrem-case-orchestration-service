@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.WithAt
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DirectionOrderCollection implements HasCaseDocument, WithAttachmentsCollection {
+public class DirectionOrderCollection implements HasCaseDocument, WithAttachmentsCollection, UploadedApprovedOrderHolder {
 
     @JsonProperty("id")
     private String id;

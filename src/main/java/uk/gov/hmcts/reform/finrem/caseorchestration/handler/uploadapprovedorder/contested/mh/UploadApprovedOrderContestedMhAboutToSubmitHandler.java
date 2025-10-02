@@ -57,8 +57,12 @@ public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCa
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
+        // Set the case ID so that requests to CDAM don't fail.
+        // This is a temporary workaround until the request to CDAM is fixed to
+        // send the case type ID and not the case ID. See DFR-4138
+        caseData.setCcdCaseId(String.valueOf(caseDetails.getId()));
 
-        uploadApprovedOrderService.processApprovedOrdersMh(caseDetails, callbackRequest.getCaseDetailsBefore(), userAuthorisation);
+        uploadApprovedOrderService.processApprovedOrdersMh(caseDetails, userAuthorisation);
 
         if (YesOrNo.YES.equals(caseData.getManageHearingsWrapper().getIsAddHearingChosen())) {
             ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
@@ -67,7 +71,7 @@ public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCa
             manageHearingsWrapper.setManageHearingsActionSelection(ADD_HEARING);
             Optional<CaseDocument> latestDraftHearingOrder = Optional.ofNullable(caseData.getLatestDraftHearingOrder());
 
-            // Add order document to be include in hearing bulk print document bundle.
+            // Add order document to be included in hearing bulk print document bundle.
             // Ideally this doc would be added as a new document to Hearing Documents collection to avoid
             // the document appearing against the hearing when Edited. This requires completion of DFR-4040.
             latestDraftHearingOrder.ifPresent(workingHearing::addDocumentToAdditionalHearingDocs);

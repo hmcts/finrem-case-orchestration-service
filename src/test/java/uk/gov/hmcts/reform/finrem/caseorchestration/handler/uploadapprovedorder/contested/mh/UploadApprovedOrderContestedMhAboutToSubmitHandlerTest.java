@@ -72,7 +72,7 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(uploadApprovedOrderService).processApprovedOrdersMh(caseDetails, caseDetailsBefore, AUTH_TOKEN);
+        verify(uploadApprovedOrderService).processApprovedOrdersMh(caseDetails, AUTH_TOKEN);
         verifyNoInteractions(manageHearingActionService);
         assertNotNull(response);
     }
@@ -131,7 +131,7 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getWarnings()).containsExactly("warning 1");
 
-        verify(uploadApprovedOrderService).processApprovedOrdersMh(caseDetails, caseDetailsBefore, AUTH_TOKEN);
+        verify(uploadApprovedOrderService).processApprovedOrdersMh(caseDetails, AUTH_TOKEN);
         verify(documentWarningsHelper).getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN));
     }
 }

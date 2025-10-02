@@ -178,7 +178,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
             .getApprovedHearingOrders(caseDetailsBefore, AUTH_TOKEN)).thenReturn(existingOrders);
 
         // Act
-        uploadApprovedOrderService.processApprovedOrdersMh(finremCaseDetails, caseDetailsBefore, AUTH_TOKEN);
+        uploadApprovedOrderService.processApprovedOrdersMh(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
         assertEquals(2, finremCaseData.getUploadHearingOrder().size());
