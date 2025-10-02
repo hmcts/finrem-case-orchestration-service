@@ -75,19 +75,6 @@ public class ProcessOrderService {
     }
 
     /**
-     * Determines if all legacy approved orders have been removed by comparing the state of
-     * the "upload hearing order" field in the provided case data before and after an update.
-     *
-     * @param caseDataBefore the case data before the update, used to check if legacy orders existed
-     * @param caseData       the case data after the update, used to check if legacy orders have been removed
-     * @return {@code true} if the "upload hearing order" was not empty in {@code caseDataBefore}
-     *          and is empty in {@code caseData}, otherwise {@code false}
-     */
-    public boolean areAllLegacyApprovedOrdersRemoved(FinremCaseData caseDataBefore, FinremCaseData caseData) {
-        return !isUploadHearingOrderEmpty(caseDataBefore) && isUploadHearingOrderEmpty(caseData);
-    }
-
-    /**
      * Checks whether all approved orders have been removed from the provided case data.
      * <p>
      * This method returns {@code true} if both the unprocessed approved documents collection
