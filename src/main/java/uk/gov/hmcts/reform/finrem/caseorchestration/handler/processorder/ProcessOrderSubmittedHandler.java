@@ -49,10 +49,9 @@ public class ProcessOrderSubmittedHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         if (EventType.DIRECTION_UPLOAD_ORDER.equals(callbackRequest.getEventType())) {
