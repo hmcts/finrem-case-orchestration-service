@@ -121,8 +121,8 @@ class HearingOrderServiceTest {
                 underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
 
                 InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
-                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
+                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
 
                 assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
@@ -159,8 +159,8 @@ class HearingOrderServiceTest {
                 underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
 
                 InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
-                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
+                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
 
                 assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
@@ -200,9 +200,9 @@ class HearingOrderServiceTest {
                 underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
 
                 InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
+                inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
                 inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao2Docx, AUTH_TOKEN, CASE_ID);
-                inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
                 inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
                 inOrder.verify(genericDocumentService).stampDocument(uao2Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
 
@@ -241,8 +241,8 @@ class HearingOrderServiceTest {
                 underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
 
                 InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
-                inOrder.verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
+                inOrder.verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 inOrder.verify(genericDocumentService, times(2)).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
 
                 assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);

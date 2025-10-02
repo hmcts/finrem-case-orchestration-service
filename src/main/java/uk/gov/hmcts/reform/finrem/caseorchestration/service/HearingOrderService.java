@@ -50,15 +50,13 @@ public class HearingOrderService {
      * @param authorisationToken the service authorization token used for document conversion and stamping
      */
     public void stampAndStoreJudgeApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
-        List<DraftDirectionOrder> judgeApprovedHearingOrders = convertJudgeApprovedOrdersToPdfIfNeeded(finremCaseData, authorisationToken);
-
         String caseId = finremCaseData.getCcdCaseId();
         StampType stampType = documentHelper.getStampType(finremCaseData);
 
         finremCaseData.setFinalOrderCollection(orderDateService.syncCreatedDateAndMarkDocumentStamped(
             finremCaseData.getFinalOrderCollection(), authorisationToken));
 
-        for (DraftDirectionOrder ddo : judgeApprovedHearingOrders) {
+        for (DraftDirectionOrder ddo : convertJudgeApprovedOrdersToPdfIfNeeded(finremCaseData, authorisationToken)) {
             CaseDocument stampedDocument = genericDocumentService.stampDocument(ddo.getUploadDraftDocument(),
                 authorisationToken, stampType, caseId);
 
