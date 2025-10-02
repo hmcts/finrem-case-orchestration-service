@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -20,7 +19,6 @@ public class UploadApprovedOrderService {
     private final HearingOrderService hearingOrderService;
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
     private final ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
-    private final OrderDateService orderDateService;
 
     /**
      * Method for processing approved orders in a financial remedy case.
@@ -42,12 +40,7 @@ public class UploadApprovedOrderService {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
 
-        try {
-            processCaseworkerUploadedApprovedOrders(caseDetails.getData(), authorisationToken);
-        } catch (CourtDetailsParseException e) {
-            log.error(e.getMessage());
-            errors.add(e.getMessage());
-        }
+        processCaseworkerUploadedApprovedOrders(caseDetails.getData(), authorisationToken);
 
         // TODO Looks like the following logic is not needed. Remove it later.
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);

@@ -457,34 +457,6 @@ class AdditionalHearingDocumentServiceTest {
         assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments()).isNull();
     }
 
-    @Test
-    void givenAdditionalDocumentsToBeStored_whenStampAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
-        FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseDetails finremCaseDetails = request.getCaseDetails();
-        CaseDocument expectedDocument = CaseDocument.builder().documentBinaryUrl(BINARY_URL).documentFilename(FILE_NAME)
-            .documentUrl(DOC_URL).build();
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(expectedDocument);
-        Map<String, Object> caseData = baseCaseData();
-        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
-        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-
-        FinremCaseData data = finremCaseDetails.getData();
-        List<DirectionOrderCollection> uploadHearingOrder = new ArrayList<>();
-        DirectionOrder directionOrder = DirectionOrder.builder().uploadDraftDocument(caseDocument())
-            .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
-        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(directionOrder).build();
-        uploadHearingOrder.add(orderCollection);
-        data.setUploadHearingOrder(uploadHearingOrder);
-
-        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(expectedDocument);
-
-        additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, finremCaseDetails);
-
-        CaseDocument actualDocument = data.getLatestDraftHearingOrder();
-        assertEquals(expectedDocument, actualDocument);
-        verify(genericDocumentService).stampDocument(any(), any(), any(), any());
-    }
-
     private Court getTestCourt() {
         return Court.builder()
             .region(Region.SOUTHEAST)

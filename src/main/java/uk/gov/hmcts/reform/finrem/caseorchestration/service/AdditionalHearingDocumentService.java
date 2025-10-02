@@ -93,55 +93,6 @@ public class AdditionalHearingDocumentService {
         finremAdditionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 
-    public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken,
-                                                                          FinremCaseDetails caseDetails) {
-        // TODO Remove me
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("dealing upload approve order for Case ID: {}", caseId);
-        FinremCaseData caseData = caseDetails.getData();
-        StampType stampType = documentHelper.getStampType(caseData);
-        List<DirectionOrderCollection> cwUploadedApprovedOrders = toPdf(caseData.getDraftDirectionWrapper().getCwApprovedOrderCollection(),
-            stampType, caseId, authorisationToken);
-
-        if (!cwUploadedApprovedOrders.isEmpty()) {
-            caseData.setUploadHearingOrder(cwUploadedApprovedOrders);
-            // TODO should append to uploadHearingOrder which is used in Process Order event
-            DirectionOrderCollection orderCollection = cwUploadedApprovedOrders.getLast();
-            caseData.setLatestDraftHearingOrder(orderCollection.getValue().getUploadDraftDocument());
-        }
-    }
-
-    private List<DirectionOrderCollection> toPdf(List<DirectionOrderCollection> uploadHearingOrder,
-                                                 StampType stampType,
-                                                 String caseId,
-                                                 String authorisationToken) {
-        List<DirectionOrderCollection> orderList = new ArrayList<>();
-        if (uploadHearingOrder != null && !uploadHearingOrder.isEmpty()) {
-            uploadHearingOrder.forEach(order -> stampOrder(order, stampType, caseId, orderList, authorisationToken));
-        }
-        return orderList;
-    }
-
-    private void stampOrder(DirectionOrderCollection order,
-                                StampType stampType,
-                                   String caseId,
-                                   List<DirectionOrderCollection> orderList,
-                                   String authorisationToken) {
-        CaseDocument pdfOrder = genericDocumentService.convertDocumentIfNotPdfAlready(order.getValue()
-            .getUploadDraftDocument(), authorisationToken, caseId);
-
-        CaseDocument stampedDocs = genericDocumentService.stampDocument(pdfOrder,
-            authorisationToken, stampType, caseId);
-
-        DirectionOrder directionOrder = DirectionOrder.builder()
-            .uploadDraftDocument(stampedDocs)
-            .isOrderStamped(YesOrNo.YES)
-            .orderDateTime(LocalDateTime.now())
-            .build();
-        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(directionOrder).build();
-        orderList.add(orderCollection);
-    }
-
     public List<DirectionOrderCollection> getApprovedHearingOrders(FinremCaseDetails caseDetails, String authorisationToken) {
         List<DirectionOrderCollection> uploadHearingOrder = caseDetails.getData().getUploadHearingOrder();
         return orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadHearingOrder, authorisationToken);

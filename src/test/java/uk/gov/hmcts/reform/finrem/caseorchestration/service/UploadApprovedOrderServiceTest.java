@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalDocumentType;
@@ -25,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,8 +33,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     private static final String AUTH_TOKEN = "Token -:)";
     private static final String JUDGE_NAME = "TEST_NAME";
-
-    private static final String COURT_DETAILS_PARSE_EXCEPTION_MESSAGE = "Failed to parse court details.";
 
     @Autowired
     private UploadApprovedOrderService uploadApprovedOrderService;
@@ -97,8 +93,6 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         assertEquals(1, finremCaseData.getUploadAdditionalDocument().size());
         assertEquals(1, finremCaseData.getFinalOrderCollection().size());
 
-        verify(additionalHearingDocumentService)
-            .createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, finremCaseDetails);
         verify(hearingOrderService).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(finremCaseDetails);
         verify(approvedOrderNoticeOfHearingService).createAndStoreHearingNoticeDocumentPack(finremCaseDetails, AUTH_TOKEN);
         verify(additionalHearingDocumentService).getApprovedHearingOrders(finremCaseDetailsBefore, AUTH_TOKEN);
@@ -125,33 +119,10 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
 
         verify(contestedOrderApprovedLetterService)
             .generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
-        verify(additionalHearingDocumentService)
-            .createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, finremCaseDetails);
         verify(hearingOrderService)
             .appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(finremCaseDetails);
         verify(approvedOrderNoticeOfHearingService, never())
             .createAndStoreHearingNoticeDocumentPack(finremCaseDetails, AUTH_TOKEN);
-    }
-
-    @Test
-    public void givenExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnResponseWithErrors() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
-
-        doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService)
-            .createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, finremCaseDetails);
-
-        finremCaseData.setUploadHearingOrder(getHearingOrderCollection());
-
-        List<String> errors = new ArrayList<>();
-        uploadApprovedOrderService.processApprovedOrders(callbackRequest, errors, AUTH_TOKEN);
-
-        assertEquals(1, errors.size());
-        assertEquals(COURT_DETAILS_PARSE_EXCEPTION_MESSAGE, errors.get(0));
-
-        verify(contestedOrderApprovedLetterService)
-            .generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
     }
 
     @Test
@@ -183,7 +154,6 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         // Assert
         assertEquals(2, finremCaseData.getUploadHearingOrder().size());
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
-        verify(additionalHearingDocumentService).createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, finremCaseDetails);
         verify(hearingOrderService).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(finremCaseDetails);
         verify(additionalHearingDocumentService).getApprovedHearingOrders(caseDetailsBefore, AUTH_TOKEN);
         verify(additionalHearingDocumentService).addToFinalOrderCollection(finremCaseDetails, AUTH_TOKEN);
