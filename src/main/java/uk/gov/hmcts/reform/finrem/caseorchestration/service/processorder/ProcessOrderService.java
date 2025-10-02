@@ -76,11 +76,10 @@ public class ProcessOrderService {
 
     /**
      * Checks whether all approved orders have been removed from the provided case data.
-     * <p>
-     * This method returns {@code true} if both the unprocessed approved documents collection
+     *
+     * <p>This method returns {@code true} if both the unprocessed approved documents collection
      * and the legacy approved orders collection (upload hearing order) are empty, indicating
-     * that there are no draft or legacy approved orders left to process.
-     * </p>
+     * that there are no draft or legacy approved orders left to process.</p>
      *
      * @param caseData the {@link FinremCaseData} instance containing draft and legacy approved orders
      * @return {@code true} if both unprocessed approved documents and upload hearing orders are empty; {@code false} otherwise

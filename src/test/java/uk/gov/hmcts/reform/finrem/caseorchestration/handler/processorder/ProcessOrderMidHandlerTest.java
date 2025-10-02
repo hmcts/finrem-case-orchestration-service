@@ -57,7 +57,8 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
     private static final String ERROR_NO_ORDERS = "There are no draft orders to be processed.";
     private static final String ERROR_NEW_DOCS = "You must upload a Microsoft Word file or PDF for new documents.";
     private static final String ERROR_LEGACY_PDF = "You must upload a PDF file for modifying legacy approved documents.";
-    private static final String ERROR_MODIFY_UNPROCESSED = "You must upload a Microsoft Word file or PDF for modifying an unprocessed approved documents.";
+    private static final String ERROR_MODIFY_UNPROCESSED =
+        "You must upload a Microsoft Word file or PDF for modifying an unprocessed approved documents.";
 
     @Test
     void testCanHandle() {
