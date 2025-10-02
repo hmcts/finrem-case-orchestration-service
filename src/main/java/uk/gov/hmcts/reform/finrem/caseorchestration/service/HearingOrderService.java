@@ -59,8 +59,6 @@ public class HearingOrderService {
     public void stampAndStoreCwApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
         synchroniseExistingApprovedOrder(finremCaseData, authorisationToken); // existing logic which is not in UAO (judge)
         convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken); // newly added to UAO (cw)
-        List<DraftDirectionOrder> cwApprovedHearingOrders = convertApprovedOrdersToPdfIfNeeded(finremCaseData,
-            ApprovedOrderUploader.CASEWORKER, authorisationToken);
 
         String caseId = finremCaseData.getCcdCaseId();
         StampType stampType = documentHelper.getStampType(finremCaseData);
@@ -68,20 +66,21 @@ public class HearingOrderService {
         finremCaseData.setFinalOrderCollection(orderDateService.syncCreatedDateAndMarkDocumentStamped(
             finremCaseData.getFinalOrderCollection(), authorisationToken));
 
-        for (DraftDirectionOrder ddo : cwApprovedHearingOrders) {
-            CaseDocument stampedDocument = genericDocumentService.stampDocument(ddo.getUploadDraftDocument(),
-                authorisationToken, stampType, caseId);
+        convertApprovedOrdersToPdfIfNeeded(finremCaseData, ApprovedOrderUploader.CASEWORKER, authorisationToken)
+            .forEach(cwApprovedOrder -> {
+                CaseDocument stampedDocument = genericDocumentService.stampDocument(cwApprovedOrder.getUploadDraftDocument(),
+                    authorisationToken, stampType, caseId);
 
-            // Store
-            setLatestDraftHearingOrder(finremCaseData, stampedDocument);
-            List<DocumentCollectionItem> additionalDocs = ddo.getAdditionalDocuments();
+                // Store
+                setLatestDraftHearingOrder(finremCaseData, stampedDocument);
+                List<DocumentCollectionItem> additionalDocs = cwApprovedOrder.getAdditionalDocuments();
 
-            // make the uploaded approved orders available in Order tab
-            appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
+                // make the uploaded approved orders available in Order tab
+                appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
 
-            // make the uploaded approved orders available in Process Order event
-            appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
-        }
+                // make the uploaded approved orders available in Process Order event
+                appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
+            });
     }
 
     /**
@@ -108,20 +107,21 @@ public class HearingOrderService {
         finremCaseData.setFinalOrderCollection(orderDateService.syncCreatedDateAndMarkDocumentStamped(
             finremCaseData.getFinalOrderCollection(), authorisationToken));
 
-        convertJudgeApprovedOrdersToPdfIfNeeded(finremCaseData, authorisationToken).forEach(judgeApprovedOrder -> {
-            CaseDocument stampedDocument = genericDocumentService.stampDocument(judgeApprovedOrder.getUploadDraftDocument(),
-                authorisationToken, stampType, caseId);
+        convertApprovedOrdersToPdfIfNeeded(finremCaseData, ApprovedOrderUploader.JUDGE, authorisationToken)
+            .forEach(judgeApprovedOrder -> {
+                CaseDocument stampedDocument = genericDocumentService.stampDocument(judgeApprovedOrder.getUploadDraftDocument(),
+                    authorisationToken, stampType, caseId);
 
-            // Store
-            setLatestDraftHearingOrder(finremCaseData, stampedDocument);
-            List<DocumentCollectionItem> additionalDocs = judgeApprovedOrder.getAdditionalDocuments();
+                // Store
+                setLatestDraftHearingOrder(finremCaseData, stampedDocument);
+                List<DocumentCollectionItem> additionalDocs = judgeApprovedOrder.getAdditionalDocuments();
 
-            // make the uploaded approved orders available in Order tab
-            appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
+                // make the uploaded approved orders available in Order tab
+                appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
 
-            // make the uploaded approved orders available in Process Order event
-            appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
-        });
+                // make the uploaded approved orders available in Process Order event
+                appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
+            });
     }
 
     public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(FinremCaseDetails caseDetails) {
