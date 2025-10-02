@@ -275,22 +275,25 @@ class ProcessOrderServiceTest {
 
     @ParameterizedTest()
     @MethodSource("approvedOrderCollectionsToProcess")
-    void testHasNoApprovedOrdersToProcess(String scenario, FinremCaseData input, boolean expected) {
+    void testHasNoApprovedOrdersToProcess(FinremCaseData input, boolean expected) {
         boolean actual = underTest.hasNoApprovedOrdersToProcess(input);
-        assertThat(actual).as(scenario).isEqualTo(expected);
+        assertThat(actual).isEqualTo(expected);
     }
 
     private static Stream<Arguments> approvedOrderCollectionsToProcess() {
         return Stream.of(
-            Arguments.of("both unprocessedApprovedDocuments and uploadHearingOrder(legacy) are null",
+            //both unprocessedApprovedDocuments and uploadHearingOrder(legacy) are null
+            Arguments.of(
                 FinremCaseData.builder()
                     .draftOrdersWrapper(DraftOrdersWrapper.builder()
                         .unprocessedApprovedDocuments(null)
                         .build())
                     .uploadHearingOrder(null)
                     .build(),
-                false),
-            Arguments.of("has unprocessedApprovedDocuments only",
+                true
+            ),
+            //has unprocessedApprovedDocuments only
+            Arguments.of(
                 FinremCaseData.builder()
                     .draftOrdersWrapper(DraftOrdersWrapper.builder()
                         .unprocessedApprovedDocuments(
@@ -298,9 +301,10 @@ class ProcessOrderServiceTest {
                         .build())
                     .uploadHearingOrder(List.of())
                     .build(),
-                false),
-
-            Arguments.of("has uploadHearingOrder(legacy) only",
+                false
+            ),
+            //has uploadHearingOrder(legacy) only
+            Arguments.of(
                 FinremCaseData.builder()
                     .draftOrdersWrapper(DraftOrdersWrapper.builder()
                         .unprocessedApprovedDocuments(List.of())
@@ -308,9 +312,10 @@ class ProcessOrderServiceTest {
                     .uploadHearingOrder(
                         List.of(DirectionOrderCollection.builder().build()))
                     .build(),
-                false),
-
-            Arguments.of("has both unprocessedApprovedDocuments and uploadHearingOrder(legacy)",
+                false
+            ),
+            //has both unprocessedApprovedDocuments and uploadHearingOrder(legacy)
+            Arguments.of(
                 FinremCaseData.builder()
                     .draftOrdersWrapper(DraftOrdersWrapper.builder()
                         .unprocessedApprovedDocuments(
@@ -319,7 +324,8 @@ class ProcessOrderServiceTest {
                     .uploadHearingOrder(
                         List.of(DirectionOrderCollection.builder().build()))
                     .build(),
-                false)
+                false
+            )
         );
     }
 
