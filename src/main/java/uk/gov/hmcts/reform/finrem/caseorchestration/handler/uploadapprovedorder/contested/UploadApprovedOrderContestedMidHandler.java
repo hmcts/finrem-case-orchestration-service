@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPLOAD_APPROVED_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPLOAD_APPROVED_ORDER_MH;
 
@@ -55,7 +56,7 @@ public class UploadApprovedOrderContestedMidHandler extends FinremCallbackHandle
         }
 
         String caseId = String.valueOf(caseDetails.getId());
-        caseData.getDraftDirectionWrapper().getCwApprovedOrderCollection().forEach(doc ->
+        emptyIfNull(caseData.getDraftDirectionWrapper().getCwApprovedOrderCollection()).forEach(doc ->
             bulkPrintDocumentService.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
                 caseId, errors, userAuthorisation)
         );
