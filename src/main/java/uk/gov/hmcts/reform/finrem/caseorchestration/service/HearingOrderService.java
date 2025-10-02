@@ -57,8 +57,8 @@ public class HearingOrderService {
      * @param authorisationToken the service authorization token used for document conversion and stamping
      */
     public void stampAndStoreCwApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
-        synchroniseExistingApprovedOrder(finremCaseData, authorisationToken); // existing logic
-        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken); // added to upload approved orders (cw)
+        synchroniseExistingApprovedOrder(finremCaseData, authorisationToken); // existing logic which is not in UAO (judge)
+        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken); // newly added to UAO (cw)
         List<DraftDirectionOrder> cwApprovedHearingOrders = convertApprovedOrdersToPdfIfNeeded(finremCaseData,
             ApprovedOrderUploader.CASEWORKER, authorisationToken);
 
@@ -75,7 +75,11 @@ public class HearingOrderService {
             // Store
             setLatestDraftHearingOrder(finremCaseData, stampedDocument);
             List<DocumentCollectionItem> additionalDocs = ddo.getAdditionalDocuments();
+
+            // make the uploaded approved orders available in Order tab
             appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
+
+            // make the uploaded approved orders available in Process Order event
             appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
         }
     }
@@ -114,7 +118,11 @@ public class HearingOrderService {
             // Store
             setLatestDraftHearingOrder(finremCaseData, stampedDocument);
             List<DocumentCollectionItem> additionalDocs = ddo.getAdditionalDocuments();
+
+            // make the uploaded approved orders available in Order tab
             appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
+
+            // make the uploaded approved orders available in Process Order event
             appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
         }
     }
