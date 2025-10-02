@@ -107,7 +107,6 @@ public class UploadApprovedOrderService {
     }
 
     private void processCaseworkerUploadedApprovedOrders(FinremCaseData caseData, String authorisationToken) {
-//        synchroniseExistingApprovedOrder(caseData, authorisationToken);
         hearingOrderService.stampAndStoreCwApprovedOrders(caseData, authorisationToken);
     }
 }
