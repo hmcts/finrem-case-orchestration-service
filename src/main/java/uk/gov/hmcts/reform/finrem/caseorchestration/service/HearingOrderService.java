@@ -102,29 +102,26 @@ public class HearingOrderService {
      */
     public void stampAndStoreJudgeApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
         convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken);
-        List<DraftDirectionOrder> judgeApprovedHearingOrders = convertApprovedOrdersToPdfIfNeeded(finremCaseData,
-            ApprovedOrderUploader.JUDGE, authorisationToken);
-
         String caseId = finremCaseData.getCcdCaseId();
         StampType stampType = documentHelper.getStampType(finremCaseData);
 
         finremCaseData.setFinalOrderCollection(orderDateService.syncCreatedDateAndMarkDocumentStamped(
             finremCaseData.getFinalOrderCollection(), authorisationToken));
 
-        for (DraftDirectionOrder ddo : judgeApprovedHearingOrders) {
-            CaseDocument stampedDocument = genericDocumentService.stampDocument(ddo.getUploadDraftDocument(),
+        convertJudgeApprovedOrdersToPdfIfNeeded(finremCaseData, authorisationToken).forEach(judgeApprovedOrder -> {
+            CaseDocument stampedDocument = genericDocumentService.stampDocument(judgeApprovedOrder.getUploadDraftDocument(),
                 authorisationToken, stampType, caseId);
 
             // Store
             setLatestDraftHearingOrder(finremCaseData, stampedDocument);
-            List<DocumentCollectionItem> additionalDocs = ddo.getAdditionalDocuments();
+            List<DocumentCollectionItem> additionalDocs = judgeApprovedOrder.getAdditionalDocuments();
 
             // make the uploaded approved orders available in Order tab
             appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
 
             // make the uploaded approved orders available in Process Order event
             appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
-        }
+        });
     }
 
     public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(FinremCaseDetails caseDetails) {
