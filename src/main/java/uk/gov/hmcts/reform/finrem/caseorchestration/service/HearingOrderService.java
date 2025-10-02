@@ -65,7 +65,11 @@ public class HearingOrderService {
             // Store
             setLatestDraftHearingOrder(finremCaseData, stampedDocument);
             List<DocumentCollectionItem> additionalDocs = ddo.getAdditionalDocuments();
+
+            // make the uploaded approved orders available in Order tab
             appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
+
+            // make the uploaded approved orders available in Process Order event
             appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
         }
     }
