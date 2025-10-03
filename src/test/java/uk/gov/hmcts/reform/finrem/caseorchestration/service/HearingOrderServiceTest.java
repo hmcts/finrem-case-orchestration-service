@@ -108,7 +108,6 @@ class HearingOrderServiceTest {
         void nestedSetUp() {
             when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(mockedStampType);
 
-            // Mocking additionalDocs
             stubDocsConversionToPdf(List.of(
                 Pair.of(uao1Docx, uao1Pdf),
                 Pair.of(uao2Docx, uao2Pdf),
