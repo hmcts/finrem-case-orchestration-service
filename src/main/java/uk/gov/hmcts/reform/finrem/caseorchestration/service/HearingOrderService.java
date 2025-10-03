@@ -58,7 +58,7 @@ public class HearingOrderService {
      */
     public void stampAndStoreCwApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
         synchroniseCreatedDateExistingApprovedOrder(finremCaseData, authorisationToken); // only CW
-        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken); // CW does it too, just later
+        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken);
         doStampAndStoreApprovedOrders(finremCaseData, authorisationToken, ApprovedOrderUploader.CASEWORKER);
     }
 
