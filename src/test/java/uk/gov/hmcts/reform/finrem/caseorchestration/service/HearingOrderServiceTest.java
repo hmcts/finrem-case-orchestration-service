@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -101,6 +104,23 @@ class HearingOrderServiceTest {
         List<DirectionOrderCollection> originalFinalOrderCollection = mock(ArrayList.class);
         StampType mockedStampType = mock(StampType.class);
 
+        @BeforeEach
+        void nestedSetUp() {
+            when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(mockedStampType);
+
+            // Mocking additionalDocs
+            stubDocsConversionToPdf(List.of(
+                Pair.of(uao1Docx, uao1Pdf),
+                Pair.of(uao2Docx, uao2Pdf),
+                Pair.of(additionalDoc1Docx, additionalDoc1Pdf),
+                Pair.of(additionalDoc2Docx, additionalDoc2Pdf)
+            ));
+            stubDocsStamping(List.of(
+                Pair.of(uao1Pdf, stampedUao1Pdf),
+                Pair.of(uao2Pdf, stampedUao2Pdf)
+            ));
+        }
+
         @Test
         void givenSingleApprovedOrder_whenJudgeUploads_thenStoredInExpectedProperties() {
             // Arrange
@@ -110,9 +130,6 @@ class HearingOrderServiceTest {
                 ))
                 .build());
 
-            when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
-            when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
-            when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
             List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>(List.of(
                 createStampedDirectionOrderCollection(
                     caseDocument("existingFinalOrderOne.pdf"),
@@ -148,10 +165,6 @@ class HearingOrderServiceTest {
                 ))
                 .build());
 
-            mockAdditionalDocsConversionToPdf();
-            when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
-            when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
-            when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
             List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>(List.of(
                 createStampedDirectionOrderCollection(
                     caseDocument("existingFinalOrderOne.pdf"),
@@ -189,12 +202,6 @@ class HearingOrderServiceTest {
                 ))
                 .build());
 
-            when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
-            mockAdditionalDocsConversionToPdf();
-            when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
-            when(genericDocumentService.convertDocumentIfNotPdfAlready(uao2Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao2Pdf);
-            when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
-            when(genericDocumentService.stampDocument(uao2Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao2Pdf);
             List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>(List.of(
                 createStampedDirectionOrderCollection(
                     caseDocument("existingFinalOrderOne.pdf"),
@@ -236,9 +243,6 @@ class HearingOrderServiceTest {
                 ))
                 .build());
 
-            when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
-            when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
-            mockAdditionalDocsConversionToPdf();
             when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
             List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>();
             when(orderDateService.syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN))
@@ -264,9 +268,18 @@ class HearingOrderServiceTest {
             }
         }
 
-        private void mockAdditionalDocsConversionToPdf() {
-            when(genericDocumentService.convertDocumentIfNotPdfAlready(additionalDoc1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(additionalDoc1Pdf);
-            when(genericDocumentService.convertDocumentIfNotPdfAlready(additionalDoc2Docx, AUTH_TOKEN, CASE_ID)).thenReturn(additionalDoc2Pdf);
+        private void stubDocsConversionToPdf(List<Pair<CaseDocument, CaseDocument>> pairs) {
+            for (Pair<CaseDocument, CaseDocument> pair : pairs) {
+                lenient().when(genericDocumentService.convertDocumentIfNotPdfAlready(pair.getLeft(), AUTH_TOKEN, CASE_ID))
+                    .thenReturn(pair.getRight());
+            }
+        }
+
+        private void stubDocsStamping(List<Pair<CaseDocument, CaseDocument>> pairs) {
+            for (Pair<CaseDocument, CaseDocument> pair : pairs) {
+                lenient().when(genericDocumentService.stampDocument(pair.getLeft(), AUTH_TOKEN, mockedStampType, CASE_ID))
+                    .thenReturn(pair.getRight());
+            }
         }
 
         private void verifyAdditionalDocsConversionToPdf(InOrder inOrder) {
