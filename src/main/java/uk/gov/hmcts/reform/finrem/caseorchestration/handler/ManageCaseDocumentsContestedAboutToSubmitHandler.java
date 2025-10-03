@@ -71,6 +71,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         List<String> warnings = new ArrayList<>();
 
@@ -140,7 +141,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
 
     private void addDefaultsToAdministrativeDocuments(List<UploadCaseDocumentCollection> managedCollections) {
 
-        managedCollections.stream().forEach(document -> setDefaultsForDocumentTypes(document));
+        managedCollections.forEach(this::setDefaultsForDocumentTypes);
     }
 
     private void setDefaultsForDocumentTypes(UploadCaseDocumentCollection document) {

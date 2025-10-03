@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -53,6 +55,9 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
 
     @Mock
     private UpdateRepresentationWorkflowService nocWorkflowService;
+
+    @Mock
+    private InternationalPostalService internationalPostalService;
 
     @Mock
     private FinremCaseDetailsMapper detailsMapper;
@@ -209,6 +214,31 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
             mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
             mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails), times(1));
         }
+    }
+
+    @ParameterizedTest
+    @EnumSource(CaseType.class)
+    void testGetPostCodeErrorsCalled(CaseType caseTypeParam) {
+        //Arrange
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().setCaseType(caseTypeParam);
+        FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
+
+        // handle, then assert
+        try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class)) {
+
+            handler.handle(callbackRequest, AUTH_TOKEN);
+            mockedStatic.verify(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData));
+
+            if (CaseType.CONSENTED.equals(caseTypeParam)) {
+                mockedStatic.verify(() -> ContactDetailsValidator.validatePostcodesByRepresentation(callbackRequest.getCaseDetails()));
+            }
+
+            if (CaseType.CONTESTED.equals(caseTypeParam)) {
+                mockedStatic.verify(() -> ContactDetailsValidator.validateCaseDataAddresses(finremCaseData));
+            }
+        }
+        verify(internationalPostalService).validate(finremCaseData);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

@@ -104,6 +104,7 @@ class ProcessOrderSubmittedHandlerTest {
     @Test
     void givenMhProcessOrderEvent_whenHandling_thenSendMhNotifications() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().getData().getManageHearingsWrapper().setIsAddHearingChosen(YesOrNo.YES);
         callbackRequest.setEventType(EventType.PROCESS_ORDER);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
@@ -111,6 +112,19 @@ class ProcessOrderSubmittedHandlerTest {
         verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
         verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
         verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+    }
+
+    @Test
+    void givenMhProcessOrderEvent_whenHandlingWithNoHearing_thenNoMhNotifications() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().getData().getManageHearingsWrapper().setIsAddHearingChosen(YesOrNo.NO);
+        callbackRequest.setEventType(EventType.PROCESS_ORDER);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
+        verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
+        verify(manageHearingsCorresponder, never()).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

@@ -99,6 +99,8 @@ public enum EventType {
     XUI_SANDBOX("FR_exuiSandbox"),
     XUI_SANDBOX_ONE("FR_exuiSandboxOne"),
     XUI_SANDBOX_TWO("FR_exuiSandboxTwo"),
+    FR_HWF_DECISION_MADE("FR_HWFDecisionMade"),
+    FR_HWF_DECISION_MADE_FROM_AWAITING_PAYMENT("FR_HWFDecisionMadeFromAwaitingPayment"),
     @JsonEnumDefaultValue
     NONE("");
 
