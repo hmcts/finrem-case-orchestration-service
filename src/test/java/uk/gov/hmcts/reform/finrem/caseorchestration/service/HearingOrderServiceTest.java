@@ -87,8 +87,14 @@ class HearingOrderServiceTest {
         CaseDocument uao2Pdf = caseDocument("UAO2.pdf");
         CaseDocument stampedUao2Pdf = caseDocument("StampedUAO2.pdf");
 
+        CaseDocument additionalDoc1Docx = caseDocument("additionalDoc1.docx");
+        CaseDocument additionalDoc1Pdf = caseDocument("additionalDoc1.pdf");
+        CaseDocument additionalDoc2Docx = caseDocument("additionalDoc2.docx");
+        CaseDocument additionalDoc2Pdf = caseDocument("additionalDoc2.pdf");
+
         private final List<DocumentCollectionItem> additionalDocs = List.of(
-            DocumentCollectionItem.fromCaseDocument(caseDocument("AdditionalDoc.docx"))
+            DocumentCollectionItem.fromCaseDocument(additionalDoc1Docx),
+            DocumentCollectionItem.fromCaseDocument(additionalDoc2Docx)
         );
 
         // Mocks
@@ -142,6 +148,7 @@ class HearingOrderServiceTest {
                 ))
                 .build());
 
+            mockAdditionalDocsConversionToPdf();
             when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
             when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
             when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
@@ -159,6 +166,7 @@ class HearingOrderServiceTest {
                 underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
 
                 InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
+                verifyAdditionalDocsConversionToPdf(inOrder);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
                 inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
@@ -182,6 +190,7 @@ class HearingOrderServiceTest {
                 .build());
 
             when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
+            mockAdditionalDocsConversionToPdf();
             when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
             when(genericDocumentService.convertDocumentIfNotPdfAlready(uao2Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao2Pdf);
             when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
@@ -200,6 +209,7 @@ class HearingOrderServiceTest {
                 underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
 
                 InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
+                verifyAdditionalDocsConversionToPdf(inOrder);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
                 inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao2Docx, AUTH_TOKEN, CASE_ID);
@@ -228,6 +238,7 @@ class HearingOrderServiceTest {
 
             when(documentHelper.getStampType(finremCaseData)).thenReturn(mockedStampType);
             when(genericDocumentService.convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(uao1Pdf);
+            mockAdditionalDocsConversionToPdf();
             when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID)).thenReturn(stampedUao1Pdf);
             List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>();
             when(orderDateService.syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN))
@@ -239,6 +250,7 @@ class HearingOrderServiceTest {
                 underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
 
                 InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
+                verifyAdditionalDocsConversionToPdf(inOrder);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
                 inOrder.verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 inOrder.verify(genericDocumentService, times(2)).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
@@ -250,6 +262,16 @@ class HearingOrderServiceTest {
                 assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(stampedUao1Pdf, additionalDocs),
                     createUploadHearingEntry(stampedUao1Pdf));
             }
+        }
+
+        private void mockAdditionalDocsConversionToPdf() {
+            when(genericDocumentService.convertDocumentIfNotPdfAlready(additionalDoc1Docx, AUTH_TOKEN, CASE_ID)).thenReturn(additionalDoc1Pdf);
+            when(genericDocumentService.convertDocumentIfNotPdfAlready(additionalDoc2Docx, AUTH_TOKEN, CASE_ID)).thenReturn(additionalDoc2Pdf);
+        }
+
+        private void verifyAdditionalDocsConversionToPdf(InOrder inOrder) {
+            inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(additionalDoc1Docx, AUTH_TOKEN, CASE_ID);
+            inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(additionalDoc2Docx, AUTH_TOKEN, CASE_ID);
         }
 
         private void assertLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument expectedOrder) {
@@ -320,7 +342,7 @@ class HearingOrderServiceTest {
     }
 
     @Test
-    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrdersV2() {
+    void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrdersV2() {
         FinremCallbackRequest callbackRequest = getContestedNewCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = caseDetails.getData();
