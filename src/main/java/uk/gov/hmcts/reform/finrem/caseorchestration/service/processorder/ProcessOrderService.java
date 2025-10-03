@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
@@ -74,16 +75,18 @@ public class ProcessOrderService {
     }
 
     /**
-     * Determines if all legacy approved orders have been removed by comparing the state of
-     * the "upload hearing order" field in the provided case data before and after an update.
+     * Checks whether all approved orders have been removed from the provided case data.
      *
-     * @param caseDataBefore the case data before the update, used to check if legacy orders existed
-     * @param caseData       the case data after the update, used to check if legacy orders have been removed
-     * @return {@code true} if the "upload hearing order" was not empty in {@code caseDataBefore}
-     *          and is empty in {@code caseData}, otherwise {@code false}
+     * <p>This method returns {@code true} if both the unprocessed approved documents collection
+     * and the legacy approved orders collection (upload hearing order) are empty, indicating
+     * that there are no draft or legacy approved orders left to process.</p>
+     *
+     * @param caseData the {@link FinremCaseData} instance containing draft and legacy approved orders
+     * @return {@code true} if both unprocessed approved documents and upload hearing orders are empty; {@code false} otherwise
      */
-    public boolean areAllLegacyApprovedOrdersRemoved(FinremCaseData caseDataBefore, FinremCaseData caseData) {
-        return !isUploadHearingOrderEmpty(caseDataBefore) && isUploadHearingOrderEmpty(caseData);
+    public boolean hasNoApprovedOrdersToProcess(FinremCaseData caseData) {
+        return CollectionUtils.isEmpty(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
+            && CollectionUtils.isEmpty(caseData.getUploadHearingOrder());
     }
 
     /**
