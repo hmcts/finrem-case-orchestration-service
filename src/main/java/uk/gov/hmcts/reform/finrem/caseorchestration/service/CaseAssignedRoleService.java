@@ -34,11 +34,12 @@ public class CaseAssignedRoleService {
     private final CaseDataService caseDataService;
     private final AuthTokenGenerator authTokenGenerator;
     private final IdamService idamService;
+    private CaseAssignedRoleService caseAssignedRoleService;
 
     public Map<String, Object> setCaseAssignedUserRole(CaseDetails caseDetails,
                                                        String authToken) {
 
-        CaseAssignedUserRolesResource resource = getCaseAssignedUserRole(caseDetails.getId().toString(), authToken);
+        CaseAssignedUserRolesResource resource = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails.getId().toString(), authToken);
         String caseRole = resource.getCaseAssignedUserRoles().getFirst().getCaseRole();
 
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
@@ -57,7 +58,7 @@ public class CaseAssignedRoleService {
 
     public FinremCaseData setCaseAssignedUserRole(FinremCaseDetails finremCaseDetails,
                                                   String authToken) {
-        CaseAssignedUserRolesResource resource = getCaseAssignedUserRole(finremCaseDetails.getId().toString(), authToken);
+        CaseAssignedUserRolesResource resource = caseAssignedRoleService.getCaseAssignedUserRole(finremCaseDetails.getId().toString(), authToken);
         String caseRole = resource.getCaseAssignedUserRoles().getFirst().getCaseRole();
 
         boolean isConsented = caseDataService.isConsentedApplication(finremCaseDetails);
