@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -52,7 +51,7 @@ public class JudgeDraftOrderAboutToStartHandler extends FinremCallbackHandler {
     private void prepareJudgeApprovedOrderCollection(FinremCaseData finremCaseData) {
         // Create an empty object to save the user from clicking the “Add New” button.
         finremCaseData.getDraftDirectionWrapper().setJudgeApprovedOrderCollection(List.of(
-            DraftDirectionOrderCollection.builder().value(DraftDirectionOrder.builder().build()).build()
+            DraftDirectionOrderCollection.EMPTY_COLLECTION
         ));
     }
 
