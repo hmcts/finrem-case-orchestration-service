@@ -272,7 +272,7 @@ class ProcessOrderServiceTest {
         assertTrue(result, "Expected all draft orders (excluding PSA) to have .doc or .docx extensions");
     }
 
-    @ParameterizedTest()
+    @ParameterizedTest
     @MethodSource("approvedOrderCollectionsToProcess")
     void testHasNoApprovedOrdersToProcess(FinremCaseData input, boolean expected) {
         boolean actual = underTest.hasNoApprovedOrdersToProcess(input);
