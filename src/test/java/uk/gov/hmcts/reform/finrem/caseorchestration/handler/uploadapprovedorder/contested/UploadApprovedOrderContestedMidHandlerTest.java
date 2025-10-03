@@ -144,11 +144,11 @@ class UploadApprovedOrderContestedMidHandlerTest {
             .validateEncryptionOnUploadedDocument(eq(newUploadDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
         lenient(). // should not be invoked
             doAnswer(invocation -> {
-            List<String> errors = invocation.getArgument(2);
-            errors.add("Mocked encryption error for existing document");
-            return null;
-        }).when(bulkPrintDocumentService)
-            .validateEncryptionOnUploadedDocument(eq(existingUploadedDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
+                List<String> errors = invocation.getArgument(2);
+                errors.add("Mocked encryption error for existing document");
+                return null;
+            }).when(bulkPrintDocumentService)
+                .validateEncryptionOnUploadedDocument(eq(existingUploadedDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         if (!valid) {
