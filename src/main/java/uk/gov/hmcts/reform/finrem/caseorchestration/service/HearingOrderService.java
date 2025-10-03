@@ -57,7 +57,7 @@ public class HearingOrderService {
      * @param authorisationToken the service authorization token used for document conversion and stamping
      */
     public void stampAndStoreCwApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
-        synchroniseExistingApprovedOrder(finremCaseData, authorisationToken); // existing logic which is not in UAO (judge)
+        synchroniseCreatedDateExistingApprovedOrder(finremCaseData, authorisationToken); // existing logic which is not in UAO (judge)
         convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken); // newly added to UAO (cw)
 
         String caseId = finremCaseData.getCcdCaseId();
@@ -168,6 +168,10 @@ public class HearingOrderService {
             .toList();
     }
 
+    private void setLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder) {
+        finremCaseData.setLatestDraftHearingOrder(stampedOrder);
+    }
+
     private void appendStampedDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder,
                                                            List<DocumentCollectionItem> additionalDocs) {
         List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder()).orElse(new ArrayList<>());
@@ -180,10 +184,6 @@ public class HearingOrderService {
                 .build()
         );
         finremCaseData.setUploadHearingOrder(directionOrders);
-    }
-
-    private void setLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder) {
-        finremCaseData.setLatestDraftHearingOrder(stampedOrder);
     }
 
     private void appendStampedOrderToFinalOrderCollection(FinremCaseData finremCaseData,
@@ -202,12 +202,13 @@ public class HearingOrderService {
         finremCaseData.setFinalOrderCollection(finalOrderCollection);
     }
 
-    private void synchroniseExistingApprovedOrder(FinremCaseData caseData, String authorisationToken) {
+    private void synchroniseCreatedDateExistingApprovedOrder(FinremCaseData caseData, String authorisationToken) {
         List<DirectionOrderCollection> uploadHearingOrder = caseData.getUploadHearingOrder();
         caseData.setUploadHearingOrder(
             orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadHearingOrder, authorisationToken)
         );
     }
+
     private void convertAdditionalDocumentsToPdf(FinremCaseData caseData, String authorisation) {
         List<DraftDirectionOrderCollection> judgeApprovedOrderCollection = caseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection();
 
