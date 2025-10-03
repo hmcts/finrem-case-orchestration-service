@@ -8,6 +8,10 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.Map;
 
@@ -30,11 +34,12 @@ public class CaseAssignedRoleService {
     private final CaseDataService caseDataService;
     private final AuthTokenGenerator authTokenGenerator;
     private final IdamService idamService;
+    private CaseAssignedRoleService caseAssignedRoleService;
 
     public Map<String, Object> setCaseAssignedUserRole(CaseDetails caseDetails,
                                                        String authToken) {
 
-        CaseAssignedUserRolesResource resource = getCaseAssignedUserRole(caseDetails.getId().toString(), authToken);
+        CaseAssignedUserRolesResource resource = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails.getId().toString(), authToken);
         String caseRole = resource.getCaseAssignedUserRoles().getFirst().getCaseRole();
 
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
@@ -49,6 +54,28 @@ public class CaseAssignedRoleService {
         caseDetails.getData().put(CASE_ROLE, caseRole);
 
         return caseDetails.getData();
+    }
+
+    public FinremCaseData setCaseAssignedUserRole(FinremCaseDetails finremCaseDetails,
+                                                  String authToken) {
+        CaseAssignedUserRolesResource resource = caseAssignedRoleService.getCaseAssignedUserRole(finremCaseDetails.getId().toString(), authToken);
+        String caseRole = resource.getCaseAssignedUserRoles().getFirst().getCaseRole();
+
+        boolean isConsented = caseDataService.isConsentedApplication(finremCaseDetails);
+
+        if (caseRole.equals(APP_SOLICITOR_POLICY)) {
+            finremCaseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+            finremCaseDetails.getData().setCurrentUserCaseRole(CaseRole.APP_SOLICITOR);
+        } else if (caseRole.equals(RESP_SOLICITOR_POLICY)) {
+            if (isConsented) {
+                finremCaseDetails.getData().getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
+            } else {
+                finremCaseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+            }
+            finremCaseDetails.getData().setCurrentUserCaseRole(CaseRole.RESP_SOLICITOR);
+        }
+
+        return finremCaseDetails.getData();
     }
 
     @Cacheable(cacheManager = APPLICATION_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
