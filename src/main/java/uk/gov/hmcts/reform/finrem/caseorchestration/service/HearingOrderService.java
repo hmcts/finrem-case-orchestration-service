@@ -127,10 +127,6 @@ public class HearingOrderService {
         finremCaseData.setUploadHearingOrder(directionOrders);
     }
 
-    private void setLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder) {
-        finremCaseData.setLatestDraftHearingOrder(stampedOrder);
-    }
-
     private void appendStampedOrderToFinalOrderCollection(FinremCaseData finremCaseData,
                                                           CaseDocument stampedOrder,
                                                           List<DocumentCollectionItem> additionalDocs) {
@@ -145,5 +141,9 @@ public class HearingOrderService {
             .build();
         finalOrderCollection.add(latestOrder);
         finremCaseData.setFinalOrderCollection(finalOrderCollection);
+    }
+
+    private void setLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder) {
+        finremCaseData.setLatestDraftHearingOrder(stampedOrder);
     }
 }
