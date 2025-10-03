@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
@@ -67,7 +66,7 @@ public class UploadApprovedOrderMhContestedAboutToStartHandler extends FinremCal
     private void prepareCwApprovedOrderCollection(FinremCaseData finremCaseData) {
         // Create an empty object to save the user from clicking the “Add New” button.
         finremCaseData.getDraftDirectionWrapper().setCwApprovedOrderCollection(List.of(
-            DirectionOrderCollection.builder().value(DirectionOrder.builder().build()).build()
+            DirectionOrderCollection.EMPTY_COLLECTION
         ));
     }
 }

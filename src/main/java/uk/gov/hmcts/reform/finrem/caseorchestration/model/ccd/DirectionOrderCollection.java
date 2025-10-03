@@ -19,4 +19,7 @@ public class DirectionOrderCollection implements HasCaseDocument, WithAttachment
     private String id;
     @JsonProperty("value")
     private DirectionOrder value;
+
+    public static DirectionOrderCollection EMPTY_COLLECTION =
+        DirectionOrderCollection.builder().value(DirectionOrder.builder().build()).build();
 }
