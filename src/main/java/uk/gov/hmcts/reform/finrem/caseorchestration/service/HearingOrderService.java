@@ -158,9 +158,12 @@ public class HearingOrderService {
     }
 
     private void synchroniseCreatedDateExistingApprovedOrder(FinremCaseData caseData, String authorisationToken) {
-        List<DirectionOrderCollection> uploadHearingOrder = caseData.getUploadHearingOrder();
+        // TODO is it a bug that it marks the document to be not stamped.
+        // It was copied from AdditionalHearingDocumentService.
+        // (called by UploadApprovedOrderService.processApprovedOrders)
+        // (called by UploadApprovedOrderService.processApprovedOrdersMh)
         caseData.setUploadHearingOrder(
-            orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadHearingOrder, authorisationToken)
+            orderDateService.syncCreatedDateAndMarkDocumentNotStamped(caseData.getUploadHearingOrder(), authorisationToken)
         );
     }
 

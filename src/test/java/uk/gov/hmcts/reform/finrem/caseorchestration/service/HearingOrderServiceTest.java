@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -31,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Up
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -81,24 +85,31 @@ class HearingOrderServiceTest {
     }
 
     @Nested
-    class StampAndStoreJudgeApprovedOrders {
-        LocalDateTime fixedDateTime = LocalDateTime.of(2025, 10, 1, 0, 0);
-        CaseDocument uao1Docx = caseDocument("UAO1.docx");
-        CaseDocument uao1Pdf = caseDocument("UAO1.pdf");
-        CaseDocument stampedUao1Pdf = caseDocument("StampedUAO1.pdf");
-        CaseDocument uao2Docx = caseDocument("UAO2.docx");
-        CaseDocument uao2Pdf = caseDocument("UAO2.pdf");
-        CaseDocument stampedUao2Pdf = caseDocument("StampedUAO2.pdf");
+    class StampAndStoreJudgeOrCaseworkerApprovedOrders {
 
-        CaseDocument additionalDoc1Docx = caseDocument("additionalDoc1.docx");
-        CaseDocument additionalDoc1Pdf = caseDocument("additionalDoc1.pdf");
-        CaseDocument additionalDoc2Docx = caseDocument("additionalDoc2.docx");
-        CaseDocument additionalDoc2Pdf = caseDocument("additionalDoc2.pdf");
+        final static Boolean CASEWORKER_UAO_EVENT = true;
+        final static Boolean JUDGE_UAO_EVENT = false;
 
-        private final List<DocumentCollectionItem> additionalDocs = List.of(
+        static LocalDateTime fixedDateTime = LocalDateTime.of(2025, 10, 1, 0, 0);
+        static CaseDocument uao1Docx = caseDocument("UAO1.docx");
+        static CaseDocument uao1Pdf = caseDocument("UAO1.pdf");
+        static CaseDocument stampedUao1Pdf = caseDocument("StampedUAO1.pdf");
+        static CaseDocument uao2Docx = caseDocument("UAO2.docx");
+        static CaseDocument uao2Pdf = caseDocument("UAO2.pdf");
+        static CaseDocument stampedUao2Pdf = caseDocument("StampedUAO2.pdf");
+
+        static CaseDocument additionalDoc1Docx = caseDocument("additionalDoc1.docx");
+        static CaseDocument additionalDoc1Pdf = caseDocument("additionalDoc1.pdf");
+        static CaseDocument additionalDoc2Docx = caseDocument("additionalDoc2.docx");
+        static CaseDocument additionalDoc2Pdf = caseDocument("additionalDoc2.pdf");
+
+        static List<DocumentCollectionItem> additionalDocs = List.of(
             DocumentCollectionItem.fromCaseDocument(additionalDoc1Docx),
             DocumentCollectionItem.fromCaseDocument(additionalDoc2Docx)
         );
+
+        List<DirectionOrderCollection> existingApprovedOrders;
+        List<DirectionOrderCollection> syncedExistingApprovedOrders;
 
         // Mocks
         List<DirectionOrderCollection> originalFinalOrderCollection = mock(ArrayList.class);
@@ -118,16 +129,36 @@ class HearingOrderServiceTest {
                 Pair.of(uao1Pdf, stampedUao1Pdf),
                 Pair.of(uao2Pdf, stampedUao2Pdf)
             ));
+
+            existingApprovedOrders = new ArrayList<>(List.of(
+                DirectionOrderCollection.builder().value(DirectionOrder.builder().build()).build()
+            ));
+            syncedExistingApprovedOrders = mock(List.class);
+            lenient().when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(existingApprovedOrders, AUTH_TOKEN))
+                .thenReturn(syncedExistingApprovedOrders);
         }
 
-        @Test
-        void givenSingleApprovedOrder_whenJudgeUploads_thenStoredInExpectedProperties() {
+        static Stream<Arguments> givenSingleApprovedOrder_whenStampAndStore_thenStoredInExpectedProperties() {
+            return Stream.of(
+                Arguments.of(JUDGE_UAO_EVENT, DraftDirectionWrapper.builder()
+                    .judgeApprovedOrderCollection(List.of(
+                        createJudgeApprovedOrder(uao1Docx)
+                    ))
+                    .build()),
+                Arguments.of(CASEWORKER_UAO_EVENT, DraftDirectionWrapper.builder()
+                    .cwApprovedOrderCollection(List.of(
+                        createCwApprovedOrder(uao1Docx)
+                    ))
+                    .build())
+            );
+        }
+
+        @MethodSource
+        @ParameterizedTest
+        void givenSingleApprovedOrder_whenStampAndStore_thenStoredInExpectedProperties(final boolean isCaseworkerUAO,
+                                                                                       DraftDirectionWrapper draftDirectionWrapper) {
             // Arrange
-            FinremCaseData finremCaseData = setupFinremCaseData(DraftDirectionWrapper.builder()
-                .judgeApprovedOrderCollection(List.of(
-                    createJudgeApprovedOrder(uao1Docx)
-                ))
-                .build());
+            FinremCaseData finremCaseData = setupFinremCaseData(draftDirectionWrapper);
 
             List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>(List.of(
                 createStampedDirectionOrderCollection(
@@ -140,7 +171,11 @@ class HearingOrderServiceTest {
             try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
                 mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
                 // Act
-                underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
+                if (isCaseworkerUAO) {
+                    underTest.stampAndStoreCwApprovedOrders(finremCaseData, AUTH_TOKEN);
+                } else {
+                    underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
+                }
 
                 InOrder inOrder = Mockito.inOrder(genericDocumentService, orderDateService, documentHelper);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
@@ -303,6 +338,7 @@ class HearingOrderServiceTest {
                 .ccdCaseId(CASE_ID)
                 .finalOrderCollection(originalFinalOrderCollection)
                 .draftDirectionWrapper(draftDirectionWrapper)
+                .uploadHearingOrder(existingApprovedOrders)
                 .build();
         }
 
@@ -338,14 +374,28 @@ class HearingOrderServiceTest {
                 .build();
         }
 
-        private DraftDirectionOrderCollection createJudgeApprovedOrder(CaseDocument uploadDraftDocument) {
+        private static DirectionOrderCollection createCwApprovedOrder(CaseDocument uploadDraftDocument) {
+            return createCwApprovedOrder(uploadDraftDocument, null);
+        }
+
+        private static DraftDirectionOrderCollection createJudgeApprovedOrder(CaseDocument uploadDraftDocument) {
             return createJudgeApprovedOrder(uploadDraftDocument, null);
         }
 
-        private DraftDirectionOrderCollection createJudgeApprovedOrder(CaseDocument uploadDraftDocument,
+        private static DraftDirectionOrderCollection createJudgeApprovedOrder(CaseDocument uploadDraftDocument,
                                                                        List<DocumentCollectionItem> additionalDocs) {
             return DraftDirectionOrderCollection.builder()
                 .value(DraftDirectionOrder.builder()
+                    .uploadDraftDocument(uploadDraftDocument)
+                    .additionalDocuments(additionalDocs)
+                    .build())
+                .build();
+        }
+
+        private static DirectionOrderCollection createCwApprovedOrder(CaseDocument uploadDraftDocument,
+                                                                      List<DocumentCollectionItem> additionalDocs) {
+            return DirectionOrderCollection.builder()
+                .value(DirectionOrder.builder()
                     .uploadDraftDocument(uploadDraftDocument)
                     .additionalDocuments(additionalDocs)
                     .build())
