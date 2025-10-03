@@ -69,7 +69,7 @@ class JudgeDraftOrderAboutToStartHandlerTest {
         FinremCaseData toBeTested = response.getData();
 
         assertThat(toBeTested.getDraftDirectionWrapper().getJudgeApprovedOrderCollection())
-            .containsOnly(DraftDirectionOrderCollection.builder().value(DraftDirectionOrder.builder().build()).build());
+            .containsOnly(DraftDirectionOrderCollection.EMPTY_COLLECTION);
     }
 
     @Test
@@ -89,7 +89,7 @@ class JudgeDraftOrderAboutToStartHandlerTest {
         FinremCaseData toBeTested = response.getData();
 
         assertThat(toBeTested.getDraftDirectionWrapper().getJudgeApprovedOrderCollection())
-            .containsOnly(DraftDirectionOrderCollection.builder().value(DraftDirectionOrder.builder().build()).build());
+            .containsOnly(DraftDirectionOrderCollection.EMPTY_COLLECTION);
     }
 
     @Test
