@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.BaseHandlerTestSetup;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -41,7 +40,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UploadApprovedOrderContestedMidHandlerTest extends BaseHandlerTestSetup {
+class UploadApprovedOrderContestedMidHandlerTest {
 
     @Mock
     private BulkPrintDocumentService bulkPrintDocumentService;
