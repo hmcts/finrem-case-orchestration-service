@@ -57,30 +57,9 @@ public class HearingOrderService {
      * @param authorisationToken the service authorization token used for document conversion and stamping
      */
     public void stampAndStoreCwApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
-        synchroniseCreatedDateExistingApprovedOrder(finremCaseData, authorisationToken); // existing logic which is not in UAO (judge)
-        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken); // newly added to UAO (cw)
-
-        String caseId = finremCaseData.getCcdCaseId();
-        StampType stampType = documentHelper.getStampType(finremCaseData);
-
-        finremCaseData.setFinalOrderCollection(orderDateService.syncCreatedDateAndMarkDocumentStamped(
-            finremCaseData.getFinalOrderCollection(), authorisationToken));
-
-        convertApprovedOrdersToPdfIfNeeded(finremCaseData, ApprovedOrderUploader.CASEWORKER, authorisationToken)
-            .forEach(cwApprovedOrder -> {
-                CaseDocument stampedDocument = genericDocumentService.stampDocument(cwApprovedOrder.getUploadDraftDocument(),
-                    authorisationToken, stampType, caseId);
-
-                // Store "Latest draft hearing order" field which is under "Scheduling and Listing" tabs
-                setLatestDraftHearingOrder(finremCaseData, stampedDocument);
-                List<DocumentCollectionItem> additionalDocs = cwApprovedOrder.getAdditionalDocuments();
-
-                // make the uploaded approved orders available in Order tab
-                appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
-
-                // make the uploaded approved orders available in Process Order event
-                appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
-            });
+        synchroniseCreatedDateExistingApprovedOrder(finremCaseData, authorisationToken); // only CW
+        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken); // CW does it too, just later
+        doStampAndStoreApprovedOrders(finremCaseData, authorisationToken, ApprovedOrderUploader.CASEWORKER);
     }
 
     /**
@@ -100,28 +79,8 @@ public class HearingOrderService {
      * @param authorisationToken the service authorization token used for document conversion and stamping
      */
     public void stampAndStoreJudgeApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
-        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken);
-        String caseId = finremCaseData.getCcdCaseId();
-        StampType stampType = documentHelper.getStampType(finremCaseData);
-
-        finremCaseData.setFinalOrderCollection(orderDateService.syncCreatedDateAndMarkDocumentStamped(
-            finremCaseData.getFinalOrderCollection(), authorisationToken));
-
-        convertApprovedOrdersToPdfIfNeeded(finremCaseData, ApprovedOrderUploader.JUDGE, authorisationToken)
-            .forEach(judgeApprovedOrder -> {
-                CaseDocument stampedDocument = genericDocumentService.stampDocument(judgeApprovedOrder.getUploadDraftDocument(),
-                    authorisationToken, stampType, caseId);
-
-                // Store "Latest draft hearing order" field which is under "Scheduling and Listing" tabs
-                setLatestDraftHearingOrder(finremCaseData, stampedDocument);
-                List<DocumentCollectionItem> additionalDocs = judgeApprovedOrder.getAdditionalDocuments();
-
-                // make the uploaded approved orders available in Order tab
-                appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
-
-                // make the uploaded approved orders available in Process Order event
-                appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
-            });
+        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken); // only Judge first
+        doStampAndStoreApprovedOrders(finremCaseData, authorisationToken, ApprovedOrderUploader.JUDGE);
     }
 
     public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(FinremCaseDetails caseDetails) {
@@ -218,6 +177,35 @@ public class HearingOrderService {
                     additionalDoc.getValue(), authorisation, String.valueOf(caseData.getCcdCaseId()));
                 additionalDoc.setValue(documentPdf);
             });
+    }
+
+    private void doStampAndStoreApprovedOrders(FinremCaseData finremCaseData, String authorisationToken,
+                                               ApprovedOrderUploader uploader) {
+        String caseId = finremCaseData.getCcdCaseId();
+        StampType stampType = documentHelper.getStampType(finremCaseData);
+
+        finremCaseData.setFinalOrderCollection(orderDateService.syncCreatedDateAndMarkDocumentStamped(
+            finremCaseData.getFinalOrderCollection(), authorisationToken));
+
+        convertApprovedOrdersToPdfIfNeeded(finremCaseData, uploader, authorisationToken)
+            .forEach(order -> handleApprovedOrder(finremCaseData, order, authorisationToken, stampType, caseId));
+    }
+
+    private void handleApprovedOrder(FinremCaseData finremCaseData, UploadedApprovedOrder order,
+                                     String authorisationToken, StampType stampType, String caseId) {
+        CaseDocument stampedDocument = genericDocumentService.stampDocument(
+            order.getApprovedOrder(), authorisationToken, stampType, caseId);
+
+        // Store "Latest draft hearing order"
+        setLatestDraftHearingOrder(finremCaseData, stampedDocument);
+
+        List<DocumentCollectionItem> additionalDocs = order.getAdditionalDocuments();
+
+        // make the uploaded approved orders available in Order tab
+        appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
+
+        // make the uploaded approved orders available in Process Order event
+        appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
     }
 
     private void setLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder) {
