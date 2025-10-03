@@ -58,11 +58,9 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
     void handle_shouldProcessApprovedOrdersAndReturnResponse() {
         var caseData = mock(FinremCaseData.class);
         var caseDetails = mock(FinremCaseDetails.class);
-        var caseDetailsBefore = mock(FinremCaseDetails.class);
         var callbackRequest = mock(FinremCallbackRequest.class);
 
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
         when(caseDetails.getData()).thenReturn(caseData);
 
         var manageHearingsWrapper = mock(ManageHearingsWrapper.class);
@@ -114,11 +112,9 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
     void givenContestedCase_whenUploadDocumentWithWarnings_thenReturnWarnings() {
         var caseData = mock(FinremCaseData.class);
         var caseDetails = mock(FinremCaseDetails.class);
-        var caseDetailsBefore = mock(FinremCaseDetails.class);
         var callbackRequest = mock(FinremCallbackRequest.class);
 
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
         when(caseDetails.getData()).thenReturn(caseData);
 
         var manageHearingsWrapper = mock(ManageHearingsWrapper.class);
