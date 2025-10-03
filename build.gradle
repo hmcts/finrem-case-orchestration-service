@@ -3,7 +3,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.sonarqube' version '6.3.1.5724'
-    id 'org.springframework.boot' version '3.5.5' // TODO remove tomcat dependency once spring boot is upgraded
+    id 'org.springframework.boot' version '3.5.6'
     id 'com.github.ben-manes.versions' version '0.52.0'
     id 'uk.gov.hmcts.java' version '0.12.67'
     id 'au.com.dius.pact' version '4.6.17'
@@ -19,7 +19,7 @@ def versions = [
         bspCommonLib         : '0.2.0',
         ccdClient            : '5.2.0',
         commonsIo            : '2.20.0',
-        commonsLang3         : '3.18.0',
+        commonsLang3         : '3.19.0',
         hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
         lombok               : '1.18.42',
@@ -31,7 +31,7 @@ def versions = [
         serviceTokenGenerator: '5.3.3',
         springDoc            : '1.8.0',
         wiremock             : '3.0.1',
-        apacheLogging        : '2.25.1',
+        apacheLogging        : '2.25.2',
         idamClient           : '3.0.4',
         springHateoas        : '1.5.6',
         tika                 : '3.2.3',
@@ -43,8 +43,7 @@ def versions = [
         snakeyaml            : '2.4',
         loadbalancer         : '4.3.0',
         commonsValidator     : '1.7',
-        commonsBeanUtils     : '1.11.0',
-        tomcat               : '10.1.46'
+        commonsBeanUtils     : '1.11.0'
 ]
 
 project.ext {
@@ -402,9 +401,6 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: versions.tomcat
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: versions.tomcat
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: versions.tomcat
     implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'

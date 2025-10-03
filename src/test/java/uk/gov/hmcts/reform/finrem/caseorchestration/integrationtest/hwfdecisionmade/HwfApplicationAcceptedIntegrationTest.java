@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTestUtils.givenSearchUserRoles;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTestUtils.performCallback;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTestUtils.performSubmittedCallback;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 
@@ -55,7 +55,7 @@ class HwfApplicationAcceptedIntegrationTest {
     void givenContestedCaseWhenHandleThenSendsEmail() throws Exception {
         givenSearchUserRoles(assignCaseAccessService, CaseRole.APP_SOLICITOR);
 
-        performCallback(mockMvc, "/case-orchestration/notify/hwf-successful", jsonFile("contested-submitted.json"))
+        performSubmittedCallback(mockMvc, jsonFile("contested-submitted.json"))
             .andExpect(status().isOk());
 
         String expectedTemplateId = emailTemplates.get(FR_CONTESTED_HWF_SUCCESSFUL.name());
@@ -72,7 +72,7 @@ class HwfApplicationAcceptedIntegrationTest {
         byte[] expectedBytes = new byte[] {1, 2, 3, 4};
         when(docmosisPdfGenerationService.generateDocFrom(anyString(),anyMap())).thenReturn(expectedBytes);
 
-        performCallback(mockMvc, "/case-orchestration/notify/hwf-successful", jsonFile("consented-submitted.json"))
+        performSubmittedCallback(mockMvc, jsonFile("consented-submitted.json"))
             .andExpect(status().isOk());
 
         String expectedTemplateId = emailTemplates.get(FR_HWF_SUCCESSFUL.name());
