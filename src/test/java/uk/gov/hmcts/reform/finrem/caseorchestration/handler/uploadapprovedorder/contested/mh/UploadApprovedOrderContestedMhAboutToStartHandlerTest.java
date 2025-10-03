@@ -28,7 +28,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -89,7 +88,8 @@ class UploadApprovedOrderContestedMhAboutToStartHandlerTest extends BaseHandlerT
         assertNull(finremCaseData.getOrderApprovedJudgeName());
         assertNull(finremCaseData.getOrderApprovedDate());
         assertThat(finremCaseData.getHearingNoticeDocumentPack()).isEmpty();
-        assertTrue(finremCaseData.getUploadHearingOrder().isEmpty());
+        assertThat(finremCaseData.getDraftDirectionWrapper().getCwApprovedOrderCollection())
+            .contains(DirectionOrderCollection.EMPTY_COLLECTION);
         assertThat(finremCaseData.getManageHearingsWrapper().getWorkingHearing().getPartiesOnCaseMultiSelectList())
             .isEqualTo(partiesOnCase);
         assertFalse(response.hasErrors());

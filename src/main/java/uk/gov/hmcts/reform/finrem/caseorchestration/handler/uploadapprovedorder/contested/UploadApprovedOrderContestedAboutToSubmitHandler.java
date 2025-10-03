@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
 
 import java.util.ArrayList;
@@ -47,6 +48,12 @@ public class UploadApprovedOrderContestedAboutToSubmitHandler extends FinremCall
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
+        // Set the case ID so that requests to CDAM don't fail.
+        // This is a temporary workaround until the request to CDAM is fixed to
+        // send the case type ID and not the case ID. See DFR-4138
+        caseData.setCcdCaseId(String.valueOf(caseDetails.getId()));
 
         List<String> errors = new ArrayList<>();
         uploadApprovedOrderService.processApprovedOrders(callbackRequest, errors, userAuthorisation);

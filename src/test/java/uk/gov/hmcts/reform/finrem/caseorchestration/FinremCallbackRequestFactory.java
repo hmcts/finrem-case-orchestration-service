@@ -75,6 +75,7 @@ public class FinremCallbackRequestFactory {
         return FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
                 .id(id)
+                .data(FinremCaseData.builder().ccdCaseId(String.valueOf(id)).build())
                 .caseType(caseType)
                 .build())
             .eventType(eventType)
