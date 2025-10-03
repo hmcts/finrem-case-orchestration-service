@@ -58,7 +58,7 @@ public class HearingOrderService {
      */
     public void stampAndStoreCwApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
         synchroniseCreatedDateExistingApprovedOrder(finremCaseData, authorisationToken); // only CW
-        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken);
+        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken, ApprovedOrderUploader.CASEWORKER);
         doStampAndStoreApprovedOrders(finremCaseData, authorisationToken, ApprovedOrderUploader.CASEWORKER);
     }
 
@@ -79,7 +79,7 @@ public class HearingOrderService {
      * @param authorisationToken the service authorization token used for document conversion and stamping
      */
     public void stampAndStoreJudgeApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
-        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken); // only Judge first
+        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken, ApprovedOrderUploader.JUDGE); // only Judge first
         doStampAndStoreApprovedOrders(finremCaseData, authorisationToken, ApprovedOrderUploader.JUDGE);
     }
 
@@ -171,12 +171,15 @@ public class HearingOrderService {
         );
     }
 
-    private void convertAdditionalDocumentsToPdf(FinremCaseData caseData, String authorisation) {
-        List<DraftDirectionOrderCollection> judgeApprovedOrderCollection = caseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection();
+    private void convertAdditionalDocumentsToPdf(FinremCaseData caseData, String authorisation,
+                                                 ApprovedOrderUploader uploader) {
+        List<? extends UploadedApprovedOrderHolder> orders = ApprovedOrderUploader.CASEWORKER == uploader
+            ? caseData.getDraftDirectionWrapper().getCwApprovedOrderCollection()
+            : caseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection();
 
-        emptyIfNull(judgeApprovedOrderCollection).stream()
-            .map(DraftDirectionOrderCollection::getValue)
-            .map(DraftDirectionOrder::getAdditionalDocuments)
+        emptyIfNull(orders).stream()
+            .map(UploadedApprovedOrderHolder::getValue)
+            .map(UploadedApprovedOrder::getAdditionalDocuments)
             .filter(CollectionUtils::isNotEmpty)
             .flatMap(List::stream)
             .forEach(additionalDoc -> {
