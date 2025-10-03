@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
@@ -75,7 +74,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
@@ -164,15 +162,6 @@ class AdditionalHearingDocumentServiceTest {
         assertThat(data).extracting("CourtEmail").isEqualTo("FRCNottingham@justice.gov.uk");
 
         assertThat(data).extracting(ADDITIONAL_HEARING_DOCUMENT_COLLECTION).isNotNull();
-    }
-
-    @Test
-    void getHearingOrderAdditionalDocuments() {
-        Map<String, Object> caseData = baseCaseData();
-        caseData.put(HEARING_UPLOADED_DOCUMENT, Collections.EMPTY_LIST);
-        List<HearingOrderAdditionalDocCollectionData> hearingOrderAdditionalDocuments
-            = additionalHearingDocumentService.getHearingOrderAdditionalDocuments(caseData);
-        assertThat(hearingOrderAdditionalDocuments).isEmpty();
     }
 
     @Test
