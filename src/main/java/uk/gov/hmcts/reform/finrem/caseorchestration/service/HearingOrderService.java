@@ -205,10 +205,6 @@ public class HearingOrderService {
         );
     }
 
-    private void setLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder) {
-        finremCaseData.setLatestDraftHearingOrder(stampedOrder);
-    }
-
     private void convertAdditionalDocumentsToPdf(FinremCaseData caseData, String authorisation) {
         List<DraftDirectionOrderCollection> judgeApprovedOrderCollection = caseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection();
 
@@ -222,5 +218,9 @@ public class HearingOrderService {
                     additionalDoc.getValue(), authorisation, String.valueOf(caseData.getCcdCaseId()));
                 additionalDoc.setValue(documentPdf);
             });
+    }
+
+    private void setLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder) {
+        finremCaseData.setLatestDraftHearingOrder(stampedOrder);
     }
 }
