@@ -8,6 +8,11 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Yes;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.Map;
 
@@ -55,5 +60,26 @@ public class CaseAssignedRoleService {
     public CaseAssignedUserRolesResource getCaseAssignedUserRole(final String caseId, final String authToken) {
         return dataStoreClient.getUserRoles(authToken, authTokenGenerator.generate(),
             caseId, idamService.getIdamUserId(authToken));
+    }
+    public FinremCaseData setCaseAssignedUserRole(FinremCaseDetails finremCaseDetails,
+                                                  String authToken) {
+        CaseAssignedUserRolesResource resource = getCaseAssignedUserRole(finremCaseDetails.getId().toString(), authToken);
+        String caseRole = resource.getCaseAssignedUserRoles().getFirst().getCaseRole();
+
+        boolean isConsented = caseDataService.isConsentedApplication(finremCaseDetails);
+
+        if (caseRole.equals(APP_SOLICITOR_POLICY)) {
+            finremCaseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+            finremCaseDetails.getData().setCurrentUserCaseRole(CaseRole.APP_SOLICITOR);
+        } else if (caseRole.equals(RESP_SOLICITOR_POLICY)) {
+            if (isConsented) {
+                finremCaseDetails.getData().getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
+            } else {
+                finremCaseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+            }
+            finremCaseDetails.getData().setCurrentUserCaseRole(CaseRole.RESP_SOLICITOR);
+        }
+
+        return finremCaseDetails.getData();
     }
 }
