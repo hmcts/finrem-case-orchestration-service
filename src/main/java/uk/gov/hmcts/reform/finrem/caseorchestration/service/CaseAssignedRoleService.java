@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Yes;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.Map;
@@ -56,11 +55,6 @@ public class CaseAssignedRoleService {
         return caseDetails.getData();
     }
 
-    @Cacheable(cacheManager = APPLICATION_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
-    public CaseAssignedUserRolesResource getCaseAssignedUserRole(final String caseId, final String authToken) {
-        return dataStoreClient.getUserRoles(authToken, authTokenGenerator.generate(),
-            caseId, idamService.getIdamUserId(authToken));
-    }
     public FinremCaseData setCaseAssignedUserRole(FinremCaseDetails finremCaseDetails,
                                                   String authToken) {
         CaseAssignedUserRolesResource resource = getCaseAssignedUserRole(finremCaseDetails.getId().toString(), authToken);
@@ -81,5 +75,11 @@ public class CaseAssignedRoleService {
         }
 
         return finremCaseDetails.getData();
+    }
+
+    @Cacheable(cacheManager = APPLICATION_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
+    public CaseAssignedUserRolesResource getCaseAssignedUserRole(final String caseId, final String authToken) {
+        return dataStoreClient.getUserRoles(authToken, authTokenGenerator.generate(),
+            caseId, idamService.getIdamUserId(authToken));
     }
 }
