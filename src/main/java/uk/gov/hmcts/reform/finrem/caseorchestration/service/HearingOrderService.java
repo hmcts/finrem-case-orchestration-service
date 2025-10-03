@@ -168,10 +168,6 @@ public class HearingOrderService {
             .toList();
     }
 
-    private void setLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder) {
-        finremCaseData.setLatestDraftHearingOrder(stampedOrder);
-    }
-
     private void appendStampedDocumentToUploadHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder,
                                                            List<DocumentCollectionItem> additionalDocs) {
         List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder()).orElse(new ArrayList<>());
@@ -207,6 +203,10 @@ public class HearingOrderService {
         caseData.setUploadHearingOrder(
             orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadHearingOrder, authorisationToken)
         );
+    }
+
+    private void setLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder) {
+        finremCaseData.setLatestDraftHearingOrder(stampedOrder);
     }
 
     private void convertAdditionalDocumentsToPdf(FinremCaseData caseData, String authorisation) {
