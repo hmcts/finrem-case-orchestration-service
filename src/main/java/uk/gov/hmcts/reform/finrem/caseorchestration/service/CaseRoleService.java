@@ -22,10 +22,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfigura
 public class CaseRoleService {
 
     private final CaseAssignedRoleService caseAssignedRoleService;
-    private final DataStoreClient dataStoreClient;
-    private final AuthTokenGenerator authTokenGenerator;
-    private final IdamService idamService;
-
 
     /**
      * Retrieves the case role of the logged-in user for a given case.
@@ -71,18 +67,5 @@ public class CaseRoleService {
     public CaseRole getUserOrCaseworkerCaseRole(String id, String auth) {
         return Optional.ofNullable(getUserCaseRole(id, auth))
             .orElse(CaseRole.CASEWORKER);
-    }
-
-    /**
-     * Retrieves the case assigned user roles for a given case ID.
-     *
-     * @param caseId    the case ID
-     * @param authToken the authorisation token
-     * @return the {@link CaseAssignedUserRolesResource} containing the user roles for the case
-     */
-    @Cacheable(cacheManager = APPLICATION_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
-    public CaseAssignedUserRolesResource getCaseAssignedUserRole(final String caseId, final String authToken) {
-        return dataStoreClient.getUserRoles(authToken, authTokenGenerator.generate(),
-            caseId, idamService.getIdamUserId(authToken));
     }
 }

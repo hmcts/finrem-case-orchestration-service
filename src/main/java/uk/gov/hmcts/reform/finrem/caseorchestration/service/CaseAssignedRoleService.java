@@ -3,8 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -14,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.APPLICATION_SCOPED_CACHE_MANAGER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.USER_ROLES_CACHE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
@@ -27,12 +32,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class CaseAssignedRoleService {
 
     private final CaseDataService caseDataService;
-    private final CaseRoleService caseRoleService;
+    private final DataStoreClient dataStoreClient;
+    private final AuthTokenGenerator authTokenGenerator;
+    private final IdamService idamService;
+
+    @Autowired
+    private CaseAssignedRoleService caseAssignedRoleService;
 
     public Map<String, Object> setCaseAssignedUserRole(CaseDetails caseDetails,
                                                        String authToken) {
 
-        CaseAssignedUserRolesResource resource = caseRoleService.getCaseAssignedUserRole(caseDetails.getId().toString(), authToken);
+        CaseAssignedUserRolesResource resource = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails.getId().toString(), authToken);
         String caseRole = resource.getCaseAssignedUserRoles().getFirst().getCaseRole();
 
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
@@ -51,7 +61,7 @@ public class CaseAssignedRoleService {
 
     public FinremCaseData setCaseAssignedUserRole(FinremCaseDetails finremCaseDetails,
                                                   String authToken) {
-        CaseAssignedUserRolesResource resource = caseRoleService.getCaseAssignedUserRole(finremCaseDetails.getId().toString(), authToken);
+        CaseAssignedUserRolesResource resource = caseAssignedRoleService.getCaseAssignedUserRole(finremCaseDetails.getId().toString(), authToken);
         String caseRole = resource.getCaseAssignedUserRoles().getFirst().getCaseRole();
 
         boolean isConsented = caseDataService.isConsentedApplication(finremCaseDetails);
@@ -69,5 +79,10 @@ public class CaseAssignedRoleService {
         }
 
         return finremCaseDetails.getData();
+    }
+    @Cacheable(cacheManager = APPLICATION_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
+    public CaseAssignedUserRolesResource getCaseAssignedUserRole(final String caseId, final String authToken) {
+        return dataStoreClient.getUserRoles(authToken, authTokenGenerator.generate(),
+            caseId, idamService.getIdamUserId(authToken));
     }
 }
