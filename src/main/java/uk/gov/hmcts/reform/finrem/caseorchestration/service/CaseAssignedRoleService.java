@@ -80,6 +80,7 @@ public class CaseAssignedRoleService {
 
         return finremCaseDetails.getData();
     }
+
     @Cacheable(cacheManager = APPLICATION_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
     public CaseAssignedUserRolesResource getCaseAssignedUserRole(final String caseId, final String authToken) {
         return dataStoreClient.getUserRoles(authToken, authTokenGenerator.generate(),
