@@ -31,8 +31,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class CaseAssignedRoleService {
 
-    private final CaseDataService caseDataService;
     private final DataStoreClient dataStoreClient;
+    private final CaseDataService caseDataService;
     private final AuthTokenGenerator authTokenGenerator;
     private final IdamService idamService;
 
