@@ -80,7 +80,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
             FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONSENTED, UPDATE_CONTACT_DETAILS, caseData);
 
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
-            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
+            contactValidatorMock.when(() -> ContactDetailsValidator.validatePostcodesByRepresentation(callbackRequest.getCaseDetails()))
                 .thenReturn(new ArrayList<>(addressErrors));
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
                 .thenReturn(new ArrayList<>(emailErrors));
