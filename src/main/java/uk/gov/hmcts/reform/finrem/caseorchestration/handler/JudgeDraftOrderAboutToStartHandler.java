@@ -57,7 +57,7 @@ public class JudgeDraftOrderAboutToStartHandler extends FinremCallbackHandler {
 
     private void prepareFieldsForOrderApprovedCoverLetter(FinremCaseData finremCaseData, String authorisationToken) {
         finremCaseData.setOrderApprovedJudgeType(null);
-        finremCaseData.setOrderApprovedJudgeName(idamService.getIdamFullName(authorisationToken));
+        finremCaseData.setOrderApprovedJudgeName(idamService.getIdamSurname(authorisationToken));
         finremCaseData.setOrderApprovedDate(null);
     }
 }
