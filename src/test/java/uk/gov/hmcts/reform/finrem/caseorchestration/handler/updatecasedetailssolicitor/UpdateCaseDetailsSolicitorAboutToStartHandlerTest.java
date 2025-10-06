@@ -54,7 +54,7 @@ class UpdateCaseDetailsSolicitorAboutToStartHandlerTest {
     }
 
     @Test
-    void GivenUserIsApplicantSolicitorWhenHandleThenUpdateCaseData() {
+    void givenUserIsApplicantSolicitorWhenHandleThenUpdateCaseData() {
         FinremCaseData caseData = setUpCaseData();
         FinremCallbackRequest callbackRequest = setUpCallbackRequest(caseData);
         CaseAssignedUserRolesResource resource = CaseAssignedUserRolesResource.builder()
@@ -72,7 +72,7 @@ class UpdateCaseDetailsSolicitorAboutToStartHandlerTest {
     }
 
     @Test
-    void GivenUserIsConsentedRespondentSolicitorWhenHandleThenUpdateCaseData(){
+    void givenUserIsConsentedRespondentSolicitorWhenHandleThenUpdateCaseData() {
         FinremCaseData caseData = setUpCaseData();
         FinremCallbackRequest callbackRequest = setUpCallbackRequest(caseData);
 
@@ -88,11 +88,10 @@ class UpdateCaseDetailsSolicitorAboutToStartHandlerTest {
 
         assertThat(response.getData().getCurrentUserCaseRoleLabel()).isEqualTo("RESPSOLICITOR");
         assertThat(response.getData().getContactDetailsWrapper().getConsentedRespondentRepresented()).isEqualTo(YesOrNo.YES);
-
     }
 
     @Test
-    void GivenUserIsContestedRespondentSolicitorWhenHandleThenUpdateCaseData(){
+    void givenUserIsContestedRespondentSolicitorWhenHandleThenUpdateCaseData() {
         FinremCaseData caseData = setUpCaseData();
         FinremCallbackRequest callbackRequest = setUpCallbackRequest(caseData);
 
@@ -108,7 +107,6 @@ class UpdateCaseDetailsSolicitorAboutToStartHandlerTest {
 
         assertThat(response.getData().getCurrentUserCaseRoleLabel()).isEqualTo("RESPSOLICITOR");
         assertThat(response.getData().getContactDetailsWrapper().getContestedRespondentRepresented()).isEqualTo(YesOrNo.YES);
-
     }
 
     private FinremCaseData setUpCaseData() {

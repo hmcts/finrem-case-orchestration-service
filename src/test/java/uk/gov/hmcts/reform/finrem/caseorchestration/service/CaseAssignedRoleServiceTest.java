@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
@@ -67,7 +66,6 @@ class CaseAssignedRoleServiceTest {
         Map<String, Object> caseData = new HashMap<>();
         caseDetails = CaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
         caseAssignedRoleService = new CaseAssignedRoleService(dataStoreClient, caseDataService, authTokenGenerator, idamService);
-        ReflectionTestUtils.setField(caseAssignedRoleService, "caseAssignedRoleService", caseAssignedRoleService);
     }
 
     @Test
