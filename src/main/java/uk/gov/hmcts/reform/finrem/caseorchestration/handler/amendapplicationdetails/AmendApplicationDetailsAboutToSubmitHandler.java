@@ -217,7 +217,14 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
 
     private void clearUnusedDivorceDetailsFields(FinremCaseData caseData) {
         StageReached divorceStageReached = caseData.getDivorceStageReached();
-
+        if (divorceStageReached == null) {
+            // handle as default
+            caseData.setDivorceUploadEvidence1(null);
+            caseData.setDivorceDecreeNisiDate(null);
+            caseData.setDivorceUploadEvidence2(null);
+            caseData.setDivorceDecreeAbsoluteDate(null);
+            return;
+        }
         switch (divorceStageReached) {
             case DECREE_NISI -> {
                 caseData.setDivorceUploadEvidence2(null);
