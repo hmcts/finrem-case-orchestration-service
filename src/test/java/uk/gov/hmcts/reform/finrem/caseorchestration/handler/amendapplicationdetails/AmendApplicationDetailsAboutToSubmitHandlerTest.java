@@ -917,6 +917,19 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
         }
     }
+  
+    @Test
+    void givenDivorceStageReachedIsNull_whenHandled_thenExceptionWasNotThrown() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(null);
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
+        when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+    }
 
     private <T> void assertContainsOnlyNulls(T target, List<?> functions) {
         if (!functions.isEmpty()) {
