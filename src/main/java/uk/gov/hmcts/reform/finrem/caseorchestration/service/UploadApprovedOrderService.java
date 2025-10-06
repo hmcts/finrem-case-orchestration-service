@@ -28,14 +28,12 @@ public class UploadApprovedOrderService {
      * <p>Use {@link #processApprovedOrdersMh(FinremCaseDetails, String)} instead.</p>
      *
      * @param callbackRequest   the callback request containing case details
-     * @param errors            a list to collect error messages encountered during processing
      * @param authorisationToken the authorisation token for accessing secure resources
      * @deprecated This method is deprecated and should not be used. Scheduled for removal since 30/09/2025.
      */
     @Deprecated(forRemoval = true, since = "30/09/2025")
     @SuppressWarnings("squid:S1133") // Suppress SonarQube rule for deprecated code
     public void processApprovedOrders(FinremCallbackRequest callbackRequest,
-                                      List<String> errors,
                                       String authorisationToken) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
@@ -68,7 +66,7 @@ public class UploadApprovedOrderService {
         if (latestHearingDirections.isPresent()) {
             List<HearingDirectionDetailsCollection> directionDetailsCollections = latestHearingDirections.get();
             if (!directionDetailsCollections.isEmpty()) {
-                HearingDirectionDetailsCollection hearingCollection = directionDetailsCollections.get(directionDetailsCollections.size() - 1);
+                HearingDirectionDetailsCollection hearingCollection = directionDetailsCollections.getLast();
                 return YesOrNo.YES.equals(hearingCollection.getValue().getIsAnotherHearingYN());
             }
         }

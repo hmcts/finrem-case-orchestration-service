@@ -56,7 +56,7 @@ public class UploadApprovedOrderContestedAboutToSubmitHandler extends FinremCall
         caseData.setCcdCaseId(String.valueOf(caseDetails.getId()));
 
         List<String> errors = new ArrayList<>();
-        uploadApprovedOrderService.processApprovedOrders(callbackRequest, errors, userAuthorisation);
+        uploadApprovedOrderService.processApprovedOrders(callbackRequest, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
