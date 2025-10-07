@@ -54,6 +54,7 @@ public class ManageBarristerAboutToStartHandler extends FinremCallbackHandler {
             caseData.setCurrentUserCaseRole(CaseRole.forValue(caseRole));
             caseData.setCurrentUserCaseRoleLabel(caseRole.replace("[", "").replace("]",""));
         }
+        caseData.setBarristerParty(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData)
