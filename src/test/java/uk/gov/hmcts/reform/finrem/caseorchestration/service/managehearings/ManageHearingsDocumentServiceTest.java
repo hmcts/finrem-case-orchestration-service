@@ -16,11 +16,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
@@ -281,7 +282,7 @@ class ManageHearingsDocumentServiceTest {
         when(staticHearingDocumentService.uploadPfdNcdrComplianceLetter(CASE_ID, AUTH_TOKEN))
             .thenReturn(complianceLetter);
 
-        when(staticHearingDocumentService.isPdfNcdrCoverSheetRequired(eq(finremCaseDetails)))
+        when(staticHearingDocumentService.isPdfNcdrCoverSheetRequired(finremCaseDetails))
             .thenReturn(false);
 
         // Act
@@ -324,13 +325,15 @@ class ManageHearingsDocumentServiceTest {
         ManageHearingsCollectionItem hearingItem = ManageHearingsCollectionItem.builder()
             .value(Hearing.builder()
                 .additionalHearingDocs(List.of(
-                    DocumentCollectionItem
-                        .builder()
-                        .value(CaseDocument
-                            .builder()
-                            .categoryId(null)
-                            .build())
-                        .build()))
+                    AdditionalHearingDocumentCollection.builder()
+                        .value(
+                            AdditionalHearingDocument.builder()
+                                .additionalDocument(CaseDocument.builder()
+                                    .categoryId(null)
+                                    .build())
+                                .build())
+                        .build()
+                ))
                 .build())
             .build();
 
@@ -350,7 +353,8 @@ class ManageHearingsDocumentServiceTest {
         manageHearingsDocumentService.categoriseSystemDuplicateDocs(hearings, hearingDocuments);
 
         // Assert
-        assertEquals(expectedCategoryId, hearingItem.getValue().getAdditionalHearingDocs().getFirst().getValue().getCategoryId());
+        assertEquals(expectedCategoryId, hearingItem.getValue().getAdditionalHearingDocs().getFirst().getValue()
+            .getAdditionalDocument().getCategoryId());
         assertEquals(expectedCategoryId, hearingDocumentItem.getValue().getHearingDocument().getCategoryId());
     }
 
@@ -438,28 +442,37 @@ class ManageHearingsDocumentServiceTest {
         ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
             .workingHearingId(hearingId)
             .hearings(List.of(
-                    ManageHearingsCollectionItem
-                        .builder()
-                        .id(hearingId)
-                        .value(Hearing.builder()
-                            .additionalHearingDocs(List.of(DocumentCollectionItem
-                                .builder()
-                                .value(CaseDocument.builder().documentFilename("expected doc url").build())
-                                .build()))
-                            .build())
-                        .build(),
-                    ManageHearingsCollectionItem
-                        .builder()
-                        .id(UUID.randomUUID())
-                        .value(Hearing.builder()
-                            .additionalHearingDocs(List.of(DocumentCollectionItem
-                                .builder()
-                                .value(CaseDocument.builder().documentFilename("Other doc").build())
-                                .build()))
-                            .build())
-                        .build()
-                )
-            )
+                ManageHearingsCollectionItem.builder()
+                    .id(hearingId)
+                    .value(Hearing.builder()
+                        .additionalHearingDocs(List.of(
+                            AdditionalHearingDocumentCollection.builder()
+                                .value(
+                                    AdditionalHearingDocument.builder()
+                                        .additionalDocument(CaseDocument.builder()
+                                            .documentFilename("expected doc url")
+                                            .build())
+                                        .build())
+                                .build()
+                        ))
+                        .build())
+                    .build(),
+                ManageHearingsCollectionItem.builder()
+                    .id(UUID.randomUUID())
+                    .value(Hearing.builder()
+                        .additionalHearingDocs(List.of(
+                            AdditionalHearingDocumentCollection.builder()
+                                .value(
+                                    AdditionalHearingDocument.builder()
+                                        .additionalDocument(CaseDocument.builder()
+                                            .documentFilename("Other doc")
+                                            .build())
+                                        .build())
+                                .build()
+                        ))
+                        .build())
+                    .build()
+            ))
             .build();
 
         // Act

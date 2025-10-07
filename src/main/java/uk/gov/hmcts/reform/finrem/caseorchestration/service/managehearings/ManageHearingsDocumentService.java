@@ -10,9 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
@@ -172,7 +173,7 @@ public class ManageHearingsDocumentService {
                 .map(ManageHearingsCollectionItem::getValue)
                 .filter(hearing -> hearing.getAdditionalHearingDocs() != null)
                 .flatMap(hearing -> hearing.getAdditionalHearingDocs().stream())
-                .forEach(document -> document.getValue().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId()));
+                .forEach(document -> document.getValue().getAdditionalDocument().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId()));
         }
 
         if (hearingDocuments != null) {
@@ -212,7 +213,8 @@ public class ManageHearingsDocumentService {
             .map(Hearing::getAdditionalHearingDocs)
             .stream()
             .flatMap(List::stream)
-            .map(DocumentCollectionItem::getValue)
+            .map(AdditionalHearingDocumentCollection::getValue)
+            .map(AdditionalHearingDocument::getAdditionalDocument)
             .filter(Objects::nonNull)
             .toList();
     }
