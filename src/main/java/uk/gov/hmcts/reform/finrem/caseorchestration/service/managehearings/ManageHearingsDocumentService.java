@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -324,7 +323,7 @@ public class ManageHearingsDocumentService {
                 finremCaseDetails.getData().getMiniFormA()
             )
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**
@@ -340,7 +339,7 @@ public class ManageHearingsDocumentService {
 
         return Stream.of(formC, formG)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**
@@ -363,7 +362,7 @@ public class ManageHearingsDocumentService {
 
         return Stream.of(formC, formG)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**
