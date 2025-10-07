@@ -1,12 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
@@ -17,22 +20,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BarristerValidationServiceTest {
+@ExtendWith(MockitoExtension.class)
+class BarristerValidationServiceTest {
 
     private static final String REGISTERED_EMAIL = "email";
     private static final String ANOTHER_REGISTERED_EMAIL = "email3";
-    private static final String NON_REGISTERED_EMAIL = "email2";
     private static final String CASE_ID = "1234567890";
 
     private static final Barrister VALID_BARRISTER = Barrister.builder()
         .email(REGISTERED_EMAIL)
-        .build();
-    private static final Barrister INVALID_BARRISTER = Barrister.builder()
-        .email(NON_REGISTERED_EMAIL)
         .build();
 
     @Mock
@@ -44,7 +43,7 @@ public class BarristerValidationServiceTest {
     private BarristerValidationService barristerValidationService;
 
     @Test
-    public void givenRegisteredBarrister_whenValidateBarristerEmail_thenValidateWithNoErrors() {
+    void givenRegisteredBarrister_whenValidateBarristerEmail_thenValidateWithNoErrors() {
         when(organisationService.findUserByEmail(REGISTERED_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of("UserId"));
         when(assignCaseAccessService.isLegalCounselRepresentingOpposingLitigant(any(), any(), any())).thenReturn(false);
 
@@ -52,13 +51,13 @@ public class BarristerValidationServiceTest {
             List.of(BarristerData.builder()
                 .barrister(VALID_BARRISTER)
                 .build()),
-            AUTH_TOKEN, CASE_ID, APP_SOLICITOR_POLICY);
+            AUTH_TOKEN, CASE_ID, APP_BARRISTER);
 
         assertThat(actualErrors).isEmpty();
     }
 
     @Test
-    public void givenMultipleRegisteredBarristers_whenValidateBarristerEmails_thenValidateWithNoErrors() {
+    void givenMultipleRegisteredBarristers_whenValidateBarristerEmails_thenValidateWithNoErrors() {
         when(organisationService.findUserByEmail(REGISTERED_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of("UserId"));
         when(organisationService.findUserByEmail(ANOTHER_REGISTERED_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of("AnotherUserId"));
         when(assignCaseAccessService.isLegalCounselRepresentingOpposingLitigant(eq("UserId"), any(), any())).thenReturn(false);
@@ -66,18 +65,19 @@ public class BarristerValidationServiceTest {
 
         List<String> actualErrors = barristerValidationService.validateBarristerEmails(List.of(
             buildValidBarristerData(REGISTERED_EMAIL),
-            buildValidBarristerData(ANOTHER_REGISTERED_EMAIL)), AUTH_TOKEN, CASE_ID, APP_SOLICITOR_POLICY);
+            buildValidBarristerData(ANOTHER_REGISTERED_EMAIL)), AUTH_TOKEN, CASE_ID, APP_BARRISTER);
 
         assertThat(actualErrors).isEmpty();
     }
 
     @Test
-    public void givenMultipleUnregisteredBarristers_whenValidateBarristerEmails_thenReturnCorrectErrorMessages() {
-        when(organisationService.findUserByEmail(NON_REGISTERED_EMAIL, AUTH_TOKEN)).thenReturn(Optional.empty());
+    void givenMultipleUnregisteredBarristers_whenValidateBarristerEmails_thenReturnCorrectErrorMessages() {
+        when(organisationService.findUserByEmail("barrister1@test.com", AUTH_TOKEN)).thenReturn(Optional.empty());
+        when(organisationService.findUserByEmail("barrister2@test.com", AUTH_TOKEN)).thenReturn(Optional.empty());
 
         List<String> actualErrors = barristerValidationService.validateBarristerEmails(List.of(
-            buildInvalidBarristerData(),
-            buildInvalidBarristerData()), AUTH_TOKEN, CASE_ID, APP_SOLICITOR_POLICY);
+            buildInvalidBarristerData("barrister1@test.com"),
+            buildInvalidBarristerData("barrister2@test.com")), AUTH_TOKEN, CASE_ID, APP_BARRISTER);
 
         assertThat(actualErrors).containsExactly(
             """
@@ -89,8 +89,10 @@ public class BarristerValidationServiceTest {
         );
     }
 
-    @Test
-    public void givenBarristerHasRepresentedOpposingLitigant_whenValidateBarristers_thenReturnCorrectErrorMessage() {
+    @ParameterizedTest
+    @EnumSource(value = CaseRole.class, names = {"APP_BARRISTER", "RESP_BARRISTER",
+        "INTVR_BARRISTER_1", "INTVR_BARRISTER_2", "INTVR_BARRISTER_3", "INTVR_BARRISTER_4"})
+    void givenBarristerHasRepresentedOpposingLitigant_whenValidateBarristers_thenReturnCorrectErrorMessage(CaseRole barristerCaseRole) {
         when(organisationService.findUserByEmail(REGISTERED_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of("UserId"));
         when(organisationService.findUserByEmail(ANOTHER_REGISTERED_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of("AnotherUserId"));
         when(assignCaseAccessService.isLegalCounselRepresentingOpposingLitigant(eq("UserId"), any(), any())).thenReturn(true);
@@ -98,12 +100,21 @@ public class BarristerValidationServiceTest {
 
         List<String> actualErrors = barristerValidationService.validateBarristerEmails(List.of(
             buildValidBarristerData(REGISTERED_EMAIL),
-            buildValidBarristerData(ANOTHER_REGISTERED_EMAIL)), AUTH_TOKEN, CASE_ID, APP_SOLICITOR_POLICY);
+            buildValidBarristerData(ANOTHER_REGISTERED_EMAIL)), AUTH_TOKEN, CASE_ID, barristerCaseRole);
 
         assertThat(actualErrors).containsExactly(
             "Barrister 1 is already representing another party on this case",
             "Barrister 2 is already representing another party on this case"
         );
+    }
+
+    @Test
+    void givenBarristersWithSameEmail_whenValidateBarristers_thenReturnErrorMessage() {
+        List<String> actualErrors = barristerValidationService.validateBarristerEmails(List.of(
+            buildValidBarristerData("barrister1@test.com"),
+            buildValidBarristerData("barrister1@test.com")), AUTH_TOKEN, CASE_ID, APP_BARRISTER);
+
+        assertThat(actualErrors).containsOnly("Duplicate barrister email: barrister1@test.com");
     }
 
     private BarristerData buildValidBarristerData(String email) {
@@ -114,9 +125,11 @@ public class BarristerValidationServiceTest {
             .build();
     }
 
-    private BarristerData buildInvalidBarristerData() {
+    private BarristerData buildInvalidBarristerData(String emailAddress) {
         return BarristerData.builder()
-            .barrister(INVALID_BARRISTER)
+            .barrister(Barrister.builder()
+                .email(emailAddress)
+                .build())
             .build();
     }
 }
