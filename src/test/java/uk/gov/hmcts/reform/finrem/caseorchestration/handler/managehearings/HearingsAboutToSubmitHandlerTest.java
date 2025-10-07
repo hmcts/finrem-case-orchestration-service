@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
@@ -179,16 +181,17 @@ class HearingsAboutToSubmitHandlerTest {
             .hearingNoticePrompt(YesOrNo.YES)
             .additionalHearingDocPrompt(YesOrNo.YES)
             .additionalHearingDocs(List.of(
-                DocumentCollectionItem
-                    .builder()
-                    .value(CaseDocument
-                        .builder()
-                        .categoryId("categoryId")
-                        .documentUrl("documentUrl")
-                        .documentFilename("documentFileName")
-                        .documentBinaryUrl("documentBinaryUrl")
-                        .uploadTimestamp(LocalDateTime.now())
-                        .build())
+                AdditionalHearingDocumentCollection.builder()
+                    .value(
+                        AdditionalHearingDocument.builder()
+                            .additionalDocument(CaseDocument.builder()
+                                .categoryId("categoryId")
+                                .documentUrl("documentUrl")
+                                .documentFilename("documentFileName")
+                                .documentBinaryUrl("documentBinaryUrl")
+                                .uploadTimestamp(LocalDateTime.now())
+                                .build())
+                            .build())
                     .build()
             ))
             .partiesOnCaseMultiSelectList(DynamicMultiSelectList
