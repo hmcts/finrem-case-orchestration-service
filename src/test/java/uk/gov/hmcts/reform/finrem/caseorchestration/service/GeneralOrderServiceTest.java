@@ -257,27 +257,6 @@ class GeneralOrderServiceTest {
     }
 
     @Test
-    void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        CaseDocument caseDocument = documentHelper.convertToCaseDocument(details.getData().get(GENERAL_ORDER_LATEST_DOCUMENT));
-        CaseDocument pdfDoc = caseDocument("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/",
-            "test.pdf",
-            "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary");
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, AUTH_TOKEN, CASE_ID)).thenReturn(pdfDoc);
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN, CASE_ID);
-        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
-            latestGeneralOrder.getBinaryFileUrl());
-    }
-
-    @Test
-    void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        details.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, null);
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN, CASE_ID);
-        assertNull(latestGeneralOrder);
-    }
-
-    @Test
     void whenRequestedOrderList_and_notShared_before_returnList() {
         FinremCaseData data = FinremCaseData.builder().build();
 
