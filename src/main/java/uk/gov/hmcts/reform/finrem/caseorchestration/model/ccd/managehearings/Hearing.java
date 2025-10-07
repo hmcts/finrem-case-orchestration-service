@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
@@ -31,7 +30,7 @@ public class Hearing {
     private String additionalHearingInformation;
     private YesOrNo hearingNoticePrompt;
     private YesOrNo additionalHearingDocPrompt;
-    private List<DocumentCollectionItem> additionalHearingDocs;
+    private List<AdditionalHearingDocumentCollection> additionalHearingDocs;
     private List<PartyOnCaseCollectionItem> partiesOnCase;
     private YesOrNo wasMigrated;
 }
