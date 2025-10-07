@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -39,15 +38,12 @@ class WorkingHearingTest {
             .documentBinaryUrl("https://example.com/document-binary.pdf")
             .build();
 
-        DocumentCollectionItem documentCollectionItem = DocumentCollectionItem.builder()
-            .value(document)
-            .build();
-
         workingHearing.addDocumentToAdditionalHearingDocs(document);
 
-        assertThat(workingHearing.getAdditionalHearingDocs()).hasSize(1);
-        assertThat(workingHearing.getAdditionalHearingDocs().getFirst())
-            .isEqualTo(documentCollectionItem);
+        assertThat(workingHearing.getAdditionalHearingDocs())
+            .hasSize(1)
+            .extracting(collection -> collection.getValue().getAdditionalDocument())
+            .containsExactly(document);
     }
 
     @ParameterizedTest
@@ -186,12 +182,18 @@ class WorkingHearingTest {
             .additionalHearingInformation("Info A")
             .hearingNoticePrompt(YesOrNo.YES)
             .additionalHearingDocPrompt(YesOrNo.NO)
-            .additionalHearingDocs(List.of(DocumentCollectionItem.builder().value(CaseDocument
-                .builder()
-                .documentFilename("Test Document.pdf")
-                .documentUrl("https://example.com/document.pdf")
-                .documentBinaryUrl("https://example.com/document-binary.pdf")
-                .build()).build()))
+            .additionalHearingDocs(List.of(
+                AdditionalHearingDocumentCollection.builder()
+                    .value(
+                        AdditionalHearingDocument.builder()
+                            .additionalDocument(CaseDocument.builder()
+                                .documentFilename("Test Document.pdf")
+                                .documentUrl("https://example.com/document.pdf")
+                                .documentBinaryUrl("https://example.com/document-binary.pdf")
+                                .build())
+                            .build())
+                    .build()
+            ))
             .partiesOnCase(List.of(PartyOnCaseCollectionItem
                 .builder()
                 .value(PartyOnCase
@@ -218,12 +220,18 @@ class WorkingHearingTest {
             .additionalHearingInformation("Info A")
             .hearingNoticePrompt(null)
             .additionalHearingDocPrompt(YesOrNo.NO)
-            .additionalHearingDocs(List.of(DocumentCollectionItem.builder().value(CaseDocument
-                .builder()
-                .documentFilename("Test Document.pdf")
-                .documentUrl("https://example.com/document.pdf")
-                .documentBinaryUrl("https://example.com/document-binary.pdf")
-                .build()).build()))
+            .additionalHearingDocs(List.of(
+                AdditionalHearingDocumentCollection.builder()
+                    .value(
+                        AdditionalHearingDocument.builder()
+                            .additionalDocument(CaseDocument.builder()
+                                .documentFilename("Test Document.pdf")
+                                .documentUrl("https://example.com/document.pdf")
+                                .documentBinaryUrl("https://example.com/document-binary.pdf")
+                                .build())
+                            .build())
+                    .build()
+            ))
             .partiesOnCase(List.of(PartyOnCaseCollectionItem
                 .builder()
                 .value(PartyOnCase
