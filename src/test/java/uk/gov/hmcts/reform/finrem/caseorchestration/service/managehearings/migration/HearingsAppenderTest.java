@@ -9,13 +9,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
@@ -117,7 +118,8 @@ class HearingsAppenderTest {
         assertEquals(YesOrNo.YES, result.getWasMigrated());
         if (withAdditionDoc) {
             assertThat(result.getAdditionalHearingDocs())
-                .extracting(DocumentCollectionItem::getValue)
+                .extracting(AdditionalHearingDocumentCollection::getValue)
+                .extracting(AdditionalHearingDocument::getAdditionalDocument)
                 .containsExactly(additionalDoc);
         } else {
             assertThat(result.getAdditionalHearingDocs()).isNull();
@@ -202,7 +204,8 @@ class HearingsAppenderTest {
         assertEquals(YesOrNo.YES, result.getWasMigrated());
         if (withAdditionDoc) {
             assertThat(result.getAdditionalHearingDocs())
-                .extracting(DocumentCollectionItem::getValue)
+                .extracting(AdditionalHearingDocumentCollection::getValue)
+                .extracting(AdditionalHearingDocument::getAdditionalDocument)
                 .containsExactly(additionalDoc);
         } else {
             assertThat(result.getAdditionalHearingDocs()).isNull();

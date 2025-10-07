@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirecti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
@@ -111,8 +113,13 @@ public class HearingsAppender {
         String additionalInformationAboutHearing = interimHearingItem.getInterimAdditionalInformationAboutHearing();
         // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
         Court hearingCourtSelection = interimHearingItem.toCourt();
-        DocumentCollectionItem additionalDocument = interimHearingItem.getInterimUploadAdditionalDocument() == null ? null :
-            DocumentCollectionItem.builder().value(interimHearingItem.getInterimUploadAdditionalDocument().toBuilder().build()).build();
+        AdditionalHearingDocumentCollection additionalDocument = interimHearingItem.getInterimUploadAdditionalDocument() == null ? null :
+            AdditionalHearingDocumentCollection.builder().value(
+                AdditionalHearingDocument.builder()
+                .additionalDocument(interimHearingItem.getInterimUploadAdditionalDocument()
+                    .toBuilder().build())
+                    .build())
+                .build();
 
         return Hearing.builder()
             .hearingDate(hearingDate)
@@ -213,8 +220,13 @@ public class HearingsAppender {
      * @param listForHearingWrapper the wrapper containing additional hearing documents
      * @return singleton list with the document collection item or {@code null} if none found
      */
-    private List<DocumentCollectionItem> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
+    private List<AdditionalHearingDocumentCollection> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
         CaseDocument doc = listForHearingWrapper.getAdditionalListOfHearingDocuments();
-        return doc == null ? null : List.of(DocumentCollectionItem.builder().value(doc.toBuilder().build()).build());
+        return doc == null ? null : List.of(
+            AdditionalHearingDocumentCollection.builder()
+            .value(AdditionalHearingDocument.builder()
+                .additionalDocument(doc.toBuilder().build())
+                .build())
+            .build());
     }
 }
