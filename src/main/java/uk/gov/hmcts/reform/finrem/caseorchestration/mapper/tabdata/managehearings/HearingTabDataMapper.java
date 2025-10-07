@@ -204,21 +204,17 @@ public class HearingTabDataMapper {
         List<DocumentCollectionItem> additionalDocs = hearing.getAdditionalHearingDocs() != null
             ? hearing.getAdditionalHearingDocs().stream()
             .map(doc -> DocumentCollectionItem.builder()
-                    .value(CaseDocument
-                            .builder()
-                            .documentUrl(doc.getValue().getDocumentUrl())
-                            .documentFilename(doc.getValue().getDocumentFilename())
-                            .uploadTimestamp(doc.getValue().getUploadTimestamp())
-                            .documentBinaryUrl(doc.getValue().getDocumentBinaryUrl())
-                            .categoryId(HEARING_NOTICES.getDocumentCategoryId())
-                            .build()
-                    ).build())
+                .value(CaseDocument.builder()
+                    .documentUrl(doc.getValue().getAdditionalDocument().getDocumentUrl())
+                    .documentFilename(doc.getValue().getAdditionalDocument().getDocumentFilename())
+                    .uploadTimestamp(doc.getValue().getAdditionalDocument().getUploadTimestamp())
+                    .documentBinaryUrl(doc.getValue().getAdditionalDocument().getDocumentBinaryUrl())
+                    .categoryId(HEARING_NOTICES.getDocumentCategoryId())
+                    .build())
+                .build())
             .toList()
             : List.of();
 
-        return Stream.concat(
-            hearingDocuments.stream(),
-            additionalDocs.stream()
-        ).toList();
+        return Stream.concat(hearingDocuments.stream(), additionalDocs.stream()).toList();
     }
 }

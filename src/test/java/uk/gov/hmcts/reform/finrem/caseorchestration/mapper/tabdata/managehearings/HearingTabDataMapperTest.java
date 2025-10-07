@@ -8,7 +8,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
@@ -77,12 +78,16 @@ class HearingTabDataMapperTest {
                     .build()
             ))
             .additionalHearingInformation(ADDITIONAL_INFO)
-            .additionalHearingDocs(List.of(DocumentCollectionItem
-                .builder()
-                .value(CaseDocument.builder()
-                    .documentFilename(DOCUMENT_1_FILENAME)
-                    .build())
-                .build()))
+            .additionalHearingDocs(List.of(
+                AdditionalHearingDocumentCollection.builder()
+                    .value(
+                        AdditionalHearingDocument.builder()
+                            .additionalDocument(CaseDocument.builder()
+                                .documentFilename(DOCUMENT_1_FILENAME)
+                                .build())
+                            .build())
+                    .build()
+            ))
             .build();
 
         ManageHearingsCollectionItem hearingCollectionItem = ManageHearingsCollectionItem.builder()
@@ -172,12 +177,16 @@ class HearingTabDataMapperTest {
 
         Hearing hearing = Hearing.builder()
             .hearingType(HearingType.FDR)
-            .additionalHearingDocs(List.of(DocumentCollectionItem
-                .builder()
-                .value(CaseDocument.builder()
-                    .documentFilename(DOCUMENT_1_FILENAME)
-                    .build())
-                .build()))
+            .additionalHearingDocs(List.of(
+                AdditionalHearingDocumentCollection.builder()
+                    .value(
+                        AdditionalHearingDocument.builder()
+                            .additionalDocument(CaseDocument.builder()
+                                .documentFilename(DOCUMENT_1_FILENAME)
+                                .build())
+                            .build())
+                    .build()
+            ))
             .build();
 
         ManageHearingsCollectionItem hearingCollectionItem = ManageHearingsCollectionItem.builder()
@@ -195,7 +204,7 @@ class HearingTabDataMapperTest {
         // Assert - default values returned when exceptions handled
         assertEquals("Court name not available", result.getTabCourtSelection());
         // Hearing had 1 valid document, but empty list returned when there is an exception.
-        assertThat(result.getTabHearingDocuments().isEmpty());
+        assertThat(result.getTabHearingDocuments()).isEmpty();
 
         // assert logs
         assertThat(logs.getErrors()).contains("Caught an exception when retrieving court name. 'Court name not available' provided instead.");
