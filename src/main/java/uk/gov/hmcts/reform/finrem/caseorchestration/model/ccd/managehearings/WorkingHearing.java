@@ -44,7 +44,7 @@ public class WorkingHearing {
     private String additionalHearingInformation;
     private YesOrNo hearingNoticePrompt;
     private YesOrNo additionalHearingDocPrompt;
-    private List<DocumentCollectionItem> additionalHearingDocs;
+    private List<AdditionalHearingDocumentCollection> additionalHearingDocs;
     private DynamicMultiSelectList partiesOnCaseMultiSelectList;
 
     /**
@@ -94,7 +94,13 @@ public class WorkingHearing {
 
     public void addDocumentToAdditionalHearingDocs(CaseDocument caseDocument) {
         additionalHearingDocs = Optional.ofNullable(additionalHearingDocs).orElseGet(ArrayList::new);
-        additionalHearingDocs.add(DocumentCollectionItem.builder().value(caseDocument).build());
+        additionalHearingDocs.add(
+            AdditionalHearingDocumentCollection.builder()
+                .value(AdditionalHearingDocument.builder()
+                    .additionalDocument(caseDocument)
+                    .build())
+                .build()
+        );
     }
 
     /*
