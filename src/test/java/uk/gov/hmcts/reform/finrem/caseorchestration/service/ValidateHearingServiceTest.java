@@ -12,7 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -488,6 +490,39 @@ class ValidateHearingServiceTest {
 
         // Assert that no warnings.  GA created by applicant, so not selecting intervener party for correspondence OK.
         assertThat(warnings).isEmpty();
+    }
+
+    @Test
+    void givenValidData_whenAreAllAdditionalHearingDocsWordOrPdfInvoked_shouldReturnTrue() {
+        List<DocumentCollectionItem> docs = List.of(
+            docItem("doc1.pdf"),
+            docItem("doc2.DOCX"),
+            docItem("doc3.doc")
+        );
+
+        boolean result = service.areAllAdditionalHearingDocsWordOrPdf(docs);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void givenInvalidData_whenAreAllAdditionalHearingDocsWordOrPdfInvoked_shouldReturnFalse() {
+        List<DocumentCollectionItem> docs = List.of(
+            docItem("doc1.pdf"),
+            docItem("image.png")
+        );
+
+        boolean result = service.areAllAdditionalHearingDocsWordOrPdf(docs);
+
+        assertThat(result).isFalse();
+    }
+
+    private static DocumentCollectionItem docItem(String filename) {
+        return DocumentCollectionItem.builder()
+            .value(CaseDocument.builder()
+                .documentFilename(filename)
+                .build())
+            .build();
     }
 
     private List<String> doTestWarnings() {
