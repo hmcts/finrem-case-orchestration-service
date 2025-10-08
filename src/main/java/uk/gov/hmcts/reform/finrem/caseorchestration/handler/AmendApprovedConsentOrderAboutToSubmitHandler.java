@@ -104,7 +104,7 @@ public class AmendApprovedConsentOrderAboutToSubmitHandler extends FinremCallbac
                         .map(pensionDoc -> {
                             PensionType pensionTypeDoc = pensionDoc.getTypedCaseDocument();
                             pensionTypeDoc.setPensionDocument(genericDocumentService.stampDocument(
-                                pensionTypeDoc.getPensionDocument(), userAuthorisation, stampType, caseDetails.getId().toString()));
+                                pensionTypeDoc.getPensionDocument(), userAuthorisation, stampType, caseDetails.getCaseIdAsString()));
                             return pensionDoc;
                         }).toList()
                 );

@@ -31,6 +31,9 @@ import java.util.Optional;
 public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
 
     private Long id;
+    public Long getId() {
+        return id;
+    }
     private String jurisdiction;
     private State state;
     private LocalDateTime createdDate;
