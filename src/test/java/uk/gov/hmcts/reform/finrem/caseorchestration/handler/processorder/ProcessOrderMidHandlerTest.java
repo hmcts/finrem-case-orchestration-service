@@ -53,7 +53,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
     @InjectMocks
-    private ProcessOrderMidHandler underTest;
+    private ProcessOrderMidHandler handler;
     @Mock
     private BulkPrintDocumentService service;
     @Mock
@@ -67,7 +67,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest,
+        assertCanHandle(handler,
             Arguments.of(CallbackType.MID_EVENT, CaseType.CONTESTED, PROCESS_ORDER),
             Arguments.of(CallbackType.MID_EVENT, CaseType.CONTESTED, DIRECTION_UPLOAD_ORDER)
         );
@@ -93,7 +93,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         hearingOrderOtherDocuments.add(documentCollectionItem);
         caseData.setHearingOrderOtherDocuments(hearingOrderOtherDocuments);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().isEmpty());
         verify(service, times(2)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
@@ -122,7 +122,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         finremCallbackRequest.getCaseDetailsBefore().getData().setHearingOrderOtherDocuments(hearingOrderOtherDocuments);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().isEmpty());
         verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
@@ -143,7 +143,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         callbackRequest.setCaseDetailsBefore(FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build());
 
-        FinremCaseData result = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
+        FinremCaseData result = handler.handle(callbackRequest, AUTH_TOKEN).getData();
         assertEquals(expected, result.getDirectionDetailsCollection());
 
         // Test with empty directionDetailsCollection
@@ -153,7 +153,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         callbackRequest.setCaseDetailsBefore(FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build());
 
-        result = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
+        result = handler.handle(callbackRequest, AUTH_TOKEN).getData();
         assertEquals(expected, result.getDirectionDetailsCollection());
     }
 
@@ -165,7 +165,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         callbackRequest.setCaseDetailsBefore(FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build());
 
-        FinremCaseData result = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
+        FinremCaseData result = handler.handle(callbackRequest, AUTH_TOKEN).getData();
         assertNull(result.getDirectionDetailsCollection());
     }
 
@@ -183,7 +183,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
                 DirectionDetailCollection.builder().value(DirectionDetail.builder().build()).build()
             ))
             .build());
-        FinremCaseData result = underTest.handle(finremCallbackRequest, AUTH_TOKEN).getData();
+        FinremCaseData result = handler.handle(finremCallbackRequest, AUTH_TOKEN).getData();
         assertNotEquals(notExpected, result.getDirectionDetailsCollection());
 
         finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
@@ -192,7 +192,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
                     .build()).build()
             ))
             .build());
-        result = underTest.handle(finremCallbackRequest, AUTH_TOKEN).getData();
+        result = handler.handle(finremCallbackRequest, AUTH_TOKEN).getData();
         assertNotEquals(notExpected, result.getDirectionDetailsCollection());
     }
 
@@ -200,7 +200,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
     void shouldShowErrorMessageWhenAllLegacyApprovedOrdersRemoved() {
         when(processOrderService.areAllLegacyApprovedOrdersRemoved(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(true);
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(List.of("Upload Approved Order is required."), res.getErrors());
     }
 
@@ -209,7 +209,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         when(processOrderService.areAllLegacyApprovedOrdersRemoved(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(false);
         when(processOrderService.areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class))).thenReturn(false);
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(List.of("You must upload a Microsoft Word file or PDF for new documents."), res.getErrors());
     }
 
@@ -219,7 +219,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         when(processOrderService.areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class))).thenReturn(false);
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(List.of("You must upload a PDF file for modifying legacy approved documents."), res.getErrors());
     }
 
@@ -231,7 +231,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         when(processOrderService.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(any(FinremCaseData.class))).thenReturn(false);
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(List.of("You must upload a Microsoft Word file or PDF for modifying an unprocessed approved documents."), res.getErrors());
     }
 
@@ -270,7 +270,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         caseDataBefore.setHearingOrderOtherDocuments(List.of(oldDocCollection));
         caseData.setHearingOrderOtherDocuments(List.of(oldDocCollection, newDocCollection));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData().getUploadHearingOrder())
             .extracting(DirectionOrderCollection::getValue)
@@ -304,7 +304,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
             .thenReturn(false);
 
         // Act
-        var response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         // Assert
         assertThat(response.getErrors()).containsExactly("All additional hearing documents must be Word or PDF files.");
