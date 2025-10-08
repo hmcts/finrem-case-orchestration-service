@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.ManageHearingsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -28,16 +27,13 @@ public class GeneralApplicationDirectionsNewMidHandler extends FinremCallbackHan
 
     private final ValidateHearingService validateHearingService;
     private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
-    private final ManageHearingsHelper manageHearingsHelper;
 
     public GeneralApplicationDirectionsNewMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      ValidateHearingService validateHearingService,
-                                                     GeneralApplicationDirectionsService generalApplicationDirectionsService,
-                                                     ManageHearingsHelper manageHearingsHelper) {
+                                                     GeneralApplicationDirectionsService generalApplicationDirectionsService) {
         super(finremCaseDetailsMapper);
         this.validateHearingService = validateHearingService;
         this.generalApplicationDirectionsService = generalApplicationDirectionsService;
-        this.manageHearingsHelper = manageHearingsHelper;
     }
 
     @Override
@@ -62,7 +58,7 @@ public class GeneralApplicationDirectionsNewMidHandler extends FinremCallbackHan
 
         if (generalApplicationDirectionsService.isHearingRequired(finremCaseDetails)) {
             if (YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
-                && !manageHearingsHelper.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
+                && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
                 errors.add("All additional hearing documents must be Word or PDF files.");
             }
 

@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.ManageHearingsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
 import java.util.ArrayList;
@@ -34,14 +34,15 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
 
     private final BulkPrintDocumentService bulkPrintDocumentService;
     private final ProcessOrderService processOrderService;
-    private final ManageHearingsHelper manageHearingsHelper;
+    private final ValidateHearingService validateHearingService;
 
     public ProcessOrderMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                  BulkPrintDocumentService bulkPrintDocumentService, ProcessOrderService processOrderService, ManageHearingsHelper manageHearingsHelper) {
+                                  BulkPrintDocumentService bulkPrintDocumentService, ProcessOrderService processOrderService,
+                                  ValidateHearingService validateHearingService) {
         super(finremCaseDetailsMapper);
         this.bulkPrintDocumentService = bulkPrintDocumentService;
         this.processOrderService = processOrderService;
-        this.manageHearingsHelper = manageHearingsHelper;
+        this.validateHearingService = validateHearingService;
     }
 
     @Override
@@ -68,7 +69,7 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
         if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())
             && YesOrNo.YES.equals(hearingsWrapper.getIsAddHearingChosen())
             && YesOrNo.YES.equals(hearingsWrapper.getWorkingHearing().getAdditionalHearingDocPrompt())
-            && !manageHearingsHelper.areAllAdditionalHearingDocsWordOrPdf(hearingsWrapper)) {
+            && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(hearingsWrapper)) {
 
             errors.add("All additional hearing documents must be Word or PDF files.");
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

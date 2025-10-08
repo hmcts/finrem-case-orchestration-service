@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.ManageHearingsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -30,12 +29,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.manageheari
 public class ManageHearingsMidHandler extends FinremCallbackHandler {
 
     private final ValidateHearingService validateHearingService;
-    private final ManageHearingsHelper manageHearingsHelper;
 
-    public ManageHearingsMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ValidateHearingService validateHearingService, ManageHearingsHelper manageHearingsHelper) {
+    public ManageHearingsMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ValidateHearingService validateHearingService) {
         super(finremCaseDetailsMapper);
         this.validateHearingService = validateHearingService;
-        this.manageHearingsHelper = manageHearingsHelper;
     }
 
     @Override
@@ -62,7 +59,7 @@ public class ManageHearingsMidHandler extends FinremCallbackHandler {
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
             if (YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
-                && !manageHearingsHelper.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
+                && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
                     errors.add("All additional hearing documents must be Word or PDF files.");
                     return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                         .data(finremCaseData)

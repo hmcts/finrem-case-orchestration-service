@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.ManageHearingsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -19,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,13 +28,13 @@ import java.util.List;
 public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHandler {
 
     private final BulkPrintDocumentService bulkPrintDocumentService;
-    private final ManageHearingsHelper manageHearingsHelper;
+    private final ValidateHearingService validateHearingService;
 
     public UploadApprovedOrderContestedMhMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                    BulkPrintDocumentService bulkPrintDocumentService, ManageHearingsHelper manageHearingsHelper) {
+                                                    BulkPrintDocumentService bulkPrintDocumentService, ValidateHearingService validateHearingService) {
         super(finremCaseDetailsMapper);
         this.bulkPrintDocumentService = bulkPrintDocumentService;
-        this.manageHearingsHelper = manageHearingsHelper;
+        this.validateHearingService = validateHearingService;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
 
         if (YesOrNo.YES.equals(caseData.getManageHearingsWrapper().getIsAddHearingChosen())
             && YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
-            && !manageHearingsHelper.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
+            && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
                 errors.add("All additional hearing documents must be Word or PDF files.");
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                     .data(caseData)

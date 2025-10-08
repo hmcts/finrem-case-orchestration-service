@@ -28,6 +28,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.IN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils.isPdf;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils.isWordDocument;
 
 @Service
 @Slf4j
@@ -139,6 +141,21 @@ public class ValidateHearingService {
         }
 
         return List.of();
+    }
+
+    /**
+     * Checks whether all additional hearing documents associated with the current working hearing
+     * are either Word or PDF files.
+     *
+     * <p>This method iterates through the list of additional hearing documents and verifies
+     * that each document is of a supported type (Word or PDF) using the file utility methods.
+     *
+     * @param manageHearingsWrapper the wrapper containing the working hearing and its documents
+     * @return {@code true} if every additional hearing document is a Word or PDF file; {@code false} otherwise
+     */
+    public boolean areAllAdditionalHearingDocsWordOrPdf(ManageHearingsWrapper manageHearingsWrapper) {
+        return manageHearingsWrapper.getWorkingHearing().getAdditionalHearingDocs().stream()
+            .allMatch(doc -> isPdf(doc.getValue()) || isWordDocument(doc.getValue()));
     }
 
     /*
