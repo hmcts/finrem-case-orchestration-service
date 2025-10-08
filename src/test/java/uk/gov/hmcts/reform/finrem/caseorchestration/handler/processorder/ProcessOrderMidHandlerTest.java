@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.BaseHandlerTestSetup;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
@@ -23,7 +22,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
 import java.util.ArrayList;
@@ -35,11 +39,14 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DIRECTION_UPLOAD_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.PROCESS_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,6 +58,9 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
     private BulkPrintDocumentService service;
     @Mock
     private ProcessOrderService processOrderService;
+    @Mock
+    private ValidateHearingService validateHearingService;
+
     private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
     private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
     private static final String FILE_NAME = "abc.pdf";
@@ -58,14 +68,14 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
     @Test
     void testCanHandle() {
         assertCanHandle(underTest,
-            Arguments.of(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.PROCESS_ORDER),
-            Arguments.of(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER)
+            Arguments.of(CallbackType.MID_EVENT, CaseType.CONTESTED, PROCESS_ORDER),
+            Arguments.of(CallbackType.MID_EVENT, CaseType.CONTESTED, DIRECTION_UPLOAD_ORDER)
         );
     }
 
     @Test
     void givenContestedCase_whenDirectionUploadOrderButNonEncryptedFileShouldNotGetError() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(DIRECTION_UPLOAD_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
         mockPassAllValidations();
@@ -91,7 +101,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void givenContestedCase_whenExistingDirectionUploadOrderAndUploadedSame_thenShouldNotCheck() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(DIRECTION_UPLOAD_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
         mockPassAllValidations();
@@ -127,7 +137,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         mockPassAllValidations();
 
         // Test with null directionDetailsCollection
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(EventType.DIRECTION_UPLOAD_ORDER, FinremCaseDetails.builder()
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(DIRECTION_UPLOAD_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder().build()));
 
@@ -137,7 +147,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         assertEquals(expected, result.getDirectionDetailsCollection());
 
         // Test with empty directionDetailsCollection
-        callbackRequest = FinremCallbackRequestFactory.from(EventType.DIRECTION_UPLOAD_ORDER, FinremCaseDetails.builder()
+        callbackRequest = FinremCallbackRequestFactory.from(DIRECTION_UPLOAD_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder().directionDetailsCollection(List.of()).build()));
 
@@ -149,7 +159,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void shouldNotInitializeDirectionDetailsCollectionWhenNotEventDirectionUploadOrder() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(EventType.PROCESS_ORDER, FinremCaseDetails.builder()
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(PROCESS_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder().build()));
 
@@ -234,7 +244,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void givenContestedCase_whenDirectionUploadOrderWithPreviousFiles_shouldNotModifyUploadHearingOrder() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(DIRECTION_UPLOAD_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
@@ -267,5 +277,36 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
             .extracting(DirectionOrder::getUploadDraftDocument)
             .containsExactlyInAnyOrder(oldDocument, newDocument);
         assertThat(response.getErrors()).isEmpty();
+    }
+
+    @Test
+    void givenInvalidAdditionalDocument_whenHandle_thenReturnsError() {
+        //Arrange
+        WorkingHearing workingHearing = WorkingHearing.builder()
+            .additionalHearingDocPrompt(YesOrNo.YES)
+            .build();
+
+        FinremCaseDetails.FinremCaseDetailsBuilder caseData = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .isAddHearingChosen(YesOrNo.YES)
+                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
+                .workingHearing(workingHearing)
+                .build())
+            .build());
+
+        FinremCaseDetails.FinremCaseDetailsBuilder caseDataBefore =  FinremCaseDetails.builder().data(mock(FinremCaseData.class));
+
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory
+            .from(PROCESS_ORDER, caseDataBefore, caseData);
+
+        when(validateHearingService.areAllAdditionalHearingDocsWordOrPdf(any()))
+            .thenReturn(false);
+
+        // Act
+        var response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertThat(response.getErrors()).containsExactly("All additional hearing documents must be Word or PDF files.");
     }
 }

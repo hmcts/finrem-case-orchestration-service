@@ -8,6 +8,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.BaseHandlerTestSetup;
@@ -19,12 +21,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -36,6 +44,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +52,10 @@ class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup 
 
     @Mock
     private BulkPrintDocumentService bulkPrintDocumentService;
+
+    @Mock
+    private ValidateHearingService validateHearingService;
+
     @InjectMocks
     private UploadApprovedOrderContestedMhMidHandler handler;
 
@@ -170,5 +183,32 @@ class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup 
             .validateEncryptionOnUploadedDocument(eq(newUploadDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
         verify(bulkPrintDocumentService, never())
             .validateEncryptionOnUploadedDocument(eq(existingUploadedDocument), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    void givenInvalidAdditionalDocument_whenHandle_thenReturnsError() {
+        //Arrange
+        WorkingHearing workingHearing = WorkingHearing.builder()
+            .additionalHearingDocPrompt(YesOrNo.YES)
+            .build();
+
+        FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .isAddHearingChosen(YesOrNo.YES)
+                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
+                .workingHearing(workingHearing)
+                .build());
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory
+            .from(FinremCaseDetailsBuilderFactory.from(CONTESTED, builder));
+
+        when(validateHearingService.areAllAdditionalHearingDocsWordOrPdf(any()))
+            .thenReturn(false);
+
+        // Act
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertThat(response.getErrors()).containsExactly("All additional hearing documents must be Word or PDF files.");
     }
 }
