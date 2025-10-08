@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationd
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -49,26 +51,48 @@ class GeneralApplicationDirectionsNewMidHandlerTest {
     }
 
     @Test
-    void givenHearingRequiredWithWarnings_whenHandle_thenReturnsResponseWarnings() {
+    void givenHearingRequiredWithWarningsAndInvalidAdditionalDocument_whenHandle_thenReturnsErrorsAndWarnings() {
         //Arrange
-        FinremCaseData finremCaseData = FinremCaseData.builder().build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(caseDetails).build();
+        WorkingHearing workingHearing = WorkingHearing.builder()
+            .additionalHearingDocPrompt(YesOrNo.YES)
+            .build();
 
-        when(generalApplicationDirectionsService.isHearingRequired(caseDetails)).thenReturn(true);
-        when(validateHearingService.validateGeneralApplicationDirectionsMandatoryParties(finremCaseData))
+        FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
+                .workingHearing(workingHearing)
+                .build());
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory
+            .from(FinremCaseDetailsBuilderFactory.from(CONTESTED, builder));
+
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
+        when(validateHearingService.areAllAdditionalHearingDocsWordOrPdf(any()))
+            .thenReturn(false);
+        when(validateHearingService.validateGeneralApplicationDirectionsMandatoryParties(caseData))
             .thenReturn(List.of("Mandatory party error"));
-        when(validateHearingService.validateGeneralApplicationDirectionsNoticeSelection(finremCaseData))
+        when(validateHearingService.validateGeneralApplicationDirectionsNoticeSelection(caseData))
             .thenReturn(List.of("Notice selection error"));
-        when(validateHearingService.validateGeneralApplicationDirectionsIntervenerParties(finremCaseData))
+        when(validateHearingService.validateGeneralApplicationDirectionsIntervenerParties(caseData))
             .thenReturn(List.of("Intervener warning"));
         //Act
-        var response = generalApplicationDirectionsNewMidHandler.handle(callbackRequest, "authToken");
+        var response = generalApplicationDirectionsNewMidHandler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
-        assertThat(response.getErrors()).containsExactlyInAnyOrder("Mandatory party error", "Notice selection error");
+        assertThat(response.getErrors()).containsExactlyInAnyOrder(
+            "Mandatory party error", "Notice selection error",
+            "All additional hearing documents must be Word or PDF files.");
         assertThat(response.getWarnings()).containsExactly("Intervener warning");
-        assertThat(response.getData()).isEqualTo(finremCaseData);
+        assertThat(response.getData()).isEqualTo(caseData);
+
+        InOrder inOrder = inOrder(generalApplicationDirectionsService, validateHearingService);
+        inOrder.verify(generalApplicationDirectionsService).isHearingRequired(callbackRequest.getCaseDetails());
+        inOrder.verify(validateHearingService).areAllAdditionalHearingDocsWordOrPdf(any(ManageHearingsWrapper.class));
+        inOrder.verify(validateHearingService).validateGeneralApplicationDirectionsMandatoryParties(caseData);
+        inOrder.verify(validateHearingService).validateGeneralApplicationDirectionsNoticeSelection(caseData);
+        inOrder.verify(validateHearingService).validateGeneralApplicationDirectionsIntervenerParties(caseData);
     }
 
     @Test
@@ -86,32 +110,5 @@ class GeneralApplicationDirectionsNewMidHandlerTest {
         // Assert
         verifyNoMoreInteractions(validateHearingService);
         assertThat(response.getData()).isEqualTo(finremCaseData);
-    }
-
-    @Test
-    void givenInvalidAdditionalDocument_whenHandle_thenReturnsError() {
-        //Arrange
-        WorkingHearing workingHearing = WorkingHearing.builder()
-            .additionalHearingDocPrompt(YesOrNo.YES)
-            .build();
-
-        FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder()
-            .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
-                .workingHearing(workingHearing)
-                .build());
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory
-            .from(FinremCaseDetailsBuilderFactory.from(CONTESTED, builder));
-
-        when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(validateHearingService.areAllAdditionalHearingDocsWordOrPdf(any()))
-            .thenReturn(false);
-
-        // Act
-        var response = generalApplicationDirectionsNewMidHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        // Assert
-        assertThat(response.getErrors()).containsExactly("All additional hearing documents must be Word or PDF files.");
     }
 }
