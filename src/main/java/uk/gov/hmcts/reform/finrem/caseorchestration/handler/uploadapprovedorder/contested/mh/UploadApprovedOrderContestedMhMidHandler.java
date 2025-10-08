@@ -31,7 +31,8 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
     private final ValidateHearingService validateHearingService;
 
     public UploadApprovedOrderContestedMhMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                    BulkPrintDocumentService bulkPrintDocumentService, ValidateHearingService validateHearingService) {
+                                                    BulkPrintDocumentService bulkPrintDocumentService,
+                                                    ValidateHearingService validateHearingService) {
         super(finremCaseDetailsMapper);
         this.bulkPrintDocumentService = bulkPrintDocumentService;
         this.validateHearingService = validateHearingService;
@@ -63,8 +64,9 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
         if (YesOrNo.YES.equals(caseData.getManageHearingsWrapper().getIsAddHearingChosen())
             && YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
             && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
-                errors.add("All additional hearing documents must be Word or PDF files.");
-                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+
+            errors.add("All additional hearing documents must be Word or PDF files.");
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                     .data(caseData)
                     .errors(errors)
                     .build();

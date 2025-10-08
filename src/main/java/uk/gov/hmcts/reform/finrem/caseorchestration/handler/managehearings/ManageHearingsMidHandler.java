@@ -60,8 +60,8 @@ public class ManageHearingsMidHandler extends FinremCallbackHandler {
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
             if (YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
                 && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
-                    errors.add("All additional hearing documents must be Word or PDF files.");
-                    return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                errors.add("All additional hearing documents must be Word or PDF files.");
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                         .data(finremCaseData)
                         .errors(errors)
                         .build();
