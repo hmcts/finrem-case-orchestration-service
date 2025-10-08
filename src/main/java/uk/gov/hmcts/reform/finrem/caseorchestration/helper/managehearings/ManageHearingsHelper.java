@@ -11,4 +11,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils.isWor
 @Component
 public class ManageHearingsHelper {
 
+    public boolean areAllAdditionalHearingDocsWordOrPdf(ManageHearingsWrapper manageHearingsWrapper) {
+        return manageHearingsWrapper.getWorkingHearing().getAdditionalHearingDocs().stream()
+            .allMatch(doc -> isPdf(doc.getValue()) || isWordDocument(doc.getValue()));
+    }
 }
