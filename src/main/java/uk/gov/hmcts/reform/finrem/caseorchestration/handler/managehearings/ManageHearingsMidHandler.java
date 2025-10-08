@@ -7,13 +7,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.ManageHearingsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -27,10 +30,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.manageheari
 public class ManageHearingsMidHandler extends FinremCallbackHandler {
 
     private final ValidateHearingService validateHearingService;
+    private final ManageHearingsHelper manageHearingsHelper;
 
-    public ManageHearingsMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ValidateHearingService validateHearingService) {
+    public ManageHearingsMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ValidateHearingService validateHearingService, ManageHearingsHelper manageHearingsHelper) {
         super(finremCaseDetailsMapper);
         this.validateHearingService = validateHearingService;
+        this.manageHearingsHelper = manageHearingsHelper;
     }
 
     @Override
@@ -50,10 +55,21 @@ public class ManageHearingsMidHandler extends FinremCallbackHandler {
 
         ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        WorkingHearing workingHearing = manageHearingsWrapper.getWorkingHearing();
 
+        List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
+            if (YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
+                && !manageHearingsHelper.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
+                    errors.add("All additional hearing documents must be Word or PDF files.");
+                    return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                        .data(finremCaseData)
+                        .errors(errors)
+                        .build();
+            }
+
             HearingType hearingType = getHearingType(manageHearingsWrapper.getWorkingHearing().getHearingTypeDynamicList());
 
             // Pass the converted HearingType to the validation service
@@ -62,6 +78,7 @@ public class ManageHearingsMidHandler extends FinremCallbackHandler {
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)
+            .errors(errors)
             .warnings(warnings)
             .build();
     }
