@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.67'
     id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1874'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1882'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -57,7 +57,7 @@ version = '0.0.1'
 mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 
 checkstyle {
-    toolVersion = '11.0.1'
+    toolVersion = '11.1.0'
     getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
