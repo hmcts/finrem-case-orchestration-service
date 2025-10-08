@@ -60,7 +60,7 @@ public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCa
         // Set the case ID so that requests to CDAM don't fail.
         // This is a temporary workaround until the request to CDAM is fixed to
         // send the case type ID and not the case ID. See DFR-4138
-        caseData.setCcdCaseId(String.valueOf(caseDetails.getId()));
+        caseData.setCcdCaseId(caseDetails.getCaseIdAsString());
 
         uploadApprovedOrderService.processApprovedOrdersMh(caseDetails, userAuthorisation);
 

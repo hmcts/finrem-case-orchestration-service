@@ -57,7 +57,7 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         // Set the case ID so that requests to CDAM don't fail.
         // This is a temporary workaround until the request to CDAM is fixed to
         // send the case type ID and not the case ID. See DFR-4138
-        finremCaseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
+        finremCaseData.setCcdCaseId(finremCaseDetails.getCaseIdAsString());
 
         hearingOrderService.stampAndStoreJudgeApprovedOrders(finremCaseData, userAuthorisation);
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, userAuthorisation);
