@@ -69,14 +69,14 @@ class GeneralApplicationDirectionsNewMidHandlerTest {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(validateHearingService.areAllAdditionalHearingDocsWordOrPdf(any()))
-            .thenReturn(false);
+        when(validateHearingService.areAllAdditionalHearingDocsWordOrPdf(any())).thenReturn(false);
         when(validateHearingService.validateGeneralApplicationDirectionsMandatoryParties(caseData))
             .thenReturn(List.of("Mandatory party error"));
         when(validateHearingService.validateGeneralApplicationDirectionsNoticeSelection(caseData))
             .thenReturn(List.of("Notice selection error"));
         when(validateHearingService.validateGeneralApplicationDirectionsIntervenerParties(caseData))
             .thenReturn(List.of("Intervener warning"));
+
         //Act
         var response = generalApplicationDirectionsNewMidHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -89,7 +89,7 @@ class GeneralApplicationDirectionsNewMidHandlerTest {
 
         InOrder inOrder = inOrder(generalApplicationDirectionsService, validateHearingService);
         inOrder.verify(generalApplicationDirectionsService).isHearingRequired(callbackRequest.getCaseDetails());
-        inOrder.verify(validateHearingService).areAllAdditionalHearingDocsWordOrPdf(any(ManageHearingsWrapper.class));
+        inOrder.verify(validateHearingService).areAllAdditionalHearingDocsWordOrPdf(any());
         inOrder.verify(validateHearingService).validateGeneralApplicationDirectionsMandatoryParties(caseData);
         inOrder.verify(validateHearingService).validateGeneralApplicationDirectionsNoticeSelection(caseData);
         inOrder.verify(validateHearingService).validateGeneralApplicationDirectionsIntervenerParties(caseData);
