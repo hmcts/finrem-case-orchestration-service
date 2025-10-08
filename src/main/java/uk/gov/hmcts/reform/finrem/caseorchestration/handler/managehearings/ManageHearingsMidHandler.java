@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -51,15 +52,17 @@ public class ManageHearingsMidHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
-        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
-        WorkingHearing workingHearing = manageHearingsWrapper.getWorkingHearing();
 
-        List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
+            ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+            WorkingHearing workingHearing = manageHearingsWrapper.getWorkingHearing();
+            List<DocumentCollectionItem> additionalHearingDocs = workingHearing.getAdditionalHearingDocs();
+
             if (YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
-                && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
+                && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(additionalHearingDocs)) {
+                List<String> errors = new ArrayList<>();
                 errors.add("All additional hearing documents must be Word or PDF files.");
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                         .data(finremCaseData)
@@ -75,7 +78,6 @@ public class ManageHearingsMidHandler extends FinremCallbackHandler {
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)
-            .errors(errors)
             .warnings(warnings)
             .build();
     }

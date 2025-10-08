@@ -5,6 +5,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -56,8 +58,7 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for Case ID: {}", callbackRequest.getEventType(), caseId);
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseData caseData = caseDetails.getData();
 
         List<String> errors = new ArrayList<>();
@@ -65,17 +66,21 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
-        ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
-        if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())
-            && YesOrNo.YES.equals(hearingsWrapper.getIsAddHearingChosen())
-            && YesOrNo.YES.equals(hearingsWrapper.getWorkingHearing().getAdditionalHearingDocPrompt())
-            && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(hearingsWrapper)) {
+        if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())) {
+            ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
+            WorkingHearing workingHearing = hearingsWrapper.getWorkingHearing();
+            List<DocumentCollectionItem> additionalHearingDocs = workingHearing.getAdditionalHearingDocs();
 
-            errors.add("All additional hearing documents must be Word or PDF files.");
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData)
-                .errors(errors)
-                .build();
+            if (YesOrNo.YES.equals(hearingsWrapper.getIsAddHearingChosen())
+                && YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
+                && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(additionalHearingDocs)) {
+
+                errors.add("All additional hearing documents must be Word or PDF files.");
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                    .data(caseData)
+                    .errors(errors)
+                    .build();
+            }
         }
 
         if (processOrderService.areAllLegacyApprovedOrdersRemoved(caseDataBefore, caseData)) {
@@ -91,7 +96,7 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
         if (CollectionUtils.isNotEmpty(uploadHearingOrders)) {
             uploadHearingOrders.forEach(doc ->
                 bulkPrintDocumentService.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
-                    caseId, errors, userAuthorisation));
+                    caseDetails.getCaseIdAsString(), errors, userAuthorisation));
         }
 
         if (CollectionUtils.isNotEmpty(caseData.getHearingOrderOtherDocuments())) {
@@ -102,7 +107,7 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
             if (CollectionUtils.isNotEmpty(hearingOrderOtherDocuments)) {
                 hearingOrderOtherDocuments.forEach(doc ->
                     bulkPrintDocumentService.validateEncryptionOnUploadedDocument(doc.getValue(),
-                        caseId, errors, userAuthorisation));
+                        caseDetails.getCaseIdAsString(), errors, userAuthorisation));
             }
         }
 

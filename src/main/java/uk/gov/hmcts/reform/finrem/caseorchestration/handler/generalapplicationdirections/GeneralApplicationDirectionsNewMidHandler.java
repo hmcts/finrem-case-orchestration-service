@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -50,15 +51,17 @@ public class GeneralApplicationDirectionsNewMidHandler extends FinremCallbackHan
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
-        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
-        WorkingHearing workingHearing = manageHearingsWrapper.getWorkingHearing();
 
         List<String> warnings = new ArrayList<>();
         List<String> errors = new ArrayList<>();
 
         if (generalApplicationDirectionsService.isHearingRequired(finremCaseDetails)) {
+            ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+            WorkingHearing workingHearing = manageHearingsWrapper.getWorkingHearing();
+            List<DocumentCollectionItem> additionalHearingDocs = workingHearing.getAdditionalHearingDocs();
+
             if (YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
-                && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
+                && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(additionalHearingDocs)) {
                 errors.add("All additional hearing documents must be Word or PDF files.");
             }
 
