@@ -58,11 +58,12 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
         processOrderService.populateUnprocessedApprovedDocuments(caseData);
         populateMetaDataFields(caseData);
 
-        String error = "There are no draft orders to be processed.";
         List<String> errors = new ArrayList<>();
-        if (CollectionUtils.isEmpty(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
-            && CollectionUtils.isEmpty(caseData.getUploadHearingOrder())) {
+        if (processOrderService.hasNoApprovedOrdersToProcess(caseData)) {
+            String error = "There are no draft orders to be processed.";
             errors.add(error);
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData).errors(errors).build();
         }
 
         // Initialise Working Hearings if the event is PROCESS_ORDER

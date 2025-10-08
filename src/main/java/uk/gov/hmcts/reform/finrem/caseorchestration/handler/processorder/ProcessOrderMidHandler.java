@@ -59,9 +59,11 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
-        if (processOrderService.areAllLegacyApprovedOrdersRemoved(caseDataBefore, caseData)) {
+        if (processOrderService.hasNoApprovedOrdersToProcess(caseData)) {
+            String error = "There are no draft orders to be processed.";
+            errors.add(error);
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("Upload Approved Order is required.")).build();
+                .data(caseData).errors(errors).build();
         }
 
         List<DirectionOrderCollection> uploadHearingOrders = filterNewItems(
