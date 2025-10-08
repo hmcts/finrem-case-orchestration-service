@@ -184,7 +184,7 @@ public class HearingOrderService {
             .flatMap(List::stream)
             .forEach(additionalDoc -> {
                 CaseDocument documentPdf = genericDocumentService.convertDocumentIfNotPdfAlready(
-                    additionalDoc.getValue(), authorisation, String.valueOf(caseData.getCcdCaseId()));
+                    additionalDoc.getValue(), authorisation, caseData.getCcdCaseId());
                 additionalDoc.setValue(documentPdf);
             });
     }
