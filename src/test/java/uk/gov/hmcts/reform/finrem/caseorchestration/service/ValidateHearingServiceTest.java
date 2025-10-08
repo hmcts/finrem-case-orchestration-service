@@ -12,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -34,11 +33,13 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem.fromCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
@@ -495,9 +496,9 @@ class ValidateHearingServiceTest {
     @Test
     void givenValidData_whenAreAllAdditionalHearingDocsWordOrPdfInvoked_shouldReturnTrue() {
         List<DocumentCollectionItem> docs = List.of(
-            docItem("doc1.pdf"),
-            docItem("doc2.DOCX"),
-            docItem("doc3.doc")
+            fromCaseDocument(caseDocument("doc1.pdf")),
+            fromCaseDocument(caseDocument("doc2.DOCX")),
+            fromCaseDocument(caseDocument("doc3.doc"))
         );
 
         boolean result = service.areAllAdditionalHearingDocsWordOrPdf(docs);
@@ -508,21 +509,13 @@ class ValidateHearingServiceTest {
     @Test
     void givenInvalidData_whenAreAllAdditionalHearingDocsWordOrPdfInvoked_shouldReturnFalse() {
         List<DocumentCollectionItem> docs = List.of(
-            docItem("doc1.pdf"),
-            docItem("image.png")
+            fromCaseDocument(caseDocument("doc1.pdf")),
+            fromCaseDocument(caseDocument("image.png"))
         );
 
         boolean result = service.areAllAdditionalHearingDocsWordOrPdf(docs);
 
         assertThat(result).isFalse();
-    }
-
-    private static DocumentCollectionItem docItem(String filename) {
-        return DocumentCollectionItem.builder()
-            .value(CaseDocument.builder()
-                .documentFilename(filename)
-                .build())
-            .build();
     }
 
     private List<String> doTestWarnings() {
