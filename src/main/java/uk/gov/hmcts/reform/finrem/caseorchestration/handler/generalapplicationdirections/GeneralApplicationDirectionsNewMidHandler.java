@@ -7,11 +7,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.ManageHearingsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -24,13 +28,16 @@ public class GeneralApplicationDirectionsNewMidHandler extends FinremCallbackHan
 
     private final ValidateHearingService validateHearingService;
     private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
+    private final ManageHearingsHelper manageHearingsHelper;
 
     public GeneralApplicationDirectionsNewMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      ValidateHearingService validateHearingService,
-                                                     GeneralApplicationDirectionsService generalApplicationDirectionsService) {
+                                                     GeneralApplicationDirectionsService generalApplicationDirectionsService,
+                                                     ManageHearingsHelper manageHearingsHelper) {
         super(finremCaseDetailsMapper);
         this.validateHearingService = validateHearingService;
         this.generalApplicationDirectionsService = generalApplicationDirectionsService;
+        this.manageHearingsHelper = manageHearingsHelper;
     }
 
     @Override
@@ -47,11 +54,18 @@ public class GeneralApplicationDirectionsNewMidHandler extends FinremCallbackHan
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        WorkingHearing workingHearing = manageHearingsWrapper.getWorkingHearing();
 
         List<String> warnings = new ArrayList<>();
         List<String> errors = new ArrayList<>();
 
         if (generalApplicationDirectionsService.isHearingRequired(finremCaseDetails)) {
+            if (YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
+                && !manageHearingsHelper.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
+                errors.add("All additional hearing documents must be Word or PDF files.");
+            }
+
             errors.addAll(validateHearingService.validateGeneralApplicationDirectionsMandatoryParties(finremCaseData));
             errors.addAll(validateHearingService.validateGeneralApplicationDirectionsNoticeSelection(finremCaseData));
             warnings.addAll(validateHearingService.validateGeneralApplicationDirectionsIntervenerParties(finremCaseData));
