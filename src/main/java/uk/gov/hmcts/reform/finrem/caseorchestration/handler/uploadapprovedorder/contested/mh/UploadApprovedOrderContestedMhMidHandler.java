@@ -8,12 +8,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.ManageHearingsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
 import java.util.ArrayList;
@@ -24,11 +28,13 @@ import java.util.List;
 public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHandler {
 
     private final BulkPrintDocumentService bulkPrintDocumentService;
+    private final ManageHearingsHelper manageHearingsHelper;
 
     public UploadApprovedOrderContestedMhMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                    BulkPrintDocumentService bulkPrintDocumentService) {
+                                                    BulkPrintDocumentService bulkPrintDocumentService, ManageHearingsHelper manageHearingsHelper) {
         super(finremCaseDetailsMapper);
         this.bulkPrintDocumentService = bulkPrintDocumentService;
+        this.manageHearingsHelper = manageHearingsHelper;
     }
 
     @Override
@@ -51,6 +57,18 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData beforeData = caseDetailsBefore.getData();
+        ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
+        WorkingHearing workingHearing = manageHearingsWrapper.getWorkingHearing();
+
+        if (YesOrNo.YES.equals(caseData.getManageHearingsWrapper().getIsAddHearingChosen())
+            && YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
+            && !manageHearingsHelper.areAllAdditionalHearingDocsWordOrPdf(manageHearingsWrapper)) {
+                errors.add("All additional hearing documents must be Word or PDF files.");
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                    .data(caseData)
+                    .errors(errors)
+                    .build();
+        }
 
         List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
         if (CollectionUtils.isEmpty(uploadHearingOrders)) {
