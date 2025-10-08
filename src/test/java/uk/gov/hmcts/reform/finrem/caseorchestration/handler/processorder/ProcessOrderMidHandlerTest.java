@@ -308,5 +308,6 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         // Assert
         assertThat(response.getErrors()).containsExactly("All additional hearing documents must be Word or PDF files.");
+        verify(validateHearingService).areAllAdditionalHearingDocsWordOrPdf(any(ManageHearingsWrapper.class));
     }
 }

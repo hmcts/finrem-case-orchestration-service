@@ -27,6 +27,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -106,5 +107,6 @@ class ManageHearingsMidHandlerTest {
 
         // Assert
         assertThat(response.getErrors()).containsExactly("All additional hearing documents must be Word or PDF files.");
+        verify(validateHearingService).areAllAdditionalHearingDocsWordOrPdf(any(ManageHearingsWrapper.class));
     }
 }
