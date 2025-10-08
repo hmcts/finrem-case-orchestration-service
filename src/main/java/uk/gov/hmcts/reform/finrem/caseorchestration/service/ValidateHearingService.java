@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -144,17 +145,15 @@ public class ValidateHearingService {
     }
 
     /**
-     * Checks whether all additional hearing documents associated with the current working hearing
-     * are either Word or PDF files.
+     * Determines whether all documents in the provided list are either Word or PDF files.
+     * This method checks each document in the {@code additionalHearingDocs} collection using
+     * file type utility methods to ensure only supported formats are present.
      *
-     * <p>This method iterates through the list of additional hearing documents and verifies
-     * that each document is of a supported type (Word or PDF) using the file utility methods.
-     *
-     * @param manageHearingsWrapper the wrapper containing the working hearing and its documents
-     * @return {@code true} if every additional hearing document is a Word or PDF file; {@code false} otherwise
+     * @param additionalHearingDocs the list of additional hearing documents to validate
+     * @return {@code true} if every document is a Word or PDF file; {@code false} otherwise
      */
-    public boolean areAllAdditionalHearingDocsWordOrPdf(ManageHearingsWrapper manageHearingsWrapper) {
-        return manageHearingsWrapper.getWorkingHearing().getAdditionalHearingDocs().stream()
+    public boolean areAllAdditionalHearingDocsWordOrPdf(List<DocumentCollectionItem> additionalHearingDocs) {
+        return additionalHearingDocs.stream()
             .allMatch(doc -> isPdf(doc.getValue()) || isWordDocument(doc.getValue()));
     }
 
