@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.GeneralApplicationHa
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -27,6 +29,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 
 @Slf4j
 @Service
@@ -68,7 +74,11 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandler extends Fin
         // Initialize the working hearing for general application directions (MH)
         caseData.getManageHearingsWrapper().setWorkingHearing(
             WorkingHearing.builder()
-                .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(finremCaseDetails))
+                .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(finremCaseDetails)
+                    .presetByCodes(Stream.of(APP_SOLICITOR, RESP_SOLICITOR)
+                        .map(CaseRole::getCcdCode)
+                        .toList()))
+                .hearingNoticePrompt(YesOrNo.YES)
                 .withHearingTypes(HearingType.APPLICATION_HEARING)
                 .build());
 

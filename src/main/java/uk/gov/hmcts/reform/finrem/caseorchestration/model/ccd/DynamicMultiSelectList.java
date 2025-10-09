@@ -32,4 +32,9 @@ public class DynamicMultiSelectList {
     public List<DynamicMultiSelectListElement> getValue() {
         return value != null ? value : null;
     }
+
+    public DynamicMultiSelectList presetByCodes(List<String> presetCodes) {
+        this.setValue(this.listItems.stream().filter(d -> presetCodes.contains(d.getCode())).toList());
+        return this;
+    }
 }
