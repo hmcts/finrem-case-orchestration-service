@@ -29,9 +29,9 @@ public class FinremCallbackRequestFactory {
         return from(id, NULL_CASE_TYPE, caseData, NULL_STATE);
     }
 
-    public static FinremCallbackRequest from(Long id, FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        return from(FinremCaseDetailsBuilderFactory.from(id, NULL_CASE_TYPE, caseData, NULL_STATE),
-            FinremCaseDetailsBuilderFactory.from(id, NULL_CASE_TYPE, caseDataBefore, NULL_STATE));
+    public static FinremCallbackRequest from(Long id, FinremCaseData caseDataBefore, FinremCaseData caseData) {
+        return from(FinremCaseDetailsBuilderFactory.from(id, NULL_CASE_TYPE, caseDataBefore, NULL_STATE),
+            FinremCaseDetailsBuilderFactory.from(id, NULL_CASE_TYPE, caseData, NULL_STATE));
     }
 
     public static FinremCallbackRequest from(Long id, FinremCaseData caseData, State state) {
