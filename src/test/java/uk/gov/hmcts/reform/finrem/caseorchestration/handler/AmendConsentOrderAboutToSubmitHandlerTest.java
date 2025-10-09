@@ -54,7 +54,7 @@ class AmendConsentOrderAboutToSubmitHandlerTest {
 
     @Test
     void givenAnyCase_whenHandle_thenSetCaseFlagInfoAndLatestConsentOrder() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
         CaseDocument latestConsentOrder = mock(CaseDocument.class);
         when(consentOrderService.getLatestConsentOrderData(any(FinremCallbackRequest.class))).thenReturn(latestConsentOrder);
@@ -71,7 +71,7 @@ class AmendConsentOrderAboutToSubmitHandlerTest {
     @SuppressWarnings("unchecked")
     void givenAnyCase_whenHandle_thenPopulateDocumentWarnings() {
         // Arrange
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
         when(documentWarningsHelper.getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN)))
             .thenReturn(List.of("warnings"));
 

@@ -21,6 +21,10 @@ public class FinremCallbackRequestFactory {
         return from(id, FinremCaseData.builder().build());
     }
 
+    public static FinremCallbackRequest from() {
+        return from(FinremCaseData.builder().build());
+    }
+
     public static FinremCallbackRequest from(FinremCaseData caseData) {
         return from(NULL_CASE_ID, caseData);
     }
