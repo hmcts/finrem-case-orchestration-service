@@ -49,11 +49,21 @@ public class ManageHearingsMidHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
-        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
 
         List<String> warnings = new ArrayList<>();
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
+            ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+
+            if (validateHearingService.hasInvalidAdditionalHearingDocs(finremCaseData)) {
+                List<String> errors = new ArrayList<>();
+                errors.add("All additional hearing documents must be Word or PDF files.");
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                        .data(finremCaseData)
+                        .errors(errors)
+                        .build();
+            }
+
             HearingType hearingType = getHearingType(manageHearingsWrapper.getWorkingHearing().getHearingTypeDynamicList());
 
             // Pass the converted HearingType to the validation service

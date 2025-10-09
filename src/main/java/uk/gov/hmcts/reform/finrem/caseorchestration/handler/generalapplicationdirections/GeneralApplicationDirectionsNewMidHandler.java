@@ -52,6 +52,10 @@ public class GeneralApplicationDirectionsNewMidHandler extends FinremCallbackHan
         List<String> errors = new ArrayList<>();
 
         if (generalApplicationDirectionsService.isHearingRequired(finremCaseDetails)) {
+            if (validateHearingService.hasInvalidAdditionalHearingDocs(finremCaseData)) {
+                errors.add("All additional hearing documents must be Word or PDF files.");
+            }
+
             errors.addAll(validateHearingService.validateGeneralApplicationDirectionsMandatoryParties(finremCaseData));
             errors.addAll(validateHearingService.validateGeneralApplicationDirectionsNoticeSelection(finremCaseData));
             warnings.addAll(validateHearingService.validateGeneralApplicationDirectionsIntervenerParties(finremCaseData));

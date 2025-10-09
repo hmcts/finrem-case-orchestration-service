@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -28,6 +29,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.IN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils.isPdf;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils.isWordDocument;
 
 @Service
 @Slf4j
@@ -139,6 +142,49 @@ public class ValidateHearingService {
         }
 
         return List.of();
+    }
+
+    /**
+     * Determines if any additional hearing documents are not Word or PDF files,
+     * but only when both 'Add Hearing' and 'Additional Hearing Document Prompt' are selected as YES.
+     *
+     * @param caseData the {@link FinremCaseData} containing hearing document information
+     * @return {@code true} if any document is not a Word or PDF file, {@code false} otherwise
+     */
+    public boolean hasInvalidAdditionalHearingDocsForAddHearingChosen(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getManageHearingsWrapper())
+            .filter(wrapper -> YesOrNo.YES.equals(wrapper.getIsAddHearingChosen()))
+            .map(ManageHearingsWrapper::getWorkingHearing)
+            .filter(workingHearing -> YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt()))
+            .map(workingHearing -> hasInvalidFileType(workingHearing.getAdditionalHearingDocs()))
+            .orElse(false);
+    }
+
+    /**
+     * Determines if any additional hearing documents are not Word or PDF files,
+     * but only when 'Additional Hearing Document Prompt' is selected as YES.
+     *
+     * @param caseData the {@link FinremCaseData} containing hearing document information
+     * @return {@code true} if any document is not a Word or PDF file, {@code false} otherwise
+     */
+    public boolean hasInvalidAdditionalHearingDocs(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getManageHearingsWrapper())
+            .map(ManageHearingsWrapper::getWorkingHearing)
+            .filter(workingHearing -> YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt()))
+            .map(workingHearing -> hasInvalidFileType(workingHearing.getAdditionalHearingDocs()))
+            .orElse(false);
+    }
+
+    /**
+     * Checks if the provided list of additional hearing documents contains any files
+     * that are not in Word or PDF format.
+     *
+     * @param additionalHearingDocs the list of {@link DocumentCollectionItem} to validate
+     * @return {@code true} if any document is not a Word or PDF file, {@code false} otherwise
+     */
+    private boolean hasInvalidFileType(List<DocumentCollectionItem> additionalHearingDocs) {
+        return additionalHearingDocs.stream()
+            .anyMatch(doc -> !isPdf(doc.getValue()) && !isWordDocument(doc.getValue()));
     }
 
     /*
