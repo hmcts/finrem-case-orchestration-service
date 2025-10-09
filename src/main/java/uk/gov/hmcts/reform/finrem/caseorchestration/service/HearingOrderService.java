@@ -159,7 +159,7 @@ public class HearingOrderService {
 
     private void synchroniseCreatedDateExistingApprovedOrder(FinremCaseData caseData, String authorisationToken) {
         /*
-            TODO: Seems like it's a bug that it marks the existing documents to be not stamped.
+            TODO (DFR-4184): Seems like it's a bug that it marks the existing documents to be not stamped.
                   Have to study how we use `isOrderStamped` field.
                   For the original logic, please see commit 628fe5dd.
                   Below logic was copied from AdditionalHearingDocumentService and is called by
