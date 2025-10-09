@@ -167,7 +167,6 @@ class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
             RESP_SOLICITOR.getCcdCode())));
     }
 
-
     @Test
     void givenCase_whenHandlerInvoked_thenInitializeWorkingHearing() {
         //Arrange
