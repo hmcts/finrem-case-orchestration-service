@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
@@ -68,20 +70,12 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandler extends Fin
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
-        String caseId = finremCaseDetails.getId().toString();
+        String caseId = finremCaseDetails.getCaseIdAsString();
 
         FinremCaseData caseData = finremCaseDetails.getData();
 
         // Initialize the working hearing for general application directions (MH)
-        caseData.getManageHearingsWrapper().setWorkingHearing(
-            WorkingHearing.builder()
-                .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(finremCaseDetails)
-                    .presetByCodes(Stream.of(APP_SOLICITOR, RESP_SOLICITOR)
-                        .map(CaseRole::getCcdCode)
-                        .toList()))
-                .hearingNoticePrompt(YesOrNo.YES)
-                .withHearingTypes(HearingType.APPLICATION_HEARING)
-                .build());
+        initialiseWorkingHearing(caseData.getManageHearingsWrapper(), finremCaseDetails);
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
         log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
@@ -126,5 +120,20 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandler extends Fin
 
         DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicList);
+    }
+
+    private void initialiseWorkingHearing(ManageHearingsWrapper manageHearingsWrapper, FinremCaseDetails finremCaseDetails) {
+        manageHearingsWrapper.setWorkingHearing(WorkingHearing.builder()
+            .partiesOnCaseMultiSelectList(getDefaultPartiesOnCaseMultiSelectList(finremCaseDetails))
+            .hearingNoticePrompt(YesOrNo.YES)
+            .withHearingTypes(HearingType.APPLICATION_HEARING)
+            .build());
+    }
+
+    private DynamicMultiSelectList getDefaultPartiesOnCaseMultiSelectList(FinremCaseDetails finremCaseDetails) {
+        return partyService.getAllActivePartyList(finremCaseDetails)
+            .presetByCodes(Stream.of(APP_SOLICITOR, RESP_SOLICITOR)
+                .map(CaseRole::getCcdCode)
+                .toList());
     }
 }

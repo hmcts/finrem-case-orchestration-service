@@ -83,6 +83,12 @@ class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
         helper = new GeneralApplicationHelper(objectMapper, documentService);
         handler = new GeneralApplicationDirectionsNewEventAboutToStartHandler(assignCaseAccessService,
             finremCaseDetailsMapper, helper, generalApplicationDirectionsService, partyService);
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(
+            List.of()
+        ).build();
+        when(partyService.getAllActivePartyList(any(FinremCaseDetails.class)))
+            .thenReturn(dynamicMultiSelectList);
     }
 
     @Test
@@ -135,10 +141,6 @@ class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
             helper.convertToGeneralApplicationsCollection(updatedList));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
 
-        DynamicMultiSelectList mockedDynamicMultiSelectList = mock(DynamicMultiSelectList.class);
-        when(partyService.getAllActivePartyList(callbackRequest.getCaseDetails()))
-            .thenReturn(mockedDynamicMultiSelectList);
-
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(handle.getErrors())
             .contains("There are no general application available for issue direction.");
@@ -174,9 +176,6 @@ class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
         callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
             .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
-
-        DynamicMultiSelectList expectedDynamicMultiSelectList = DynamicMultiSelectList.builder().build();
-        when(partyService.getAllActivePartyList(any(FinremCaseDetails.class))).thenReturn(expectedDynamicMultiSelectList);
 
         //Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
