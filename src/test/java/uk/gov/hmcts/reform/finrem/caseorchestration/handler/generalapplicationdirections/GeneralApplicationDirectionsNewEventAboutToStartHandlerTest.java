@@ -61,8 +61,6 @@ class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
     @Mock
-    private GeneralApplicationService generalApplicationService;
-    @Mock
     private GeneralApplicationDirectionsService generalApplicationDirectionsService;
     @Mock
     private GenericDocumentService documentService;
