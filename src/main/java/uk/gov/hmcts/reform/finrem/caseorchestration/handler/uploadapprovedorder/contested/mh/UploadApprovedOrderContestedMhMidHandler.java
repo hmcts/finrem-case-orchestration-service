@@ -12,12 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -60,20 +56,12 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData beforeData = caseDetailsBefore.getData();
 
-        if (YesOrNo.YES.equals(caseData.getManageHearingsWrapper().getIsAddHearingChosen())) {
-            ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
-            WorkingHearing workingHearing = manageHearingsWrapper.getWorkingHearing();
-            List<DocumentCollectionItem> additionalHearingDocs = workingHearing.getAdditionalHearingDocs();
-
-            if (YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt())
-                && !validateHearingService.areAllAdditionalHearingDocsWordOrPdf(additionalHearingDocs)) {
-
-                errors.add("All additional hearing documents must be Word or PDF files.");
-                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                    .data(caseData)
-                    .errors(errors)
-                    .build();
-            }
+        if (validateHearingService.hasInvalidAdditionalHearingDocsForAddHearingChosen(caseData)) {
+            errors.add("All additional hearing documents must be Word or PDF files.");
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData)
+                .errors(errors)
+                .build();
         }
 
         List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();

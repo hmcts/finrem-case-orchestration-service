@@ -145,16 +145,46 @@ public class ValidateHearingService {
     }
 
     /**
-     * Determines whether all documents in the provided list are either Word or PDF files.
-     * This method checks each document in the {@code additionalHearingDocs} collection using
-     * file type utility methods to ensure only supported formats are present.
+     * Determines if any additional hearing documents are not Word or PDF files,
+     * but only when both 'Add Hearing' and 'Additional Hearing Document Prompt' are selected as YES.
      *
-     * @param additionalHearingDocs the list of additional hearing documents to validate
-     * @return {@code true} if every document is a Word or PDF file; {@code false} otherwise
+     * @param caseData the {@link FinremCaseData} containing hearing document information
+     * @return {@code true} if any document is not a Word or PDF file, {@code false} otherwise
      */
-    public boolean areAllAdditionalHearingDocsWordOrPdf(List<DocumentCollectionItem> additionalHearingDocs) {
+    public boolean hasInvalidAdditionalHearingDocsForAddHearingChosen(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getManageHearingsWrapper())
+            .filter(wrapper -> YesOrNo.YES.equals(wrapper.getIsAddHearingChosen()))
+            .map(ManageHearingsWrapper::getWorkingHearing)
+            .filter(workingHearing -> YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt()))
+            .map(workingHearing -> hasInvalidFileType(workingHearing.getAdditionalHearingDocs()))
+            .orElse(false);
+    }
+
+    /**
+     * Determines if any additional hearing documents are not Word or PDF files,
+     * but only when 'Additional Hearing Document Prompt' is selected as YES.
+     *
+     * @param caseData the {@link FinremCaseData} containing hearing document information
+     * @return {@code true} if any document is not a Word or PDF file, {@code false} otherwise
+     */
+    public boolean hasInvalidAdditionalHearingDocs(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getManageHearingsWrapper())
+            .map(ManageHearingsWrapper::getWorkingHearing)
+            .filter(workingHearing -> YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt()))
+            .map(workingHearing -> hasInvalidFileType(workingHearing.getAdditionalHearingDocs()))
+            .orElse(false);
+    }
+
+    /**
+     * Checks if the provided list of additional hearing documents contains any files
+     * that are not in Word or PDF format.
+     *
+     * @param additionalHearingDocs the list of {@link DocumentCollectionItem} to validate
+     * @return {@code true} if any document is not a Word or PDF file, {@code false} otherwise
+     */
+    private boolean hasInvalidFileType(List<DocumentCollectionItem> additionalHearingDocs) {
         return additionalHearingDocs.stream()
-            .allMatch(doc -> isPdf(doc.getValue()) || isWordDocument(doc.getValue()));
+            .anyMatch(doc -> !isPdf(doc.getValue()) && !isWordDocument(doc.getValue()));
     }
 
     /*
