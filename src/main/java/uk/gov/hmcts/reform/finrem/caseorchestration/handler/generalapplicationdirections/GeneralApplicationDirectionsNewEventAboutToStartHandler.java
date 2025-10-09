@@ -40,16 +40,17 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandler extends Fin
 
     private final AssignCaseAccessService assignCaseAccessService;
     private final GeneralApplicationHelper helper;
-    private final GeneralApplicationDirectionsService service;
+    private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
     private final PartyService partyService;
 
     public GeneralApplicationDirectionsNewEventAboutToStartHandler(AssignCaseAccessService assignCaseAccessService,
                                                                    FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                                    GeneralApplicationHelper helper,
-                                                                   GeneralApplicationDirectionsService service, PartyService partyService) {
+                                                                   GeneralApplicationDirectionsService generalApplicationDirectionsService,
+                                                                   PartyService partyService) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
-        this.service = service;
+        this.generalApplicationDirectionsService = generalApplicationDirectionsService;
         this.assignCaseAccessService = assignCaseAccessService;
         this.partyService = partyService;
     }
@@ -86,7 +87,7 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandler extends Fin
         log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
-        service.resetGeneralApplicationDirectionsFields(caseData);
+        generalApplicationDirectionsService.resetGeneralApplicationDirectionsFields(caseData);
 
         helper.populateGeneralApplicationSender(caseData, caseData.getGeneralApplicationWrapper().getGeneralApplications());
 

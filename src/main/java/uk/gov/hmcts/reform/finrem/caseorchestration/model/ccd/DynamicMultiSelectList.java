@@ -33,6 +33,18 @@ public class DynamicMultiSelectList {
         return value != null ? value : null;
     }
 
+    /**
+     * Presets the multi-select list by selecting items that match the given list of codes.
+     *
+     * <p>
+     * This method filters the existing {@code listItems} to include only those whose code
+     * is present in the provided {@code presetCodes} list. The filtered items are then
+     * set as the current selected values of the list.
+     * </p>
+     *
+     * @param presetCodes a list of codes to preselect in the multi-select list
+     * @return the updated {@link DynamicMultiSelectList} instance with the preset values applied
+     */
     public DynamicMultiSelectList presetByCodes(List<String> presetCodes) {
         this.setValue(this.listItems.stream().filter(d -> presetCodes.contains(d.getCode())).toList());
         return this;
