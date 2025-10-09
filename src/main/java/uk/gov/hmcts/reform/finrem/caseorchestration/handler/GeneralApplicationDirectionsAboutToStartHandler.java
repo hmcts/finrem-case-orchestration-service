@@ -52,7 +52,7 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
-        String caseId = finremCaseDetails.getId().toString();
+        String caseId = finremCaseDetails.getCaseIdAsString();
 
         FinremCaseData caseData = finremCaseDetails.getData();
 

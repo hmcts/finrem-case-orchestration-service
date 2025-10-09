@@ -6,6 +6,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
@@ -15,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
@@ -27,11 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,7 +54,7 @@ class AmendConsentOrderAboutToSubmitHandlerTest {
 
     @Test
     void givenAnyCase_whenHandle_thenSetCaseFlagInfoAndLatestConsentOrder() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
         CaseDocument latestConsentOrder = mock(CaseDocument.class);
         when(consentOrderService.getLatestConsentOrderData(any(FinremCallbackRequest.class))).thenReturn(latestConsentOrder);
@@ -73,7 +71,7 @@ class AmendConsentOrderAboutToSubmitHandlerTest {
     @SuppressWarnings("unchecked")
     void givenAnyCase_whenHandle_thenPopulateDocumentWarnings() {
         // Arrange
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
         when(documentWarningsHelper.getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN)))
             .thenReturn(List.of("warnings"));
 
@@ -99,16 +97,5 @@ class AmendConsentOrderAboutToSubmitHandlerTest {
             .isEmpty();
         assertThat(lambdaCaptor.getValue().apply(FinremCaseData.builder().amendedConsentOrderCollection(null).build()))
             .isEmpty();
-    }
-
-    private FinremCallbackRequest buildCallbackRequest() {
-        FinremCallbackRequest mockedCallbackRequest = mock(FinremCallbackRequest.class);
-        FinremCaseDetails mockedCaseDetails = mock(FinremCaseDetails.class);
-        when(mockedCallbackRequest.getCaseDetails()).thenReturn(mockedCaseDetails);
-
-        FinremCaseData mockedCaseData = spy(FinremCaseData.class);
-        when(mockedCaseDetails.getData()).thenReturn(mockedCaseData);
-        when(mockedCaseDetails.getId()).thenReturn(Long.valueOf(CASE_ID));
-        return mockedCallbackRequest;
     }
 }
