@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
@@ -494,28 +495,43 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void givenValidData_whenAreAllAdditionalHearingDocsWordOrPdfInvoked_shouldReturnTrue() {
+    void hasInvalidAdditionalHearingDocsForAddHearingChosen_returnsFalse_whenAllDocsValid() {
         List<DocumentCollectionItem> docs = List.of(
-            fromCaseDocument(caseDocument("doc1.pdf")),
-            fromCaseDocument(caseDocument("doc2.DOCX")),
-            fromCaseDocument(caseDocument("doc3.doc"))
+            fromCaseDocument(caseDocument("a.pdf")),
+            fromCaseDocument(caseDocument("b.DOCX")),
+            fromCaseDocument(caseDocument("c.doc"))
         );
 
-        boolean result = service.areAllAdditionalHearingDocsWordOrPdf(docs);
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .isAddHearingChosen(YesOrNo.YES)
+                .workingHearing(WorkingHearing.builder()
+                    .additionalHearingDocPrompt(YesOrNo.YES)
+                    .additionalHearingDocs(docs)
+                    .build())
+                .build())
+            .build();
 
-        assertThat(result).isTrue();
+        assertThat(service.hasInvalidAdditionalHearingDocsForAddHearingChosen(finremCaseData)).isFalse();
     }
 
     @Test
-    void givenInvalidData_whenAreAllAdditionalHearingDocsWordOrPdfInvoked_shouldReturnFalse() {
+    void hasInvalidAdditionalHearingDocs_returnsTrue_whenAnyDocInvalid() {
         List<DocumentCollectionItem> docs = List.of(
-            fromCaseDocument(caseDocument("doc1.pdf")),
+            fromCaseDocument(caseDocument("ok.pdf")),
             fromCaseDocument(caseDocument("image.png"))
         );
 
-        boolean result = service.areAllAdditionalHearingDocsWordOrPdf(docs);
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .workingHearing(WorkingHearing.builder()
+                    .additionalHearingDocPrompt(YesOrNo.YES)
+                    .additionalHearingDocs(docs)
+                    .build())
+                .build())
+            .build();
 
-        assertThat(result).isFalse();
+        assertThat(service.hasInvalidAdditionalHearingDocs(finremCaseData)).isTrue();
     }
 
     private List<String> doTestWarnings() {
