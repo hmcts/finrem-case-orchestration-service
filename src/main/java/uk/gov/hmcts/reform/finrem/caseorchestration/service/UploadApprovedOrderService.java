@@ -40,7 +40,6 @@ public class UploadApprovedOrderService {
 
         processCaseworkerUploadedApprovedOrders(caseDetails.getData(), authorisationToken);
 
-        // TODO Looks like the following logic is not needed. Remove it later.
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
 
         if (isAnotherHearingToBeListed(caseDetails)) {

@@ -83,7 +83,24 @@ public class HearingOrderService {
         doStampAndStoreApprovedOrders(finremCaseData, authorisationToken, ApprovedOrderUploader.JUDGE);
     }
 
+    /**
+     * DFR-4185 - This method is deprecated and should no longer be used.
+     *
+     * <p>
+     * Previously, it appended the latest draft direction order to the judge's amended direction
+     * orders collection in {@link FinremCaseData}. However, the
+     * {@code judgesAmendedOrderCollection} field is no longer used or displayed anywhere in the system,
+     * so this method no longer has any functional effect.
+     * <p>
+     *
+     * It remains in the codebase temporarily for backward compatibility and will be removed
+     * in a future release.
+     *
+     * @param caseDetails the {@link FinremCaseDetails} containing case data
+     */
+    @Deprecated
     public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(FinremCaseDetails caseDetails) {
+        // DFR-4185 to deprecate it
         FinremCaseData caseData = caseDetails.getData();
 
         List<DraftDirectionOrderCollection> judgesAmendedDirectionOrders
