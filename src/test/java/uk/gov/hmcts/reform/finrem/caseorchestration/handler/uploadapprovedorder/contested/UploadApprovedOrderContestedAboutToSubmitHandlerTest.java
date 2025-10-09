@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarni
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -52,7 +51,7 @@ class UploadApprovedOrderContestedAboutToSubmitHandlerTest {
             .from(Long.valueOf(CASE_ID), CONTESTED, UPLOAD_APPROVED_ORDER);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertTrue(response.getErrors().isEmpty());
-        verify(uploadApprovedOrderService).processApprovedOrders(finremCallbackRequest, new ArrayList<>(), AUTH_TOKEN);
+        verify(uploadApprovedOrderService).processApprovedOrders(finremCallbackRequest, AUTH_TOKEN);
     }
 
     @Test
@@ -65,7 +64,7 @@ class UploadApprovedOrderContestedAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getWarnings()).containsExactly("warning 1");
 
-        verify(uploadApprovedOrderService).processApprovedOrders(finremCallbackRequest, new ArrayList<>(), AUTH_TOKEN);
+        verify(uploadApprovedOrderService).processApprovedOrders(finremCallbackRequest,  AUTH_TOKEN);
         verify(documentWarningsHelper).getDocumentWarnings(eq(finremCallbackRequest), any(Function.class), eq(AUTH_TOKEN));
     }
 }
