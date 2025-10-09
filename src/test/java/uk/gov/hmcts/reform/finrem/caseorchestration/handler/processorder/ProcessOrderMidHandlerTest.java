@@ -286,7 +286,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
             .additionalHearingDocPrompt(YesOrNo.YES)
             .build();
 
-        FinremCaseDetails.FinremCaseDetailsBuilder caseData = FinremCaseDetails.builder()
+        FinremCaseDetails.FinremCaseDetailsBuilder caseDataBuilder = FinremCaseDetails.builder()
             .data(FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .isAddHearingChosen(YesOrNo.YES)
@@ -298,16 +298,17 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         FinremCaseDetails.FinremCaseDetailsBuilder caseDataBefore =  FinremCaseDetails.builder().data(mock(FinremCaseData.class));
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory
-            .from(PROCESS_ORDER, caseDataBefore, caseData);
+            .from(PROCESS_ORDER, caseDataBefore, caseDataBuilder);
 
-        when(validateHearingService.areAllAdditionalHearingDocsWordOrPdf(any()))
-            .thenReturn(false);
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        when(validateHearingService.hasInvalidAdditionalHearingDocsForAddHearingChosen(finremCaseData))
+            .thenReturn(true);
 
         // Act
         var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         // Assert
         assertThat(response.getErrors()).containsExactly("All additional hearing documents must be Word or PDF files.");
-        verify(validateHearingService).areAllAdditionalHearingDocsWordOrPdf(any());
+        verify(validateHearingService).hasInvalidAdditionalHearingDocsForAddHearingChosen(finremCaseData);
     }
 }

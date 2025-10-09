@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -202,14 +201,14 @@ class UploadApprovedOrderContestedMhMidHandlerTest extends BaseHandlerTestSetup 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory
             .from(FinremCaseDetailsBuilderFactory.from(CONTESTED, builder));
 
-        when(validateHearingService.areAllAdditionalHearingDocsWordOrPdf(any()))
-            .thenReturn(false);
+        when(validateHearingService.hasInvalidAdditionalHearingDocsForAddHearingChosen(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(true);
 
         // Act
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
         assertThat(response.getErrors()).containsExactly("All additional hearing documents must be Word or PDF files.");
-        verify(validateHearingService).areAllAdditionalHearingDocsWordOrPdf(any());
+        verify(validateHearingService).hasInvalidAdditionalHearingDocsForAddHearingChosen(callbackRequest.getCaseDetails().getData());
     }
 }

@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -69,7 +68,8 @@ class GeneralApplicationDirectionsNewMidHandlerTest {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         when(generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(validateHearingService.areAllAdditionalHearingDocsWordOrPdf(any())).thenReturn(false);
+        when(validateHearingService.hasInvalidAdditionalHearingDocs(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(true);
         when(validateHearingService.validateGeneralApplicationDirectionsMandatoryParties(caseData))
             .thenReturn(List.of("Mandatory party error"));
         when(validateHearingService.validateGeneralApplicationDirectionsNoticeSelection(caseData))
@@ -89,7 +89,7 @@ class GeneralApplicationDirectionsNewMidHandlerTest {
 
         InOrder inOrder = inOrder(generalApplicationDirectionsService, validateHearingService);
         inOrder.verify(generalApplicationDirectionsService).isHearingRequired(callbackRequest.getCaseDetails());
-        inOrder.verify(validateHearingService).areAllAdditionalHearingDocsWordOrPdf(any());
+        inOrder.verify(validateHearingService).hasInvalidAdditionalHearingDocs(callbackRequest.getCaseDetails().getData());
         inOrder.verify(validateHearingService).validateGeneralApplicationDirectionsMandatoryParties(caseData);
         inOrder.verify(validateHearingService).validateGeneralApplicationDirectionsNoticeSelection(caseData);
         inOrder.verify(validateHearingService).validateGeneralApplicationDirectionsIntervenerParties(caseData);

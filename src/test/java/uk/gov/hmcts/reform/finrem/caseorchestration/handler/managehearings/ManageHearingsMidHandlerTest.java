@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -99,14 +98,14 @@ class ManageHearingsMidHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory
             .from(FinremCaseDetailsBuilderFactory.from(CONTESTED, builder));
 
-        when(validateHearingService.areAllAdditionalHearingDocsWordOrPdf(any()))
-            .thenReturn(false);
+        when(validateHearingService.hasInvalidAdditionalHearingDocs(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(true);
 
         // Act
         var response = manageHearingsMidHandler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
         assertThat(response.getErrors()).containsExactly("All additional hearing documents must be Word or PDF files.");
-        verify(validateHearingService).areAllAdditionalHearingDocsWordOrPdf(any());
+        verify(validateHearingService).hasInvalidAdditionalHearingDocs(callbackRequest.getCaseDetails().getData());
     }
 }
