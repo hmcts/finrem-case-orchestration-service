@@ -1,13 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -15,14 +12,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderN
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -40,10 +33,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDataWithRefusalOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
 
 @WebMvcTest(ContestedDraftOrderNotApprovedController.class)
 public class ContestedDraftOrderNotApprovedControllerTest extends BaseControllerTest {
@@ -59,57 +48,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @MockitoBean
     private DocumentHelper documentHelper;
 
-    private static final String START_REFUSAL_ORDER_URL = "/case-orchestration/contested-application-not-approved-start";
     private static final String PREVIEW_REFUSAL_ORDER_URL = "/case-orchestration/documents/preview-refusal-order";
     private static final String SUBMIT_REFUSAL_ORDER_URL = "/case-orchestration/contested-application-not-approved-submit";
     private static final String SUBMIT_REFUSAL_REASON_URL = "/case-orchestration/contested-application-send-refusal";
-    private static final String BEARER_TOKEN = "some-access-token";
-
-    @Test
-    public void startRefusalOrderPropertiesSuccess() throws Exception {
-        refusalOrderStartControllerSetUp();
-        when(idamService.getIdamFullName(BEARER_TOKEN)).thenReturn("User Name");
-
-        mvc.perform(post(START_REFUSAL_ORDER_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE, is(nullValue())))
-            .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_DATE, is(nullValue())))
-            .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT, is(nullValue())))
-            .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME, is("User Name")));
-    }
-
-    @Test
-    public void startRefusalOrderPropertiesBadRequest() throws Exception {
-        doEmptyCaseDataSetUp();
-
-        mvc.perform(post(START_REFUSAL_ORDER_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void startRefusalOrderPropertiesInternalServerError() throws Exception {
-        refusalOrderStartControllerSetUp();
-        when(idamService.getIdamFullName(BEARER_TOKEN))
-            .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
-
-        mvc.perform(post(START_REFUSAL_ORDER_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isInternalServerError());
-    }
-
-    private void refusalOrderStartControllerSetUp() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/refusal-order-contested.json").toURI()));
-    }
 
     @Test
     public void previewRefusalOrderSuccess() throws Exception {
