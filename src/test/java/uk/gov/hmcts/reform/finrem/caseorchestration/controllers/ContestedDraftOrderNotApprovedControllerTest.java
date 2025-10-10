@@ -49,7 +49,6 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     private DocumentHelper documentHelper;
 
     private static final String PREVIEW_REFUSAL_ORDER_URL = "/case-orchestration/documents/preview-refusal-order";
-    private static final String SUBMIT_REFUSAL_ORDER_URL = "/case-orchestration/contested-application-not-approved-submit";
     private static final String SUBMIT_REFUSAL_REASON_URL = "/case-orchestration/contested-application-send-refusal";
 
     @Test
@@ -100,30 +99,6 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     }
 
     @Test
-    public void submitRefusalOrderSuccess() throws Exception {
-        doValidCaseDataSetUp();
-        whenServicePopulatesCollection().thenReturn(caseDataWithRefusalOrder());
-
-        mvc.perform(post(SUBMIT_REFUSAL_ORDER_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
-        verify(contestedDraftOrderNotApprovedService).populateRefusalOrderCollection(any(CaseDetails.class));
-    }
-
-    @Test
-    public void submitRefusalOrder400Error() throws Exception {
-        doEmptyCaseDataSetUp();
-
-        mvc.perform(post(SUBMIT_REFUSAL_ORDER_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
     public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantTrue() throws Exception {
         doValidRefusalOrder();
         when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
@@ -166,9 +141,5 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         verify(contestedDraftOrderNotApprovedService).getLatestRefusalReason(any());
         verify(bulkPrintService, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
         verify(bulkPrintService, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
-    }
-
-    private OngoingStubbing<Map<String, Object>> whenServicePopulatesCollection() {
-        return when(contestedDraftOrderNotApprovedService.populateRefusalOrderCollection(isA(CaseDetails.class)));
     }
 }

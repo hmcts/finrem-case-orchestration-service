@@ -65,25 +65,6 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(path = "/contested-application-not-approved-submit", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Creates application not approved entry and document. Serves as a callback from CCD")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> createGeneralLetter(
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
-
-        CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request for storing general order with Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
-
-        Map<String, Object> caseData = contestedNotApprovedService.populateRefusalOrderCollection(caseDetails);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
     @PostMapping(path = "/contested-application-send-refusal", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Sends refusal reason to paper cases")
     @ApiResponses(value = {
