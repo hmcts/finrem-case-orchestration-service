@@ -132,7 +132,7 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandler extends Fin
 
     private DynamicMultiSelectList getDefaultPartiesOnCaseMultiSelectList(FinremCaseDetails finremCaseDetails) {
         return partyService.getAllActivePartyList(finremCaseDetails)
-            .presetByCodes(Stream.of(APP_SOLICITOR, RESP_SOLICITOR)
+            .setValueByCodes(Stream.of(APP_SOLICITOR, RESP_SOLICITOR)
                 .map(CaseRole::getCcdCode)
                 .toList());
     }

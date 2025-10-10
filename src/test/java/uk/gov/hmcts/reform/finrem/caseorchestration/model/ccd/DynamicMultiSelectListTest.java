@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DynamicMultiSelectListTest {
 
     @Test
-    void givenDynamicMultiSelectList_whenPresetByCodes_thenReturnSameInstance() {
+    void givenDynamicMultiSelectList_whenSetValueByCodes_thenReturnSameInstance() {
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .listItems(List.of(
                 DynamicMultiSelectListElement.builder().code("1").build(),
@@ -18,18 +18,18 @@ public class DynamicMultiSelectListTest {
             .build();
 
         // Test that the method returns the instance itself.
-        assertThat(dynamicMultiSelectList.presetByCodes(List.of("1"))).isEqualTo(dynamicMultiSelectList);
+        assertThat(dynamicMultiSelectList.setValueByCodes(List.of("1"))).isEqualTo(dynamicMultiSelectList);
     }
 
     @Test
-    void givenDynamicMultiSelectList_whenPresetByCodes_thenSetValueByMatchingCodes() {
+    void givenDynamicMultiSelectList_whenSetValueByCodes_thenSetValueByMatchingCodes() {
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .listItems(List.of(
                 DynamicMultiSelectListElement.builder().code("1").build(),
                 DynamicMultiSelectListElement.builder().code("2").build()
             ))
             .build();
-        assertThat(dynamicMultiSelectList.presetByCodes(List.of("1", "2")).getValue())
+        assertThat(dynamicMultiSelectList.setValueByCodes(List.of("1", "2")).getValue())
             .extracting(DynamicMultiSelectListElement::getCode)
             .containsExactly("1", "2");
     }

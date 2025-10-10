@@ -151,7 +151,7 @@ class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
         DynamicMultiSelectList mockedDynamicMultiSelectList = mock(DynamicMultiSelectList.class);
         when(partyService.getAllActivePartyList(callbackRequest.getCaseDetails()))
             .thenReturn(mockedDynamicMultiSelectList);
-        when(mockedDynamicMultiSelectList.presetByCodes(eq(List.of(APP_SOLICITOR.getCcdCode(),
+        when(mockedDynamicMultiSelectList.setValueByCodes(eq(List.of(APP_SOLICITOR.getCcdCode(),
             RESP_SOLICITOR.getCcdCode())))).thenReturn(mockedDynamicMultiSelectList);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -162,7 +162,7 @@ class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
         assertThat(handle.getData().getManageHearingsWrapper().getWorkingHearing().getPartiesOnCaseMultiSelectList())
             .isEqualTo(mockedDynamicMultiSelectList);
 
-        verify(mockedDynamicMultiSelectList).presetByCodes(eq(List.of(APP_SOLICITOR.getCcdCode(),
+        verify(mockedDynamicMultiSelectList).setValueByCodes(eq(List.of(APP_SOLICITOR.getCcdCode(),
             RESP_SOLICITOR.getCcdCode())));
     }
 
