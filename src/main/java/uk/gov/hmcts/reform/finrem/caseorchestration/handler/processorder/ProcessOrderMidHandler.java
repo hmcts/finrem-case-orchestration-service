@@ -55,7 +55,7 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseData caseData = caseDetails.getData();
 
         List<String> errors = new ArrayList<>();
@@ -65,10 +65,9 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
 
         if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())
             && validateHearingService.hasInvalidAdditionalHearingDocsForAddHearingChosen(caseData)) {
-            errors.add("All additional hearing documents must be Word or PDF files.");
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                     .data(caseData)
-                    .errors(errors)
+                    .errors(List.of("All additional hearing documents must be Word or PDF files."))
                     .build();
         }
 

@@ -60,7 +60,7 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
             errors.add("All additional hearing documents must be Word or PDF files.");
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData)
-                .errors(errors)
+                .errors(List.of("All additional hearing documents must be Word or PDF files"))
                 .build();
         }
 
