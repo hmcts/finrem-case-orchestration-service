@@ -57,10 +57,9 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
         FinremCaseData beforeData = caseDetailsBefore.getData();
 
         if (validateHearingService.hasInvalidAdditionalHearingDocsForAddHearingChosen(caseData)) {
-            errors.add("All additional hearing documents must be Word or PDF files.");
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData)
-                .errors(List.of("All additional hearing documents must be Word or PDF files"))
+                .errors(List.of("All additional hearing documents must be Word or PDF files."))
                 .build();
         }
 
