@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -85,7 +87,7 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
     void givenAnyCase_whenHandle_thenShouldSetPaperApplicationYes() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CaseType.CONTESTED,
             FinremCaseData.builder().build(), mock(State.class));
-        ;
+
         assertThat(handler.handle(callbackRequest, AUTH_TOKEN).getData().getPaperApplication())
             .isEqualTo(YesOrNo.YES);
     }
@@ -216,7 +218,9 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(caseDataService).setFinancialRemediesCourtDetails(oldCaseDetails);
+        InOrder inOrder = Mockito.inOrder(finremCaseDetailsMapper, caseDataService);
+        inOrder.verify(finremCaseDetailsMapper).mapToCaseDetails(callbackRequest.getCaseDetails());
+        inOrder.verify(caseDataService).setFinancialRemediesCourtDetails(oldCaseDetails);
     }
 
     @Test
@@ -232,7 +236,10 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
+        InOrder inOrder = Mockito.inOrder(finremCaseDetailsMapper, expressCaseService);
+        inOrder.verify(finremCaseDetailsMapper).mapToCaseDetails(callbackRequest.getCaseDetails());
+        inOrder.verify(finremCaseDetailsMapper).mapToFinremCaseData(oldCaseDetails.getData());
+        inOrder.verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
     }
 
     @Test
@@ -245,14 +252,17 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
 
         when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(oldCaseDetails);
         when(finremCaseDetailsMapper.mapToFinremCaseData(oldCaseDetails.getData())).thenReturn(caseData);
-
         when(applicantSolicitorDetailsValidator.validate(caseData))
             .thenReturn(List.of("error1"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(handle.getErrors()).containsExactly("error1");
-        verify(applicantSolicitorDetailsValidator).validate(caseData);
+
+        InOrder inOrder = Mockito.inOrder(finremCaseDetailsMapper, applicantSolicitorDetailsValidator);
+        inOrder.verify(finremCaseDetailsMapper).mapToCaseDetails(callbackRequest.getCaseDetails());
+        inOrder.verify(finremCaseDetailsMapper).mapToFinremCaseData(oldCaseDetails.getData());
+        inOrder.verify(applicantSolicitorDetailsValidator).validate(caseData);
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
