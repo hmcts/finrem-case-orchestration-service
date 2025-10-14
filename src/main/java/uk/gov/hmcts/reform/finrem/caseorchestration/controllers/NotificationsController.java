@@ -18,15 +18,11 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
@@ -52,29 +48,8 @@ public class NotificationsController extends BaseController {
     private final TransferCourtService transferCourtService;
     private final NocLetterNotificationService nocLetterNotificationService;
     private final UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
-    private final ConsentOrderNotApprovedCorresponder consentOrderNotApprovedCorresponder;
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final ConsentOrderNotApprovedSentCorresponder consentOrderNotApprovedSentCorresponder;
-
-    @PostMapping(value = "/order-not-approved", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for consent/contest order not approved.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Consent/Contest order not approved e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to process notifications for 'Consent/Contest Order Not Approved' for Case ID: {}",
-            callbackRequest.getCaseDetails().getId());
-
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        consentOrderNotApprovedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails());
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
 
     @PostMapping(value = "/consent-order-available", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for Consent order available.")
