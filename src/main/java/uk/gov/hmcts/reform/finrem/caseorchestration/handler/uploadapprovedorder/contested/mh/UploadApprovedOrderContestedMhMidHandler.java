@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +25,14 @@ import java.util.List;
 public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHandler {
 
     private final BulkPrintDocumentService bulkPrintDocumentService;
+    private final ValidateHearingService validateHearingService;
 
     public UploadApprovedOrderContestedMhMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                    BulkPrintDocumentService bulkPrintDocumentService) {
+                                                    BulkPrintDocumentService bulkPrintDocumentService,
+                                                    ValidateHearingService validateHearingService) {
         super(finremCaseDetailsMapper);
         this.bulkPrintDocumentService = bulkPrintDocumentService;
+        this.validateHearingService = validateHearingService;
     }
 
     @Override
@@ -51,6 +55,13 @@ public class UploadApprovedOrderContestedMhMidHandler extends FinremCallbackHand
 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData beforeData = caseDetailsBefore.getData();
+
+        if (validateHearingService.hasInvalidAdditionalHearingDocsForAddHearingChosen(caseData)) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData)
+                .errors(List.of("All additional hearing documents must be Word or PDF files."))
+                .build();
+        }
 
         List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
         if (CollectionUtils.isEmpty(uploadHearingOrders)) {
