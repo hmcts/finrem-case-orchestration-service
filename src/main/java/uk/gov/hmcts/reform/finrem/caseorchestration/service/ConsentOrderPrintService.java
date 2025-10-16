@@ -114,7 +114,6 @@ public class ConsentOrderPrintService {
 
     private UUID sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet, FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore,
                                                         EventType eventType, String authorisationToken) {
-        log.info("Sending order documents to respondent / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverSheet));
 
@@ -128,6 +127,7 @@ public class ConsentOrderPrintService {
                 caseDetails, authorisationToken, docRespondent));
         }
 
+        log.info("Sending order documents to respondent / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
