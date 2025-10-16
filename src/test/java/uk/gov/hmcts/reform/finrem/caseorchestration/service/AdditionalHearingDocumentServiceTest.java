@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
@@ -75,7 +74,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
@@ -164,15 +162,6 @@ class AdditionalHearingDocumentServiceTest {
         assertThat(data).extracting("CourtEmail").isEqualTo("FRCNottingham@justice.gov.uk");
 
         assertThat(data).extracting(ADDITIONAL_HEARING_DOCUMENT_COLLECTION).isNotNull();
-    }
-
-    @Test
-    void getHearingOrderAdditionalDocuments() {
-        Map<String, Object> caseData = baseCaseData();
-        caseData.put(HEARING_UPLOADED_DOCUMENT, Collections.EMPTY_LIST);
-        List<HearingOrderAdditionalDocCollectionData> hearingOrderAdditionalDocuments
-            = additionalHearingDocumentService.getHearingOrderAdditionalDocuments(caseData);
-        assertThat(hearingOrderAdditionalDocuments).isEmpty();
     }
 
     @Test
@@ -455,34 +444,6 @@ class AdditionalHearingDocumentServiceTest {
             ));
         assertThat(data.getLatestDraftHearingOrder().getDocumentFilename()).isEqualTo(FILE_NAME);
         assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments()).isNull();
-    }
-
-    @Test
-    void givenAdditionalDocumentsToBeStored_whenStampAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
-        FinremCallbackRequest request = buildCallbackRequest();
-        FinremCaseDetails finremCaseDetails = request.getCaseDetails();
-        CaseDocument expectedDocument = CaseDocument.builder().documentBinaryUrl(BINARY_URL).documentFilename(FILE_NAME)
-            .documentUrl(DOC_URL).build();
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(expectedDocument);
-        Map<String, Object> caseData = baseCaseData();
-        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
-        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-
-        FinremCaseData data = finremCaseDetails.getData();
-        List<DirectionOrderCollection> uploadHearingOrder = new ArrayList<>();
-        DirectionOrder directionOrder = DirectionOrder.builder().uploadDraftDocument(caseDocument())
-            .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
-        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(directionOrder).build();
-        uploadHearingOrder.add(orderCollection);
-        data.setUploadHearingOrder(uploadHearingOrder);
-
-        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(expectedDocument);
-
-        additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, finremCaseDetails);
-
-        CaseDocument actualDocument = data.getLatestDraftHearingOrder();
-        assertEquals(expectedDocument, actualDocument);
-        verify(genericDocumentService).stampDocument(any(), any(), any(), any());
     }
 
     private Court getTestCourt() {
