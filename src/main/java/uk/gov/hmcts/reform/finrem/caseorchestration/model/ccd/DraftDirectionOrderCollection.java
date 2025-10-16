@@ -11,6 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DraftDirectionOrderCollection implements HasCaseDocument {
+public class DraftDirectionOrderCollection implements HasCaseDocument, UploadedApprovedOrderHolder {
+
+    public static final DraftDirectionOrderCollection EMPTY_COLLECTION =
+        DraftDirectionOrderCollection.builder().value(DraftDirectionOrder.builder().build()).build();
+
     private DraftDirectionOrder value;
 }
