@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapproveOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
@@ -116,11 +117,15 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private FinremCaseDetails finremCaseDetails;
     @MockitoBean
     private FeatureToggleService featureToggleService;
+    @MockitoBean private CaseDataService caseDataService;
 
     @Before
     public void setUp() {
         caseDetails = defaultConsentedCaseDetails();
         finremCaseDetails = defaultContestedFinremCaseDetails();
+
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
+        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(false);
 
         when(evidenceManagementUploadService.upload(any(), any(), any()))
             .thenReturn(Collections.singletonList(
@@ -257,7 +262,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn("approvedConsentOrderNotificationTemplate");
         when(documentHelper.prepareLetterTemplateData(any(FinremCaseDetails.class), eq(APPLICANT))).thenReturn(caseDetails);
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
-            consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN);
+            consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, APPLICANT);
 
         assertThat(generatedApprovedConsentOrderNotificationLetter.getDocumentFilename(), is(FILE_NAME));
         assertThat(generatedApprovedConsentOrderNotificationLetter.getDocumentUrl(),
@@ -297,7 +302,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn("approvedConsentOrderNotificationTemplate");
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
-            consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN);
+            consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, APPLICANT);
 
         assertThat(generatedApprovedConsentOrderNotificationLetter.getDocumentFilename(), is(FILE_NAME));
         assertThat(generatedApprovedConsentOrderNotificationLetter.getDocumentUrl(), is(CONSENT_ORDER_APPROVED_COVER_LETTER_URL));
@@ -428,6 +433,54 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         ConsentOrderCollection collection = ConsentOrderCollection.builder().approvedOrder(approvedOrder).id(UUID.randomUUID().toString()).build();
         ConsentOrderWrapper wrapper = ConsentOrderWrapper.builder().consentedNotApprovedOrders(List.of(collection)).build();
         assertThat(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, AUTH_TOKEN), equalTo(false));
+    }
+
+    @Test
+    public void shouldAddApprovedConsentOrderCoverLetterForRespondent() {
+        CaseDocument coverLetter = caseDocument(DOC_URL, "consentOrderApprovedCoverLetter.pdf", BINARY_URL);
+
+        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(true);
+        when(documentHelper.prepareLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT))
+            .thenReturn(caseDetails);
+        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn("consentOrderApprovedCoverLetter.pdf");
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), anyString(), anyString()))
+            .thenReturn(coverLetter);
+        when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn("FL-FRM-LET-ENG-00095.docx");
+        when(documentHelper.mapToBulkPrintDocument(coverLetter)).thenReturn(BulkPrintDocument.builder().build());
+
+        List<BulkPrintDocument> result = consentOrderApprovedDocumentService
+            .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    public void shouldAddApprovedConsentOrderCoverLetterForApplicant() {
+        CaseDocument coverLetter = caseDocument(DOC_URL, "consentOrderApprovedCoverLetter.pdf", BINARY_URL);
+
+        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(true);
+        when(documentHelper.prepareLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
+            .thenReturn(caseDetails);
+        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn("consentOrderApprovedCoverLetter.pdf");
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), anyString(), anyString()))
+            .thenReturn(coverLetter);
+        when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn("FL-FRM-LET-ENG-00095.docx");
+        when(documentHelper.mapToBulkPrintDocument(coverLetter)).thenReturn(BulkPrintDocument.builder().build());
+
+        List<BulkPrintDocument> result = consentOrderApprovedDocumentService
+            .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, APPLICANT);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenNotPaperApplication() {
+        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(false);
+
+        List<BulkPrintDocument> result = consentOrderApprovedDocumentService
+            .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+
+        assertEquals(0, result.size());
     }
 
     private List<ConsentOrderCollection> getDocumentList(FinremCaseData data) {

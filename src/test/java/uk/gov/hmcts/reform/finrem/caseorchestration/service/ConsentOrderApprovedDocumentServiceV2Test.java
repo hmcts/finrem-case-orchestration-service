@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
@@ -23,15 +24,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_URL;
 
@@ -74,26 +74,29 @@ public class ConsentOrderApprovedDocumentServiceV2Test extends BaseServiceTest {
             .thenReturn(caseDocument(FILE_URL, documentApprovedConsentOrderFileName, BINARY_URL));
         addConsentOrderApprovedDataToCaseDetails(finremCaseDetailsTemp);
         List<BulkPrintDocument> documents = consentOrderApprovedDocumentService
-            .prepareApplicantLetterPack(finremCaseDetailsTemp, AUTH_TOKEN);
+            .addApprovedConsentOrderCoverLetter(finremCaseDetailsTemp, AUTH_TOKEN, APPLICANT);
 
-        assertThat(documents, hasSize(0));
+        assertThat(documents).isEmpty();
     }
 
     @Test
     public void whenPreparingApplicantLetterPack_paperApplication() {
         Mockito.reset(genericDocumentService);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
-
         FinremCaseDetails finremCaseDetailsTemp = documentHelper.deepCopy(finremCaseDetails, FinremCaseDetails.class);
         finremCaseDetailsTemp.getData().setPaperApplication(YesOrNo.YES);
-        when(genericDocumentService.generateDocument(any(), any(), any(), any()))
-            .thenReturn(caseDocument(FILE_URL, documentApprovedConsentOrderFileName, BINARY_URL));
+        CaseDocument generatedDocument = caseDocument(FILE_URL, documentApprovedConsentOrderFileName, BINARY_URL);
         addConsentOrderApprovedDataToCaseDetails(finremCaseDetailsTemp);
-        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService
-            .prepareApplicantLetterPack(finremCaseDetailsTemp, AUTH_TOKEN);
 
-        assertThat(documents, hasSize(1));
-        assertThat(documents.getFirst().getBinaryFileUrl(), is(BINARY_URL));
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any()))
+            .thenReturn(generatedDocument);
+
+        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService
+            .addApprovedConsentOrderCoverLetter(finremCaseDetailsTemp, AUTH_TOKEN, APPLICANT);
+
+        BulkPrintDocument expectedBulkPrintDocument = documentHelper.mapToBulkPrintDocument(generatedDocument);
+
+        assertThat(documents).containsExactly(expectedBulkPrintDocument);
     }
 
     private void addConsentOrderApprovedDataToCaseDetails(FinremCaseDetails caseDetails) {

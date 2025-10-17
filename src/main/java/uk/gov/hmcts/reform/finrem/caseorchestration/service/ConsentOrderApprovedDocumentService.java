@@ -35,7 +35,6 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.VARIATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
@@ -96,10 +95,12 @@ public class ConsentOrderApprovedDocumentService {
             fileName);
     }
 
-    public CaseDocument generateApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authToken) {
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, APPLICANT);
+    public CaseDocument generateApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authToken,
+                                                                DocumentHelper.PaperNotificationRecipient recipient) {
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
         String approvedOrderNotificationFileName;
-        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getData()))) {
+
+        if (consentedApplicationHelper.isVariationOrder(caseDetails.getData())) {
             approvedOrderNotificationFileName = documentConfiguration.getApprovedVariationOrderNotificationFileName();
             caseDetailsForBulkPrint.getData().put(ORDER_TYPE, VARIATION);
         } else {
@@ -111,7 +112,7 @@ public class ConsentOrderApprovedDocumentService {
                 documentConfiguration.getApprovedConsentOrderNotificationTemplate(),
                 approvedOrderNotificationFileName);
 
-        log.info("Generated Approved Consent Order cover Letter: {} for Case ID: {}",
+        log.info("Generated Approved Consent Order Cover Letter for {}: {} for Case ID: {}", recipient,
             generatedApprovedConsentOrderNotificationLetter, caseDetails.getId());
 
         return generatedApprovedConsentOrderNotificationLetter;
@@ -146,17 +147,15 @@ public class ConsentOrderApprovedDocumentService {
         return stampedPensionData;
     }
 
-    public List<BulkPrintDocument> prepareApplicantLetterPack(FinremCaseDetails caseDetails, String authorisationToken) {
-        log.info("Sending Approved Consent Order to applicant / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
+    public List<BulkPrintDocument> addApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
+                                                                      DocumentHelper.PaperNotificationRecipient recipient) {
         FinremCaseData caseData = caseDetails.getData();
-
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-
         if (caseDataService.isPaperApplication(caseData)) {
-            CaseDocument coverLetter = generateApprovedConsentOrderCoverLetter(caseDetails, authorisationToken);
+            log.info("Adding Approved Consent Order Cover Letter for {} / solicitor for Bulk Print, Case ID: {}", recipient, caseDetails.getId());
+            CaseDocument coverLetter = generateApprovedConsentOrderCoverLetter(caseDetails, authorisationToken, recipient);
             bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverLetter));
         }
-
         return bulkPrintDocuments;
     }
 

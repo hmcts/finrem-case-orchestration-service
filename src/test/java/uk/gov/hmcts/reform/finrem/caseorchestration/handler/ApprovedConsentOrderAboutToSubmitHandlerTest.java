@@ -137,7 +137,8 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
             doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderCoverLetter(any(), any());
+        verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderCoverLetter(any(), any(),
+            any(DocumentHelper.PaperNotificationRecipient.class));
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), any());
     }
 
@@ -147,14 +148,12 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
             doValidCaseDataSetUp(NO_PENSION_VALID_JSON);
         whenServiceGeneratesDocument().thenReturn(caseDocument());
 
-
         CallbackRequest callbackRequest1 = CallbackRequest.builder()
             .caseDetails(callbackRequest.getCaseDetails())
             .caseDetailsBefore(callbackRequest.getCaseDetails())
             .eventId(EventType.APPROVE_ORDER.getCcdType()).build();
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest1, AUTH_TOKEN);
-
 
         assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
 
