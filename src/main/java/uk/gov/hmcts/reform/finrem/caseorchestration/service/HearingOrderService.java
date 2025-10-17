@@ -220,20 +220,18 @@ public class HearingOrderService {
 
     private void handleApprovedOrder(FinremCaseData finremCaseData, UploadedApprovedOrder order,
                                      String authorisationToken, StampType stampType, String caseId, ApprovedOrderUploader uploader) {
-        CaseDocument stampedDocument = genericDocumentService.stampDocument(
-            order.getApprovedOrder(), authorisationToken, stampType, caseId);
-
-        // Store "Latest draft hearing order"
-        setLatestDraftHearingOrder(finremCaseData, stampedDocument);
 
         List<DocumentCollectionItem> additionalDocs = order.getAdditionalDocuments();
 
-        // make the uploaded approved orders available in Order tab
-        appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
+        if (ApprovedOrderUploader.CASEWORKER == uploader) {
+            CaseDocument stampedDocument = genericDocumentService.stampDocument(
+                order.getApprovedOrder(), authorisationToken, stampType, caseId);
 
-        // make the uploaded approved orders available for judge uploaded orders in Process Order event
-        if (ApprovedOrderUploader.JUDGE == uploader) {
-            appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
+            appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
+            setLatestDraftHearingOrder(finremCaseData, stampedDocument);
+        } else {
+            // make the uploaded approved orders available for judge uploaded orders in Process Order event
+            appendStampedDocumentToUploadHearingOrder(finremCaseData, order.getApprovedOrder(), additionalDocs);
         }
     }
 
