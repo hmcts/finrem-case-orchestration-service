@@ -215,11 +215,11 @@ public class HearingOrderService {
             finremCaseData.getFinalOrderCollection(), authorisationToken));
 
         convertApprovedOrdersToPdfIfNeeded(finremCaseData, uploader, authorisationToken)
-            .forEach(order -> handleApprovedOrder(finremCaseData, order, authorisationToken, stampType, caseId));
+            .forEach(order -> handleApprovedOrder(finremCaseData, order, authorisationToken, stampType, caseId, uploader));
     }
 
     private void handleApprovedOrder(FinremCaseData finremCaseData, UploadedApprovedOrder order,
-                                     String authorisationToken, StampType stampType, String caseId) {
+                                     String authorisationToken, StampType stampType, String caseId, ApprovedOrderUploader uploader) {
         CaseDocument stampedDocument = genericDocumentService.stampDocument(
             order.getApprovedOrder(), authorisationToken, stampType, caseId);
 
@@ -231,8 +231,10 @@ public class HearingOrderService {
         // make the uploaded approved orders available in Order tab
         appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
 
-        // make the uploaded approved orders available in Process Order event
-        appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
+        // make the uploaded approved orders available for judge uploaded orders in Process Order event
+        if (ApprovedOrderUploader.JUDGE == uploader) {
+            appendStampedDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs);
+        }
     }
 
     private void setLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument stampedOrder) {
