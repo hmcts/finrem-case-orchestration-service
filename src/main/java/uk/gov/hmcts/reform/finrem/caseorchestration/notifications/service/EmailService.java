@@ -28,6 +28,7 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 public class EmailService {
 
     protected final EmailClient emailClient;
+    private final NotificationClientExceptionResolver notificationClientExceptionResolver;
 
     @Value("#{${uk.gov.notify.email.templates}}")
     private Map<String, String> emailTemplates;
@@ -212,7 +213,8 @@ public class EmailService {
             );
             log.info("Sending email success. Reference ID: {}", referenceId);
         } catch (NotificationClientException e) {
-            log.warn("Failed to send email. Reference ID: {}. Reason:", referenceId, e);
+            log.warn("Failed to send email. Reference ID: {}. Reason: {}", referenceId, e.getMessage(), e);
+            notificationClientExceptionResolver.resolve(e);
         }
     }
 
