@@ -154,6 +154,7 @@ class ProcessOrderAboutToStartHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(EventType.PROCESS_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder()
+                .uploadHearingOrder(List.of(DirectionOrderCollection.builder().build()))
                 .manageHearingsWrapper(ManageHearingsWrapper
                     .builder()
                     .workingHearing(null)
