@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
 import java.util.ArrayList;
@@ -26,15 +26,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -98,12 +94,12 @@ class AmendConsentOrderMidHandlerTest {
         CaseDocument amendedConsentOrder = mock(CaseDocument.class);
         CaseDocument amendedConsentOrder2 = mock(CaseDocument.class);
 
-        caseData.setAmendedConsentOrderCollection(List.of(
+        caseData.setAmendedConsentOrderCollection(new ArrayList<>(List.of(
             AmendedConsentOrderCollection.builder()
                 .value(AmendedConsentOrder.builder().amendedConsentOrder(amendedConsentOrder).build()).build(),
             AmendedConsentOrderCollection.builder()
                 .value(AmendedConsentOrder.builder().amendedConsentOrder(amendedConsentOrder2).build()).build()
-        ));
+        )));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
@@ -138,31 +134,20 @@ class AmendConsentOrderMidHandlerTest {
     }
 
     private FinremCallbackRequest buildBaseCallbackRequest() {
-        FinremCallbackRequest mockedCallbackRequest = mock(FinremCallbackRequest.class);
-        FinremCaseDetails mockedCaseDetails = mock(FinremCaseDetails.class);
-        FinremCaseDetails mockedCaseDetailsBefore = mock(FinremCaseDetails.class);
-        when(mockedCallbackRequest.getCaseDetails()).thenReturn(mockedCaseDetails);
-        lenient().when(mockedCallbackRequest.getCaseDetailsBefore()).thenReturn(mockedCaseDetailsBefore);
-
-        FinremCaseData mockedCaseData = spy(FinremCaseData.class);
-        when(mockedCaseDetails.getData()).thenReturn(mockedCaseData);
-        when(mockedCaseDetails.getId()).thenReturn(Long.valueOf(CASE_ID));
-
-        FinremCaseData mockedCaseDataBefore = spy(FinremCaseData.class);
-        lenient().when(mockedCaseDetailsBefore.getData()).thenReturn(mockedCaseDataBefore);
-        return mockedCallbackRequest;
+        return FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), FinremCaseData.builder().build(),
+            FinremCaseData.builder().build());
     }
 
     @SuppressWarnings("unchecked")
     private void verifyValidateEncryptionOnUploadedDocument(CaseDocument amendedConsentOrder, List<String> responseErrors) {
         ArgumentCaptor<List<String>> argumentCaptor = ArgumentCaptor.forClass(List.class);
         verify(bulkPrintDocumentService)
-            .validateEncryptionOnUploadedDocument(eq(amendedConsentOrder), anyString(), argumentCaptor.capture(), eq(AUTH_TOKEN));
+            .validateEncryptionOnUploadedDocument(eq(amendedConsentOrder), eq(CASE_ID), argumentCaptor.capture(), eq(AUTH_TOKEN));
         assertThat(argumentCaptor.getValue()).isEqualTo(responseErrors);
     }
 
     private void verifyNotValidateEncryptionOnUploadedDocument(CaseDocument amendedConsentOrder) {
         verify(bulkPrintDocumentService, never())
-            .validateEncryptionOnUploadedDocument(eq(amendedConsentOrder), anyString(), anyList(), eq(AUTH_TOKEN));
+            .validateEncryptionOnUploadedDocument(eq(amendedConsentOrder), eq(CASE_ID), anyList(), eq(AUTH_TOKEN));
     }
 }
