@@ -473,6 +473,16 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertEquals(1, result.size());
     }
 
+    @Test
+    public void shouldReturnEmptyListWhenNotPaperApplication() {
+        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(false);
+
+        List<BulkPrintDocument> result = consentOrderApprovedDocumentService
+            .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+
+        assertEquals(0, result.size());
+    }
+
     private List<ConsentOrderCollection> getDocumentList(FinremCaseData data) {
         return Optional.ofNullable(data.getConsentOrderWrapper().getContestedConsentedApprovedOrders()).orElse(new ArrayList<>());
     }
