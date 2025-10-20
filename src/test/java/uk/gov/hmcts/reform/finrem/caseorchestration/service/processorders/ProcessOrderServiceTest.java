@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -117,39 +118,6 @@ class ProcessOrderServiceTest {
 
             return true;
         }));
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideIsAllLegacyApprovedOrdersRemovedTestCases")
-    void testIsAllLegacyApprovedOrdersRemoved(FinremCaseData caseDataBefore, FinremCaseData caseData, boolean expectedResult) {
-        boolean result = underTest.areAllLegacyApprovedOrdersRemoved(caseDataBefore, caseData);
-        assertEquals(expectedResult, result);
-    }
-
-    private static Stream<Arguments> provideIsAllLegacyApprovedOrdersRemovedTestCases() {
-        final FinremCaseData caseDataBeforeWithOrders = new FinremCaseData();
-        final FinremCaseData caseDataWithOrders = new FinremCaseData();
-        final FinremCaseData emptyCaseDataBefore = new FinremCaseData();
-        final FinremCaseData emptyCaseData = new FinremCaseData();
-
-        caseDataBeforeWithOrders.setUploadHearingOrder(List.of(DirectionOrderCollection.builder().build()));
-        caseDataWithOrders.setUploadHearingOrder(List.of(DirectionOrderCollection.builder().build()));
-        emptyCaseDataBefore.setUploadHearingOrder(List.of());
-        emptyCaseData.setUploadHearingOrder(List.of());
-
-        return Stream.of(
-            // Legacy approved orders removed
-            Arguments.of(caseDataBeforeWithOrders, emptyCaseData, true),
-
-            // No legacy approved orders to remove
-            Arguments.of(emptyCaseDataBefore, emptyCaseData, false),
-
-            // Legacy approved orders still exist
-            Arguments.of(caseDataBeforeWithOrders, caseDataWithOrders, false),
-
-            // Legacy approved orders already removed
-            Arguments.of(emptyCaseDataBefore, caseDataWithOrders, false)
-        );
     }
 
     @ParameterizedTest
@@ -266,7 +234,6 @@ class ProcessOrderServiceTest {
         // Set up the mock data based on expectedResult
         when(draftOrdersWrapper.getUnprocessedApprovedDocuments()).thenReturn(unprocessedApprovedDocuments);
 
-
         // Call the method to test
         boolean result = underTest.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(caseData);
 
@@ -303,6 +270,62 @@ class ProcessOrderServiceTest {
         // Call the method to test
         boolean result = underTest.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(caseData);
         assertTrue(result, "Expected all draft orders (excluding PSA) to have .doc or .docx extensions");
+    }
+
+    @ParameterizedTest
+    @MethodSource("approvedOrderCollectionsToProcess")
+    void testHasNoApprovedOrdersToProcess(FinremCaseData input, boolean expected) {
+        boolean actual = underTest.hasNoApprovedOrdersToProcess(input);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    private static Stream<Arguments> approvedOrderCollectionsToProcess() {
+        return Stream.of(
+            //both unprocessedApprovedDocuments and uploadHearingOrder(legacy) are null
+            Arguments.of(
+                FinremCaseData.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .unprocessedApprovedDocuments(null)
+                        .build())
+                    .uploadHearingOrder(null)
+                    .build(),
+                true
+            ),
+            //has unprocessedApprovedDocuments only
+            Arguments.of(
+                FinremCaseData.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .unprocessedApprovedDocuments(
+                            List.of(DirectionOrderCollection.builder().build()))
+                        .build())
+                    .uploadHearingOrder(List.of())
+                    .build(),
+                false
+            ),
+            //has uploadHearingOrder(legacy) only
+            Arguments.of(
+                FinremCaseData.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .unprocessedApprovedDocuments(List.of())
+                        .build())
+                    .uploadHearingOrder(
+                        List.of(DirectionOrderCollection.builder().build()))
+                    .build(),
+                false
+            ),
+            //has both unprocessedApprovedDocuments and uploadHearingOrder(legacy)
+            Arguments.of(
+                FinremCaseData.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .unprocessedApprovedDocuments(
+                            List.of(DirectionOrderCollection.builder().build()))
+                        .build())
+                    .uploadHearingOrder(
+                        List.of(DirectionOrderCollection.builder().build()))
+                    .build(),
+                false
+            )
+        );
     }
 
     private static String extractFileName(String url) {
