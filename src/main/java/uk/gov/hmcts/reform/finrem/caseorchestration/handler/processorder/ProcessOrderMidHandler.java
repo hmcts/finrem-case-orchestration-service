@@ -63,17 +63,16 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
+        if (processOrderService.hasNoApprovedOrdersToProcess(caseData)) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData).errors(List.of("There are no draft orders to be processed.")).build();
+        }
         if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())
             && validateHearingService.hasInvalidAdditionalHearingDocsForAddHearingChosen(caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                     .data(caseData)
                     .errors(List.of("All additional hearing documents must be Word or PDF files."))
                     .build();
-        }
-
-        if (processOrderService.areAllLegacyApprovedOrdersRemoved(caseDataBefore, caseData)) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("Upload Approved Order is required.")).build();
         }
 
         List<DirectionOrderCollection> uploadHearingOrders = filterNewItems(
