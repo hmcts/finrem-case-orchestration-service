@@ -88,21 +88,6 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
         }
 
         processOrderService.populateUnprocessedApprovedDocuments(caseDataBefore);
-        if (!processOrderService.areAllNewOrdersWordOrPdfFiles(caseData)) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("You must upload a Microsoft Word file or PDF for new documents.")).build();
-        }
-        // Validate the modifying legacy approved orders
-        if (!processOrderService.areAllLegacyApprovedOrdersPdf(caseData)) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("You must upload a PDF file for modifying legacy approved documents.")).build();
-        }
-        // Validate the modifying unprocessed approved orders are word documents (except PSA)
-        if (!processOrderService.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(caseData)) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("You must upload a Microsoft Word file or PDF for modifying an unprocessed approved documents."))
-                .build();
-        }
 
         // Old Process Order hearing data setup
         if (EventType.DIRECTION_UPLOAD_ORDER.equals(callbackRequest.getEventType())) {
