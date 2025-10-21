@@ -137,7 +137,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
             doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderCoverLetter(any(), any(),
+        verify(consentOrderApprovedDocumentService, never()).addApprovedConsentOrderCoverLetter(any(), any(),
             any(DocumentHelper.PaperNotificationRecipient.class));
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), any());
     }

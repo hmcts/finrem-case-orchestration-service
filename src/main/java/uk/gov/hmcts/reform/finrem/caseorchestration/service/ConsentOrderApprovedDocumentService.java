@@ -95,7 +95,7 @@ public class ConsentOrderApprovedDocumentService {
             fileName);
     }
 
-    public CaseDocument generateApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authToken,
+    private CaseDocument generateApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authToken,
                                                                 DocumentHelper.PaperNotificationRecipient recipient) {
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
         String approvedOrderNotificationFileName;
