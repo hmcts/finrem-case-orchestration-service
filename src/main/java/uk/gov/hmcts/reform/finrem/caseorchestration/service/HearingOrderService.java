@@ -91,8 +91,6 @@ public class HearingOrderService {
      * orders collection in {@link FinremCaseData}. However, the
      * {@code judgesAmendedOrderCollection} field is no longer used or displayed anywhere in the system,
      * so this method no longer has any functional effect.
-     * <p>
-     *
      * It remains in the codebase temporarily for backward compatibility and will be removed
      * in a future release.
      *
