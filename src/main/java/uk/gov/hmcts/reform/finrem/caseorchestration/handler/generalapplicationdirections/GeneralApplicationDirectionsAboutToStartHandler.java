@@ -1,9 +1,13 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationdirections;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.GeneralApplicationHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -14,8 +18,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,22 +35,24 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
     private final AssignCaseAccessService assignCaseAccessService;
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
+    private final PartyService partyService;
 
     public GeneralApplicationDirectionsAboutToStartHandler(AssignCaseAccessService assignCaseAccessService,
                                                            FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            GeneralApplicationHelper helper,
-                                                           GeneralApplicationDirectionsService service) {
+                                                           GeneralApplicationDirectionsService service, PartyService partyService) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;
         this.assignCaseAccessService = assignCaseAccessService;
+        this.partyService = partyService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.GENERAL_APPLICATION_DIRECTIONS.equals(eventType);
+            && EventType.GENERAL_APPLICATION_DIRECTIONS_MH.equals(eventType);
     }
 
     @Override
@@ -55,6 +64,13 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         String caseId = finremCaseDetails.getId().toString();
 
         FinremCaseData caseData = finremCaseDetails.getData();
+
+        // Initialize the working hearing for general application directions (MH)
+        caseData.getManageHearingsWrapper().setWorkingHearing(
+            WorkingHearing.builder()
+                .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(finremCaseDetails))
+                .withHearingTypes(HearingType.APPLICATION_HEARING)
+                .build());
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
         log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
@@ -100,5 +116,4 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicList);
     }
-
 }

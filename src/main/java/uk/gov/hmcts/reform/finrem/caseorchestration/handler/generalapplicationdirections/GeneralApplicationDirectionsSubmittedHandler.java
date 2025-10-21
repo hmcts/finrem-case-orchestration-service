@@ -16,14 +16,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.manag
 
 @Slf4j
 @Service
-public class GeneralApplicationDirectionsNewEventSubmittedHandler extends FinremCallbackHandler {
+public class GeneralApplicationDirectionsSubmittedHandler extends FinremCallbackHandler {
 
     private final ManageHearingsCorresponder manageHearingsCorresponder;
     private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
 
-    public GeneralApplicationDirectionsNewEventSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                                ManageHearingsCorresponder manageHearingsCorresponder,
-                                                                GeneralApplicationDirectionsService generalApplicationDirectionsService) {
+    public GeneralApplicationDirectionsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                        ManageHearingsCorresponder manageHearingsCorresponder,
+                                                        GeneralApplicationDirectionsService generalApplicationDirectionsService) {
         super(finremCaseDetailsMapper);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
         this.generalApplicationDirectionsService = generalApplicationDirectionsService;

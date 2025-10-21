@@ -47,9 +47,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @RunWith(MockitoJUnitRunner.class)
-class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
+class GeneralApplicationDirectionsAboutToStartHandlerTest {
 
-    private GeneralApplicationDirectionsNewEventAboutToStartHandler handler;
+    private GeneralApplicationDirectionsAboutToStartHandler handler;
     private GeneralApplicationHelper helper;
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
@@ -75,7 +75,7 @@ class GeneralApplicationDirectionsNewEventAboutToStartHandlerTest {
         MockitoAnnotations.openMocks(this);
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
-        handler = new GeneralApplicationDirectionsNewEventAboutToStartHandler(assignCaseAccessService,
+        handler = new GeneralApplicationDirectionsAboutToStartHandler(assignCaseAccessService,
             finremCaseDetailsMapper, helper, service, partyService);
     }
 
