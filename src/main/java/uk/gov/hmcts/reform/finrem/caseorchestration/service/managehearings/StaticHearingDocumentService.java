@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentStorageException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.FinremMultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
@@ -55,46 +56,46 @@ public class StaticHearingDocumentService {
     /**
      * Uploads PFD NCDR Compliance Letter document to document store and returns the document.
      *
-     * @param caseId case ID
+     * @param caseType CCD case type
      * @param authToken user authorization token
      * @return uploaded document
      */
-    public CaseDocument uploadPfdNcdrComplianceLetter(String caseId, String authToken) {
+    public CaseDocument uploadPfdNcdrComplianceLetter(CaseType caseType, String authToken) {
         byte[] bytes = getPfdNcdrComplianceLetter();
 
         MultipartFile multipartFile = createMultipartFile("PfdNcdrComplianceLetter.pdf", bytes);
 
-        return uploadDocument(caseId, authToken, multipartFile, "PFD NCDR Compliance Letter");
+        return uploadDocument(caseType, authToken, multipartFile, "PFD NCDR Compliance Letter");
     }
 
     /**
      * Uploads Out Of Court Resolution document to document store and returns the document.
      *
-     * @param caseId case ID
+     * @param caseType CCD case type
      * @param authToken user authorization token
      * @return uploaded document
      */
-    public CaseDocument uploadOutOfCourtResolutionDocument(String caseId, String authToken) {
+    public CaseDocument uploadOutOfCourtResolutionDocument(CaseType caseType, String authToken) {
         byte[] bytes = getOutOfCourtResolutionDocument();
 
         MultipartFile multipartFile = createMultipartFile("OutOfFamilyCourtResolution.pdf", bytes);
 
-        return uploadDocument(caseId, authToken, multipartFile, "Out of Court Resolution Document");
+        return uploadDocument(caseType, authToken, multipartFile, "Out of Court Resolution Document");
     }
 
     /**
      * Uploads PFD NCDR Cover Letter document to document store and returns the document.
      *
-     * @param caseId case ID
+     * @param caseType CCD case type
      * @param authToken user authorization token
      * @return uploaded document
      */
-    public CaseDocument uploadPfdNcdrCoverLetter(String caseId, String authToken) {
+    public CaseDocument uploadPfdNcdrCoverLetter(CaseType caseType, String authToken) {
         byte[] bytes = getPfdNcdrCoverLetter();
 
         MultipartFile multipartFile = createMultipartFile("PfdNcdrCoverLetter.pdf", bytes);
 
-        return uploadDocument(caseId, authToken, multipartFile, "PFD NCDR Cover Letter");
+        return uploadDocument(caseType, authToken, multipartFile, "PFD NCDR Cover Letter");
     }
 
     private byte[] getOutOfCourtResolutionDocument() {
@@ -131,11 +132,11 @@ public class StaticHearingDocumentService {
             .build();
     }
 
-    private CaseDocument uploadDocument(String caseId, String authToken, MultipartFile multipartFile,
+    private CaseDocument uploadDocument(CaseType caseType, String authToken, MultipartFile multipartFile,
                                         String documentName) {
         List<FileUploadResponse> response = uploadService.upload(Collections.singletonList(multipartFile),
-            caseId, authToken);
-        FileUploadResponse fileUploadResponse = Optional.of(response.get(0))
+            caseType, authToken);
+        FileUploadResponse fileUploadResponse = Optional.of(response.getFirst())
             .filter(r -> r.getStatus() == HttpStatus.OK)
             .orElseThrow(() -> new DocumentStorageException("Failed to store " + documentName));
 
