@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -55,17 +56,17 @@ public class EvidenceManagementUploadService {
     @Value("${document.management.store.upload.url}")
     private String documentManagementStoreUploadUrl;
 
-    public List<FileUploadResponse> upload(List<MultipartFile> files, String caseTypeId, String auth) {
+    public List<FileUploadResponse> upload(List<MultipartFile> files, CaseType caseTypeId, String auth) {
         if (featureToggleService.isSecureDocEnabled()) {
             return uploadToSecDoc(files, caseTypeId, auth);
         } else {
-            return uploadToDmStore(files, caseTypeId, auth);
+            return uploadToDmStore(files, auth);
         }
     }
 
-    private List<FileUploadResponse> uploadToDmStore(@NonNull final List<MultipartFile> files, final String caseTypeId, final String auth) {
+    private List<FileUploadResponse> uploadToDmStore(@NonNull final List<MultipartFile> files, final String auth) {
         UserDetails userDetails = idamAuthService.getUserDetails(auth);
-        log.info("DMStore Upload files: {} and case id: {}", files.toString(), caseTypeId);
+        log.info("DMStore Upload files: {}", files);
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity<>(param(files), headers(userDetails.getId()));
 
         JsonNode documents = Objects.requireNonNull(template.postForObject(documentManagementStoreUploadUrl, httpEntity, ObjectNode.class))
@@ -74,22 +75,21 @@ public class EvidenceManagementUploadService {
         return toUploadResponse(documents);
     }
 
-    private List<FileUploadResponse> uploadToSecDoc(List<MultipartFile> files, String caseTypeId, String auth)
+    private List<FileUploadResponse> uploadToSecDoc(List<MultipartFile> files, @NonNull CaseType caseType, String auth)
         throws HttpClientErrorException {
         IdamToken idamTokens = idamAuthService.getIdamToken(auth);
-        log.info("EMSDocStore Upload files: {} and case id: {}",
-            files.toString(), caseTypeId);
+        log.info("EMSDocStore Upload files: {} and case type: {}", files.toString(), caseType.getCcdType());
 
         UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(idamTokens.getIdamOauth2Token(),
-            idamTokens.getServiceAuthorization(), caseTypeId, JURISDICTION_ID, files);
+            idamTokens.getServiceAuthorization(), caseType.getCcdType(), JURISDICTION_ID, files);
 
         if (uploadResponse == null) {
             log.info("EMSDocStore Failed to upload files");
             return List.of();
         }
 
-        log.info("EMSDocStore Uploaded files are: {} and case id: {}",
-            uploadResponse.getDocuments().stream().map(e -> e.links.binary.href).toList(), caseTypeId);
+        log.info("EMSDocStore Uploaded files are: {} and case type: {}",
+            uploadResponse.getDocuments().stream().map(e -> e.links.binary.href).toList(), caseType.getCcdType());
 
         return toUploadResponse(uploadResponse);
     }
