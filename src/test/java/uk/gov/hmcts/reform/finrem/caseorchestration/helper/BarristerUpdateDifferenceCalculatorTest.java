@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 
 import java.util.List;
@@ -32,11 +33,13 @@ public class BarristerUpdateDifferenceCalculatorTest {
     @Test
     public void givenEmptyLists_whenCalculateDifference_thenReturnEmptySets() {
         BarristerChange actual = underTest.calculate(
+            BarristerParty.APPLICANT,
             emptyList(),
             emptyList()
         );
 
         assertThat(actual).isEqualTo(BarristerChange.builder()
+            .barristerParty(BarristerParty.APPLICANT)
             .added(emptySet())
             .removed(emptySet())
             .build());
@@ -45,11 +48,13 @@ public class BarristerUpdateDifferenceCalculatorTest {
     @Test
     public void givenAddedBarrister_whenCalculateDifference_thenReturnAddedSet() {
         BarristerChange actual = underTest.calculate(
+            BarristerParty.APPLICANT,
             emptyList(),
             List.of(BARRISTER)
         );
 
         assertThat(actual).isEqualTo(BarristerChange.builder()
+            .barristerParty(BarristerParty.APPLICANT)
             .added(Set.of(BARRISTER))
             .removed(emptySet())
             .build());
@@ -58,11 +63,13 @@ public class BarristerUpdateDifferenceCalculatorTest {
     @Test
     public void givenAddedBarristerWithPreExisting_whenCalculateDifference_thenReturnNewBarristerOnly() {
         BarristerChange actual = underTest.calculate(
+            BarristerParty.APPLICANT,
             List.of(BARRISTER),
             List.of(BARRISTER, ANOTHER_BARRISTER)
         );
 
         assertThat(actual).isEqualTo(BarristerChange.builder()
+            .barristerParty(BarristerParty.APPLICANT)
             .added(Set.of(ANOTHER_BARRISTER))
             .removed(emptySet())
             .build());
@@ -71,11 +78,13 @@ public class BarristerUpdateDifferenceCalculatorTest {
     @Test
     public void givenRemovedBarrister_whenCalculateDifference_thenReturnRemovedBarrister() {
         BarristerChange actual = underTest.calculate(
+            BarristerParty.APPLICANT,
             List.of(BARRISTER),
             emptyList()
         );
 
         assertThat(actual).isEqualTo(BarristerChange.builder()
+            .barristerParty(BarristerParty.APPLICANT)
             .added(emptySet())
             .removed(Set.of(BARRISTER))
             .build());
@@ -84,11 +93,13 @@ public class BarristerUpdateDifferenceCalculatorTest {
     @Test
     public void givenRemovedBarristerWithPreExisting_whenCalculateDifference_thenReturnBarristerToRemoveOnly()  {
         BarristerChange actual = underTest.calculate(
+            BarristerParty.APPLICANT,
             List.of(BARRISTER, ANOTHER_BARRISTER),
             List.of(BARRISTER)
         );
 
         assertThat(actual).isEqualTo(BarristerChange.builder()
+            .barristerParty(BarristerParty.APPLICANT)
             .added(emptySet())
             .removed(Set.of(ANOTHER_BARRISTER))
             .build());
@@ -97,12 +108,14 @@ public class BarristerUpdateDifferenceCalculatorTest {
     @Test
     public void givenEmailChangedOnExistingElement_whenCalculateDifference_thenTreatAsNewBarrister() {
         BarristerChange actual = underTest.calculate(
+            BarristerParty.APPLICANT,
             List.of(BARRISTER),
             List.of(BARRISTER.toBuilder()
                 .email(ANOTHER_EMAIL).build())
         );
 
         assertThat(actual).isEqualTo(BarristerChange.builder()
+            .barristerParty(BarristerParty.APPLICANT)
             .added(Set.of(BARRISTER.toBuilder().email(ANOTHER_EMAIL).build()))
             .removed(Set.of(BARRISTER.toBuilder().build()))
             .build());
@@ -111,6 +124,7 @@ public class BarristerUpdateDifferenceCalculatorTest {
     @Test
     public void givenNonRelevantFieldsUpdatedForBarrister_whenCalculateDifference_thenTreatAsNoChange() {
         BarristerChange actual = underTest.calculate(
+            BarristerParty.APPLICANT,
             List.of(BARRISTER),
             List.of(BARRISTER.toBuilder()
                 .phone("23243")
@@ -120,6 +134,7 @@ public class BarristerUpdateDifferenceCalculatorTest {
         );
 
         assertThat(actual).isEqualTo(BarristerChange.builder()
+            .barristerParty(BarristerParty.APPLICANT)
             .added(emptySet())
             .removed(emptySet())
             .build());
