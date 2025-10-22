@@ -60,7 +60,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
@@ -84,9 +83,9 @@ class AdditionalHearingDocumentServiceTest {
     @Captor
     private ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
     @Mock
-    GenericDocumentService genericDocumentService;   
+    GenericDocumentService genericDocumentService;
     @Mock
-    BulkPrintService bulkPrintService;    
+    BulkPrintService bulkPrintService;
     @Mock
     NotificationService notificationService;
     @Mock
@@ -123,7 +122,7 @@ class AdditionalHearingDocumentServiceTest {
     void convertToPdf() {
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), any())).thenReturn(caseDocument());
         CaseDocument caseDocument = caseDocument(DOC_URL, "app_docs.docx", BINARY_URL);
-        CaseDocument toPdf = additionalHearingDocumentService.convertToPdf(caseDocument, AUTH_TOKEN, CASE_ID);
+        CaseDocument toPdf = additionalHearingDocumentService.convertToPdf(caseDocument, AUTH_TOKEN, CONTESTED);
         assertEquals("app_docs.pdf", toPdf.getDocumentFilename());
     }
 
