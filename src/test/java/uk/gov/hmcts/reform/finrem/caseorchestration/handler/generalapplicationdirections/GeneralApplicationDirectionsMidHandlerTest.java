@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
-class GeneralApplicationDirectionsNewMidHandlerTest {
+class GeneralApplicationDirectionsMidHandlerTest {
 
     @Mock
     private ValidateHearingService validateHearingService;
@@ -41,11 +41,11 @@ class GeneralApplicationDirectionsNewMidHandlerTest {
     private GeneralApplicationDirectionsService generalApplicationDirectionsService;
 
     @InjectMocks
-    private GeneralApplicationDirectionsNewMidHandler generalApplicationDirectionsNewMidHandler;
+    private GeneralApplicationDirectionsMidHandler generalApplicationDirectionsMidHandler;
 
     @Test
     void testCanHandle() {
-        Assertions.assertCanHandle(generalApplicationDirectionsNewMidHandler, CallbackType.MID_EVENT, CaseType.CONTESTED,
+        Assertions.assertCanHandle(generalApplicationDirectionsMidHandler, CallbackType.MID_EVENT, CaseType.CONTESTED,
             EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
     }
 
@@ -78,7 +78,7 @@ class GeneralApplicationDirectionsNewMidHandlerTest {
             .thenReturn(List.of("Intervener warning"));
 
         //Act
-        var response = generalApplicationDirectionsNewMidHandler.handle(callbackRequest, AUTH_TOKEN);
+        var response = generalApplicationDirectionsMidHandler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
         assertThat(response.getErrors()).containsExactlyInAnyOrder(
@@ -105,7 +105,7 @@ class GeneralApplicationDirectionsNewMidHandlerTest {
         when(generalApplicationDirectionsService.isHearingRequired(caseDetails)).thenReturn(false);
 
         //Act
-        var response = generalApplicationDirectionsNewMidHandler.handle(callbackRequest, "authToken");
+        var response = generalApplicationDirectionsMidHandler.handle(callbackRequest, "authToken");
 
         // Assert
         verifyNoMoreInteractions(validateHearingService);
