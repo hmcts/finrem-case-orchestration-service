@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +29,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPLOA
 public class UploadApprovedOrderContestedMidHandler extends FinremCallbackHandler {
 
     private final BulkPrintDocumentService bulkPrintDocumentService;
+    private final ValidateHearingService validateHearingService;
 
     public UploadApprovedOrderContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                          BulkPrintDocumentService bulkPrintDocumentService) {
+                                                  BulkPrintDocumentService bulkPrintDocumentService,
+                                                  ValidateHearingService validateHearingService) {
         super(finremCaseDetailsMapper);
         this.bulkPrintDocumentService = bulkPrintDocumentService;
+        this.validateHearingService = validateHearingService;
     }
 
     @Override
@@ -49,6 +53,13 @@ public class UploadApprovedOrderContestedMidHandler extends FinremCallbackHandle
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
+
+        if (validateHearingService.hasInvalidAdditionalHearingDocsForAddHearingChosen(caseData)) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData)
+                .errors(List.of("All additional hearing documents must be Word or PDF files."))
+                .build();
+        }
 
         List<DirectionOrderCollection> uploadHearingOrders = caseData.getDraftDirectionWrapper().getCwApprovedOrderCollection();
         if (CollectionUtils.isEmpty(uploadHearingOrders)) {

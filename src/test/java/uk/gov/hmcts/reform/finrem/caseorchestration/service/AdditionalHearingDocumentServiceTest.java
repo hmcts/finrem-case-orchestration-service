@@ -583,7 +583,6 @@ class AdditionalHearingDocumentServiceTest {
         FinremCaseData data = caseDetails.getData();
         data.setUploadHearingOrder(uploadHearingOrder);
 
-
         DirectionOrder directionOrder1 = DirectionOrder.builder()
             .uploadDraftDocument(caseDocument()).orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
         DirectionOrderCollection orderCollection1 = DirectionOrderCollection.builder().value(directionOrder1).build();
