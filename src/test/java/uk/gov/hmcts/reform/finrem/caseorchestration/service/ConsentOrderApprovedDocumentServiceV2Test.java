@@ -61,7 +61,7 @@ class ConsentOrderApprovedDocumentServiceV2Test {
 
     @Test
     void shouldReturnEmptyListWhenNotPaperApplication() {
-        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(false);
+        isPaperApplication(false);
         List<BulkPrintDocument> result = consentOrderApprovedDocumentService
             .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, APPLICANT);
 
@@ -70,55 +70,65 @@ class ConsentOrderApprovedDocumentServiceV2Test {
 
     @Test
     void shouldAddApprovedConsentOrderCoverLetterForApplicant() {
-        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(true);
-        when(documentHelper.prepareLetterTemplateData(any(FinremCaseDetails.class), eq(APPLICANT))).thenReturn(caseDetails);
-        when(consentedApplicationHelper.isVariationOrder(any(FinremCaseData.class))).thenReturn(false);
-        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(CONSENT_ORDER_APPROVED_COVER_LETTER_FILENAME);
-        when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn(APPROVED_CONSENT_ORDER_TEMPLATE);
-        when(genericDocumentService.generateDocument(any(String.class), any(CaseDetails.class), any(String.class), any(String.class)))
-            .thenReturn(caseDocument);
-        when(documentHelper.mapToBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
+        isPaperApplication(true);
+        mockPrepareLetterTemplateData(APPLICANT);
+        isVariationOrder(false);
+        mockApprovedConsentOrder();
 
         List<BulkPrintDocument> result = consentOrderApprovedDocumentService
             .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, APPLICANT);
 
-        assertThat(result).hasSize(1);
+        assertThat(result.getFirst()).isEqualTo(bulkPrintDocument);
     }
 
     @Test
     void shouldAddApprovedConsentOrderCoverLetterForRespondent() {
-        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(true);
-        when(documentHelper.prepareLetterTemplateData(any(FinremCaseDetails.class), eq(RESPONDENT))).thenReturn(caseDetails);
-        when(consentedApplicationHelper.isVariationOrder(any(FinremCaseData.class))).thenReturn(false);
-        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(CONSENT_ORDER_APPROVED_COVER_LETTER_FILENAME);
-        when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn(APPROVED_CONSENT_ORDER_TEMPLATE);
-        when(genericDocumentService.generateDocument(any(String.class), any(CaseDetails.class), any(String.class), any(String.class)))
-            .thenReturn(caseDocument);
-        when(documentHelper.mapToBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
+        isPaperApplication(true);
+        mockPrepareLetterTemplateData(RESPONDENT);
+        isVariationOrder(false);
+        mockApprovedConsentOrder();
 
         List<BulkPrintDocument> result = consentOrderApprovedDocumentService
             .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN,DocumentHelper.PaperNotificationRecipient.RESPONDENT);
 
-        assertThat(result).hasSize(1);
+        assertThat(result.getFirst()).isEqualTo(bulkPrintDocument);
     }
 
     @Test
     void shouldAddApprovedConsentOrderCoverLetterForVariationOrder() {
-        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(true);
-        when(documentHelper.prepareLetterTemplateData(any(FinremCaseDetails.class),
-            any(DocumentHelper.PaperNotificationRecipient.class)))
-            .thenReturn(caseDetails);
-        when(consentedApplicationHelper.isVariationOrder(any(FinremCaseData.class))).thenReturn(true);
+        isPaperApplication(true);
+        mockPrepareLetterTemplateData(APPLICANT);
+        isVariationOrder(true);
         when(documentConfiguration.getApprovedVariationOrderNotificationFileName()).thenReturn("VariationOrderApprovedCoverLetter.pdf");
         when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn(APPROVED_CONSENT_ORDER_TEMPLATE);
         when(genericDocumentService.generateDocument(any(String.class), any(CaseDetails.class), any(String.class), any(String.class)))
             .thenReturn(caseDocument);
         when(documentHelper.mapToBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
 
-
         List<BulkPrintDocument> result = consentOrderApprovedDocumentService
             .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, APPLICANT);
 
-        assertThat(result).hasSize(1);
+        assertThat(result.getFirst()).isEqualTo(bulkPrintDocument);
+    }
+
+    private void mockApprovedConsentOrder(){
+        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(CONSENT_ORDER_APPROVED_COVER_LETTER_FILENAME);
+        when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn(APPROVED_CONSENT_ORDER_TEMPLATE);
+        when(genericDocumentService.generateDocument(any(String.class), any(CaseDetails.class), any(String.class), any(String.class)))
+            .thenReturn(caseDocument);
+        when(documentHelper.mapToBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
+    }
+
+    private void isPaperApplication(Boolean value) {
+        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(value);
+    }
+
+    private void isVariationOrder(Boolean value) {
+        when(consentedApplicationHelper.isVariationOrder(any(FinremCaseData.class))).thenReturn(value);
+    }
+
+    private void mockPrepareLetterTemplateData(DocumentHelper.PaperNotificationRecipient recipient) {
+        when(documentHelper.prepareLetterTemplateData(any(FinremCaseDetails.class), eq(recipient)))
+            .thenReturn(caseDetails);
     }
 }
