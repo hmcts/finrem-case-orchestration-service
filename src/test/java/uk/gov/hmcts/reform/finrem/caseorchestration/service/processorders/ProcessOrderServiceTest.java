@@ -171,19 +171,19 @@ class ProcessOrderServiceTest {
         DirectionOrderCollection excelFile = createDirectionOrder("http://example.com/document4.xlxs");
 
         return Stream.of(
-            // Valid Cases:
-            // 1. All new documents are valid PDFs
+            // All new documents are valid (.pdf, .doc, .docx)
             Arguments.of(createCaseData(List.of(existingWordOrder, newPdfOrder1, newPdfOrder2), false), true),
             Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder1, newPdfOrder2), true), true),
             Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder, newPdfOrder1, newPdfOrder2)), true),
             Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder2), List.of(existingWordOrder, newPdfOrder1)), true),
-            // 2. No new documents
+            // No new documents
             Arguments.of(createCaseData(List.of(existingWordOrder), false), true),
             Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true), true),
 
-            // Invalid cases:
-            // New document(s) is/are not a PDF document
+            // Invalid case: new document is not .pdf, .doc, or .docx
             Arguments.of(createCaseData(List.of(existingWordOrder, excelFile), false), false),
+
+            // Valid cases: new documents are .doc or .docx
             Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder2), false), true),
             Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2), true), true),
             Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder3), false), true),
@@ -204,12 +204,17 @@ class ProcessOrderServiceTest {
             Arguments.of(
                 List.of(
                     createDirectionOrder("http://example.xyz/document.docx")
-                ), false
+                ), true // .docx is valid
             ),
             Arguments.of(
                 List.of(
                     createDirectionOrder("http://example.xyz/documentX.pdf", "http://example.xyz/document.doc")
-                ), false
+                ), true // .doc is valid
+            ),
+            Arguments.of(
+                List.of(
+                    createDirectionOrder("http://example.xyz/documentX.pdf", "http://example.xyz/document.xlsx")
+                ), false // .xlsx is NOT valid
             )
         );
     }
@@ -217,20 +222,16 @@ class ProcessOrderServiceTest {
     @ParameterizedTest
     @MethodSource("provideAreAllLegacyApprovedOrdersWordOrPdfData")
     void testAreAllLegacyApprovedOrdersWordOrPdf(List<DirectionOrderCollection> uploadHearingOrder, boolean expectedTrue) {
-        // Mocking the unprocessed approved documents
-        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .unprocessedUploadHearingDocuments(uploadHearingOrder)
+            .build();
 
-        // Set up the mock data based on expectedResult
-        when(caseData.getUploadHearingOrder()).thenReturn(uploadHearingOrder);
-
-        // Call the method to test
         boolean result = underTest.areAllLegacyApprovedOrdersWordOrPdf(caseData);
 
-        // Assert the expected result
         if (expectedTrue) {
-            assertTrue(result, "Expected all documents to have .pdf extensions");
+            assertTrue(result, "Expected all documents to have .doc, .docx, or .pdf extensions");
         } else {
-            assertFalse(result, "Expected not all documents to have .pdf extensions, but the method returned true.");
+            assertFalse(result, "Expected not all documents to have valid extensions, but the method returned true.");
         }
     }
 
@@ -313,52 +314,33 @@ class ProcessOrderServiceTest {
     }
 
     private static Stream<Arguments> approvedOrderCollectionsToProcess() {
+        DirectionOrderCollection sampleOrder = DirectionOrderCollection.builder().build();
+
+        List<DirectionOrderCollection> noOrders = null;
+        List<DirectionOrderCollection> emptyOrders = List.of();
+        List<DirectionOrderCollection> oneOrder = List.of(sampleOrder);
+
         return Stream.of(
-            //both unprocessedApprovedDocuments and uploadHearingOrder(legacy) are null
-            Arguments.of(
-                FinremCaseData.builder()
-                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                        .unprocessedApprovedDocuments(null)
-                        .build())
-                    .uploadHearingOrder(null)
-                    .build(),
-                true
-            ),
-            //has unprocessedApprovedDocuments only
-            Arguments.of(
-                FinremCaseData.builder()
-                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                        .unprocessedApprovedDocuments(
-                            List.of(DirectionOrderCollection.builder().build()))
-                        .build())
-                    .uploadHearingOrder(List.of())
-                    .build(),
-                false
-            ),
-            //has uploadHearingOrder(legacy) only
-            Arguments.of(
-                FinremCaseData.builder()
-                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                        .unprocessedApprovedDocuments(List.of())
-                        .build())
-                    .uploadHearingOrder(
-                        List.of(DirectionOrderCollection.builder().build()))
-                    .build(),
-                false
-            ),
-            //has both unprocessedApprovedDocuments and uploadHearingOrder(legacy)
-            Arguments.of(
-                FinremCaseData.builder()
-                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                        .unprocessedApprovedDocuments(
-                            List.of(DirectionOrderCollection.builder().build()))
-                        .build())
-                    .uploadHearingOrder(
-                        List.of(DirectionOrderCollection.builder().build()))
-                    .build(),
-                false
-            )
+            // Both collections are null: expect true (no orders to process)
+            Arguments.of(buildCaseData(noOrders, noOrders), true),
+            // Only unprocessedApprovedDocuments has one order: expect false
+            Arguments.of(buildCaseData(oneOrder, emptyOrders), false),
+            // Only uploadHearingOrder has one order: expect false
+            Arguments.of(buildCaseData(emptyOrders, oneOrder), false),
+            // Both collections have one order: expect false
+            Arguments.of(buildCaseData(oneOrder, oneOrder), false)
         );
+    }
+
+    private static FinremCaseData buildCaseData(List<DirectionOrderCollection> unprocessedApprovedDocuments,
+                                                List<DirectionOrderCollection> uploadHearingOrder) {
+        return FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .unprocessedApprovedDocuments(unprocessedApprovedDocuments)
+                .build())
+            .uploadHearingOrder(uploadHearingOrder)
+            .unprocessedUploadHearingDocuments(uploadHearingOrder)
+            .build();
     }
 
     private static String extractFileName(String url) {
