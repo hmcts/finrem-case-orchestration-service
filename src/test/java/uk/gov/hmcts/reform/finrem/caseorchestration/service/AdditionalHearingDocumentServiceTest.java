@@ -17,19 +17,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.KentSurreyCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
@@ -42,11 +37,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.heari
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,17 +55,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
@@ -246,6 +231,45 @@ class AdditionalHearingDocumentServiceTest {
         verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), any(), eq(CASE_ID));
     }
 
+    @Test
+    void givenAnotherHearingIsYes_whenStoreHearingNotice_shouldStoreHearingNotice() throws Exception {
+        // Arrange
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        DirectionDetail directionDetail = DirectionDetail.builder()
+            .isAnotherHearingYN(YesOrNo.YES)
+            .typeOfHearing(HearingTypeDirection.FH)
+            .dateOfHearing(LocalDate.of(2020, 1, 1))
+            .hearingTime("10:00")
+            .timeEstimate("12")
+            .localCourt(getTestCourt())
+            .build();
+
+        DirectionDetailCollection detailCollection = DirectionDetailCollection.builder()
+            .value(directionDetail)
+            .build();
+
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setDirectionDetailsCollection(new ArrayList<>(List.of(detailCollection)));
+        caseDetails.setData(caseData);
+
+        // Mock dependencies
+        CaseDocument additionalDocument = caseDocument("url", "doc.pdf");
+        when(genericDocumentService.generateDocument(any(), any(), any(), any()))
+            .thenReturn(additionalDocument);
+
+        // Act
+        additionalHearingDocumentService.storeHearingNotice(caseDetails, AUTH_TOKEN);
+
+        // Assert
+        // Verify that an additional document was generated and added
+        verify(genericDocumentService).generateDocument(any(), any(), any(), any());
+        assertThat(caseData.getListForHearingWrapper().getAdditionalHearingDocuments())
+            .hasSize(1)
+            .extracting(docCollection -> docCollection.getValue().getDocument())
+            .containsExactly(additionalDocument);
+    }
+
     private void caseWithUnprocessed(FinremCaseData caseData, CaseDocument originalDoc, LocalDateTime uploadOrderDateTime) {
 
         DirectionOrder directionOrder = DirectionOrder.builder()
@@ -290,43 +314,6 @@ class AdditionalHearingDocumentServiceTest {
                 .kentSurreyCourtList(KentSurreyCourt.FR_kent_surreyList_9)
                 .build())
             .build();
-    }
-
-    private Map<String, Object> baseCaseData() {
-        Map<String, Object> caseData = new HashMap<>();
-
-        caseData.put(DIVORCE_CASE_NUMBER, "AB01D23456");
-        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Test");
-        caseData.put(APPLICANT_LAST_NAME, "Applicant");
-        caseData.put(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "Name");
-        caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Respondent");
-
-        return caseData;
-    }
-
-    private List<HearingOrderCollectionData> buildHearingOrderCollectionData() {
-        CaseDocument caseDocument = CaseDocument
-            .builder()
-            .documentBinaryUrl("docBin")
-            .documentFilename("docFilename")
-            .documentUrl("docUrl")
-            .build();
-
-        HearingOrderDocument hearingOrderDocument = HearingOrderDocument
-            .builder()
-            .uploadDraftDocument(caseDocument)
-            .build();
-
-        HearingOrderCollectionData hearingOrderCollectionData = HearingOrderCollectionData
-            .builder()
-            .id(UUID.randomUUID().toString())
-            .hearingOrderDocuments(hearingOrderDocument)
-            .build();
-
-        List<HearingOrderCollectionData> hearingOrderCollectionList = new ArrayList<>();
-        hearingOrderCollectionList.add(hearingOrderCollectionData);
-
-        return hearingOrderCollectionList;
     }
 
     @Test
