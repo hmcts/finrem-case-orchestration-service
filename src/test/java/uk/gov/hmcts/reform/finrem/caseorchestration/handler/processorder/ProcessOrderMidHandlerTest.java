@@ -66,9 +66,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
     private static final String FILE_NAME = "abc.pdf";
     private static final String ERROR_NO_ORDERS = "There are no draft orders to be processed.";
     private static final String ERROR_NEW_DOCS = "You must upload a Microsoft Word file or PDF for new documents.";
-    private static final String ERROR_LEGACY_PDF = "You must upload a PDF file for modifying legacy approved documents.";
-    private static final String ERROR_MODIFY_UNPROCESSED =
-        "You must upload a Microsoft Word file or PDF for modifying an unprocessed approved documents.";
+    private static final String ERROR_FILE_FORMAT = "You must upload a Microsoft Word file or PDF for modifying an unprocessed document.";
 
     @Test
     void testCanHandle() {
@@ -89,9 +87,9 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         DirectionOrder order = DirectionOrder.builder().uploadDraftDocument(caseDocument).build();
         DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(order).build();
-        List<DirectionOrderCollection> uploadHearingOrders = new ArrayList<>();
-        uploadHearingOrders.add(orderCollection);
-        caseData.setUploadHearingOrder(uploadHearingOrders);
+        List<DirectionOrderCollection> unprocessedUploadHearingDocuments = new ArrayList<>();
+        unprocessedUploadHearingDocuments.add(orderCollection);
+        caseData.setUnprocessedUploadHearingDocuments(unprocessedUploadHearingDocuments);
 
         DocumentCollectionItem documentCollectionItem = DocumentCollectionItem.builder().value(caseDocument).build();
         List<DocumentCollectionItem> hearingOrderOtherDocuments = new ArrayList<>();
@@ -115,10 +113,10 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         DirectionOrder order = DirectionOrder.builder().uploadDraftDocument(caseDocument).build();
         DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(order).build();
-        List<DirectionOrderCollection> uploadHearingOrders = new ArrayList<>();
-        uploadHearingOrders.add(orderCollection);
-        caseData.setUploadHearingOrder(uploadHearingOrders);
-        finremCallbackRequest.getCaseDetailsBefore().getData().setUploadHearingOrder(uploadHearingOrders);
+        List<DirectionOrderCollection> unprocessedUploadHearingDocuments = new ArrayList<>();
+        unprocessedUploadHearingDocuments.add(orderCollection);
+        caseData.setUnprocessedUploadHearingDocuments(unprocessedUploadHearingDocuments);
+        finremCallbackRequest.getCaseDetailsBefore().getData().setUnprocessedUploadHearingDocuments(unprocessedUploadHearingDocuments);
 
         DocumentCollectionItem documentCollectionItem = DocumentCollectionItem.builder().value(caseDocument).build();
         List<DocumentCollectionItem> hearingOrderOtherDocuments = new ArrayList<>();
@@ -229,38 +227,38 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
     void shouldShowErrorMessageWhenNotAllLegacyApprovedOrdersPdf() {
         when(processOrderService.hasNoApprovedOrdersToProcess(any(FinremCaseData.class))).thenReturn(false);
         when(processOrderService.areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class))).thenReturn(true);
-        when(processOrderService.areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class))).thenReturn(false);
+        when(processOrderService.areAllLegacyApprovedOrdersWordOrPdf(any(FinremCaseData.class))).thenReturn(false);
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(res.getErrors()).containsExactly(ERROR_LEGACY_PDF);
+        assertThat(res.getErrors()).containsExactly(ERROR_FILE_FORMAT);
         verify(processOrderService).hasNoApprovedOrdersToProcess(any(FinremCaseData.class));
         verify(processOrderService).areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class));
-        verify(processOrderService).areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class));
+        verify(processOrderService).areAllLegacyApprovedOrdersWordOrPdf(any(FinremCaseData.class));
     }
 
     @Test
     void shouldShowErrorMessageWhenNotAllModifyingUnprocessedOrdersWordDocumentsOrPdf() {
         when(processOrderService.hasNoApprovedOrdersToProcess(any(FinremCaseData.class))).thenReturn(false);
         when(processOrderService.areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class))).thenReturn(true);
-        when(processOrderService.areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class))).thenReturn(true);
+        when(processOrderService.areAllLegacyApprovedOrdersWordOrPdf(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(any(FinremCaseData.class))).thenReturn(false);
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(res.getErrors()).containsExactly(ERROR_MODIFY_UNPROCESSED);
+        assertThat(res.getErrors()).containsExactly(ERROR_FILE_FORMAT);
         verify(processOrderService).hasNoApprovedOrdersToProcess(any(FinremCaseData.class));
         verify(processOrderService).areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class));
-        verify(processOrderService).areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class));
+        verify(processOrderService).areAllLegacyApprovedOrdersWordOrPdf(any(FinremCaseData.class));
         verify(processOrderService).areAllModifyingUnprocessedOrdersWordOrPdfDocuments(any(FinremCaseData.class));
     }
 
     private void mockPassAllValidations() {
         when(processOrderService.hasNoApprovedOrdersToProcess(any(FinremCaseData.class))).thenReturn(false);
         when(processOrderService.areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class))).thenReturn(true);
-        when(processOrderService.areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class))).thenReturn(true);
+        when(processOrderService.areAllLegacyApprovedOrdersWordOrPdf(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(any(FinremCaseData.class))).thenReturn(true);
     }
 
@@ -279,12 +277,12 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         //Old document in 'before' case data
         DirectionOrder oldOrder = DirectionOrder.builder().uploadDraftDocument(oldDocument).build();
         DirectionOrderCollection oldOrderCollection = DirectionOrderCollection.builder().value(oldOrder).build();
-        caseDataBefore.setUploadHearingOrder(List.of(oldOrderCollection));
+        caseDataBefore.setUnprocessedUploadHearingDocuments(List.of(oldOrderCollection));
 
         //New document in current case data
         DirectionOrder newOrder = DirectionOrder.builder().uploadDraftDocument(newDocument).build();
         DirectionOrderCollection newOrderCollection = DirectionOrderCollection.builder().value(newOrder).build();
-        caseData.setUploadHearingOrder(List.of(oldOrderCollection, newOrderCollection));
+        caseData.setUnprocessedUploadHearingDocuments(List.of(oldOrderCollection, newOrderCollection));
 
         //Create similar setup for hearingOrderOtherDocuments
         DocumentCollectionItem oldDocCollection = DocumentCollectionItem.builder().value(oldDocument).build();
@@ -294,7 +292,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getData().getUploadHearingOrder())
+        assertThat(response.getData().getUnprocessedUploadHearingDocuments())
             .extracting(DirectionOrderCollection::getValue)
             .extracting(DirectionOrder::getUploadDraftDocument)
             .containsExactlyInAnyOrder(oldDocument, newDocument);
