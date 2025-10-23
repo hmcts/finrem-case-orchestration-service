@@ -115,7 +115,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(1, res.getErrors().size());
         assertEquals("There was an unexpected error", res.getErrors().getFirst());
-        verify(additionalHearingDocumentService).stampAndCollectOrderCollection(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(additionalHearingDocumentService).stampAndUpdateOrderCollections(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(additionalHearingDocumentService).storeHearingNotice(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
@@ -125,7 +125,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         finremCallbackRequest.setEventType(EventType.DIRECTION_UPLOAD_ORDER);
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        verify(additionalHearingDocumentService).stampAndCollectOrderCollection(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(additionalHearingDocumentService).stampAndUpdateOrderCollections(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(additionalHearingDocumentService).storeHearingNotice(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
@@ -458,12 +458,12 @@ class ProcessOrderAboutToSubmitHandlerTest {
 
         lenient().doThrow(new AssertionError("Expected two documents to be processed, but only one was found"))
             .when(additionalHearingDocumentService)
-            .stampAndCollectOrderCollection(
+            .stampAndUpdateOrderCollections(
                 any(FinremCaseDetails.class),
                 eq(AUTH_TOKEN));
         // mocking the valid invocation on createAndStoreAdditionalHearingDocuments
         lenient().doNothing().when(additionalHearingDocumentService)
-            .stampAndCollectOrderCollection(
+            .stampAndUpdateOrderCollections(
                 argThat(a -> a.getData().getUploadHearingOrder().size() == 2 && a.getData().getUploadHearingOrder().contains(expectedNewDocument)),
                 eq(AUTH_TOKEN));
 
@@ -491,7 +491,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
 
         final var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(additionalHearingDocumentService).stampAndCollectOrderCollection(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(additionalHearingDocumentService).stampAndUpdateOrderCollections(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(additionalHearingDocumentService, never()).storeHearingNotice(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).performAddHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(caseData);
@@ -517,7 +517,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
 
         final var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(additionalHearingDocumentService).stampAndCollectOrderCollection(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(additionalHearingDocumentService).stampAndUpdateOrderCollections(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(additionalHearingDocumentService, never()).storeHearingNotice(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService, never()).performAddHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService, never()).updateTabData(caseData);
