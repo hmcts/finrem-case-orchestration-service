@@ -147,9 +147,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
                 .generalApplicationSpecialMeasures("Special measure").build();
 
-        when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
-            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
-            generalApplicationItems);
+        when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(generalApplicationItems);
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -222,11 +220,9 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
                 .build();
 
         when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(details);
-        when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
-            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
-            generalApplicationItems);
+        when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(generalApplicationItems);
         when(gaDirectionService.isHearingRequired(callbackRequest.getCaseDetails())).thenReturn(true); //Hearing is required
-        when(helper.getPdfDocument(any(CaseDocument.class), any(String.class), any(String.class)))
+        when(helper.getPdfDocument(any(CaseDocument.class), any(String.class), any(CaseType.class)))
             .thenReturn(generalApplicationDocument, generalApplicationDraftOrder);
 
         //Hearing required document
@@ -246,8 +242,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
 
         String collectionId = UUID.randomUUID().toString();
 
-        when(helper.mapExistingGeneralApplicationToData(callbackRequest.getCaseDetails().getData(),
-            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
+        when(helper.mapExistingGeneralApplicationToData(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
             GeneralApplicationCollectionData.builder()
                 .id(collectionId)
                 .generalApplicationItems(generalApplicationItems)
@@ -260,7 +255,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         assertThat(applications).hasSize(1);
 
         verify(gaDirectionService, times(2)).isHearingRequired(callbackRequest.getCaseDetails());
-        verify(helper, times(2)).getPdfDocument(any(CaseDocument.class), any(String.class), any(String.class));
+        verify(helper, times(2)).getPdfDocument(any(CaseDocument.class), any(String.class), any(CaseType.class));
         verify(manageHearingActionService).performAddHearing(any(FinremCaseDetails.class), any(String.class));
         verify(manageHearingActionService).updateTabData(any(FinremCaseData.class));
     }
@@ -288,8 +283,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
-            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
+        when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
@@ -338,8 +332,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(helper.getApplicationItems(finremCallbackRequest.getCaseDetails().getData(),
-            AUTH_TOKEN, finremCallbackRequest.getCaseDetails().getId().toString())).thenReturn(
+        when(helper.getApplicationItems(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
             finremCallbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
@@ -386,8 +379,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
-            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
+        when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
@@ -434,8 +426,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection.builder()
             .value(generalApplicationItems).build();
         details.getData().put(GENERAL_APPLICATION_COLLECTION, generalApplications);
-        when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(),
-            AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString())).thenReturn(
+        when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
                 .getGeneralApplications().getFirst().getValue());
 
@@ -482,8 +473,8 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         // Assert
         assertThat(caseDetails.getData().getManageHearingsWrapper().getManageHearingsActionSelection())
             .isEqualTo(ManageHearingsAction.ADD_HEARING);
-        verify(manageHearingActionService).performAddHearing(eq(caseDetails), eq(userAuthorisation));
-        verify(manageHearingActionService).updateTabData(eq(caseDetails.getData()));
+        verify(manageHearingActionService).performAddHearing(caseDetails, userAuthorisation);
+        verify(manageHearingActionService).updateTabData(caseDetails.getData());
     }
 
     private DynamicRadioList buildDynamicIntervenerList() {

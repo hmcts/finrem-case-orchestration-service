@@ -108,8 +108,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         String caseId = caseDetails.getId().toString();
         log.info("Map existing general application to collection for Case ID: {}", caseId);
-        GeneralApplicationCollectionData data = helper.mapExistingGeneralApplicationToData(
-            caseData, userAuthorisation, caseId);
+        GeneralApplicationCollectionData data = helper.mapExistingGeneralApplicationToData(caseDetails, userAuthorisation);
         if (data != null) {
             String status = Objects.toString(caseData.getGeneralApplicationWrapper()
                 .getGeneralApplicationOutcome(), null);
@@ -191,9 +190,10 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         log.info("items getGeneralApplicationDocument {}, for case ID: {}",
             items.getGeneralApplicationDocument(), caseId);
 
+        CaseType caseType = CaseType.forValue(caseDetails.getCaseTypeId());
         if (items.getGeneralApplicationDocument() != null) {
             items.setGeneralApplicationDocument(
-                helper.getPdfDocument(items.getGeneralApplicationDocument(), userAuthorisation, caseId));
+                helper.getPdfDocument(items.getGeneralApplicationDocument(), userAuthorisation, caseType));
             final BulkPrintDocument genDoc = BulkPrintDocument.builder()
                 .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
                 .fileName(items.getGeneralApplicationDocument().getDocumentFilename())
@@ -205,7 +205,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
 
         if (items.getGeneralApplicationDraftOrder() != null) {
             items.setGeneralApplicationDraftOrder(
-                helper.getPdfDocument(items.getGeneralApplicationDraftOrder(), userAuthorisation, caseId));
+                helper.getPdfDocument(items.getGeneralApplicationDraftOrder(), userAuthorisation, caseType));
             final BulkPrintDocument draftDoc = BulkPrintDocument.builder()
                 .binaryFileUrl(items.getGeneralApplicationDraftOrder().getDocumentBinaryUrl())
                 .fileName(items.getGeneralApplicationDraftOrder().getDocumentFilename())

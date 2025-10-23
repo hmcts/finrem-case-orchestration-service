@@ -480,6 +480,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
                 CASE_ALLOCATED_TO, YES_VALUE, HEARING_DATE, DATE_OF_HEARING);
         return CaseDetails.builder()
             .id(12345L)
+            .caseTypeId(CaseType.CONTESTED.getCcdType())
             .data(caseData)
             .build();
     }
@@ -491,12 +492,14 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
                 "FR_swansea_hc_list_1");
         return CaseDetails.builder()
             .id(12345L)
+            .caseTypeId(CaseType.CONTESTED.getCcdType())
             .data(caseData)
             .build();
     }
 
     private FinremCaseDetails finremCaseDetails(YesOrNo fastTrackDecision) {
         return FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder()
                 .fastTrackDecision(fastTrackDecision)
                 .listForHearingWrapper(ListForHearingWrapper.builder()

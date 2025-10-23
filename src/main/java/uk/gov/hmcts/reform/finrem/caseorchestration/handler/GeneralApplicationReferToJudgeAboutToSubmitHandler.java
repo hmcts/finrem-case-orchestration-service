@@ -56,7 +56,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
         DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationReferList());
 
         if (existingList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
-            migrateExistingApplication(caseDetails, userAuthorisation, caseId);
+            migrateExistingApplication(caseDetails, userAuthorisation);
 
         } else {
             if (dynamicList == null) {
@@ -85,12 +85,12 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
             ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
     }
 
-    private void migrateExistingApplication(FinremCaseDetails caseDetails, String userAuthorisation, String caseId) {
+    private void migrateExistingApplication(FinremCaseDetails caseDetails, String userAuthorisation) {
         FinremCaseData caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         GeneralApplicationCollectionData data =
-            helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
+            helper.mapExistingGeneralApplicationToData(caseDetails, userAuthorisation);
         if (data != null) {
             data.getGeneralApplicationItems().setGeneralApplicationStatus(REFERRED.getId());
             existingGeneralApplication.add(data);

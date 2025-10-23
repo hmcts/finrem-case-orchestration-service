@@ -90,7 +90,8 @@ class PensionAnnexDateStampServiceTest {
 
     @Test
     void shouldNotAddApprovalDateToPensionOrderDocumentIfApprovalDateIsMissing() {
-        Exception exception = assertThrows(Exception.class, () -> service.appendApprovedDateToDocument(document, AUTH_TOKEN, null, CONTESTED));
+        Exception exception = assertThrows(Exception.class, () -> service.appendApprovedDateToDocument(document,
+            AUTH_TOKEN, null, CONTESTED));
         assertEquals("Missing or Invalid Approved Date of Order for Case type: " + CONTESTED, exception.getMessage());
     }
 
@@ -100,7 +101,8 @@ class PensionAnnexDateStampServiceTest {
         when(emDownloadService.download(document.getDocumentBinaryUrl(), AUTH_TOKEN))
             .thenReturn(docInBytes);
 
-        Exception exception = assertThrows(Exception.class, () -> service.appendApprovedDateToDocument(document, AUTH_TOKEN, approvalDate, CONTESTED));
+        Exception exception = assertThrows(Exception.class, () -> service.appendApprovedDateToDocument(document,
+            AUTH_TOKEN, approvalDate, CONTESTED));
         assertEquals("Pension Order document PDF is flattened / not editable.", exception.getMessage());
     }
 

@@ -84,7 +84,7 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandler extends Fin
         AtomicInteger index = new AtomicInteger(0);
         if (outcomeList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             log.info("Setting direction list if existing general application not moved to collection for Case ID: {}", caseId);
-            setDirectionListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
+            setDirectionListForNonCollectionGeneralApplication(finremCaseDetails, index, userAuthorisation);
         } else {
             if (outcomeList.isEmpty()) {
                 log.info("The user cannot carry out the directions as there are no general applications in the outcome state"
@@ -103,10 +103,10 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandler extends Fin
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private void setDirectionListForNonCollectionGeneralApplication(FinremCaseData caseData,
+    private void setDirectionListForNonCollectionGeneralApplication(FinremCaseDetails caseDetails,
                                                                     AtomicInteger index,
-                                                                    String userAuthorisation, String caseId) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);
+                                                                    String userAuthorisation) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseDetails, userAuthorisation);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 
@@ -114,6 +114,6 @@ public class GeneralApplicationDirectionsNewEventAboutToStartHandler extends Fin
         dynamicListElementsList.add(dynamicListElements);
 
         DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicList);
+        caseDetails.getData().getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicList);
     }
 }

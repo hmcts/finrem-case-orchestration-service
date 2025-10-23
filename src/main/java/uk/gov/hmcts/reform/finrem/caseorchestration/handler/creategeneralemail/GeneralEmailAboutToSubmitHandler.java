@@ -58,7 +58,7 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
         CaseDocument generalEmailUploadedDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         if (generalEmailUploadedDocument != null) {
             CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalEmailUploadedDocument,
-                userAuthorisation, caseDetails.getId().toString());
+                userAuthorisation, caseDetails.getCaseType());
             caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailUploadedDocument(pdfDocument);
         }
         generalEmailService.storeGeneralEmail(caseDetails);

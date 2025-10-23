@@ -106,9 +106,9 @@ class GeneralApplicationHelperTest {
             .data(caseData)
             .build();
 
-         when(service.convertDocumentIfNotPdfAlready(
-             generationApplicationWrapper.getGeneralApplicationDocument(), AUTH_TOKEN, CONTESTED))
-             .thenReturn(caseDocument());
+        when(service.convertDocumentIfNotPdfAlready(
+            generationApplicationWrapper.getGeneralApplicationDocument(), AUTH_TOKEN, CONTESTED))
+            .thenReturn(caseDocument());
 
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         GeneralApplicationCollectionData generalApplicationCollectionData =

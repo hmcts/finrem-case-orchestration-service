@@ -48,8 +48,7 @@ public class GeneralApplicationController extends BaseController {
         validateCaseData(callback);
 
         CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
-        generalApplicationService.updateCaseDataSubmit(
-            caseDetails.getData(), caseDetailsBefore, authorisationToken, caseId);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, authorisationToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
