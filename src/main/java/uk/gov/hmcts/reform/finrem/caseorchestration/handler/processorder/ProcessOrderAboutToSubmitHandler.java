@@ -89,7 +89,7 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         // handleNewDocument must be handled before storeAdditionalHearingDocuments in order to stamp the newly uploaded document.
         handleNewDocumentInUnprocessedApprovedDocuments(caseData);
 
-        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, userAuthorisation);
+        additionalHearingDocumentService.stampAndUpdateOrderCollections(caseDetails, userAuthorisation);
 
         List<String> errors = new ArrayList<>();
         log.info("Storing Additional Hearing Document for Case ID: {}", caseId);

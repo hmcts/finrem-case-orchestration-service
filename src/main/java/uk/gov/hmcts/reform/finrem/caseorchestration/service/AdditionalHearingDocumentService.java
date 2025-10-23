@@ -125,7 +125,7 @@ public class AdditionalHearingDocumentService {
      * @param caseDetails the case details containing the orders
      * @param authorisationToken the authorisation token for document stamping
      */
-    public void stampAndCollectOrderCollection(FinremCaseDetails caseDetails, String authorisationToken) {
+    public void stampAndUpdateOrderCollections(FinremCaseDetails caseDetails, String authorisationToken) {
         String caseId = caseDetails.getId().toString();
         log.info("Processing unprocessed upload hearing documents for Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
@@ -172,14 +172,15 @@ public class AdditionalHearingDocumentService {
      * @param stampedDoc the new stamped document
      * @param orderDateTime the order date time
      */
-    private void replaceOrAddOrder(List<DirectionOrderCollection> orders, CaseDocument originalDoc, CaseDocument stampedDoc, LocalDateTime orderDateTime) {
+    private void replaceOrAddOrder(List<DirectionOrderCollection> orders, CaseDocument originalDoc, CaseDocument stampedDoc,
+                                   LocalDateTime orderDateTime) {
         for (int i = 0; i < orders.size(); i++) {
             if (orders.get(i).getValue().getUploadDraftDocument().getDocumentUrl().equals(originalDoc.getDocumentUrl())) {
                 orders.set(i, getDirectionOrderCollection(orders.get(i).getValue(), stampedDoc, orderDateTime));
                 return;
             }
         }
-        // If not found, add as new
+        // If not found, add as a new stamped order
         orders.add(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
                 .uploadDraftDocument(stampedDoc)
