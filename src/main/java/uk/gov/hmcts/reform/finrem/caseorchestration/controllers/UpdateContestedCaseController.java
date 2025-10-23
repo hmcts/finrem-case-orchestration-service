@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.AmendApplicationDetailsAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.ArrayList;
@@ -57,10 +59,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
 
+/**
+ * Unit tests for UpdateContestedCaseControllerTest.
+ *
+ * @deprecated This controller will be removed in favour of using
+ *     {@link AmendApplicationDetailsAboutToSubmitHandler}.
+ */
+@Deprecated
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
@@ -80,6 +90,7 @@ public class UpdateContestedCaseController extends BaseController {
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
     private final FeatureToggleService featureToggleService;
     private final ExpressCaseService expressCaseService;
+    private final UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
 
     @PostMapping(path = "/update-contested-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
@@ -106,7 +117,7 @@ public class UpdateContestedCaseController extends BaseController {
         }
         caseFlagsService.setCaseFlagInformation(caseDetails);
         updateDivorceDetailsForContestedCase(caseData);
-        updateContestedRespondentDetails(caseData);
+        updateContestedRespondentDetails(caseDetails);
         updateContestedPeriodicPaymentOrder(caseData, typeOfApplication);
         if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             updateContestedPropertyAdjustmentOrder(caseData);
@@ -300,12 +311,25 @@ public class UpdateContestedCaseController extends BaseController {
         }
     }
 
-    private void updateContestedRespondentDetails(Map<String, Object> caseData) {
+    private void updateContestedRespondentDetails(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
         if (equalsTo((String) caseData.get(CONTESTED_RESPONDENT_REPRESENTED), NO_VALUE)) {
             removeRespondentSolicitorAddress(caseData);
+            removeRespondentSolicitorOrganisationPolicy(caseDetails);
         } else {
             removeContestedRespondentAddress(caseData);
         }
+    }
+
+    /**
+     * Removes the respondent solicitor organisation policy and replaces it with the default one.
+     * There is no need to remove solicitor case access as this stage as the case has not been submitted yet.
+     *
+     * @param caseDetails the case details
+     */
+    private void removeRespondentSolicitorOrganisationPolicy(CaseDetails caseDetails) {
+        caseDetails.getData().remove(RESPONDENT_ORGANISATION_POLICY);
+        updateRepresentationWorkflowService.persistDefaultOrganisationPolicy(caseDetails);
     }
 
     private void removeContestedRespondentAddress(Map<String, Object> caseData) {

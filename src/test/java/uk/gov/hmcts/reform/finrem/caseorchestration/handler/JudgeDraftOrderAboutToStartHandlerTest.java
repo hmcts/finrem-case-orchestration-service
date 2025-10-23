@@ -1,16 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
@@ -34,17 +31,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class JudgeDraftOrderAboutToStartHandlerTest {
 
+    @InjectMocks
     private JudgeDraftOrderAboutToStartHandler handler;
     @Mock
     private IdamService idamService;
-    @Spy
-    private ObjectMapper objectMapper;
-
-    @BeforeEach
-    void setUp() {
-        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
-        handler = new JudgeDraftOrderAboutToStartHandler(finremCaseDetailsMapper, idamService);
-    }
 
     @Test
     void canHandle() {
@@ -52,14 +42,13 @@ class JudgeDraftOrderAboutToStartHandlerTest {
     }
 
     @Test
-    void givenLegacyDraftOrdersExist_whenHandle_thenShouldPopulateJudgeApprovedOrderCollection() {
-        DraftDirectionOrderCollection previousJudgeApprovedOrder;
+    void givenLegacyDraftOrdersExist_whenHandle_thenShouldPopulateAnEmptyDraftDirectionOrder() {
         FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder();
         builder.draftDirectionWrapper(DraftDirectionWrapper.builder()
             .draftDirectionOrderCollection(List.of(
                 legacyDraftOrder("1"),
                 legacyDraftOrder("2"),
-                previousJudgeApprovedOrder = previousJudgeApprovedOrder("1")
+                previousJudgeApprovedOrder()
             ))
             .build());
 
@@ -69,14 +58,12 @@ class JudgeDraftOrderAboutToStartHandlerTest {
 
         FinremCaseData toBeTested = response.getData();
 
-        assertThat(toBeTested.getDraftDirectionWrapper())
-            .extracting(DraftDirectionWrapper::getJudgeApprovedOrderCollection)
-            .satisfies(judgeApprovedOrderCollection ->
-                assertThat(judgeApprovedOrderCollection).containsExactly(previousJudgeApprovedOrder));
+        assertThat(toBeTested.getDraftDirectionWrapper().getJudgeApprovedOrderCollection())
+            .containsOnly(DraftDirectionOrderCollection.EMPTY_COLLECTION);
     }
 
     @Test
-    void givenNoPreviousJudgesApprovedOrder_whenHandle_thenShouldPopulateEmptyJudgeApprovedOrderCollection() {
+    void givenNoPreviousJudgesApprovedOrder_whenHandle_thenShouldPopulateAnEmptyDraftDirectionOrder() {
         FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder();
         builder.draftDirectionWrapper(DraftDirectionWrapper.builder()
             .draftDirectionOrderCollection(List.of(
@@ -91,32 +78,31 @@ class JudgeDraftOrderAboutToStartHandlerTest {
 
         FinremCaseData toBeTested = response.getData();
 
-        assertThat(toBeTested.getDraftDirectionWrapper())
-            .extracting(DraftDirectionWrapper::getJudgeApprovedOrderCollection)
-            .satisfies(judgeApprovedOrderCollection ->
-                assertThat(judgeApprovedOrderCollection).isEmpty());
+        assertThat(toBeTested.getDraftDirectionWrapper().getJudgeApprovedOrderCollection())
+            .containsOnly(DraftDirectionOrderCollection.EMPTY_COLLECTION);
     }
 
     @Test
-    void shouldPrepopulateFields() {
+    void givenUploadApproveOrder_whenHandle_shouldPrepopulateFields() {
+        //Given
+        String judgeName = "expected judge name";
         FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder();
         builder.orderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
-        builder.orderApprovedJudgeName("UNKNOWN");
         builder.orderApprovedDate(LocalDate.now());
-
-        when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("expected judge name");
-
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory
             .from(FinremCaseDetailsBuilderFactory.from(CONTESTED, builder));
+
+        when(idamService.getIdamSurname(AUTH_TOKEN)).thenReturn(judgeName);
+
+        //When
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        FinremCaseData toBeTested = response.getData();
-
-        assertThat(toBeTested).extracting(
-            FinremCaseData::getOrderApprovedJudgeType,
-            FinremCaseData::getOrderApprovedDate,
-            FinremCaseData::getOrderApprovedJudgeName
-        ).containsExactly(null, null, "expected judge name");
+        //Assert
+        FinremCaseData responseData = response.getData();
+        assertThat(responseData)
+            .returns(judgeName, FinremCaseData::getOrderApprovedJudgeName)
+            .returns(null, FinremCaseData::getOrderApprovedJudgeType)
+            .returns(null, FinremCaseData::getOrderApprovedDate);
     }
 
     private DraftDirectionOrderCollection legacyDraftOrder(String id) {
@@ -127,7 +113,8 @@ class JudgeDraftOrderAboutToStartHandlerTest {
             .build();
     }
 
-    private DraftDirectionOrderCollection previousJudgeApprovedOrder(String id) {
+    private DraftDirectionOrderCollection previousJudgeApprovedOrder() {
+        String id = "previousId";
         return DraftDirectionOrderCollection.builder()
             .value(DraftDirectionOrder.builder()
                 .purposeOfDocument(null) // null means judge's approved order

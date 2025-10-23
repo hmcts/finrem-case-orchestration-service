@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHear
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -49,13 +51,22 @@ public class UploadApprovedOrderMhContestedAboutToStartHandler extends FinremCal
             .withHearingTypes(HearingType.values())
             .build());
 
+        manageHearingsWrapper.setIsFinalOrder(null);
+        manageHearingsWrapper.setIsAddHearingChosen(null);
         caseData.setOrderApprovedJudgeName(null);
         caseData.setOrderApprovedJudgeType(null);
         caseData.setOrderApprovedDate(null);
         caseData.setHearingNoticeDocumentPack(new ArrayList<>());
-        caseData.setUploadHearingOrder(new ArrayList<>());
+        prepareCwApprovedOrderCollection(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
+    }
+
+    private void prepareCwApprovedOrderCollection(FinremCaseData finremCaseData) {
+        // Create an empty object to save the user from clicking the “Add New” button.
+        finremCaseData.getDraftDirectionWrapper().setCwApprovedOrderCollection(List.of(
+            DirectionOrderCollection.EMPTY_COLLECTION
+        ));
     }
 }

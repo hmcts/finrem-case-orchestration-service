@@ -126,7 +126,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             return new DraftOrderService(idamAuthService, hearingService).applySubmittedInfo(input, secondArg);
         }).when(draftOrderService).applySubmittedInfo(anyString(), any());
 
-        lenient().when(caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(CASEWORKER);
+        lenient().when(caseRoleService.getUserOrCaseworkerCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(CASEWORKER);
     }
 
     @ParameterizedTest
@@ -221,7 +221,6 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     @Test
     void givenMultipleOrderDetailsWithAttachments_whenHandle_thenMapCorrectly() {
         // Given
-        final Long caseID = Long.valueOf(CASE_ID);
         FinremCaseData caseData = spy(new FinremCaseData());
 
         AdditionalDocumentsCollection additionalDocument1 = AdditionalDocumentsCollection.builder()
@@ -591,11 +590,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     }
 
     private void mockCaseRole(String caseId, CaseRole userCaseRole) {
-        if (CASEWORKER == userCaseRole) {
-            when(caseRoleService.getUserCaseRole(caseId, AUTH_TOKEN)).thenReturn(null);
-        } else {
-            when(caseRoleService.getUserCaseRole(caseId, AUTH_TOKEN)).thenReturn(userCaseRole);
-        }
+        when(caseRoleService.getUserOrCaseworkerCaseRole(caseId, AUTH_TOKEN)).thenReturn(userCaseRole);
     }
 
     private static List<AgreedDraftOrderCollection> agreedDraftOrdersCollection(

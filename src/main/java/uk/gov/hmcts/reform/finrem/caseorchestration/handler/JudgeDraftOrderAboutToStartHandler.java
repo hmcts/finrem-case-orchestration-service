@@ -13,9 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.util.List;
-import java.util.function.Predicate;
 
-import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.JUDGE_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -51,21 +49,15 @@ public class JudgeDraftOrderAboutToStartHandler extends FinremCallbackHandler {
     }
 
     private void prepareJudgeApprovedOrderCollection(FinremCaseData finremCaseData) {
-        List<DraftDirectionOrderCollection> judgeApprovedOrderCollection = emptyIfNull(
-            finremCaseData.getDraftDirectionWrapper().getDraftDirectionOrderCollection()
-        ).stream()
-            .filter(isNotLegacyDraftOrder())
-            .toList();
-        finremCaseData.getDraftDirectionWrapper().setJudgeApprovedOrderCollection(judgeApprovedOrderCollection);
-    }
-
-    private Predicate<DraftDirectionOrderCollection> isNotLegacyDraftOrder() {
-        return d -> d.getValue().getPurposeOfDocument() == null;
+        // Create an empty object to save the user from clicking the “Add New” button.
+        finremCaseData.getDraftDirectionWrapper().setJudgeApprovedOrderCollection(List.of(
+            DraftDirectionOrderCollection.EMPTY_COLLECTION
+        ));
     }
 
     private void prepareFieldsForOrderApprovedCoverLetter(FinremCaseData finremCaseData, String authorisationToken) {
         finremCaseData.setOrderApprovedJudgeType(null);
-        finremCaseData.setOrderApprovedJudgeName(idamService.getIdamFullName(authorisationToken));
+        finremCaseData.setOrderApprovedJudgeName(idamService.getIdamSurname(authorisationToken));
         finremCaseData.setOrderApprovedDate(null);
     }
 }

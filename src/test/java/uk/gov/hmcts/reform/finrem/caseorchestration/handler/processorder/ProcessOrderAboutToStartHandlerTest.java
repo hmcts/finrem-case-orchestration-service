@@ -154,6 +154,7 @@ class ProcessOrderAboutToStartHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(EventType.PROCESS_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder()
+                .uploadHearingOrder(List.of(DirectionOrderCollection.builder().build()))
                 .manageHearingsWrapper(ManageHearingsWrapper
                     .builder()
                     .workingHearing(null)
@@ -171,8 +172,10 @@ class ProcessOrderAboutToStartHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> result = underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        WorkingHearing workingHearing = result.getData().getManageHearingsWrapper().getWorkingHearing();
+        ManageHearingsWrapper manageHearingsWrapper = result.getData().getManageHearingsWrapper();
+        WorkingHearing workingHearing = manageHearingsWrapper.getWorkingHearing();
 
+        assertThat(manageHearingsWrapper.getIsAddHearingChosen()).isNull();
         assertThat(workingHearing).isNotNull();
         assertThat(workingHearing.getPartiesOnCaseMultiSelectList().getListItems().getFirst().getLabel()).isEqualTo("Party 1");
         assertThat(workingHearing.getPartiesOnCaseMultiSelectList().getListItems().getLast().getLabel()).isEqualTo("Party 2");

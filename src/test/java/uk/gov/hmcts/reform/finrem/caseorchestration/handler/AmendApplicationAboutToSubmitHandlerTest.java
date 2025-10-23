@@ -15,14 +15,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
@@ -52,12 +56,14 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     @Mock
     private ConsentOrderService consentOrderService;
+    @Mock
+    private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
 
     @BeforeEach
     void setUp() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         underTest = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
-            consentOrderService);
+            consentOrderService, updateRepresentationWorkflowService);
         lenient().when(consentOrderService.getLatestConsentOrderData(isA(CallbackRequest.class)))
             .thenReturn(newDocument(DOC_URL, BINARY_URL, FILE_NAME));
     }
@@ -173,6 +179,7 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void givenCase_whenIfRespondentNotRepresentedBySolicitor_thenShouldDeleteRespondentSolicitorDetails() {
+        doCallRealMethod().when(updateRepresentationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
         CallbackRequest callbackRequest = doValidCaseDataSetUp(RES_SOL_JSON);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
@@ -185,6 +192,9 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorDxNumber());
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorEmail());
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorPhone());
+        assertThat(responseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole())
+            .isEqualTo(CaseRole.RESP_SOLICITOR.getCcdCode());
+        assertThat(responseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID()).isNull();
     }
 
     @Test

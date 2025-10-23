@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
@@ -32,11 +34,13 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem.fromCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
@@ -106,7 +110,6 @@ class ValidateHearingServiceTest {
         DynamicMultiSelectList partiesOnCase = getPartiesOnCaseMissingSelectedAppAndResp();
         when(selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(
             caseData, HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE)).thenReturn(List.of(HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE));
-
 
         caseData.setPartiesOnCase(partiesOnCase);
         List<String> errors = doTestErrors();
@@ -225,18 +228,18 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageFastTrackHearingDatesWarningFdr() {
+    void manageFastTrackHearingDates_DoesNotValidateFdr() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3));
 
         List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDR);
 
-        assertThat(errors).containsExactly(DATE_BETWEEN_6_AND_10_WEEKS);
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    void manageFastTrackHearingDatesWarningFda() {
+    void manageFastTrackHearingDates_WarningOnInvalidFda() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3));
@@ -246,17 +249,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingFastTrackHearingDatesNoWarningFdr() {
-        caseData.setIssueDate(LocalDate.now());
-        caseData.setFastTrackDecision(YesOrNo.YES);
-        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(7));
-
-        List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDR);
-        assertThat(errors).isEmpty();
-    }
-
-    @Test
-    void manageHearingHearingFastTrackHearingDatesNoWarningFda() {
+    void manageHearingHearingFastTrackHearing_NoWarningsOnValidFdaDates() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(7));
@@ -266,7 +259,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingExpressPilotDatesFdr() {
+    void manageHearingHearingExpressPilot_WarningOnInvalidFdrDates() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
@@ -278,7 +271,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingExpressPilotDatesFda() {
+    void manageHearingHearingExpressPilot_DoesNotValidateFda() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
@@ -286,11 +279,11 @@ class ValidateHearingServiceTest {
         when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
 
         List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDA);
-        assertThat(errors).containsExactly(DATE_BETWEEN_16_AND_20_WEEKS);
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    void manageHearingHearingExpressPilotDatesNoWarningFdr() {
+    void manageHearingHearingExpress_NoWarningsOnValidFdrDates() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
@@ -302,28 +295,16 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingExpressPilotDatesNoWarningFda() {
-        caseData.setIssueDate(LocalDate.now());
-        caseData.setFastTrackDecision(YesOrNo.NO);
-        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
-        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(17));
-        when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
-
-        List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDA);
-        assertThat(errors).isEmpty();
-    }
-
-    @Test
-    void manageHearingHearingNonFastTrackHearingDatesWarningFdr() {
+    void manageHearingHearingStandardTrack_DoesNotValidateFdr() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3));
         List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDR);
-        assertThat(errors).containsExactly(DATE_BETWEEN_12_AND_16_WEEKS);
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    void manageHearingHearingNonFastTrackHearingDatesWarningFda() {
+    void manageHearingHearingStandardTrack_WarningOnInvalidFdaDates() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3));
@@ -332,16 +313,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingNonFastTrackHearingDatesNoWarningFdr() {
-        caseData.setIssueDate(LocalDate.now());
-        caseData.setFastTrackDecision(YesOrNo.NO);
-        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13));
-        List<String> errors = service.validateManageHearingWarnings(caseData, HearingType.FDR);
-        assertThat(errors).isEmpty();
-    }
-
-    @Test
-    void manageHearingHearingNonFastTrackHearingDatesNoWarningFda() {
+    void manageHearingHearingStandardTrack_NoWarningsOnValidFdrDates() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13));
@@ -350,7 +322,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingDatesWarningOtherHearingType() {
+    void manageHearingHearingDates_NoValidationOnOtherHearingType() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13));
@@ -359,7 +331,7 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void manageHearingHearingDatesWarningNoIssueDate() {
+    void manageHearingHearingDates_NoValidationWhenNoIssueDate() {
         caseData.setIssueDate(null);
         caseData.setFastTrackDecision(YesOrNo.NO);
         setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13));
@@ -520,6 +492,46 @@ class ValidateHearingServiceTest {
 
         // Assert that no warnings.  GA created by applicant, so not selecting intervener party for correspondence OK.
         assertThat(warnings).isEmpty();
+    }
+
+    @Test
+    void hasInvalidAdditionalHearingDocsForAddHearingChosen_returnsFalse_whenAllDocsValid() {
+        List<DocumentCollectionItem> docs = List.of(
+            fromCaseDocument(caseDocument("a.pdf")),
+            fromCaseDocument(caseDocument("b.DOCX")),
+            fromCaseDocument(caseDocument("c.doc"))
+        );
+
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .isAddHearingChosen(YesOrNo.YES)
+                .workingHearing(WorkingHearing.builder()
+                    .additionalHearingDocPrompt(YesOrNo.YES)
+                    .additionalHearingDocs(docs)
+                    .build())
+                .build())
+            .build();
+
+        assertThat(service.hasInvalidAdditionalHearingDocsForAddHearingChosen(finremCaseData)).isFalse();
+    }
+
+    @Test
+    void hasInvalidAdditionalHearingDocs_returnsTrue_whenAnyDocInvalid() {
+        List<DocumentCollectionItem> docs = List.of(
+            fromCaseDocument(caseDocument("ok.pdf")),
+            fromCaseDocument(caseDocument("image.png"))
+        );
+
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .workingHearing(WorkingHearing.builder()
+                    .additionalHearingDocPrompt(YesOrNo.YES)
+                    .additionalHearingDocs(docs)
+                    .build())
+                .build())
+            .build();
+
+        assertThat(service.hasInvalidAdditionalHearingDocs(finremCaseData)).isTrue();
     }
 
     private List<String> doTestWarnings() {

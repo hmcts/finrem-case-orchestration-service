@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.InvalidEmailAddressException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.SendEmailException;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.Map;
@@ -26,7 +28,9 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -434,9 +438,21 @@ public class EmailServiceTest {
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL.name());
 
-
         assertEquals("Nottingham FRC", returnedTemplateVars.get("courtName"));
         assertEquals("FRCNottingham@justice.gov.uk", returnedTemplateVars.get("courtEmail"));
+        assertNull(returnedTemplateVars.get("generalEmailBody"));
+    }
+
+    @Test
+    public void shouldBuildTemplateVarsWithCourtDataForContested() {
+        setContestedData();
+        notificationRequest.setContactCourtEmail("contact.court@test.com");
+        notificationRequest.setContactCourtName("Local Court");
+
+        Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_HWF_SUCCESSFUL.name());
+
+        assertEquals("Local Court", returnedTemplateVars.get("courtName"));
+        assertEquals("contact.court@test.com", returnedTemplateVars.get("courtEmail"));
         assertNull(returnedTemplateVars.get("generalEmailBody"));
     }
 
@@ -446,8 +462,19 @@ public class EmailServiceTest {
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_HWF_SUCCESSFUL.name());
 
-
         assertContestedTemplateVariablesAreAbsent(returnedTemplateVars);
+    }
+
+    @Test
+    public void shouldBuildTemplateVarsWithCourtDataForConsented() {
+        setConsentedData();
+        notificationRequest.setContactCourtEmail("contact.court@test.com");
+        notificationRequest.setContactCourtName("Local Court");
+
+        Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_HWF_SUCCESSFUL.name());
+
+        assertEquals("Local Court", returnedTemplateVars.get("courtName"));
+        assertEquals("contact.court@test.com", returnedTemplateVars.get("courtEmail"));
     }
 
     @Test
@@ -455,9 +482,7 @@ public class EmailServiceTest {
         setContestedData();
         notificationRequest.setGeneralEmailBody("test email body");
 
-        Map<String, Object> returnedTemplateVars =
-
-            emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_GENERAL_EMAIL.name());
+        Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_GENERAL_EMAIL.name());
 
         assertEquals("Nottingham FRC", returnedTemplateVars.get("courtName"));
         assertEquals("FRCNottingham@justice.gov.uk", returnedTemplateVars.get("courtEmail"));
@@ -774,6 +799,24 @@ public class EmailServiceTest {
 
         Map<String, Object> actualTemplateFields = templateFieldsArgumentCaptor.getValue();
         expectedTemplateFields.forEach((k, v) -> assertEquals(v, actualTemplateFields.get(k)));
+    }
+
+    @Test
+    public void givenInvalidEmail_whenSendEmail_thenExceptionThrown() throws NotificationClientException {
+        doThrow(new NotificationClientException("email_address Not a valid email address"))
+            .when(mockClient).sendEmail(any(), any(), any(), any(), any());
+
+        assertThrows(InvalidEmailAddressException.class,
+            () -> emailService.sendConfirmationEmail(notificationRequest, FR_HWF_SUCCESSFUL));
+    }
+
+    @Test
+    public void givenSendEmailError_whenSendEmail_thenExceptionThrown() throws NotificationClientException {
+        doThrow(new NotificationClientException("Internal Server Error"))
+            .when(mockClient).sendEmail(any(), any(), any(), any(), any());
+
+        assertThrows(SendEmailException.class,
+            () -> emailService.sendConfirmationEmail(notificationRequest, FR_HWF_SUCCESSFUL));
     }
 
     private void assertContestedTemplateVariablesAreAbsent(Map<String, Object> returnedTemplateVars) {

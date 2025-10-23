@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -28,6 +29,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.IN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils.isPdf;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils.isWordDocument;
 
 @Service
 @Slf4j
@@ -65,7 +68,7 @@ public class ValidateHearingService {
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
         errors.addAll(selectablePartiesCorrespondenceService
             .validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseDetails.getData(),
-            HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE));
+                HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE));
         return errors;
     }
 
@@ -111,26 +114,77 @@ public class ValidateHearingService {
      *         otherwise an empty list
      */
     public List<String> validateManageHearingWarnings(FinremCaseData caseData, HearingType hearingType) {
-        Optional<LocalDate> issueDate = Optional.ofNullable(caseData.getIssueDate());
+        Optional<LocalDate> issueDateOptional = Optional.ofNullable(caseData.getIssueDate());
         LocalDate hearingDate = caseData.getManageHearingsWrapper().getWorkingHearing().getHearingDate();
 
-        if (issueDate.isEmpty() || !(hearingType.equals(HearingType.FDA) || hearingType.equals(HearingType.FDR))) {
+        if (issueDateOptional.isEmpty()) {
             return List.of();
         }
 
-        if (caseData.isFastTrackApplication()) {
-            if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(6), issueDate.get().plusWeeks(10), hearingDate)) {
+        LocalDate issueDate = issueDateOptional.get();
+
+        if (HearingType.FDA.equals(hearingType)
+            && !expressCaseService.isExpressCase(caseData)) {
+            // Validate Standard hearing timeline
+            if (!caseData.isFastTrackApplication()
+                && isHearingOutsideOfTimeline(issueDate.plusWeeks(12), issueDate.plusWeeks(16), hearingDate)) {
+                return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
+            // Validate Fast Track hearing timeline
+            } else if (caseData.isFastTrackApplication()
+                && isHearingOutsideOfTimeline(issueDate.plusWeeks(6), issueDate.plusWeeks(10), hearingDate)) {
                 return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
-        } else if (expressCaseService.isExpressCase(caseData)) {
-            if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(16), issueDate.get().plusWeeks(20), hearingDate)) {
-                return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
-            }
-        } else if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(12), issueDate.get().plusWeeks(16), hearingDate)) {
-            return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
+            // Validate Express hearing timeline
+        } else if (HearingType.FDR.equals(hearingType)
+            && expressCaseService.isExpressCase(caseData)
+            && isHearingOutsideOfTimeline(issueDate.plusWeeks(16), issueDate.plusWeeks(20), hearingDate)) {
+            return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
         }
 
         return List.of();
+    }
+
+    /**
+     * Determines if any additional hearing documents are not Word or PDF files,
+     * but only when both 'Add Hearing' and 'Additional Hearing Document Prompt' are selected as YES.
+     *
+     * @param caseData the {@link FinremCaseData} containing hearing document information
+     * @return {@code true} if any document is not a Word or PDF file, {@code false} otherwise
+     */
+    public boolean hasInvalidAdditionalHearingDocsForAddHearingChosen(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getManageHearingsWrapper())
+            .filter(wrapper -> YesOrNo.YES.equals(wrapper.getIsAddHearingChosen()))
+            .map(ManageHearingsWrapper::getWorkingHearing)
+            .filter(workingHearing -> YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt()))
+            .map(workingHearing -> hasInvalidFileType(workingHearing.getAdditionalHearingDocs()))
+            .orElse(false);
+    }
+
+    /**
+     * Determines if any additional hearing documents are not Word or PDF files,
+     * but only when 'Additional Hearing Document Prompt' is selected as YES.
+     *
+     * @param caseData the {@link FinremCaseData} containing hearing document information
+     * @return {@code true} if any document is not a Word or PDF file, {@code false} otherwise
+     */
+    public boolean hasInvalidAdditionalHearingDocs(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getManageHearingsWrapper())
+            .map(ManageHearingsWrapper::getWorkingHearing)
+            .filter(workingHearing -> YesOrNo.YES.equals(workingHearing.getAdditionalHearingDocPrompt()))
+            .map(workingHearing -> hasInvalidFileType(workingHearing.getAdditionalHearingDocs()))
+            .orElse(false);
+    }
+
+    /**
+     * Checks if the provided list of additional hearing documents contains any files
+     * that are not in Word or PDF format.
+     *
+     * @param additionalHearingDocs the list of {@link DocumentCollectionItem} to validate
+     * @return {@code true} if any document is not a Word or PDF file, {@code false} otherwise
+     */
+    private boolean hasInvalidFileType(List<DocumentCollectionItem> additionalHearingDocs) {
+        return additionalHearingDocs.stream()
+            .anyMatch(doc -> !isPdf(doc.getValue()) && !isWordDocument(doc.getValue()));
     }
 
     /*
@@ -188,7 +242,7 @@ public class ValidateHearingService {
     }
 
     private boolean isHearingOutsideOfTimeline(final LocalDate min, final LocalDate max,
-                                                      final LocalDate date) {
+                                               final LocalDate date) {
         return date.isBefore(min) || date.isAfter(max);
     }
 
@@ -196,6 +250,7 @@ public class ValidateHearingService {
      * Retrieves the set of party codes selected for the working hearing in the provided event data.
      * Firstly, creates a list of {@link DynamicMultiSelectListElement} objects for the selected parties.
      * Secondly, get the codes for these parties, then returns that in a set.
+     *
      * @param caseData the case data containing the manage hearings wrapper and working hearing details
      * @return a set of selected party codes; never {@code null}
      */
