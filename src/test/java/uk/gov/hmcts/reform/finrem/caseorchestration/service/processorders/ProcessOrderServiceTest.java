@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
@@ -54,6 +56,37 @@ class ProcessOrderServiceTest {
 
     @InjectMocks
     private ProcessOrderService underTest;
+
+    @Test
+    void givenPopulateUnprocessedUploadHearingDocuments_shouldPopulateOnlyUnstampedOrders() {
+        CaseDocument unstampedDocument = caseDocument("unstamped.pdf");
+        DirectionOrderCollection stampedOrder = DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .isOrderStamped(YesOrNo.YES)
+                .uploadDraftDocument(CaseDocument.builder().documentFilename("stamped.pdf").build())
+                .build())
+            .build();
+
+        DirectionOrderCollection unstampedOrder = DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .isOrderStamped(YesOrNo.NO)
+                .uploadDraftDocument(unstampedDocument)
+                .build())
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .uploadHearingOrder(List.of(stampedOrder, unstampedOrder))
+            .build();
+
+        underTest.populateUnprocessedUploadHearingDocuments(caseData);
+
+        List<DirectionOrderCollection> result = caseData.getUnprocessedUploadHearingDocuments();
+        assertThat(result)
+            .hasSize(1)
+            .extracting(DirectionOrderCollection::getValue)
+            .extracting(DirectionOrder::getUploadDraftDocument)
+            .containsExactly(unstampedDocument);
+    }
 
     @SuppressWarnings("unchecked")
     @Test
@@ -160,7 +193,7 @@ class ProcessOrderServiceTest {
         );
     }
 
-    private static Stream<Arguments> provideAreAllLegacyApprovedOrdersPdfData() {
+    private static Stream<Arguments> provideAreAllLegacyApprovedOrdersWordOrPdfData() {
         return Stream.of(
             Arguments.of(
                 List.of(
@@ -182,8 +215,8 @@ class ProcessOrderServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideAreAllLegacyApprovedOrdersPdfData")
-    void testAreAllLegacyApprovedOrdersPdf(List<DirectionOrderCollection> uploadHearingOrder, boolean expectedTrue) {
+    @MethodSource("provideAreAllLegacyApprovedOrdersWordOrPdfData")
+    void testAreAllLegacyApprovedOrdersWordOrPdf(List<DirectionOrderCollection> uploadHearingOrder, boolean expectedTrue) {
         // Mocking the unprocessed approved documents
         FinremCaseData caseData = mock(FinremCaseData.class);
 
@@ -191,7 +224,7 @@ class ProcessOrderServiceTest {
         when(caseData.getUploadHearingOrder()).thenReturn(uploadHearingOrder);
 
         // Call the method to test
-        boolean result = underTest.areAllLegacyApprovedOrdersPdf(caseData);
+        boolean result = underTest.areAllLegacyApprovedOrdersWordOrPdf(caseData);
 
         // Assert the expected result
         if (expectedTrue) {
