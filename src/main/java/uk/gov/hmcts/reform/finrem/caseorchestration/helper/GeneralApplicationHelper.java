@@ -9,10 +9,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.core.Tuple;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -148,26 +150,27 @@ public class GeneralApplicationHelper {
         return null;
     }
 
-    public GeneralApplicationCollectionData mapExistingGeneralApplicationToData(FinremCaseData caseData,
-                                                                                String userAuthorisation, String caseId) {
+    public GeneralApplicationCollectionData mapExistingGeneralApplicationToData(FinremCaseDetails caseDetails,
+                                                                                String userAuthorisation) {
+        FinremCaseData caseData = caseDetails.getData();
         if (caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             String collectionId = UUID.randomUUID().toString();
             caseData.getGeneralApplicationWrapper().setGeneralApplicationTracking(collectionId);
             return GeneralApplicationCollectionData.builder()
                 .id(collectionId)
-                .generalApplicationItems(getApplicationItems(caseData, userAuthorisation, caseId))
+                .generalApplicationItems(getApplicationItems(caseDetails, userAuthorisation))
                 .build();
         }
         return null;
     }
 
-    public GeneralApplicationCollectionData retrieveInitialGeneralApplicationData(FinremCaseData caseData,
+    public GeneralApplicationCollectionData retrieveInitialGeneralApplicationData(FinremCaseDetails caseDetails,
                                                                                   String collectionId,
-                                                                                  String userAuthorisation, String caseId) {
-        if (caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
+                                                                                  String userAuthorisation) {
+        if (caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
             return GeneralApplicationCollectionData.builder()
                 .id(collectionId)
-                .generalApplicationItems(getApplicationItems(caseData, userAuthorisation, caseId))
+                .generalApplicationItems(getApplicationItems(caseDetails, userAuthorisation))
                 .build();
         }
         return null;
@@ -217,8 +220,8 @@ public class GeneralApplicationHelper {
         }
     }
 
-    public CaseDocument getPdfDocument(CaseDocument document, String userAuthorisation, String caseId) {
-        return service.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseId);
+    public CaseDocument getPdfDocument(CaseDocument document, String userAuthorisation, CaseType caseType) {
+        return service.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseType);
     }
 
     public DynamicRadioListElement getDynamicListElements(String code, String label) {
@@ -323,15 +326,15 @@ public class GeneralApplicationHelper {
         }
     }
 
-    public GeneralApplicationItems getApplicationItems(FinremCaseData caseData, String userAuthorisation, String caseId) {
-        GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
-            GeneralApplicationItems.builder();
+    public GeneralApplicationItems getApplicationItems(FinremCaseDetails caseDetails, String userAuthorisation) {
+        GeneralApplicationItems.GeneralApplicationItemsBuilder builder = GeneralApplicationItems.builder();
 
+        FinremCaseData caseData = caseDetails.getData();
         buildGeneralApplicantionSenderDynamicList(caseData, builder);
 
         buildGeneralApplicationHearingDetails(caseData, builder);
 
-        buildGeneralApplicationDocuments(caseData, userAuthorisation, caseId, builder);
+        buildGeneralApplicationDocuments(caseDetails, userAuthorisation, builder);
 
         return builder.build();
     }
@@ -362,12 +365,14 @@ public class GeneralApplicationHelper {
             .orElse(duplicateGas.stream().findFirst().orElse(null));
     }
 
-    private void buildGeneralApplicationDocuments(FinremCaseData caseData, String userAuthorisation, String caseId,
+    private void buildGeneralApplicationDocuments(FinremCaseDetails caseDetails, String userAuthorisation,
                                                   GeneralApplicationItems.GeneralApplicationItemsBuilder builder) {
+        FinremCaseData caseData = caseDetails.getData();
+        String caseId = caseDetails.getCaseIdAsString();
         CaseDocument caseDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDocument());
         if (caseDocument != null) {
             log.info("General Application Document before converting to Pdf {} for Case ID: {}", caseDocument, caseId);
-            CaseDocument pdfCaseDocument = getPdfDocument(caseDocument, userAuthorisation, caseId);
+            CaseDocument pdfCaseDocument = getPdfDocument(caseDocument, userAuthorisation, caseDetails.getCaseType());
             builder.generalApplicationDocument(pdfCaseDocument);
             log.info("General Application Document after converting to Pdf {} for Case ID: {}", pdfCaseDocument, caseId);
         }
@@ -375,7 +380,7 @@ public class GeneralApplicationHelper {
         CaseDocument draftDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDraftOrder());
         if (draftDocument != null) {
             log.info("General Application Draft Document before converting to Pdf {} for Case ID: {}", draftDocument, caseId);
-            CaseDocument draftCaseDocument = getPdfDocument(draftDocument, userAuthorisation, caseId);
+            CaseDocument draftCaseDocument = getPdfDocument(draftDocument, userAuthorisation, caseDetails.getCaseType());
             builder.generalApplicationDraftOrder(draftCaseDocument);
             log.info("General Application Draft Document after converting to Pdf {} for Case ID: {}", draftCaseDocument, caseId);
         }
@@ -384,7 +389,7 @@ public class GeneralApplicationHelper {
         // However, some existing data still contains a value.
         if (directionDocument != null) {
             log.info("General Application Direction Document before converting to Pdf {} for Case ID: {}", directionDocument, caseId);
-            CaseDocument directionCaseDocument = getPdfDocument(directionDocument, userAuthorisation, caseId);
+            CaseDocument directionCaseDocument = getPdfDocument(directionDocument, userAuthorisation, caseDetails.getCaseType());
             builder.generalApplicationDirectionsDocument(directionCaseDocument);
             log.info("General Application Direction Document after converting to Pdf {} for Case ID: {}", directionCaseDocument, caseId);
         }
