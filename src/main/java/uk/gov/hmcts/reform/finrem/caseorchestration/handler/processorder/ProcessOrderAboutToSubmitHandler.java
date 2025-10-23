@@ -247,14 +247,20 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         }
         caseData.getUploadHearingOrder().add(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
+                .isOrderStamped(YesOrNo.YES)
                 .uploadDraftDocument(unprocessedApprovedOrder.getValue().getUploadDraftDocument())
                 .build())
             .build());
     }
 
     private void clearTemporaryFields(FinremCaseData caseData) {
+        clearUnprocessedUploadHearingDocuments(caseData);
         clearUnprocessedApprovedDocuments(caseData.getDraftOrdersWrapper());
         clearMetaDataFields(caseData);
+    }
+
+    private void clearUnprocessedUploadHearingDocuments(FinremCaseData caseData) {
+        caseData.setUnprocessedUploadHearingDocuments(null);
     }
 
     private void clearUnprocessedApprovedDocuments(DraftOrdersWrapper draftOrdersWrapper) {
