@@ -111,7 +111,7 @@ class ConsentOrderApprovedDocumentServiceV2Test {
         assertThat(result.getFirst()).isEqualTo(bulkPrintDocument);
     }
 
-    private void mockApprovedConsentOrder(){
+    private void mockApprovedConsentOrder() {
         when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(CONSENT_ORDER_APPROVED_COVER_LETTER_FILENAME);
         when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn(APPROVED_CONSENT_ORDER_TEMPLATE);
         when(genericDocumentService.generateDocument(any(String.class), any(CaseDetails.class), any(String.class), any(String.class)))
