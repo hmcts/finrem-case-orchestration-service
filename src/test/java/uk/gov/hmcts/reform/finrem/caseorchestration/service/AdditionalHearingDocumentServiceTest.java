@@ -165,285 +165,121 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-    void givenStampAndCollectOrderCollectionWhenFinalOrderCollIsEmpty_thenHandlerWillAddNewOrderToFinalOrder()
-        throws JsonProcessingException {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
+    void givenNewOrder_whenUnprocessedOrdersExist_shouldStampAndUpdateOrderCollections() {
+        // Arrange
+        CaseDocument originalDoc = caseDocument("url1", "file1.pdf");
+        CaseDocument stampedDoc  = caseDocument("url1", "file1-stamped.pdf");
 
-        List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
         LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
-        DirectionOrderCollection uploadOrderCollection
-            = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
-        uploadOrderCollections.add(uploadOrderCollection);
-        data.setUploadHearingOrder(uploadOrderCollections);
-        when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
-        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
-        List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
+        FinremCaseData caseData = new FinremCaseData();
+        caseWithUnprocessed(caseData, originalDoc, uploadOrderDateTime);
 
-        DirectionDetail directionDetail = DirectionDetail.builder()
-            .isAnotherHearingYN(YesOrNo.YES)
-            .typeOfHearing(HearingTypeDirection.FH)
-            .hearingTime("12")
-            .timeEstimate("12")
-            .dateOfHearing(LocalDate.of(2020, 1, 1))
-            .localCourt(getTestCourt()).build();
-        DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
-        directionDetailsCollection.add(detailCollection);
-        data.setDirectionDetailsCollection(directionDetailsCollection);
-
-        Map<String, Object> caseData = baseCaseData();
-        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
-        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-
-        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
-        additionalHearingDocumentService.storeHearingNotice(caseDetails, AUTH_TOKEN);
-
-        assertThat(data.getFinalOrderCollection()).hasSize(1);
-        assertThat(data.getUploadHearingOrder()).hasSize(1);
-        assertThat(data.getLatestDraftHearingOrder()).extracting(CaseDocument::getDocumentFilename).isEqualTo(FILE_NAME);
-
-        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
-            .isNotEmpty()
-            .allSatisfy(doc -> assertThat(doc.getValue()).isNotNull());
-        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
-            .extracting(doc -> doc.getValue().getDocument())
-            .first()
-            .isEqualTo(caseDocument());
-    }
-
-    @Test
-    void givenStampAndCollectOrderCollectionWhenFinalOrderHasSameOrder_thenHandlerWillNotAddNewOrderToFinalOrder()
-        throws JsonProcessingException {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
-        LocalDateTime orderDateTime = LocalDateTime.of(2022, 11, 1, 17, 10, 10);
-        DirectionOrderCollection orderCollection
-            = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
-        orderCollections.add(orderCollection);
-        data.setFinalOrderCollection(orderCollections);
-        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
-
-        List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
-        LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
-        DirectionOrderCollection uploadOrderCollection
-            = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
-        uploadOrderCollections.add(uploadOrderCollection);
-        data.setUploadHearingOrder(uploadOrderCollections);
-        when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
-        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-
-        List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
-        DirectionDetail directionDetail = DirectionDetail.builder()
-            .isAnotherHearingYN(YesOrNo.YES)
-            .typeOfHearing(HearingTypeDirection.FH)
-            .hearingTime("12")
-            .timeEstimate("12")
-            .dateOfHearing(LocalDate.of(2020, 1, 1))
-            .localCourt(getTestCourt()).build();
-        DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
-        directionDetailsCollection.add(detailCollection);
-        data.setDirectionDetailsCollection(directionDetailsCollection);
-
-        Map<String, Object> caseData = baseCaseData();
-        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
-        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
-
-        additionalHearingDocumentService.storeHearingNotice(caseDetails, AUTH_TOKEN);
-
-        assertThat(data.getFinalOrderCollection()).hasSize(1);
-        assertThat(data.getUploadHearingOrder()).hasSize(1);
-        assertThat(data.getLatestDraftHearingOrder().getDocumentFilename()).isEqualTo(FILE_NAME);
-        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
-            .isNotEmpty()
-            .extracting(AdditionalHearingDocumentCollection::getValue)
-            .isNotNull()
-            .extracting(AdditionalHearingDocument::getDocument)
-            .first()
-            .isEqualTo(caseDocument());
-    }
-
-    @Test
-    void givenStampAndCollectOrderCollectionWhenFinalOrderIsNotSameOrder_thenHandlerWillAddNewOrderToFinalOrder()
-        throws JsonProcessingException {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
-        LocalDateTime orderDateTime = LocalDateTime.of(2022, 11, 1, 17, 10, 10);
-        DirectionOrderCollection orderCollection
-            = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument("url", "abc","binary"))
-            .isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
-        orderCollections.add(orderCollection);
-        data.setFinalOrderCollection(orderCollections);
-        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
-
-        List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
-        LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
-        DirectionOrderCollection uploadOrderCollection
-            = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
-        uploadOrderCollections.add(uploadOrderCollection);
-        data.setUploadHearingOrder(uploadOrderCollections);
-        when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
-        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-
-        List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
-
-        DirectionDetail directionDetail = DirectionDetail.builder()
-            .isAnotherHearingYN(YesOrNo.YES)
-            .typeOfHearing(HearingTypeDirection.FH)
-            .hearingTime("12")
-            .timeEstimate("12")
-            .dateOfHearing(LocalDate.of(2020, 1, 1))
-            .localCourt(getTestCourt()).build();
-        DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
-        directionDetailsCollection.add(detailCollection);
-        data.setDirectionDetailsCollection(directionDetailsCollection);
-
-        Map<String, Object> caseData = baseCaseData();
-        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
-        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-
-        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
-
-        assertThat(data.getFinalOrderCollection()).hasSize(2);
-        assertThat(data.getUploadHearingOrder()).hasSize(1);
-        assertThat(data.getLatestDraftHearingOrder().getDocumentFilename()).isEqualTo(FILE_NAME);
-    }
-
-    @Test
-    void givenStoreHearingNotice_withNoDirectionDetailsCollection_thenShouldNotAddHearingNoice() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-        data.setDirectionDetailsCollection(Collections.emptyList());
-
-        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
-
-        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
-            .isNull();
-    }
-
-    @Test
-    void givenStampAndCollectOrderCollection_AndStoreHearingNotice_WhenFinalOrderIsNull_thenHandlerWillAddMultipleNewOrdersToFinalOrder()
-        throws JsonProcessingException {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
-        LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
-        DirectionOrderCollection uploadOrderCollection
-            = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument("newDoc1", "newDoc1")).isOrderStamped(YesOrNo.YES)
-            .orderDateTime(uploadOrderDateTime).build()).build();
-        uploadOrderCollections.add(uploadOrderCollection);
-        DirectionOrderCollection uploadOrderCollection2
-            = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument("newDoc2", "newDoc2")).isOrderStamped(YesOrNo.YES)
-            .orderDateTime(uploadOrderDateTime).build()).build();
-        uploadOrderCollections.add(uploadOrderCollection2);
-        data.setUploadHearingOrder(uploadOrderCollections);
-
-        List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
-
-        DirectionDetail directionDetail = DirectionDetail.builder()
-            .isAnotherHearingYN(YesOrNo.YES)
-            .typeOfHearing(HearingTypeDirection.FH)
-            .hearingTime("12")
-            .timeEstimate("12")
-            .dateOfHearing(LocalDate.of(2020, 1, 1))
-            .localCourt(getTestCourt()).build();
-        DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
-        directionDetailsCollection.add(detailCollection);
-        data.setDirectionDetailsCollection(directionDetailsCollection);
-
-        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(isNull(), eq(AUTH_TOKEN))).thenReturn(List.of());
-        when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
-        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument("stampedDoc1", "stampedDoc1"));
-
-        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
-        additionalHearingDocumentService.storeHearingNotice(caseDetails, AUTH_TOKEN);
-
-        assertThat(data.getFinalOrderCollection()).hasSize(2);
-
-        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
-            .isNotEmpty()
-            .extracting(AdditionalHearingDocumentCollection::getValue)
-            .isNotNull()
-            .extracting(AdditionalHearingDocument::getDocument)
-            .first()
-            .isEqualTo(caseDocument());
-    }
-
-    @Test
-    void givenStampAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrderAndNoAnotherHearing_thenHandle()
-        throws JsonProcessingException {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
-        LocalDateTime orderDateTime = LocalDateTime.of(2022, 11, 1, 17, 10, 10);
-        DirectionOrderCollection orderCollection
-            = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument("url", "abc","binary"))
-            .isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
-        orderCollections.add(orderCollection);
-        data.setFinalOrderCollection(orderCollections);
-        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
-
-        List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
-        LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
-        DirectionOrderCollection uploadOrderCollection
-            = DirectionOrderCollection.builder().value(DirectionOrder
-                .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime)
-                .additionalDocuments(List.of(
-                    DocumentCollectionItem.builder().value(caseDocument("attachment", "attachment.pdf")).build()
-                )).build())
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(caseData)
             .build();
-        uploadOrderCollections.add(uploadOrderCollection);
-        data.setUploadHearingOrder(uploadOrderCollections);
-        when(orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
-        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
-        List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
+        mockConversionAndStamp(originalDoc, stampedDoc);
 
-        DirectionDetail directionDetail = DirectionDetail.builder()
-            .isAnotherHearingYN(YesOrNo.NO)
-            .typeOfHearing(HearingTypeDirection.FH)
-            .hearingTime("12")
-            .timeEstimate("12")
-            .dateOfHearing(LocalDate.of(2020, 1, 1))
-            .localCourt(getTestCourt()).build();
-        DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
-        directionDetailsCollection.add(detailCollection);
-        data.setDirectionDetailsCollection(directionDetailsCollection);
+        // Act
+        additionalHearingDocumentService.stampAndUpdateOrderCollections(caseDetails, AUTH_TOKEN);
 
-        Map<String, Object> caseData = baseCaseData();
-        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
-        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
+        // Assert
+        assertThat(caseData.getUploadHearingOrder())
+            .hasSize(1)
+            .extracting(DirectionOrderCollection::getValue)
+            .extracting(DirectionOrder::getUploadDraftDocument)
+            .isEqualTo(List.of(stampedDoc));
 
-        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, AUTH_TOKEN);
+        assertThat(caseData.getFinalOrderCollection())
+            .hasSize(1)
+            .extracting(DirectionOrderCollection::getValue)
+            .extracting(DirectionOrder::getUploadDraftDocument)
+            .isEqualTo(List.of(stampedDoc));
 
-        assertThat(data.getFinalOrderCollection()).hasSize(2);
-        assertThat(data.getUploadHearingOrder()).hasSize(1);
-        // should retain the uploadHearingOrder additionalDocuments
-        assertThat(data.getUploadHearingOrder()).extracting(DirectionOrderCollection::getValue)
-            .map(DirectionOrder::getAdditionalDocuments).contains(List.of(
-                DocumentCollectionItem.builder().value(caseDocument("attachment", "attachment.pdf")).build()
-            ));
-        assertThat(data.getLatestDraftHearingOrder().getDocumentFilename()).isEqualTo(FILE_NAME);
-        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments()).isNull();
+        assertThat(caseData.getLatestDraftHearingOrder()).isEqualTo(stampedDoc);
+
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), any(), eq(CASE_ID));
+    }
+
+    @Test
+    void givenModifiedOrder_whenUnprocessedOrdersExist_shouldReplaceAndStampAndUpdateOrderCollections() {
+        // Arrange
+        CaseDocument originalDoc = caseDocument("url1", "file1.pdf");
+        CaseDocument stampedDoc  = caseDocument("url1", "file1-stamped.pdf");
+
+        LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
+
+        FinremCaseData caseData = new FinremCaseData();
+
+        //pre-populate existing uploadHearingOrder with same URL to trigger replace
+        setUploadHearingOrder(caseData, originalDoc);
+        //also add unprocessed with same original (so it should replace)
+        caseWithUnprocessed(caseData, originalDoc, uploadOrderDateTime);
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(caseData)
+            .build();
+
+        mockConversionAndStamp(originalDoc, stampedDoc);
+
+        // Act
+        additionalHearingDocumentService.stampAndUpdateOrderCollections(caseDetails, AUTH_TOKEN);
+
+        // Assert
+        assertThat(caseData.getUploadHearingOrder())
+            .hasSize(1)
+            .extracting(DirectionOrderCollection::getValue)
+            .extracting(DirectionOrder::getUploadDraftDocument)
+            .isEqualTo(List.of(stampedDoc));
+
+        assertThat(caseData.getFinalOrderCollection())
+            .hasSize(1)
+            .extracting(DirectionOrderCollection::getValue)
+            .extracting(DirectionOrder::getUploadDraftDocument)
+            .isEqualTo(List.of(stampedDoc));
+
+        assertThat(caseData.getLatestDraftHearingOrder()).isEqualTo(stampedDoc);
+
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), any(), eq(CASE_ID));
+    }
+
+    private void caseWithUnprocessed(FinremCaseData caseData, CaseDocument originalDoc, LocalDateTime uploadOrderDateTime) {
+
+        DirectionOrder directionOrder = DirectionOrder.builder()
+            .uploadDraftDocument(originalDoc)
+            .orderDateTime(uploadOrderDateTime)
+            .isOrderStamped(YesOrNo.NO)
+            .build();
+        DirectionOrderCollection unprocessedOrder = DirectionOrderCollection.builder()
+            .value(directionOrder)
+            .build();
+
+        List<DirectionOrderCollection> unprocessedOrders = List.of(unprocessedOrder);
+
+        caseData.setUnprocessedUploadHearingDocuments(unprocessedOrders);
+    }
+
+    private void mockConversionAndStamp(CaseDocument originalDoc, CaseDocument stampedDoc) {
+        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(any(), eq(AUTH_TOKEN)))
+            .thenReturn(new ArrayList<>());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), eq(CASE_ID)))
+            .thenReturn(originalDoc);
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), any(StampType.class), eq(CASE_ID)))
+            .thenReturn(stampedDoc);
+    }
+
+    private void setUploadHearingOrder(FinremCaseData caseData, CaseDocument originalDoc) {
+        DirectionOrder directionOrder = DirectionOrder.builder()
+            .uploadDraftDocument(originalDoc)
+            .isOrderStamped(YesOrNo.NO)
+            .build();
+        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder()
+            .value(directionOrder)
+            .build();
+        caseData.setUploadHearingOrder(new ArrayList<>(List.of(orderCollection)));
     }
 
     private Court getTestCourt() {
