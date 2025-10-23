@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
@@ -28,4 +29,6 @@ public class DraftDirectionWrapper implements HasCaseDocument {
 
     // temporary field for capturing judge's uploaded approved order
     private List<DraftDirectionOrderCollection> judgeApprovedOrderCollection;
+    // temporary field for capturing cw's uploaded approved order
+    private List<DirectionOrderCollection> cwApprovedOrderCollection;
 }

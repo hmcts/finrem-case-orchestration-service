@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -12,9 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -22,38 +22,28 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class JudgeDraftOrderAboutToSubmitHandlerTest {
 
-    private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
-    private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
-    private static final String FILE_NAME = "abc.pdf";
-
     private JudgeDraftOrderAboutToSubmitHandler handler;
     @Mock
     private HearingOrderService hearingOrderService;
-    @Mock
-    private GenericDocumentService genericDocumentService;
     @Mock
     private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
     @Mock
@@ -63,17 +53,19 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
     @Spy
     private ObjectMapper objectMapper;
 
+    private InOrder inOrder;
+
     @BeforeEach
     void setUp() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
         handler = new JudgeDraftOrderAboutToSubmitHandler(
-                finremCaseDetailsMapper,
+            finremCaseDetailsMapper,
             hearingOrderService,
-            genericDocumentService,
             contestedOrderApprovedLetterService,
             uploadedDraftOrderCategoriser,
             documentWarningsHelper
         );
+        inOrder = Mockito.inOrder(hearingOrderService, uploadedDraftOrderCategoriser, contestedOrderApprovedLetterService);
     }
 
     @Test
@@ -83,8 +75,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
 
     @Test
     void givenDraftOrderUploaded_whenDocumentWarningDetected_thenPopulateWarnings() {
-        //No additional Documents
-        FinremCallbackRequest callbackRequest = setupTestData(Collections.emptyList());
+        FinremCallbackRequest callbackRequest = setupTestDataWithoutAdditionalDocs();
 
         when(documentWarningsHelper.getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN)))
             .thenReturn(List.of("warnings 1"));
@@ -97,78 +88,58 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenNoAdditionalDocuments_whenHandle_thenAllInvocationsAreExecuted() {
-        //No additional Documents
-        FinremCallbackRequest callbackRequest = setupTestData(Collections.emptyList());
+    void givenApprovedOrdersProvided_whenHandle_thenMoveToDraftDirectionOrderCollection() {
+        List<DraftDirectionOrderCollection> uploadingApprovedOrders = List.of(
+            DraftDirectionOrderCollection.builder().value(DraftDirectionOrder.builder().build()).build()
+        );
 
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(hearingOrderService).convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
-        verify(uploadedDraftOrderCategoriser).categorise(any(FinremCaseData.class));
-        verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
-        verify(documentWarningsHelper).getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN));
-        verifyNoInteractions(genericDocumentService); // Ensure no unnecessary document conversions
-    }
-
-    @Test
-    void givenMultipleAdditionalDocuments_whenHandle_thenAllAdditionalDocumentsAreConvertedToPdf() {
-        CaseDocument document1 = CaseDocument.builder().documentFilename("additional doc 1.docx").build();
-        CaseDocument document2 = CaseDocument.builder().documentFilename("additional doc 2.docx").build();
-        CaseDocument pdfConverted1 = caseDocument(FILE_URL, "additional doc 1.pdf", FILE_BINARY_URL);
-        CaseDocument pdfConverted2 = caseDocument(FILE_URL, "additional doc 2.pdf", FILE_BINARY_URL);
-
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(document1, AUTH_TOKEN, "123")).thenReturn(pdfConverted1);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(document2, AUTH_TOKEN, "123")).thenReturn(pdfConverted2);
-
-        DocumentCollectionItem additionalDocument1 = DocumentCollectionItem.builder()
-            .value(document1)
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
+        draftDirectionWrapper.setJudgeApprovedOrderCollection(uploadingApprovedOrders);
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .caseType(CaseType.CONTESTED)
+            .state(State.SCHEDULING_AND_HEARING)
+            .data(caseData).build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .eventType(EventType.JUDGE_DRAFT_ORDER)
+            .caseDetails(finremCaseDetails)
             .build();
-        DocumentCollectionItem additionalDocument2 = DocumentCollectionItem.builder()
-            .value(document2)
-            .build();
-
-        FinremCallbackRequest callbackRequest = setupTestData(List.of(additionalDocument1, additionalDocument2));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getData().getDraftDirectionWrapper().getDraftDirectionOrderCollection())
-            .isNotEmpty()
-            .extracting(DraftDirectionOrderCollection::getValue)
-            .flatExtracting(DraftDirectionOrder::getAdditionalDocuments)
-            .extracting(DocumentCollectionItem::getValue)
-            .containsExactlyInAnyOrder(pdfConverted1, pdfConverted2);
+        FinremCaseData result = response.getData();
 
-        verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(CaseDocument.class),
-            any(String.class), any(String.class));
-        verify(uploadedDraftOrderCategoriser).categorise(any(FinremCaseData.class));
-        verify(hearingOrderService).convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(
-            any(FinremCaseData.class), eq(AUTH_TOKEN));
-        verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
+        assertThat(result.getDraftDirectionWrapper().getJudgeApprovedOrderCollection()).isNull();
+        assertThat(result.getDraftDirectionWrapper().getDraftDirectionOrderCollection()).isEqualTo(uploadingApprovedOrders);
     }
 
-    private FinremCallbackRequest setupTestData(List<DocumentCollectionItem> additionalDocuments) {
-        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+    @Test
+    void givenNoAdditionalDocsUploaded_whenHandle_thenNoAdditionalDocsProcessed() {
+        FinremCallbackRequest callbackRequest = setupTestDataWithoutAdditionalDocs();
 
-        //Create direction order with additional documents (if any)
-        DraftDirectionOrder directionOrder =
-            DraftDirectionOrder.builder()
-                .purposeOfDocument("test")
-                .uploadDraftDocument(caseDocument)
-                .additionalDocuments(additionalDocuments)
-                .build();
+        handler.handle(callbackRequest, AUTH_TOKEN);
 
-        DraftDirectionOrderCollection directionOrderCollection = DraftDirectionOrderCollection.builder().value(directionOrder).build();
+        verifyExpectedInvocations(callbackRequest);
+    }
 
-        //Set up draft direction order collection list
+    private void verifyExpectedInvocations(FinremCallbackRequest callbackRequest) {
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
+        inOrder.verify(hearingOrderService).stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
+        inOrder.verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
+        inOrder.verify(uploadedDraftOrderCategoriser).categorise(finremCaseData);
+    }
+
+    private FinremCallbackRequest setupTestDataWithoutAdditionalDocs() {
         List<DraftDirectionOrderCollection> draftDirectionOrderCollection = new ArrayList<>();
-        draftDirectionOrderCollection.add(directionOrderCollection);
 
         FinremCaseData caseData = FinremCaseData.builder().build();
         DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
         draftDirectionWrapper.setJudgeApprovedOrderCollection(draftDirectionOrderCollection);
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
-            .id(123L)
+            .id(Long.valueOf(CASE_ID))
             .caseType(CaseType.CONTESTED)
             .state(State.SCHEDULING_AND_HEARING)
             .data(caseData).build();
