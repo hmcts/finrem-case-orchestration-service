@@ -105,7 +105,9 @@ class ConsentOrderApprovedDocumentServiceV2Test {
     @Test
     void shouldAddApprovedConsentOrderCoverLetterForVariationOrder() {
         when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(true);
-        when(documentHelper.prepareLetterTemplateData(any(FinremCaseDetails.class), any(DocumentHelper.PaperNotificationRecipient.class))).thenReturn(caseDetails);
+        when(documentHelper.prepareLetterTemplateData(any(FinremCaseDetails.class),
+            any(DocumentHelper.PaperNotificationRecipient.class)))
+            .thenReturn(caseDetails);
         when(consentedApplicationHelper.isVariationOrder(any(FinremCaseData.class))).thenReturn(true);
         when(documentConfiguration.getApprovedVariationOrderNotificationFileName()).thenReturn("VariationOrderApprovedCoverLetter.pdf");
         when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn(APPROVED_CONSENT_ORDER_TEMPLATE);
