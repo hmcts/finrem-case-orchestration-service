@@ -120,22 +120,19 @@ public class HearingOrderService {
         }
     }
 
-    private List<DraftDirectionOrder> convertApprovedOrdersToPdfIfNeeded(FinremCaseData caseData, ApprovedOrderUploader approvedOrderUploader,
-                                                                         String authorisationToken) {
-        final String caseId = caseData.getCcdCaseId();
-        List<? extends UploadedApprovedOrderHolder> orders = ApprovedOrderUploader.CASEWORKER == approvedOrderUploader
-            ? caseData.getDraftDirectionWrapper().getCwApprovedOrderCollection()
-            : caseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection();
-        return emptyIfNull(orders)
-            .stream()
-            .map(orderCollection -> {
-                UploadedApprovedOrder approvedOrder = orderCollection.getValue();
+    private List<DraftDirectionOrder> convertCaseWorkerApprovedOrdersToPdfIfNeeded(FinremCaseData caseData,
+                                                                                   String authorisationToken) {
+        String caseId = caseData.getCcdCaseId();
+        List<? extends UploadedApprovedOrderHolder> caseworkerOrders =
+            emptyIfNull(caseData.getDraftDirectionWrapper().getCwApprovedOrderCollection());
+
+        return caseworkerOrders.stream()
+            .map(orderHolder -> {
+                UploadedApprovedOrder approvedOrder = orderHolder.getValue();
+                CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
+                    approvedOrder.getApprovedOrder(), authorisationToken, caseId);
                 return DraftDirectionOrder.builder()
-                    .uploadDraftDocument(
-                        genericDocumentService.convertDocumentIfNotPdfAlready(
-                            approvedOrder.getApprovedOrder(),
-                            authorisationToken,
-                            caseId))
+                    .uploadDraftDocument(pdfDocument)
                     .additionalDocuments(approvedOrder.getAdditionalDocuments())
                     .build();
             })
@@ -213,8 +210,16 @@ public class HearingOrderService {
         finremCaseData.setFinalOrderCollection(orderDateService.syncCreatedDateAndMarkDocumentStamped(
             finremCaseData.getFinalOrderCollection(), authorisationToken));
 
-        convertApprovedOrdersToPdfIfNeeded(finremCaseData, uploader, authorisationToken)
-            .forEach(order -> handleApprovedOrder(finremCaseData, order, authorisationToken, stampType, caseId, uploader));
+        if (ApprovedOrderUploader.CASEWORKER == uploader) {
+            convertCaseWorkerApprovedOrdersToPdfIfNeeded(finremCaseData, authorisationToken)
+                .forEach(order -> handleApprovedOrder(finremCaseData, order, authorisationToken, stampType, caseId, uploader));
+        } else {
+            List<? extends UploadedApprovedOrderHolder> judgeOrders = emptyIfNull(
+                finremCaseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection());
+            judgeOrders.stream()
+                .map(UploadedApprovedOrderHolder::getValue)
+                .forEach(order -> handleApprovedOrder(finremCaseData, order, authorisationToken, stampType, caseId, uploader));
+        }
     }
 
     private void handleApprovedOrder(FinremCaseData finremCaseData, UploadedApprovedOrder order,
