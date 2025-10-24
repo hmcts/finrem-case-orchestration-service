@@ -55,6 +55,7 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
         log.info("Invoking contested event {} about to start callback for Case ID: {}", callbackRequest.getEventType(), caseId);
         FinremCaseData caseData = caseDetails.getData();
 
+        processOrderService.populateUnprocessedUploadHearingDocuments(caseData);
         processOrderService.populateUnprocessedApprovedDocuments(caseData);
         populateMetaDataFields(caseData);
 
@@ -83,7 +84,7 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
 
     private void populateMetaDataFields(FinremCaseData caseData) {
         caseData.getDraftOrdersWrapper().setIsLegacyApprovedOrderPresent(YesOrNo.forValue(!CollectionUtils
-            .isEmpty(caseData.getUploadHearingOrder())));
+            .isEmpty(caseData.getUnprocessedUploadHearingDocuments())));
         caseData.getDraftOrdersWrapper().setIsUnprocessedApprovedDocumentPresent(YesOrNo.forValue(!ofNullable(caseData.getDraftOrdersWrapper()
             .getUnprocessedApprovedDocuments()).orElse(List.of()).isEmpty()));
     }
