@@ -241,7 +241,7 @@ public class HearingService {
         if (currentCaseRole == null || CASEWORKER.equals(currentCaseRole)) {
             return hearings;
         }
-        return hearings.stream()
+        return emptyIfNull(hearings).stream()
             .filter(item -> getRoles(item).contains(currentCaseRole.getCcdCode()))
             .toList();
     }
