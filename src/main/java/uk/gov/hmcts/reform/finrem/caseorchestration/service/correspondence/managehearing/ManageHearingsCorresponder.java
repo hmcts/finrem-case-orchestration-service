@@ -47,9 +47,9 @@ public class ManageHearingsCorresponder {
      * Begin sending hearing correspondence to parties, included based on the callback request data.
      * No notifications, notices or documents sent if the User has specified that.
      * No notifications, notices or documents sent if the party list is empty.
-     * Loops through each selected party in the hearing and sends using
-     * {@link #sendHearingCorrespondenceByParty}.</p>
-     * @param callbackRequest the callback request containing case and hearing data
+     * Loops through each selected party in the hearing and sends using {@link #sendHearingCorrespondenceByParty}.
+     *
+     * @param callbackRequest   the callback request containing case and hearing data
      * @param userAuthorisation the user authorisation token
      */
     public void sendHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
