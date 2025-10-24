@@ -56,9 +56,17 @@ public class EvidenceManagementUploadService {
     @Value("${document.management.store.upload.url}")
     private String documentManagementStoreUploadUrl;
 
-    public List<FileUploadResponse> upload(List<MultipartFile> files, CaseType caseTypeId, String auth) {
+    /**
+     * Upload documents to the Evidence Management service.
+     *
+     * @param files    the documents to upload
+     * @param caseType the CCD case type of the case that the documents are being uploaded for
+     * @param auth     the user auth token
+     * @return the list of uploaded document details
+     */
+    public List<FileUploadResponse> upload(List<MultipartFile> files, CaseType caseType, String auth) {
         if (featureToggleService.isSecureDocEnabled()) {
-            return uploadToSecDoc(files, caseTypeId, auth);
+            return uploadToSecDoc(files, caseType, auth);
         } else {
             return uploadToDmStore(files, auth);
         }
