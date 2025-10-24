@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -90,7 +91,8 @@ public class GeneralLetterService {
         GeneralLetterWrapper wrapper = caseData.getGeneralLetterWrapper();
         log.info("Generating General letter for Case ID: {}", caseId);
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
-        List<DocumentCollectionItem> pdfGeneralLetterUploadedDocuments = getUploadedDocumentsAsPdfs(authorisationToken, wrapper, caseId);
+        List<DocumentCollectionItem> pdfGeneralLetterUploadedDocuments = getUploadedDocumentsAsPdfs(authorisationToken,
+            wrapper, caseDetails.getCaseType());
 
         addGeneralLetterToCaseData(caseDetails, document, pdfGeneralLetterUploadedDocuments);
         printLatestGeneralLetter(caseDetails, authorisationToken);
@@ -100,7 +102,8 @@ public class GeneralLetterService {
         }
     }
 
-    private List<DocumentCollectionItem> getUploadedDocumentsAsPdfs(String authorisationToken, GeneralLetterWrapper wrapper, Long caseId) {
+    private List<DocumentCollectionItem> getUploadedDocumentsAsPdfs(String authorisationToken, GeneralLetterWrapper wrapper,
+                                                                    CaseType caseType) {
         Optional<List<DocumentCollectionItem>> generalLetterUploadedDocuments = Optional.ofNullable(wrapper.getGeneralLetterUploadedDocuments());
 
         List<DocumentCollectionItem> pdfGeneralLetterUploadedDocuments = new ArrayList<>();
@@ -110,7 +113,7 @@ public class GeneralLetterService {
                 uploadedDocuments.forEach(generalLetterUploadedDocumentCollection -> {
                     CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
                         generalLetterUploadedDocumentCollection.getValue(),
-                        authorisationToken, caseId.toString());
+                        authorisationToken, caseType);
                     pdfGeneralLetterUploadedDocuments.add(DocumentCollectionItem.builder().value(pdfDocument).build());
                 });
                 wrapper.setGeneralLetterUploadedDocuments(pdfGeneralLetterUploadedDocuments);

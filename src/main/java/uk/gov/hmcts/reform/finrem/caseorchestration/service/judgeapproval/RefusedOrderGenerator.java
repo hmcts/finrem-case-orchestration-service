@@ -52,7 +52,7 @@ public class RefusedOrderGenerator {
                 ),
                 documentConfiguration.getContestedDraftOrderNotApprovedTemplate(finremCaseDetails),
                 insertTimestamp(documentConfiguration.getContestedDraftOrderNotApprovedFileName()),
-                finremCaseDetails.getId().toString());
+                finremCaseDetails.getCaseType());
         } finally {
             // Clear the temp values as they are for report generation purpose.
             draftOrdersWrapper.setGeneratedOrderReason(null);

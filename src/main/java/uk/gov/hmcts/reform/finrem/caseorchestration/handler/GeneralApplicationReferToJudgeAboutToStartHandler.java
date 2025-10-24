@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,17 +22,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
-public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCallbackHandler
-    implements GeneralApplicationHandler {
+public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCallbackHandler implements GeneralApplicationHandler {
 
     private final GeneralApplicationHelper helper;
-    private final GeneralApplicationService service;
 
-    public GeneralApplicationReferToJudgeAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, GeneralApplicationHelper helper,
-                                        GeneralApplicationService service) {
+    public GeneralApplicationReferToJudgeAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                             GeneralApplicationHelper helper) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
-        this.service = service;
     }
 
     @Override
@@ -71,7 +67,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
             }
             log.info("Setting refer list if existing general application not moved to collection for Case ID: {}", caseDetails.getId());
 
-            setReferListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
+            setReferListForNonCollectionGeneralApplication(caseDetails, index, userAuthorisation);
 
         } else {
             log.info("Setting refer list for Case ID: {}", caseDetails.getId());
@@ -95,10 +91,9 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
             .toList();
     }
 
-    private void setReferListForNonCollectionGeneralApplication(FinremCaseData caseData,
-                                                                AtomicInteger index,
-                                                                String userAuthorisation, String caseId) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);
+    private void setReferListForNonCollectionGeneralApplication(FinremCaseDetails caseDetails, AtomicInteger index,
+                                                                String userAuthorisation) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseDetails, userAuthorisation);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 
@@ -106,6 +101,6 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
         dynamicListElementsList.add(dynamicListElements);
 
         DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferList(dynamicList);
+        caseDetails.getData().getGeneralApplicationWrapper().setGeneralApplicationReferList(dynamicList);
     }
 }

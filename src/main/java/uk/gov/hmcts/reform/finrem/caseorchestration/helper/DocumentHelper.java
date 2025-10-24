@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -56,7 +55,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -278,7 +276,7 @@ public class DocumentHelper {
 
         // use a utility to handle directionDetailsCollectionList being null as well as empty
         return !CollectionUtils.isEmpty(directionDetailsCollectionList) && YES_VALUE.equalsIgnoreCase(
-            nullToEmpty(directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()));
+            nullToEmpty(directionDetailsCollectionList.getFirst().getDirectionDetailsCollection().getIsAnotherHearingYN()));
     }
 
     public boolean hasAnotherHearing(FinremCaseData caseData) {
@@ -610,14 +608,6 @@ public class DocumentHelper {
             .toList();
     }
 
-    private List<DocumentCollectionItem> covertDocumentCollections(Object object) {
-        if (object == null) {
-            return Collections.emptyList();
-        }
-        return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
-        });
-    }
-
     public List<CaseDocument> getHearingDocumentsAsPdfDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
         FinremCaseData data = caseDetails.getData();
         List<CaseDocument> documents = new ArrayList<>();
@@ -628,7 +618,7 @@ public class DocumentHelper {
             documentCollectionItems.forEach(doc -> {
                 CaseDocument caseDocument = doc.getValue();
                 CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken,
-                    String.valueOf(caseDetails.getId()));
+                    caseDetails.getCaseType());
                 pdfDocuments.add(DocumentCollectionItem.builder().value(pdfDocument).build());
                 documents.add(pdfDocument);
             });

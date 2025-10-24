@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -60,6 +59,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
@@ -99,8 +99,8 @@ class ProcessOrderAboutToSubmitHandlerTest {
     @Test
     void testCanHandle() {
         assertCanHandle(underTest,
-            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.PROCESS_ORDER),
-            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER)
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CONTESTED, EventType.PROCESS_ORDER),
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CONTESTED, EventType.DIRECTION_UPLOAD_ORDER)
         );
     }
 
@@ -154,7 +154,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         List<DirectionOrderCollection> uploadHearingOrder = nullExistingUploadHearingOrder ? null : new ArrayList<>();
         DirectionOrderCollection expectedNewDirectionOrderCollection;
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
             .uploadHearingOrder(uploadHearingOrder)
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
@@ -184,7 +184,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         ));
         DirectionOrderCollection expectedNewDirectionOrderCollection;
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(12345678L, FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(12345678L, CONTESTED, FinremCaseData.builder()
             .uploadHearingOrder(uploadHearingOrder)
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
@@ -215,7 +215,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         mockDocumentStamping(TARGET_DOCUMENT_2, STAMPED_DOCUMENT_2);
         mockDocumentStamping(TARGET_DOCUMENT_3, STAMPED_DOCUMENT_3);
 
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(ADDITIONAL_DOCUMENT_1, AUTH_TOKEN, String.valueOf(CASE_ID)))
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(ADDITIONAL_DOCUMENT_1, AUTH_TOKEN, CONTESTED))
             .thenReturn(CONVERTED_DOCUMENT_1);
 
         DraftOrderDocReviewCollection test1;
@@ -226,7 +226,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         AgreedDraftOrderCollection test6;
         AgreedDraftOrderCollection test7;
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
@@ -274,19 +274,19 @@ class ProcessOrderAboutToSubmitHandlerTest {
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         verify(genericDocumentService, times(3)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
-            eq(StampType.FAMILY_COURT_STAMP), eq(String.valueOf(CASE_ID)));
+            eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED));
 
         //check DraftOrderDocReviewCollection is updated
         assertEquals(STAMPED_DOCUMENT_1, test1.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
-        assertEquals(CONVERTED_DOCUMENT_1, test1.getValue().getAttachments().get(0).getValue());
+        assertEquals(CONVERTED_DOCUMENT_1, test1.getValue().getAttachments().getFirst().getValue());
         assertEquals(STAMPED_DOCUMENT_2, test2.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
 
         //check AgreedDraftOrderCollection is updated
         assertEquals(STAMPED_DOCUMENT_1, test3.getValue().getDraftOrder());
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
-        assertEquals(CONVERTED_DOCUMENT_1, test3.getValue().getAttachments().get(0).getValue());
+        assertEquals(CONVERTED_DOCUMENT_1, test3.getValue().getAttachments().getFirst().getValue());
         assertEquals(STAMPED_DOCUMENT_2, test4.getValue().getDraftOrder());
         assertEquals(PROCESSED, test4.getValue().getOrderStatus());
         assertEquals(STAMPED_DOCUMENT_3, test5.getValue().getDraftOrder());
@@ -310,7 +310,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         AgreedDraftOrderCollection test3;
         AgreedDraftOrderCollection test4;
         AgreedDraftOrderCollection test5;
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
@@ -348,7 +348,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
-            eq(StampType.FAMILY_COURT_STAMP), eq(String.valueOf(CASE_ID)));
+            eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED));
         //Check PsaDocReviewCollection is updated
         assertEquals(STAMPED_DOCUMENT_1, test1.getValue().getPsaDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
@@ -375,7 +375,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         AgreedDraftOrderCollection test3;
         AgreedDraftOrderCollection test4;
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
@@ -411,7 +411,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
-            eq(StampType.FAMILY_COURT_STAMP), any(String.class));
+            eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED));
         //Check PsaDocReviewCollection is updated
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
         assertEquals(STAMPED_DOCUMENT_1, test1.getValue().getPsaDocument());
@@ -425,7 +425,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldStampNewUploadedDocumentsFromUnprocessedApprovedDocuments() throws JsonProcessingException {
+    void shouldStampNewUploadedDocumentsFromUnprocessedApprovedDocuments() {
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
         mockDocumentStamping(TARGET_DOCUMENT_1, STAMPED_DOCUMENT_1);
         mockDocumentStamping(TARGET_DOCUMENT_2, STAMPED_DOCUMENT_2);
@@ -433,7 +433,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         DirectionOrderCollection expectedNewDocument = DirectionOrderCollection.builder().value(DirectionOrder.builder()
             .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build();
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
             .uploadHearingOrder(new ArrayList<>(List.of(
                 DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_4).build()).build()
             )))
@@ -462,7 +462,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
-            eq(StampType.FAMILY_COURT_STAMP), eq(String.valueOf(CASE_ID)));
+            eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED));
     }
 
     @Test
@@ -478,7 +478,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
                 .build())
             .build();
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(EventType.PROCESS_ORDER, FinremCaseDetails.builder()
-            .caseType(CaseType.CONTESTED)
+            .caseType(CONTESTED)
             .data(caseData));
 
         final var response = underTest.handle(callbackRequest, AUTH_TOKEN);
@@ -504,7 +504,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
                 .build())
             .build();
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(EventType.PROCESS_ORDER, FinremCaseDetails.builder()
-            .caseType(CaseType.CONTESTED)
+            .caseType(CONTESTED)
             .data(caseData));
 
         final var response = underTest.handle(callbackRequest, AUTH_TOKEN);
@@ -517,7 +517,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
     }
 
     private void mockDocumentStamping(CaseDocument originalDocument, CaseDocument stampedDocument) {
-        when(genericDocumentService.stampDocument(originalDocument, AUTH_TOKEN, FAMILY_COURT_STAMP, String.valueOf(CASE_ID)))
+        when(genericDocumentService.stampDocument(originalDocument, AUTH_TOKEN, FAMILY_COURT_STAMP, CONTESTED))
             .thenReturn(stampedDocument);
     }
 

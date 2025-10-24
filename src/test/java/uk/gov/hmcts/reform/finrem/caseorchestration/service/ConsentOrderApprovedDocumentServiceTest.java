@@ -81,6 +81,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test-mock-feign-clients")
@@ -308,7 +309,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void givenNullDocumentInPensionDocuments_whenStampingDocuments_thenTheNullValueIsIgnored() {
         Mockito.reset(pdfStampingServiceMock);
         when(pdfStampingServiceMock.stampDocument(
-            document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
+            document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, CONTESTED))
             .thenReturn(document());
 
         when(documentHelper.deepCopy(any(), any())).thenReturn(pensionDocumentData());
@@ -319,30 +320,30 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
             asList(pensionDocumentData(), pensionCollectionDataWithNullDocument);
 
         List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService
-            .stampPensionDocuments(pensionDocuments, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, LocalDate.now(), caseId);
+            .stampPensionDocuments(pensionDocuments, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, LocalDate.now(), CONTESTED);
 
         assertThat(stampPensionDocuments, hasSize(1));
     }
 
     @Test
     public void stampsAndPopulatesCaseDataForContestedConsentOrder() throws Exception {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, CONTESTED))
             .thenReturn(document());
         finremCaseDetails = defaultConsentedFinremCaseDetails();
         FinremCaseData caseData = finremCaseDetails.getData();
         caseData.setConsentOrder(caseDocument());
 
-        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseId);
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(finremCaseDetails, AUTH_TOKEN);
         assertThat(getDocumentList(caseData), hasSize(1));
 
-        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseId);
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(finremCaseDetails, AUTH_TOKEN);
         assertThat(getDocumentList(caseData), hasSize(2));
     }
 
     @Test
     public void givenFinremCaseDetails_whenAddGenApprovedDocs_thenCaseDocsAdded() {
         when(pdfStampingServiceMock.stampDocument(
-            any(Document.class), eq(AUTH_TOKEN), eq(false), eq(StampType.FAMILY_COURT_STAMP), eq(caseId)))
+            any(Document.class), eq(AUTH_TOKEN), eq(false), eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED)))
             .thenReturn(document());
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);

@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService.CASE_DATA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService.CASE_DETAILS;
@@ -80,7 +81,7 @@ public class NocDocumentServiceBaseTestSetup {
     protected void assertAndVerifyDocumentsAreGenerated(CaseDocument caseDocument) {
         assertNotNull(caseDocument);
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), notiicationLettersDetailsMapCaptor.capture(),
-            eq(DOC_TEMPLATE), eq(DOC_FILENAME), eq("1234"));
+            eq(DOC_TEMPLATE), eq(DOC_FILENAME), eq(CONTESTED));
     }
 
     protected void assertPlaceHoldersMap(Map placeholdersMap) {
