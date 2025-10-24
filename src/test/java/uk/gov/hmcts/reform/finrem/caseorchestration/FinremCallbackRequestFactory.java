@@ -9,6 +9,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 public class FinremCallbackRequestFactory {
 
+    private static final CaseType NULL_CASE_TYPE = null;
+    private static final State NULL_STATE = null;
+    private static final Long NULL_CASE_ID = null;
+
     private FinremCallbackRequestFactory() {
         // all access through static methods
     }
@@ -17,16 +21,25 @@ public class FinremCallbackRequestFactory {
         return from(id, FinremCaseData.builder().build());
     }
 
+    public static FinremCallbackRequest from() {
+        return from(FinremCaseData.builder().build());
+    }
+
     public static FinremCallbackRequest from(FinremCaseData caseData) {
-        return from(null, caseData);
+        return from(NULL_CASE_ID, caseData);
     }
 
     public static FinremCallbackRequest from(Long id, FinremCaseData caseData) {
-        return from(id, null, caseData, null);
+        return from(id, NULL_CASE_TYPE, caseData, NULL_STATE);
+    }
+
+    public static FinremCallbackRequest from(Long id, FinremCaseData caseDataBefore, FinremCaseData caseData) {
+        return from(FinremCaseDetailsBuilderFactory.from(id, NULL_CASE_TYPE, caseDataBefore, NULL_STATE),
+            FinremCaseDetailsBuilderFactory.from(id, NULL_CASE_TYPE, caseData, NULL_STATE));
     }
 
     public static FinremCallbackRequest from(Long id, FinremCaseData caseData, State state) {
-        return from(id, null, caseData, state);
+        return from(id, NULL_CASE_TYPE, caseData, state);
     }
 
     public static FinremCallbackRequest from(Long id, CaseType caseType, FinremCaseData caseData) {

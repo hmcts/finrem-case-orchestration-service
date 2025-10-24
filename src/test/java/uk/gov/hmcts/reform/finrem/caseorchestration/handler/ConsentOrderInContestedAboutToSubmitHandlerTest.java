@@ -9,6 +9,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -35,7 +35,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -81,7 +80,7 @@ class ConsentOrderInContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenNonConsentedInContestedCase_whenHandle_thenGenerateMiniFormA() {
-        FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(Long.valueOf(CASE_ID));
 
         CaseDetails caseDetails = mock(CaseDetails.class);
         CaseDocument expectedMiniFormA = mock(CaseDocument.class);
@@ -106,7 +105,7 @@ class ConsentOrderInContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenConsentedInContestedCase_whenHandle_thenGenerateConsentedInContestedMiniFormA() {
-        FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from();
 
         CaseDetails caseDetails = mock(CaseDetails.class);
         CaseDocument expectedConsentedInContestedMiniFormA = mock(CaseDocument.class);
@@ -132,7 +131,7 @@ class ConsentOrderInContestedAboutToSubmitHandlerTest {
     @ValueSource(booleans = {true, false})
     @SuppressWarnings("unchecked")
     void givenAnyCase_whenHandle_thenDocumentWarningsPopulated(boolean noWarnings) {
-        FinremCallbackRequest finremCallbackRequest = buildBaseCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from();
 
         when(documentWarningsHelper.getDocumentWarnings(any(), any(), any())).thenReturn(noWarnings ? List.of()
             : List.of("warning1"));
@@ -155,16 +154,5 @@ class ConsentOrderInContestedAboutToSubmitHandlerTest {
             .getFirst().getUploadingDocuments()).contains(consentOrder);
         assertThat(lambdaCaptor.getValue().apply(FinremCaseData.builder().consentOrder(null).build())
             .getFirst().getUploadingDocuments()).isEmpty();
-    }
-
-    private FinremCallbackRequest buildBaseCallbackRequest() {
-        FinremCallbackRequest mockedCallbackRequest = mock(FinremCallbackRequest.class);
-        FinremCaseDetails mockedCaseDetails = mock(FinremCaseDetails.class);
-        when(mockedCallbackRequest.getCaseDetails()).thenReturn(mockedCaseDetails);
-
-        FinremCaseData mockedCaseData = spy(FinremCaseData.class);
-        when(mockedCaseDetails.getData()).thenReturn(mockedCaseData);
-        when(mockedCaseDetails.getId()).thenReturn(Long.valueOf(CASE_ID));
-        return mockedCallbackRequest;
     }
 }

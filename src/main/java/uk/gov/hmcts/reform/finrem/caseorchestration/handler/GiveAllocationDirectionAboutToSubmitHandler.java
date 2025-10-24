@@ -38,8 +38,8 @@ public class GiveAllocationDirectionAboutToSubmitHandler extends FinremCallbackH
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("About to Submit handler for FR_giveAllocationDirections Case ID: {}", caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getData();
 

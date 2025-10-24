@@ -37,7 +37,7 @@ public class ConsentApplicationApprovedInContestedAboutToSubmitHandler extends F
         FinremCaseData caseData = caseDetails.getData();
 
         consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData,
-            userAuthorisation, caseDetails.getId().toString());
+            userAuthorisation, caseDetails.getCaseIdAsString());
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();

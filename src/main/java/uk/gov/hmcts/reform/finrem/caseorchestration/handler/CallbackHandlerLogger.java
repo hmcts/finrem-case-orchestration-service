@@ -54,7 +54,7 @@ public class CallbackHandlerLogger {
         CaseType caseType = callbackRequest.getCaseDetails().getCaseType();
         EventType eventType = callbackRequest.getEventType();
         String ccdEventType = eventType == null ? "null" : eventType.getCcdType();
-        String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
+        String caseId = callbackRequest.getCaseDetails().getCaseIdAsString();
 
         return String.format("===> Case ID %s: Handling %s %s callback for event %s",
                 caseId, caseType, callbackType, ccdEventType);

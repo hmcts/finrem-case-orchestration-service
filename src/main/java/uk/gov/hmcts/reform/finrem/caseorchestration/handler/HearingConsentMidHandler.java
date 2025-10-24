@@ -38,9 +38,9 @@ public class HearingConsentMidHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for Case ID: {}", EventType.LIST_FOR_HEARING_CONSENTED, caseId);
+        String caseId = caseDetails.getCaseIdAsString();
 
         FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
