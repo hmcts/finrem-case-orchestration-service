@@ -24,7 +24,7 @@ public class SolicitorCreateConsentedAboutToStartHandler implements CallbackHand
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.SOLICITOR_CREATE.equals(eventType));
+            && EventType.SOLICITOR_CREATE.equals(eventType);
     }
 
     @Override

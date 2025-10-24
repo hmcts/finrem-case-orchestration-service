@@ -97,10 +97,11 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData)
-            .errors(getPostCodeErrors(finremCaseDetails))
-            .build();
+        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
+        errors.addAll(getPostCodeErrors(finremCaseDetails));
+      
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors)
+            .data(finremCaseData).build();
     }
 
     private void considerContestedMiniFormA(FinremCaseDetails finremCaseDetails,
