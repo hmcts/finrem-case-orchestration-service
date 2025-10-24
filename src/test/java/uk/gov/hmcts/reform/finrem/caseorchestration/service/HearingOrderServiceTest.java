@@ -168,8 +168,8 @@ class HearingOrderServiceTest {
                 inOrder.verify(orderDateService, times(isCaseworkerUao ? 1 : 0))
                     .syncCreatedDateAndMarkDocumentNotStamped(existingUploadHearingOrderIsEmpty, AUTH_TOKEN);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
-                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 if (isCaseworkerUao) {
+                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                     inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
                     assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
                     assertFinalOrderCollection(finremCaseData,
@@ -178,7 +178,7 @@ class HearingOrderServiceTest {
                     assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(stampedUao1Pdf, YesOrNo.YES));
                 } else {
                     // For judge, the uploaded hearing order is the PDF, not stamped
-                    assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(uao1Pdf, YesOrNo.NO));
+                    assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(uao1Docx, YesOrNo.NO));
                 }
             }
         }
@@ -233,8 +233,8 @@ class HearingOrderServiceTest {
                     .syncCreatedDateAndMarkDocumentNotStamped(existingUploadHearingOrderIsEmpty, AUTH_TOKEN);
                 verifyAdditionalDocsConversionToPdf(inOrder);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
-                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 if (isCaseworkerUao) {
+                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                     inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
                     assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
                     assertFinalOrderCollection(finremCaseData,
@@ -251,7 +251,7 @@ class HearingOrderServiceTest {
                         YesOrNo.YES));
                 } else {
                     // For judge, the uploaded hearing order is the PDF, not stamped
-                    assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(uao1Pdf, List.of(
+                    assertUploadHearingOrder(finremCaseData, createUploadHearingEntry(uao1Docx, List.of(
                         DocumentCollectionItem.fromCaseDocument(additionalDoc1Pdf),
                         DocumentCollectionItem.fromCaseDocument(additionalDoc2Pdf)),
                         YesOrNo.NO));
@@ -311,9 +311,9 @@ class HearingOrderServiceTest {
                 inOrder.verify(orderDateService, times(isCaseworkerUao ? 1 : 0))
                     .syncCreatedDateAndMarkDocumentNotStamped(existingUploadHearingOrderIsEmpty, AUTH_TOKEN);
                 verifyAdditionalDocsConversionToPdf(inOrder);
-                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
-                inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao2Docx, AUTH_TOKEN, CASE_ID);
                 if (isCaseworkerUao) {
+                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
+                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao2Docx, AUTH_TOKEN, CASE_ID);
                     inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
                     inOrder.verify(genericDocumentService).stampDocument(uao2Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
 
@@ -334,11 +334,11 @@ class HearingOrderServiceTest {
                     );
                 } else {
                     assertUploadHearingOrder(finremCaseData,
-                        createUploadHearingEntry(uao1Pdf, List.of(
+                        createUploadHearingEntry(uao1Docx, List.of(
                             DocumentCollectionItem.fromCaseDocument(additionalDoc1Pdf),
                             DocumentCollectionItem.fromCaseDocument(additionalDoc2Pdf)
                         ), YesOrNo.NO),
-                        createUploadHearingEntry(uao2Pdf, null, YesOrNo.NO)
+                        createUploadHearingEntry(uao2Docx, null, YesOrNo.NO)
                     );
                 }
             }
@@ -392,8 +392,8 @@ class HearingOrderServiceTest {
                     .syncCreatedDateAndMarkDocumentNotStamped(existingUploadHearingOrderIsEmpty, AUTH_TOKEN);
                 verifyAdditionalDocsConversionToPdf(inOrder);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
-                inOrder.verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                 if (isCaseworkerUao) {
+                    inOrder.verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
                     inOrder.verify(genericDocumentService, times(2)).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
 
                     assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
@@ -412,11 +412,11 @@ class HearingOrderServiceTest {
                     );
                 } else {
                     assertUploadHearingOrder(finremCaseData,
-                        createUploadHearingEntry(uao1Pdf, List.of(
+                        createUploadHearingEntry(uao1Docx, List.of(
                             DocumentCollectionItem.fromCaseDocument(additionalDoc1Pdf),
                             DocumentCollectionItem.fromCaseDocument(additionalDoc2Pdf)
                         ), YesOrNo.NO),
-                        createUploadHearingEntry(uao1Pdf, null, YesOrNo.NO)
+                        createUploadHearingEntry(uao1Docx, null, YesOrNo.NO)
                     );
                 }
             }
