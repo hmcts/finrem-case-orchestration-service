@@ -68,6 +68,10 @@ public class EvidenceManagementUploadService {
         if (featureToggleService.isSecureDocEnabled()) {
             return uploadToSecDoc(files, caseType, auth);
         } else {
+            if (caseType == null) {
+                log.error("Document upload: caseType is null. This needs fixing before enabling Secure Document Store.");
+            }
+
             return uploadToDmStore(files, auth);
         }
     }
