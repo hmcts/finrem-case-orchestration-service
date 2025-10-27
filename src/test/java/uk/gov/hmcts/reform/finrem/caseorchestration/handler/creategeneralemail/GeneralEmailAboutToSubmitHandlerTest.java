@@ -21,11 +21,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailHolder
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.InvalidEmailAddressException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.SendEmailException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralEmailDocumentCategoriser;
+import uk.gov.service.notify.NotificationClientException;
 
 import java.util.List;
 
@@ -33,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -173,6 +177,26 @@ class GeneralEmailAboutToSubmitHandlerTest {
         InOrder inOrderContested = inOrder(notificationService, generalEmailWrapper);
         inOrderContested.verify(notificationService, times(1)).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
         inOrderContested.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
+    }
+
+    @Test
+    void givenInvalidEmailAddressException_whenHandled_thenReturnError() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(true);
+        doThrow(new InvalidEmailAddressException(mock(NotificationClientException.class)))
+            .when(notificationService).sendConsentGeneralEmail(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).containsOnly("Not a valid email address");
+    }
+
+    @Test
+    void givenSendEmailException_whenHandled_thenReturnError() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(true);
+        doThrow(new SendEmailException(mock(NotificationClientException.class)))
+            .when(notificationService).sendConsentGeneralEmail(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).containsOnly("An error occurred when sending the email");
     }
 
     private void verifyDocumentCategory(FinremCallbackRequest callbackRequest, DocumentCategory category) {

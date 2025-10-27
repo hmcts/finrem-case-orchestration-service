@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -105,13 +105,17 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         aboutToSubmitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
             finremCaseDetailsMapper, helper, gaDirectionService, gaService, manageHearingActionService, generalApplicationsCategoriser,
             hearingCorrespondenceHelper);
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(
+            List.of()
+        ).build();
+        when(partyService.getAllActivePartyList(any(FinremCaseDetails.class)))
+            .thenReturn(dynamicMultiSelectList);
     }
 
     @Test
     void testCanHandle() {
-        assertCanHandle(aboutToSubmitHandler,
-            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
-        );
+        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
     }
 
     /**
