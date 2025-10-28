@@ -220,7 +220,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
 
     private void setHearingDetails(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
         HearingTabItem hearingTabItem = hearingCorrespondenceHelper.getHearingInContextFromTab(caseDetails.getData());
-        items.setHearingDetailsForGeneralApplication(hearingTabItem);
+        items.setHearingDetailsForGeneralApplication(HearingTabItem.fromHearingTabItemMarkDuplicateDocs(hearingTabItem));
     }
 
     private void updateApplicationStatus(GeneralApplicationItems items, String status, String caseId) {
