@@ -90,7 +90,7 @@ public class EvidenceManagementUploadService {
     private List<FileUploadResponse> uploadToSecDoc(List<MultipartFile> files, @NonNull CaseType caseType, String auth)
         throws HttpClientErrorException {
         IdamToken idamTokens = idamAuthService.getIdamToken(auth);
-        log.info("EMSDocStore Upload files: {} and case type: {}", files.toString(), caseType.getCcdType());
+        log.info("EMSDocStore Upload files: {} and case type: {}", files, caseType.getCcdType());
 
         UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(idamTokens.getIdamOauth2Token(),
             idamTokens.getServiceAuthorization(), caseType.getCcdType(), JURISDICTION_ID, files);
