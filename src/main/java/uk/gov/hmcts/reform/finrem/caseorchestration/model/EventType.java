@@ -86,6 +86,7 @@ public enum EventType {
     MANAGE_HEARING_BUNDLES("FR_manageHearingBundles"),
     MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
     UPDATE_CONTACT_DETAILS("FR_updateContactDetails"),
+    UPDATE_ORGANISATION("FR_updateOrganisation"),
     CONSENT_SEND_ORDER_FOR_APPROVED_ORDER("FR_sendOrderForApproved"),
     HIDE_CASE("FR_hideCase"),
     UNHIDE_CASE("FR_unhideCase"),
@@ -96,7 +97,6 @@ public enum EventType {
     APPROVE_ORDERS("FR_approveOrders"),
     MANAGE_EXPRESS_CASE("FR_manageExpressCase"),
     MANAGE_HEARINGS_MIGRATION("FR_manageHearingsMigration"),
-    UPDATE_ORGANISATION("FR_updateOrganisation"),
     FR_HWF_DECISION_MADE("FR_HWFDecisionMade"),
     FR_HWF_DECISION_MADE_FROM_AWAITING_PAYMENT("FR_HWFDecisionMadeFromAwaitingPayment"),
     @JsonEnumDefaultValue
