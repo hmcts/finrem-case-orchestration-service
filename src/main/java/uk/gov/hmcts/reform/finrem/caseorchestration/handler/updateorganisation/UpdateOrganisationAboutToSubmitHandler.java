@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.ApplicantSolicitorDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -22,13 +22,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 @Service
 public class UpdateOrganisationAboutToSubmitHandler extends FinremCallbackHandler {
 
-    public UpdateOrganisationAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final ApplicantSolicitorDetailsValidator applicantSolicitorDetailsValidator;
+
+    public UpdateOrganisationAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                  ApplicantSolicitorDetailsValidator applicantSolicitorDetailsValidator) {
         super(finremCaseDetailsMapper);
+        this.applicantSolicitorDetailsValidator = applicantSolicitorDetailsValidator;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return ABOUT_TO_SUBMIT.equals(callbackType) && CONSENTED.equals(caseType) && UPDATE_ORGANISATION.equals(eventType);
+        return ABOUT_TO_SUBMIT.equals(callbackType)
+            && CONSENTED.equals(caseType)
+            && UPDATE_ORGANISATION.equals(eventType);
     }
 
     @Override
@@ -39,7 +45,8 @@ public class UpdateOrganisationAboutToSubmitHandler extends FinremCallbackHandle
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .errors(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData))
-            .data(finremCaseData).build();
+            .data(finremCaseData)
+            .errors(applicantSolicitorDetailsValidator.validate(finremCaseData))
+            .build();
     }
 }
