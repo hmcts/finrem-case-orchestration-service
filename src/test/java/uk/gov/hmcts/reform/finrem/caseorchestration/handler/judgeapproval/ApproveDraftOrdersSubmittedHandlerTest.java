@@ -81,7 +81,7 @@ class ApproveDraftOrdersSubmittedHandlerTest {
         assertThat(correspondenceRequest.caseDetails()).isEqualTo(request.getCaseDetails());
         assertThat(correspondenceRequest.refusedOrders())
             .extracting(RefusedOrder::getJudgeFeedback)
-            .containsExactlyInAnyOrder("order 4", "order 2");
+            .containsExactlyInAnyOrder("order 1", "order 2");
     }
 
     @Test
