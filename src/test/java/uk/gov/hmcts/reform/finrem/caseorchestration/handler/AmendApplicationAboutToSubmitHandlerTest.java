@@ -287,7 +287,6 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-
         // Assert
         assertThat(response.getErrors()).containsExactlyInAnyOrder(
             "Postcode field is required for applicant solicitor address.",
