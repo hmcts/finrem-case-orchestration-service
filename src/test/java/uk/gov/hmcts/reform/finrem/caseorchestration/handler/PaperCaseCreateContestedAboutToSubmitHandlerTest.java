@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -22,6 +23,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -44,6 +47,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG2_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
@@ -272,5 +277,31 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
     private FinremCallbackRequest buildFinremCallbackRequest(FinremCaseData finremCaseData) {
         return FinremCallbackRequestFactory.from(CASE_ID, CaseType.CONTESTED,
             finremCaseData, mock(State.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenContestedCase_whenApplicantAndRespondentOrganisationPolicyAreTheSame_thenShowError(boolean happyPath) {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseDetails.getState()).thenReturn(State.APPLICATION_SUBMITTED);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+        when(finremCaseDetails.getCaseType()).thenReturn(CaseType.CONTESTED);
+
+        when(finremCaseData.getApplicantOrganisationPolicy()).thenReturn(OrganisationPolicy
+            .builder().organisation(Organisation.builder().organisationID(TEST_ORG_ID).build())
+            .build());
+        when(finremCaseData.getRespondentOrganisationPolicy()).thenReturn(OrganisationPolicy
+            .builder().organisation(Organisation.builder().organisationID(happyPath ? TEST_ORG2_ID : TEST_ORG_ID).build())
+            .build());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        if (happyPath) {
+            assertThat(response.getErrors()).isEmpty();
+        } else {
+            assertThat(response.getErrors()).contains("Solicitor can only represent one party.");
+        }
     }
 }
