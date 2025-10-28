@@ -42,7 +42,7 @@ public class ManualPaymentAboutToSubmitHandler extends FinremCallbackHandler {
         List<PaymentDocumentCollection> paymentDocuments = caseData.getCopyOfPaperFormA();
 
         List<PaymentDocumentCollection> paymentList
-            = paymentDocuments.stream().map(payment -> covertToPdf(payment.getValue(), userAuthorisation,
+            = paymentDocuments.stream().map(payment -> convertToPdf(payment.getValue(), userAuthorisation,
                 callbackRequest.getCaseDetails().getCaseType()))
             .toList();
         caseData.setCopyOfPaperFormA(paymentList);
@@ -51,7 +51,7 @@ public class ManualPaymentAboutToSubmitHandler extends FinremCallbackHandler {
             .data(caseData).build();
     }
 
-    private PaymentDocumentCollection covertToPdf(PaymentDocument paymentDocument, String userAuthorisation, CaseType caseType) {
+    private PaymentDocumentCollection convertToPdf(PaymentDocument paymentDocument, String userAuthorisation, CaseType caseType) {
 
         return PaymentDocumentCollection.builder()
             .value(PaymentDocument.builder().typeOfDocument(paymentDocument.getTypeOfDocument())
