@@ -936,7 +936,10 @@ public class FinremCaseData implements HasCaseDocument {
         if (frc != null) {
             return Map.of(
                 RegionSouthEastFrc.BEDFORDSHIRE, getCourtListIdOrDefault(courtList.getBedfordshireCourt()),
+                // For contested FRCs
                 RegionSouthEastFrc.KENT_FRC, getCourtListIdOrDefault(courtList.getKentSurreyCourt()),
+                // For consented FRCs
+                RegionSouthEastFrc.KENT, getCourtListIdOrDefault(courtList.getKentSurreyCourt()),
                 RegionSouthEastFrc.THAMES_VALLEY, getCourtListIdOrDefault(courtList.getThamesValleyCourt())
             ).get(frc).getSelectedCourtId();
         } else {
