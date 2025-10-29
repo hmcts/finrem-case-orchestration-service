@@ -48,9 +48,9 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
         FinremCallbackRequest callbackRequest,
         String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final String caseId = String.valueOf(caseDetails.getId());
-        log.info("Received on start request to outcome decision general application for Case ID: {}", caseId);
+        final String caseId = caseDetails.getCaseIdAsString();
         FinremCaseData caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
@@ -86,7 +86,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler extends FinremCallbac
     }
 
     private void migrateExistingApplication(FinremCaseDetails caseDetails, String userAuthorisation)  {
-        String caseId = String.valueOf(caseDetails.getId());
+        String caseId = caseDetails.getCaseIdAsString();
         FinremCaseData caseData = caseDetails.getData();
         GeneralApplicationCollectionData data =
             helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
