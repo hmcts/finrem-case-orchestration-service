@@ -63,7 +63,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
         FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData caseData = caseDetails.getData();
@@ -106,7 +106,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         FinremCaseData caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
-        String caseId = caseDetails.getId().toString();
+        String caseId = caseDetails.getCaseIdAsString();
         log.info("Map existing general application to collection for Case ID: {}", caseId);
         GeneralApplicationCollectionData data = helper.mapExistingGeneralApplicationToData(caseDetails, userAuthorisation);
         if (data != null) {

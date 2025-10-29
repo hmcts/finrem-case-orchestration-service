@@ -484,7 +484,7 @@ public class DocumentHelper {
         Long caseId = finremCaseDetails.getId();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         Map<String, Object> caseData = caseDetails.getData();
-        String ccdNumber = nullToEmpty((finremCaseDetails.getId()));
+        String ccdNumber = finremCaseDetails.getCaseIdAsString();
         String applicantName = finremCaseDetails.getData().getFullApplicantName();
         String respondentName = finremCaseDetails.getData().getRespondentFullName();
 

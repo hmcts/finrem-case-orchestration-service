@@ -43,9 +43,9 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler extends FinremCal
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
         FinremCallbackRequest callbackRequest,
         String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Received on start request to refer general application for Case ID: {}", caseId);
+        String caseId = caseDetails.getCaseIdAsString();
 
         FinremCaseData caseData = caseDetails.getData();
         caseData.getGeneralApplicationWrapper().setGeneralApplicationReferList(null);

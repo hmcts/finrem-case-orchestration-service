@@ -46,9 +46,9 @@ public class GeneralApplicationOutcomeAboutToStartHandler extends FinremCallback
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
         FinremCallbackRequest callbackRequest,
         String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Received on start request to outcome general application for Case ID: {}", caseId);
+        String caseId = caseDetails.getCaseIdAsString();
         FinremCaseData caseData = caseDetails.getData();
         helper.populateGeneralApplicationSender(
             caseData, caseData.getGeneralApplicationWrapper().getGeneralApplications());
