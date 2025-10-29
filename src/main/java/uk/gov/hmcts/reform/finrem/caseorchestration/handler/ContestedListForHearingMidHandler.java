@@ -31,16 +31,15 @@ public class ContestedListForHearingMidHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.LIST_FOR_HEARING.equals(eventType));
+            && EventType.LIST_FOR_HEARING.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for Case ID: {}",
-            EventType.LIST_FOR_HEARING, caseId);
+        String caseId = caseDetails.getCaseIdAsString();
         FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
         if (caseData.getListForHearingWrapper().getAdditionalHearingDocumentsOption().isYes()) {
