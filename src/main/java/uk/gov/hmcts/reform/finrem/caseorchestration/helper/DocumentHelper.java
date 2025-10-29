@@ -91,7 +91,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
@@ -285,14 +284,6 @@ public class DocumentHelper {
         Optional<DirectionDetailCollection> detailCollection
             = directionDetailsCollection.stream().filter(e -> e.getValue().getIsAnotherHearingYN().isYes()).findAny();
         return detailCollection.isPresent();
-    }
-
-    public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {
-        if (isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
-            log.warn("Latest general order not found for printing for case");
-            return null;
-        }
-        return convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
     }
 
     public CaseDocument getLatestGeneralOrder(FinremCaseData caseData) {
@@ -690,13 +681,6 @@ public class DocumentHelper {
             return INTERVENER_THREE;
         } else if (IntervenerType.INTERVENER_FOUR.equals(intervenerWrapper.getIntervenerType())) {
             return INTERVENER_FOUR;
-        }
-        return null;
-    }
-
-    public CaseDocument nullCheckAndConvertToCaseDocument(Object object) {
-        if (object != null) {
-            return objectMapper.convertValue(object, CaseDocument.class);
         }
         return null;
     }
