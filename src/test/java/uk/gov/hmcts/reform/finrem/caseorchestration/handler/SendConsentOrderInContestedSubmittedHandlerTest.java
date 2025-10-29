@@ -40,7 +40,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARTIES_ON_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -91,7 +90,6 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
         FinremCaseDetails finremCaseDetails = finremCallbackRequest.getCaseDetails();
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, caseDocument());
         setupFinremData(finremCaseDetails);
         setupData(caseDetails);
         when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
@@ -112,7 +110,6 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
         FinremCaseDetails finremCaseDetails = finremCallbackRequest.getCaseDetails();
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, caseDocument());
         setupFinremData(finremCaseDetails);
         setupData(caseDetails);
         when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
@@ -132,7 +129,6 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, caseDocument());
         FinremCaseDetails finremCaseDetails = finremCallbackRequest.getCaseDetails();
         setupFinremData(finremCaseDetails);
         setupData(caseDetails);
@@ -153,7 +149,6 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, caseDocument());
         FinremCaseDetails finremCaseDetails = finremCallbackRequest.getCaseDetails();
         setupFinremData(finremCaseDetails);
         setupData(caseDetails);
