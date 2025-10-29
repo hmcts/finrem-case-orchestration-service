@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -49,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENTS_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARTIES_ON_CASE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -85,7 +85,7 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
 
     @Test
     void testHandlerCanHandle() {
-        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING);
+        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CONTESTED, EventType.LIST_FOR_HEARING);
     }
 
     @Test
@@ -143,7 +143,7 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         CaseDocument document = caseDocument("http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
                 "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
         when(objectMapper.convertValue(any(), eq(CaseDocument.class))).thenReturn(document);
-        when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), anyString())).thenReturn(document);
+        when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), eq(CONTESTED))).thenReturn(document);
         when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(true);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes(), equalTo(caseDocument()));
@@ -188,7 +188,7 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         CaseDocument document = caseDocument("http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
             "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
         when(objectMapper.convertValue(any(), eq(CaseDocument.class))).thenReturn(document);
-        when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), anyString())).thenReturn(document);
+        when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), eq(CONTESTED))).thenReturn(document);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes(), equalTo(caseDocument()));
         assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp(), equalTo(caseDocument()));
@@ -232,7 +232,7 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         CaseDocument document = caseDocument("http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
                 "api.docx", "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary");
         when(objectMapper.convertValue(any(), eq(CaseDocument.class))).thenReturn(document);
-        when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), anyString())).thenReturn(document);
+        when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), eq(CONTESTED))).thenReturn(document);
         when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(true);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);

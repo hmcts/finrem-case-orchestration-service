@@ -132,7 +132,7 @@ public class ApprovedOrderNoticeOfHearingService {
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, mapOfLetterDetails,
             documentConfiguration.getAdditionalHearingTemplate(),
-            documentConfiguration.getAdditionalHearingFileName(), caseDetails.getId().toString());
+            documentConfiguration.getAdditionalHearingFileName(), caseDetails.getCaseType());
 
     }
 

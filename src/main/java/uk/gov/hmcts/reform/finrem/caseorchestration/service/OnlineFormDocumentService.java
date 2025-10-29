@@ -100,7 +100,7 @@ public class OnlineFormDocumentService {
             contestedMiniFormPlaceholdersMap,
             contestedMiniFormTemplate,
             documentConfiguration.getContestedMiniFormFileName(),
-            caseDetails.getId().toString());
+            caseDetails.getCaseType());
     }
 
     public CaseDocument generateDraftContestedMiniFormA(String authorisationToken, CaseDetails caseDetails) {
@@ -140,7 +140,7 @@ public class OnlineFormDocumentService {
             contestedDraftMiniFormPlaceholdersMap,
             contestedDraftMiniFormTemplate,
             documentConfiguration.getContestedDraftMiniFormFileName(),
-            caseDetails.getId().toString());
+            caseDetails.getCaseType());
     }
 
     private CaseDetails translateOptions(CaseDetails caseDetails) {

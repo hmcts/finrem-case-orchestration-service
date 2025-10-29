@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
@@ -28,7 +29,6 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
     private static final String UPLOADED_FILE_URL = "http://localhost:8080/documents/6";
     private static final String AUTH_TOKEN = "AAAAAAA";
     private static final String AUTHORIZATION_TOKEN_HEADER = "Authorization";
-    private static final String REQUEST_ID_HEADER = "requestId";
     private static final String CONTENT_TYPE_HEADER = "content-type";
     private static final String EM_CLIENT_UPLOAD_URL = "http://localhost/case-orchestration/emclientapi/upload";
     public static final String CASE_ID = "123123123";
@@ -47,7 +47,7 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
         mvc.perform(multipart(EM_CLIENT_UPLOAD_URL)
                 .file(file)
                 .header(AUTHORIZATION_TOKEN_HEADER, AUTH_TOKEN)
-                .header(CASE_ID_HEADER, CASE_ID)
+                .header(CASE_ID_HEADER, CaseType.CONSENTED.getCcdType())
                 .header(CONTENT_TYPE_HEADER, MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].fileUrl", is("http://localhost:8080/documents/6")))
@@ -59,7 +59,7 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$[0].mimeType", is(MediaType.TEXT_PLAIN_VALUE)))
             .andExpect(jsonPath("$[0].status", is("OK")));
 
-        verify(emUploadService).upload(multipartFileList, CASE_ID, AUTH_TOKEN);
+        verify(emUploadService).upload(multipartFileList, CaseType.CONSENTED, AUTH_TOKEN);
     }
 
     private List<FileUploadResponse> prepareFileUploadResponse() {
@@ -74,11 +74,6 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
             .mimeType(MediaType.TEXT_PLAIN_VALUE).build();
 
         return singletonList(fileUploadResponse);
-    }
-
-    private MockMultipartFile textMultipartFile() {
-        return new MockMultipartFile("file", "test.txt", "multipart/form-data",
-            "This is a test file".getBytes());
     }
 
     private MockMultipartFile jpegMultipartFile() {

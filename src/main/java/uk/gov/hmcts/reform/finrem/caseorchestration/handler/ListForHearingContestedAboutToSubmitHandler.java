@@ -78,7 +78,8 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
         if (listForHearingWrapper.getAdditionalListOfHearingDocuments() != null) {
             CaseDocument caseDocument = objectMapper.convertValue(listForHearingWrapper.getAdditionalListOfHearingDocuments(),
                 CaseDocument.class);
-            CaseDocument pdfDocument = additionalHearingDocumentService.convertToPdf(caseDocument, userAuthorisation, caseId);
+            CaseDocument pdfDocument = additionalHearingDocumentService.convertToPdf(caseDocument, userAuthorisation,
+                finremCaseDetails.getCaseType());
             listForHearingWrapper.setAdditionalListOfHearingDocuments(pdfDocument);
         }
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);

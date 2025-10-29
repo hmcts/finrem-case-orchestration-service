@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentStorageExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.StampDocumentException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.FinremMultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -43,8 +44,8 @@ public class PensionAnnexDateStampService {
     public CaseDocument appendApprovedDateToDocument(CaseDocument document,
                                                      String authToken,
                                                      LocalDate approvalDate,
-                                                     String caseId) throws Exception {
-        log.info("Adding date stamp to Pension Sharing Annex for Case id: {}", caseId);
+                                                     CaseType caseType) throws Exception {
+        log.info("Adding date stamp to Pension Sharing Annex for Case type: {}", caseType);
         Optional<LocalDate> optionalApprovalDate = Optional.ofNullable(approvalDate);
         if (optionalApprovalDate.isPresent()) {
             byte[] docInBytes = emDownloadService.download(document.getDocumentBinaryUrl(), authToken);
@@ -53,14 +54,14 @@ public class PensionAnnexDateStampService {
                 FinremMultipartFile.builder().name(document.getDocumentFilename()).content(approvedDoc)
                     .contentType(APPLICATION_PDF_VALUE).build();
             List<FileUploadResponse> uploadResponse =
-                emUploadService.upload(Collections.singletonList(multipartFile), caseId, authToken);
-            FileUploadResponse fileSaved = Optional.of(uploadResponse.get(0))
+                emUploadService.upload(Collections.singletonList(multipartFile), caseType, authToken);
+            FileUploadResponse fileSaved = Optional.of(uploadResponse.getFirst())
                 .filter(response -> response.getStatus() == HttpStatus.OK)
-                .orElseThrow(() -> new DocumentStorageException("Failed to store document Case id: " + caseId));
+                .orElseThrow(() -> new DocumentStorageException("Failed to store document Case type: " + caseType));
             Document dateStampedDocument = CONVERTER.apply(fileSaved);
             return CaseDocument.from(dateStampedDocument);
         } else {
-            throw new StampDocumentException("Missing or Invalid Approved Date of Order for Case id: " + caseId);
+            throw new StampDocumentException("Missing or Invalid Approved Date of Order for Case type: " + caseType);
         }
     }
 

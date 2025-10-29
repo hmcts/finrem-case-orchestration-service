@@ -55,7 +55,7 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
         List<GeneralApplicationCollectionData> existingGeneralApplicationList = helper.getReadyForRejectOrReadyForReferList(caseData);
         AtomicInteger index = new AtomicInteger(0);
         if (existingGeneralApplicationList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
-            setNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
+            setNonCollectionGeneralApplication(caseDetails, index, userAuthorisation);
         } else {
             List<DynamicListElement> dynamicListElements = existingGeneralApplicationList.stream()
                 .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
@@ -75,11 +75,10 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private void setNonCollectionGeneralApplication(FinremCaseData caseData,
+    private void setNonCollectionGeneralApplication(FinremCaseDetails caseDetails,
                                                     AtomicInteger index,
-                                                    String userAuthorisation,
-                                                    String caseId) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);
+                                                    String userAuthorisation) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseDetails, userAuthorisation);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 
@@ -87,6 +86,6 @@ public class RejectGeneralApplicationAboutToStartHandler extends FinremCallbackH
         dynamicListElementsList.add(dynamicListElements);
 
         DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationList(dynamicList);
+        caseDetails.getData().getGeneralApplicationWrapper().setGeneralApplicationList(dynamicList);
     }
 }

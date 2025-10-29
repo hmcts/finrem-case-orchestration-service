@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EvidenceFile;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
@@ -41,6 +42,6 @@ public class EvidenceManagementClientController {
         @RequestHeader(value = "caseTypeId") String caseTypeId,
         @RequestParam("file") List<@EvidenceFile MultipartFile> files) {
 
-        return evidenceManagementUploadService.upload(files, caseTypeId, authorizationToken);
+        return evidenceManagementUploadService.upload(files, CaseType.forValue(caseTypeId), authorizationToken);
     }
 }
