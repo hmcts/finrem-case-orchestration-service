@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @Slf4j
@@ -94,9 +95,10 @@ public class ConsentOrderPrintService {
                                                              FinremCaseDetails caseDetailsBefore,
                                                              EventType eventType,
                                                              String authorisationToken) {
-        List<BulkPrintDocument> bulkPrintDocuments = consentOrderApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, authorisationToken);
+        List<BulkPrintDocument> bulkPrintDocuments = consentOrderApprovedDocumentService.addApprovedConsentOrderCoverLetter(
+            caseDetails, authorisationToken, APPLICANT);
         getOrderDocuments(caseDetails, caseDetailsBefore, eventType, authorisationToken, bulkPrintDocuments);
+
         return bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, bulkPrintDocuments);
     }
 
@@ -112,15 +114,20 @@ public class ConsentOrderPrintService {
 
     private UUID sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet, FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore,
                                                         EventType eventType, String authorisationToken) {
-        log.info("Sending order documents to recipient / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverSheet));
+
         getOrderDocuments(caseDetails, caseDetailsBefore, eventType, authorisationToken, bulkPrintDocuments);
-        DocumentHelper.PaperNotificationRecipient docRespondent;
+        DocumentHelper.PaperNotificationRecipient docRespondent = DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+
         if (!shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)) {
-            docRespondent = DocumentHelper.PaperNotificationRecipient.RESPONDENT;
             bulkPrintDocuments.add(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(caseDetails, authorisationToken, docRespondent));
+        } else {
+            bulkPrintDocuments.addAll(consentOrderApprovedDocumentService.addApprovedConsentOrderCoverLetter(
+                caseDetails, authorisationToken, docRespondent));
         }
+
+        log.info("Sending order documents to respondent / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
