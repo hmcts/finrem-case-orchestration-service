@@ -33,6 +33,7 @@ public class CftLibConfig implements CFTLibConfigurer {
 
     private void createCcdRoles(CFTLib lib) {
         lib.createRoles(
+            "payment-access",
             "citizen",
             CASEWORKER,
             "caseworker-approver",
