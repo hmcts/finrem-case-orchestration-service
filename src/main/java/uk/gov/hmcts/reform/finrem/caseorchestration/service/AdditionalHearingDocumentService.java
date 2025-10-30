@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
@@ -50,7 +49,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
@@ -93,61 +91,9 @@ public class AdditionalHearingDocumentService {
         finremAdditionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 
-    public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken,
-                                                                          FinremCaseDetails caseDetails) {
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("dealing upload approve order for Case ID: {}", caseId);
-        FinremCaseData caseData = caseDetails.getData();
-        StampType stampType = documentHelper.getStampType(caseData);
-        List<DirectionOrderCollection> uploadHearingOrder = toPdf(caseData.getUploadHearingOrder(), stampType, caseId, authorisationToken);
-
-        if (!uploadHearingOrder.isEmpty()) {
-            caseData.setUploadHearingOrder(uploadHearingOrder);
-            DirectionOrderCollection orderCollection = uploadHearingOrder.get(uploadHearingOrder.size() - 1);
-            caseData.setLatestDraftHearingOrder(orderCollection.getValue().getUploadDraftDocument());
-        }
-    }
-
-    private List<DirectionOrderCollection> toPdf(List<DirectionOrderCollection> uploadHearingOrder,
-                                                 StampType stampType,
-                                                 String caseId,
-                                                 String authorisationToken) {
-        List<DirectionOrderCollection> orderList = new ArrayList<>();
-        if (uploadHearingOrder != null && !uploadHearingOrder.isEmpty()) {
-            uploadHearingOrder.forEach(order -> stampOrder(order, stampType, caseId, orderList, authorisationToken));
-        }
-        return orderList;
-    }
-
-    private void stampOrder(DirectionOrderCollection order,
-                                StampType stampType,
-                                   String caseId,
-                                   List<DirectionOrderCollection> orderList,
-                                   String authorisationToken) {
-        CaseDocument pdfOrder = genericDocumentService.convertDocumentIfNotPdfAlready(order.getValue()
-            .getUploadDraftDocument(), authorisationToken, caseId);
-
-        CaseDocument stampedDocs = genericDocumentService.stampDocument(pdfOrder,
-            authorisationToken, stampType, caseId);
-
-        DirectionOrder directionOrder = DirectionOrder.builder()
-            .uploadDraftDocument(stampedDocs)
-            .isOrderStamped(YesOrNo.YES)
-            .orderDateTime(LocalDateTime.now())
-            .build();
-        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder().value(directionOrder).build();
-        orderList.add(orderCollection);
-    }
-
     public List<DirectionOrderCollection> getApprovedHearingOrders(FinremCaseDetails caseDetails, String authorisationToken) {
         List<DirectionOrderCollection> uploadHearingOrder = caseDetails.getData().getUploadHearingOrder();
         return orderDateService.syncCreatedDateAndMarkDocumentNotStamped(uploadHearingOrder, authorisationToken);
-    }
-
-    public List<HearingOrderAdditionalDocCollectionData> getHearingOrderAdditionalDocuments(Map<String, Object> caseData) {
-        return new ObjectMapper().convertValue(caseData.get(HEARING_UPLOADED_DOCUMENT),
-            new TypeReference<>() {
-            });
     }
 
     public void sortDirectionDetailsCollection(FinremCaseData caseData) {

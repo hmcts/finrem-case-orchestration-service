@@ -152,11 +152,11 @@ class HearingServiceTest {
         final Map<String, String> expectedSelectableHearingsOneOnly = Map.of(hearingOneId.toString(), HEARING_ONE_SELECTABLE_DISPLAY);
 
         return Stream.of(
-            // Case 1: Expecting nothing when empty hearing
+            // Case 1: Expecting nothing when null hearing.  Null hearing collections resolve to an empty list.
             Arguments.of(null, List.of(), Map.of()),
-            Arguments.of(CASEWORKER, List.of(), Map.of()),
-            Arguments.of(APP_SOLICITOR, List.of(), Map.of()),
-            Arguments.of(RESP_SOLICITOR, List.of(), Map.of()),
+            Arguments.of(CASEWORKER, null, Map.of()),
+            Arguments.of(APP_SOLICITOR, null, Map.of()),
+            Arguments.of(RESP_SOLICITOR, null, Map.of()),
             // Case 2: Expecting different results depending on user case roles in single hearing condition
             Arguments.of(null, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
             Arguments.of(CASEWORKER, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),

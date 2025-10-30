@@ -15,6 +15,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
@@ -898,6 +899,25 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         }
     }
 
+    @Test
+    void givenInvalidOrganisationPolicy_whenHandle_thenReturnsValidationError() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+        when(caseDetails.getData()).thenReturn(finremCaseData);
+
+        try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class)) {
+            mockedStatic.when(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData))
+                .thenReturn(List.of("VALIDATION FAILED"));
+
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+            mockedStatic.verify(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
+            assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
+        }
+    }
+  
     @Test
     void givenDivorceStageReachedIsNull_whenHandled_thenExceptionWasNotThrown() {
         FinremCaseData finremCaseData = spy(FinremCaseData.class);

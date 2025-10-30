@@ -45,7 +45,7 @@ public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
+        String caseId = caseDetails.getCaseIdAsString();
         FinremCaseData finremCaseData = caseDetails.getData();
         consentedApplicationHelper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
 

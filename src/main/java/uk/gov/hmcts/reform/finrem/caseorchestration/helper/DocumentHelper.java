@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -56,7 +55,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -93,7 +91,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
@@ -287,14 +284,6 @@ public class DocumentHelper {
         Optional<DirectionDetailCollection> detailCollection
             = directionDetailsCollection.stream().filter(e -> e.getValue().getIsAnotherHearingYN().isYes()).findAny();
         return detailCollection.isPresent();
-    }
-
-    public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {
-        if (isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
-            log.warn("Latest general order not found for printing for case");
-            return null;
-        }
-        return convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
     }
 
     public CaseDocument getLatestGeneralOrder(FinremCaseData caseData) {
@@ -495,7 +484,7 @@ public class DocumentHelper {
         Long caseId = finremCaseDetails.getId();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         Map<String, Object> caseData = caseDetails.getData();
-        String ccdNumber = nullToEmpty((finremCaseDetails.getId()));
+        String ccdNumber = finremCaseDetails.getCaseIdAsString();
         String applicantName = finremCaseDetails.getData().getFullApplicantName();
         String respondentName = finremCaseDetails.getData().getRespondentFullName();
 
@@ -610,14 +599,6 @@ public class DocumentHelper {
             .toList();
     }
 
-    private List<DocumentCollectionItem> covertDocumentCollections(Object object) {
-        if (object == null) {
-            return Collections.emptyList();
-        }
-        return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
-        });
-    }
-
     public List<CaseDocument> getHearingDocumentsAsPdfDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
         FinremCaseData data = caseDetails.getData();
         List<CaseDocument> documents = new ArrayList<>();
@@ -700,13 +681,6 @@ public class DocumentHelper {
             return INTERVENER_THREE;
         } else if (IntervenerType.INTERVENER_FOUR.equals(intervenerWrapper.getIntervenerType())) {
             return INTERVENER_FOUR;
-        }
-        return null;
-    }
-
-    public CaseDocument nullCheckAndConvertToCaseDocument(Object object) {
-        if (object != null) {
-            return objectMapper.convertValue(object, CaseDocument.class);
         }
         return null;
     }
