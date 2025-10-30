@@ -96,6 +96,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LEYLAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LLUNDUDNO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_CFC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
@@ -173,6 +174,9 @@ class CourtHelperTest {
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
             MOLD, "Mold County");
+
+        verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
+            LLUNDUDNO, "Llundudno Magistrates Court");
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
             "invalid", EMPTY);
