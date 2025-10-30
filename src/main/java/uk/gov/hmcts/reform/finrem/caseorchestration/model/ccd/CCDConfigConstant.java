@@ -351,7 +351,6 @@ public class CCDConfigConstant {
     public static final String GENERAL_ORDER_JUDGE_TYPE = "generalOrderJudgeType";
     public static final String GENERAL_ORDER_RECITALS = "generalOrderRecitals";
     public static final String GENERAL_ORDER_JUDGE_NAME = "generalOrderJudgeName";
-    public static final String GENERAL_ORDER_LATEST_DOCUMENT = "generalOrderLatestDocument";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
 
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";

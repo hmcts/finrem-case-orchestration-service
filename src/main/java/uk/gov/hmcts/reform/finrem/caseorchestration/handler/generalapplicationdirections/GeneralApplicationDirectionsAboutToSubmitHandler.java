@@ -125,7 +125,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         FinremCaseData caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
-        String caseId = caseDetails.getId().toString();
+        String caseId = caseDetails.getCaseIdAsString();
         log.info("Map existing general application to collection for Case ID: {}", caseId);
         GeneralApplicationCollectionData data = helper.mapExistingGeneralApplicationToData(
             caseData, userAuthorisation, caseId);
@@ -227,7 +227,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         log.info("status {} for general application for Case ID: {} Event type {}", status, caseId,
-            EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
+            EventType.GENERAL_APPLICATION_DIRECTIONS);
 
         switch (gaElementStatus.toLowerCase()) {
             case "approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
