@@ -217,7 +217,7 @@ public class CourtHelper {
     private static final Map<String, String> humberMap = ImmutableMap.<String, String>builder()
         .put("FR_humber_hc_list_1", "Sheffield Family Hearing Centre")
         .put("FR_humber_hc_list_2", "Kingston-upon-Hull Combined Court Centre")
-        .put("FR_humber_hc_list_3", "Doncaster Justice Centre North")
+        .put("FR_humber_hc_list_3", "Doncaster Justice Centre South")
         .put("FR_humber_hc_list_4", "Great Grimsby Combined Court Centre")
         .put("FR_humber_hc_list_5", "Barnsley Law Courts")
         .build();
@@ -305,7 +305,7 @@ public class CourtHelper {
     private static final Map<String, String> lancashireMap = ImmutableMap.<String, String>builder()
         .put(PRESTON, "Preston Designated Family Court")
         .put(BLACKBURN, "Blackburn Family Court")
-        .put(BLACKPOOL, "Blackpool Family Court")
+        .put(BLACKPOOL, "Blackpool Tribunal Centre")
         .put(LANCASTER, "Lancaster Courthouse")
         .put(LEYLAND, "Leyland Family Hearing Centre")
         .put(REEDLEY, "Reedley Family Hearing Centre")

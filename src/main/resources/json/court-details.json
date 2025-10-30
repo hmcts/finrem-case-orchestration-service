@@ -287,11 +287,11 @@
     "emailReplyToId": "5555188f-724c-40fd-aa55-92f5ba019d70"
   },
   "FR_humber_hc_list_3": {
-    "courtName": "Doncaster Justice Centre North",
-    "courtAddress": "College Road, Doncaster, DN1 3HT",
+    "courtName": "Doncaster Justice Centre South",
+    "courtAddress": "College Road, Doncaster, DN1 3HS",
     "phoneNumber": "0300 123 5577",
-    "email": "family.doncaster.countycourt@justice.gov.uk",
-    "emailReplyToId": "10199921-9e19-4f37-b43b-3ff8b6f642d1"
+    "email": "FRCSheffield@justice.gov.uk",
+    "emailReplyToId": "3036ec66-e305-40b3-a0ce-de3d5ecfba16"
   },
   "FR_humber_hc_list_4": {
     "courtName": "Great Grimsby Combined Court Centre",
@@ -588,8 +588,8 @@
     "emailReplyToId": "f1fda0b5-43f8-4089-8dc8-dd6ed46b86d5"
   },
   "FR_lancashireList_3": {
-    "courtName": "Blackpool Family Court",
-    "courtAddress": "The Law Courts, Chapel Street, Blackpool, FY1 5RJ",
+    "courtName": "Blackpool Tribunal Centre",
+    "courtAddress": "2-8 Market Street, Blackpool, FY1 1ET",
     "phoneNumber": "0300 123 5577",
     "email": "LancashireandCumbriaFRC@justice.gov.uk",
     "emailReplyToId": "f1fda0b5-43f8-4089-8dc8-dd6ed46b86d5"

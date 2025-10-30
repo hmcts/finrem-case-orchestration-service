@@ -345,7 +345,7 @@ class CourtHelperTest {
             BLACKBURN, "Blackburn Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
-            BLACKPOOL, "Blackpool Family Court");
+            BLACKPOOL, "Blackpool Tribunal Centre");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
             LANCASTER, "Lancaster Courthouse");
@@ -561,7 +561,7 @@ class CourtHelperTest {
             "FR_humber_hc_list_2", "Kingston-upon-Hull Combined Court Centre");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
-            "FR_humber_hc_list_3", "Doncaster Justice Centre North");
+            "FR_humber_hc_list_3", "Doncaster Justice Centre South");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
             "FR_humber_hc_list_4", "Great Grimsby Combined Court Centre");
