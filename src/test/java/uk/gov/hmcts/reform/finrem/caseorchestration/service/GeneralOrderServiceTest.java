@@ -258,7 +258,7 @@ class GeneralOrderServiceTest {
 
         List<DirectionOrderCollection> hearingOrderDocuments = List.of(
             DirectionOrderCollection.builder()
-                .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
+                .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).build())
                 .build());
         data.setUploadHearingOrder(hearingOrderDocuments);
 
@@ -312,7 +312,7 @@ class GeneralOrderServiceTest {
 
         List<DirectionOrderCollection> hearingOrderDocuments = List.of(
             DirectionOrderCollection.builder()
-                .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
+                .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).build())
                 .build());
         data.setUploadHearingOrder(hearingOrderDocuments);
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());

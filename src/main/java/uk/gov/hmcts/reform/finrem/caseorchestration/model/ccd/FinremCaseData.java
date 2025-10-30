@@ -245,6 +245,7 @@ public class FinremCaseData implements HasCaseDocument {
     private String attendingCourtWithArrangement;
     private SolicitorToDraftOrder solicitorResponsibleForDraftingOrder;
     private List<DirectionOrderCollection> uploadHearingOrder;
+    private List<DirectionOrderCollection> unprocessedUploadHearingDocuments;
     private List<DocumentCollectionItem> hearingOrderOtherDocuments;
 
     private List<DirectionDetailCollection> directionDetailsCollection;

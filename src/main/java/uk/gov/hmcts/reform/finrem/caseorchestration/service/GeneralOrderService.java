@@ -261,10 +261,21 @@ public class GeneralOrderService {
         List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
         if (hearingOrderDocuments != null) {
             Collections.reverse(hearingOrderDocuments);
-            hearingOrderDocuments.stream().map(DirectionOrderCollection::getValue).forEach(directionOrder ->
-                appendOrderToShareCollection(orderToShareCollection, directionOrder.getUploadDraftDocument(),
-                    "Case documents tab [Approved Order] - %s", data.getOrderApprovedCoverLetter(),
-                    emptyIfNull(directionOrder.getAttachments()).stream().map(DocumentCollectionItem::getValue).toArray(CaseDocument[]::new)));
+            hearingOrderDocuments.stream()
+                .map(DirectionOrderCollection::getValue)
+                .filter(directionOrder -> directionOrder.getIsOrderStamped() == YesOrNo.YES)
+                .forEach(directionOrder ->
+                    appendOrderToShareCollection(
+                        orderToShareCollection,
+                        directionOrder.getUploadDraftDocument(),
+                        "Case documents tab [Approved Order] - %s",
+                        data.getOrderApprovedCoverLetter(),
+                        emptyIfNull(directionOrder.getAttachments())
+                            .stream()
+                            .map(DocumentCollectionItem::getValue)
+                            .toArray(CaseDocument[]::new)
+                    )
+                );
         }
 
         populateProcessedAgreedDraftOrderToOrdersToShare(data, orderToShareCollection);
