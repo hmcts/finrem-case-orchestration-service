@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -20,8 +19,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -105,13 +107,17 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         aboutToSubmitHandler = new GeneralApplicationDirectionsNewEventAboutToSubmitHandler(
             finremCaseDetailsMapper, helper, gaDirectionService, gaService, manageHearingActionService, generalApplicationsCategoriser,
             hearingCorrespondenceHelper);
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(
+            List.of()
+        ).build();
+        when(partyService.getAllActivePartyList(any(FinremCaseDetails.class)))
+            .thenReturn(dynamicMultiSelectList);
     }
 
     @Test
     void testCanHandle() {
-        assertCanHandle(aboutToSubmitHandler,
-            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH)
-        );
+        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
     }
 
     /**
@@ -253,12 +259,13 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
                 .generalApplicationItems(generalApplicationItems)
                 .build());
 
+        when(hearingCorrespondenceHelper.getHearingInContextFromTab(any())).thenReturn(buildHearingTabItem());
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> aboutToSubmitHandle = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData data = aboutToSubmitHandle.getData();
 
         List<GeneralApplicationsCollection> applications = data.getGeneralApplicationWrapper().getGeneralApplications();
         assertThat(applications).hasSize(1);
-
         verify(gaDirectionService, times(2)).isHearingRequired(callbackRequest.getCaseDetails());
         verify(helper, times(2)).getPdfDocument(any(CaseDocument.class), any(String.class), any(String.class));
         verify(manageHearingActionService).performAddHearing(any(FinremCaseDetails.class), any(String.class));
@@ -577,5 +584,20 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private HearingTabItem buildHearingTabItem() {
+        return HearingTabItem.builder()
+            .tabDateTime("2023-06-20T10:00:00")
+            .tabHearingType("Application Hearing")
+            .tabHearingDocuments(List.of(DocumentCollectionItem
+                .fromCaseDocument(
+                    CaseDocument.builder()
+                        .documentFilename("Hearing Notice.pdf")
+                        .categoryId("Hearing Notices")
+                        .documentBinaryUrl("http://some-url/binary")
+                        .build())
+            ))
+            .build();
     }
 }
