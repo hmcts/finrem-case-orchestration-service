@@ -88,11 +88,20 @@ public class UploadApprovedOrderService {
 
         // TODO Looks like the following logic is not needed anymore. Remove it later.
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
-
-        clearCwApprovedOrderCollection(caseDetails.getData());
     }
 
-    private void clearCwApprovedOrderCollection(FinremCaseData caseData) {
+    /**
+     * Clears the Caseworker Approved Order collection from the given {@link FinremCaseData}.
+     *
+     * <p>
+     * This method sets the {@code cwApprovedOrderCollection} field within the
+     * {@code DraftDirectionWrapper} to {@code null}, effectively removing
+     * all caseworker-approved orders from the case data.
+     *
+     * @param caseData the {@link FinremCaseData} object whose caseworker-approved
+     *                 order collection should be cleared
+     */
+    public void clearCwApprovedOrderCollection(FinremCaseData caseData) {
         caseData.getDraftDirectionWrapper().setCwApprovedOrderCollection(null);
     }
 
