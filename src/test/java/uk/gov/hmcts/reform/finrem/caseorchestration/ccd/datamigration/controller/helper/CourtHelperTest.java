@@ -576,6 +576,9 @@ class CourtHelperTest {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
             "FR_humber_hc_list_6", "Hull Magistrates Court");
 
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
+            "FR_humber_hc_list_7", "Beverley Magistrates Court");
+
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, "invalid", HSYORKSHIRE_COURTLIST,
             "FR_humber_hc_list_5", EMPTY);
 

@@ -222,6 +222,7 @@ public class CourtHelper {
         .put("FR_humber_hc_list_4", "Great Grimsby Combined Court Centre")
         .put("FR_humber_hc_list_5", "Barnsley Law Courts")
         .put("FR_humber_hc_list_6", "Hull Magistrates Court")
+        .put("FR_humber_hc_list_7", "Beverley Magistrates Court")
         .build();
     private static final Map<String, String> kentMap = ImmutableMap.<String, String>builder()
         .put("FR_kent_surrey_hc_list_1", "Canterbury Family Court Hearing Centre")

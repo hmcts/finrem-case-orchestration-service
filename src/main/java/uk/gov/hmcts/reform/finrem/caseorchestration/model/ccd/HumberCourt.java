@@ -17,12 +17,14 @@ public enum HumberCourt implements CourtList {
     FR_humberList_4("FR_humber_hc_list_4"),
     FR_humberList_5("FR_humber_hc_list_5"),
     FR_humberList_6("FR_humber_hc_list_6"),
+    FR_humberList_7("FR_humber_hc_list_7"),
     CONSENTED_FR_humberList_1("FR_humberList_1"),
     CONSENTED_FR_humberList_2("FR_humberList_2"),
     CONSENTED_FR_humberList_3("FR_humberList_3"),
     CONSENTED_FR_humberList_4("FR_humberList_4"),
     CONSENTED_FR_humberList_5("FR_humberList_5"),
-    CONSENTED_FR_humberList_6("FR_humberList_6");
+    CONSENTED_FR_humberList_6("FR_humberList_6"),
+    CONSENTED_FR_humberList_7("FR_humberList_7");
 
     private final String id;
 
