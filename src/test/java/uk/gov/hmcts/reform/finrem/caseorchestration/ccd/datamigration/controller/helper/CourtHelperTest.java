@@ -526,6 +526,12 @@ class CourtHelperTest {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEVELAND, CLEAVELAND_COURTLIST,
             "FR_cleaveland_hc_list_10", "Berwick Magistrates Court");
 
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
+            "FR_cleaveland_hc_list_11", "South East Northumberland");
+
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEVELAND, CLEAVELAND_COURTLIST,
+            "FR_cleaveland_hc_list_11", "South East Northumberland");
+
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, "invalid", CLEAVELAND_COURTLIST,
             "FR_cleaveland_hc_list_8", EMPTY);
 

@@ -210,6 +210,7 @@ public class CourtHelper {
         .put("FR_cleaveland_hc_list_8", "Darlington County Court and Family Court")
         .put("FR_cleaveland_hc_list_9", "Darlington Magistrates Court")
         .put("FR_cleaveland_hc_list_10", "Berwick Magistrates Court")
+        .put("FR_cleaveland_hc_list_11", "South East Northumberland")
         .build();
     private static final Map<String, String> yorkshireMap = ImmutableMap.<String, String>builder()
         .put("FR_nw_yorkshire_hc_list_1", "Harrogate Justice Centre")
