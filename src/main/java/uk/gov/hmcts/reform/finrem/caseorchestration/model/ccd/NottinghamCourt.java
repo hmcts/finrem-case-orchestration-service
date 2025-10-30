@@ -18,6 +18,7 @@ public enum NottinghamCourt implements CourtList {
     BOSTON_COUNTY_COURT_AND_FAMILY_COURT("FR_s_NottinghamList_8"),
     LEICESTER_MAGISTRATES_COURT("FR_s_NottinghamList_9"),
     DERBY_MAGISTRATES_COURT("FR_s_NottinghamList_10"),
+    NOTTINGHAM_JUSTICE_CENTRE("FR_s_NottinghamList_11"),
     CONSENTED_NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT("FR_nottinghamList_1"),
     CONSENTED_DERBY_COMBINED_COURT_CENTRE("FR_nottinghamList_2"),
     CONSENTED_LEICESTER_COUNTY_COURT_AND_FAMILY_COURT("FR_nottinghamList_3"),
@@ -27,7 +28,8 @@ public enum NottinghamCourt implements CourtList {
     CONSENTED_MANSFIELD_MAGISTRATES_AND_COUNTY_COURT("FR_nottinghamList_7"),
     CONSENTED_BOSTON_COUNTY_COURT_AND_FAMILY_COURT("FR_nottinghamList_8"),
     CONSENTED_LEICESTER_MAGISTRATES_COURT("FR_nottinghamList_9"),
-    CONSENTED_DERBY_MAGISTRATES_COURT("FR_nottinghamList_10");
+    CONSENTED_DERBY_MAGISTRATES_COURT("FR_nottinghamList_10"),
+    CONSENTED_NOTTINGHAM_JUSTICE_CENTRE("FR_nottinghamList_11");
 
     private final String id;
 
