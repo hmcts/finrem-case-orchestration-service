@@ -482,6 +482,9 @@ class CourtHelperTest {
             "FR_kent_surrey_hc_list_12", "The Oria");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
+            "FR_kent_surrey_hc_list_13", "Maidstone Magistrates Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "invalid", EMPTY);
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
