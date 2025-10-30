@@ -758,6 +758,9 @@ class CourtHelperTest {
             "FR_s_NottinghamList_9", "Leicester Magistrates Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
+            "FR_s_NottinghamList_10", "Derby Magistrates Court");
+
+        verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
             "INVALID", EMPTY);
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, "invalid", NOTTINGHAM_COURTLIST,
