@@ -60,6 +60,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXETER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GLOUCESTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GREAT_YARMOUTH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_HIGHCOURT_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_MIDLANDS_FRC_LIST;
@@ -328,6 +329,9 @@ class CourtHelperTest {
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
             WATFORD, "Watford County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            GREAT_YARMOUTH, "Great Yarmouth Magistrates and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
             "invalid", EMPTY);

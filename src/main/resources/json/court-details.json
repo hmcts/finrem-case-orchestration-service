@@ -713,6 +713,13 @@
     "email": "watfordcountyfamily@justice.gov.uk",
     "emailReplyToId": "4328732f-0e90-441d-8f23-40fd7ecb14b3"
   },
+  "FR_bedfordshireList_12": {
+    "courtName": "Great Yarmouth Magistrates and Family Court",
+    "courtAddress": "The Court house, North Quay, Great Yarmouth, NR30 1PW",
+    "phoneNumber": "0300 123 5577",
+    "email": " FRC.NES.BCH@justice.gov.uk",
+    "emailReplyToId": "25dc4238-28f5-4787-af79-372627e94542"
+  },
   "FR_thamesvalleyList_1": {
     "courtName": "Oxford Combined Court Centre",
     "courtAddress": "St Aldates, Oxford, OX1 1TL",

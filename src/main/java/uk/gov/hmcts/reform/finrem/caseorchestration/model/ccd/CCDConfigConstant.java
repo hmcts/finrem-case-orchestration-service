@@ -196,6 +196,7 @@ public class CCDConfigConstant {
     public static final String LUTON = "FR_bedfordshireList_9";
     public static final String HERTFORD = "FR_bedfordshireList_10";
     public static final String WATFORD = "FR_bedfordshireList_11";
+    public static final String GREAT_YARMOUTH = "FR_bedfordshireList_12";
 
     //Thamesvalley CourtList
     public static final String OXFORD = "FR_thamesvalleyList_1";

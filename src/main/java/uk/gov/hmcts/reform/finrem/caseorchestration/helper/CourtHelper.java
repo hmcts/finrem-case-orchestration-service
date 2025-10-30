@@ -47,6 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXETER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GLOUCESTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GREAT_YARMOUTH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_HIGHCOURT_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_MIDLANDS_FRC_LIST;
@@ -265,6 +266,7 @@ public class CourtHelper {
         .put(LUTON, "Luton Justice Centre")
         .put(HERTFORD, "Hertford County Court and Family Court")
         .put(WATFORD, "Watford County Court and Family Court")
+        .put(GREAT_YARMOUTH, "Great Yarmouth Magistrates and Family Court")
         .build();
     private static final Map<String, String> dorsetMap = ImmutableMap.<String, String>builder()
         .put(BOURNEMOUTH, "Bournemouth and Poole County Court and Family Court")
