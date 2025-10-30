@@ -491,6 +491,9 @@ class CourtHelperTest {
             "FR_kent_surrey_hc_list_15", "Ashford Tribunal Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
+            "FR_kent_surrey_hc_list_16", "Sevenoaks Magistrates Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "invalid", EMPTY);
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,

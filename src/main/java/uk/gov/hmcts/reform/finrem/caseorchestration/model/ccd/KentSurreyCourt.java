@@ -25,6 +25,7 @@ public enum KentSurreyCourt implements CourtList {
     FR_kent_surreyList_13("FR_kent_surrey_hc_list_13"),
     FR_kent_surreyList_14("FR_kent_surrey_hc_list_14"),
     FR_kent_surreyList_15("FR_kent_surrey_hc_list_15"),
+    FR_kent_surreyList_16("FR_kent_surrey_hc_list_16"),
     CONSENTED_FR_kent_surreyList_1("FR_kent_surreyList_1"),
     CONSENTED_FR_kent_surreyList_2("FR_kent_surreyList_2"),
     CONSENTED_FR_kent_surreyList_3("FR_kent_surreyList_3"),
@@ -39,7 +40,8 @@ public enum KentSurreyCourt implements CourtList {
     CONSENTED_FR_kent_surreyList_12("FR_kent_surreyList_12"),
     CONSENTED_FR_kent_surreyList_13("FR_kent_surreyList_13"),
     CONSENTED_FR_kent_surreyList_14("FR_kent_surreyList_14"),
-    CONSENTED_FR_kent_surreyList_15("FR_kent_surreyList_15");
+    CONSENTED_FR_kent_surreyList_15("FR_kent_surreyList_15"),
+    CONSENTED_FR_kent_surreyList_16("FR_kent_surreyList_16");
 
     private final String id;
 
