@@ -307,6 +307,13 @@
     "email": "family.barnsley.countycourt@justice.gov.uk",
     "emailReplyToId": "2ba9a295-91da-4a55-9588-78b5b03209b5"
   },
+  "FR_humber_hc_list_6": {
+    "courtName": "Hull Magistrates Court",
+    "courtAddress": "Market Place, Hull, HU1 2AD",
+    "phoneNumber": "0300 123 5577",
+    "email": "FRCSheffield@justice.gov.uk",
+    "emailReplyToId": "3036ec66-e305-40b3-a0ce-de3d5ecfba16"
+  },
   "FR_liverpool_hc_list_1": {
     "courtName": "Liverpool Civil And Family Court",
     "courtAddress": "35 Vernon Street, Liverpool, L2 2BX",
