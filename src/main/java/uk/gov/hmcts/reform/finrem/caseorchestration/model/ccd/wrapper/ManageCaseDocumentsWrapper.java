@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction;
 
 import java.util.List;
 
@@ -18,6 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManageCaseDocumentsWrapper implements HasCaseDocument {
+
+    private ManageCaseDocumentsAction manageCaseDocumentsActionSelection;
 
     private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
 }
