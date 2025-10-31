@@ -45,7 +45,7 @@ public class RespondentStatementsExhibitsCollectionServiceTest extends BaseManag
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_STATEMENTS_EXHIBITS_COLLECTION),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
