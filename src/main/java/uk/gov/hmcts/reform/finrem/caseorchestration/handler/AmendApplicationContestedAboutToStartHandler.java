@@ -73,7 +73,6 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
                 userAuthorisation);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
             .warnings(warnings)

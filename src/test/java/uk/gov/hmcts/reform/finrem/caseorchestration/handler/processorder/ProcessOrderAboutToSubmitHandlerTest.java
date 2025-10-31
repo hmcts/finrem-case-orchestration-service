@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -13,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -53,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -98,35 +95,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest,
-            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.PROCESS_ORDER),
-            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER)
-        );
-    }
-
-    @Test
-    void storeHearingNoticeHandleExceptionDirectionUploadOrder() throws JsonProcessingException {
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(CASE_ID);
-        FinremCaseDetails finremCaseDetails = finremCallbackRequest.getCaseDetails();
-        finremCallbackRequest.setEventType(EventType.DIRECTION_UPLOAD_ORDER);
-        doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService)
-            .storeHearingNotice(finremCaseDetails, AUTH_TOKEN);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(1, res.getErrors().size());
-        assertEquals("There was an unexpected error", res.getErrors().getFirst());
-        verify(additionalHearingDocumentService).stampAndCollectOrderCollection(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
-        verify(additionalHearingDocumentService).storeHearingNotice(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
-    }
-
-    @Test
-    void stampOrdersAndStoreHearingNoticeDocuments() throws JsonProcessingException {
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(CASE_ID);
-        finremCallbackRequest.setEventType(EventType.DIRECTION_UPLOAD_ORDER);
-        underTest.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        verify(additionalHearingDocumentService).stampAndCollectOrderCollection(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
-        verify(additionalHearingDocumentService).storeHearingNotice(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.PROCESS_ORDER);
     }
 
     @Test

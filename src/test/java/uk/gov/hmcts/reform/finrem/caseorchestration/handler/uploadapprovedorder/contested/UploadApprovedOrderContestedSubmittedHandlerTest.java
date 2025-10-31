@@ -1,78 +1,76 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder.contested;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApprovedOrderNoticeOfHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 
-import java.util.List;
-import java.util.UUID;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UploadApprovedOrderContestedSubmittedHandlerTest extends UploadApprovedOrderBaseHandlerTestSetup {
-
-    @InjectMocks
-    UploadApprovedOrderContestedSubmittedHandler uploadApprovedOrderContestedSubmittedHandler;
+@ExtendWith(MockitoExtension.class)
+class UploadApprovedOrderContestedSubmittedHandlerTest {
 
     @Mock
-    ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
+    private ManageHearingsCorresponder manageHearingsCorresponder;
+
+    @InjectMocks
+    private UploadApprovedOrderContestedSubmittedHandler handler;
 
     @Test
-    public void givenContestedCase_whenAboutToSubmitUploadApprovedOrder_thenCanHandle() {
-        assertThat(uploadApprovedOrderContestedSubmittedHandler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER),
-            is(true));
-    }
-
-    @Test
-    public void givenContestedCase_whenSubmittedUploadApprovedOrder_thenCannotHandle() {
-        assertThat(uploadApprovedOrderContestedSubmittedHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER),
-            is(false));
+    void canHandle() {
+        assertCanHandle(handler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER_MH);
     }
 
     @Test
-    public void givenContestedCase_whenSubmittedUploadApprovedOrder_thenHandle() {
-        setHearingDirectionDetailsCollection(YES_VALUE);
-        uploadApprovedOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+    void handle_shouldReturnResponseWhenAddHearingNotChosen() {
+        var caseData = mock(FinremCaseData.class);
+        var caseDetails = mock(FinremCaseDetails.class);
+        var callbackRequest = mock(FinremCallbackRequest.class);
+        var manageHearingsWrapper = mock(ManageHearingsWrapper.class);
 
-        verify(approvedOrderNoticeOfHearingService, times(1))
-            .printHearingNoticePackAndSendToApplicantAndRespondent(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(caseDetails.getData()).thenReturn(caseData);
+        when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
+        when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.NO);
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertNotNull(response);
+        assertEquals(caseData, response.getData());
     }
 
     @Test
-    public void givenContestedCase_whenSubmittedUploadApprovedOrderAndNotFinalHearing_thenHandle() {
-        setHearingDirectionDetailsCollection(NO_VALUE);
-        uploadApprovedOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+    void handle_shouldReturnResponseWhenAddHearingChosen() {
+        var caseData = mock(FinremCaseData.class);
+        var caseDetails = mock(FinremCaseDetails.class);
+        var callbackRequest = mock(FinremCallbackRequest.class);
+        var manageHearingsWrapper = mock(ManageHearingsWrapper.class);
 
-        verify(approvedOrderNoticeOfHearingService, never())
-            .printHearingNoticePackAndSendToApplicantAndRespondent(callbackRequest.getCaseDetails(), AUTH_TOKEN);
-    }
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(caseDetails.getData()).thenReturn(caseData);
+        when(caseData.getManageHearingsWrapper()).thenReturn(manageHearingsWrapper);
+        when(manageHearingsWrapper.getIsAddHearingChosen()).thenReturn(YesOrNo.YES);
 
-    private void setHearingDirectionDetailsCollection(String value) {
-        callbackRequest.getCaseDetails().getData().put(HEARING_DIRECTION_DETAILS_COLLECTION,
-            buildAdditionalHearingDetailsCollection(value));
-    }
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-    private List<Element<AdditionalHearingDirectionsCollection>> buildAdditionalHearingDetailsCollection(String value) {
-        return List.of(Element.element(UUID.randomUUID(), AdditionalHearingDirectionsCollection.builder()
-            .isAnotherHearingYN(value).build()));
+        verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        assertNotNull(response);
+        assertEquals(caseData, response.getData());
     }
 }

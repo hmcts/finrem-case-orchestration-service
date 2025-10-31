@@ -230,7 +230,6 @@ public class EmailServiceTest {
         notificationRequest.setHearingType("First Directions Appointment (FDA)");
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING.name());
 
-
         assertEquals("Nottingham FRC", returnedTemplateVars.get("courtName"));
         assertEquals("FRCNottingham@justice.gov.uk", returnedTemplateVars.get("courtEmail"));
         assertNull(returnedTemplateVars.get("generalEmailBody"));
@@ -252,7 +251,6 @@ public class EmailServiceTest {
         notificationRequest.setHearingType("First Directions Appointment (FDA)");
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest,
             FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL.name());
-
 
         assertEquals("Nottingham FRC", returnedTemplateVars.get("courtName"));
         assertEquals("FRCNottingham@justice.gov.uk", returnedTemplateVars.get("courtEmail"));
@@ -288,7 +286,6 @@ public class EmailServiceTest {
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONSENT_ORDER_MADE.name());
 
-
         assertContestedTemplateVariablesAreAbsent(returnedTemplateVars);
         returnedTemplateVars.putAll(emailTemplateVars.get(FR_CONSENT_ORDER_MADE.name()));
 
@@ -307,7 +304,6 @@ public class EmailServiceTest {
         notificationRequest.setCamelCaseOrderType("Variation");
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONSENT_ORDER_MADE.name());
-
 
         assertContestedTemplateVariablesAreAbsent(returnedTemplateVars);
         returnedTemplateVars.putAll(emailTemplateVars.get(FR_CONSENT_ORDER_MADE.name()));
@@ -339,7 +335,6 @@ public class EmailServiceTest {
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED.name());
 
-
         assertContestedTemplateVariablesAreAbsent(returnedTemplateVars);
         returnedTemplateVars.putAll(emailTemplateVars.get(FR_CONSENT_ORDER_NOT_APPROVED.name()));
 
@@ -357,7 +352,6 @@ public class EmailServiceTest {
         setConsentedData();
 
         Map<String, Object> returnedTemplateVars = emailService.buildTemplateVars(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT.name());
-
 
         assertContestedTemplateVariablesAreAbsent(returnedTemplateVars);
         returnedTemplateVars.putAll(emailTemplateVars.get(FR_CONSENT_ORDER_NOT_APPROVED_SENT.name()));

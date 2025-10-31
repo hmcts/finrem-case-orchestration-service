@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder.contested.mh;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.generalapplicationdirections;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,43 +11,43 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 
 @Slf4j
 @Service
-public class UploadApprovedOrderContestedMhSubmittedHandler extends FinremCallbackHandler {
+public class GeneralApplicationDirectionsSubmittedHandler extends FinremCallbackHandler {
 
     private final ManageHearingsCorresponder manageHearingsCorresponder;
+    private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
 
-    public UploadApprovedOrderContestedMhSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                          ManageHearingsCorresponder manageHearingsCorresponder) {
+    public GeneralApplicationDirectionsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                        ManageHearingsCorresponder manageHearingsCorresponder,
+                                                        GeneralApplicationDirectionsService generalApplicationDirectionsService) {
         super(finremCaseDetailsMapper);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
+        this.generalApplicationDirectionsService = generalApplicationDirectionsService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.UPLOAD_APPROVED_ORDER_MH.equals(eventType);
+            && EventType.GENERAL_APPLICATION_DIRECTIONS_MH.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
-        ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
 
-        if (YesOrNo.YES.equals(manageHearingsWrapper.getIsAddHearingChosen())) {
-            log.info("Sending hearing notification for case ID: {}", caseDetails.getId());
+        // Hearings are optional, so send hearing correspondence if a hearing was added in the event.
+        if (generalApplicationDirectionsService.isHearingRequired(callbackRequest.getCaseDetails())) {
             manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).build();
+            .data(callbackRequest.getCaseDetails().getData())
+            .build();
     }
 }
