@@ -47,6 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXETER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GLOUCESTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GREAT_YARMOUTH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_HIGHCOURT_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_MIDLANDS_FRC_LIST;
@@ -76,12 +77,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KINGS_LYNN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LEYLAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LLUNDUDNO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LUTON;
@@ -155,6 +158,9 @@ public class CourtHelper {
         .put("FR_s_NottinghamList_6", "Chesterfield County Court")
         .put("FR_s_NottinghamList_7", "Mansfield Magistrates and County Court")
         .put("FR_s_NottinghamList_8", "Boston County Court and Family Court")
+        .put("FR_s_NottinghamList_9", "Leicester Magistrates Court")
+        .put("FR_s_NottinghamList_10", "Derby Magistrates Court")
+        .put("FR_s_NottinghamList_11", "Nottingham Justice Centre")
         .build();
     private static final Map<String, String> birminghamMap = ImmutableMap.<String, String>builder()
         .put("FR_birmingham_hc_list_1", "Birmingham Civil and Family Justice Centre")
@@ -167,6 +173,7 @@ public class CourtHelper {
         .put("FR_birmingham_hc_list_8", "Worcester Combined Court")
         .put("FR_birmingham_hc_list_9", "Stafford Combined Court")
         .put("FR_birmingham_hc_list_10", "Hereford County Court and Family Court")
+        .put("FR_birmingham_hc_list_11", "Warwickshire Justice Centre")
         .build();
     private static final Map<String, String> londonMap = ImmutableMap.<String, String>builder()
         .put("FR_s_CFCList_1", "Bromley County Court and Family Court")
@@ -203,6 +210,9 @@ public class CourtHelper {
         .put("FR_cleaveland_hc_list_6", "South Shields County Court and Family Court")
         .put("FR_cleaveland_hc_list_7", "North Shields County Court and Family Court")
         .put("FR_cleaveland_hc_list_8", "Darlington County Court and Family Court")
+        .put("FR_cleaveland_hc_list_9", "Darlington Magistrates Court")
+        .put("FR_cleaveland_hc_list_10", "Berwick Magistrates Court")
+        .put("FR_cleaveland_hc_list_11", "South East Northumberland")
         .build();
     private static final Map<String, String> yorkshireMap = ImmutableMap.<String, String>builder()
         .put("FR_nw_yorkshire_hc_list_1", "Harrogate Justice Centre")
@@ -217,9 +227,11 @@ public class CourtHelper {
     private static final Map<String, String> humberMap = ImmutableMap.<String, String>builder()
         .put("FR_humber_hc_list_1", "Sheffield Family Hearing Centre")
         .put("FR_humber_hc_list_2", "Kingston-upon-Hull Combined Court Centre")
-        .put("FR_humber_hc_list_3", "Doncaster Justice Centre North")
+        .put("FR_humber_hc_list_3", "Doncaster Justice Centre South")
         .put("FR_humber_hc_list_4", "Great Grimsby Combined Court Centre")
         .put("FR_humber_hc_list_5", "Barnsley Law Courts")
+        .put("FR_humber_hc_list_6", "Hull Magistrates Court")
+        .put("FR_humber_hc_list_7", "Beverley Magistrates Court")
         .build();
     private static final Map<String, String> kentMap = ImmutableMap.<String, String>builder()
         .put("FR_kent_surrey_hc_list_1", "Canterbury Family Court Hearing Centre")
@@ -233,6 +245,11 @@ public class CourtHelper {
         .put("FR_kent_surrey_hc_list_9", "Hastings County Court and Family Court Hearing Centre")
         .put("FR_kent_surrey_hc_list_10", "Horsham County Court and Family Court")
         .put("FR_kent_surrey_hc_list_11", "Thanet Family Court Hearing Centre")
+        .put("FR_kent_surrey_hc_list_12", "The Oria")
+        .put("FR_kent_surrey_hc_list_13", "Maidstone Magistrates Court")
+        .put("FR_kent_surrey_hc_list_14", "Medway Magistrates Court")
+        .put("FR_kent_surrey_hc_list_15", "Ashford Tribunal Centre")
+        .put("FR_kent_surrey_hc_list_16", "Sevenoaks Magistrates Court")
         .build();
     private static final Map<String, String> newportMap = ImmutableMap.<String, String>builder()
         .put("FR_newport_hc_list_1", "Newport Civil and Family Court")
@@ -265,6 +282,8 @@ public class CourtHelper {
         .put(LUTON, "Luton Justice Centre")
         .put(HERTFORD, "Hertford County Court and Family Court")
         .put(WATFORD, "Watford County Court and Family Court")
+        .put(GREAT_YARMOUTH, "Great Yarmouth Magistrates and Family Court")
+        .put(KINGS_LYNN, "King's Lynn Magistrates Court")
         .build();
     private static final Map<String, String> dorsetMap = ImmutableMap.<String, String>builder()
         .put(BOURNEMOUTH, "Bournemouth and Poole County Court and Family Court")
@@ -305,7 +324,7 @@ public class CourtHelper {
     private static final Map<String, String> lancashireMap = ImmutableMap.<String, String>builder()
         .put(PRESTON, "Preston Designated Family Court")
         .put(BLACKBURN, "Blackburn Family Court")
-        .put(BLACKPOOL, "Blackpool Family Court")
+        .put(BLACKPOOL, "Blackpool Tribunal Centre")
         .put(LANCASTER, "Lancaster Courthouse")
         .put(LEYLAND, "Leyland Family Hearing Centre")
         .put(REEDLEY, "Reedley Family Hearing Centre")
@@ -319,6 +338,7 @@ public class CourtHelper {
         .put(PRESTATYN, "Prestatyn Justice Centre")
         .put(WELSHPOOL, "Welshpool Civil and Family Court")
         .put(MOLD, "Mold County")
+        .put(LLUNDUDNO, "Llundudno Magistrates Court")
         .build();
 
     public static String getSelectedCourt(CaseDetails caseDetails) {

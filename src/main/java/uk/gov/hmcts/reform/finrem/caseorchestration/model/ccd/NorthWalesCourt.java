@@ -14,7 +14,8 @@ public enum NorthWalesCourt implements CourtList {
     CAERNARFON("FR_northwalesList_2"),
     PRESTATYN("FR_northwalesList_3"),
     WELSHPOOL("FR_northwalesList_4"),
-    MOLD("FR_northwalesList_5");
+    MOLD("FR_northwalesList_5"),
+    LLUNDUDNO("FR_northwalesList_6");
 
     private final String id;
 

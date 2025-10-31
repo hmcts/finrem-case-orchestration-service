@@ -17,6 +17,7 @@ public enum BirminghamCourt implements CourtList {
     WORCESTER_COMBINED_COURT("FR_birmingham_hc_list_8"),
     STAFFORD_COMBINED_COURT("FR_birmingham_hc_list_9"),
     HEREFORD_COUNTY_COURT_AND_FAMILY_COURT("FR_birmingham_hc_list_10"),
+    WARWICKSHIRE_JUSTICE_CENTRE("FR_birmingham_hc_list_11"),
     CONSENTED_BIRMINGHAM_CIVIL_AND_FAMILY_JUSTICE_CENTRE("FR_birminghamList_1"),
     CONSENTED_COVENTRY_COMBINED_COURT_CENTRE("FR_birminghamList_2"),
     CONSENTED_TELFORD_COUNTY_COURT_AND_FAMILY_COURT("FR_birminghamList_3"),
@@ -26,7 +27,8 @@ public enum BirminghamCourt implements CourtList {
     CONSENTED_STOKE_ON_TRENT_COMBINED_COURT("FR_birminghamList_7"),
     CONSENTED_WORCESTER_COMBINED_COURT("FR_birminghamList_8"),
     CONSENTED_STAFFORD_COMBINED_COURT("FR_birminghamList_9"),
-    CONSENTED_HEREFORD_COUNTY_COURT_AND_FAMILY_COURT("FR_birminghamList_10");
+    CONSENTED_HEREFORD_COUNTY_COURT_AND_FAMILY_COURT("FR_birminghamList_10"),
+    CONSENTED_WARWICKSHIRE_JUSTICE_CENTRE("FR_birminghamList_11");
 
     private final String id;
 
