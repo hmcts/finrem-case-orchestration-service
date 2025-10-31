@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
-
 @RequiredArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public enum ManageCaseDocumentsAction {
@@ -18,12 +16,5 @@ public enum ManageCaseDocumentsAction {
     @JsonValue
     public String getValue() {
         return value;
-    }
-
-    public static ManageCaseDocumentsAction forValue(String value) {
-        return Arrays.stream(ManageCaseDocumentsAction.values())
-            .filter(option -> option.getValue().equalsIgnoreCase(value))
-            .findFirst()
-            .orElseThrow(IllegalArgumentException::new);
     }
 }
