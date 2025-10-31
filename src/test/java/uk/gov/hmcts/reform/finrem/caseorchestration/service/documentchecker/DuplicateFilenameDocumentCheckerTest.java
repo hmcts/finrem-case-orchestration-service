@@ -96,6 +96,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLet
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCaseDocumentsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
@@ -421,11 +422,13 @@ class DuplicateFilenameDocumentCheckerTest {
                     .build()))
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .manageCaseDocumentCollection(List.of(UploadCaseDocumentCollection.builder()
-                    .uploadCaseDocument(UploadCaseDocument.builder()
-                        .caseDocuments(DUPLICATED_CASE_DOCUMENT)
-                        .build())
-                    .build()))
+                .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
+                    .manageCaseDocumentCollection(List.of(UploadCaseDocumentCollection.builder()
+                        .uploadCaseDocument(UploadCaseDocument.builder()
+                            .caseDocuments(DUPLICATED_CASE_DOCUMENT)
+                            .build())
+                        .build()))
+                    .build())
                 .build()),
             Arguments.of(FinremCaseData.builder()
                 .uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder()

@@ -38,7 +38,7 @@ public class ApplicantFormsHCollectionServiceTest extends FormsHHandlerTest {
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
             hasSize(1));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 

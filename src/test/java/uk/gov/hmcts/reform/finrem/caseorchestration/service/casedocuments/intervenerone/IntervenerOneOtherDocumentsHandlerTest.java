@@ -47,7 +47,7 @@ public class IntervenerOneOtherDocumentsHandlerTest extends BaseManageDocumentsH
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
             hasSize(5));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 

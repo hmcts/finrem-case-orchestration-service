@@ -42,7 +42,7 @@ public class IntervenerTwoChronologiesStatementHandlerTest extends BaseManageDoc
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
             hasSize(3));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
