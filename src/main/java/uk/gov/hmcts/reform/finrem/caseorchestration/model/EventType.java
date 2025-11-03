@@ -37,6 +37,7 @@ public enum EventType {
     REJECT_GENERAL_APPLICATION("rejectGeneralApplication"),
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
+    NEW_MANAGE_CASE_DOCUMENTS("FR_newManageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
     UPLOAD_APPROVED_ORDER_MH("FR_uploadApprovedOrderMh"),
     NEW_PAPER_CASE("FR_newPaperCase"),
