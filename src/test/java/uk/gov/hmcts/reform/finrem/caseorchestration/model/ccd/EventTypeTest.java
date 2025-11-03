@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -12,17 +12,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-public class EventTypeTest {
+class EventTypeTest {
 
     @Test
-    public void givenEventHandler_whenMoreThanOneEventMatches_thenThrowError() {
+    void givenEventHandler_whenMoreThanOneEventMatches_thenThrowError() {
 
         List<String> errors = new ArrayList<>();
         List<Class<?>> handlerClasses = InterfaceImplementingClasses.findClassesImplementingInterface(CallbackHandler.class,
-            "uk.gov.hmcts.reform.finrem.caseorchestration.handler");
+            CallbackHandler.class.getPackageName());
 
         for (EventType event : EventType.values()) {
             for (CaseType caseType : CaseType.values()) {
@@ -37,11 +37,11 @@ public class EventTypeTest {
             }
         }
         errors.forEach(log::error);
-        assertTrue(errors.isEmpty());
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    public void givenEventType_whenEventTypeNotUnique_ThenThrowError() {
+    void givenEventType_whenEventTypeNotUnique_thenThrowError() {
         List<String> errors = new ArrayList<>();
         List<EventType> eventTypeList = new ArrayList<>(Arrays.stream(EventType.values()).toList());
         eventTypeList.forEach(x -> {
@@ -52,7 +52,7 @@ public class EventTypeTest {
             }
         });
         errors.forEach(log::error);
-        assertTrue(errors.isEmpty());
+        assertThat(errors).isEmpty();
     }
 
     private void validateEventTypes(EventType event, List<EventType> allEvents, List<String> errors) {
