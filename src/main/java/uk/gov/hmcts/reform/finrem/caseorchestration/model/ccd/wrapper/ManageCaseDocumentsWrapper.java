@@ -23,4 +23,6 @@ public class ManageCaseDocumentsWrapper implements HasCaseDocument {
     private ManageCaseDocumentsAction manageCaseDocumentsActionSelection;
 
     private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
+
+    private List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection;
 }
