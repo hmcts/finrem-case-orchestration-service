@@ -69,7 +69,8 @@ public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse response =
             manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(((FinremCaseData) response.getData()).getManageCaseDocumentCollection().size(), is(1));
+        assertThat(((FinremCaseData) response.getData()).getManageCaseDocumentsWrapper()
+            .getManageCaseDocumentCollection().size(), is(1));
     }
 
     @Test
@@ -126,10 +127,12 @@ public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse response =
             manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(((FinremCaseData) response.getData()).getManageCaseDocumentCollection().get(0)
+        assertThat(((FinremCaseData) response.getData()).getManageCaseDocumentsWrapper()
+                .getManageCaseDocumentCollection().getFirst()
                 .getUploadCaseDocument().getHearingDetails(),
             is("Legacy doc comment"));
-        assertThat(((FinremCaseData) response.getData()).getManageCaseDocumentCollection().get(0)
+        assertThat(((FinremCaseData) response.getData()).getManageCaseDocumentsWrapper()
+                .getManageCaseDocumentCollection().getFirst()
                 .getUploadCaseDocument().getCaseDocumentUploadDateTime(),
             is(now));
     }
