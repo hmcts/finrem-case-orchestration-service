@@ -42,7 +42,7 @@ public class IntervenerOneCorrespondenceHandlerTest extends CorrespondenceHandle
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
