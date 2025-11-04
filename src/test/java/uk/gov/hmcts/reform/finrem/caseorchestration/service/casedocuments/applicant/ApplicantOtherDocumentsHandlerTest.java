@@ -49,7 +49,7 @@ public class ApplicantOtherDocumentsHandlerTest extends BaseManageDocumentsHandl
         assertThat(getDocumentCollection(),
             hasSize(5));
 
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 

@@ -41,7 +41,7 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
         caseDetails.getData().getUploadCaseDocumentWrapper()
             .setRespQaCollection(Stream.of(questionnaireDoc).collect(Collectors.toList()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         collectionService.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
@@ -69,7 +69,7 @@ public class RespondentQuestionnairesAnswersCollectionServiceTest extends BaseMa
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
