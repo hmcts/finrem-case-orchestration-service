@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,14 +15,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarni
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -29,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -75,8 +82,9 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
         assertNotNull(response);
     }
 
-    @Test
-    void handle_shouldInvokeManageHearingActionServiceWhenAddHearingChosen() {
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2, 10})
+    void handle_shouldInvokeManageHearingActionServiceWhenAddHearingChosen(int numberOfUploadedApprovedOrders) {
 
         WorkingHearing workingHearing = mock(WorkingHearing.class);
 
@@ -85,12 +93,17 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
             .isAddHearingChosen(YesOrNo.YES)
             .build();
 
-        CaseDocument orderDocument = CaseDocument.builder()
-            .documentFilename("order")
-            .build();
+        List<CaseDocument> caseDocuments = new ArrayList<>();
+        for (int i = 0; i < numberOfUploadedApprovedOrders; i++) {
+            caseDocuments.add(mock(CaseDocument.class));
+        }
+        List<DirectionOrderCollection> cwApprovedOrderCollection = caseDocuments.stream()
+            .map(this::toDirectionOrderCollection).toList();
 
         FinremCaseData caseData = FinremCaseData.builder()
-            .latestDraftHearingOrder(orderDocument)
+            .draftDirectionWrapper(DraftDirectionWrapper.builder()
+                .cwApprovedOrderCollection(cwApprovedOrderCollection)
+                .build())
             .manageHearingsWrapper(manageHearingsWrapper)
             .build();
 
@@ -102,7 +115,12 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
         assertThat(response.getData().getManageHearingsWrapper().getManageHearingsActionSelection())
             .isEqualTo(ADD_HEARING);
 
-        verify(workingHearing).addDocumentToAdditionalHearingDocs(orderDocument);
+        if (caseDocuments.isEmpty()) {
+            verify(workingHearing, never()).addDocumentToAdditionalHearingDocs(any(CaseDocument.class));
+        } else {
+            caseDocuments.forEach(document ->
+                verify(workingHearing).addDocumentToAdditionalHearingDocs(document));
+        }
         verify(manageHearingActionService).performAddHearing(caseDetails, AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(caseData);
         assertNotNull(response);
@@ -129,5 +147,11 @@ class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
 
         verify(uploadApprovedOrderService).processApprovedOrdersMh(caseDetails, AUTH_TOKEN);
         verify(documentWarningsHelper).getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN));
+    }
+
+    private DirectionOrderCollection toDirectionOrderCollection(CaseDocument caseDocument) {
+        return DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder().uploadDraftDocument(caseDocument).build())
+            .build();
     }
 }
