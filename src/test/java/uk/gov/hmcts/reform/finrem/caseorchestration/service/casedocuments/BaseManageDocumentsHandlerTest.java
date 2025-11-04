@@ -44,7 +44,7 @@ public abstract class BaseManageDocumentsHandlerTest<H extends DocumentHandler> 
         caseDetailsBefore = buildCaseDetails();
         caseData = caseDetails.getData();
         setUpscreenUploadDocumentList();
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
         handler = getDocumentHandler();
     }
 
