@@ -14,6 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Legacy
 
 import java.util.List;
 
+/**
+ * Event "FR_manageCaseDocuments" will be replaced by "FR_newManageCaseDocuments soon.
+ * Similar logics have been moved to ManageCaseDocumentsContestedMidHandler
+ *
+ * @deprecated Event "FR_manageCaseDocuments" will be replaced by "FR_newManageCaseDocuments soon.
+ */
+@Deprecated
 @Slf4j
 @Service
 public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallbackHandler {
