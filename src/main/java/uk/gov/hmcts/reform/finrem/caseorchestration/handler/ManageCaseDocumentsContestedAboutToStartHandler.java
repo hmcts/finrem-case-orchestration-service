@@ -14,8 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Legacy
 
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.MANAGE_CASE_DOCUMENTS;
-
 @Slf4j
 @Service
 public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallbackHandler {
@@ -32,7 +30,7 @@ public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallb
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && MANAGE_CASE_DOCUMENTS.equals(eventType);
+            && EventType.MANAGE_CASE_DOCUMENTS.equals(eventType);
     }
 
     @Override
