@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.NEW_MANAGE_CASE_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction.ADD_NEW;
 
 @Slf4j
@@ -28,7 +27,7 @@ public class ManageCaseDocumentsContestedMidHandler extends FinremCallbackHandle
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && NEW_MANAGE_CASE_DOCUMENTS.equals(eventType);
+            && EventType.NEW_MANAGE_CASE_DOCUMENTS.equals(eventType);
     }
 
     @Override
