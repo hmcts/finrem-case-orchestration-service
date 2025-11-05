@@ -4,11 +4,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -21,6 +24,7 @@ public class ContactDetailsValidator {
     static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
     static final String INVALID_EMAIL_ADDRESS_ERROR_MESSAGE = "%s is not a valid Email address.";
+    static final String ORGANISATION_POLICY_ERROR = "Solicitor can only represent one party.";
     static final String INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE = "%s. Method validatePostcodesByRepresentation is only for "
         + "updating contact details on consented cases. Use validateCaseDataAddresses whenever possible.";
 
@@ -216,6 +220,42 @@ public class ContactDetailsValidator {
         checkForRespondentEmail(caseData, wrapper, errors);
 
         return errors;
+    }
+
+    /**
+     * Validates the organisation policies of the applicant and respondent in a financial remedy case.
+     *
+     * <p>
+     * This method checks whether the applicant and respondent are associated with the same organisation.
+     * An error is added if both organisation IDs are non-empty and equal. If either or both IDs are empty,
+     * no error will be returned.
+     *
+     * @param caseData the {@link FinremCaseData} object containing organisation policies for both parties
+     * @return a list of validation error messages; empty if no errors are found
+     */
+    public static List<String> validateOrganisationPolicy(FinremCaseData caseData) {
+        List<String> errors = new ArrayList<>();
+
+        OrganisationPolicy applicantOrganisationPolicy = caseData.getApplicantOrganisationPolicy();
+        OrganisationPolicy respondentOrganisationPolicy = caseData.getRespondentOrganisationPolicy();
+
+        String applicantOrgId = getOrganisationId(applicantOrganisationPolicy);
+        String respondentOrgId = getOrganisationId(respondentOrganisationPolicy);
+
+        if (!applicantOrgId.isEmpty()
+            && !respondentOrgId.isEmpty()
+            && applicantOrgId.equals(respondentOrgId)) {
+            errors.add(ORGANISATION_POLICY_ERROR);
+        }
+
+        return errors;
+    }
+
+    private static String getOrganisationId(OrganisationPolicy policy) {
+        return Optional.ofNullable(policy)
+            .map(OrganisationPolicy::getOrganisation)
+            .map(Organisation::getOrganisationID)
+            .orElse("");
     }
 
     /**

@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCaseDocumentsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
@@ -247,7 +248,6 @@ public class FinremCaseData implements HasCaseDocument {
     private List<DirectionOrderCollection> uploadHearingOrder;
     private List<DirectionOrderCollection> unprocessedUploadHearingDocuments;
     private List<DocumentCollectionItem> hearingOrderOtherDocuments;
-
     private List<DirectionDetailCollection> directionDetailsCollection;
     private List<DirectionOrderCollection> finalOrderCollection;
     private List<IntervenerHearingNoticeCollection> intv1HearingNoticesCollection;
@@ -294,13 +294,13 @@ public class FinremCaseData implements HasCaseDocument {
     private String currentUserCaseRoleLabel;
     private String currentUserCaseRoleType;
     private CaseDocument outOfFamilyCourtResolution;
-
     private DynamicMultiSelectList sourceDocumentList;
     private DynamicMultiSelectList solicitorRoleList;
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
-
-    private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private ManageCaseDocumentsWrapper manageCaseDocumentsWrapper;
 
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener1")
@@ -937,7 +937,10 @@ public class FinremCaseData implements HasCaseDocument {
         if (frc != null) {
             return Map.of(
                 RegionSouthEastFrc.BEDFORDSHIRE, getCourtListIdOrDefault(courtList.getBedfordshireCourt()),
+                // For contested FRCs
                 RegionSouthEastFrc.KENT_FRC, getCourtListIdOrDefault(courtList.getKentSurreyCourt()),
+                // For consented FRCs
+                RegionSouthEastFrc.KENT, getCourtListIdOrDefault(courtList.getKentSurreyCourt()),
                 RegionSouthEastFrc.THAMES_VALLEY, getCourtListIdOrDefault(courtList.getThamesValleyCourt())
             ).get(frc).getSelectedCourtId();
         } else {
@@ -1108,5 +1111,13 @@ public class FinremCaseData implements HasCaseDocument {
             this.paymentDetailsWrapper = new PaymentDetailsWrapper();
         }
         return paymentDetailsWrapper;
+    }
+
+    @JsonIgnore
+    public ManageCaseDocumentsWrapper getManageCaseDocumentsWrapper() {
+        if (manageCaseDocumentsWrapper == null) {
+            this.manageCaseDocumentsWrapper = new ManageCaseDocumentsWrapper();
+        }
+        return manageCaseDocumentsWrapper;
     }
 }

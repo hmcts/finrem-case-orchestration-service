@@ -51,8 +51,18 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_BARRISTER_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_BARRISTER_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_BARRISTER_3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_BARRISTER_4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService.TOP_LEVEL_HEARING_ID;
 
@@ -126,7 +136,11 @@ class HearingServiceTest {
         when(hearingOne.getHearingTime()).thenReturn("09:14");
         when(hearingOne.getPartiesOnCase()).thenReturn(List.of(
             PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(APP_SOLICITOR.getCcdCode()).build()).build(),
-            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(RESP_SOLICITOR.getCcdCode()).build()).build()
+            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(RESP_SOLICITOR.getCcdCode()).build()).build(),
+            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(INTVR_SOLICITOR_1.getCcdCode()).build()).build(),
+            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(INTVR_SOLICITOR_2.getCcdCode()).build()).build(),
+            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(INTVR_SOLICITOR_3.getCcdCode()).build()).build(),
+            PartyOnCaseCollectionItem.builder().value(PartyOnCase.builder().role(INTVR_SOLICITOR_4.getCcdCode()).build()).build()
         ));
 
         Hearing hearingTwo = mock(Hearing.class);
@@ -152,21 +166,54 @@ class HearingServiceTest {
         final Map<String, String> expectedSelectableHearingsOneOnly = Map.of(hearingOneId.toString(), HEARING_ONE_SELECTABLE_DISPLAY);
 
         return Stream.of(
-            // Case 1: Expecting nothing when empty hearing
+            // Case 1: Expecting nothing when null hearing.  Null hearing collections resolve to an empty list.
             Arguments.of(null, List.of(), Map.of()),
-            Arguments.of(CASEWORKER, List.of(), Map.of()),
-            Arguments.of(APP_SOLICITOR, List.of(), Map.of()),
-            Arguments.of(RESP_SOLICITOR, List.of(), Map.of()),
+            Arguments.of(CASEWORKER, null, Map.of()),
+            Arguments.of(APP_SOLICITOR, null, Map.of()),
+            Arguments.of(APP_BARRISTER, null, Map.of()),
+            Arguments.of(RESP_BARRISTER, null, Map.of()),
+            Arguments.of(RESP_SOLICITOR, null, Map.of()),
+            Arguments.of(INTVR_SOLICITOR_1, null, Map.of()),
+            Arguments.of(INTVR_BARRISTER_1, null, Map.of()),
+            Arguments.of(INTVR_SOLICITOR_2, null, Map.of()),
+            Arguments.of(INTVR_BARRISTER_2, null, Map.of()),
+            Arguments.of(INTVR_SOLICITOR_3, null, Map.of()),
+            Arguments.of(INTVR_BARRISTER_3, null, Map.of()),
+            Arguments.of(INTVR_SOLICITOR_4, null, Map.of()),
+            Arguments.of(INTVR_BARRISTER_4, null, Map.of()),
+
             // Case 2: Expecting different results depending on user case roles in single hearing condition
             Arguments.of(null, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
             Arguments.of(CASEWORKER, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
             Arguments.of(APP_SOLICITOR, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(APP_BARRISTER, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
             Arguments.of(RESP_SOLICITOR, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(RESP_BARRISTER, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_SOLICITOR_1, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_BARRISTER_1, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_SOLICITOR_2, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_BARRISTER_2, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_SOLICITOR_3, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_BARRISTER_3, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_SOLICITOR_4, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_BARRISTER_4, singleHearingAccessibleByAllParties, expectedSelectableHearingsOneOnly),
+
             // Case 3: Expecting different results depending on user case roles in multiple hearings condition
             Arguments.of(null, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingOneAndTwo),
             Arguments.of(CASEWORKER, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingOneAndTwo),
+            Arguments.of(RESP_SOLICITOR, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingOneAndTwo),
+            Arguments.of(RESP_BARRISTER, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingOneAndTwo),
+            // -- Other roles cannot see respondent-only hearing
             Arguments.of(APP_SOLICITOR, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly),
-            Arguments.of(RESP_SOLICITOR, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingOneAndTwo)
+            Arguments.of(APP_BARRISTER, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_SOLICITOR_1, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_BARRISTER_1, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_SOLICITOR_2, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_BARRISTER_2, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_SOLICITOR_3, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_BARRISTER_3, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_SOLICITOR_4, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly),
+            Arguments.of(INTVR_BARRISTER_4, twoHearingsWithDifferentConfidentiality, expectedSelectableHearingsOneOnly)
         );
     }
 
