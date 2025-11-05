@@ -29,7 +29,7 @@ import java.util.Optional;
  *
  * @deprecated This about-to-submit handler will be removed.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @Slf4j
 @Service
 public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {

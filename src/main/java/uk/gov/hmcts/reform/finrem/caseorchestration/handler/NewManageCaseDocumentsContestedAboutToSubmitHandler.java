@@ -31,11 +31,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullI
 @Slf4j
 @Service
 public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
-    public static final String CHOOSE_A_DIFFERENT_PARTY = " not present on the case, do you want to continue?";
-    public static final String INTERVENER_1 = "Intervener 1 ";
-    public static final String INTERVENER_2 = "Intervener 2 ";
-    public static final String INTERVENER_3 = "Intervener 3 ";
-    public static final String INTERVENER_4 = "Intervener 4 ";
+    private static final String CHOOSE_A_DIFFERENT_PARTY = " not present on the case, do you want to continue?";
+    private static final String INTERVENER_1 = "Intervener 1 ";
+    private static final String INTERVENER_2 = "Intervener 2 ";
+    private static final String INTERVENER_3 = "Intervener 3 ";
+    private static final String INTERVENER_4 = "Intervener 4 ";
 
     private static final List<CaseDocumentType> administrativeCaseDocumentTypes = List.of(
         CaseDocumentType.ATTENDANCE_SHEETS,
@@ -78,10 +78,35 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
         final List<String> warnings = new ArrayList<>();
         final FinremCaseData caseData = getFinremCaseData(callbackRequest);
         final FinremCaseData caseDataBefore = getFinremCaseDataBefore(callbackRequest);
-        final ManageCaseDocumentsAction action = caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentsActionSelection();
 
         calculateWarnings(caseData, warnings);
+        moveInputManageCaseDocumentsToManagedCollections(caseData);
+        addDefaultsToAdministrativeDocuments(getManagedCollections(caseData));
+        replaceManagedDocumentsInCollectionType(caseData);
+        addUploadDateToNewDocuments(caseData, caseDataBefore);
+        clearLegacyCollections(caseData);
+        deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
+        clearTemporaryField(caseData);
 
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
+    }
+
+    private void addUploadDateToNewDocuments(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+        uploadedDocumentService.addUploadDateToNewDocuments(caseData, caseDataBefore);
+    }
+
+    private void replaceManagedDocumentsInCollectionType(FinremCaseData caseData) {
+        documentHandlers.forEach(documentHandler ->
+            documentHandler.replaceManagedDocumentsInCollectionType(caseData, getManagedCollections(caseData),
+                false));
+    }
+
+    private List<UploadCaseDocumentCollection> getManagedCollections(FinremCaseData caseData) {
+        return nullIfEmpty(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection());
+    }
+
+    private void moveInputManageCaseDocumentsToManagedCollections(FinremCaseData caseData) {
+        final ManageCaseDocumentsAction action = caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentsActionSelection();
         if (action == ManageCaseDocumentsAction.ADD_NEW) {
             List<UploadCaseDocumentCollection> newManageCaseDocumentCollection =
                 Optional.ofNullable(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection())
@@ -91,23 +116,6 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
             );
             caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(newManageCaseDocumentCollection);
         }
-
-        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentsWrapper()
-            .getManageCaseDocumentCollection();
-        addDefaultsToAdministrativeDocuments(managedCollections);
-        documentHandlers.forEach(documentCollectionService ->
-            documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, managedCollections, false));
-        uploadedDocumentService.addUploadDateToNewDocuments(caseData, caseDataBefore);
-
-        clearLegacyCollections(caseData);
-
-        if (featureToggleService.isSecureDocEnabled()) {
-            deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
-        }
-
-        clearTemporaryField(caseData);
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
     }
 
     private FinremCaseData getFinremCaseData(FinremCallbackRequest callbackRequest) {
@@ -167,12 +175,14 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
     private void deleteRemovedDocuments(FinremCaseData caseData,
                                         FinremCaseData caseDataBefore,
                                         String userAuthorisation) {
+        if (featureToggleService.isSecureDocEnabled()) {
         List<UploadCaseDocumentCollection> allCollectionsBefore =
             caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
         allCollectionsBefore.removeAll(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
 
         allCollectionsBefore.stream().map(this::getDocumentUrl)
             .forEach(docUrl -> evidenceManagementDeleteService.delete(docUrl, userAuthorisation));
+        }
     }
 
     private String getDocumentUrl(UploadCaseDocumentCollection documentCollection) {
