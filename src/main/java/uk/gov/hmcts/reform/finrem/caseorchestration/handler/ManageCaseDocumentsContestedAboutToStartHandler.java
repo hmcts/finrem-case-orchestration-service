@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @deprecated Event "FR_manageCaseDocuments" will be replaced by "FR_newManageCaseDocuments soon.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 @Slf4j
 @Service
 public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallbackHandler {

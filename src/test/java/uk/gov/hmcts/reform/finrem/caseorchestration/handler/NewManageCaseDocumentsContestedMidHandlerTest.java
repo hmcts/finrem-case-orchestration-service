@@ -20,10 +20,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class ManageCaseDocumentsContestedMidHandlerTest {
+class NewManageCaseDocumentsContestedMidHandlerTest {
 
     @InjectMocks
-    private ManageCaseDocumentsContestedMidHandler underTest;
+    private NewManageCaseDocumentsContestedMidHandler underTest;
 
     @Test
     void testCanHandle() {

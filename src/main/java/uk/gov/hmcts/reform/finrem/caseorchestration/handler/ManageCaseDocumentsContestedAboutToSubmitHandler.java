@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * NewManageCaseDocumentsContestedAboutToSubmitHandler is replacing this handler
+ * NewManageCaseDocumentsContestedAboutToSubmitHandler is replacing this handler.
  *
  * @deprecated This about-to-submit handler will be removed.
  */
