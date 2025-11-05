@@ -11,8 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -24,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.Process
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
@@ -48,7 +45,7 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.DIRECTION_UPLOAD_ORDER.equals(eventType) || EventType.PROCESS_ORDER.equals(eventType));
+            && EventType.PROCESS_ORDER.equals(eventType);
     }
 
     @Override
@@ -113,16 +110,6 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(List.of("You must upload a Microsoft Word file or PDF for modifying an unprocessed approved documents."))
                 .build();
-        }
-
-        // Old Process Order hearing data setup
-        if (EventType.DIRECTION_UPLOAD_ORDER.equals(callbackRequest.getEventType())) {
-            // Create an empty entry if it is empty to save a click on add new button
-            if (ofNullable(caseData.getDirectionDetailsCollection()).orElse(List.of()).isEmpty()) {
-                caseData.setDirectionDetailsCollection(List.of(
-                    DirectionDetailCollection.builder().value(DirectionDetail.builder().build()).build()
-                ));
-            }
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

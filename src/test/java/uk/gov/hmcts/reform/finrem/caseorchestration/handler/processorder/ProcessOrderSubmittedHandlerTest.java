@@ -2,14 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
@@ -19,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
@@ -49,56 +46,7 @@ class ProcessOrderSubmittedHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler,
-            Arguments.of(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.PROCESS_ORDER),
-            Arguments.of(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER)
-        );
-    }
-
-    @Test
-    void givenCase_whenSchedulingFirstTime_thenSendInitialCorrespondence() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetailsBefore =
-            FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
-        callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
-        callbackRequest.setEventType(EventType.DIRECTION_UPLOAD_ORDER);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(hearingDocumentService).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
-        verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
-    }
-
-    @Test
-    void givenCase_whenSchedulingSecondTime_thenSendAdditionalHearingDocuments() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetailsBefore =
-            FinremCaseDetails.builder()
-                .id(123L)
-                .data(FinremCaseData.builder()
-                    .listForHearingWrapper(ListForHearingWrapper.builder()
-                        .formC(CaseDocument.builder().build())
-                        .build())
-                    .build())
-                .build();
-        callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
-        callbackRequest.setEventType(EventType.DIRECTION_UPLOAD_ORDER);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
-        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
-    }
-
-    @Test
-    void givenCase_whenCaseDetailsBeforeDoNotExist_thenSendInitialCorrespondence() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.setEventType(EventType.DIRECTION_UPLOAD_ORDER);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(hearingDocumentService).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
-        verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
+        assertCanHandle(handler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.PROCESS_ORDER);
     }
 
     @Test
