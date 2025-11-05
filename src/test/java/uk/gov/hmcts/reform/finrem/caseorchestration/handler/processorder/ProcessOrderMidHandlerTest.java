@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,10 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -72,15 +69,12 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler,
-            Arguments.of(CallbackType.MID_EVENT, CaseType.CONTESTED, PROCESS_ORDER),
-            Arguments.of(CallbackType.MID_EVENT, CaseType.CONTESTED, DIRECTION_UPLOAD_ORDER)
-        );
+        assertCanHandle(handler, CallbackType.MID_EVENT, CaseType.CONTESTED, PROCESS_ORDER);
     }
 
     @Test
     void givenContestedCase_whenDirectionUploadOrderButNonEncryptedFileShouldNotGetError() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(DIRECTION_UPLOAD_ORDER);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(PROCESS_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
         mockPassAllValidations();
@@ -100,13 +94,13 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertTrue(response.getErrors().isEmpty());
+        assertThat(response.getErrors()).isEmpty();
         verify(service, times(2)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
     @Test
     void givenContestedCase_whenExistingDirectionUploadOrderAndUploadedSame_thenShouldNotCheck() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(DIRECTION_UPLOAD_ORDER);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(PROCESS_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
         mockPassAllValidations();
@@ -129,37 +123,33 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertTrue(response.getErrors().isEmpty());
+        assertThat(response.getErrors()).isEmpty();
         verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
     @Test
     void shouldCreateEmptyEntryWhenDirectionDetailsCollectionIsEmptyOrNull() {
-        List<DirectionDetailCollection> expected = List.of(
-            DirectionDetailCollection.builder().value(DirectionDetail.builder().build()).build()
-        );
-
         mockPassAllValidations();
 
         // Test with null directionDetailsCollection
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(DIRECTION_UPLOAD_ORDER, FinremCaseDetails.builder()
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(PROCESS_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder().build()));
 
         callbackRequest.setCaseDetailsBefore(FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build());
 
         FinremCaseData result = handler.handle(callbackRequest, AUTH_TOKEN).getData();
-        assertEquals(expected, result.getDirectionDetailsCollection());
+        assertThat(result.getDirectionDetailsCollection()).isNull();
 
         // Test with empty directionDetailsCollection
-        callbackRequest = FinremCallbackRequestFactory.from(DIRECTION_UPLOAD_ORDER, FinremCaseDetails.builder()
+        callbackRequest = FinremCallbackRequestFactory.from(PROCESS_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder().directionDetailsCollection(List.of()).build()));
 
         callbackRequest.setCaseDetailsBefore(FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build());
 
         result = handler.handle(callbackRequest, AUTH_TOKEN).getData();
-        assertEquals(expected, result.getDirectionDetailsCollection());
+        assertThat(result.getDirectionDetailsCollection()).isEmpty();
     }
 
     @Test
