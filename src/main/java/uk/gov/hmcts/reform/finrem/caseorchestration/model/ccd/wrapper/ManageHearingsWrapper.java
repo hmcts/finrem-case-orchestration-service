@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateHearingAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 
@@ -29,6 +30,7 @@ public class ManageHearingsWrapper {
     private YesOrNo isAddHearingChosen;
     private YesOrNo isFinalOrder;
     private ManageHearingsAction manageHearingsActionSelection;
+    private VacateHearingAction vacateHearingSelection;
     private WorkingHearing workingHearing;
     private List<ManageHearingsCollectionItem> hearings;
     private List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection;
