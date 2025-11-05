@@ -28,16 +28,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.manageheari
 
 @Slf4j
 @Service
-public class UploadApprovedOrderContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class UploadApprovedOrderContestedMhAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final DocumentWarningsHelper documentWarningsHelper;
     private final UploadApprovedOrderService uploadApprovedOrderService;
     private final ManageHearingActionService manageHearingActionService;
 
-    public UploadApprovedOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                            DocumentWarningsHelper documentWarningsHelper,
-                                                            UploadApprovedOrderService uploadApprovedOrderService,
-                                                            ManageHearingActionService manageHearingActionService) {
+    public UploadApprovedOrderContestedMhAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                              DocumentWarningsHelper documentWarningsHelper,
+                                                              UploadApprovedOrderService uploadApprovedOrderService,
+                                                              ManageHearingActionService manageHearingActionService) {
         super(finremCaseDetailsMapper);
         this.documentWarningsHelper = documentWarningsHelper;
         this.uploadApprovedOrderService = uploadApprovedOrderService;

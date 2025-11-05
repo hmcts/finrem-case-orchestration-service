@@ -37,7 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.manageheari
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UploadApprovedOrderContestedAboutToSubmitHandlerTest {
+class UploadApprovedOrderContestedMhAboutToSubmitHandlerTest {
 
     @Mock
     private DocumentWarningsHelper documentWarningsHelper;
@@ -47,7 +47,7 @@ class UploadApprovedOrderContestedAboutToSubmitHandlerTest {
     private ManageHearingActionService manageHearingActionService;
 
     @InjectMocks
-    private UploadApprovedOrderContestedAboutToSubmitHandler handler;
+    private UploadApprovedOrderContestedMhAboutToSubmitHandler handler;
 
     @Test
     void canHandle() {
