@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUpload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
@@ -55,10 +56,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.NEW_MANAGE_CASE_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_FOUR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_TWO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.ES1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.TRIAL_BUNDLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.WITHOUT_PREJUDICE_OFFERS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -326,5 +331,140 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseDataBefore, caseData), AUTH_TOKEN);
         verify(evidenceManagementDeleteService, times(featureToggleEnabled ? 1 : 0))
             .delete(removedDocument.getDocumentUrl(), AUTH_TOKEN);
+    }
+
+    @Test
+    void givenAnyCase_whenHandle_thenClearTemporaryField() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
+                .inputManageCaseDocumentCollection(List.of())
+                .build())
+            .build();
+
+        assertThat(underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN)
+            .getData().getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection()
+        ).isNull();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = CaseDocumentType.class, names = {"ATTENDANCE_SHEETS", "JUDICIAL_NOTES", "JUDGMENT",
+        "WITNESS_SUMMONS", "TRANSCRIPT"})
+    void givenAdministrativeCaseDocumentTypes_whenHandleAddNewAction_thenDefaultsApplied(CaseDocumentType caseDocumentType) {
+        UploadCaseDocumentCollection singleCaseDocumentUploaded = null;
+        List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection = List.of(
+            singleCaseDocumentUploaded = UploadCaseDocumentCollection.builder()
+                .uploadCaseDocument(UploadCaseDocument.builder()
+                    .caseDocumentType(caseDocumentType)
+                    .caseDocumentParty(mock(CaseDocumentParty.class))
+                    .caseDocumentFdr(YesOrNo.YES)
+                    .caseDocumentConfidentiality(YesOrNo.YES)
+                    .build())
+                .build()
+        );
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
+                .manageCaseDocumentsActionSelection(ManageCaseDocumentsAction.ADD_NEW)
+                .inputManageCaseDocumentCollection(inputManageCaseDocumentCollection)
+                .build())
+            .build();
+        underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
+
+        UploadCaseDocument uploadCaseDocument = singleCaseDocumentUploaded.getUploadCaseDocument();
+        assertThat(uploadCaseDocument.getCaseDocumentParty()).isEqualTo(CASE);
+        assertThat(uploadCaseDocument.getCaseDocumentConfidentiality()).isEqualTo(YesOrNo.NO);
+        assertThat(uploadCaseDocument.getCaseDocumentFdr()).isEqualTo(YesOrNo.NO);
+    }
+
+    @Test
+    void givenWithoutPrejudiceOffersDocumentTypeSelected_whenHandleAddNewAction_thenDefaultsApplied() {
+        UploadCaseDocumentCollection caseDocumentUploadedOne = null;
+        UploadCaseDocumentCollection caseDocumentUploadedTwo = null;
+        CaseDocumentParty caseDocumentPartyOne = mock(CaseDocumentParty.class);
+        CaseDocumentParty caseDocumentPartyTwo = mock(CaseDocumentParty.class);
+
+        List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection = List.of(
+            caseDocumentUploadedOne = UploadCaseDocumentCollection.builder()
+                .uploadCaseDocument(UploadCaseDocument.builder()
+                    .caseDocumentType(WITHOUT_PREJUDICE_OFFERS)
+                    .caseDocumentParty(caseDocumentPartyOne)
+                    .caseDocumentFdr(YesOrNo.NO)
+                    .caseDocumentConfidentiality(YesOrNo.YES)
+                    .build())
+                .build(),
+            caseDocumentUploadedTwo = UploadCaseDocumentCollection.builder()
+                .uploadCaseDocument(UploadCaseDocument.builder()
+                    .caseDocumentType(WITHOUT_PREJUDICE_OFFERS)
+                    .caseDocumentParty(caseDocumentPartyTwo)
+                    .caseDocumentFdr(YesOrNo.NO)
+                    .caseDocumentConfidentiality(YesOrNo.YES)
+                    .build())
+                .build()
+        );
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
+                .manageCaseDocumentsActionSelection(ManageCaseDocumentsAction.ADD_NEW)
+                .inputManageCaseDocumentCollection(inputManageCaseDocumentCollection)
+                .build())
+            .build();
+
+        underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
+
+        UploadCaseDocument uploadCaseDocumentOne = caseDocumentUploadedOne.getUploadCaseDocument();
+        assertThat(uploadCaseDocumentOne.getCaseDocumentParty()).isEqualTo(caseDocumentPartyOne);
+        assertThat(uploadCaseDocumentOne.getCaseDocumentConfidentiality()).isEqualTo(YesOrNo.NO);
+        assertThat(uploadCaseDocumentOne.getCaseDocumentFdr()).isEqualTo(YesOrNo.YES);
+
+        UploadCaseDocument uploadCaseDocumentTwo = caseDocumentUploadedTwo.getUploadCaseDocument();
+        assertThat(uploadCaseDocumentTwo.getCaseDocumentParty()).isEqualTo(caseDocumentPartyTwo);
+        assertThat(uploadCaseDocumentTwo.getCaseDocumentConfidentiality()).isEqualTo(YesOrNo.NO);
+        assertThat(uploadCaseDocumentTwo.getCaseDocumentFdr()).isEqualTo(YesOrNo.YES);
+    }
+
+    @Test
+    void givenOtherDocumentTypeSelected_whenHandleAddNewAction_thenDefaultsNotApplied() {
+        UploadCaseDocumentCollection caseDocumentUploadedOne = null;
+        UploadCaseDocumentCollection caseDocumentUploadedTwo = null;
+        CaseDocumentParty caseDocumentPartyOne = mock(CaseDocumentParty.class);
+        CaseDocumentParty caseDocumentPartyTwo = mock(CaseDocumentParty.class);
+
+        List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection = List.of(
+            caseDocumentUploadedOne = UploadCaseDocumentCollection.builder()
+                .uploadCaseDocument(UploadCaseDocument.builder()
+                    .caseDocumentType(TRIAL_BUNDLE)
+                    .caseDocumentParty(caseDocumentPartyOne)
+                    .caseDocumentFdr(YesOrNo.NO)
+                    .caseDocumentConfidentiality(YesOrNo.YES)
+                    .build())
+                .build(),
+            caseDocumentUploadedTwo = UploadCaseDocumentCollection.builder()
+                .uploadCaseDocument(UploadCaseDocument.builder()
+                    .caseDocumentType(ES1)
+                    .caseDocumentParty(caseDocumentPartyTwo)
+                    .caseDocumentFdr(YesOrNo.NO)
+                    .caseDocumentConfidentiality(YesOrNo.YES)
+                    .build())
+                .build()
+        );
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
+                .manageCaseDocumentsActionSelection(ManageCaseDocumentsAction.ADD_NEW)
+                .inputManageCaseDocumentCollection(inputManageCaseDocumentCollection)
+                .build())
+            .build();
+
+        underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
+
+        UploadCaseDocument uploadCaseDocumentOne = caseDocumentUploadedOne.getUploadCaseDocument();
+        assertThat(uploadCaseDocumentOne.getCaseDocumentParty()).isEqualTo(caseDocumentPartyOne);
+        assertThat(uploadCaseDocumentOne.getCaseDocumentConfidentiality()).isEqualTo(YesOrNo.YES);
+        assertThat(uploadCaseDocumentOne.getCaseDocumentFdr()).isEqualTo(YesOrNo.NO);
+
+        UploadCaseDocument uploadCaseDocumentTwo = caseDocumentUploadedTwo.getUploadCaseDocument();
+        assertThat(uploadCaseDocumentTwo.getCaseDocumentParty()).isEqualTo(caseDocumentPartyTwo);
+        assertThat(uploadCaseDocumentTwo.getCaseDocumentConfidentiality()).isEqualTo(YesOrNo.YES);
+        assertThat(uploadCaseDocumentTwo.getCaseDocumentFdr()).isEqualTo(YesOrNo.NO);
     }
 }
