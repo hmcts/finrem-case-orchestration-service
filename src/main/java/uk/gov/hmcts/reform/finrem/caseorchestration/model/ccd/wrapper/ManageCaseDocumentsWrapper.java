@@ -22,7 +22,10 @@ public class ManageCaseDocumentsWrapper implements HasCaseDocument {
 
     private ManageCaseDocumentsAction manageCaseDocumentsActionSelection;
 
+    // It was used for capturing user input in the old event.
+    // It’s kept to maintain compatibility with the existing document handler logic.
     private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
 
+    // it's used for capturing user's input in FR_newManageCaseDocuments event.
     private List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection;
 }
