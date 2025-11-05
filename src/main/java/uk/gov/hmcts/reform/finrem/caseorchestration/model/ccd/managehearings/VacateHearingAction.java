@@ -19,5 +19,7 @@ public class VacateHearingAction {
     private DynamicList hearingDetails;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate hearingDate;
+    @JsonProperty("reasonsForVacating")
+    private String reasonsForVacating;
 
 }
