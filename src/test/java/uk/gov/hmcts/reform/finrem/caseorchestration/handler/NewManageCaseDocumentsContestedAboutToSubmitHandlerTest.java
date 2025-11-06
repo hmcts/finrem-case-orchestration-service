@@ -351,13 +351,14 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         "WITNESS_SUMMONS", "TRANSCRIPT"})
     void givenAdministrativeCaseDocumentTypes_whenHandleAddNewAction_thenDefaultsApplied(CaseDocumentType caseDocumentType) {
         UploadCaseDocumentCollection singleCaseDocumentUploaded = null;
+        YesOrNo selectedConfidentiality = mock(YesOrNo.class);
         List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection = List.of(
             singleCaseDocumentUploaded = UploadCaseDocumentCollection.builder()
                 .uploadCaseDocument(UploadCaseDocument.builder()
                     .caseDocumentType(caseDocumentType)
                     .caseDocumentParty(mock(CaseDocumentParty.class))
                     .caseDocumentFdr(YesOrNo.YES)
-                    .caseDocumentConfidentiality(YesOrNo.YES)
+                    .caseDocumentConfidentiality(selectedConfidentiality)
                     .build())
                 .build()
         );
@@ -372,7 +373,7 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
         UploadCaseDocument uploadCaseDocument = singleCaseDocumentUploaded.getUploadCaseDocument();
         assertThat(uploadCaseDocument.getCaseDocumentParty()).isEqualTo(CASE);
-        assertThat(uploadCaseDocument.getCaseDocumentConfidentiality()).isEqualTo(YesOrNo.NO);
+        assertThat(uploadCaseDocument.getCaseDocumentConfidentiality()).isEqualTo(selectedConfidentiality);
         assertThat(uploadCaseDocument.getCaseDocumentFdr()).isEqualTo(YesOrNo.NO);
     }
 

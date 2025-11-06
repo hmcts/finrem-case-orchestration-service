@@ -215,7 +215,6 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
         UploadCaseDocument uploadCaseDocument = document.getUploadCaseDocument();
         if (administrativeCaseDocumentTypes.contains(uploadCaseDocument.getCaseDocumentType())) {
             uploadCaseDocument.setCaseDocumentParty(CaseDocumentParty.CASE);
-            uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
             uploadCaseDocument.setCaseDocumentFdr(YesOrNo.NO);
         } else if (CaseDocumentType.WITHOUT_PREJUDICE_OFFERS.equals(uploadCaseDocument.getCaseDocumentType())) {
             uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
