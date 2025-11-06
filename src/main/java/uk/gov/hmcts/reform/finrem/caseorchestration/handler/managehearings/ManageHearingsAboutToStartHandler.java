@@ -29,7 +29,8 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
     private final HearingService hearingService;
 
     public ManageHearingsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                             PartyService partyService, ValidateHearingService validateHearingService, HearingService hearingService) {
+                                             PartyService partyService, ValidateHearingService validateHearingService,
+                                             HearingService hearingService) {
         super(finremCaseDetailsMapper);
         this.partyService = partyService;
         this.validateHearingService = validateHearingService;
@@ -70,11 +71,11 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
                 .withHearingTypes(HearingType.values())
                 .build()
         );
-
+        // Remove this line after /DFR-4138 release
         finremCaseData.setCcdCaseId(caseDetails.getCaseIdAsString());
         finremCaseData.getManageHearingsWrapper().setVacateHearingSelection(
             VacateHearingAction.builder()
-                .hearingDetails(hearingService.generateSelectableHearingsAsDynamicList(caseDetails, userAuthorisation))
+                .chooseHearings(hearingService.generateSelectableHearingsAsDynamicList(caseDetails, userAuthorisation))
                 .build()
         );
 

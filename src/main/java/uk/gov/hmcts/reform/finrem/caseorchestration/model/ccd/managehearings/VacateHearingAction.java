@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,11 +14,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VacateHearingAction {
-    @JsonProperty("choose_hearings")
-    private DynamicList hearingDetails;
+    private DynamicList chooseHearings;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate hearingDate;
-    @JsonProperty("reasonsForVacating")
     private String reasonsForVacating;
 
 }
