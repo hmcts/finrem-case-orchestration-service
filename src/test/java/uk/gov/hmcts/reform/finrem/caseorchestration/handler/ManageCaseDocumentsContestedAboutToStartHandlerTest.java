@@ -1,150 +1,120 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.LegacyConfidentialDocumentsService;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.MANAGE_CASE_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ManageCaseDocumentsContestedAboutToStartHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class ManageCaseDocumentsContestedAboutToStartHandlerTest {
 
+    @Mock
+    private LegacyConfidentialDocumentsService legacyConfidentialDocumentsService;
+    
+    @InjectMocks
     private ManageCaseDocumentsContestedAboutToStartHandler manageCaseDocumentsAboutToStartCaseHandler;
 
-    @Before
-    public void setup() {
-        manageCaseDocumentsAboutToStartCaseHandler =
-            new ManageCaseDocumentsContestedAboutToStartHandler(
-                new FinremCaseDetailsMapper(
-                    new ObjectMapper().registerModule(new JavaTimeModule())), new LegacyConfidentialDocumentsService());
+    @Test
+    void testCanHandle() {
+        assertCanHandle(manageCaseDocumentsAboutToStartCaseHandler,
+            CallbackType.ABOUT_TO_START, CaseType.CONTESTED, MANAGE_CASE_DOCUMENTS);
     }
 
     @Test
-    public void givenACcdCallbackContestedCase_WhenAnAboutToStartEventManageCaseDocuments_thenHandlerCanHandle() {
-        assertThat(manageCaseDocumentsAboutToStartCaseHandler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.MANAGE_CASE_DOCUMENTS),
-            is(true));
+    void givenAnyCase_whenHandle_thenPopulateAllManageableCollections() {
+        List<UploadCaseDocumentCollection> allManageableCollections = mock(List.class);
+        UploadCaseDocumentWrapper mockedUploadCaseDocumentWrapper = mock(UploadCaseDocumentWrapper.class);
+        lenient().when(mockedUploadCaseDocumentWrapper.getAllManageableCollections()).thenReturn(allManageableCollections);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .uploadCaseDocumentWrapper(mockedUploadCaseDocumentWrapper)
+            .build();
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(MANAGE_CASE_DOCUMENTS,
+            FinremCaseDetails.builder().data(caseData));
+
+        FinremCaseData responseData = manageCaseDocumentsAboutToStartCaseHandler.handle(request, AUTH_TOKEN).getData();
+
+        assertThat(responseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection())
+            .isEqualTo(allManageableCollections);
     }
 
     @Test
-    public void givenACcdCallbackConsentedCase_WhenAnAboutToStartEventManageCaseDocuments_thenHandlerCanNotHandle() {
-        assertThat(manageCaseDocumentsAboutToStartCaseHandler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.MANAGE_CASE_DOCUMENTS),
-            is(false));
+    void givenAnyCase_whenHandle_thenMigrateLegacyConfidentialCaseDocumentFormat() {
+        List<UploadCaseDocumentCollection> allManageableCollections = mock(List.class);
+        UploadCaseDocumentWrapper mockedUploadCaseDocumentWrapper = mock(UploadCaseDocumentWrapper.class);
+        lenient().when(mockedUploadCaseDocumentWrapper.getAllManageableCollections()).thenReturn(allManageableCollections);
+
+        List<ConfidentialUploadedDocumentData> mockedConfidentialDocumentsUploaded = mock(List.class);
+        List<UploadCaseDocumentCollection> mockedUploadCaseDocumentCollections = mock(List.class);
+        lenient().when(legacyConfidentialDocumentsService
+            .mapLegacyConfidentialDocumentToConfidentialDocumentCollection(mockedConfidentialDocumentsUploaded))
+            .thenReturn(mockedUploadCaseDocumentCollections);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .uploadCaseDocumentWrapper(mockedUploadCaseDocumentWrapper)
+            .confidentialDocumentsUploaded(mockedConfidentialDocumentsUploaded)
+            .build();
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(MANAGE_CASE_DOCUMENTS,
+            FinremCaseDetails.builder().data(caseData));
+
+        manageCaseDocumentsAboutToStartCaseHandler.handle(request, AUTH_TOKEN);
+
+        verify(allManageableCollections).addAll(mockedUploadCaseDocumentCollections);
+        verify(mockedConfidentialDocumentsUploaded).clear();
+        verify(legacyConfidentialDocumentsService)
+            .mapLegacyConfidentialDocumentToConfidentialDocumentCollection(mockedConfidentialDocumentsUploaded);
     }
 
     @Test
-    public void givenCallbackRequestWithDocumentCollectionsWhenHandleThenScreenCollectionPopulatedWithAllCollections() {
+    void givenAnyCase_whenHandle_thenPopulateMissingConfidentialFlag() {
+        List<UploadCaseDocumentCollection> allManageableCollections = new ArrayList<>();
+        allManageableCollections.add(toUploadCaseDocumentCollection(null));
+        allManageableCollections.add(toUploadCaseDocumentCollection(YesOrNo.YES));
+        allManageableCollections.add(toUploadCaseDocumentCollection(YesOrNo.NO));
+        allManageableCollections.add(toUploadCaseDocumentCollection(null));
 
-        FinremCallbackRequest callbackRequest =
-            FinremCallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
-        callbackRequest.getCaseDetails().getData().getUploadCaseDocumentWrapper()
-            .setAppCaseSummariesCollection(getTestUploadCaseDocumentCollection());
+        UploadCaseDocumentWrapper mockedUploadCaseDocumentWrapper = mock(UploadCaseDocumentWrapper.class);
+        lenient().when(mockedUploadCaseDocumentWrapper.getAllManageableCollections()).thenReturn(allManageableCollections);
 
-        GenericAboutToStartOrSubmitCallbackResponse response =
-            manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .uploadCaseDocumentWrapper(mockedUploadCaseDocumentWrapper)
+            .build();
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(MANAGE_CASE_DOCUMENTS,
+            FinremCaseDetails.builder().data(caseData));
 
-        assertThat(((FinremCaseData) response.getData()).getManageCaseDocumentsWrapper()
-            .getManageCaseDocumentCollection().size(), is(1));
+        FinremCaseData responseData = manageCaseDocumentsAboutToStartCaseHandler.handle(request, AUTH_TOKEN).getData();
+
+        assertThat(responseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection())
+            .map(UploadCaseDocumentCollection::getUploadCaseDocument)
+            .map(UploadCaseDocument::getCaseDocumentConfidentiality)
+            .containsExactly(YesOrNo.NO, YesOrNo.YES, YesOrNo.NO, YesOrNo.NO);
     }
 
-    @Test
-    public void givenConfidentialFlagMissingInExistingDocumentWhenAboutToStartThenSetConfidentialNo() {
-
-        FinremCallbackRequest callbackRequest =
-            FinremCallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
-        callbackRequest.getCaseDetails().getData().getUploadCaseDocumentWrapper().setConfidentialDocumentCollection(
-            List.of(UploadCaseDocumentCollection.builder()
-                .uploadCaseDocument(UploadCaseDocument.builder().build()).build()));
-
-        GenericAboutToStartOrSubmitCallbackResponse response =
-            manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(((FinremCaseData) response.getData()).getUploadCaseDocumentWrapper()
-            .getConfidentialDocumentCollection().get(0).getUploadCaseDocument().getCaseDocumentConfidentiality(),
-            is(YesOrNo.NO));
-    }
-
-    @Test
-    public void givenConfidentialFlagNotMissingInExistingDocumentWhenAboutToStartThenConfidentialFlagNotChanged() {
-
-        FinremCallbackRequest callbackRequest =
-            FinremCallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
-        callbackRequest.getCaseDetails().getData().getUploadCaseDocumentWrapper().setConfidentialDocumentCollection(
-            List.of(UploadCaseDocumentCollection.builder()
-                .uploadCaseDocument(UploadCaseDocument.builder()
-                    .caseDocumentConfidentiality(YesOrNo.YES)
-                    .build()).build()));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(((FinremCaseData) response.getData()).getUploadCaseDocumentWrapper()
-                .getConfidentialDocumentCollection().get(0).getUploadCaseDocument().getCaseDocumentConfidentiality(),
-            is(YesOrNo.YES));
-    }
-
-    @Test
-    public void givenExistingLegacyConfidentialDocsWhenAboutToStartThenMapLegacyDocsIntoCaseDocumentConfidential() {
-
-        List<ConfidentialUploadedDocumentData> legacyConfidentialDocList = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.now();
-        legacyConfidentialDocList.add(ConfidentialUploadedDocumentData.builder()
-            .id("Legacy doc id")
-            .value(UploadConfidentialDocument.builder()
-                .documentType(CaseDocumentType.CARE_PLAN)
-                .documentComment("Legacy doc comment")
-                .confidentialDocumentUploadDateTime(now).build()).build());
-        FinremCallbackRequest callbackRequest =
-            FinremCallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
-        callbackRequest.getCaseDetails().getData().setConfidentialDocumentsUploaded(legacyConfidentialDocList);
-
-        GenericAboutToStartOrSubmitCallbackResponse response =
-            manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(((FinremCaseData) response.getData()).getManageCaseDocumentsWrapper()
-                .getManageCaseDocumentCollection().getFirst()
-                .getUploadCaseDocument().getHearingDetails(),
-            is("Legacy doc comment"));
-        assertThat(((FinremCaseData) response.getData()).getManageCaseDocumentsWrapper()
-                .getManageCaseDocumentCollection().getFirst()
-                .getUploadCaseDocument().getCaseDocumentUploadDateTime(),
-            is(now));
-    }
-
-    private List<UploadCaseDocumentCollection> getTestUploadCaseDocumentCollection() {
-        return Collections.singletonList(UploadCaseDocumentCollection.builder().build());
-    }
-
-    private FinremCaseDetails generalOrderContestedCaseDetails() {
-        FinremCaseData caseData =
-            FinremCaseData.builder().uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder().build()).build();
-
-        return FinremCaseDetails.builder().caseType(CaseType.CONTESTED).data(caseData).build();
+    private UploadCaseDocumentCollection toUploadCaseDocumentCollection(YesOrNo confidentiality) {
+        return UploadCaseDocumentCollection.builder()
+            .uploadCaseDocument(UploadCaseDocument.builder().caseDocumentConfidentiality(confidentiality).build())
+            .build();
     }
 }

@@ -71,10 +71,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @RunWith(MockitoJUnitRunner.class)
-class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
+class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
-    private GeneralApplicationDirectionsNewEventAboutToStartHandler startHandler;
-    private GeneralApplicationDirectionsNewEventAboutToSubmitHandler aboutToSubmitHandler;
+    private GeneralApplicationDirectionsAboutToStartHandler startHandler;
+    private GeneralApplicationDirectionsAboutToSubmitHandler aboutToSubmitHandler;
     @Mock
     private GeneralApplicationHelper helper;
     @Mock
@@ -102,9 +102,9 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
     void setup() {
         MockitoAnnotations.openMocks(this);
         objectMapper = new ObjectMapper();
-        startHandler = new GeneralApplicationDirectionsNewEventAboutToStartHandler(
+        startHandler = new GeneralApplicationDirectionsAboutToStartHandler(
             assignCaseAccessService, finremCaseDetailsMapper, helper, gaDirectionService, partyService);
-        aboutToSubmitHandler = new GeneralApplicationDirectionsNewEventAboutToSubmitHandler(
+        aboutToSubmitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
             finremCaseDetailsMapper, helper, gaDirectionService, gaService, manageHearingActionService, generalApplicationsCategoriser,
             hearingCorrespondenceHelper);
 
@@ -481,7 +481,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
         String userAuthorisation = "Bearer test-token";
 
         // Act, call performAddHearingIfNecessary using reflection
-        Method method = GeneralApplicationDirectionsNewEventAboutToSubmitHandler.class.getDeclaredMethod(
+        Method method = GeneralApplicationDirectionsAboutToSubmitHandler.class.getDeclaredMethod(
             "performAddHearingIfNecessary", FinremCaseDetails.class, String.class);
         method.setAccessible(true);
         method.invoke(aboutToSubmitHandler, caseDetails, userAuthorisation);
@@ -579,7 +579,7 @@ class GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest {
     }
 
     private CaseDetails buildCaseDetailsFromJson() {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(GeneralApplicationDirectionsNewEventAboutToSubmitHandlerTest.GA_JSON)) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(GeneralApplicationDirectionsAboutToSubmitHandlerTest.GA_JSON)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         } catch (Exception e) {
             throw new RuntimeException(e);
