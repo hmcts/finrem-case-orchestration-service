@@ -68,7 +68,7 @@ class HearingConsentMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void givenContestedCase_whenListForHearingbutNoAdditionalUploaded_thenNoCheckPerformed() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.LIST_FOR_HEARING);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.LIST_FOR_HEARING_CONSENTED);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
         List<ConsentedHearingDataWrapper> listForHearings =
@@ -90,7 +90,7 @@ class HearingConsentMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void givenContestedCase_whenListForHearingAdditionalUploadedButNonEncryptedFileShouldNotGetError() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.LIST_FOR_HEARING);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.LIST_FOR_HEARING_CONSENTED);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
         CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
@@ -115,7 +115,7 @@ class HearingConsentMidHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void givenContestedCase_whenListForHearingAdditionalUploadedButSameDocumentAlreadyExists_thenDoNotCheckDocumentValidity() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.LIST_FOR_HEARING);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.LIST_FOR_HEARING_CONSENTED);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
         CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
