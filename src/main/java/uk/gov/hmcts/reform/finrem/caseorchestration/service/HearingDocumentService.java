@@ -34,8 +34,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @RequiredArgsConstructor
 public class HearingDocumentService {
 
-    private final FeatureToggleService featureToggleService;
-
     protected static final String HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE = "This listing notice must be sent to the applicant and respondent"
         + " as default. If this listing needs to be sent to only one of these parties please use the general order event.";
     private final GenericDocumentService genericDocumentService;
@@ -139,16 +137,5 @@ public class HearingDocumentService {
 
     public void sendInitialHearingCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         finremFormCandGCorresponder.sendCorrespondence(caseDetails, authorisationToken);
-    }
-
-    /**
-     * Checks for presence of Form C on case data.
-     *
-     * <p>It checks for form C only, because this form will be populated for
-     * both non-fast track and fast track cases. Fast track cases will have
-     * additionally form G populated.</p>
-     */
-    public boolean alreadyHadFirstHearing(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getListForHearingWrapper().getFormC() != null;
     }
 }
