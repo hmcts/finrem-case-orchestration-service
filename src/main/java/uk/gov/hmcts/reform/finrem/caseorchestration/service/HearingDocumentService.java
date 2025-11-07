@@ -61,7 +61,7 @@ public class HearingDocumentService {
             .map(this::generateFastTrackFormC)
             .orElseGet(() -> generateFormCAndG(pair));
 
-        objectMap.put(OUT_OF_FAMILY_COURT_RESOLUTION, generatOutOfFamilyCourtResolutionDocument(pair));
+        objectMap.put(OUT_OF_FAMILY_COURT_RESOLUTION, generateOutOfFamilyCourtResolutionDocument(pair));
         objectMap.putAll(generatePfdNcdrDocuments(pair));
 
         return objectMap;
@@ -98,7 +98,7 @@ public class HearingDocumentService {
         return documentMap;
     }
 
-    private CaseDocument generatOutOfFamilyCourtResolutionDocument(Pair<CaseDetails, String> pair) {
+    private CaseDocument generateOutOfFamilyCourtResolutionDocument(Pair<CaseDetails, String> pair) {
         return genericDocumentService.generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
             documentConfiguration.getOutOfFamilyCourtResolutionTemplate(),
             documentConfiguration.getOutOfFamilyCourtResolutionName());
