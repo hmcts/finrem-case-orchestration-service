@@ -41,7 +41,6 @@ public enum EventType {
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
     UPLOAD_APPROVED_ORDER_MH("FR_uploadApprovedOrderMh"),
     NEW_PAPER_CASE("FR_newPaperCase"),
-    LIST_FOR_HEARING("FR_addSchedulingListingInfo"),
     GENERAL_APPLICATION_REFER_TO_JUDGE("FR_generalApplicationReferToJudge"),
     GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
     GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
