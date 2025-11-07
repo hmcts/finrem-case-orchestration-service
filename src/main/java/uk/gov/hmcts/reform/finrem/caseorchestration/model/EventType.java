@@ -52,7 +52,6 @@ public enum EventType {
     CASE_FLAG_CREATE("createFlags"),
     CASE_FLAG_MANAGE("manageFlags"),
     ISSUE_APPLICATION("FR_issueApplication"),
-    REGENERATE_FORM_C("FR_regenerateFormC"),
     CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
     UPDATE_CONTESTED_GENERAL_APPLICATION("updateGeneralApplication"),
     READY_FOR_HEARING("FR_readyForHearing"),
