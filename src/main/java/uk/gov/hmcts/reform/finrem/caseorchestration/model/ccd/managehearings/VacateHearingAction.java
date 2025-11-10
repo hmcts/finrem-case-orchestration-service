@@ -18,5 +18,6 @@ public class VacateHearingAction {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate hearingDate;
     private String reasonsForVacating;
+    private String specifyOtherReason;
 
 }
