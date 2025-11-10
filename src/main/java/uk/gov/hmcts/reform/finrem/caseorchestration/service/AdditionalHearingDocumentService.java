@@ -152,7 +152,8 @@ public class AdditionalHearingDocumentService {
 
                 // Add to finalOrderCollection if not already present
                 if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, uploadDraftDocument)) {
-                    newFinalOrderCollection.add(documentHelper.prepareFinalOrder(stampedDocument));
+                    newFinalOrderCollection.add(documentHelper.prepareFinalOrder(stampedDocument,
+                        unprocessedOrder.getValue().getAdditionalDocuments()));
                 }
             }
 
