@@ -44,7 +44,7 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return ABOUT_TO_START.equals(callbackType)
             && CONTESTED.equals(caseType)
-            && (EventType.DIRECTION_UPLOAD_ORDER.equals(eventType) || EventType.PROCESS_ORDER.equals(eventType));
+            && EventType.PROCESS_ORDER.equals(eventType);
     }
 
     @Override
