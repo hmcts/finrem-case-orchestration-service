@@ -30,12 +30,6 @@ public class DocumentConfiguration {
     private String rejectedVariationOrderFileName;
     private String coversheetFileName;
     private String rejectedOrderDocType;
-    @Getter(AccessLevel.NONE)
-    private String formCFastTrackHighCourtTemplate;
-    @Getter(AccessLevel.NONE)
-    private String formCNonFastTrackTemplate;
-    private String formCNonFastTrackHighCourtTemplate;
-    private String formCExpressCaseTemplate;
     private String formCFileName;
     @Getter(AccessLevel.NONE)
     private String formGTemplate;
@@ -168,10 +162,6 @@ public class DocumentConfiguration {
 
     public String getFormCFastTrackTemplate(FinremCaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? manageHearingFastTrackHighCourtFormCTemplate : manageHearingFastTrackFormCTemplate;
-    }
-
-    public String getFormCNonFastTrackTemplate(CaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? formCNonFastTrackHighCourtTemplate : formCNonFastTrackTemplate;
     }
 
     public String getFormGTemplate(CaseDetails caseDetails) {

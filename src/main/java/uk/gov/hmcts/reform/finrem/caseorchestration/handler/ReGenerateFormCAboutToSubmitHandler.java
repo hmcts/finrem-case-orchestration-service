@@ -49,8 +49,9 @@ public class ReGenerateFormCAboutToSubmitHandler implements CallbackHandler {
 
         if (isHearingDatePresent(caseData) && isHearingTypeFda(caseData)) {
 
-            caseDetails.getData().putAll(
-                hearingDocumentService.generateHearingDocuments(userAuthorisation, caseDetails));
+            // So99y has addressed in another PR
+            // caseDetails.getData().putAll(
+            // hearingDocumentService.generateHearingDocuments(userAuthorisation, caseDetails));
 
             return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
         } else if (!isHearingTypeFda(caseData)) {
