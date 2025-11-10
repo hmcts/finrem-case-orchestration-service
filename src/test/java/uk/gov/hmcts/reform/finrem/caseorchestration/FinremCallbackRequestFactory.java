@@ -91,6 +91,11 @@ public class FinremCallbackRequestFactory {
                 .data(FinremCaseData.builder().ccdCaseId(String.valueOf(id)).build())
                 .caseType(caseType)
                 .build())
+            .caseDetailsBefore(FinremCaseDetails.builder()
+                .id(id)
+                .data(FinremCaseData.builder().ccdCaseId(String.valueOf(id)).build())
+                .caseType(caseType)
+                .build())
             .eventType(eventType)
             .build();
     }
