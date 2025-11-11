@@ -46,7 +46,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     private static final String PATH = "/fixtures/noticeOfChange/";
-    private static final String NO_ORG_POLICIES_JSON = "no-org-policies.json";
     private static final String VALID_AUTH_TOKEN = AUTH_TOKEN;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -65,10 +64,6 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     protected String updateEndpoint() {
         return "/case-orchestration/apply-noc-decision";
-    }
-
-    protected String setDefaultsEndpoint() {
-        return "/case-orchestration/set-update-defaults";
     }
 
     String beforeFixture() {
