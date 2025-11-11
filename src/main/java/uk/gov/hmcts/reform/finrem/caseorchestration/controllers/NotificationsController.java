@@ -167,10 +167,16 @@ public class NotificationsController extends BaseController {
         log.info("{} - Received request to send Notice of Change email and letter.", caseId);
         validateCaseData(callbackRequest);
 
-        if (!YES_VALUE.equals(caseDetails.getData().get(IS_NOC_REJECTED))) {
-            log.info("{} - Sending notice of change email & letters.", caseId);
-            notificationService.sendNoticeOfChangeEmail(caseDetails);
-            nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
+        try {
+            if (!YES_VALUE.equals(caseDetails.getData().get(IS_NOC_REJECTED))) {
+                log.info("{} - Sending notice of change email & letters.", caseId);
+                notificationService.sendNoticeOfChangeEmail(caseDetails);
+                nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
+            }
+        }
+        catch (Throwable e) {
+            log.info("{} - Sending notice of change email & letters failed. Caught the exception to avoid breaking NOC user interface flow",
+                caseId);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
