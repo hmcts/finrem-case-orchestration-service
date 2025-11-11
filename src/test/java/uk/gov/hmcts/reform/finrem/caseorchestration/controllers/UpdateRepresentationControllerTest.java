@@ -158,7 +158,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         ServletException exception = assertThrows(
             ServletException.class,
             () -> mvc.perform(
-                post(updateEndpoint()) // replace with your endpoint method
+                post(updateEndpoint())
                     .contentType(MediaType.APPLICATION_JSON)
                     .header(AUTHORIZATION_HEADER, VALID_AUTH_TOKEN)
                     .content(requestContent.toString())
