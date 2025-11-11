@@ -6,9 +6,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -55,12 +58,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.Up
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
@@ -298,6 +304,22 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService, never()).sendNoticeOfChangeEmail(any(CaseDetails.class));
 
+        verify(nocLetterNotificationService, never()).sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
+    }
+
+    @Test
+    public void givenExceptionThrown_whenSendNoticeOfChangeNotifications_thenShouldReturnHttpStatusOk() {
+        CallbackRequest callbackRequest = buildCallbackRequestWithBeforeCaseDetails();
+        callbackRequest.getCaseDetails().getData().put(IS_NOC_REJECTED, NO_VALUE);
+
+        doThrow(RuntimeException.class).when(notificationService).sendNoticeOfChangeEmail(any(CaseDetails.class));
+
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response
+            = notificationsController.sendNoticeOfChangeNotifications("authToken", callbackRequest);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getData()).isEqualTo(callbackRequest.getCaseDetails().getData());
+
+        verify(notificationService).sendNoticeOfChangeEmail(any(CaseDetails.class));
         verify(nocLetterNotificationService, never()).sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
     }
 
