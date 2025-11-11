@@ -3,11 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.servlet.ServletException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.stubbing.OngoingStubbing;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -18,17 +17,19 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.Objects;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -56,18 +57,16 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
     @MockitoBean
     private AssignCaseAccessService assignCaseAccessService;
 
-    @Autowired
-    private UpdateRepresentationController updateRepresentationController;
-
-    @InjectMocks
-    private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
-
     protected String updateEndpoint() {
         return "/case-orchestration/apply-noc-decision";
     }
 
     String beforeFixture() {
         return PATH + "AppSolReplacing/change-of-representatives-before.json";
+    }
+
+    String invalidChangeOrganisationRequestFixture() {
+        return PATH + "AppSolReplacing/invalid-change-of-representatives-before.json";
     }
 
     String jsonFixture() {
@@ -101,9 +100,13 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
+        doRequestSetUp(beforeFixture());
+    }
+
+    private void doRequestSetUp(String fixture) throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(beforeFixture()).toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource(fixture)).toURI()));
     }
 
     private Map<String, Object> getUpdatedRepresentationData(String filename) throws IOException {
@@ -139,6 +142,30 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
 
         verify(updateRepresentationService, times(1)).addRemovedSolicitorOrganisationFieldToCaseData(any(CaseDetails.class));
+    }
+
+    @Test
+    public void shouldThrowExceptionWithInvalidChangeOrganisationRequest() throws Exception {
+        doRequestSetUp(invalidChangeOrganisationRequestFixture());
+
+        whenServiceUpdatesRepresentationValid().thenReturn(getUpdatedRepresentationData(beforeAppliedFixture()));
+        whenServiceAssignsCaseAccessValid().thenReturn(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(getUpdatedRepresentationData(jsonFixture()))
+            .build());
+        whenRevokeCreatorCaseAccessValid().thenReturn(null);
+
+        ServletException exception = assertThrows(
+            ServletException.class,
+            () -> mvc.perform(
+                post(updateEndpoint()) // replace with your endpoint method
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(AUTHORIZATION_HEADER, VALID_AUTH_TOKEN)
+                    .content(requestContent.toString())
+            ).andReturn()
+        );
+        assertThat(exception.getMessage())
+            .contains("Invalid ChangeOrganisationRequest");
     }
 
     @Test

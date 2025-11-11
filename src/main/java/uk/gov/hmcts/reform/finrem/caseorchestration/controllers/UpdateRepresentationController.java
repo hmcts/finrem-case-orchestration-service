@@ -19,11 +19,13 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 
 import java.util.Map;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
@@ -68,8 +70,8 @@ public class UpdateRepresentationController extends BaseController {
 
     private void validateChangeOrganisationRequest(CaseDetails caseDetails) {
         ChangeOrganisationRequest change = getChangeOrganisationRequest(caseDetails);
-        if (isEmpty(change) || isEmpty(change.getCaseRoleId()) || isEmpty(change.getOrganisationToAdd())) {
-            throw new IllegalStateException("Invalid or missing ChangeOrganisationRequest: " + change);
+        if (isEmpty(change) || isEmpty(ofNullable(change.getCaseRoleId()).map(DynamicList::getValueCode))) {
+            throw new IllegalStateException("Invalid ChangeOrganisationRequest: " + change);
         }
     }
 
