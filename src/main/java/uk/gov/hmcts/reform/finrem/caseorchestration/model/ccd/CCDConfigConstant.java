@@ -196,6 +196,8 @@ public class CCDConfigConstant {
     public static final String LUTON = "FR_bedfordshireList_9";
     public static final String HERTFORD = "FR_bedfordshireList_10";
     public static final String WATFORD = "FR_bedfordshireList_11";
+    public static final String GREAT_YARMOUTH = "FR_bedfordshireList_12";
+    public static final String KINGS_LYNN = "FR_bedfordshireList_13";
 
     //Thamesvalley CourtList
     public static final String OXFORD = "FR_thamesvalleyList_1";
@@ -241,6 +243,7 @@ public class CCDConfigConstant {
     public static final String PRESTATYN = "FR_northwalesList_3";
     public static final String WELSHPOOL = "FR_northwalesList_4";
     public static final String MOLD = "FR_northwalesList_5";
+    public static final String LLUNDUDNO = "FR_northwalesList_6";
 
     //High court List
     public static final String HIGHCOURT_COURT = "FR_highCourtList_1";
