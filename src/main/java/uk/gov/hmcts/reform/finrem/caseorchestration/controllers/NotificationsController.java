@@ -167,15 +167,18 @@ public class NotificationsController extends BaseController {
         log.info("{} - Received request to send Notice of Change email and letter.", caseId);
         validateCaseData(callbackRequest);
 
-        try {
-            if (!YES_VALUE.equals(caseDetails.getData().get(IS_NOC_REJECTED))) {
-                log.info("{} - Sending notice of change email & letters.", caseId);
+        if (isNocRequestAccepted(caseDetails.getData())) {
+            try {
+                log.info("{} - Attempting sending notice of change email.", caseId);
                 notificationService.sendNoticeOfChangeEmail(caseDetails);
+                log.info("{} - Attempting sending notice of change letters.", caseId);
                 nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
+            } catch (Throwable e) {
+                // Catch the exception to prevent this endpoint from being retriggered by an invalid ChangeOrganisationRequest
+                log.info("{} - Caught exception while sending notification to avoid breaking NOC flow.", caseId);
             }
-        } catch (Throwable e) {
-            log.info("{} - Sending notice of change email & letters failed. Caught the exception to avoid breaking NOC user interface flow",
-                caseId);
+        } else {
+            log.info("{} - Notice of change rejected. Do nothing.", caseId);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
@@ -232,5 +235,9 @@ public class NotificationsController extends BaseController {
 
         return Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATIVE_UPDATE))
             .map(updateField -> updateField.equals(YES_VALUE)).orElse(false);
+    }
+
+    private boolean isNocRequestAccepted(Map<String, Object> caseData) {
+        return !YES_VALUE.equals(caseData.get(IS_NOC_REJECTED));
     }
 }

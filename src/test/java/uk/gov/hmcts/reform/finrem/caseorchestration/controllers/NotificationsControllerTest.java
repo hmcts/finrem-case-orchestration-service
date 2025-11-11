@@ -57,13 +57,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.Up
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -289,18 +289,18 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoticeOfChangeWhenSendNoticeOfChangeNotificationsThenSendNoticeOfChangeServiceCalled() {
-        notificationsController.sendNoticeOfChangeNotifications("authToken", buildCallbackRequestWithBeforeCaseDetails());
+        notificationsController.sendNoticeOfChangeNotifications(AUTH_TOKEN, buildCallbackRequestWithBeforeCaseDetails());
 
-        verify(notificationService, times(1)).sendNoticeOfChangeEmail(any(CaseDetails.class));
+        verify(notificationService).sendNoticeOfChangeEmail(any(CaseDetails.class));
 
-        verify(nocLetterNotificationService, times(1)).sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
+        verify(nocLetterNotificationService).sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
     }
 
     @Test
     public void givenNoticeOfChangeRejected_whenSendNoticeOfChangeNotifications_thenSendNoticeOfChangeServiceNotCalled() {
         CallbackRequest callbackRequest = buildCallbackRequestWithBeforeCaseDetails();
         callbackRequest.getCaseDetails().getData().put(IS_NOC_REJECTED, YES_VALUE);
-        notificationsController.sendNoticeOfChangeNotifications("authToken", callbackRequest);
+        notificationsController.sendNoticeOfChangeNotifications(AUTH_TOKEN, callbackRequest);
 
         verify(notificationService, never()).sendNoticeOfChangeEmail(any(CaseDetails.class));
 
@@ -308,29 +308,55 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void givenExceptionThrown_whenSendNoticeOfChangeNotifications_thenShouldReturnHttpStatusOk() {
+    public void givenExceptionThrownInSendEmail_whenSendNoticeOfChangeNotifications_thenShouldReturnHttpStatusOk() {
         CallbackRequest callbackRequest = buildCallbackRequestWithBeforeCaseDetails();
-        callbackRequest.getCaseDetails().getData().put(IS_NOC_REJECTED, NO_VALUE);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseData.put(IS_NOC_REJECTED, NO_VALUE);
 
-        doThrow(RuntimeException.class).when(notificationService).sendNoticeOfChangeEmail(any(CaseDetails.class));
+        doThrow(RuntimeException.class).when(notificationService)
+            .sendNoticeOfChangeEmail(callbackRequest.getCaseDetails());
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> response
-            = notificationsController.sendNoticeOfChangeNotifications("authToken", callbackRequest);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().getData()).isEqualTo(callbackRequest.getCaseDetails().getData());
+            = notificationsController.sendNoticeOfChangeNotifications(AUTH_TOKEN, callbackRequest);
 
-        verify(notificationService).sendNoticeOfChangeEmail(any(CaseDetails.class));
-        verify(nocLetterNotificationService, never()).sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getData()).isEqualTo(caseData);
+
+        verify(notificationService).sendNoticeOfChangeEmail(callbackRequest.getCaseDetails());
+        verify(nocLetterNotificationService, never()).sendNoticeOfChangeLetters(
+            callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(),
+            AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenExceptionThrownInSendLetter_whenSendNoticeOfChangeNotifications_thenShouldReturnHttpStatusOk() {
+        CallbackRequest callbackRequest = buildCallbackRequestWithBeforeCaseDetails();
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseData.put(IS_NOC_REJECTED, NO_VALUE);
+
+        doThrow(RuntimeException.class).when(nocLetterNotificationService)
+            .sendNoticeOfChangeLetters(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN);
+
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response
+            = notificationsController.sendNoticeOfChangeNotifications(AUTH_TOKEN, callbackRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getData()).isEqualTo(caseData);
+
+        verify(notificationService).sendNoticeOfChangeEmail(callbackRequest.getCaseDetails());
+        verify(nocLetterNotificationService).sendNoticeOfChangeLetters(
+            callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(),
+            AUTH_TOKEN);
     }
 
     @Test
     public void givenNoticeOfChangeAsCaseworker_whenSendNoCNotifications_ThenSendNoticeOfChangeServiceCalled() {
-        notificationsController.sendNoticeOfChangeNotificationsCaseworker("authtoken",
+        notificationsController.sendNoticeOfChangeNotificationsCaseworker(AUTH_TOKEN,
             buildNoCCaseworkerCallbackRequest());
 
-        verify(notificationService, times(1)).sendNoticeOfChangeEmailCaseworker(any(CaseDetails.class));
+        verify(notificationService).sendNoticeOfChangeEmailCaseworker(any(CaseDetails.class));
 
-        verify(nocLetterNotificationService, times(1))
+        verify(nocLetterNotificationService)
             .sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
     }
 
@@ -341,9 +367,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
-        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any(CaseDetails.class));
-        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any(CaseDetails.class));
-        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any(CaseDetails.class));
+        verify(notificationService).sendUpdateFrcInformationEmailToAppSolicitor(any(CaseDetails.class));
+        verify(notificationService).sendUpdateFrcInformationEmailToRespondentSolicitor(any(CaseDetails.class));
+        verify(notificationService).sendUpdateFrcInformationEmailToCourt(any(CaseDetails.class));
     }
 
     @Test
@@ -353,8 +379,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
         verify(notificationService, never()).sendUpdateFrcInformationEmailToAppSolicitor(any(CaseDetails.class));
-        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any(CaseDetails.class));
-        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any(CaseDetails.class));
+        verify(notificationService).sendUpdateFrcInformationEmailToRespondentSolicitor(any(CaseDetails.class));
+        verify(notificationService).sendUpdateFrcInformationEmailToCourt(any(CaseDetails.class));
 
     }
 
@@ -364,9 +390,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
-        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any(CaseDetails.class));
+        verify(notificationService).sendUpdateFrcInformationEmailToAppSolicitor(any(CaseDetails.class));
         verify(notificationService, never()).sendUpdateFrcInformationEmailToRespondentSolicitor(any(CaseDetails.class));
-        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any(CaseDetails.class));
+        verify(notificationService).sendUpdateFrcInformationEmailToCourt(any(CaseDetails.class));
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {
