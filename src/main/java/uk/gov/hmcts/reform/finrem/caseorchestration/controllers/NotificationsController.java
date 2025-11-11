@@ -173,8 +173,7 @@ public class NotificationsController extends BaseController {
                 notificationService.sendNoticeOfChangeEmail(caseDetails);
                 nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
             }
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             log.info("{} - Sending notice of change email & letters failed. Caught the exception to avoid breaking NOC user interface flow",
                 caseId);
         }
