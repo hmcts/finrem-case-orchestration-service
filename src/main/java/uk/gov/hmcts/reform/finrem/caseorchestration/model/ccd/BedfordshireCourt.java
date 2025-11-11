@@ -20,7 +20,9 @@ public enum BedfordshireCourt implements CourtList {
     BEDFORD("FR_bedfordshireList_8"),
     LUTON("FR_bedfordshireList_9"),
     HERTFORD("FR_bedfordshireList_10"),
-    WATFORD("FR_bedfordshireList_11");
+    WATFORD("FR_bedfordshireList_11"),
+    GREAT_YARMOUTH("FR_bedfordshireList_12"),
+    KINGS_LYNN("FR_bedfordshireList_13");
 
     private final String id;
 
