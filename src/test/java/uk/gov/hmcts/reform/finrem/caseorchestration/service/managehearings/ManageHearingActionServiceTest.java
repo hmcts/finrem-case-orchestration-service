@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateHearingAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -294,6 +295,28 @@ class ManageHearingActionServiceTest {
                 outOfCourtResolution);
 
         verify(manageHearingsDocumentService, never()).generateFormG(finremCaseDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    void performVacateHearing_shouldVacateHearing() {
+        UUID hearingId = UUID.randomUUID();
+        Hearing hearing = createHearing(HearingType.FDR, "10:00", "30mins", LocalDate.now());
+
+        hearingWrapper.setVacateHearingSelection(VacateHearingAction.builder()
+            .chooseHearings(DynamicList.builder()
+                .value(DynamicListElement.builder().code(hearingId.toString()).build())
+                .build())
+            .reasonsForVacating("Courtroom_Unavailable")
+            .build());
+        hearingWrapper.setHearings(new ArrayList<>(List.of(
+            ManageHearingsCollectionItem.builder().id(hearingId).value(hearing).build()
+        )));
+
+        manageHearingActionService.performVacateHearing(finremCaseDetails);
+
+        assertThat(hearingWrapper.getHearings()).isEmpty();
+        assertThat(hearingWrapper.getVacatedHearings()).hasSize(1);
+        assertThat(hearingWrapper.getVacatedHearings().getFirst().getId()).isEqualTo(hearingId);
     }
 
     @Test
