@@ -144,24 +144,7 @@ public class ManageHearingActionService {
 
         hearings.remove(hearingToVacate);
 
-        VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.builder()
-            .hearingDate(hearingToVacate.getValue().getHearingDate())
-            .hearingType(hearingToVacate.getValue().getHearingType())
-            .hearingTimeEstimate(hearingToVacate.getValue().getHearingTimeEstimate())
-            .hearingTime(hearingToVacate.getValue().getHearingTime())
-            .hearingCourtSelection(hearingToVacate.getValue().getHearingCourtSelection())
-            .hearingMode(hearingToVacate.getValue().getHearingMode())
-            .additionalHearingInformation(hearingToVacate.getValue().getAdditionalHearingInformation())
-            .hearingNoticePrompt(hearingToVacate.getValue().getHearingNoticePrompt())
-            .additionalHearingDocPrompt(hearingToVacate.getValue().getAdditionalHearingDocPrompt())
-            .additionalHearingDocs(hearingToVacate.getValue().getAdditionalHearingDocs())
-            .partiesOnCase(hearingToVacate.getValue().getPartiesOnCase())
-            .wasMigrated(hearingToVacate.getValue().getWasMigrated())
-            .chooseHearings(vacateHearingInput.getChooseHearings())
-            .reasonsForVacating(vacateHearingInput.getReasonsForVacating())
-            .specifyOtherReason(vacateHearingInput.getSpecifyOtherReason())
-            .newHearingDate(vacateHearingInput.getHearingDate())
-            .build();
+        VacateOrAdjournedHearing vacatedHearing = buildVacatedHearing(hearingToVacate, vacateHearingInput);
 
         ManageVacatedHearingsCollectionItem vacatedItem = ManageVacatedHearingsCollectionItem.builder()
             .id(hearingToVacate.getId())
@@ -361,5 +344,27 @@ public class ManageHearingActionService {
         if (hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)) {
             generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
         }
+    }
+
+    private VacateOrAdjournedHearing buildVacatedHearing(ManageHearingsCollectionItem hearingToVacate, VacateHearingAction vacateHearingInput) {
+        Hearing hearing = hearingToVacate.getValue();
+        return VacateOrAdjournedHearing.builder()
+            .hearingDate(hearing.getHearingDate())
+            .hearingType(hearing.getHearingType())
+            .hearingTimeEstimate(hearing.getHearingTimeEstimate())
+            .hearingTime(hearing.getHearingTime())
+            .hearingCourtSelection(hearing.getHearingCourtSelection())
+            .hearingMode(hearing.getHearingMode())
+            .additionalHearingInformation(hearing.getAdditionalHearingInformation())
+            .hearingNoticePrompt(hearing.getHearingNoticePrompt())
+            .additionalHearingDocPrompt(hearing.getAdditionalHearingDocPrompt())
+            .additionalHearingDocs(hearing.getAdditionalHearingDocs())
+            .partiesOnCase(hearing.getPartiesOnCase())
+            .wasMigrated(hearing.getWasMigrated())
+            .chooseHearings(vacateHearingInput.getChooseHearings())
+            .reasonsForVacating(vacateHearingInput.getReasonsForVacating())
+            .specifyOtherReason(vacateHearingInput.getSpecifyOtherReason())
+            .newHearingDate(vacateHearingInput.getHearingDate())
+            .build();
     }
 }
