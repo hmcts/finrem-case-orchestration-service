@@ -19,5 +19,4 @@ public class VacateHearingAction {
     private LocalDate hearingDate;
     private String reasonsForVacating;
     private String specifyOtherReason;
-
 }

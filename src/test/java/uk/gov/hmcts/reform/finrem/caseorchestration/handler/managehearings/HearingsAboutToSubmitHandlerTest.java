@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -21,12 +22,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageVacatedHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateHearingAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -36,10 +41,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
@@ -160,6 +167,61 @@ class HearingsAboutToSubmitHandlerTest {
         //Assert perform tab data
         assertThat(responseManageHearingsWrapper.getApplicantHearingTabItems())
             .contains(hearingTabItem);
+    }
+
+    @Test
+    void givenValidCaseData_whenHandleVacate_thenHearingVacated() {
+        UUID hearingId = UUID.randomUUID();
+        String caseReference = TestConstants.CASE_ID;
+
+        ManageHearingsWrapper manageHearingsWrapper = ManageHearingsWrapper.builder()
+            .manageHearingsActionSelection(ManageHearingsAction.VACATE_HEARING)
+            .vacateHearingSelection(VacateHearingAction.builder()
+                .chooseHearings(DynamicList.builder()
+                    .value(DynamicListElement.builder().code(hearingId.toString()).build())
+                    .build())
+                .hearingDate(LocalDate.now())
+                .reasonsForVacating("Courtroom_Unavailable")
+                .build())
+            .hearings(new ArrayList<>(List.of(ManageHearingsCollectionItem.builder()
+                .id(hearingId)
+                .value(Hearing.builder()
+                    .hearingType(HearingType.FDR)
+                    .hearingDate(LocalDate.now())
+                    .hearingTime("10:00")
+                    .hearingTimeEstimate("30")
+                    .hearingMode(HearingMode.IN_PERSON)
+                    .hearingNoticePrompt(YesOrNo.YES)
+                    .additionalHearingDocPrompt(YesOrNo.NO)
+                    .wasMigrated(YesOrNo.NO)
+                    .build())
+                .build())))
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(manageHearingsWrapper)
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
+            Long.parseLong(caseReference), CaseType.CONTESTED, caseData);
+
+        doAnswer(invocation -> {
+            FinremCaseDetails details = invocation.getArgument(0);
+            ManageHearingsWrapper wrapper = details.getData().getManageHearingsWrapper();
+            wrapper.setHearings(List.of());
+            wrapper.setVacatedHearings(List.of(ManageVacatedHearingsCollectionItem.builder()
+                .id(hearingId)
+                .value(VacateOrAdjournedHearing.builder().hearingType(HearingType.FDR).build())
+                .build()));
+            return null;
+        }).when(manageHearingActionService).performVacateHearing(any());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
+        ManageHearingsWrapper wrapper = response.getData().getManageHearingsWrapper();
+
+        assertThat(wrapper.getHearings()).isEmpty();
+        assertThat(wrapper.getVacatedHearings()).hasSize(1);
     }
 
     private WorkingHearing createHearingToAdd() {

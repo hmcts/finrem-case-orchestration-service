@@ -15,6 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageVacatedHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateHearingAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -113,6 +116,62 @@ public class ManageHearingActionService {
         addDocumentsToCollection(documentMap, hearingWrapper);
         // Although the working hearing is cleared, the working hearing ID is retained for use in submitted handler.
         hearingWrapper.setWorkingHearing(null);
+    }
+
+    /**
+     * Vacates a selected hearing from the case, transferring its details to the vacated hearings collection.
+     * Removes the specified hearing from the active hearings list and creates a corresponding vacated hearing entry
+     * with additional information provided by the user.
+     *
+     * @param finremCaseDetails case details containing hearing and case data
+     */
+    public void performVacateHearing(FinremCaseDetails finremCaseDetails) {
+        FinremCaseData caseData = finremCaseDetails.getData();
+        ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
+
+        VacateHearingAction vacateHearingInput = hearingsWrapper.getVacateHearingSelection();
+        UUID selectedHearingId = UUID.fromString(vacateHearingInput.getChooseHearings().getValue().getCode());
+
+        List<ManageHearingsCollectionItem> hearings = new ArrayList<>(hearingsWrapper.getHearings());
+        List<ManageVacatedHearingsCollectionItem> vacateHearings = new ArrayList<>(
+            ofNullable(hearingsWrapper.getVacatedHearings()).orElseGet(ArrayList::new)
+        );
+
+        ManageHearingsCollectionItem hearingToVacate = hearings.stream()
+            .filter(item -> selectedHearingId.equals(item.getId()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No hearing found with ID: " + selectedHearingId));
+
+        hearings.remove(hearingToVacate);
+
+        VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.builder()
+            .hearingDate(hearingToVacate.getValue().getHearingDate())
+            .hearingType(hearingToVacate.getValue().getHearingType())
+            .hearingTimeEstimate(hearingToVacate.getValue().getHearingTimeEstimate())
+            .hearingTime(hearingToVacate.getValue().getHearingTime())
+            .hearingCourtSelection(hearingToVacate.getValue().getHearingCourtSelection())
+            .hearingMode(hearingToVacate.getValue().getHearingMode())
+            .additionalHearingInformation(hearingToVacate.getValue().getAdditionalHearingInformation())
+            .hearingNoticePrompt(hearingToVacate.getValue().getHearingNoticePrompt())
+            .additionalHearingDocPrompt(hearingToVacate.getValue().getAdditionalHearingDocPrompt())
+            .additionalHearingDocs(hearingToVacate.getValue().getAdditionalHearingDocs())
+            .partiesOnCase(hearingToVacate.getValue().getPartiesOnCase())
+            .wasMigrated(hearingToVacate.getValue().getWasMigrated())
+            .chooseHearings(vacateHearingInput.getChooseHearings())
+            .reasonsForVacating(vacateHearingInput.getReasonsForVacating())
+            .specifyOtherReason(vacateHearingInput.getSpecifyOtherReason())
+            .newHearingDate(vacateHearingInput.getHearingDate())
+            .build();
+
+        ManageVacatedHearingsCollectionItem vacatedItem = ManageVacatedHearingsCollectionItem.builder()
+            .id(hearingToVacate.getId())
+            .value(vacatedHearing)
+            .build();
+
+        vacateHearings.add(vacatedItem);
+
+        hearingsWrapper.setHearings(hearings);
+        hearingsWrapper.setVacatedHearings(vacateHearings);
     }
 
     /**
