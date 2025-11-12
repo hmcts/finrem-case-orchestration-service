@@ -21,33 +21,33 @@ import java.util.List;
 @Service
 public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
 
-    private final BulkPrintDocumentService service;
-    private final ConsentedApplicationHelper helper;
+    private final BulkPrintDocumentService bulkPrintDocumentService;
+
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     public AmendConsentOrderMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                       BulkPrintDocumentService service,
-                                       ConsentedApplicationHelper helper) {
+                                       BulkPrintDocumentService bulkPrintDocumentService,
+                                       ConsentedApplicationHelper consentedApplicationHelper) {
         super(finremCaseDetailsMapper);
-        this.service = service;
-        this.helper = helper;
+        this.bulkPrintDocumentService = bulkPrintDocumentService;
+        this.consentedApplicationHelper = consentedApplicationHelper;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.AMEND_CONSENT_ORDER.equals(eventType));
+            && EventType.AMEND_CONSENT_ORDER.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for Case ID: {}",
-            EventType.AMEND_CONSENT_ORDER, caseId);
+        String caseId = caseDetails.getCaseIdAsString();
         FinremCaseData finremCaseData = caseDetails.getData();
-        helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
+        consentedApplicationHelper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
 
         List<String> errors = new ArrayList<>();
 
@@ -61,12 +61,11 @@ public class AmendConsentOrderMidHandler extends FinremCallbackHandler {
             }
             amendedCollection.forEach(order -> {
                 CaseDocument document = order.getValue().getAmendedConsentOrder();
-                service.validateEncryptionOnUploadedDocument(document,
+                bulkPrintDocumentService.validateEncryptionOnUploadedDocument(document,
                     caseId, errors, userAuthorisation);
             });
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).errors(errors).build();
     }
 }

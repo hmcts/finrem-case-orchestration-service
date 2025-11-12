@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
@@ -16,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHeari
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 
@@ -32,6 +35,13 @@ import java.util.function.Function;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 
 @Service
 @Slf4j
@@ -78,15 +88,16 @@ public class HearingService {
      * The returned list is sorted using these sorting keys before being wrapped in a {@link DynamicList}.
      *
      * @param caseDetails the {@link FinremCaseDetails} containing hearing-related case data
+     * @param userAuthorisation authorisation token
      * @return a {@link DynamicList} of hearings, sorted by date, time, and type
      */
-    public DynamicList generateSelectableHearingsAsDynamicList(FinremCaseDetails caseDetails) {
+    public DynamicList generateSelectableHearingsAsDynamicList(FinremCaseDetails caseDetails, String userAuthorisation) {
         FinremCaseData caseData = caseDetails.getData();
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap = new HashMap<>();
 
         if (featureToggleService.isManageHearingEnabled()) {
-            populateManageHearings(caseData, dynamicListElements, elementToSortingKeyMap);
+            populateManageHearings(caseData, dynamicListElements, elementToSortingKeyMap, userAuthorisation);
         } else {
             // old-style
             populateTopLevelHearings(caseData, dynamicListElements, elementToSortingKeyMap);
@@ -208,15 +219,61 @@ public class HearingService {
     }
 
     private void populateManageHearings(FinremCaseData caseData, List<DynamicListElement> dynamicListElements,
-                                        Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap) {
+                                        Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap,
+                                        String userAuthorisation) {
         ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
-        emptyIfNull(manageHearingsWrapper.getHearings())
+
+        emptyIfNull(applyConfidentiality(caseData.getCcdCaseId(), manageHearingsWrapper.getHearings(), userAuthorisation))
             .forEach(hearing -> {
                 DynamicListElement dynamicListElement = buildDynamicListElementFromHearing(hearing);
                 dynamicListElements.add(dynamicListElement);
                 elementToSortingKeyMap.put(dynamicListElement, new HearingSortingKey(hearing.getValue().getHearingDate(),
                     hearing.getValue().getHearingTime(), hearing.getId().toString()));
             });
+    }
+
+    private List<String> getRoles(ManageHearingsCollectionItem hearingItem) {
+        return emptyIfNull(hearingItem.getValue().getPartiesOnCase()).stream()
+            .map(PartyOnCaseCollectionItem::getValue)
+            .map(PartyOnCase::getRole).toList();
+    }
+
+    private final CaseRoleService caseRoleService;
+
+    /**
+     * Filters the provided list of hearings based on the confidentiality rules for the current user's case role.
+     * <p>
+     * If the user is a caseworker or has no case role, all hearings are returned. Otherwise, only hearings
+     * associated with the user's solicitor role are included.
+     * Barristers have access to hearings associated to their corresponding solicitor roles.
+     *
+     * @param caseId           the case identifier
+     * @param hearings         the list of hearings to filter
+     * @param userAuthorisation the user's authorisation token
+     * @return a filtered {@link List} of {@link ManageHearingsCollectionItem} according to confidentiality rules
+     */
+    private List<ManageHearingsCollectionItem> applyConfidentiality(String caseId,
+                                                                    List<ManageHearingsCollectionItem> hearings, String userAuthorisation) {
+
+        CaseRole currentCaseRole = caseRoleService.getUserCaseRole(caseId, userAuthorisation);
+        if (currentCaseRole == null || CASEWORKER.equals(currentCaseRole)) {
+            return hearings;
+        }
+
+        Map<CaseRole, String> barristerToSolicitorMap = Map.of(
+            CaseRole.APP_BARRISTER, APP_SOLICITOR.getCcdCode(),
+            CaseRole.RESP_BARRISTER, RESP_SOLICITOR.getCcdCode(),
+            CaseRole.INTVR_BARRISTER_1, INTVR_SOLICITOR_1.getCcdCode(),
+            CaseRole.INTVR_BARRISTER_2, INTVR_SOLICITOR_2.getCcdCode(),
+            CaseRole.INTVR_BARRISTER_3, INTVR_SOLICITOR_3.getCcdCode(),
+            CaseRole.INTVR_BARRISTER_4, INTVR_SOLICITOR_4.getCcdCode()
+        );
+
+        String roleCode = barristerToSolicitorMap.getOrDefault(currentCaseRole, currentCaseRole.getCcdCode());
+
+        return emptyIfNull(hearings).stream()
+            .filter(item -> getRoles(item).contains(roleCode))
+            .toList();
     }
 
     private void populateTopLevelHearings(FinremCaseData caseData, List<DynamicListElement> dynamicListElements,

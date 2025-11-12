@@ -3,9 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
@@ -20,7 +18,6 @@ import java.util.Optional;
 public class UploadApprovedOrderService {
     private final HearingOrderService hearingOrderService;
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
-    private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
 
     /**
@@ -28,41 +25,28 @@ public class UploadApprovedOrderService {
      * This method generates and stores the contested order approved letter, creates additional order documents,
      * appends the latest draft direction order, and updates the hearing order collection with approved hearing orders.
      *
-     * <p>Use {@link #processApprovedOrdersMh(FinremCaseDetails, FinremCaseDetails, String)} instead.</p>
+     * <p>Use {@link #processApprovedOrdersMh(FinremCaseDetails, String)} instead.</p>
      *
      * @param callbackRequest   the callback request containing case details
-     * @param errors            a list to collect error messages encountered during processing
      * @param authorisationToken the authorisation token for accessing secure resources
      * @deprecated This method is deprecated and should not be used. Scheduled for removal since 30/09/2025.
      */
     @Deprecated(forRemoval = true, since = "30/09/2025")
     @SuppressWarnings("squid:S1133") // Suppress SonarQube rule for deprecated code
     public void processApprovedOrders(FinremCallbackRequest callbackRequest,
-                                      List<String> errors,
                                       String authorisationToken) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
-        try {
-            additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
-        } catch (CourtDetailsParseException e) {
-            log.error(e.getMessage());
-            errors.add(e.getMessage());
-        }
+
+        processCaseworkerUploadedApprovedOrders(caseDetails.getData(), authorisationToken);
 
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
+
         if (isAnotherHearingToBeListed(caseDetails)) {
             approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, authorisationToken);
         }
 
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        List<DirectionOrderCollection> hearingOrderCollectionBefore
-            = additionalHearingDocumentService.getApprovedHearingOrders(caseDetailsBefore, authorisationToken);
-
-        FinremCaseData caseData = caseDetails.getData();
-        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
-        hearingOrderCollectionBefore.addAll(uploadHearingOrders);
-        caseData.setUploadHearingOrder(hearingOrderCollectionBefore);
-        additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, authorisationToken);
+        clearCwApprovedOrderCollection(caseDetails.getData());
     }
 
     /**
@@ -81,7 +65,7 @@ public class UploadApprovedOrderService {
         if (latestHearingDirections.isPresent()) {
             List<HearingDirectionDetailsCollection> directionDetailsCollections = latestHearingDirections.get();
             if (!directionDetailsCollections.isEmpty()) {
-                HearingDirectionDetailsCollection hearingCollection = directionDetailsCollections.get(directionDetailsCollections.size() - 1);
+                HearingDirectionDetailsCollection hearingCollection = directionDetailsCollections.getLast();
                 return YesOrNo.YES.equals(hearingCollection.getValue().getIsAnotherHearingYN());
             }
         }
@@ -95,21 +79,33 @@ public class UploadApprovedOrderService {
      * and updates the hearing order collection with approved hearing orders.
      *
      * @param caseDetails       the current state of the financial remedy case
-     * @param detailsBefore     the previous state of the financial remedy case
      * @param authorisationToken the authorisation token for accessing secure resources
      */
-    public void processApprovedOrdersMh(FinremCaseDetails caseDetails, FinremCaseDetails detailsBefore, String authorisationToken) {
+    public void processApprovedOrdersMh(FinremCaseDetails caseDetails, String authorisationToken) {
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
-        additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
+
+        processCaseworkerUploadedApprovedOrders(caseDetails.getData(), authorisationToken);
+
+        // TODO Looks like the following logic is not needed anymore. Remove it later.
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
+    }
 
-        List<DirectionOrderCollection> hearingOrderCollectionBefore
-            = additionalHearingDocumentService.getApprovedHearingOrders(detailsBefore, authorisationToken);
+    /**
+     * Clears the Caseworker Approved Order collection from the given {@link FinremCaseData}.
+     *
+     * <p>
+     * This method sets the {@code cwApprovedOrderCollection} field within the
+     * {@code DraftDirectionWrapper} to {@code null}, effectively removing
+     * all caseworker-approved orders from the case data.
+     *
+     * @param caseData the {@link FinremCaseData} object whose caseworker-approved
+     *                 order collection should be cleared
+     */
+    public void clearCwApprovedOrderCollection(FinremCaseData caseData) {
+        caseData.getDraftDirectionWrapper().setCwApprovedOrderCollection(null);
+    }
 
-        FinremCaseData caseData = caseDetails.getData();
-        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
-        hearingOrderCollectionBefore.addAll(uploadHearingOrders);
-        caseData.setUploadHearingOrder(hearingOrderCollectionBefore);
-        additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, authorisationToken);
+    private void processCaseworkerUploadedApprovedOrders(FinremCaseData caseData, String authorisationToken) {
+        hearingOrderService.stampAndStoreCwApprovedOrders(caseData, authorisationToken);
     }
 }

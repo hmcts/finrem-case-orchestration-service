@@ -8,27 +8,40 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -43,7 +56,7 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
     private static final String DECREE_NISI_JSON = "/fixtures/updatecase/amend-divorce-details-decree-nisi.json";
     private static final String DECREE_ABS_JSON = "/fixtures/updatecase/amend-divorce-details-decree-absolute.json";
     private static final String D81_JOINT_JSON = "/fixtures/updatecase/amend-divorce-details-d81-joint.json";
-    private static final String D81_INDIVIUAL_JSON = "/fixtures/updatecase/amend-divorce-details-d81-individual.json";
+    private static final String D81_INDIVIDUAL_JSON = "/fixtures/updatecase/amend-divorce-details-d81-individual.json";
     private static final String PAYMENT_UNCHECKED_JSON = "/fixtures/updatecase/amend-remove-periodic-payment-order.json";
     private static final String RES_SOL_JSON = "/fixtures/updatecase/remove-respondent-solicitor-details.json";
     private static final String APP_SOL_JSON = "/fixtures/updatecase/remove-applicant-solicitor-details.json";
@@ -52,14 +65,16 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     @Mock
     private ConsentOrderService consentOrderService;
+    @Mock
+    private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
 
     @BeforeEach
     void setUp() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         underTest = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
-            consentOrderService);
+            consentOrderService, updateRepresentationWorkflowService);
         lenient().when(consentOrderService.getLatestConsentOrderData(isA(CallbackRequest.class)))
-            .thenReturn(newDocument(DOC_URL, BINARY_URL, FILE_NAME));
+            .thenReturn(caseDocument(DOC_URL, FILE_NAME, BINARY_URL));
     }
 
     @Test
@@ -103,7 +118,7 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void givenCase_whenCaseUpdated_thenShouldDeleteD81JointData() {
-        CallbackRequest callbackRequest = doValidCaseDataSetUp(D81_INDIVIUAL_JSON);
+        CallbackRequest callbackRequest = doValidCaseDataSetUp(D81_INDIVIDUAL_JSON);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
@@ -173,6 +188,7 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void givenCase_whenIfRespondentNotRepresentedBySolicitor_thenShouldDeleteRespondentSolicitorDetails() {
+        doCallRealMethod().when(updateRepresentationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
         CallbackRequest callbackRequest = doValidCaseDataSetUp(RES_SOL_JSON);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
@@ -185,6 +201,9 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorDxNumber());
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorEmail());
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorPhone());
+        assertThat(responseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole())
+            .isEqualTo(CaseRole.RESP_SOLICITOR.getCcdCode());
+        assertThat(responseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID()).isNull();
     }
 
     @Test
@@ -268,7 +287,6 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-
         // Assert
         assertThat(response.getErrors()).containsExactlyInAnyOrder(
             "Postcode field is required for applicant solicitor address.",
@@ -323,6 +341,24 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
         // Assert
         assertThat(response.getErrors()).isEmpty();
+    }
+
+    @Test
+    void givenInvalidOrganisationPolicy_whenHandle_thenReturnsValidationError() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(caseDetails.getData()).thenReturn(finremCaseData);
+
+        try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class)) {
+            mockedStatic.when(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData))
+                .thenReturn(List.of("VALIDATION FAILED"));
+
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
+            mockedStatic.verify(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
+            assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
+        }
     }
 
     private static void setupApplicantRepresented(FinremCaseData caseData, Address applicantSolicitorAddress) {

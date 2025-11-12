@@ -20,27 +20,27 @@ import java.util.List;
 @Service
 public class HearingConsentMidHandler extends FinremCallbackHandler {
 
-    private final BulkPrintDocumentService service;
+    private final BulkPrintDocumentService bulkPrintDocumentService;
 
     public HearingConsentMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                             BulkPrintDocumentService service) {
+                                    BulkPrintDocumentService bulkPrintDocumentService) {
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.bulkPrintDocumentService = bulkPrintDocumentService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.LIST_FOR_HEARING_CONSENTED.equals(eventType));
+            && EventType.LIST_FOR_HEARING_CONSENTED.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for Case ID: {}", EventType.LIST_FOR_HEARING_CONSENTED, caseId);
+        String caseId = caseDetails.getCaseIdAsString();
 
         FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
@@ -57,7 +57,7 @@ public class HearingConsentMidHandler extends FinremCallbackHandler {
             listForHearings.forEach(hearing -> {
                 ConsentedHearingDataElement hearingValue = hearing.getValue();
                 if (hearingValue.getPromptForAnyDocument().equals("Yes")) {
-                    service.validateEncryptionOnUploadedDocument(hearingValue.getUploadAdditionalDocument(),
+                    bulkPrintDocumentService.validateEncryptionOnUploadedDocument(hearingValue.getUploadAdditionalDocument(),
                         caseId, errors, userAuthorisation);
                 }
             });

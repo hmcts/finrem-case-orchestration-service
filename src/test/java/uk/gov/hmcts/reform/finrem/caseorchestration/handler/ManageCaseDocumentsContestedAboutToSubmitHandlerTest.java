@@ -121,7 +121,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         setUpRemovedDocuments();
         setUpAddedDocuments();
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         manageCaseDocumentsAboutToSubmitCaseHandler.handle(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
@@ -136,7 +136,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(1));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -144,8 +144,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     public void givenAdministrativeDocsAreAdded_ThenDefaultsAreSetCorrectly() {
         setUpAdministrativeDocuments();
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-        caseDetails.getData().getManageCaseDocumentCollection().get(0).getUploadCaseDocument()
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().getManageCaseDocumentCollection().getFirst().getUploadCaseDocument()
             .setCaseDocumentParty(null);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(
@@ -172,8 +172,10 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         setUpAdministrativeDocuments();
         setUpAddedDocuments();
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
-        caseDetails.getData().getManageCaseDocumentCollection().get(0).getUploadCaseDocument()
+        caseDetails.getData().getManageCaseDocumentsWrapper()
+            .setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper()
+            .getManageCaseDocumentCollection().getFirst().getUploadCaseDocument()
             .setCaseDocumentParty(null);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = manageCaseDocumentsAboutToSubmitCaseHandler.handle(

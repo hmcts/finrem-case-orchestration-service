@@ -1,20 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum NorthWalesCourt implements CourtList {
     WREXHAM("FR_northwalesList_1"),
     CAERNARFON("FR_northwalesList_2"),
     PRESTATYN("FR_northwalesList_3"),
     WELSHPOOL("FR_northwalesList_4"),
-    MOLD("FR_northwalesList_5");
+    MOLD("FR_northwalesList_5"),
+    LLUNDUDNO("FR_northwalesList_6");
 
     private final String id;
 

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +31,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetails
 public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final ConsentOrderService consentOrderService;
+    private final UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
 
     @Autowired
     public AmendApplicationAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                ConsentOrderService consentOrderService) {
+                                                ConsentOrderService consentOrderService,
+                                                UpdateRepresentationWorkflowService updateRepresentationWorkflowService) {
         super(mapper);
         this.consentOrderService = consentOrderService;
+        this.updateRepresentationWorkflowService = updateRepresentationWorkflowService;
     }
 
     @Override
@@ -62,10 +67,12 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);
         updatePropertyDetails(caseData);
-        updateRespondentSolicitorAddress(caseData);
+        updateRespondentSolicitor(caseData);
         updateD81Details(caseData);
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(callbackRequest);
+
+        errors.addAll(ContactDetailsValidator.validateOrganisationPolicy(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
@@ -118,9 +125,10 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         }
     }
 
-    private void updateRespondentSolicitorAddress(FinremCaseData caseData) {
+    private void updateRespondentSolicitor(FinremCaseData caseData) {
         if (YesOrNo.NO.equals(caseData.getContactDetailsWrapper().getConsentedRespondentRepresented())) {
             removeRespondentSolicitorAddress(caseData);
+            removeRespondentSolicitorOrganisationPolicy(caseData);
         } else {
             removeRespondentAddress(caseData);
         }
@@ -178,5 +186,16 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(null);
         caseData.getContactDetailsWrapper().setRespondentSolicitorDxNumber(null);
         caseData.setRespSolNotificationsEmailConsent(null);
+    }
+
+    /**
+     * Removes the respondent solicitor organisation policy and replaces it with the default one.
+     * There is no need to remove solicitor case access as this stage as the case has not been submitted yet.
+     *
+     * @param caseData the case data
+     */
+    private void removeRespondentSolicitorOrganisationPolicy(FinremCaseData caseData) {
+        caseData.setRespondentOrganisationPolicy(null);
+        updateRepresentationWorkflowService.persistDefaultOrganisationPolicy(caseData);
     }
 }

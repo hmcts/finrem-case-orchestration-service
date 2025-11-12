@@ -36,9 +36,11 @@ public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallb
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        caseData.setManageCaseDocumentCollection(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
+        caseData.getManageCaseDocumentsWrapper()
+            .setManageCaseDocumentCollection(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
 
         migrateLegacyConfidentialCaseDocumentFormat(caseData);
         populateMissingConfidentialFlag(caseData);
@@ -48,14 +50,14 @@ public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallb
 
     private void migrateLegacyConfidentialCaseDocumentFormat(FinremCaseData data) {
         if (data.getConfidentialDocumentsUploaded() != null) {
-            data.getManageCaseDocumentCollection()
+            data.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection()
                 .addAll(getConfidentialCaseDocumentCollectionFromLegacyConfidentialDocs(data));
             data.getConfidentialDocumentsUploaded().clear();
         }
     }
 
     private void populateMissingConfidentialFlag(FinremCaseData caseData) {
-        caseData.getManageCaseDocumentCollection().stream()
+        caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection().stream()
             .filter(this::isConfidentialFlagMissing).forEach(documentCollection ->
                 documentCollection.getUploadCaseDocument().setCaseDocumentConfidentiality(YesOrNo.NO));
     }
