@@ -300,7 +300,9 @@ class ManageHearingActionServiceTest {
     @Test
     void performVacateHearing_shouldVacateHearing() {
         UUID hearingId = UUID.randomUUID();
+        UUID hearing1ID = UUID.randomUUID();
         Hearing hearing = createHearing(HearingType.FDR, "10:00", "30mins", LocalDate.now());
+        Hearing hearing1 = createHearing(HearingType.FH, "11:00", "1hr", LocalDate.now().plusDays(1));
 
         hearingWrapper.setVacateHearingSelection(VacateHearingAction.builder()
             .chooseHearings(DynamicList.builder()
@@ -308,15 +310,23 @@ class ManageHearingActionServiceTest {
                 .build())
             .reasonsForVacating("Courtroom_Unavailable")
             .build());
+
         hearingWrapper.setHearings(new ArrayList<>(List.of(
-            ManageHearingsCollectionItem.builder().id(hearingId).value(hearing).build()
+            ManageHearingsCollectionItem.builder().id(hearingId).value(hearing).build(),
+            ManageHearingsCollectionItem.builder().id(hearing1ID).value(hearing1).build()
         )));
 
         manageHearingActionService.performVacateHearing(finremCaseDetails);
 
-        assertThat(hearingWrapper.getHearings()).isEmpty();
+        assertThat(hearingWrapper.getHearings().getFirst().getId()).isEqualTo(hearing1ID);
+        assertThat(hearingWrapper.getHearings().getFirst().getValue().getHearingType()).isEqualTo(HearingType.FH);
+
         assertThat(hearingWrapper.getVacatedHearings()).hasSize(1);
         assertThat(hearingWrapper.getVacatedHearings().getFirst().getId()).isEqualTo(hearingId);
+        assertThat(hearingWrapper.getVacatedHearings().getFirst().getValue().getHearingType()).isEqualTo(HearingType.FDR);
+        assertThat(hearingWrapper.getVacatedHearings().getFirst().getValue().getHearingTime()).isEqualTo("10:00");
+        assertThat(hearingWrapper.getVacatedHearings().getFirst().getValue().getHearingTimeEstimate())
+            .isEqualTo("30mins");
     }
 
     @Test
