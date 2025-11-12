@@ -321,11 +321,11 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getHearings().getFirst().getId()).isEqualTo(hearing1ID);
         assertThat(hearingWrapper.getHearings().getFirst().getValue().getHearingType()).isEqualTo(HearingType.FH);
 
-        assertThat(hearingWrapper.getVacatedHearings()).hasSize(1);
-        assertThat(hearingWrapper.getVacatedHearings().getFirst().getId()).isEqualTo(hearingId);
-        assertThat(hearingWrapper.getVacatedHearings().getFirst().getValue().getHearingType()).isEqualTo(HearingType.FDR);
-        assertThat(hearingWrapper.getVacatedHearings().getFirst().getValue().getHearingTime()).isEqualTo("10:00");
-        assertThat(hearingWrapper.getVacatedHearings().getFirst().getValue().getHearingTimeEstimate())
+        assertThat(hearingWrapper.getVacatedHearingsCollection()).hasSize(1);
+        assertThat(hearingWrapper.getVacatedHearingsCollection().getFirst().getId()).isEqualTo(hearingId);
+        assertThat(hearingWrapper.getVacatedHearingsCollection().getFirst().getValue().getHearingType()).isEqualTo(HearingType.FDR);
+        assertThat(hearingWrapper.getVacatedHearingsCollection().getFirst().getValue().getHearingTime()).isEqualTo("10:00");
+        assertThat(hearingWrapper.getVacatedHearingsCollection().getFirst().getValue().getHearingTimeEstimate())
             .isEqualTo("30mins");
     }
 

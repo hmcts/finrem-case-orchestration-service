@@ -35,7 +35,7 @@ public class ManageHearingsWrapper {
     private VacateHearingAction vacateHearingSelection;
     private WorkingHearing workingHearing;
     private List<ManageHearingsCollectionItem> hearings;
-    private List<ManageVacatedHearingsCollectionItem> vacatedHearings;
+    private List<ManageVacatedHearingsCollectionItem> vacatedHearingsCollection;
     private List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection;
     private UUID workingHearingId;
     private List<HearingTabCollectionItem> hearingTabItems;

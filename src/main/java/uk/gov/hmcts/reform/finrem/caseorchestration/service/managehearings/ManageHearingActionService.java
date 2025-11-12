@@ -134,7 +134,7 @@ public class ManageHearingActionService {
 
         List<ManageHearingsCollectionItem> hearings = new ArrayList<>(hearingsWrapper.getHearings());
         List<ManageVacatedHearingsCollectionItem> vacateHearings = new ArrayList<>(
-            ofNullable(hearingsWrapper.getVacatedHearings()).orElseGet(ArrayList::new)
+            ofNullable(hearingsWrapper.getVacatedHearingsCollection()).orElseGet(ArrayList::new)
         );
 
         ManageHearingsCollectionItem hearingToVacate = hearings.stream()
@@ -154,7 +154,7 @@ public class ManageHearingActionService {
         vacateHearings.add(vacatedItem);
 
         hearingsWrapper.setHearings(hearings);
-        hearingsWrapper.setVacatedHearings(vacateHearings);
+        hearingsWrapper.setVacatedHearingsCollection(vacateHearings);
     }
 
     /**
