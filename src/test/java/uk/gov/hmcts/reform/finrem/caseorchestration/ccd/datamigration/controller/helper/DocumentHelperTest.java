@@ -896,9 +896,19 @@ class DocumentHelperTest {
 
     @Test
     void prepareFinalOrder() {
-        DirectionOrderCollection orderCollection = documentHelper.prepareFinalOrder(caseDocument());
-        assertEquals(YesOrNo.YES, orderCollection.getValue().getIsOrderStamped());
+        DocumentCollectionItem additionalDocument = DocumentCollectionItem.builder()
+            .value(caseDocument())
+            .build();
+        CaseDocument finalOrder = caseDocument();
+
+        DirectionOrderCollection orderCollection = documentHelper.prepareFinalOrder(finalOrder, List.of(additionalDocument));
+
         assertNotNull(orderCollection.getValue().getOrderDateTime());
+        assertThat(orderCollection.getValue())
+            .returns(YesOrNo.YES, DirectionOrder::getIsOrderStamped)
+            .returns(finalOrder, DirectionOrder::getUploadDraftDocument)
+            .returns(List.of(additionalDocument), DirectionOrder::getAdditionalDocuments);
+
     }
 
     private static Stream<Arguments> provideOrderCollections() {

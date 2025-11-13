@@ -121,7 +121,6 @@ class ProcessOrderAboutToSubmitHandlerTest {
         mockDocumentStamping(TARGET_DOCUMENT_2, STAMPED_DOCUMENT_2);
 
         List<DirectionOrderCollection> uploadHearingOrder = nullExistingUploadHearingOrder ? null : new ArrayList<>();
-        DirectionOrderCollection expectedNewDirectionOrderCollection;
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
             .uploadHearingOrder(uploadHearingOrder)
@@ -131,7 +130,8 @@ class ProcessOrderAboutToSubmitHandlerTest {
                         .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
                         .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build(),
-                    expectedNewDirectionOrderCollection = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                        .isOrderStamped(YesOrNo.NO)
                         .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build()
                 ))
                 .build())
@@ -139,7 +139,8 @@ class ProcessOrderAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(res.getData().getUploadHearingOrder()).containsExactly(expectedNewDirectionOrderCollection);
+        DirectionOrderCollection actualNewOrder = res.getData().getUploadHearingOrder().getFirst();
+        assertThat(actualNewOrder.getValue().getIsOrderStamped()).isEqualTo(YesOrNo.YES);
     }
 
     @Test
@@ -151,7 +152,6 @@ class ProcessOrderAboutToSubmitHandlerTest {
         List<DirectionOrderCollection> uploadHearingOrder = new ArrayList<>(List.of(
             DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_4).build()).build()
         ));
-        DirectionOrderCollection expectedNewDirectionOrderCollection;
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(12345678L, CONTESTED, FinremCaseData.builder()
             .uploadHearingOrder(uploadHearingOrder)
@@ -161,7 +161,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
                         .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
                         .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build(),
-                    expectedNewDirectionOrderCollection = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder()
                         .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build()
                 ))
                 .build())
@@ -169,9 +169,15 @@ class ProcessOrderAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(res.getData().getUploadHearingOrder())
+        List<DirectionOrderCollection> actualUploadHearingOrder = res.getData().getUploadHearingOrder();
+
+        assertThat(actualUploadHearingOrder)
             .hasSize(2)
-            .contains(expectedNewDirectionOrderCollection);
+            .anySatisfy(order -> {
+                if (TARGET_DOCUMENT_3.equals(order.getValue().getUploadDraftDocument())) {
+                    assertThat(order.getValue().getIsOrderStamped()).isEqualTo(YesOrNo.YES);
+                }
+            });
         assertThat(res.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).isNull();
         assertThat(res.getData().getDraftOrdersWrapper().getIsLegacyApprovedOrderPresent()).isNull();
         assertThat(res.getData().getDraftOrdersWrapper().getIsUnprocessedApprovedDocumentPresent()).isNull();
@@ -400,6 +406,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         mockDocumentStamping(TARGET_DOCUMENT_2, STAMPED_DOCUMENT_2);
 
         DirectionOrderCollection expectedNewDocument = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+            .isOrderStamped(YesOrNo.YES)
             .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build();
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
@@ -412,19 +419,20 @@ class ProcessOrderAboutToSubmitHandlerTest {
                         .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
                         .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build(),
-                    expectedNewDocument
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                        .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build()
                 ))
                 .build())
             .build());
 
         lenient().doThrow(new AssertionError("Expected two documents to be processed, but only one was found"))
             .when(additionalHearingDocumentService)
-            .stampAndCollectOrderCollection(
+            .stampAndUpdateOrderCollections(
                 any(FinremCaseDetails.class),
                 eq(AUTH_TOKEN));
         // mocking the valid invocation on createAndStoreAdditionalHearingDocuments
         lenient().doNothing().when(additionalHearingDocumentService)
-            .stampAndCollectOrderCollection(
+            .stampAndUpdateOrderCollections(
                 argThat(a -> a.getData().getUploadHearingOrder().size() == 2 && a.getData().getUploadHearingOrder().contains(expectedNewDocument)),
                 eq(AUTH_TOKEN));
 
@@ -452,7 +460,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
 
         final var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(additionalHearingDocumentService).stampAndCollectOrderCollection(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(additionalHearingDocumentService).stampAndUpdateOrderCollections(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(additionalHearingDocumentService, never()).storeHearingNotice(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).performAddHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(caseData);
@@ -478,7 +486,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
 
         final var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(additionalHearingDocumentService).stampAndCollectOrderCollection(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(additionalHearingDocumentService).stampAndUpdateOrderCollections(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(additionalHearingDocumentService, never()).storeHearingNotice(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService, never()).performAddHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService, never()).updateTabData(caseData);
