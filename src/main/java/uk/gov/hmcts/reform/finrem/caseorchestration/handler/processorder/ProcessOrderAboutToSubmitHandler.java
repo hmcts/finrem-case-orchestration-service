@@ -85,7 +85,7 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         // handleNewDocument must be handled before storeAdditionalHearingDocuments in order to stamp the newly uploaded document.
         handleNewDocumentInUnprocessedApprovedDocuments(caseData);
 
-        additionalHearingDocumentService.stampAndCollectOrderCollection(caseDetails, userAuthorisation);
+        additionalHearingDocumentService.stampAndUpdateOrderCollections(caseDetails, userAuthorisation);
 
         List<String> errors = new ArrayList<>();
         log.info("Storing Additional Hearing Document for Case ID: {}", caseId);
@@ -234,14 +234,20 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         }
         caseData.getUploadHearingOrder().add(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
+                .isOrderStamped(YesOrNo.YES)
                 .uploadDraftDocument(unprocessedApprovedOrder.getValue().getUploadDraftDocument())
                 .build())
             .build());
     }
 
     private void clearTemporaryFields(FinremCaseData caseData) {
+        clearUnprocessedUploadHearingDocuments(caseData);
         clearUnprocessedApprovedDocuments(caseData.getDraftOrdersWrapper());
         clearMetaDataFields(caseData);
+    }
+
+    private void clearUnprocessedUploadHearingDocuments(FinremCaseData caseData) {
+        caseData.setUnprocessedUploadHearingDocuments(null);
     }
 
     private void clearUnprocessedApprovedDocuments(DraftOrdersWrapper draftOrdersWrapper) {
