@@ -6,7 +6,7 @@ plugins {
     id 'org.springframework.boot' version '3.5.7'
     id 'com.github.ben-manes.versions' version '0.53.0'
     id 'uk.gov.hmcts.java' version '0.12.67'
-    id 'au.com.dius.pact' version '4.6.17'
+    id 'au.com.dius.pact' version '4.6.18'
     id "info.solidsoft.pitest" version "1.15.0"
     id 'com.github.hmcts.rse-cft-lib' version '0.19.1918'
 }
