@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasAppro
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.Optional.of;
@@ -34,6 +35,31 @@ public class ProcessOrderService {
 
     private static <T> List<T> nullSafeList(List<T> t) {
         return ofNullable(t).orElse(List.of());
+    }
+
+    /**
+     * Populates the {@code unprocessedUploadHearingDocuments} collection in the {@link FinremCaseData}
+     * with orders that have not been stamped yet from {@code uploadHearingOrder}.
+     *
+     * <p>The method collects documents marked as not stamped from the
+     * {@code uploadHearingOrder} collection. It then converts
+     * these documents into {@link DirectionOrderCollection} objects and sets them in the
+     * {@code unprocessedUploadHearingDocuments} field.
+     *
+     * @param caseData the case data.
+     */
+    public void populateUnprocessedUploadHearingDocuments(FinremCaseData caseData) {
+        List<DirectionOrderCollection> uploadHearingOrders = Optional.ofNullable(caseData.getUploadHearingOrder())
+            .orElseGet(ArrayList::new);
+
+        List<DirectionOrderCollection> unprocessedOrders = uploadHearingOrders.stream()
+            .filter(orderCollection -> Optional.ofNullable(orderCollection.getValue())
+                .map(directionOrder ->  directionOrder.getIsOrderStamped() == null
+                    || YesOrNo.NO.equals(directionOrder.getIsOrderStamped()))
+                .orElse(false))
+            .toList();
+
+        caseData.setUnprocessedUploadHearingDocuments(unprocessedOrders);
     }
 
     /**
@@ -86,7 +112,7 @@ public class ProcessOrderService {
      */
     public boolean hasNoApprovedOrdersToProcess(FinremCaseData caseData) {
         return CollectionUtils.isEmpty(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
-            && CollectionUtils.isEmpty(caseData.getUploadHearingOrder());
+            && CollectionUtils.isEmpty(caseData.getUnprocessedUploadHearingDocuments());
     }
 
     /**
@@ -97,7 +123,7 @@ public class ProcessOrderService {
      */
     public boolean areAllNewOrdersWordOrPdfFiles(FinremCaseData caseData) {
         return areAllNewDocumentsWordOrPdf(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
-            && areAllNewDocumentsWordOrPdf(caseData.getUploadHearingOrder()
+            && areAllNewDocumentsWordOrPdf(caseData.getUnprocessedUploadHearingDocuments()
         );
     }
 
@@ -110,8 +136,8 @@ public class ProcessOrderService {
      * @param caseData the {@link FinremCaseData} object containing the uploaded hearing orders
      * @return {@code true} if all documents in {@code uploadHearingOrder} have the "pdf" extension; {@code false} otherwise
      */
-    public boolean areAllLegacyApprovedOrdersPdf(FinremCaseData caseData) {
-        return areAllDocumentsWithExtensions(caseData.getUploadHearingOrder(), List.of("pdf"));
+    public boolean areAllLegacyApprovedOrdersWordOrPdf(FinremCaseData caseData) {
+        return areAllDocumentsWithExtensions(caseData.getUnprocessedUploadHearingDocuments(), List.of("doc", "docx", "pdf"));
     }
 
     /**
@@ -152,9 +178,4 @@ public class ProcessOrderService {
         return areAllDocumentsWithExtensions(nullSafeList(afterList).stream()
             .filter(doc -> doc.getValue().getOriginalDocument() == null).toList(), List.of("pdf", "doc", "docx"));
     }
-
-    private boolean isUploadHearingOrderEmpty(FinremCaseData caseData) {
-        return nullSafeList(caseData.getUploadHearingOrder()).isEmpty();
-    }
-
 }
