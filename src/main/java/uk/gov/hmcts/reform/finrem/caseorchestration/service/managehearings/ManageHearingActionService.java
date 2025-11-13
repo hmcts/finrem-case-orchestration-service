@@ -144,7 +144,7 @@ public class ManageHearingActionService {
 
         hearings.remove(hearingToVacate);
 
-        VacateOrAdjournedHearing vacatedHearing = buildVacatedHearing(hearingToVacate, vacateHearingInput);
+        VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.fromHearingToVacatedHearing(hearingToVacate, vacateHearingInput);
 
         ManageVacatedHearingsCollectionItem vacatedItem = ManageVacatedHearingsCollectionItem.builder()
             .id(hearingToVacate.getId())
@@ -155,6 +155,8 @@ public class ManageHearingActionService {
 
         hearingsWrapper.setHearings(hearings);
         hearingsWrapper.setVacatedHearingsCollection(vacateHearings);
+
+        hearingsWrapper.setVacateHearingSelection(null);
     }
 
     /**
@@ -344,27 +346,5 @@ public class ManageHearingActionService {
         if (hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)) {
             generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
         }
-    }
-
-    private VacateOrAdjournedHearing buildVacatedHearing(ManageHearingsCollectionItem hearingToVacate, VacateHearingAction vacateHearingInput) {
-        Hearing hearing = hearingToVacate.getValue();
-        return VacateOrAdjournedHearing.builder()
-            .hearingDate(hearing.getHearingDate())
-            .hearingType(hearing.getHearingType())
-            .hearingTimeEstimate(hearing.getHearingTimeEstimate())
-            .hearingTime(hearing.getHearingTime())
-            .hearingCourtSelection(hearing.getHearingCourtSelection())
-            .hearingMode(hearing.getHearingMode())
-            .additionalHearingInformation(hearing.getAdditionalHearingInformation())
-            .hearingNoticePrompt(hearing.getHearingNoticePrompt())
-            .additionalHearingDocPrompt(hearing.getAdditionalHearingDocPrompt())
-            .additionalHearingDocs(hearing.getAdditionalHearingDocs())
-            .partiesOnCase(hearing.getPartiesOnCase())
-            .wasMigrated(hearing.getWasMigrated())
-            .chooseHearings(vacateHearingInput.getChooseHearings())
-            .reasonsForVacating(vacateHearingInput.getReasonsForVacating())
-            .specifyOtherReason(vacateHearingInput.getSpecifyOtherReason())
-            .newHearingDate(vacateHearingInput.getHearingDate())
-            .build();
     }
 }

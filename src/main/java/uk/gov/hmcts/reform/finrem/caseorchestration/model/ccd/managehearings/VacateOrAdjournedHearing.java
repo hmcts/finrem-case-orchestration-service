@@ -41,4 +41,27 @@ public class VacateOrAdjournedHearing {
     private String reasonsForVacating;
     private String specifyOtherReason;
     private String hearingStatus;
+
+    public static VacateOrAdjournedHearing fromHearingToVacatedHearing(ManageHearingsCollectionItem hearingToVacate,
+                                                                       VacateHearingAction vacateHearingInput) {
+        Hearing hearing = hearingToVacate.getValue();
+        return VacateOrAdjournedHearing.builder()
+            .hearingDate(hearing.getHearingDate())
+            .hearingType(hearing.getHearingType())
+            .hearingTimeEstimate(hearing.getHearingTimeEstimate())
+            .hearingTime(hearing.getHearingTime())
+            .hearingCourtSelection(hearing.getHearingCourtSelection())
+            .hearingMode(hearing.getHearingMode())
+            .additionalHearingInformation(hearing.getAdditionalHearingInformation())
+            .hearingNoticePrompt(hearing.getHearingNoticePrompt())
+            .additionalHearingDocPrompt(hearing.getAdditionalHearingDocPrompt())
+            .additionalHearingDocs(hearing.getAdditionalHearingDocs())
+            .partiesOnCase(hearing.getPartiesOnCase())
+            .wasMigrated(hearing.getWasMigrated())
+            .chooseHearings(vacateHearingInput.getChooseHearings())
+            .reasonsForVacating(vacateHearingInput.getReasonsForVacating())
+            .specifyOtherReason(vacateHearingInput.getSpecifyOtherReason())
+            .newHearingDate(vacateHearingInput.getHearingDate())
+            .build();
+    }
 }
