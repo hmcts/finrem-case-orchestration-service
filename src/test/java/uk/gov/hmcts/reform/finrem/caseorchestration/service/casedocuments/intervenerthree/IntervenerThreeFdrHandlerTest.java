@@ -47,7 +47,7 @@ public class IntervenerThreeFdrHandlerTest extends BaseManageDocumentsHandlerTes
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
             CaseDocumentParty.INTERVENER_THREE, YesOrNo.NO, YesOrNo.YES, null));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         collectionService.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
@@ -56,7 +56,7 @@ public class IntervenerThreeFdrHandlerTest extends BaseManageDocumentsHandlerTes
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_THREE_FDR_DOCS_COLLECTION),
             hasSize(1));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(1));
     }
 
@@ -75,7 +75,7 @@ public class IntervenerThreeFdrHandlerTest extends BaseManageDocumentsHandlerTes
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
             hasSize(1));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 

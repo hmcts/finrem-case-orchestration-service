@@ -111,7 +111,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDocumentHandler = new CaseDocumentsHandler(featureToggleService);
         fdrDocumentsHandler = new FdrDocumentsHandler(featureToggleService, applicantFdrDocumentCategoriser, respondentFdrDocumentCategoriser);
 
-
         List<DocumentHandler> documentHandlers =
             Stream.of(applicantChronologiesStatementHandler, respondentChronologiesStatementHandler,
                     intervenerOneChronologiesStatementHandler, intervenerTwoChronologiesStatementHandler,
@@ -150,7 +149,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
@@ -159,7 +158,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -173,7 +172,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
@@ -182,7 +181,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -196,7 +195,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(CaseRole.RESP_SOLICITOR.getCcdCode()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
@@ -205,7 +204,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -219,7 +218,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
@@ -229,7 +228,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
                 .getDocumentCollectionPerType(
                     CaseDocumentCollectionType.INTERVENER_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -243,7 +242,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
@@ -252,7 +251,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_TWO_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -266,7 +265,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
@@ -275,7 +274,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_THREE_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -289,7 +288,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
@@ -298,7 +297,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_FOUR_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -312,7 +311,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(CaseRole.CASEWORKER.getCcdCode()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
@@ -321,7 +320,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -335,7 +334,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
@@ -348,7 +347,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.INTERVENER_ONE_FDR_DOCS_COLLECTION),
             hasSize(1));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -362,7 +361,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(CaseRole.APP_SOLICITOR.getCcdCode()));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         uploadContestedCaseDocumentsHandler.handle(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
@@ -371,7 +370,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -383,7 +382,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
             null, YesOrNo.YES, YesOrNo.NO, "Other Example"));
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
 
@@ -406,7 +405,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             null, YesOrNo.YES, YesOrNo.NO, "Other Example"));
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
 
@@ -424,7 +423,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.ATTENDANCE_SHEETS,
             null, YesOrNo.YES, YesOrNo.NO, "Other Example"));
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
 
@@ -442,7 +441,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
 

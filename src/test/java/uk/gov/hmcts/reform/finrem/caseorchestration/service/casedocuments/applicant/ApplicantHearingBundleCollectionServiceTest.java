@@ -34,7 +34,7 @@ public class ApplicantHearingBundleCollectionServiceTest extends HearingBundleHa
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
             CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
 
-        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         collectionService.replaceManagedDocumentsInCollectionType(
             FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
@@ -43,7 +43,7 @@ public class ApplicantHearingBundleCollectionServiceTest extends HearingBundleHa
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_HEARING_BUNDLES_COLLECTION),
             hasSize(1));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(1));
     }
 
@@ -62,7 +62,7 @@ public class ApplicantHearingBundleCollectionServiceTest extends HearingBundleHa
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
             hasSize(1));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 

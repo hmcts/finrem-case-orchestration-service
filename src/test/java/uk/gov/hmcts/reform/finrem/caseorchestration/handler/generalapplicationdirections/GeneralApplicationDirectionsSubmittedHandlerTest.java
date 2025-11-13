@@ -23,10 +23,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
-class GeneralApplicationDirectionsNewEventSubmittedHandlerTest {
+class GeneralApplicationDirectionsSubmittedHandlerTest {
 
     @InjectMocks
-    private GeneralApplicationDirectionsNewEventSubmittedHandler generalApplicationDirectionsSubmittedHandler;
+    private GeneralApplicationDirectionsSubmittedHandler generalApplicationDirectionsSubmittedHandler;
 
     @Mock
     private ManageHearingsCorresponder manageHearingsCorresponder;

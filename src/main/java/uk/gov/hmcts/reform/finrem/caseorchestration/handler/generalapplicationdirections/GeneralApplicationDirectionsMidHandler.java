@@ -20,14 +20,14 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class GeneralApplicationDirectionsNewMidHandler extends FinremCallbackHandler {
+public class GeneralApplicationDirectionsMidHandler extends FinremCallbackHandler {
 
     private final ValidateHearingService validateHearingService;
     private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
 
-    public GeneralApplicationDirectionsNewMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     ValidateHearingService validateHearingService,
-                                                     GeneralApplicationDirectionsService generalApplicationDirectionsService) {
+    public GeneralApplicationDirectionsMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                  ValidateHearingService validateHearingService,
+                                                  GeneralApplicationDirectionsService generalApplicationDirectionsService) {
         super(finremCaseDetailsMapper);
         this.validateHearingService = validateHearingService;
         this.generalApplicationDirectionsService = generalApplicationDirectionsService;
