@@ -100,6 +100,7 @@ public enum EventType {
     MANAGE_HEARINGS_MIGRATION("FR_manageHearingsMigration"),
     FR_HWF_DECISION_MADE("FR_HWFDecisionMade"),
     FR_HWF_DECISION_MADE_FROM_AWAITING_PAYMENT("FR_HWFDecisionMadeFromAwaitingPayment"),
+    STOP_REPRESENTING_CLIENT("FR_stopRepresentingClient"),
     @JsonEnumDefaultValue
     NONE("");
 
