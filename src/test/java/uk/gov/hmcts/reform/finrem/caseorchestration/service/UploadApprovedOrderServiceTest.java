@@ -28,13 +28,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
 class UploadApprovedOrderServiceTest  {
 
     @InjectMocks
     private UploadApprovedOrderService uploadApprovedOrderService;
-
     @Mock
     private HearingOrderService hearingOrderService;
     @Mock
@@ -82,7 +83,7 @@ class UploadApprovedOrderServiceTest  {
                 .build())
             .hearingDirectionDetailsCollection(hearingDirectionDetailsCollections)
             .build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, finremCaseData);
 
         uploadApprovedOrderService.processApprovedOrders(callbackRequest, AUTH_TOKEN);
 
@@ -90,7 +91,7 @@ class UploadApprovedOrderServiceTest  {
         InOrder inOrder = Mockito.inOrder(contestedOrderApprovedLetterService, approvedOrderNoticeOfHearingService,
             hearingOrderService);
         inOrder.verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
-        inOrder.verify(hearingOrderService).stampAndStoreCwApprovedOrders(finremCaseData, AUTH_TOKEN);
+        inOrder.verify(hearingOrderService).stampAndStoreCwApprovedOrders(caseDetails, AUTH_TOKEN);
         inOrder.verify(hearingOrderService).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
         inOrder.verify(approvedOrderNoticeOfHearingService).createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
 
@@ -136,7 +137,7 @@ class UploadApprovedOrderServiceTest  {
                 .build())
             .hearingDirectionDetailsCollection(hearingDirectionDetailsCollections)
             .build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseData);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, finremCaseData);
 
         uploadApprovedOrderService.processApprovedOrders(callbackRequest, AUTH_TOKEN);
 
@@ -144,7 +145,7 @@ class UploadApprovedOrderServiceTest  {
         InOrder inOrder = Mockito.inOrder(contestedOrderApprovedLetterService, approvedOrderNoticeOfHearingService,
             hearingOrderService);
         inOrder.verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
-        inOrder.verify(hearingOrderService).stampAndStoreCwApprovedOrders(finremCaseData, AUTH_TOKEN);
+        inOrder.verify(hearingOrderService).stampAndStoreCwApprovedOrders(caseDetails, AUTH_TOKEN);
         inOrder.verify(hearingOrderService).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
         inOrder.verify(approvedOrderNoticeOfHearingService, never()).createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
 
@@ -159,13 +160,16 @@ class UploadApprovedOrderServiceTest  {
                 .cwApprovedOrderCollection(directionOrderCollections)
                 .build())
             .build();
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails
+            .builder()
+            .caseType(CONTESTED)
+            .data(finremCaseData).build();
 
         uploadApprovedOrderService.processApprovedOrdersMh(finremCaseDetails, AUTH_TOKEN);
 
         InOrder inOrder = Mockito.inOrder(contestedOrderApprovedLetterService, hearingOrderService);
         inOrder.verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
-        inOrder.verify(hearingOrderService).stampAndStoreCwApprovedOrders(finremCaseData, AUTH_TOKEN);
+        inOrder.verify(hearingOrderService).stampAndStoreCwApprovedOrders(finremCaseDetails, AUTH_TOKEN);
         inOrder.verify(hearingOrderService).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(finremCaseDetails);
         verifyNoInteractions(approvedOrderNoticeOfHearingService);
 

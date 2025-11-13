@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentStorageExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.StampDocumentException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.FinremMultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfAnnexStampingInfo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -47,8 +48,8 @@ public class PdfStampingService {
                                   String authToken,
                                   boolean isAnnexNeeded,
                                   StampType stampType,
-                                  String caseId) {
-        log.info("About to stamp document: {} for Case ID: {}", document, caseId);
+                                  CaseType caseType) {
+        log.info("About to stamp document: {} for Case type: {}", document, caseType);
         try {
             byte[] docInBytes = emDownloadService.download(document.getBinaryUrl(), authToken);
             byte[] stampedDoc = stampDocument(docInBytes, isAnnexNeeded, stampType);
@@ -58,7 +59,7 @@ public class PdfStampingService {
                 FinremMultipartFile.builder().name(document.getFileName()).content(flattenDoc)
                     .contentType(APPLICATION_PDF_CONTENT_TYPE).build();
             List<FileUploadResponse> uploadResponse =
-                emUploadService.upload(Collections.singletonList(multipartFile), caseId, authToken);
+                emUploadService.upload(Collections.singletonList(multipartFile), caseType, authToken);
             FileUploadResponse fileSaved = Optional.of(uploadResponse.getFirst())
                 .filter(response -> response.getStatus() == HttpStatus.OK)
                 .orElseThrow(() -> new DocumentStorageException("Failed to store document"));

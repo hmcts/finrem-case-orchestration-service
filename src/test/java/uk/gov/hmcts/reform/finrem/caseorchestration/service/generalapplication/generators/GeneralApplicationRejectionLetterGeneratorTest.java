@@ -71,7 +71,7 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
 
     private CaseDetails caseDetails;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Before
     public void setUp() {

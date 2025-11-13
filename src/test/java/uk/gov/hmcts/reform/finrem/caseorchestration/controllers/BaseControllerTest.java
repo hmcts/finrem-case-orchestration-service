@@ -11,6 +11,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.task.ScheduledTaskRunner;
 
 import java.io.File;
@@ -60,7 +61,11 @@ public abstract class BaseControllerTest extends BaseTest {
 
     protected CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .caseTypeId(CaseType.CONTESTED.getCcdType())
+            .data(caseData)
+            .build();
         return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
     }
 

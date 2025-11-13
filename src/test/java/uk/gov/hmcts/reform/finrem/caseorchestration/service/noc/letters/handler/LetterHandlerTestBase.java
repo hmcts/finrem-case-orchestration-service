@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -27,7 +28,7 @@ public abstract class LetterHandlerTestBase {
     protected static final String AUTH_TOKEN = "AUTH_TOKEN";
     public static final String CASE_ID = "1234";
 
-    private AbstractLetterDetailsGenerator letterDetailsGenerator;
+    private final AbstractLetterDetailsGenerator letterDetailsGenerator;
     protected final NocDocumentService nocDocumentService;
     private final NoticeType noticeType;
     private final DocumentHelper.PaperNotificationRecipient recipient;
@@ -53,24 +54,17 @@ public abstract class LetterHandlerTestBase {
     }
 
     protected CaseDetails getCaseDetails(String resourcePath) {
-        CaseDetails caseDetails =
-            caseDetailsFromResource(resourcePath, new ObjectMapper());
-        return caseDetails;
+        return caseDetailsFromResource(resourcePath, new ObjectMapper());
     }
 
     protected void shouldSendLetter(String caseDetailsPath, String caseDetailsBeforePath) {
-        CaseDetails caseDetails =
-            getCaseDetails(caseDetailsPath);
-        CaseDetails caseDetailsBefore =
-            getCaseDetails(
-                caseDetailsBeforePath);
+        CaseDetails caseDetails = getCaseDetails(caseDetailsPath);
+        CaseDetails caseDetailsBefore = getCaseDetails(caseDetailsBeforePath);
 
-        NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
-            setUpNoticeOfChangeLetterDetailsInteraction();
-
-        CaseDocument caseDocumentApplicant =
-            setUpCaseDocumentInteraction(noticeOfChangeLetterDetails,
-                nocDocumentService, "appDocFileName");
+        NoticeOfChangeLetterDetails noticeOfChangeLetterDetails = setUpNoticeOfChangeLetterDetailsInteraction();
+        CaseType caseType = CaseType.forValue(caseDetails.getCaseTypeId());
+        CaseDocument caseDocumentApplicant = setUpCaseDocumentInteraction(noticeOfChangeLetterDetails,
+            nocDocumentService, caseType);
 
         Assert.assertNotNull(caseDocumentApplicant);
         getLetterHandler().handle(caseDetails, caseDetailsBefore, AUTH_TOKEN);
@@ -82,7 +76,7 @@ public abstract class LetterHandlerTestBase {
                 is(recipient == DocumentHelper.PaperNotificationRecipient.APPLICANT ? "Applicant" : "Respondent"));
         }
 
-        verify(nocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails, CASE_ID);
+        verify(nocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails, caseType);
         verify(bulkPrintService).sendDocumentForPrint(caseDocumentApplicant, caseDetails,
             bulkPrintService.getRecipient(recipient.toString()), AUTH_TOKEN);
     }
@@ -100,9 +94,10 @@ public abstract class LetterHandlerTestBase {
     }
 
     protected CaseDocument setUpCaseDocumentInteraction(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
-                                                        NocDocumentService nocDocumentService, String docFileName) {
-        CaseDocument caseDocument = CaseDocument.builder().documentFilename(docFileName).build();
-        when(nocDocumentService.generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails, CASE_ID)).thenReturn(caseDocument);
+                                                        NocDocumentService nocDocumentService, CaseType caseType) {
+        CaseDocument caseDocument = CaseDocument.builder().documentFilename("appDocFileName").build();
+        when(nocDocumentService.generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails, caseType))
+            .thenReturn(caseDocument);
         return caseDocument;
     }
 

@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.barristers.BarristerLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
@@ -93,6 +94,7 @@ public class BarristerLetterDetailsGeneratorTest {
         assertThat(addressee.getName(), is(APPLICANT_FULL_NAME));
         assertThat(letterDetails.getBarristerFirmName(), is(APP_BARR_ORG_NAME));
         assertThat(letterDetails.getReference(), is(APP_BARR_ORG_ID));
+        assertThat(letterDetails.getCaseType(), is(CaseType.CONTESTED));
     }
 
     @Test
@@ -112,6 +114,7 @@ public class BarristerLetterDetailsGeneratorTest {
         assertThat(addressee.getName(), is(RESPONDENT_FULL_NAME_CONTESTED));
         assertThat(letterDetails.getBarristerFirmName(), is(RESP_BARR_ORG_NAME));
         assertThat(letterDetails.getReference(), is(RESP_BARR_ORG_ID));
+        assertThat(letterDetails.getCaseType(), is(CaseType.CONTESTED));
     }
 
     private void assertLetterDetails(BarristerLetterDetails barristerLetterDetails) {

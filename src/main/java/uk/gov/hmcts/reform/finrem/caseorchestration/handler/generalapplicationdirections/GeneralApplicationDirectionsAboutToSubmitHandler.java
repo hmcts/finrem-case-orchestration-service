@@ -128,7 +128,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         String caseId = caseDetails.getCaseIdAsString();
         log.info("Map existing general application to collection for Case ID: {}", caseId);
         GeneralApplicationCollectionData data = helper.mapExistingGeneralApplicationToData(
-            caseData, userAuthorisation, caseId);
+            caseDetails, userAuthorisation);
         if (data != null) {
             String status = Objects.toString(caseData.getGeneralApplicationWrapper()
                 .getGeneralApplicationOutcome(), null);
@@ -215,7 +215,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
 
         directionsDocument.ifPresent(items::setGeneralApplicationDirectionsDocument);
         updateApplicationStatus(items, status, caseId);
-        addBulkPrintDocuments(items, bulkPrintDocuments, userAuthorisation, caseId);
+        addBulkPrintDocuments(items, bulkPrintDocuments, userAuthorisation, caseDetails);
     }
 
     private void setHearingDetails(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
@@ -239,24 +239,24 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     }
 
     private void addBulkPrintDocuments(GeneralApplicationItems items, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation,
-                                       String caseId) {
+                                       FinremCaseDetails caseDetails) {
 
         addBulkPrintDocument(items.getGeneralApplicationDirectionsDocument(), bulkPrintDocuments);
-        log.info("General Applications Directions document sent to Bulk Print, for case ID: {}", caseId);
+        log.info("General Applications Directions document sent to Bulk Print, for case ID: {}", caseDetails.getCaseIdAsString());
 
-        log.info("items getGeneralApplicationDocument {}, for case ID: {}", items.getGeneralApplicationDocument(), caseId);
+        log.info("items getGeneralApplicationDocument {}, for case ID: {}", items.getGeneralApplicationDocument(), caseDetails.getCaseIdAsString());
 
         Optional.ofNullable(items.getGeneralApplicationDocument())
-            .map(doc -> helper.getPdfDocument(doc, userAuthorisation, caseId))
+            .map(doc -> helper.getPdfDocument(doc, userAuthorisation, caseDetails.getCaseType()))
             .ifPresent(pdfDoc -> {
                 items.setGeneralApplicationDocument(pdfDoc);
                 addBulkPrintDocument(pdfDoc, bulkPrintDocuments);
                 log.info("GeneralApplicationDocument {}, BulkPrintDocument {} for Case ID: {}",
-                    pdfDoc, bulkPrintDocuments.getLast(), caseId);
+                    pdfDoc, bulkPrintDocuments.getLast(), caseDetails.getCaseIdAsString());
             });
 
         Optional.ofNullable(items.getGeneralApplicationDraftOrder())
-            .map(doc -> helper.getPdfDocument(doc, userAuthorisation, caseId))
+            .map(doc -> helper.getPdfDocument(doc, userAuthorisation, caseDetails.getCaseType()))
             .ifPresent(pdfDoc -> {
                 items.setGeneralApplicationDraftOrder(pdfDoc);
                 addBulkPrintDocument(pdfDoc, bulkPrintDocuments);

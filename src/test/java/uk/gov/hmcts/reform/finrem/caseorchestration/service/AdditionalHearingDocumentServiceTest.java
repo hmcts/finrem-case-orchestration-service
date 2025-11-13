@@ -69,9 +69,9 @@ class AdditionalHearingDocumentServiceTest {
     @Captor
     private ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
     @Mock
-    GenericDocumentService genericDocumentService;   
+    GenericDocumentService genericDocumentService;
     @Mock
-    BulkPrintService bulkPrintService;    
+    BulkPrintService bulkPrintService;
     @Mock
     NotificationService notificationService;
     @Mock
@@ -108,7 +108,7 @@ class AdditionalHearingDocumentServiceTest {
     void convertToPdf() {
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), any())).thenReturn(caseDocument());
         CaseDocument caseDocument = caseDocument(DOC_URL, "app_docs.docx", BINARY_URL);
-        CaseDocument toPdf = additionalHearingDocumentService.convertToPdf(caseDocument, AUTH_TOKEN, CASE_ID);
+        CaseDocument toPdf = additionalHearingDocumentService.convertToPdf(caseDocument, AUTH_TOKEN, CONTESTED);
         assertEquals("app_docs.pdf", toPdf.getDocumentFilename());
     }
 
@@ -162,6 +162,7 @@ class AdditionalHearingDocumentServiceTest {
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .id(Long.valueOf(CASE_ID))
+            .caseType(CONTESTED)
             .data(caseData)
             .build();
 
@@ -185,7 +186,7 @@ class AdditionalHearingDocumentServiceTest {
 
         assertThat(caseData.getLatestDraftHearingOrder()).isEqualTo(stampedDoc);
 
-        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), any(), eq(CASE_ID));
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), any(), eq(CONTESTED));
     }
 
     @Test
@@ -205,6 +206,7 @@ class AdditionalHearingDocumentServiceTest {
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .id(Long.valueOf(CASE_ID))
+            .caseType(CONTESTED)
             .data(caseData)
             .build();
 
@@ -228,7 +230,7 @@ class AdditionalHearingDocumentServiceTest {
 
         assertThat(caseData.getLatestDraftHearingOrder()).isEqualTo(stampedDoc);
 
-        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), any(), eq(CASE_ID));
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), any(), eq(CONTESTED));
     }
 
     @Test
@@ -289,9 +291,9 @@ class AdditionalHearingDocumentServiceTest {
     private void mockConversionAndStamp(CaseDocument originalDoc, CaseDocument stampedDoc) {
         when(orderDateService.syncCreatedDateAndMarkDocumentStamped(any(), eq(AUTH_TOKEN)))
             .thenReturn(new ArrayList<>());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), eq(CASE_ID)))
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), eq(CONTESTED)))
             .thenReturn(originalDoc);
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), any(StampType.class), eq(CASE_ID)))
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), any(StampType.class), eq(CONTESTED)))
             .thenReturn(stampedDoc);
     }
 

@@ -38,7 +38,7 @@ public class UploadApprovedOrderService {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
 
-        processCaseworkerUploadedApprovedOrders(caseDetails.getData(), authorisationToken);
+        processCaseworkerUploadedApprovedOrders(caseDetails, authorisationToken);
 
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
 
@@ -84,7 +84,7 @@ public class UploadApprovedOrderService {
     public void processApprovedOrdersMh(FinremCaseDetails caseDetails, String authorisationToken) {
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
 
-        processCaseworkerUploadedApprovedOrders(caseDetails.getData(), authorisationToken);
+        processCaseworkerUploadedApprovedOrders(caseDetails, authorisationToken);
 
         // TODO Looks like the following logic is not needed anymore. Remove it later.
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
@@ -105,7 +105,7 @@ public class UploadApprovedOrderService {
         caseData.getDraftDirectionWrapper().setCwApprovedOrderCollection(null);
     }
 
-    private void processCaseworkerUploadedApprovedOrders(FinremCaseData caseData, String authorisationToken) {
-        hearingOrderService.stampAndStoreCwApprovedOrders(caseData, authorisationToken);
+    private void processCaseworkerUploadedApprovedOrders(FinremCaseDetails caseDetails, String authorisationToken) {
+        hearingOrderService.stampAndStoreCwApprovedOrders(caseDetails, authorisationToken);
     }
 }

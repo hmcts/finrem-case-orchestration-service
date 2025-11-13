@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
@@ -28,7 +27,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 
-import java.io.InputStream;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,7 +44,6 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
     private GeneralApplicationReferToJudgeAboutToSubmitHandler submitHandler;
     @Mock
     private GenericDocumentService service;
-    private GeneralApplicationService gaService;
     @Mock
     private GeneralApplicationHelper helper;
     @Mock
@@ -69,9 +66,9 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
-        gaService = new GeneralApplicationService(documentHelper, objectMapper, idamService, service, accessService, helper,
-            bulkPrintDocumentService, generalApplicationsCategoriser);
-        startHandler = new GeneralApplicationReferToJudgeAboutToStartHandler(finremCaseDetailsMapper, helper, gaService);
+        GeneralApplicationService gaService = new GeneralApplicationService(documentHelper, objectMapper, idamService,
+            service, accessService, helper, bulkPrintDocumentService, generalApplicationsCategoriser);
+        startHandler = new GeneralApplicationReferToJudgeAboutToStartHandler(finremCaseDetailsMapper, helper);
         submitHandler = new GeneralApplicationReferToJudgeAboutToSubmitHandler(finremCaseDetailsMapper, helper, gaService);
     }
 
@@ -128,7 +125,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
             = helper.covertToGeneralApplicationData(data.getGeneralApplicationWrapper().getGeneralApplications());
         assertEquals(2, generalApplicationCollectionData.size());
         assertEquals(GeneralApplicationStatus.REFERRED.getId(),
-            generalApplicationCollectionData.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
+            generalApplicationCollectionData.getFirst().getGeneralApplicationItems().getGeneralApplicationStatus());
     }
 
     @Test
@@ -166,7 +163,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
         assertEquals(1, generalApplicationCollectionData.size());
 
         assertEquals(GeneralApplicationStatus.REFERRED.getId(),
-            generalApplicationCollectionData.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
+            generalApplicationCollectionData.getFirst().getGeneralApplicationItems().getGeneralApplicationStatus());
     }
 
     private void assertExistingGeneralApplication(FinremCaseData caseData) {
@@ -194,19 +191,8 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
             getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
         return DynamicRadioList.builder()
-            .value(dynamicListElements.get(0))
+            .value(dynamicListElements.getFirst())
             .listItems(dynamicListElements)
             .build();
     }
-
-    private FinremCaseDetails buildCaseDetailsWithPath(String path) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            FinremCaseDetails caseDetails =
-                objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-            return FinremCallbackRequest.builder().caseDetails(caseDetails).build().getCaseDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 }

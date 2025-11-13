@@ -106,7 +106,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
         log.info("Setting up order documents for case {}:", caseId);
         List<CaseDocument> consentOrderDocumentPack;
         ConsentOrderWrapper wrapper = caseData.getConsentOrderWrapper();
-        List<DocumentCollectionItem> additionalDocuments = getAdditionalDocuments(caseData, userAuthorisation, caseId, printOrderCollection);
+        List<DocumentCollectionItem> additionalDocuments = getAdditionalDocuments(caseDetails, userAuthorisation, caseId, printOrderCollection);
 
         if (consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, userAuthorisation)) {
             List<ConsentOrderCollection> approvedConsentOrders = caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
@@ -131,7 +131,8 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
         sendOrderPartyDocumentList.forEach(
             handler -> handler.setUpCoverSheetOnCase(caseDetails, parties, userAuthorisation));
 
-        consentOrderDocumentPack.forEach(doc -> genericDocumentService.convertDocumentIfNotPdfAlready(doc, userAuthorisation, caseId));
+        consentOrderDocumentPack.forEach(doc -> genericDocumentService.convertDocumentIfNotPdfAlready(doc, userAuthorisation,
+            caseDetails.getCaseType()));
         consentOrderDocumentPack.forEach(doc -> printOrderCollection.add(addToPrintOrderCollection(doc)));
     }
 
@@ -155,20 +156,20 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
         return approvedConsentOrderDocumentPack;
     }
 
-    private List<DocumentCollectionItem> getAdditionalDocuments(FinremCaseData caseData,
+    private List<DocumentCollectionItem> getAdditionalDocuments(FinremCaseDetails caseDetails,
                                                                 String userAuthorisation,
                                                                 String caseId,
                                                                 List<OrderSentToPartiesCollection> printOrderCollection) {
         List<CaseDocument> documents = new ArrayList<>();
         List<DocumentCollectionItem> caseDocuments = new ArrayList<>();
-        if (caseData.getAdditionalCicDocuments() != null) {
-            caseData.getAdditionalCicDocuments().forEach(doc -> documents.add(doc.getValue()));
+        if (caseDetails.getData().getAdditionalCicDocuments() != null) {
+            caseDetails.getData().getAdditionalCicDocuments().forEach(doc -> documents.add(doc.getValue()));
         }
 
         if (!documents.isEmpty()) {
             log.info("Additional uploaded documents {} to be sent with consent or general order for case id {}", documents, caseId);
             List<CaseDocument> pdfDocuments = documents.stream().map(doc ->
-                    genericDocumentService.convertDocumentIfNotPdfAlready(doc, userAuthorisation, caseId)).toList();
+                    genericDocumentService.convertDocumentIfNotPdfAlready(doc, userAuthorisation, caseDetails.getCaseType())).toList();
             pdfDocuments.forEach(doc -> {
                 printOrderCollection.add(addToPrintOrderCollection(doc));
                 caseDocuments.add(DocumentCollectionItem.builder().value(doc).build());

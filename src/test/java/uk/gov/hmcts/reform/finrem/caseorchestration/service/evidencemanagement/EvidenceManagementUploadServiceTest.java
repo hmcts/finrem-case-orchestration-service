@@ -39,11 +39,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EvidenceManagementUploadServiceTest {
 
-    private static final String CASE_ID = "1234";
     @Mock
     private RestTemplate restTemplate;
     @Mock
@@ -89,39 +89,39 @@ public class EvidenceManagementUploadServiceTest {
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectUploadToSucceed() {
-        List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CASE_ID,
+        List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CONTESTED,
             authKey());
         assertTrue(responses.size() > 0);
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmRequestWith3Headers() {
-        emUploadService.upload(getMultipartFiles(), CASE_ID, authKey());
+        emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
         List<HttpEntity> allValues = httpEntityReqEntity.getAllValues();
         assertEquals(3, allValues.get(0).getHeaders().size());
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveSecurityAuthHeader() {
-        emUploadService.upload(getMultipartFiles(), CASE_ID, authKey());
+        emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
         assertTrue(getEmRequestHeaders().containsKey("ServiceAuthorization"));
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveUserIdHeader() {
-        emUploadService.upload(getMultipartFiles(), CASE_ID, authKey());
+        emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
         assertTrue(getEmRequestHeaders().containsKey("user-id"));
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveValidContentTypeHeader() {
-        emUploadService.upload(getMultipartFiles(), CASE_ID, authKey());
+        emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
         assertEquals("multipart/form-data", getEmRequestHeaders().get("Content-Type").get(0));
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectAuthKeyIsParsedForUserId() {
-        emUploadService.upload(getMultipartFiles(), CASE_ID, authKey());
+        emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
         assertEquals("19", getEmRequestHeaders().get("user-id").get(0));
     }
 
@@ -129,7 +129,7 @@ public class EvidenceManagementUploadServiceTest {
     public void givenNullFileParamIsPassed_whenUploadIsCalled_thenExpectError() {
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("files");
-        emUploadService.upload(null, CASE_ID, authKey());
+        emUploadService.upload(null, CONTESTED, authKey());
         httpEntityReqEntity.getAllValues();
     }
 
@@ -137,7 +137,7 @@ public class EvidenceManagementUploadServiceTest {
     public void givenUploadResponseReturned_whenUploadIsCalled_thenExpectUploadToSucceed() {
         when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
-        List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CASE_ID, authKey());
+        List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
         assertTrue(responses.size() > 0);
     }
 
@@ -145,7 +145,7 @@ public class EvidenceManagementUploadServiceTest {
     public void givenNotUploadResponseReturned_whenUploadIsCalled_thenExpectUploadToNotSucceed() {
         when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(null);
-        List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CASE_ID, authKey());
+        List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(), CONTESTED, authKey());
         assertTrue(responses.isEmpty());
     }
 

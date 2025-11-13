@@ -62,8 +62,7 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
         log.info("GA AboutToStartHandler beginning existing General Application List size: {} for case ID: {}",
             existingGeneralApplication.size(), caseId);
 
-        GeneralApplicationCollectionData data =
-            helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
+        GeneralApplicationCollectionData data = helper.mapExistingGeneralApplicationToData(caseDetails, userAuthorisation);
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
