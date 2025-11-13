@@ -110,7 +110,6 @@ class HearingsAboutToStartHandlerTest {
 
         verify(hearingService).generateSelectableHearingsAsDynamicList(
             callbackRequest.getCaseDetails(), TestConstants.AUTH_TOKEN);
-
     }
 
     private FinremCallbackRequest buildCallbackRequest(ManageHearingsAction manageHearingsAction) {
