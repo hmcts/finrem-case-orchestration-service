@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @SuppressWarnings("java:S3740")
 public class ConsentApplicationApprovedInContestedAboutToStartHandler implements CallbackHandler {
 
-    private final IdamService service;
+    private final IdamService idamService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -37,7 +37,7 @@ public class ConsentApplicationApprovedInContestedAboutToStartHandler implements
             callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (Objects.isNull(caseData.get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME))) {
-            caseData.put(CONTESTED_ORDER_DIRECTION_JUDGE_NAME, service.getIdamFullName(userAuthorisation));
+            caseData.put(CONTESTED_ORDER_DIRECTION_JUDGE_NAME, idamService.getIdamSurname(userAuthorisation));
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
