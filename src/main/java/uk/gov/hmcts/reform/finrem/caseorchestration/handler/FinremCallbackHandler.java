@@ -10,8 +10,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.Temp;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SessionWrapper;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnotation;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -56,13 +59,19 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         }
     }
 
-    protected FinremCaseDetails removeTemporaryFields(FinremCaseDetails finremCaseDetails, Class scopedClass) {
+    protected FinremCaseDetails removeTemporaryFields(FinremCallbackRequest callbackRequest) {
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
-        getFieldsListWithAnnotation(scopedClass, Temp.class).stream()
-            .map(Field::getName)
-            .forEach(caseDetails.getData()::remove);
+        getTemporaryWrapperClasses().forEach(temporaryWrapperClasss ->
+            getFieldsListWithAnnotation(temporaryWrapperClasss, Temp.class).stream()
+                .map(Field::getName)
+                .forEach(caseDetails.getData()::remove));
 
         return finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+    }
+
+    private static List<Class> getTemporaryWrapperClasses() {
+        return Arrays.asList(SessionWrapper.class);
     }
 }
