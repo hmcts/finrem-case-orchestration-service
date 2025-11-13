@@ -52,6 +52,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
@@ -161,6 +162,7 @@ class AdditionalHearingDocumentServiceTest {
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .id(Long.valueOf(CASE_ID))
+            .caseType(CONTESTED)
             .data(caseData)
             .build();
 
@@ -184,7 +186,7 @@ class AdditionalHearingDocumentServiceTest {
 
         assertThat(caseData.getLatestDraftHearingOrder()).isEqualTo(stampedDoc);
 
-        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), any(), eq(CASE_ID));
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), any(), eq(CONTESTED));
     }
 
     @Test
@@ -204,6 +206,7 @@ class AdditionalHearingDocumentServiceTest {
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .id(Long.valueOf(CASE_ID))
+            .caseType(CONTESTED)
             .data(caseData)
             .build();
 
@@ -227,7 +230,7 @@ class AdditionalHearingDocumentServiceTest {
 
         assertThat(caseData.getLatestDraftHearingOrder()).isEqualTo(stampedDoc);
 
-        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), any(), eq(CASE_ID));
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), any(), eq(CONTESTED));
     }
 
     @Test
@@ -288,9 +291,9 @@ class AdditionalHearingDocumentServiceTest {
     private void mockConversionAndStamp(CaseDocument originalDoc, CaseDocument stampedDoc) {
         when(orderDateService.syncCreatedDateAndMarkDocumentStamped(any(), eq(AUTH_TOKEN)))
             .thenReturn(new ArrayList<>());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), eq(CASE_ID)))
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), eq(CONTESTED)))
             .thenReturn(originalDoc);
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), any(StampType.class), eq(CASE_ID)))
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), any(StampType.class), eq(CONTESTED)))
             .thenReturn(stampedDoc);
     }
 

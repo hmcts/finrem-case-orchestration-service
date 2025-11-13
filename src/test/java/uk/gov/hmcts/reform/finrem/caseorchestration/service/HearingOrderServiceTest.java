@@ -378,7 +378,7 @@ class HearingOrderServiceTest {
             // Arrange
             FinremCaseData finremCaseData = setupFinremCaseData(draftDirectionWrapper);
 
-            when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CONTESTED)).thenReturn(stampedUao1Pdf);
+            lenient().when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CONTESTED)).thenReturn(stampedUao1Pdf);
             List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>();
             when(orderDateService.syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN))
                 .thenReturn(createdDateSyncedFinalOrderCollection);
