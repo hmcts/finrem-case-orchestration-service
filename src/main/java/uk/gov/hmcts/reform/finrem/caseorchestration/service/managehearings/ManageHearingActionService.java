@@ -132,17 +132,12 @@ public class ManageHearingActionService {
         VacateHearingAction vacateHearingInput = hearingsWrapper.getVacateHearingSelection();
         UUID selectedHearingId = UUID.fromString(vacateHearingInput.getChooseHearings().getValue().getCode());
 
-        List<ManageHearingsCollectionItem> hearings = new ArrayList<>(hearingsWrapper.getHearings());
-        List<ManageVacatedHearingsCollectionItem> vacateHearings = new ArrayList<>(
-            ofNullable(hearingsWrapper.getVacatedHearingsCollection()).orElseGet(ArrayList::new)
-        );
-
-        ManageHearingsCollectionItem hearingToVacate = hearings.stream()
+        ManageHearingsCollectionItem hearingToVacate = hearingsWrapper.getHearings().stream()
             .filter(item -> selectedHearingId.equals(item.getId()))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("No hearing found with ID: " + selectedHearingId));
 
-        hearings.remove(hearingToVacate);
+        hearingsWrapper.getHearings().remove(hearingToVacate);
 
         VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.fromHearingToVacatedHearing(hearingToVacate, vacateHearingInput);
 
@@ -151,10 +146,10 @@ public class ManageHearingActionService {
             .value(vacatedHearing)
             .build();
 
-        vacateHearings.add(vacatedItem);
-
-        hearingsWrapper.setHearings(hearings);
-        hearingsWrapper.setVacatedHearingsCollection(vacateHearings);
+        if (hearingsWrapper.getVacatedHearingsCollection() == null) {
+            hearingsWrapper.setVacatedHearingsCollection(new ArrayList<>());
+        }
+        hearingsWrapper.getVacatedHearingsCollection().add(vacatedItem);
 
         hearingsWrapper.setVacateHearingSelection(null);
     }
