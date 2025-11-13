@@ -54,8 +54,8 @@ public class ProcessOrderService {
 
         List<DirectionOrderCollection> unprocessedOrders = uploadHearingOrders.stream()
             .filter(orderCollection -> Optional.ofNullable(orderCollection.getValue())
-                .map(directionOrder ->  directionOrder.getIsOrderStamped() == null ||
-                    YesOrNo.NO.equals(directionOrder.getIsOrderStamped()))
+                .map(directionOrder ->  directionOrder.getIsOrderStamped() == null
+                    || YesOrNo.NO.equals(directionOrder.getIsOrderStamped()))
                 .orElse(false))
             .toList();
 
