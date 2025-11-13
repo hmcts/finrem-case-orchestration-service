@@ -31,6 +31,9 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
     private final BulkPrintDocumentService bulkPrintDocumentService;
     private final ProcessOrderService processOrderService;
     private final ValidateHearingService validateHearingService;
+    private static final String ERROR_NO_ORDERS = "There are no draft orders to be processed.";
+    private static final String ERROR_NEW_DOCS = "You must upload a Microsoft Word file or PDF for new documents.";
+    private static final String ERROR_FILE_FORMAT = "You must upload a Microsoft Word file or PDF for modifying an unprocessed document.";
 
     public ProcessOrderMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                   BulkPrintDocumentService bulkPrintDocumentService, ProcessOrderService processOrderService,
@@ -62,7 +65,7 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
 
         if (processOrderService.hasNoApprovedOrdersToProcess(caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("There are no draft orders to be processed.")).build();
+                .data(caseData).errors(List.of(ERROR_NO_ORDERS)).build();
         }
         if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())
             && validateHearingService.hasInvalidAdditionalHearingDocsForAddHearingChosen(caseData)) {
@@ -73,8 +76,8 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
         }
 
         List<DirectionOrderCollection> uploadHearingOrders = filterNewItems(
-            caseData.getUploadHearingOrder(),
-            caseDataBefore.getUploadHearingOrder()
+            caseData.getUnprocessedUploadHearingDocuments(),
+            caseDataBefore.getUnprocessedUploadHearingDocuments()
         );
 
         if (CollectionUtils.isNotEmpty(uploadHearingOrders)) {
@@ -96,19 +99,20 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
         }
 
         processOrderService.populateUnprocessedApprovedDocuments(caseDataBefore);
+        processOrderService.populateUnprocessedUploadHearingDocuments(caseDataBefore);
         if (!processOrderService.areAllNewOrdersWordOrPdfFiles(caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("You must upload a Microsoft Word file or PDF for new documents.")).build();
+                .data(caseData).errors(List.of(ERROR_NEW_DOCS)).build();
         }
         // Validate the modifying legacy approved orders
-        if (!processOrderService.areAllLegacyApprovedOrdersPdf(caseData)) {
+        if (!processOrderService.areAllLegacyApprovedOrdersWordOrPdf(caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("You must upload a PDF file for modifying legacy approved documents.")).build();
+                .data(caseData).errors(List.of(ERROR_FILE_FORMAT)).build();
         }
         // Validate the modifying unprocessed approved orders are word documents (except PSA)
         if (!processOrderService.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("You must upload a Microsoft Word file or PDF for modifying an unprocessed approved documents."))
+                .data(caseData).errors(List.of(ERROR_FILE_FORMAT))
                 .build();
         }
 

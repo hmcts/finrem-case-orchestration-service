@@ -715,10 +715,11 @@ public class DocumentHelper {
             .anyMatch(filename -> filename.equals(caseDocument.getDocumentFilename()));
     }
 
-    public DirectionOrderCollection prepareFinalOrder(CaseDocument document) {
+    public DirectionOrderCollection prepareFinalOrder(CaseDocument document, List<DocumentCollectionItem> additionalDocs) {
         return DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
                 .uploadDraftDocument(document)
+                .additionalDocuments(additionalDocs)
                 .isOrderStamped(YesOrNo.YES)
                 .orderDateTime(LocalDateTime.now())
                 .build())
