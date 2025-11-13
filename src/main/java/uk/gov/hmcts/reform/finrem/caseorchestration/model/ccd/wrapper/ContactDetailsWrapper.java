@@ -21,6 +21,8 @@ public class ContactDetailsWrapper {
     private YesOrNo updateIncludesRepresentativeChange;
     private NoticeOfChangeParty nocParty;
     private YesOrNo applicantRepresented;
+    // contested, input by applicant solicitor during stop representing a client
+    private Address applicantServiceAddress;
     private Address applicantSolicitorAddress;
     private String applicantSolicitorName;
     private String applicantSolicitorFirm;
@@ -54,6 +56,8 @@ public class ContactDetailsWrapper {
     private String respondentSolicitorReference;
     @JsonProperty("rSolicitorAddress")
     private Address respondentSolicitorAddress;
+    @JsonProperty("rSolicitorServiceAddress")
+    private Address respondentSolicitorServiceAddress;
     @JsonProperty("rSolicitorPhone")
     private String respondentSolicitorPhone;
     @JsonProperty("rSolicitorEmail")
@@ -69,6 +73,8 @@ public class ContactDetailsWrapper {
     private String solicitorName;
     private String solicitorFirm;
     private Address solicitorAddress;
+    // consent, input by applicant solicitor during stop representing a client
+    private Address solicitorServiceAddress;
     private String solicitorPhone;
     private String solicitorEmail;
     @JsonProperty("solicitorDXnumber")
