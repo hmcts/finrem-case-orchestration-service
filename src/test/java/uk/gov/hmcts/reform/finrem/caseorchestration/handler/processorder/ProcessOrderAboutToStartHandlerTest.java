@@ -98,7 +98,8 @@ class ProcessOrderAboutToStartHandlerTest {
     @Test
     void shouldPopulateIsHavingOldDraftOrders() {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
-            .uploadHearingOrder(List.of(DirectionOrderCollection.builder().build()))
+            .uploadHearingOrder(List.of(DirectionOrderCollection.builder()
+                .value(DirectionOrder.builder().isOrderStamped(YesOrNo.NO).build()).build()))
             .build());
         assertEquals(YesOrNo.YES, underTest.handle(finremCallbackRequest, AUTH_TOKEN).getData().getDraftOrdersWrapper()
             .getIsLegacyApprovedOrderPresent());
@@ -150,13 +151,13 @@ class ProcessOrderAboutToStartHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(EventType.PROCESS_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder()
-                .uploadHearingOrder(List.of(DirectionOrderCollection.builder().build()))
+                .uploadHearingOrder(List.of(DirectionOrderCollection.builder()
+                    .value(DirectionOrder.builder().isOrderStamped(YesOrNo.NO).build()).build()))
                 .manageHearingsWrapper(ManageHearingsWrapper
                     .builder()
                     .workingHearing(null)
                     .build())
                 .build()));
-
         when(partyService.getAllActivePartyList(callbackRequest.getCaseDetails()))
             .thenReturn(DynamicMultiSelectList
                 .builder()
