@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 
 @Slf4j
@@ -37,7 +38,12 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        ManageHearingsAction action = caseData.getManageHearingsWrapper().getManageHearingsActionSelection();
+
+        if (ManageHearingsAction.ADD_HEARING.equals(action)) {
+            manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())

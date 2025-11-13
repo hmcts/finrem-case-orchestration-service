@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -68,6 +69,7 @@ class HearingsSubmittedHandlerTest {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper
                 .builder()
+                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
                 .workingHearingId(hearingID)
                 .hearings(List.of(
                     ManageHearingsCollectionItem

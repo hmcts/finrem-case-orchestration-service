@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateHearingAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -294,6 +295,46 @@ class ManageHearingActionServiceTest {
                 outOfCourtResolution);
 
         verify(manageHearingsDocumentService, never()).generateFormG(finremCaseDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    void performVacateHearing_shouldVacateHearing() {
+        UUID hearingId = UUID.randomUUID();
+        UUID hearing1ID = UUID.randomUUID();
+        Hearing hearing = createHearing(HearingType.FDR, "10:00", "30mins", LocalDate.now());
+        Hearing hearing1 = createHearing(HearingType.FH, "11:00", "1hr", LocalDate.now().plusDays(1));
+
+        hearingWrapper.setVacateHearingSelection(VacateHearingAction.builder()
+            .chooseHearings(DynamicList.builder()
+                .value(DynamicListElement.builder().code(hearingId.toString()).build())
+                .build())
+            .reasonsForVacating("Courtroom_Unavailable")
+            .build());
+
+        hearingWrapper.setHearings(new ArrayList<>(List.of(
+            ManageHearingsCollectionItem.builder().id(hearingId).value(hearing).build(),
+            ManageHearingsCollectionItem.builder().id(hearing1ID).value(hearing1).build()
+        )));
+
+        manageHearingActionService.performVacateHearing(finremCaseDetails);
+
+        assertThat(hearingWrapper.getHearings())
+            .hasSize(1)
+            .first()
+            .satisfies(remainingHearing -> {
+                assertThat(remainingHearing.getId()).isEqualTo(hearing1ID);
+                assertThat(remainingHearing.getValue().getHearingType()).isEqualTo(HearingType.FH);
+            });
+
+        assertThat(hearingWrapper.getVacatedHearingsCollection())
+            .hasSize(1)
+            .first()
+            .satisfies(vacatedHearing -> {
+                assertThat(vacatedHearing.getId()).isEqualTo(hearingId);
+                assertThat(vacatedHearing.getValue().getHearingType()).isEqualTo(HearingType.FDR);
+                assertThat(vacatedHearing.getValue().getHearingTime()).isEqualTo("10:00");
+                assertThat(vacatedHearing.getValue().getHearingTimeEstimate()).isEqualTo("30mins");
+            });
     }
 
     @Test

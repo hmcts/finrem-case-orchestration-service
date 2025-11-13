@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -26,6 +27,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -38,6 +40,9 @@ class HearingsAboutToStartHandlerTest {
     @Mock
     private ValidateHearingService validateHearingService;
 
+    @Mock
+    private HearingService hearingService;
+
     @InjectMocks
     private ManageHearingsAboutToStartHandler handler;
 
@@ -48,16 +53,7 @@ class HearingsAboutToStartHandlerTest {
 
     @Test
     void testHandle() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder().data(
-                    FinremCaseData.builder()
-                        .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                            .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
-                            .build())
-                        .build())
-                .build())
-            .build();
-
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADD_HEARING);
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(callbackRequest, TestConstants.AUTH_TOKEN);
@@ -101,5 +97,30 @@ class HearingsAboutToStartHandlerTest {
         assertThat(response.getErrors()).containsExactly("Error 1", "Error 2");
         assertThat(response.getData()).isEqualTo(finremCaseData);
 
+    }
+
+    @Test
+    void givenVacateAHearing_shouldCallGenerateSelectableHearingsAsDynamicList() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.VACATE_HEARING);
+
+        when(validateHearingService.validateManageHearingErrors(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(List.of());
+
+        handler.handle(callbackRequest, TestConstants.AUTH_TOKEN);
+
+        verify(hearingService).generateSelectableHearingsAsDynamicList(
+            callbackRequest.getCaseDetails(), TestConstants.AUTH_TOKEN);
+    }
+
+    private FinremCallbackRequest buildCallbackRequest(ManageHearingsAction manageHearingsAction) {
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder().data(
+                    FinremCaseData.builder()
+                        .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                            .manageHearingsActionSelection(manageHearingsAction)
+                            .build())
+                        .build())
+                .build())
+            .build();
     }
 }
