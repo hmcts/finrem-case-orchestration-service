@@ -2,13 +2,18 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.Temp;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
+import java.lang.reflect.Field;
+
+import static org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnotation;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RequiredArgsConstructor
@@ -51,4 +56,13 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         }
     }
 
+    protected FinremCaseDetails removeTemporaryFields(FinremCaseDetails finremCaseDetails, Class scopedClass) {
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+
+        getFieldsListWithAnnotation(scopedClass, Temp.class).stream()
+            .map(Field::getName)
+            .forEach(caseDetails.getData()::remove);
+
+        return finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+    }
 }

@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RefugeWrap
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SessionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
@@ -301,6 +302,9 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ManageCaseDocumentsWrapper manageCaseDocumentsWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private SessionWrapper sessionWrapper;
 
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener1")
@@ -438,6 +442,14 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private PaymentDetailsWrapper paymentDetailsWrapper;
+
+    @JsonIgnore
+    public SessionWrapper getSessionWrapper() {
+        if (sessionWrapper == null) {
+            this.sessionWrapper = new SessionWrapper();
+        }
+        return sessionWrapper;
+    }
 
     @JsonIgnore
     public CaseFlagsWrapper getCaseFlagsWrapper() {
