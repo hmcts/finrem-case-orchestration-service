@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,12 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 
 import java.util.Map;
 
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 
 @RestController
@@ -33,6 +39,7 @@ public class UpdateRepresentationController extends BaseController {
 
     private final UpdateRepresentationService updateRepresentationService;
     private final AssignCaseAccessService assignCaseAccessService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/apply-noc-decision", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Applies Notice of Change Decision when initiated by solicitor and saves new sol's details to case")
@@ -50,6 +57,8 @@ public class UpdateRepresentationController extends BaseController {
         log.info("{} - Received request to apply Notice of Change Decision and update representation", caseId);
 
         validateCaseData(ccdRequest);
+        validateChangeOrganisationRequest(caseDetails);
+
         caseDetails.getData().remove(IS_NOC_REJECTED);
         assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
         Map<String, Object> caseData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);
@@ -57,5 +66,18 @@ public class UpdateRepresentationController extends BaseController {
         caseDetails.getData().putAll(caseData);
         updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
         return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
+    }
+
+    private void validateChangeOrganisationRequest(CaseDetails caseDetails) {
+        ChangeOrganisationRequest change = getChangeOrganisationRequest(caseDetails);
+        if (isEmpty(change) || isEmpty(ofNullable(change.getCaseRoleId()).map(DynamicList::getValueCode))) {
+            throw new IllegalStateException("Invalid ChangeOrganisationRequest: " + change);
+        }
+    }
+
+    private ChangeOrganisationRequest getChangeOrganisationRequest(CaseDetails caseDetails) {
+
+        return objectMapper.convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST),
+            ChangeOrganisationRequest.class);
     }
 }
