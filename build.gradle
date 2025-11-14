@@ -531,7 +531,3 @@ tasks.withType(Tar).configureEach {
 tasks.withType(Zip).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
-
-tasks.named('checkstyleMain') {
-    maxWarnings = 3
-}
