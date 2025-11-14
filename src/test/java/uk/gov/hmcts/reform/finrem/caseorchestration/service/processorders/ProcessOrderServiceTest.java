@@ -74,18 +74,25 @@ class ProcessOrderServiceTest {
                 .build())
             .build();
 
+        DirectionOrderCollection unstampedOrder2 = DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .isOrderStamped(null)
+                .uploadDraftDocument(unstampedDocument)
+                .build())
+            .build();
+
         FinremCaseData caseData = FinremCaseData.builder()
-            .uploadHearingOrder(List.of(stampedOrder, unstampedOrder))
+            .uploadHearingOrder(List.of(stampedOrder, unstampedOrder, unstampedOrder2))
             .build();
 
         underTest.populateUnprocessedUploadHearingDocuments(caseData);
 
         List<DirectionOrderCollection> result = caseData.getUnprocessedUploadHearingDocuments();
         assertThat(result)
-            .hasSize(1)
+            .hasSize(2)
             .extracting(DirectionOrderCollection::getValue)
             .extracting(DirectionOrder::getUploadDraftDocument)
-            .containsExactly(unstampedDocument);
+            .containsExactly(unstampedDocument, unstampedDocument);
     }
 
     @SuppressWarnings("unchecked")
