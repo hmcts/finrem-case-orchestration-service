@@ -43,4 +43,9 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremCallbackHa
             .data(callbackRequest.getCaseDetails().getData())
             .build();
     }
+
+    @Override
+    protected boolean shouldClearTemporaryFields() {
+        return true;
+    }
 }

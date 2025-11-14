@@ -61,7 +61,15 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         }
     }
 
+    protected boolean shouldClearTemporaryFields() {
+        return false;
+    }
+
     protected FinremCallbackRequest removeTemporaryFields(FinremCallbackRequest callbackRequest) {
+        if (!shouldClearTemporaryFields()) {
+            return callbackRequest;
+        }
+
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 

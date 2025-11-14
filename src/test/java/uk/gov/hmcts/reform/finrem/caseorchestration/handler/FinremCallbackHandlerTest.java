@@ -22,6 +22,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -32,15 +33,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_
 @ExtendWith(MockitoExtension.class)
 class FinremCallbackHandlerTest {
 
-    class FinremCallbackHandlerImpl extends FinremCallbackHandler {
+    static class DefaultHandler extends FinremCallbackHandler {
 
-        public FinremCallbackHandlerImpl(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+        public DefaultHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
             super(finremCaseDetailsMapper);
         }
 
         @Override
         public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
             FinremCallbackRequest callbackRequest, String userAuthorisation) {
+
+            System.out.println(callbackRequest.getCaseDetails());
 
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(callbackRequest.getCaseDetails().getData())
@@ -53,17 +56,32 @@ class FinremCallbackHandlerTest {
         }
     }
 
-    private FinremCallbackHandlerImpl underTest;
+    static class EnabledClearTemporaryFieldHandler extends DefaultHandler {
+
+        public EnabledClearTemporaryFieldHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+            super(finremCaseDetailsMapper);
+        }
+
+        @Override
+        protected boolean shouldClearTemporaryFields() {
+            return true;
+        }
+    }
+
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    private DefaultHandler defaultHandler;
+    private EnabledClearTemporaryFieldHandler enabledClearTemporaryFieldHandler;
+
     @BeforeEach
     void setUp() {
-        underTest = spy(new FinremCallbackHandlerImpl(finremCaseDetailsMapper));
+        defaultHandler = new DefaultHandler(finremCaseDetailsMapper);
+        enabledClearTemporaryFieldHandler = spy(new EnabledClearTemporaryFieldHandler(finremCaseDetailsMapper));
     }
 
     @Test
-    void givenCaseDataWithAnnotatedFields_whenHandled_thenRemoveTemporaryFieldsOnly() {
+    void givenEnabledHandler_whenHandled_thenRemoveTemporaryFieldsOrNot() {
         Map<String, Object> mapWithSessionWrapperProperties = new HashMap<>();
         // properties with @TemporaryField annotation
         // The properties below are taken from SessionWrapper.class
@@ -75,7 +93,7 @@ class FinremCallbackHandlerTest {
         CaseDetails caseDetails = CaseDetails.builder().data(mapWithSessionWrapperProperties).build();
         FinremCaseDetails expectedFinremCaseDetails = mock(FinremCaseDetails.class);
         FinremCaseData expectedFinremCaseData = mock(FinremCaseData.class);
-        when(expectedFinremCaseDetails.getData()).thenReturn(expectedFinremCaseData);
+        lenient().when(expectedFinremCaseDetails.getData()).thenReturn(expectedFinremCaseData);
 
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
 
@@ -89,14 +107,16 @@ class FinremCallbackHandlerTest {
         when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
 
         Map<String, Object> expectedMapWithNonAnnotatedProperty = Map.of("retained", YesOrNo.YES);
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(CaseDetails.builder().data(expectedMapWithNonAnnotatedProperty).build()))
+        lenient().when(finremCaseDetailsMapper
+            .mapToFinremCaseDetails(CaseDetails.builder().data(expectedMapWithNonAnnotatedProperty).build()))
             .thenReturn(expectedFinremCaseDetails);
 
-        assertThat(underTest.handle(callbackRequest, AUTH_TOKEN).getData()).isEqualTo(expectedFinremCaseData);
+        assertThat(enabledClearTemporaryFieldHandler.handle(callbackRequest, AUTH_TOKEN).getData())
+            .isEqualTo(expectedFinremCaseData);
 
-        // ensure callbackRequest is a copy i.e. callbackRequest.toBuilder() was invoked
+        // to ensure callbackRequest is a copy i.e. callbackRequest.toBuilder() was invoked
         ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
-        verify(underTest).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
+        verify(enabledClearTemporaryFieldHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
         assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
     }
 }
