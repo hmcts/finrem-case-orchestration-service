@@ -20,15 +20,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 @Service
 public class ManualPaymentSubmittedHandler extends FinremCallbackHandler {
 
-    private final ManualPaymentDocumentService service;
-    private final BulkPrintService printService;
+    private final ManualPaymentDocumentService manualPaymentDocumentService;
+    private final BulkPrintService bulkPrintService;
 
     public ManualPaymentSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                         ManualPaymentDocumentService service,
-                                         BulkPrintService printService) {
+                                         ManualPaymentDocumentService manualPaymentDocumentService,
+                                         BulkPrintService bulkPrintService) {
         super(finremCaseDetailsMapper);
-        this.service = service;
-        this.printService = printService;
+        this.manualPaymentDocumentService = manualPaymentDocumentService;
+        this.bulkPrintService = bulkPrintService;
     }
 
     @Override
@@ -41,16 +41,15 @@ public class ManualPaymentSubmittedHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested event {} about to start callback for Case ID: {}",
-            EventType.MANUAL_PAYMENT, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
 
         if (caseData.isPaperCase()) {
             log.info("Sending letter correspondence to applicant for Case ID: {}", caseDetails.getId());
             CaseDocument caseDocument =
-                service.generateManualPaymentLetter(caseDetails, userAuthorisation, APPLICANT);
-            printService.sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.APPLICANT, userAuthorisation);
+                manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, userAuthorisation, APPLICANT);
+            bulkPrintService.sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.APPLICANT, userAuthorisation);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

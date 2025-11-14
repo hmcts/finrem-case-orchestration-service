@@ -5,90 +5,56 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManualPaymentDocumentService;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class ManualPaymentSubmittedHandlerTest {
 
-    public static final String AUTH_TOKEN = "tokien:)";
     @InjectMocks
     private ManualPaymentSubmittedHandler handler;
     @Mock
-    private ManualPaymentDocumentService service;
+    private ManualPaymentDocumentService manualPaymentDocumentService;
     @Mock
-    private BulkPrintService printService;
+    private BulkPrintService bulkPrintService;
 
     @Test
-    void givenContestedPaperCase_whenCaseTypeIsConsented_thenHandlerWillNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.MANUAL_PAYMENT),
-            is(false));
-    }
-
-    @Test
-    void givenContestedPaperCase_whenCallbackIsAboutToSubmit_thenHandlerWillNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANUAL_PAYMENT),
-            is(false));
-    }
-
-    @Test
-    void givenContestedPaperCase_whenWrongEvent_thenHandlerWillNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
-    }
-
-    @Test
-    void givenContestedPaperCase_whenAllCorrect_thenHandlerWillHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.MANUAL_PAYMENT),
-            is(true));
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.MANUAL_PAYMENT);
     }
 
     @Test
     void givenContestedPaperCase_whenManualPaymentEventInvoke_thenSendToBulkPrinte() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from();
         finremCallbackRequest.getCaseDetails().getData().setPaperApplication(YesOrNo.YES);
-        when(service.generateManualPaymentLetter(finremCallbackRequest.getCaseDetails(),
+        when(manualPaymentDocumentService.generateManualPaymentLetter(finremCallbackRequest.getCaseDetails(),
             AUTH_TOKEN, APPLICANT)).thenReturn(caseDocument());
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(printService).sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class), any(), anyString());
+        verify(bulkPrintService).sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class), any(), anyString());
     }
 
     @Test
     void givenContestedCase_whenManualPaymentEventInvoke_thenDoNotSendToBulkPrint() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from();
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(printService, never())
+        verify(bulkPrintService, never())
             .sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class), any(), anyString());
-    }
-
-    private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequest
-            .builder()
-            .eventType(EventType.ISSUE_APPLICATION)
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
-            .build();
     }
 }
