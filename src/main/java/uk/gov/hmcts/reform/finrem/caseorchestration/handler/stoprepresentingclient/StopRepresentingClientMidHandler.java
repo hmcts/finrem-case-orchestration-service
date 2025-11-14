@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -17,26 +17,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @Slf4j
 @Service
-public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
+public class StopRepresentingClientMidHandler extends FinremCallbackHandler {
 
-    private static final String WARNING_MESSAGE =
-        "Are you sure you wish to stop representing your client? "
-            + "If you continue your access to this access will be removed";
+    private static final String ERROR_MESSAGE = "You cannot stop representing your client without either client consent or judicial approval. "
+        + "You will need to make a general application to apply to come off record using the next step event 'general application";
 
-    public StopRepresentingClientAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    public StopRepresentingClientMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return ABOUT_TO_SUBMIT.equals(callbackType)
+        return MID_EVENT.equals(callbackType)
             && Arrays.asList(CONTESTED, CONSENTED).contains(caseType)
             && STOP_REPRESENTING_CLIENT.equals(eventType);
     }
@@ -44,31 +43,25 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
 
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
-        List<String> warnings = new ArrayList<>();
-        if (isHavingClientConsent(finremCaseData) || isHavingJudicialApproval(finremCaseData)) {
-            warnings.add(WARNING_MESSAGE);
+
+        List<String> errors = new ArrayList<>();
+        if (isNotHavingJudicialApproval(finremCaseData)) {
+            errors.add(ERROR_MESSAGE);
         }
-        
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .warnings(warnings)
+            .data(finremCaseData)
+            .errors(errors)
             .build();
     }
 
-    private boolean isHavingClientConsent(FinremCaseData finremCaseData) {
+    private boolean isNotHavingJudicialApproval(FinremCaseData finremCaseData) {
         return finremCaseData.getSessionWrapper().isLoginAsApplicantSolicitor() &&
-            YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getClientConsentOnAppSolStopRep())
+            YesOrNo.isNo(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnAppSolStopRep())
             || finremCaseData.getSessionWrapper().isLoginAsRespondentSolicitor()
-            && YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getClientConsentOnRespSolStopRep());
-    }
-
-    private boolean isHavingJudicialApproval(FinremCaseData finremCaseData) {
-        return finremCaseData.getSessionWrapper().isLoginAsApplicantSolicitor() &&
-            YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnAppSolStopRep())
-            || finremCaseData.getSessionWrapper().isLoginAsRespondentSolicitor()
-            && YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnAppSolStopRep());
+            && YesOrNo.isNo(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnAppSolStopRep());
     }
 }

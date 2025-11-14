@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -22,4 +23,12 @@ public class SessionWrapper {
 
     @TemporaryField
     private YesOrNo loginAsRespondentSolicitor;
+
+    public boolean isLoginAsApplicantSolicitor() {
+        return YesOrNo.isYes(loginAsApplicantSolicitor);
+    }
+
+    public boolean isLoginAsRespondentSolicitor() {
+        return YesOrNo.isYes(loginAsRespondentSolicitor);
+    }
 }

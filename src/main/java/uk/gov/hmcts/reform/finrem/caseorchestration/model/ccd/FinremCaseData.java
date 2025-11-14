@@ -306,6 +306,7 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private SessionWrapper sessionWrapper;
+    @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private StopRepresentationWrapper stopRepresentationWrapper;
 

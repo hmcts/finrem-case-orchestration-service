@@ -27,9 +27,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        return handle(
-            removeTemporaryFields(mapToFinremCallbackRequest(callbackRequest)),
-            userAuthorisation);
+        return removeTemporaryFields(handle(mapToFinremCallbackRequest(callbackRequest), userAuthorisation));
     }
 
     public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
@@ -60,38 +58,22 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return false;
     }
 
-    /**
-     * Removes fields marked with {@link TemporaryField} from the case data when required.
-     *
-     * <p>
-     * If {@link #shouldClearTemporaryFields()} returns {@code true}, this method finds all classes
-     * that contain fields annotated with {@link TemporaryField} and removes those fields from
-     * the case data map. The updated data is then mapped back into a new {@link FinremCaseDetails}
-     * object and returned within a rebuilt {@link FinremCallbackRequest}.
-     *
-     * <p>
-     * If temporary fields should not be cleared, the original {@code callbackRequest} is returned.
-     *
-     * @param callbackRequest the incoming callback request containing case details
-     * @return a new {@link FinremCallbackRequest} with temporary fields removed, or the original
-     *         request if no removal is required
-     */
-    protected FinremCallbackRequest removeTemporaryFields(FinremCallbackRequest callbackRequest) {
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> removeTemporaryFields(
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response) {
         if (!shouldClearTemporaryFields()) {
-            return callbackRequest;
+            return response;
         }
 
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        FinremCaseDetails toBeSanitised = FinremCaseDetails.builder()
+            .data(response.getData()).build();
+        CaseDetails toBeSanitisedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(toBeSanitised);
 
         getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
             getFieldsListWithAnnotation(clazz, TemporaryField.class).stream()
                 .map(Field::getName)
-                .forEach(caseDetails.getData()::remove));
+                .forEach(toBeSanitisedCaseDetails.getData()::remove));
 
-        return callbackRequest.toBuilder().caseDetails(
-            finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)
-        ).build();
+        return response.toBuilder().data(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedCaseDetails.getData())).build();
     }
 
     private static List<Class> getClassesWithTemporaryFieldAnnotation() {

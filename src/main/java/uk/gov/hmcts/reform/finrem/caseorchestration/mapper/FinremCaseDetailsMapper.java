@@ -56,10 +56,11 @@ public class FinremCaseDetailsMapper {
 
     public CaseDetails mapToCaseDetails(FinremCaseDetails caseDetails) {
         Map<String, Object> data = objectMapper.convertValue(caseDetails.getData(), Map.class);
-        return CaseDetails.builder().caseTypeId(caseDetails.getCaseType().getCcdType())
+        return CaseDetails.builder()
+            .caseTypeId(caseDetails.getCaseType() == null ? null : caseDetails.getCaseType().getCcdType())
             .id(caseDetails.getId())
             .jurisdiction(caseDetails.getJurisdiction())
-            .state(caseDetails.getState().getStateId())
+            .state(caseDetails.getState() == null ? null : caseDetails.getState().getStateId())
             .createdDate(caseDetails.getCreatedDate())
             .securityLevel(caseDetails.getSecurityLevel())
             .callbackResponseStatus(caseDetails.getCallbackResponseStatus())
