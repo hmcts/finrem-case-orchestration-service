@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toListOrNull;
 
@@ -57,10 +58,14 @@ public class FinremCaseDetailsMapper {
     public CaseDetails mapToCaseDetails(FinremCaseDetails caseDetails) {
         Map<String, Object> data = objectMapper.convertValue(caseDetails.getData(), Map.class);
         return CaseDetails.builder()
-            .caseTypeId(caseDetails.getCaseType() == null ? null : caseDetails.getCaseType().getCcdType())
+            .caseTypeId(Optional.ofNullable(caseDetails.getCaseType())
+                .map(CaseType::getCcdType)
+                .orElse(null))
             .id(caseDetails.getId())
             .jurisdiction(caseDetails.getJurisdiction())
-            .state(caseDetails.getState() == null ? null : caseDetails.getState().getStateId())
+            .state(Optional.ofNullable(caseDetails.getState())
+                .map(State::getStateId)
+                .orElse(null))
             .createdDate(caseDetails.getCreatedDate())
             .securityLevel(caseDetails.getSecurityLevel())
             .callbackResponseStatus(caseDetails.getCallbackResponseStatus())
