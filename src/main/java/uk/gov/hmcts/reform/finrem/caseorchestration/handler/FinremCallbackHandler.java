@@ -73,6 +73,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      * that contain fields annotated with {@link TemporaryField} and removes those fields from
      * the case data map. The updated data is then mapped back into a new {@link FinremCaseDetails}
      * object and returned within a rebuilt {@link FinremCallbackRequest}.
+     *
      * <p>
      * If temporary fields should not be cleared, the original {@code callbackRequest} is returned.
      *
