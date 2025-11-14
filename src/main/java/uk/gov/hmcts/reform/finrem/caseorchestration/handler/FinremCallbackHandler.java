@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.Temp;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SessionWrapper;
@@ -31,7 +31,9 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         FinremCallbackRequest callbackRequestWithFinremCaseDetails =
             mapToFinremCallbackRequest(callbackRequest);
 
-        return handle(callbackRequestWithFinremCaseDetails, userAuthorisation);
+        return handle(
+            removeTemporaryFields(callbackRequestWithFinremCaseDetails),
+            userAuthorisation);
     }
 
     public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
@@ -59,16 +61,18 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         }
     }
 
-    protected FinremCaseDetails removeTemporaryFields(FinremCallbackRequest callbackRequest) {
+    protected FinremCallbackRequest removeTemporaryFields(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
-        getTemporaryWrapperClasses().forEach(temporaryWrapperClasss ->
-            getFieldsListWithAnnotation(temporaryWrapperClasss, Temp.class).stream()
+        getTemporaryWrapperClasses().forEach(clazz ->
+            getFieldsListWithAnnotation(clazz, TemporaryField.class).stream()
                 .map(Field::getName)
                 .forEach(caseDetails.getData()::remove));
 
-        return finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        return callbackRequest.toBuilder().caseDetails(
+            finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)
+        ).build();
     }
 
     private static List<Class> getTemporaryWrapperClasses() {

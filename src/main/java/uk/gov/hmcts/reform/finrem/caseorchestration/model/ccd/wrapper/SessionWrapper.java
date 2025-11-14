@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.Temp;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,9 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SessionWrapper {
 
-    @Temp
+    @TemporaryField
     private YesOrNo loginAsApplicantSolicitor;
 
-    @Temp
+    @TemporaryField
     private YesOrNo loginAsRespondentSolicitor;
 }

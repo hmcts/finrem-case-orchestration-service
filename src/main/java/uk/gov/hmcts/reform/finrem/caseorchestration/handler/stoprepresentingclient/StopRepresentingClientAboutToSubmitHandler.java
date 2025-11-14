@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.Arrays;
 
@@ -39,11 +38,9 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremCallbackHa
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
-
-        FinremCaseDetails caseDetails = removeTemporaryFields(callbackRequest);
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseDetails.getData())
+            .data(callbackRequest.getCaseDetails().getData())
             .build();
     }
 }
