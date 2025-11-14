@@ -59,8 +59,8 @@ public class StopRepresentingClientMidHandler extends FinremCallbackHandler {
     }
 
     private boolean isNotHavingJudicialApproval(FinremCaseData finremCaseData) {
-        return finremCaseData.getSessionWrapper().isLoginAsApplicantSolicitor() &&
-            YesOrNo.isNo(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnAppSolStopRep())
+        return finremCaseData.getSessionWrapper().isLoginAsApplicantSolicitor()
+            && YesOrNo.isNo(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnAppSolStopRep())
             || finremCaseData.getSessionWrapper().isLoginAsRespondentSolicitor()
             && YesOrNo.isNo(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnAppSolStopRep());
     }
