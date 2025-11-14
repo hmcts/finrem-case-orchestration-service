@@ -65,7 +65,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
-        getTemporaryWrapperClasses().forEach(clazz ->
+        getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
             getFieldsListWithAnnotation(clazz, TemporaryField.class).stream()
                 .map(Field::getName)
                 .forEach(caseDetails.getData()::remove));
@@ -75,7 +75,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         ).build();
     }
 
-    private static List<Class> getTemporaryWrapperClasses() {
+    private static List<Class> getClassesWithTemporaryFieldAnnotation() {
         return Arrays.asList(SessionWrapper.class);
     }
 }
