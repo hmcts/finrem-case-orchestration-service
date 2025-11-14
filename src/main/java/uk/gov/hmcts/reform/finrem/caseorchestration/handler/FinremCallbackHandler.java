@@ -96,6 +96,16 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return response.toBuilder().data(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedCaseDetails.getData())).build();
     }
 
+    /**
+     * Returns the list of classes that contain fields annotated with {@link TemporaryField}
+     * and should have those temporary fields cleared during sanitisation.
+     *
+     * <p><strong>Developer note:</strong> If you introduce a new class that uses
+     * {@code @TemporaryField}, you must add it to this list so that its temporary
+     * fields are removed correctly.</p>
+     *
+     * @return a list of classes containing {@code @TemporaryField}-annotated fields
+     */
     private static List<Class> getClassesWithTemporaryFieldAnnotation() {
         return Arrays.asList(SessionWrapper.class);
     }
