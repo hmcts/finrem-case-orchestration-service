@@ -27,12 +27,8 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
-        FinremCallbackRequest callbackRequestWithFinremCaseDetails =
-            mapToFinremCallbackRequest(callbackRequest);
-
         return handle(
-            removeTemporaryFields(callbackRequestWithFinremCaseDetails),
+            removeTemporaryFields(mapToFinremCallbackRequest(callbackRequest)),
             userAuthorisation);
     }
 
@@ -45,12 +41,11 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         if (callbackRequest.getCaseDetailsBefore() != null) {
             finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
         }
-        FinremCallbackRequest callbackRequestWithFinremCaseDetails = FinremCallbackRequest.builder()
+        return FinremCallbackRequest.builder()
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
             .eventType(EventType.getEventType(callbackRequest.getEventId()))
             .build();
-        return callbackRequestWithFinremCaseDetails;
     }
 
     protected void validateCaseData(FinremCallbackRequest callbackRequest) {
