@@ -30,7 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 
 @ExtendWith(MockitoExtension.class)
-public class FinremCallbackHandlerTest {
+class FinremCallbackHandlerTest {
 
     class FinremCallbackHandlerImpl extends FinremCallbackHandler {
 
