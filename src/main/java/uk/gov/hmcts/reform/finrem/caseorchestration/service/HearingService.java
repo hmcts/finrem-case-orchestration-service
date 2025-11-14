@@ -242,6 +242,7 @@ public class HearingService {
 
     /**
      * Filters the provided list of hearings based on the confidentiality rules for the current user's case role.
+     *
      * <p>
      * If the user is a caseworker or has no case role, all hearings are returned. Otherwise, only hearings
      * associated with the user's solicitor role are included.
