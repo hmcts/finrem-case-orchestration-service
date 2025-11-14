@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -20,7 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
@@ -55,14 +59,14 @@ public class FinremCallbackHandlerTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new FinremCallbackHandlerImpl(finremCaseDetailsMapper);
+        underTest = spy(new FinremCallbackHandlerImpl(finremCaseDetailsMapper));
     }
 
     @Test
     void givenCaseDataWithAnnotatedFields_whenHandled_thenRemoveTemporaryFieldsOnly() {
         Map<String, Object> mapWithSessionWrapperProperties = new HashMap<>();
         // properties with @TemporaryField annotation
-        // from SessionWrapper.class
+        // The properties below are taken from SessionWrapper.class
         mapWithSessionWrapperProperties.put("loginAsApplicantSolicitor", YesOrNo.YES);
         mapWithSessionWrapperProperties.put("loginAsRespondentSolicitor", YesOrNo.YES);
         // property without @TemporaryField annotation
@@ -88,7 +92,11 @@ public class FinremCallbackHandlerTest {
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(CaseDetails.builder().data(expectedMapWithNonAnnotatedProperty).build()))
             .thenReturn(expectedFinremCaseDetails);
 
-
         assertThat(underTest.handle(callbackRequest, AUTH_TOKEN).getData()).isEqualTo(expectedFinremCaseData);
+
+        // ensure callbackRequest is a copy i.e. callbackRequest.toBuilder() was invoked
+        ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
+        verify(underTest).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
+        assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
     }
 }
