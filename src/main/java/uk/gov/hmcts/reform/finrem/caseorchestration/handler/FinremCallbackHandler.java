@@ -58,6 +58,25 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return false;
     }
 
+    /**
+     * Removes all fields marked with {@link TemporaryField} from the case data
+     * in the given callback response.
+     *
+     * <p>
+     * This method first checks whether temporary fields should be cleared. If not,
+     * it returns the original response.
+     *
+     * <p>
+     * If clearing is required, the method maps the response data into
+     * {@link FinremCaseDetails}, converts it into a CCD {@link CaseDetails} object,
+     * finds all fields annotated with {@link TemporaryField}, and removes those field
+     * names from the case data. It then maps the cleaned data back into
+     * {@link FinremCaseData} and returns a new response containing the updated data.
+     *
+     * @param response the callback response containing case data to clean
+     * @return a response with temporary fields removed, or the original response if
+     *         clearing is not needed
+     */
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> removeTemporaryFields(
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response) {
         if (!shouldClearTemporaryFields()) {
