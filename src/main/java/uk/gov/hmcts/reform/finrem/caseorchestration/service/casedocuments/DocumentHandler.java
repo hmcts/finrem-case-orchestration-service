@@ -30,24 +30,26 @@ public abstract class DocumentHandler {
     protected abstract DocumentCategory getDocumentCategoryFromDocumentType(
         CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty);
 
-    public void replaceManagedDocumentsInCollectionType(FinremCallbackRequest callbackRequest,
+    public void replaceManagedDocumentsInCollectionType(FinremCaseData caseData,
                                                         List<UploadCaseDocumentCollection> screenCollection,
                                                         boolean clearExistingCollection) {
         if (clearExistingCollection) {
-            FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-
             List<UploadCaseDocumentCollection> originalCollectionForType =
                 caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
 
             originalCollectionForType.clear();
         }
-        addUploadedDocumentToDocumentCollectionType(callbackRequest, screenCollection);
+        addUploadedDocumentToDocumentCollectionType(caseData, screenCollection);
     }
 
-    public void addUploadedDocumentToDocumentCollectionType(FinremCallbackRequest callbackRequest,
-                                                            List<UploadCaseDocumentCollection> screenCollection) {
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+    public void replaceManagedDocumentsInCollectionType(FinremCallbackRequest callbackRequest,
+                                                        List<UploadCaseDocumentCollection> screenCollection,
+                                                        boolean clearExistingCollection) {
+        replaceManagedDocumentsInCollectionType(callbackRequest.getCaseDetails().getData(), screenCollection, clearExistingCollection);
+    }
 
+    public void addUploadedDocumentToDocumentCollectionType(FinremCaseData caseData,
+                                                            List<UploadCaseDocumentCollection> screenCollection) {
         List<UploadCaseDocumentCollection> originalCollectionForType =
             caseData.getUploadCaseDocumentWrapper().getDocumentCollectionPerType(collectionType);
         List<UploadCaseDocumentCollection> uploadedCollectionForType =
@@ -64,6 +66,11 @@ public abstract class DocumentHandler {
         log.info("Adding items: {}, to {} Collection", uploadedCollectionForType,
             collectionType);
         screenCollection.removeAll(uploadedCollectionForType);
+    }
+
+    public void addUploadedDocumentToDocumentCollectionType(FinremCallbackRequest callbackRequest,
+                                                            List<UploadCaseDocumentCollection> screenCollection) {
+        addUploadedDocumentToDocumentCollectionType(callbackRequest.getCaseDetails().getData(), screenCollection);
     }
 
     private void applyDocumentCategory(List<UploadCaseDocumentCollection> uploadedCollectionForType) {

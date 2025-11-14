@@ -24,6 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * NewManageCaseDocumentsContestedAboutToSubmitHandler is replacing this handler.
+ *
+ * @deprecated This about-to-submit handler will be removed.
+ */
+@Deprecated(forRemoval = true)
 @Slf4j
 @Service
 public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
