@@ -60,6 +60,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXETER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GLOUCESTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GREAT_YARMOUTH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_HIGHCOURT_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_MIDLANDS_FRC_LIST;
@@ -89,12 +90,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KINGS_LYNN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LEYLAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LLUNDUDNO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_CFC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
@@ -172,6 +175,9 @@ class CourtHelperTest {
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
             MOLD, "Mold County");
+
+        verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
+            LLUNDUDNO, "Llundudno Magistrates Court");
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
             "invalid", EMPTY);
@@ -330,6 +336,12 @@ class CourtHelperTest {
             WATFORD, "Watford County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            GREAT_YARMOUTH, "Great Yarmouth Magistrates and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            KINGS_LYNN, "King's Lynn Magistrates Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
             "invalid", EMPTY);
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
@@ -345,7 +357,7 @@ class CourtHelperTest {
             BLACKBURN, "Blackburn Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
-            BLACKPOOL, "Blackpool Family Court");
+            BLACKPOOL, "Blackpool Tribunal Centre");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
             LANCASTER, "Lancaster Courthouse");
@@ -471,6 +483,21 @@ class CourtHelperTest {
             "FR_kent_surrey_hc_list_11", "Thanet Family Court Hearing Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
+            "FR_kent_surrey_hc_list_12", "The Oria");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
+            "FR_kent_surrey_hc_list_13", "Maidstone Magistrates Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
+            "FR_kent_surrey_hc_list_14", "Medway Magistrates Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
+            "FR_kent_surrey_hc_list_15", "Ashford Tribunal Centre");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
+            "FR_kent_surrey_hc_list_16", "Sevenoaks Magistrates Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "invalid", EMPTY);
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
@@ -505,6 +532,24 @@ class CourtHelperTest {
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEVELAND, CLEAVELAND_COURTLIST,
             "FR_cleaveland_hc_list_8", "Darlington County Court and Family Court");
+
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
+            "FR_cleaveland_hc_list_9", "Darlington Magistrates Court");
+
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEVELAND, CLEAVELAND_COURTLIST,
+            "FR_cleaveland_hc_list_9", "Darlington Magistrates Court");
+
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
+            "FR_cleaveland_hc_list_10", "Berwick Magistrates Court");
+
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEVELAND, CLEAVELAND_COURTLIST,
+            "FR_cleaveland_hc_list_10", "Berwick Magistrates Court");
+
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
+            "FR_cleaveland_hc_list_11", "South East Northumberland");
+
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEVELAND, CLEAVELAND_COURTLIST,
+            "FR_cleaveland_hc_list_11", "South East Northumberland");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, "invalid", CLEAVELAND_COURTLIST,
             "FR_cleaveland_hc_list_8", EMPTY);
@@ -561,13 +606,19 @@ class CourtHelperTest {
             "FR_humber_hc_list_2", "Kingston-upon-Hull Combined Court Centre");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
-            "FR_humber_hc_list_3", "Doncaster Justice Centre North");
+            "FR_humber_hc_list_3", "Doncaster Justice Centre South");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
             "FR_humber_hc_list_4", "Great Grimsby Combined Court Centre");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
             "FR_humber_hc_list_5", "Barnsley Law Courts");
+
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
+            "FR_humber_hc_list_6", "Hull Magistrates Court");
+
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
+            "FR_humber_hc_list_7", "Beverley Magistrates Court");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, "invalid", HSYORKSHIRE_COURTLIST,
             "FR_humber_hc_list_5", EMPTY);
@@ -708,6 +759,9 @@ class CourtHelperTest {
             "FR_birmingham_hc_list_10", "Hereford County Court and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
+            "FR_birmingham_hc_list_11", "Warwickshire Justice Centre");
+
+        verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
             "invalid", EMPTY);
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, "invalid", BIRMINGHAM_COURTLIST,
@@ -743,6 +797,15 @@ class CourtHelperTest {
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
             "FR_s_NottinghamList_8", "Boston County Court and Family Court");
+
+        verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
+            "FR_s_NottinghamList_9", "Leicester Magistrates Court");
+
+        verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
+            "FR_s_NottinghamList_10", "Derby Magistrates Court");
+
+        verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
+            "FR_s_NottinghamList_11", "Nottingham Justice Centre");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
             "INVALID", EMPTY);

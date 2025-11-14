@@ -18,13 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 class ApplicantChangeOrgPolicyAboutToSubmitHandlerTest {
-    public static final String AUTH_TOKEN = "tokien:)";
 
     private ApplicantChangeOrgPolicyAboutToSubmitHandler handler;
 
@@ -39,24 +38,6 @@ class ApplicantChangeOrgPolicyAboutToSubmitHandlerTest {
             Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CLEAR_APPLICANT_POLICY),
             Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLEAR_APPLICANT_POLICY)
         );
-    }
-
-    @Test
-    void canNotHandleWrongEvent() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED,
-                EventType.CLOSE));
-    }
-
-    @Test
-    void canNotHandleWrongCallbackType() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED,
-                EventType.CLEAR_APPLICANT_POLICY));
-    }
-
-    @Test
-    void canNotHandleAtAll() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED,
-            EventType.LIST_FOR_HEARING));
     }
 
     @Test
@@ -107,4 +88,3 @@ class ApplicantChangeOrgPolicyAboutToSubmitHandlerTest {
             .build();
     }
 }
-
