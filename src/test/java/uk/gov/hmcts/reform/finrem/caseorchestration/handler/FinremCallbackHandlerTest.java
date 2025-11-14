@@ -33,9 +33,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_
 @ExtendWith(MockitoExtension.class)
 class FinremCallbackHandlerTest {
 
-    static class DefaultHandler extends FinremCallbackHandler {
+    static class DefaultFinremCallbackHandler extends FinremCallbackHandler {
 
-        public DefaultHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+        public DefaultFinremCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
             super(finremCaseDetailsMapper);
         }
 
@@ -56,14 +56,25 @@ class FinremCallbackHandlerTest {
         }
     }
 
-    static class EnabledClearTemporaryFieldHandler extends DefaultHandler {
+    static class EnabledClearTemporaryFieldHandler extends FinremAboutToSubmitCallbackHandler {
 
         public EnabledClearTemporaryFieldHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
             super(finremCaseDetailsMapper);
         }
 
         @Override
-        protected boolean shouldClearTemporaryFields() {
+        public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
+            FinremCallbackRequest callbackRequest, String userAuthorisation) {
+
+            System.out.println(callbackRequest.getCaseDetails());
+
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(callbackRequest.getCaseDetails().getData())
+                .build();
+        }
+
+        @Override
+        public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
             return true;
         }
     }
@@ -71,12 +82,12 @@ class FinremCallbackHandlerTest {
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    private DefaultHandler defaultHandler;
+    private DefaultFinremCallbackHandler defaultFinremCallbackHandler;
     private EnabledClearTemporaryFieldHandler enabledClearTemporaryFieldHandler;
 
     @BeforeEach
     void setUp() {
-        defaultHandler = new DefaultHandler(finremCaseDetailsMapper);
+        defaultFinremCallbackHandler = new DefaultFinremCallbackHandler(finremCaseDetailsMapper);
         enabledClearTemporaryFieldHandler = spy(new EnabledClearTemporaryFieldHandler(finremCaseDetailsMapper));
     }
 

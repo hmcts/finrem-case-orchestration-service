@@ -19,6 +19,8 @@ import java.util.Arrays;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -60,19 +62,9 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
 
     private void prepareSessionWrapper(FinremCaseData caseData, String userAuthorisation) {
         String caseId = caseData.getCcdCaseId();
-        caseData.getSessionWrapper().setLoginAsApplicantSolicitor(YesOrNo.forValue(
-                getLoginAsApplicantSolicitor(caseId, userAuthorisation)
-        ));
-        caseData.getSessionWrapper().setLoginAsRespondentSolicitor(YesOrNo.forValue(
-                getLoginAsRespondentSolicitor(caseId, userAuthorisation)
-        ));
-    }
 
-    private boolean getLoginAsApplicantSolicitor(String caseId, String userAuthorisation) {
-        return CaseRole.APP_SOLICITOR.equals(caseRoleService.getUserCaseRole(caseId, userAuthorisation));
-    }
-
-    private boolean getLoginAsRespondentSolicitor(String caseId, String userAuthorisation) {
-        return CaseRole.RESP_SOLICITOR.equals(caseRoleService.getUserCaseRole(caseId, userAuthorisation));
+        CaseRole caseRole = caseRoleService.getUserCaseRole(caseId, userAuthorisation);
+        caseData.getSessionWrapper().setLoginAsApplicantSolicitor(YesOrNo.forValue(APP_SOLICITOR.equals(caseRole)));
+        caseData.getSessionWrapper().setLoginAsRespondentSolicitor(YesOrNo.forValue(RESP_SOLICITOR.equals(caseRole)));
     }
 }
