@@ -85,7 +85,7 @@ class FinremCallbackHandlerTest {
     }
 
     @Test
-    void givenEnabledHandler_whenHandled_thenRemoveTemporaryFieldsOrNot() {
+    void givenEnabledHandler_whenHandled_thenRemoveTemporaryFieldsAfterHandledOrNot() {
         Map<String, Object> mapWithSessionWrapperProperties = new HashMap<>();
         // properties with @TemporaryField annotation
         // The properties below are taken from SessionWrapper.class
@@ -125,7 +125,7 @@ class FinremCallbackHandlerTest {
     }
 
     @Test
-    void givenDefaultFinremCallbackHandler_whenHandled_thenShouldNotRemoveTemporaryFieldsOrNot() {
+    void givenDefaultFinremCallbackHandler_whenHandled_thenShouldNotRemoveTemporaryFieldsAfterHandledOrNot() {
         CaseDetails originalCaseDetails = mock(CaseDetails.class);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .eventId(STOP_REPRESENTING_CLIENT.getCcdType())

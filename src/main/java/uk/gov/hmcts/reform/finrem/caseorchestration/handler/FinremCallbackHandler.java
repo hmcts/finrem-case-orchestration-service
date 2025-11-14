@@ -27,7 +27,8 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        return removeTemporaryFields(handle(mapToFinremCallbackRequest(callbackRequest), userAuthorisation));
+        return removeTemporaryFieldsAfterHandled(
+            handle(mapToFinremCallbackRequest(callbackRequest), userAuthorisation));
     }
 
     public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
@@ -77,7 +78,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      * @return a response with temporary fields removed, or the original response if
      *         clearing is not needed
      */
-    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> removeTemporaryFields(
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> removeTemporaryFieldsAfterHandled(
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response) {
         if (!shouldClearTemporaryFields()) {
             return response;
