@@ -106,8 +106,9 @@ class FinremCallbackHandlerTest {
         FinremCaseData responseData = mock(FinremCaseData.class);
         when(finremCaseDetails.getData()).thenReturn(responseData);
         CaseDetails toBeSanitisedCaseDetails = CaseDetails.builder().data(new HashMap<>(TESTING_DATA_IN_MAP)).build();
-        when(finremCaseDetailsMapper.mapToCaseDetails(argThat(arg ->
-            responseData.equals(arg.getData())))).thenReturn(toBeSanitisedCaseDetails);
+        when(finremCaseDetailsMapper.mapToCaseDetails(
+            argThat(arg -> responseData.equals(arg.getData())))
+        ).thenReturn(toBeSanitisedCaseDetails);
         FinremCaseData expectedResponseData = mock(FinremCaseData.class);
         when(finremCaseDetailsMapper.mapToFinremCaseData(Map.of("retained", YesOrNo.YES)))
             .thenReturn(expectedResponseData);
