@@ -48,7 +48,7 @@ public class StopRepresentingClientMidHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
 
         List<String> errors = new ArrayList<>();
-        if (isNotHavingJudicialApproval(finremCaseData)) {
+        if (isHavingClientConsent(finremCaseData) == false && isNotHavingJudicialApproval(finremCaseData)) {
             errors.add(ERROR_MESSAGE);
         }
 
@@ -56,6 +56,13 @@ public class StopRepresentingClientMidHandler extends FinremCallbackHandler {
             .data(finremCaseData)
             .errors(errors)
             .build();
+    }
+
+    private boolean isHavingClientConsent(FinremCaseData finremCaseData) {
+        return finremCaseData.getSessionWrapper().isLoginAsApplicantSolicitor()
+            && YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getClientConsentOnAppSolStopRep())
+            || finremCaseData.getSessionWrapper().isLoginAsRespondentSolicitor()
+            && YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getClientConsentOnRespSolStopRep());
     }
 
     private boolean isNotHavingJudicialApproval(FinremCaseData finremCaseData) {

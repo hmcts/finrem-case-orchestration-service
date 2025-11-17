@@ -46,9 +46,29 @@ class StopRepresentingClientMidHandlerTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
+    void givenIsHavingClientConsent_whenHandled_thenErrorPopulated(boolean loginAsApplicant) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .clientConsentOnAppSolStopRep(loginAsApplicant ? YesOrNo.YES : mock(YesOrNo.class))
+                .clientConsentOnRespSolStopRep(!loginAsApplicant ? YesOrNo.YES : mock(YesOrNo.class))
+                .build())
+            .sessionWrapper(SessionWrapper.builder()
+                .loginAsApplicantSolicitor(YesOrNo.forValue(loginAsApplicant))
+                .loginAsRespondentSolicitor(YesOrNo.forValue(!loginAsApplicant))
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getErrors()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
     void givenNotHavingJudicialApproval_whenHandled_thenErrorPopulated(boolean loginAsApplicant) {
         FinremCaseData caseData = FinremCaseData.builder()
             .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .clientConsentOnAppSolStopRep(loginAsApplicant ? YesOrNo.NO : null)
+                .clientConsentOnRespSolStopRep(!loginAsApplicant ? YesOrNo.NO : null)
                 .judicialApprovalOnAppSolStopRep(loginAsApplicant ? YesOrNo.NO : mock(YesOrNo.class))
                 .judicialApprovalOnRespSolStopRep(!loginAsApplicant ? YesOrNo.NO : mock(YesOrNo.class))
                 .build())
