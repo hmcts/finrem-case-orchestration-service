@@ -69,6 +69,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         return finremCaseData.getSessionWrapper().isLoginAsApplicantSolicitor()
             && YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnAppSolStopRep())
             || finremCaseData.getSessionWrapper().isLoginAsRespondentSolicitor()
-            && YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnAppSolStopRep());
+            && YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnRespSolStopRep());
     }
 }
