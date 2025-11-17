@@ -44,8 +44,8 @@ class StopRepresentingClientAboutToStartHandlerTest {
     void givenAsApplicantSolicitor_whenHandled_thenPopulateCorrectLabel() {
         when(caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
 
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
-            FinremCaseData.builder().build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
+            FinremCaseData.builder().ccdCaseId(CASE_ID).build());
         FinremCaseData finremCaseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
         assertThat(finremCaseData.getStopRepresentationWrapper().getClientAddressForServiceConfidentialLabel())
             .isEqualTo("Keep the Applicant's contact details private from the Respondent?");
@@ -57,8 +57,8 @@ class StopRepresentingClientAboutToStartHandlerTest {
     void givenAsRespondentSolicitor_whenHandled_thenPopulateCorrectLabel() {
         when(caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(RESP_SOLICITOR);
 
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
-            FinremCaseData.builder().build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
+            FinremCaseData.builder().ccdCaseId(CASE_ID).build());
         FinremCaseData finremCaseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
         assertThat(finremCaseData.getStopRepresentationWrapper().getClientAddressForServiceConfidentialLabel())
             .isEqualTo("Keep the Respondent's contact details private from the Applicant?");
