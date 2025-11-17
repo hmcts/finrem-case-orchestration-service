@@ -87,7 +87,7 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
         additionalHearingDocumentService.stampAndUpdateOrderCollections(caseDetails, userAuthorisation);
 
-        List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
         log.info("Storing Additional Hearing Document for Case ID: {}", caseId);
 
         Map<String, CaseDocument> stampedDocuments = getStampedDocuments(caseDetails, userAuthorisation);
