@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.Hearin
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -312,7 +313,7 @@ public class ManageHearingsCorresponder {
             .getAdditionalHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
 
         List<CaseDocument> convertedHearingDocuments = convertDocumentsToPdf(
-            hearingDocuments, userAuthorisation, finremCaseDetails.getId().toString());
+            hearingDocuments, userAuthorisation, finremCaseDetails.getCaseType());
 
         List<BulkPrintDocument> bulkPrintDocuments =
             documentHelper.getCaseDocumentsAsBulkPrintDocuments(convertedHearingDocuments);
@@ -348,7 +349,7 @@ public class ManageHearingsCorresponder {
         }
 
         List<CaseDocument> convertedHearingDocuments = convertDocumentsToPdf(
-            hearingDocuments, userAuthorisation, finremCaseDetails.getId().toString());
+            hearingDocuments, userAuthorisation, finremCaseDetails.getCaseType());
 
         List<BulkPrintDocument> bulkPrintDocuments =
             documentHelper.getCaseDocumentsAsBulkPrintDocuments(convertedHearingDocuments);
@@ -410,9 +411,9 @@ public class ManageHearingsCorresponder {
         }
     }
 
-    private List<CaseDocument> convertDocumentsToPdf(List<CaseDocument> documents, String userAuthorisation, String caseId) {
+    private List<CaseDocument> convertDocumentsToPdf(List<CaseDocument> documents, String userAuthorisation, CaseType caseType) {
         return documents.stream()
-            .map(document -> genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseId))
+            .map(document -> genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseType))
             .toList();
     }
 }

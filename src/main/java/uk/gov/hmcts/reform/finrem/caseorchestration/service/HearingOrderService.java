@@ -6,6 +6,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -53,13 +54,13 @@ public class HearingOrderService {
      * - Appends the stamped order and any additional documents to the
      *   final orders and hearing orders collections
      *
-     * @param finremCaseData     the financial remedy case data containing judge-approved orders
+     * @param caseDetails        the financial remedy case data containing judge-approved orders
      * @param authorisationToken the service authorization token used for document conversion and stamping
      */
-    public void stampAndStoreCwApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
-        synchroniseCreatedDateExistingApprovedOrder(finremCaseData, authorisationToken); // only CW
-        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken, ApprovedOrderUploader.CASEWORKER);
-        doStampAndStoreApprovedOrders(finremCaseData, authorisationToken, ApprovedOrderUploader.CASEWORKER);
+    public void stampAndStoreCwApprovedOrders(FinremCaseDetails caseDetails, String authorisationToken) {
+        synchroniseCreatedDateExistingApprovedOrder(caseDetails.getData(), authorisationToken); // only CW
+        convertAdditionalDocumentsToPdf(caseDetails, authorisationToken, ApprovedOrderUploader.CASEWORKER);
+        doStampAndStoreApprovedOrders(caseDetails, authorisationToken, ApprovedOrderUploader.CASEWORKER);
     }
 
     /**
@@ -75,12 +76,12 @@ public class HearingOrderService {
      * - Appends the stamped order and any additional documents to the
      *   final orders and hearing orders collections
      *
-     * @param finremCaseData     the financial remedy case data containing judge-approved orders
+     * @param caseDetails        the financial remedy case data containing judge-approved orders
      * @param authorisationToken the service authorization token used for document conversion and stamping
      */
-    public void stampAndStoreJudgeApprovedOrders(FinremCaseData finremCaseData, String authorisationToken) {
-        convertAdditionalDocumentsToPdf(finremCaseData, authorisationToken, ApprovedOrderUploader.JUDGE); // only Judge first
-        doStampAndStoreApprovedOrders(finremCaseData, authorisationToken, ApprovedOrderUploader.JUDGE);
+    public void stampAndStoreJudgeApprovedOrders(FinremCaseDetails caseDetails, String authorisationToken) {
+        convertAdditionalDocumentsToPdf(caseDetails, authorisationToken, ApprovedOrderUploader.JUDGE); // only Judge first
+        doStampAndStoreApprovedOrders(caseDetails, authorisationToken, ApprovedOrderUploader.JUDGE);
     }
 
     /**
@@ -120,9 +121,9 @@ public class HearingOrderService {
         }
     }
 
-    private List<DraftDirectionOrder> convertCaseWorkerApprovedOrdersToPdfIfNeeded(FinremCaseData caseData,
+    private List<DraftDirectionOrder> convertCaseWorkerApprovedOrdersToPdfIfNeeded(FinremCaseDetails caseDetails,
                                                                                    String authorisationToken) {
-        String caseId = caseData.getCcdCaseId();
+        FinremCaseData caseData = caseDetails.getData();
         List<? extends UploadedApprovedOrderHolder> caseworkerOrders =
             emptyIfNull(caseData.getDraftDirectionWrapper().getCwApprovedOrderCollection());
 
@@ -130,7 +131,7 @@ public class HearingOrderService {
             .map(orderHolder -> {
                 UploadedApprovedOrder approvedOrder = orderHolder.getValue();
                 CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
-                    approvedOrder.getApprovedOrder(), authorisationToken, caseId);
+                    approvedOrder.getApprovedOrder(), authorisationToken, caseDetails.getCaseType());
                 return DraftDirectionOrder.builder()
                     .uploadDraftDocument(pdfDocument)
                     .additionalDocuments(approvedOrder.getAdditionalDocuments())
@@ -184,8 +185,9 @@ public class HearingOrderService {
         );
     }
 
-    private void convertAdditionalDocumentsToPdf(FinremCaseData caseData, String authorisation,
+    private void convertAdditionalDocumentsToPdf(FinremCaseDetails caseDetails, String authorisation,
                                                  ApprovedOrderUploader uploader) {
+        FinremCaseData caseData = caseDetails.getData();
         List<? extends UploadedApprovedOrderHolder> orders = ApprovedOrderUploader.CASEWORKER == uploader
             ? caseData.getDraftDirectionWrapper().getCwApprovedOrderCollection()
             : caseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection();
@@ -197,47 +199,48 @@ public class HearingOrderService {
             .flatMap(List::stream)
             .forEach(additionalDoc -> {
                 CaseDocument documentPdf = genericDocumentService.convertDocumentIfNotPdfAlready(
-                    additionalDoc.getValue(), authorisation, caseData.getCcdCaseId());
+                    additionalDoc.getValue(), authorisation, caseDetails.getCaseType());
                 additionalDoc.setValue(documentPdf);
             });
     }
 
-    private void doStampAndStoreApprovedOrders(FinremCaseData finremCaseData, String authorisationToken,
+    private void doStampAndStoreApprovedOrders(FinremCaseDetails caseDetails, String authorisationToken,
                                                ApprovedOrderUploader uploader) {
-        String caseId = finremCaseData.getCcdCaseId();
-        StampType stampType = documentHelper.getStampType(finremCaseData);
+        FinremCaseData caseData = caseDetails.getData();
+        StampType stampType = documentHelper.getStampType(caseDetails.getData());
 
-        finremCaseData.setFinalOrderCollection(orderDateService.syncCreatedDateAndMarkDocumentStamped(
-            finremCaseData.getFinalOrderCollection(), authorisationToken));
+        caseData.setFinalOrderCollection(orderDateService.syncCreatedDateAndMarkDocumentStamped(
+            caseData.getFinalOrderCollection(), authorisationToken));
 
         if (ApprovedOrderUploader.CASEWORKER == uploader) {
-            convertCaseWorkerApprovedOrdersToPdfIfNeeded(finremCaseData, authorisationToken)
-                .forEach(order -> handleApprovedOrder(finremCaseData, order, authorisationToken, stampType, caseId, uploader));
+            convertCaseWorkerApprovedOrdersToPdfIfNeeded(caseDetails, authorisationToken)
+                .forEach(order -> handleApprovedOrder(caseDetails, order, authorisationToken, stampType, caseDetails.getCaseType(), uploader));
         } else {
             List<? extends UploadedApprovedOrderHolder> judgeOrders = emptyIfNull(
-                finremCaseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection());
+                caseDetails.getData().getDraftDirectionWrapper().getJudgeApprovedOrderCollection());
             judgeOrders.stream()
                 .map(UploadedApprovedOrderHolder::getValue)
-                .forEach(order -> handleApprovedOrder(finremCaseData, order, authorisationToken, stampType, caseId, uploader));
+                .forEach(order -> handleApprovedOrder(caseDetails, order, authorisationToken, stampType, caseDetails.getCaseType(), uploader));
         }
     }
 
-    private void handleApprovedOrder(FinremCaseData finremCaseData, UploadedApprovedOrder order,
-                                     String authorisationToken, StampType stampType, String caseId, ApprovedOrderUploader uploader) {
+    private void handleApprovedOrder(FinremCaseDetails caseDetails, UploadedApprovedOrder order,
+                                     String authorisationToken, StampType stampType, CaseType caseType, ApprovedOrderUploader uploader) {
 
+        FinremCaseData caseData = caseDetails.getData();
         List<DocumentCollectionItem> additionalDocs = order.getAdditionalDocuments();
         YesOrNo isOrderStamped;
         if (ApprovedOrderUploader.CASEWORKER == uploader) {
             CaseDocument stampedDocument = genericDocumentService.stampDocument(
-                order.getApprovedOrder(), authorisationToken, stampType, caseId);
+                order.getApprovedOrder(), authorisationToken, stampType, caseType);
             isOrderStamped = YesOrNo.YES;
-            appendDocumentToUploadHearingOrder(finremCaseData, stampedDocument, additionalDocs, isOrderStamped);
-            appendStampedOrderToFinalOrderCollection(finremCaseData, stampedDocument, additionalDocs);
-            setLatestDraftHearingOrder(finremCaseData, stampedDocument);
+            appendDocumentToUploadHearingOrder(caseData, stampedDocument, additionalDocs, isOrderStamped);
+            appendStampedOrderToFinalOrderCollection(caseData, stampedDocument, additionalDocs);
+            setLatestDraftHearingOrder(caseData, stampedDocument);
         } else {
             isOrderStamped = YesOrNo.NO;
             // make the uploaded approved orders available for judge uploaded orders in Process Order event
-            appendDocumentToUploadHearingOrder(finremCaseData, order.getApprovedOrder(), additionalDocs, isOrderStamped);
+            appendDocumentToUploadHearingOrder(caseData, order.getApprovedOrder(), additionalDocs, isOrderStamped);
         }
     }
 

@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremFormCandGCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -105,16 +106,16 @@ public class HearingDocumentService {
     }
 
     private Map<String, CaseDocument> generatePfdNcdrDocuments(Pair<CaseDetails, String> pair) {
-        String caseId = pair.getLeft().getId().toString();
+        CaseType caseType = CaseType.forValue(pair.getLeft().getCaseTypeId());
         String authToken = pair.getRight();
 
         Map<String, CaseDocument> documentMap = new HashMap<>();
-        CaseDocument pfdNcdrComplianceLetter = staticHearingDocumentService.uploadPfdNcdrComplianceLetter(caseId, authToken);
+        CaseDocument pfdNcdrComplianceLetter = staticHearingDocumentService.uploadPfdNcdrComplianceLetter(caseType, authToken);
         documentMap.put(PFD_NCDR_COMPLIANCE_LETTER, pfdNcdrComplianceLetter);
 
         // A cover letter is only required for non-digital respondents
         if (staticHearingDocumentService.isPdfNcdrCoverSheetRequired(pair.getLeft())) {
-            CaseDocument pfdNcdrCoverLetter = staticHearingDocumentService.uploadPfdNcdrCoverLetter(caseId, authToken);
+            CaseDocument pfdNcdrCoverLetter = staticHearingDocumentService.uploadPfdNcdrCoverLetter(caseType, authToken);
             documentMap.put(PFD_NCDR_COVER_LETTER, pfdNcdrCoverLetter);
         }
 
