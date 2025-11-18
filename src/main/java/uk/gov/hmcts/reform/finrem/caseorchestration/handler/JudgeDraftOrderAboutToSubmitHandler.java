@@ -59,7 +59,7 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         // send the case type ID and not the case ID. See DFR-4138
         finremCaseData.setCcdCaseId(finremCaseDetails.getCaseIdAsString());
 
-        hearingOrderService.stampAndStoreJudgeApprovedOrders(finremCaseData, userAuthorisation);
+        hearingOrderService.stampAndStoreJudgeApprovedOrders(finremCaseDetails, userAuthorisation);
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, userAuthorisation);
         uploadedDraftOrderCategoriser.categorise(finremCaseData);
         moveJudgeUploadedApprovedOrdersToDraftDirectionOrderCollection(finremCaseData);

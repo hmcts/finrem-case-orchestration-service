@@ -28,7 +28,7 @@ public class ConsentApplicationApprovedInContestedAboutToStartHandlerTest {
     @InjectMocks
     private ConsentApplicationApprovedInContestedAboutToStartHandler handler;
     @Mock
-    private IdamService service;
+    private IdamService idamService;
     public static final String AUTH_TOKEN = "tokien:)";
 
     @Test
@@ -61,7 +61,7 @@ public class ConsentApplicationApprovedInContestedAboutToStartHandlerTest {
 
     @Test
     public void givenContestedCase_whenEventExecuted_thenSetTheLoggedInUserIfNull() {
-        when(service.getIdamFullName(AUTH_TOKEN)).thenReturn("Moj Judge");
+        when(idamService.getIdamSurname(AUTH_TOKEN)).thenReturn("Moj Judge");
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(buildCallbackRequest(null), AUTH_TOKEN);
         assertEquals("Moj Judge", response.getData().get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME));
     }
