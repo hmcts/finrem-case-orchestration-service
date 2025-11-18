@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.FinremMultipartFile;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
@@ -23,8 +24,8 @@ public class DocumentManagementService {
     public static final String CONTENT_TYPE_APPLICATION_PDF = "application/pdf";
     private final DocmosisPdfGenerationService pdfGenerationService;
     private final EvidenceManagementUploadService evidenceManagementUploadService;
-
     private final EvidenceManagementDeleteService evidenceManagementDeleteService;
+
     public static final Function<FileUploadResponse, Document> CONVERTER = (response -> Document.builder()
         .fileName(response.getFileName())
         .url(response.getFileUrl())
@@ -42,22 +43,22 @@ public class DocumentManagementService {
     public Document storeDocument(String templateName,
                                   String fileName,
                                   Map<String, Object> placeholders,
-                                  String authorizationToken, String caseId) {
+                                  String authorizationToken, CaseType caseType) {
         log.info("Generate and Store Document requested with templateName [{}], placeholders of size [{}]",
             templateName, placeholders.size());
 
         return storeDocument(
             generateDocumentFrom(templateName, placeholders),
-            fileName, authorizationToken, caseId);
+            fileName, authorizationToken, caseType);
     }
 
-    public Document storeDocument(byte[] document, String fileName, String authorizationToken, String caseId) {
+    public Document storeDocument(byte[] document, String fileName, String authorizationToken, CaseType caseType) {
         log.info("Store document requested with document of size [{}]", document.length);
 
         FinremMultipartFile multipartFile = FinremMultipartFile.builder()
             .content(document).name(fileName).contentType(CONTENT_TYPE_APPLICATION_PDF).build();
         FileUploadResponse response = evidenceManagementUploadService
-            .upload(Collections.singletonList(multipartFile), caseId, authorizationToken).get(0);
+            .upload(Collections.singletonList(multipartFile), caseType, authorizationToken).getFirst();
 
         return CONVERTER.apply(response);
     }

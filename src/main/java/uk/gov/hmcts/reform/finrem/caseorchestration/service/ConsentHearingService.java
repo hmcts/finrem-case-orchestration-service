@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -175,8 +176,9 @@ public class ConsentHearingService {
         if (YES_VALUE.equalsIgnoreCase(isDocUploaded)) {
             log.warn("Additional uploaded hearing document found for printing for Case ID: {}", caseId);
             CaseDocument caseDocument = documentHelper.convertToCaseDocument(hearingData.get(HEARING_UPLOADED_DOCUMENT));
+            CaseType caseType = CaseType.forValue(caseDetails.getCaseTypeId());
             CaseDocument additionalUploadedDocuments =
-                genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
+                genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseType);
             documents.add(documentHelper.mapToBulkPrintDocument(additionalUploadedDocuments));
         }
     }

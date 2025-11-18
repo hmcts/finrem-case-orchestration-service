@@ -111,7 +111,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
         caseDocumentHandler = new CaseDocumentsHandler(featureToggleService);
         fdrDocumentsHandler = new FdrDocumentsHandler(featureToggleService, applicantFdrDocumentCategoriser, respondentFdrDocumentCategoriser);
 
-
         List<DocumentHandler> documentHandlers =
             Stream.of(applicantChronologiesStatementHandler, respondentChronologiesStatementHandler,
                     intervenerOneChronologiesStatementHandler, intervenerTwoChronologiesStatementHandler,
