@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -56,6 +55,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
 class HearingOrderServiceTest {
@@ -169,8 +169,8 @@ class HearingOrderServiceTest {
                     .syncCreatedDateAndMarkDocumentNotStamped(existingUploadHearingOrderIsEmpty, AUTH_TOKEN);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
                 if (isCaseworkerUao) {
-                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
-                    inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
+                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CONTESTED);
+                    inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CONTESTED);
                     assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
                     assertFinalOrderCollection(finremCaseData,
                         createdDateSyncedFinalOrderCollection.getFirst(),
@@ -234,8 +234,8 @@ class HearingOrderServiceTest {
                 verifyAdditionalDocsConversionToPdf(inOrder);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
                 if (isCaseworkerUao) {
-                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
-                    inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
+                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CONTESTED);
+                    inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CONTESTED);
                     assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
                     assertFinalOrderCollection(finremCaseData,
                         createdDateSyncedFinalOrderCollection.getFirst(),
@@ -312,10 +312,10 @@ class HearingOrderServiceTest {
                     .syncCreatedDateAndMarkDocumentNotStamped(existingUploadHearingOrderIsEmpty, AUTH_TOKEN);
                 verifyAdditionalDocsConversionToPdf(inOrder);
                 if (isCaseworkerUao) {
-                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
-                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao2Docx, AUTH_TOKEN, CASE_ID);
-                    inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
-                    inOrder.verify(genericDocumentService).stampDocument(uao2Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
+                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CONTESTED);
+                    inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(uao2Docx, AUTH_TOKEN, CONTESTED);
+                    inOrder.verify(genericDocumentService).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CONTESTED);
+                    inOrder.verify(genericDocumentService).stampDocument(uao2Pdf, AUTH_TOKEN, mockedStampType, CONTESTED);
 
                     assertLatestDraftHearingOrder(finremCaseData, stampedUao2Pdf);
                     assertFinalOrderCollection(finremCaseData,
@@ -378,6 +378,7 @@ class HearingOrderServiceTest {
             // Arrange
             FinremCaseData finremCaseData = setupFinremCaseData(draftDirectionWrapper);
 
+            lenient().when(genericDocumentService.stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CONTESTED)).thenReturn(stampedUao1Pdf);
             List<DirectionOrderCollection> createdDateSyncedFinalOrderCollection = new ArrayList<>();
             when(orderDateService.syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN))
                 .thenReturn(createdDateSyncedFinalOrderCollection);
@@ -393,8 +394,8 @@ class HearingOrderServiceTest {
                 verifyAdditionalDocsConversionToPdf(inOrder);
                 inOrder.verify(orderDateService).syncCreatedDateAndMarkDocumentStamped(originalFinalOrderCollection, AUTH_TOKEN);
                 if (isCaseworkerUao) {
-                    inOrder.verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CASE_ID);
-                    inOrder.verify(genericDocumentService, times(2)).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CASE_ID);
+                    inOrder.verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(uao1Docx, AUTH_TOKEN, CONTESTED);
+                    inOrder.verify(genericDocumentService, times(2)).stampDocument(uao1Pdf, AUTH_TOKEN, mockedStampType, CONTESTED);
 
                     assertLatestDraftHearingOrder(finremCaseData, stampedUao1Pdf);
                     assertFinalOrderCollection(finremCaseData,
@@ -423,30 +424,34 @@ class HearingOrderServiceTest {
         }
 
         private void doTest(FinremCaseData finremCaseData, boolean isCaseworkerUao) {
+            FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+                .caseType(CONTESTED)
+                .data(finremCaseData)
+                .build();
             if (isCaseworkerUao) {
-                underTest.stampAndStoreCwApprovedOrders(finremCaseData, AUTH_TOKEN);
+                underTest.stampAndStoreCwApprovedOrders(caseDetails, AUTH_TOKEN);
             } else {
-                underTest.stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
+                underTest.stampAndStoreJudgeApprovedOrders(caseDetails, AUTH_TOKEN);
             }
         }
 
         private void stubDocsConversionToPdf(List<Pair<CaseDocument, CaseDocument>> pairs) {
             for (Pair<CaseDocument, CaseDocument> pair : pairs) {
-                lenient().when(genericDocumentService.convertDocumentIfNotPdfAlready(pair.getLeft(), AUTH_TOKEN, CASE_ID))
+                lenient().when(genericDocumentService.convertDocumentIfNotPdfAlready(pair.getLeft(), AUTH_TOKEN, CONTESTED))
                     .thenReturn(pair.getRight());
             }
         }
 
         private void stubDocsStamping(List<Pair<CaseDocument, CaseDocument>> pairs) {
             for (Pair<CaseDocument, CaseDocument> pair : pairs) {
-                lenient().when(genericDocumentService.stampDocument(pair.getLeft(), AUTH_TOKEN, mockedStampType, CASE_ID))
+                lenient().when(genericDocumentService.stampDocument(pair.getLeft(), AUTH_TOKEN, mockedStampType, CONTESTED))
                     .thenReturn(pair.getRight());
             }
         }
 
         private void verifyAdditionalDocsConversionToPdf(InOrder inOrder) {
-            inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(additionalDoc1Docx, AUTH_TOKEN, CASE_ID);
-            inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(additionalDoc2Docx, AUTH_TOKEN, CASE_ID);
+            inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(additionalDoc1Docx, AUTH_TOKEN, CONTESTED);
+            inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(additionalDoc2Docx, AUTH_TOKEN, CONTESTED);
         }
 
         private void assertLatestDraftHearingOrder(FinremCaseData finremCaseData, CaseDocument expectedOrder) {
@@ -593,10 +598,10 @@ class HearingOrderServiceTest {
         FinremCaseData caseData = getFinremCaseData();
         caseData.getContactDetailsWrapper().setRespondentFmName("David");
         caseData.getContactDetailsWrapper().setRespondentLname("Goodman");
-        caseData.setCcdCaseType(CaseType.CONTESTED);
+        caseData.setCcdCaseType(CONTESTED);
         return FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
-                .caseType(CaseType.CONTESTED)
+                .caseType(CONTESTED)
                 .id(Long.valueOf(CASE_ID))
                 .data(caseData)
                 .build())

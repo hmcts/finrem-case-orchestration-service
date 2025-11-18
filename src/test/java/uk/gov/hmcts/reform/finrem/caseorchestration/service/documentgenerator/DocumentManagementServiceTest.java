@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocmosisPdfGenerationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManagementService;
@@ -18,7 +19,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.fileUploadResponse;
@@ -44,13 +44,13 @@ public class DocumentManagementServiceTest {
     public void setUp() {
         when(pdfGenerationService.generateDocFrom(TEMPLATE_NAME, PLACEHOLDERS)).thenReturn("welcome doc".getBytes());
         when(
-            evidenceManagementUploadService.upload(any(), anyString(), any()))
+            evidenceManagementUploadService.upload(any(), any(CaseType.class), any()))
             .thenReturn(fileUploadResponse());
     }
 
     @Test
     public void storeDocument() {
-        Document document = service.storeDocument(TEMPLATE_NAME, FILE_NAME, PLACEHOLDERS, AUTH_TOKEN, "123");
+        Document document = service.storeDocument(TEMPLATE_NAME, FILE_NAME, PLACEHOLDERS, AUTH_TOKEN, CaseType.CONTESTED);
         assertThat(document, is(equalTo(testDocument())));
     }
 
