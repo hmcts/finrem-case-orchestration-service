@@ -42,6 +42,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .confirmationHeader(CONFIRMATION_HEADER)
+            .confirmationBody("<br /><br />")
             .build();
     }
 }
