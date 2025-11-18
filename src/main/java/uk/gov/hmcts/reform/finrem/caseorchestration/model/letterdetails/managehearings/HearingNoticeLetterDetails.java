@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 @AllArgsConstructor
 @NoArgsConstructor
 public class HearingNoticeLetterDetails implements DocumentTemplateDetails {
-    private String ccdCaseNumber;
+    private String caseNumber;
     private String applicantName;
     private String respondentName;
     private String letterDate;

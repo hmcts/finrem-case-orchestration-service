@@ -132,7 +132,7 @@ class HearingNoticeLetterDetailsMapperTest {
 
         // Assert
         HearingNoticeLetterDetails hearingNoticeDetails = (HearingNoticeLetterDetails) result;
-        assertThat(hearingNoticeDetails.getCcdCaseNumber()).isEqualTo(CASE_ID);
+        assertThat(hearingNoticeDetails.getCaseNumber()).isEqualTo(CASE_ID);
         assertThat(hearingNoticeDetails.getApplicantName()).isEqualTo("John Doe");
         assertThat(hearingNoticeDetails.getRespondentName()).isEqualTo("Jane Smith");
         assertThat(hearingNoticeDetails.getHearingType()).isEqualTo("Financial Dispute Resolution (FDR)");
