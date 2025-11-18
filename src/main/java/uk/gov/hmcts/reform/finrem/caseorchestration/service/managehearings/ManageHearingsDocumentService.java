@@ -69,7 +69,7 @@ public class ManageHearingsDocumentService {
             documentDataMap,
             documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails),
             documentConfiguration.getManageHearingNoticeFileName(),
-            finremCaseDetails.getId().toString()
+            finremCaseDetails.getCaseType()
         );
     }
 
@@ -90,7 +90,7 @@ public class ManageHearingsDocumentService {
             documentDataMap,
             determineFormCTemplate(finremCaseDetails).getRight(),
             documentConfiguration.getFormCFileName(),
-            finremCaseDetails.getId().toString()
+            finremCaseDetails.getCaseType()
         );
     }
 
@@ -111,7 +111,7 @@ public class ManageHearingsDocumentService {
             documentDataMap,
             documentConfiguration.getFormGTemplate(finremCaseDetails),
             documentConfiguration.getFormGFileName(),
-            finremCaseDetails.getId().toString()
+            finremCaseDetails.getCaseType()
         );
     }
 
@@ -123,19 +123,17 @@ public class ManageHearingsDocumentService {
      * @return a map containing the generated PFD NCDR documents
      */
     public Map<String, CaseDocument> generatePfdNcdrDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
-        String caseId = caseDetails.getId().toString();
-
         Map<String, CaseDocument> documentMap = new HashMap<>();
 
         documentMap.put(
             PFD_NCDR_COMPLIANCE_LETTER,
-            staticHearingDocumentService.uploadPfdNcdrComplianceLetter(caseId, authorisationToken)
+            staticHearingDocumentService.uploadPfdNcdrComplianceLetter(caseDetails.getCaseType(), authorisationToken)
         );
 
         if (staticHearingDocumentService.isPdfNcdrCoverSheetRequired(caseDetails)) {
             documentMap.put(
                 PFD_NCDR_COVER_LETTER,
-                staticHearingDocumentService.uploadPfdNcdrCoverLetter(caseId, authorisationToken)
+                staticHearingDocumentService.uploadPfdNcdrCoverLetter(caseDetails.getCaseType(), authorisationToken)
             );
         }
 
@@ -150,7 +148,7 @@ public class ManageHearingsDocumentService {
      * @return the generated Out Of Court Resolution document as a {@link CaseDocument}
      */
     public CaseDocument generateOutOfCourtResolutionDoc(FinremCaseDetails caseDetails, String authToken) {
-        CaseDocument outOfCourtDoc = staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
+        CaseDocument outOfCourtDoc = staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getCaseType(), authToken);
         outOfCourtDoc.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
         return outOfCourtDoc;
     }

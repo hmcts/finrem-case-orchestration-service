@@ -126,7 +126,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
     private void verifyExpectedInvocations(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
-        inOrder.verify(hearingOrderService).stampAndStoreJudgeApprovedOrders(finremCaseData, AUTH_TOKEN);
+        inOrder.verify(hearingOrderService).stampAndStoreJudgeApprovedOrders(finremCaseDetails, AUTH_TOKEN);
         inOrder.verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
         inOrder.verify(uploadedDraftOrderCategoriser).categorise(finremCaseData);
     }

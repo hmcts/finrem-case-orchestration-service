@@ -11,6 +11,7 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LitigantSolicitorRemovedDocumentServiceTest extends NocDocumentServiceBaseTestSetup {
@@ -19,6 +20,7 @@ public class LitigantSolicitorRemovedDocumentServiceTest extends NocDocumentServ
     LitigantSolicitorRemovedNocDocumentService litigantSolicitorRemovedNocDocumentService;
 
     @Before
+    @Override
     public void setUpTest() {
         super.setUpTest();
         litigantSolicitorRemovedNocDocumentService =
@@ -31,10 +33,10 @@ public class LitigantSolicitorRemovedDocumentServiceTest extends NocDocumentServ
         when(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()).thenReturn(DOC_FILENAME);
         when(
             genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), notiicationLettersDetailsMapCaptor.capture(), eq(DOC_TEMPLATE),
-                eq(DOC_FILENAME), eq("1234"))).thenReturn(new CaseDocument());
+                eq(DOC_FILENAME), eq(CONTESTED))).thenReturn(new CaseDocument());
         CaseDocument caseDocument =
             litigantSolicitorRemovedNocDocumentService.generateNoticeOfChangeLetter(
-                AUTH_TOKEN, noticeOfChangeLetterDetails, "1234");
+                AUTH_TOKEN, noticeOfChangeLetterDetails, CONTESTED);
 
         Map placeholdersMap = notiicationLettersDetailsMapCaptor.getValue();
         assertPlaceHoldersMap(placeholdersMap);

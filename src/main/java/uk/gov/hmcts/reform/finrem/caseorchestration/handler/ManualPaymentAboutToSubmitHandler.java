@@ -36,15 +36,14 @@ public class ManualPaymentAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        String caseId = callbackRequest.getCaseDetails().getId().toString();
-        log.info("Invoking contested event {} about to start callback for Case ID: {}",
-            EventType.MANUAL_PAYMENT, caseId);
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         List<PaymentDocumentCollection> paymentDocuments = caseData.getCopyOfPaperFormA();
 
         List<PaymentDocumentCollection> paymentList
-            = paymentDocuments.stream().map(payment -> covertToPdf(payment.getValue(), userAuthorisation, caseId))
+            = paymentDocuments.stream().map(payment -> convertToPdf(payment.getValue(), userAuthorisation,
+                callbackRequest.getCaseDetails().getCaseType()))
             .toList();
         caseData.setCopyOfPaperFormA(paymentList);
 
@@ -52,12 +51,12 @@ public class ManualPaymentAboutToSubmitHandler extends FinremCallbackHandler {
             .data(caseData).build();
     }
 
-    private PaymentDocumentCollection covertToPdf(PaymentDocument paymentDocument, String userAuthorisation, String caseId) {
+    private PaymentDocumentCollection convertToPdf(PaymentDocument paymentDocument, String userAuthorisation, CaseType caseType) {
 
         return PaymentDocumentCollection.builder()
             .value(PaymentDocument.builder().typeOfDocument(paymentDocument.getTypeOfDocument())
                 .uploadedDocument(service.convertDocumentIfNotPdfAlready(paymentDocument
-                    .getUploadedDocument(),userAuthorisation, caseId)).build())
+                    .getUploadedDocument(),userAuthorisation, caseType)).build())
             .build();
     }
 }

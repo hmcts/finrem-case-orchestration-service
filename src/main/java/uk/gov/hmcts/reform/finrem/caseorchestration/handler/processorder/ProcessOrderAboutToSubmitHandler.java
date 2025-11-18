@@ -90,10 +90,10 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         final List<String> errors = new ArrayList<>();
         log.info("Storing Additional Hearing Document for Case ID: {}", caseId);
 
-        Map<String, CaseDocument> stampedDocuments = getStampedDocuments(caseData, userAuthorisation, caseId);
+        Map<String, CaseDocument> stampedDocuments = getStampedDocuments(caseDetails, userAuthorisation);
         Map<String, CaseDocument> additionalDocsConverted = new HashMap<>();
 
-        handleDraftOrderDocuments(caseData, stampedDocuments, userAuthorisation, additionalDocsConverted, caseId);
+        handleDraftOrderDocuments(caseDetails, stampedDocuments, userAuthorisation, additionalDocsConverted);
         handlePsaDocuments(caseData, stampedDocuments);
         handleAgreedDraftOrdersCollection(caseData, stampedDocuments, additionalDocsConverted);
         clearTemporaryFields(caseData);
@@ -119,8 +119,9 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         });
     }
 
-    private Map<String, CaseDocument> getStampedDocuments(FinremCaseData caseData, String userAuthorisation, String caseId) {
+    private Map<String, CaseDocument> getStampedDocuments(FinremCaseDetails caseDetails, String userAuthorisation) {
         Map<String, CaseDocument> stampedDocuments = new HashMap<>();
+        FinremCaseData caseData = caseDetails.getData();
         StampType stampType = documentHelper.getStampType(caseData);
         String documentCategoryId = DocumentCategory.APPROVED_ORDERS.getDocumentCategoryId();
         List<DirectionOrderCollection> unprocessedApprovedDocuments = nullSafeUnprocessedApprovedDocuments(caseData);
@@ -130,7 +131,7 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
                 CaseDocument originalDocument = doc.getValue().getOriginalDocument();
                 CaseDocument uploadedDocument = doc.getValue().getUploadDraftDocument();
                 CaseDocument stampedDocument = genericDocumentService.stampDocument(uploadedDocument, userAuthorisation,
-                    stampType, caseId);
+                    stampType, caseDetails.getCaseType());
                 stampedDocument.setCategoryId(documentCategoryId);
 
                 stampedDocuments.put(originalDocument.getDocumentUrl(), stampedDocument);
@@ -140,9 +141,11 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         return stampedDocuments;
     }
 
-    private void handleDraftOrderDocuments(FinremCaseData caseData, Map<String, CaseDocument> stampedDocuments,
-                                           String authorisation, Map<String, CaseDocument> additionalDocsConverted, String caseId) {
+    private void handleDraftOrderDocuments(FinremCaseDetails caseDetails, Map<String, CaseDocument> stampedDocuments,
+                                           String authorisation, Map<String, CaseDocument> additionalDocsConverted) {
         List<DraftOrderDocReviewCollection> collector = new ArrayList<>();
+
+        FinremCaseData caseData = caseDetails.getData();
         hasApprovableCollectionReader.filterAndCollectDraftOrderDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             collector, APPROVED_BY_JUDGE::equals);
 
@@ -160,7 +163,7 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
                         //Process attachments
                         emptyIfNull(draftOrderDocumentReview.getAttachments()).forEach(attachment -> {
                             CaseDocument convertedAttachment = genericDocumentService.convertDocumentIfNotPdfAlready(
-                                attachment.getValue(), authorisation, caseId);
+                                attachment.getValue(), authorisation, caseDetails.getCaseType());
 
                             //Store additional document and replace attachment in review collection
                             additionalDocsConverted.put(attachment.getValue().getDocumentUrl(), convertedAttachment);

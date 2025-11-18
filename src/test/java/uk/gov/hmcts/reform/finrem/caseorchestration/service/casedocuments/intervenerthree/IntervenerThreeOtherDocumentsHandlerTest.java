@@ -79,7 +79,6 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
 
-
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES,
                 CaseDocumentParty.INTERVENER_THREE),

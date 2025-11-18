@@ -88,10 +88,12 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             .data(response.getData()).build();
         CaseDetails toBeSanitisedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(toBeSanitised);
 
-        getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
-            getFieldsListWithAnnotation(clazz, TemporaryField.class).stream()
-                .map(Field::getName)
-                .forEach(toBeSanitisedCaseDetails.getData()::remove));
+        if (toBeSanitisedCaseDetails.getData() != null) {
+            getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
+                getFieldsListWithAnnotation(clazz, TemporaryField.class).stream()
+                    .map(Field::getName)
+                    .forEach(toBeSanitisedCaseDetails.getData()::remove));
+        }
 
         return response.toBuilder().data(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedCaseDetails.getData())).build();
     }
