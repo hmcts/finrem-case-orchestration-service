@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.CONSENT_APPLICATION_APPROVED_IN_CONTESTED;
@@ -28,7 +27,7 @@ class ConsentApplicationApprovedInContestedAboutToSubmitHandlerTest extends Base
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
     @BeforeEach
-    public void init() {
+    void init() {
         aboutToSubmitHandler = new ConsentApplicationApprovedInContestedAboutToSubmitHandler(finremCaseDetailsMapper,
                 consentOrderApprovedDocumentService);
     }
@@ -43,7 +42,7 @@ class ConsentApplicationApprovedInContestedAboutToSubmitHandlerTest extends Base
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest("/fixtures/pba-validate.json");
         aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(consentOrderApprovedDocumentService).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN), anyString());
+        verify(consentOrderApprovedDocumentService).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
         verify(consentOrderApprovedDocumentService).generateAndPopulateConsentOrderLetter(any(), eq(AUTH_TOKEN));
     }
 
@@ -52,6 +51,6 @@ class ConsentApplicationApprovedInContestedAboutToSubmitHandlerTest extends Base
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest("/fixtures/contested/consent-in-contested-with-pension.json");
         aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(consentOrderApprovedDocumentService).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN), any());
+        verify(consentOrderApprovedDocumentService).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
     }
 }

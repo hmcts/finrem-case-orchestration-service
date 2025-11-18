@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -28,7 +27,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -36,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType.FAMILY_COURT_STAMP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -61,7 +60,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
     private static final CaseDocument STAMPED_ORDER = CaseDocument.builder().documentFilename("stampedOrder.pdf").build();
 
     @BeforeEach
-    public void init() {
+    void init() {
         ApprovedConsentOrderDocumentCategoriser approvedConsentOrderCategoriser = new ApprovedConsentOrderDocumentCategoriser(featureToggleService);
         aboutToSubmitHandler = new AmendApprovedConsentOrderAboutToSubmitHandler(finremCaseDetailsMapper, approvedConsentOrderCategoriser,
             genericDocumentService, documentHelper);
@@ -69,7 +68,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
 
     @Test
     void canHandle() {
-        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.AMEND_CONTESTED_APPROVED_CONSENT_ORDER);
+        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CONTESTED, EventType.AMEND_CONTESTED_APPROVED_CONSENT_ORDER);
     }
 
     @Test
@@ -88,7 +87,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
         List<ConsentOrderCollection> response = callbackRequest.getCaseDetails().getData()
             .getConsentOrderWrapper().getContestedConsentedApprovedOrders();
 
-        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), anyString());
+        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), eq(CONTESTED));
         assertEquals(STAMPED_ORDER, response.getFirst().getApprovedOrder().getConsentOrder());
         assertEquals(STAMPED_LETTER, response.getFirst().getApprovedOrder().getOrderLetter());
         assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
@@ -147,7 +146,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
         final List<ConsentOrderCollection> response = callbackRequest.getCaseDetails().getData()
             .getConsentOrderWrapper().getContestedConsentedApprovedOrders();
 
-        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), anyString());
+        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), eq(CONTESTED));
 
         assertEquals(ORIGINAL_ORDER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
             .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getConsentOrder());
@@ -181,7 +180,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
 
         aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(genericDocumentService, never()).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), anyString());
+        verify(genericDocumentService, never()).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), eq(CONTESTED));
         assertEquals(ORIGINAL_ORDER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
             .getContestedConsentedApprovedOrders().getFirst().getApprovedOrder().getConsentOrder());
         assertEquals(ORIGINAL_LETTER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
@@ -221,7 +220,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
         List<ConsentOrderCollection> response = callbackRequest.getCaseDetails().getData()
             .getConsentOrderWrapper().getContestedConsentedApprovedOrders();
 
-        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), anyString());
+        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), eq(CONTESTED));
         assertThat(response)
             .extracting(ConsentOrderCollection::getApprovedOrder)
             .flatExtracting(ApprovedOrder::getPensionDocuments)
@@ -234,7 +233,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
     }
 
     private void mockDocumentStamping(CaseDocument originalDocument, CaseDocument stampedDocument) {
-        when(genericDocumentService.stampDocument(originalDocument, AUTH_TOKEN, FAMILY_COURT_STAMP, CASE_ID))
+        when(genericDocumentService.stampDocument(originalDocument, AUTH_TOKEN, FAMILY_COURT_STAMP, CONTESTED))
             .thenReturn(stampedDocument);
     }
 
@@ -242,10 +241,12 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
         return FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
                 .id(Long.valueOf(CASE_ID))
+                .caseType(CONTESTED)
                 .data(currentData)
                 .build())
             .caseDetailsBefore(FinremCaseDetails.builder()
                 .id(Long.valueOf(CASE_ID))
+                .caseType(CONTESTED)
                 .data(previousData)
                 .build())
             .build();
