@@ -50,6 +50,8 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
         String caseId = callbackRequest.getCaseDetails().getCaseIdAsString();
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        // TODO remove after DFR-4138 release
+        caseData.setCcdCaseId(caseId);
 
         prepareSessionWrapper(caseData, userAuthorisation);
         
