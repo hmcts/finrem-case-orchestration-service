@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
@@ -35,15 +34,15 @@ public class VacateOrAdjournedHearing {
     private List<DocumentCollectionItem> additionalHearingDocs;
     private List<PartyOnCaseCollectionItem> partiesOnCase;
     private YesOrNo wasMigrated;
-    private DynamicList chooseHearings;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate newHearingDate;
+    // TODO: Use ENUM for vacateOrAdjournReason
     private String vacateOrAdjournReason;
     private String specifyOtherReason;
     private String hearingStatus;
 
     public static VacateOrAdjournedHearing fromHearingToVacatedHearing(ManageHearingsCollectionItem hearingToVacate,
-                                                                       VacateHearingAction vacateHearingInput) {
+                                                                       VacateOrAdjournHearingAction vacateHearingInput) {
         Hearing hearing = hearingToVacate.getValue();
         return VacateOrAdjournedHearing.builder()
             .hearingDate(hearing.getHearingDate())
@@ -58,7 +57,6 @@ public class VacateOrAdjournedHearing {
             .additionalHearingDocs(hearing.getAdditionalHearingDocs())
             .partiesOnCase(hearing.getPartiesOnCase())
             .wasMigrated(hearing.getWasMigrated())
-            .chooseHearings(vacateHearingInput.getChooseHearings())
             .vacateOrAdjournReason(vacateHearingInput.getVacateOrAdjournReason())
             .specifyOtherReason(vacateHearingInput.getSpecifyOtherReason())
             .newHearingDate(vacateHearingInput.getHearingDate())

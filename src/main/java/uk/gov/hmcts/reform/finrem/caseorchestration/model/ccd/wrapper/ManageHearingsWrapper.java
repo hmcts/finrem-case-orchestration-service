@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacatedOrAdjournedHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateHearingAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournHearingAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 
@@ -32,7 +32,7 @@ public class ManageHearingsWrapper {
     private YesOrNo isAddHearingChosen;
     private YesOrNo isFinalOrder;
     private ManageHearingsAction manageHearingsActionSelection;
-    private VacateHearingAction vacateOrAdjournHearingSelection;
+    private VacateOrAdjournHearingAction vacateOrAdjournHearingAction;
     private WorkingHearing workingHearing;
     private List<ManageHearingsCollectionItem> hearings;
     private List<VacatedOrAdjournedHearingsCollectionItem> vacatedOrAdjournedHearings;

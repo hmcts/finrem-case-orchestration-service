@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VacateHearingAction {
+public class VacateOrAdjournHearingAction {
     private DynamicList chooseHearings;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate hearingDate;
