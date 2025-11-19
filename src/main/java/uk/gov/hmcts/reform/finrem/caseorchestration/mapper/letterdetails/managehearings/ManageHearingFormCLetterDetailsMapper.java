@@ -34,7 +34,7 @@ public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearing
         LocalDate formCCreatedDate = LocalDate.now();
 
         return FormCLetterDetails.builder()
-            .caseNumber(caseData.getDivorceCaseNumber())
+            .caseNumber(caseDetails.getCaseIdAsString())
             .courtDetails(courtTemplateFields)
             .applicantFmName(contactDetails.getApplicantFmName())
             .applicantLName(contactDetails.getApplicantLname())
