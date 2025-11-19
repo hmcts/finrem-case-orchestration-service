@@ -24,7 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournHearingAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -304,11 +304,11 @@ class ManageHearingActionServiceTest {
         Hearing hearing = createHearing(HearingType.FDR, "10:00", "30mins", LocalDate.now());
         Hearing hearing1 = createHearing(HearingType.FH, "11:00", "1hr", LocalDate.now().plusDays(1));
 
-        hearingWrapper.setVacateOrAdjournHearingAction(VacateOrAdjournHearingAction.builder()
+        hearingWrapper.setWorkingVacatedHearing(WorkingVacatedHearing.builder()
             .chooseHearings(DynamicList.builder()
                 .value(DynamicListElement.builder().code(hearingId.toString()).build())
                 .build())
-            .vacateOrAdjournReason("Courtroom_Unavailable")
+            .vacateReason("Courtroom_Unavailable")
             .build());
 
         hearingWrapper.setHearings(new ArrayList<>(List.of(

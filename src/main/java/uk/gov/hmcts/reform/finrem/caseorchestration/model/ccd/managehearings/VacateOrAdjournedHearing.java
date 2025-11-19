@@ -34,15 +34,14 @@ public class VacateOrAdjournedHearing {
     private List<DocumentCollectionItem> additionalHearingDocs;
     private List<PartyOnCaseCollectionItem> partiesOnCase;
     private YesOrNo wasMigrated;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate newHearingDate;
     // TODO: Use ENUM for vacateOrAdjournReason
     private String vacateOrAdjournReason;
     private String specifyOtherReason;
+    // TODO: Use Enum for hearingStatus
     private String hearingStatus;
 
     public static VacateOrAdjournedHearing fromHearingToVacatedHearing(ManageHearingsCollectionItem hearingToVacate,
-                                                                       VacateOrAdjournHearingAction vacateHearingInput) {
+                                                                       WorkingVacatedHearing vacateHearingInput) {
         Hearing hearing = hearingToVacate.getValue();
         return VacateOrAdjournedHearing.builder()
             .hearingDate(hearing.getHearingDate())
@@ -57,9 +56,8 @@ public class VacateOrAdjournedHearing {
             .additionalHearingDocs(hearing.getAdditionalHearingDocs())
             .partiesOnCase(hearing.getPartiesOnCase())
             .wasMigrated(hearing.getWasMigrated())
-            .vacateOrAdjournReason(vacateHearingInput.getVacateOrAdjournReason())
+            .vacateOrAdjournReason(vacateHearingInput.getVacateReason())
             .specifyOtherReason(vacateHearingInput.getSpecifyOtherReason())
-            .newHearingDate(vacateHearingInput.getHearingDate())
             .build();
     }
 }

@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacatedOrAdjournedHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournHearingAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
@@ -129,7 +129,7 @@ public class ManageHearingActionService {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
 
-        VacateOrAdjournHearingAction vacateHearingInput = hearingsWrapper.getVacateOrAdjournHearingAction();
+        WorkingVacatedHearing vacateHearingInput = hearingsWrapper.getWorkingVacatedHearing();
         UUID selectedHearingId = UUID.fromString(vacateHearingInput.getChooseHearings().getValue().getCode());
 
         ManageHearingsCollectionItem hearingToVacate = hearingsWrapper.getHearings().stream()
@@ -151,7 +151,7 @@ public class ManageHearingActionService {
         }
         hearingsWrapper.getVacatedOrAdjournedHearings().add(vacatedItem);
 
-        hearingsWrapper.setVacateOrAdjournHearingAction(null);
+        hearingsWrapper.setWorkingVacatedHearing(null);
     }
 
     /**

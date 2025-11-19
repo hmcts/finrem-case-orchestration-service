@@ -13,10 +13,11 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VacateOrAdjournHearingAction {
+public class WorkingVacatedHearing {
     private DynamicList chooseHearings;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate hearingDate;
-    private String vacateOrAdjournReason;
+    private LocalDate vacateHearingDate;
+    //TODO: Use ENUM for vacateOrAdjournReason
+    private String vacateReason;
     private String specifyOtherReason;
 }
