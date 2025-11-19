@@ -17,15 +17,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.List.of;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -34,10 +31,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class ProcessOrderSubmittedHandlerTest {
 
-    @Mock
-    private HearingDocumentService hearingDocumentService;
-    @Mock
-    private AdditionalHearingDocumentService additionalHearingDocumentService;
     @Mock
     private ManageHearingsCorresponder manageHearingsCorresponder;
 
@@ -57,8 +50,6 @@ class ProcessOrderSubmittedHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
-        verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
         verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
 
@@ -70,8 +61,6 @@ class ProcessOrderSubmittedHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(FinremCaseDetails.class), any());
-        verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any(FinremCaseDetails.class));
         verify(manageHearingsCorresponder, never()).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
 
@@ -110,5 +99,4 @@ class ProcessOrderSubmittedHandlerTest {
             .label(role)
             .build();
     }
-
 }

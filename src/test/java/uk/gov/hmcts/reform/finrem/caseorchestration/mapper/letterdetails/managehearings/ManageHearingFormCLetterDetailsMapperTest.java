@@ -132,7 +132,7 @@ class ManageHearingFormCLetterDetailsMapperTest {
 
         // Assert
         FormCLetterDetails formCLetterDetails = (FormCLetterDetails) result;
-        assertThat(formCLetterDetails.getCaseNumber()).isEqualTo(caseData.getDivorceCaseNumber());
+        assertThat(formCLetterDetails.getCaseNumber()).isEqualTo(CASE_ID);
         assertThat(formCLetterDetails.getApplicantFmName()).isEqualTo("John");
         assertThat(formCLetterDetails.getApplicantLName()).isEqualTo("Doe");
         assertThat(formCLetterDetails.getRespondentFmName()).isEqualTo("Jane");

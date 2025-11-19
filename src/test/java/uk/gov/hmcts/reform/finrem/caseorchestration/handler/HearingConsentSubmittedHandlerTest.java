@@ -7,12 +7,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -23,25 +23,25 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentHearingServic
 
 import java.io.InputStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HearingConsentSubmittedHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class HearingConsentSubmittedHandlerTest {
+
+    private static final String TEST_JSON = "/fixtures/consented.listOfHearing/list-for-hearing.json";
 
     @InjectMocks
     private HearingConsentSubmittedHandler handler;
     @Mock
-    private ConsentHearingService service;
+    private ConsentHearingService consentHearingService;
 
     private ObjectMapper objectMapper;
-    private static final String AUTH_TOKEN = "tokien:)";
-    private static final String TEST_JSON = "/fixtures/consented.listOfHearing/list-for-hearing.json";
 
-    @Before
+    @BeforeEach
     public void setup() {
         objectMapper = JsonMapper
             .builder()
@@ -53,41 +53,18 @@ public class HearingConsentSubmittedHandlerTest {
     }
 
     @Test
-    public void givenConsentedCase_whenRequestedListForHearing_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.LIST_FOR_HEARING_CONSENTED),
-            is(true));
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.LIST_FOR_HEARING_CONSENTED);
     }
 
     @Test
-    public void givenConsentedCase_whenWrongEventType_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.INTERIM_HEARING),
-            is(false));
-    }
-
-    @Test
-    public void givenConsentedCase_whenWrongCallbackType_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.LIST_FOR_HEARING_CONSENTED),
-            is(false));
-    }
-
-    @Test
-    public void givenConsentedCase_whenWrongCaseType_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.LIST_FOR_HEARING_CONSENTED),
-            is(false));
-    }
-
-    @Test
-    public void givenConsentedCase_WhenPartiesNeedToNotify_ThenItShouldSendNotification() {
+    void givenConsentedCase_WhenPartiesNeedToNotify_ThenItShouldSendNotification() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(handle.getData());
 
-        verify(service).sendNotification(any(FinremCaseDetails.class), any());
+        verify(consentHearingService).sendNotification(any(FinremCaseDetails.class), any());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

@@ -13,8 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
@@ -27,8 +25,6 @@ public class ProcessOrderSubmittedHandler extends FinremCallbackHandler {
     private final ManageHearingsCorresponder manageHearingsCorresponder;
 
     public ProcessOrderSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                        HearingDocumentService hearingDocumentService,
-                                        AdditionalHearingDocumentService additionalHearingDocumentService,
                                         ManageHearingsCorresponder manageHearingsCorresponder) {
         super(finremCaseDetailsMapper);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
