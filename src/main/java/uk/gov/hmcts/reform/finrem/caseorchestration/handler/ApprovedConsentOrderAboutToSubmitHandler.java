@@ -65,7 +65,9 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseDetails.getData());
         if (!isEmpty(latestConsentOrder)) {
-            CaseDocument pdfConsentOrder = genericDocumentService.convertDocumentIfNotPdfAlready(latestConsentOrder, userAuthorisation, caseId);
+            CaseType caseType = CaseType.forValue(caseDetails.getCaseTypeId());
+            CaseDocument pdfConsentOrder = genericDocumentService.convertDocumentIfNotPdfAlready(latestConsentOrder,
+                userAuthorisation, caseType);
             caseDetails.getData().put(LATEST_CONSENT_ORDER, pdfConsentOrder);
             generateAndPrepareDocuments(userAuthorisation, caseDetails, caseDetailsBefore, pdfConsentOrder);
         } else {
@@ -82,7 +84,8 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         Map<String, Object> caseData = caseDetails.getData();
         StampType stampType = documentHelper.getStampType(caseData);
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, stampType, caseId);
+        CaseType caseType = CaseType.forValue(caseDetails.getCaseTypeId());
+        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, stampType, caseType);
 
         ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
@@ -95,7 +98,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                 caseId);
             LocalDate approvalDate = getApprovalDate(caseData);
             List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
-                documentHelper.getPensionDocuments(caseData), authToken, stampType, approvalDate, caseId);
+                documentHelper.getPensionDocuments(caseData), authToken, stampType, approvalDate, caseType);
             log.info("Generated StampedPensionDocs = {} for Case ID: {}", stampedPensionDocs, caseDetails.getId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }

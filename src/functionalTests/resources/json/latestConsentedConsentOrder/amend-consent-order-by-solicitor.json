@@ -4,6 +4,7 @@
   "case_details": {
     "id": "12345678",
     "jurisdiction": "divorce",
+    "case_type_id": "FinancialRemedyMVP2",
     "state": "created",
     "case_data": {
       "PBANumber": "PBA123456",
