@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.generalapplication.GeneralApplicationRejectionLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.generators.GeneralApplicationRejectionLetterGenerator;
@@ -38,7 +39,7 @@ public class RejectGeneralApplicationDocumentService  {
         Map letterDetailsMap = convertGeneralApplicationRejectionLetterDetailsToMap(letterDetails);
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, letterDetailsMap,
             documentConfiguration.getGeneralApplicationRejectionTemplate(),
-            documentConfiguration.getGeneralApplicationRejectionFileName(), String.valueOf(caseDetails.getId()));
+            documentConfiguration.getGeneralApplicationRejectionFileName(), CaseType.forValue(caseDetails.getCaseTypeId()));
     }
 
     @SuppressWarnings("java:S3740")

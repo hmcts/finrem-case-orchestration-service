@@ -79,8 +79,6 @@ public class GeneralApplicationServiceTest {
     public static final String PDF_FORMAT_EXTENSION = ".pdf";
     public static final String DOC_IN_EXISTING_COLLECTION_URL =
         "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee";
-    public static final String DOC_IN_NEW_COLLECTION_URL =
-        "http://document-management-store:8080/documents/0fbf044e-3d01-85eb-b792-c36d1e6344ee";
     public static final String USER_NAME = "Tony";
 
     @InjectMocks
@@ -101,10 +99,9 @@ public class GeneralApplicationServiceTest {
     private ObjectMapper objectMapper;
     private CaseDetails caseDetails;
     private CaseDetails caseDetailsBefore;
-    private final String caseId = "123123123";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         objectMapper = new ObjectMapper();
         caseDetailsBefore = getApplicationIssuedCaseDetailsBefore();
         caseDetails = CaseDetails.builder().data(new LinkedHashMap<>()).build();
@@ -115,7 +112,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void updateAndSortGeneralApplicationsForCaseworker() {
+    void updateAndSortGeneralApplicationsForCaseworker() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(accessService.getActiveUser(any(), any())).thenReturn("Case");
@@ -144,7 +141,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void updateAndSortGeneralApplicationsForIntervener1() {
+    void updateAndSortGeneralApplicationsForIntervener1() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(accessService.getActiveUser(any(), any())).thenReturn("Intervener1");
@@ -166,7 +163,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void updateAndSortGeneralApplicationsForIntervener2() {
+    void updateAndSortGeneralApplicationsForIntervener2() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(accessService.getActiveUser(any(), any())).thenReturn("Intervener2");
@@ -188,7 +185,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void updateAndSortGeneralApplicationsForIntervener3() {
+    void updateAndSortGeneralApplicationsForIntervener3() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(accessService.getActiveUser(any(), any())).thenReturn("Intervener3");
@@ -210,7 +207,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void updateAndSortGeneralApplicationsForIntervener4() {
+    void updateAndSortGeneralApplicationsForIntervener4() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(accessService.getActiveUser(any(), any())).thenReturn("Intervener4");
@@ -232,7 +229,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void updateAndSortGeneralApplicationsForApplicant() {
+    void updateAndSortGeneralApplicationsForApplicant() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(accessService.getActiveUser(any(), any())).thenReturn("Applicant");
@@ -258,7 +255,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void updateAndSortGeneralApplicationsForRespondent() {
+    void updateAndSortGeneralApplicationsForRespondent() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(accessService.getActiveUser(any(), any())).thenReturn("Respondent");
@@ -284,7 +281,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenUploadGenAppDocWordFormat_whenUpdateCaseDataSubmit_thenConvertGenAppDocLatestToPdf() {
+    void givenUploadGenAppDocWordFormat_whenUpdateCaseDataSubmit_thenConvertGenAppDocLatestToPdf() {
 
         Map<String, String> documentMapInWordFormat = getCcdDocumentMap();
         caseDetails.getData().put(GENERAL_APPLICATION_DOCUMENT, documentMapInWordFormat);
@@ -296,7 +293,7 @@ public class GeneralApplicationServiceTest {
 
         CaseDocument caseDocument = getCaseDocument(WORD_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(documentMapInWordFormat)).thenReturn(caseDocument);
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
 
         String convertedDocumentName =
             ((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST)).getDocumentFilename();
@@ -304,13 +301,13 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void whenDraftOrderNotUploaded() {
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
+    void whenDraftOrderNotUploaded() {
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
         assertNull(caseDetails.getData().get(GENERAL_APPLICATION_DRAFT_ORDER));
     }
 
     @Test
-    public void givenUploadDraftDocWordFormat_whenUpdateCaseDataSubmit_thenConvertDraftDocToPdf() {
+    void givenUploadDraftDocWordFormat_whenUpdateCaseDataSubmit_thenConvertDraftDocToPdf() {
 
         Map<String, String> documentMapInWordFormat = getCcdDocumentMap();
         caseDetails.getData().put(GENERAL_APPLICATION_DRAFT_ORDER, documentMapInWordFormat);
@@ -322,7 +319,7 @@ public class GeneralApplicationServiceTest {
 
         CaseDocument caseDocument = getCaseDocument(WORD_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(documentMapInWordFormat)).thenReturn(caseDocument);
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
 
         String convertedDocumentName =
             ((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DRAFT_ORDER)).getDocumentFilename();
@@ -330,29 +327,29 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenGeneralApplication_whenUpdateCaseDataSubmit_thenStateIsIssued() {
+    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenStateIsIssued() {
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
 
         assertThat(caseDetails.getData().get(GENERAL_APPLICATION_PRE_STATE), is("applicationIssued"));
     }
 
     @Test
-    public void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDocumentLatestDateIsNow() {
+    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDocumentLatestDateIsNow() {
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
 
         assertThat(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE), is(LocalDate.now()));
     }
 
     @Test
-    public void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDataListHasUploadedDoc() {
+    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDataListHasUploadedDoc() {
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
             .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
 
         List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
             .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {
@@ -365,13 +362,13 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDocLatestIsUploadedDoc() {
+    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDocLatestIsUploadedDoc() {
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
             .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
 
         CaseDocument generalApplicationLatest =
             (CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST);
@@ -379,7 +376,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenGeneralApplicationWithPreviousDocs_whenUpdateCaseDataSubmit_thenGenAppDocIsAddedToCollection() {
+    void givenGeneralApplicationWithPreviousDocs_whenUpdateCaseDataSubmit_thenGenAppDocIsAddedToCollection() {
 
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
@@ -387,7 +384,7 @@ public class GeneralApplicationServiceTest {
             .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
 
         caseDetails.getData().put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, getGeneralApplicationDataList());
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
 
         List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
             .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {
@@ -402,7 +399,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenGeneralApplicationWithPreviousData_whenUpdateCaseDataStart_thenPreviousDataDeleted() {
+    void givenGeneralApplicationWithPreviousData_whenUpdateCaseDataStart_thenPreviousDataDeleted() {
 
         String[] generalAppParameters = {GENERAL_APPLICATION_RECEIVED_FROM,
             GENERAL_APPLICATION_HEARING_REQUIRED,
@@ -420,7 +417,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenGeneralApplication_whenUpdateCaseDataStart_thenCreatedByIsCurrentLoggedUser() {
+    void givenGeneralApplication_whenUpdateCaseDataStart_thenCreatedByIsCurrentLoggedUser() {
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(USER_NAME);
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), AUTH_TOKEN);
 
@@ -428,7 +425,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenGeneralApplication_shouldGetInterimGeneralApplicationList() {
+    void givenGeneralApplication_shouldGetInterimGeneralApplicationList() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
@@ -461,7 +458,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenGeneralApplicationAndNoExistingIntervenerDirectionsOrder_ShouldUpdateIntervenerDirectionsOrder() {
+    void givenGeneralApplicationAndNoExistingIntervenerDirectionsOrder_ShouldUpdateIntervenerDirectionsOrder() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         caseDocument.setDocumentUrl(DOC_IN_EXISTING_COLLECTION_URL);
@@ -478,7 +475,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenGeneralApplicationAndExistingIntervenerDirectionsDocument_ShouldUpdateIntervenerDirectionsDocuments() {
+    void givenGeneralApplicationAndExistingIntervenerDirectionsDocument_ShouldUpdateIntervenerDirectionsDocuments() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
@@ -504,7 +501,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenNonWordOrPdfDocument_whenUpdateGeneralApplication_thenDoNotConvertSupportingDocToPdf() {
+    void givenNonWordOrPdfDocument_whenUpdateGeneralApplication_thenDoNotConvertSupportingDocToPdf() {
         String otherFilenameExtension = ".anyother";
         CaseDocument caseDocument = getCaseDocument(otherFilenameExtension);
         caseDocument.setDocumentUrl(DOC_IN_EXISTING_COLLECTION_URL);
@@ -535,7 +532,7 @@ public class GeneralApplicationServiceTest {
         assertThat(gaSupportingDocument.getDocumentFilename(), not(containsString(PDF_FORMAT_EXTENSION)));
     }
 
-    public DynamicRadioList buildDynamicList(String role) {
+    private DynamicRadioList buildDynamicList(String role) {
 
         List<DynamicRadioListElement> dynamicListElements = List.of(
             getDynamicListElement(role, role)
@@ -546,7 +543,7 @@ public class GeneralApplicationServiceTest {
             .build();
     }
 
-    public DynamicRadioListElement getDynamicListElement(String code, String label) {
+    private DynamicRadioListElement getDynamicListElement(String code, String label) {
         return DynamicRadioListElement.builder()
             .code(code)
             .label(label)
@@ -591,10 +588,10 @@ public class GeneralApplicationServiceTest {
     }
 
     private CaseDetails getApplicationIssuedCaseDetailsBefore() {
-        return CaseDetails.builder().state("applicationIssued").build();
+        return CaseDetails.builder().state("applicationIssued").caseTypeId(CaseType.CONTESTED.getCcdType()).build();
     }
 
-    protected FinremCallbackRequest buildCallbackRequest() {
+    private FinremCallbackRequest buildCallbackRequest() {
         GeneralApplicationItems generalApplicationItemsAdded =
             GeneralApplicationItems.builder().generalApplicationCreatedBy("Claire Mumford")
                 .generalApplicationHearingRequired("Yes").generalApplicationTimeEstimate("24 hours")
