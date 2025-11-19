@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -26,10 +27,12 @@ class StopRepresentingClientSubmittedHandlerTest {
     private StopRepresentingClientSubmittedHandler underTest;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @BeforeEach
     public void setup() {
-        underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper);
+        underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, applicationEventPublisher);
     }
 
     @Test
