@@ -100,6 +100,11 @@ public class DocumentConfiguration {
     private String manageHearingHighCourtNoticeTemplate;
     private String manageHearingNoticeFileName;
     @Getter(AccessLevel.NONE)
+    private String vacateHearingNoticeTemplate;
+    @Getter(AccessLevel.NONE)
+    private String vacateHearingHighCourtNoticeTemplate;
+    private String vacateHearingNoticeFileName;
+    @Getter(AccessLevel.NONE)
     private String manageHearingFormCTemplate;
     @Getter(AccessLevel.NONE)
     private String manageHearingHighCourtFormCTemplate;
@@ -250,6 +255,11 @@ public class DocumentConfiguration {
     public String getManageHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
         return isHighCourtSelected(finremCaseDetails) ? manageHearingHighCourtNoticeTemplate
             : manageHearingNoticeTemplate;
+    }
+
+    public String getVacateHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
+        return isHighCourtSelected(finremCaseDetails) ? vacateHearingHighCourtNoticeTemplate
+            : vacateHearingNoticeTemplate;
     }
 
     private boolean isHighCourtSelected(CaseDetails caseDetails) {

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manage
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.apache.commons.lang3.ObjectUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -15,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
 
 public abstract class AbstractManageHearingsLetterMapper {
     protected static final String CASE_DETAILS = "caseDetails";
@@ -56,6 +59,19 @@ public abstract class AbstractManageHearingsLetterMapper {
             ID, caseDetails.getId());
 
         return Map.of(CASE_DETAILS, caseDetailsMap);
+    }
+
+    /*
+    * Returns the type of application from the case data. If not present, returns the default value.
+    * This can be used by a template for conditional logic that determines content.
+    * @param caseData the {@link FinremCaseData} containing case-specific data
+    * @return the type of application or the default value if not present
+    */
+    public String getDefaultTypeOfApplicationIfNotPresent(FinremCaseData caseData) {
+        if (ObjectUtils.isNotEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())) {
+            return caseData.getScheduleOneWrapper().getTypeOfApplication().getValue();
+        }
+        return TYPE_OF_APPLICATION_DEFAULT_TO;
     }
 
     protected CourtDetailsTemplateFields buildCourtDetailsTemplateFields(String courtSelection) {
