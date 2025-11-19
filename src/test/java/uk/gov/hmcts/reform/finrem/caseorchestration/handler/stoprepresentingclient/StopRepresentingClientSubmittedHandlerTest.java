@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -44,6 +45,8 @@ class StopRepresentingClientSubmittedHandlerTest {
             .build();
 
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
-        assertThat(underTest.handle(request, AUTH_TOKEN).getConfirmationBody()).isEqualTo("<br /><br />");
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(request, AUTH_TOKEN);
+        assertThat(response.getConfirmationBody()).isEqualTo("<br /><br />");
+        assertThat(response.getConfirmationHeader()).isEqualTo("# Notice of change request submitted");
     }
 }
