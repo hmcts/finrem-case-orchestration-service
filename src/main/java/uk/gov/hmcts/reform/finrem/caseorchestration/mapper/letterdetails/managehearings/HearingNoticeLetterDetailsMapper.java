@@ -29,7 +29,7 @@ public class HearingNoticeLetterDetailsMapper extends AbstractManageHearingsLett
             buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt());
 
         return HearingNoticeLetterDetails.builder()
-            .caseNumber(caseDetails.getCaseIdAsString())
+            .ccdCaseNumber(caseDetails.getCaseIdAsString())
             .applicantName(caseData.getFullApplicantName())
             .respondentName(caseData.getRespondentFullName())
             .letterDate(LocalDate.now().toString())
