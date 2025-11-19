@@ -15,7 +15,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @Slf4j
 @RequiredArgsConstructor
 public class HearingDocumentService {
-
     protected static final String HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE = "This listing notice must be sent to the applicant and respondent"
         + " as default. If this listing needs to be sent to only one of these parties please use the general order event.";
     private final FinremFormCandGCorresponder finremFormCandGCorresponder;
