@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ManageVacatedHearingsCollectionItem {
+public class VacatedOrAdjournedHearingsCollectionItem {
     private UUID id;
     private VacateOrAdjournedHearing value;
 }

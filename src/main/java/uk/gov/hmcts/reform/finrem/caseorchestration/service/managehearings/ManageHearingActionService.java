@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageVacatedHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateHearingAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
@@ -129,7 +129,7 @@ public class ManageHearingActionService {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
 
-        VacateHearingAction vacateHearingInput = hearingsWrapper.getVacateHearingSelection();
+        VacateHearingAction vacateHearingInput = hearingsWrapper.getVacateOrAdjournHearingSelection();
         UUID selectedHearingId = UUID.fromString(vacateHearingInput.getChooseHearings().getValue().getCode());
 
         ManageHearingsCollectionItem hearingToVacate = hearingsWrapper.getHearings().stream()
@@ -141,17 +141,17 @@ public class ManageHearingActionService {
 
         VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.fromHearingToVacatedHearing(hearingToVacate, vacateHearingInput);
 
-        ManageVacatedHearingsCollectionItem vacatedItem = ManageVacatedHearingsCollectionItem.builder()
+        VacatedOrAdjournedHearingsCollectionItem vacatedItem = VacatedOrAdjournedHearingsCollectionItem.builder()
             .id(hearingToVacate.getId())
             .value(vacatedHearing)
             .build();
 
-        if (hearingsWrapper.getVacatedHearingsCollection() == null) {
-            hearingsWrapper.setVacatedHearingsCollection(new ArrayList<>());
+        if (hearingsWrapper.getVacatedOrAdjournedHearings() == null) {
+            hearingsWrapper.setVacatedOrAdjournedHearings(new ArrayList<>());
         }
-        hearingsWrapper.getVacatedHearingsCollection().add(vacatedItem);
+        hearingsWrapper.getVacatedOrAdjournedHearings().add(vacatedItem);
 
-        hearingsWrapper.setVacateHearingSelection(null);
+        hearingsWrapper.setVacateOrAdjournHearingSelection(null);
     }
 
     /**

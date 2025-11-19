@@ -73,7 +73,7 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
         );
         // Remove this line after /DFR-4138 release
         finremCaseData.setCcdCaseId(caseDetails.getCaseIdAsString());
-        finremCaseData.getManageHearingsWrapper().setVacateHearingSelection(
+        finremCaseData.getManageHearingsWrapper().setVacateOrAdjournHearingSelection(
             VacateHearingAction.builder()
                 .chooseHearings(hearingService.generateSelectableHearingsAsDynamicList(caseDetails, userAuthorisation))
                 .build()

@@ -38,7 +38,7 @@ public class VacateOrAdjournedHearing {
     private DynamicList chooseHearings;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate newHearingDate;
-    private String reasonsForVacating;
+    private String vacateOrAdjournReason;
     private String specifyOtherReason;
     private String hearingStatus;
 
@@ -59,7 +59,7 @@ public class VacateOrAdjournedHearing {
             .partiesOnCase(hearing.getPartiesOnCase())
             .wasMigrated(hearing.getWasMigrated())
             .chooseHearings(vacateHearingInput.getChooseHearings())
-            .reasonsForVacating(vacateHearingInput.getReasonsForVacating())
+            .vacateOrAdjournReason(vacateHearingInput.getVacateOrAdjournReason())
             .specifyOtherReason(vacateHearingInput.getSpecifyOtherReason())
             .newHearingDate(vacateHearingInput.getHearingDate())
             .build();

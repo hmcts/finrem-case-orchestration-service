@@ -304,11 +304,11 @@ class ManageHearingActionServiceTest {
         Hearing hearing = createHearing(HearingType.FDR, "10:00", "30mins", LocalDate.now());
         Hearing hearing1 = createHearing(HearingType.FH, "11:00", "1hr", LocalDate.now().plusDays(1));
 
-        hearingWrapper.setVacateHearingSelection(VacateHearingAction.builder()
+        hearingWrapper.setVacateOrAdjournHearingSelection(VacateHearingAction.builder()
             .chooseHearings(DynamicList.builder()
                 .value(DynamicListElement.builder().code(hearingId.toString()).build())
                 .build())
-            .reasonsForVacating("Courtroom_Unavailable")
+            .vacateOrAdjournReason("Courtroom_Unavailable")
             .build());
 
         hearingWrapper.setHearings(new ArrayList<>(List.of(
@@ -326,7 +326,7 @@ class ManageHearingActionServiceTest {
                 assertThat(remainingHearing.getValue().getHearingType()).isEqualTo(HearingType.FH);
             });
 
-        assertThat(hearingWrapper.getVacatedHearingsCollection())
+        assertThat(hearingWrapper.getVacatedOrAdjournedHearings())
             .hasSize(1)
             .first()
             .satisfies(vacatedHearing -> {
