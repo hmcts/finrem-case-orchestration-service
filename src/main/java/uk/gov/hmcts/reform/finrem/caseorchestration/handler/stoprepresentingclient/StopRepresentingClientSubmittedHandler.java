@@ -13,16 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuditEventService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.Arrays;
 
-import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
