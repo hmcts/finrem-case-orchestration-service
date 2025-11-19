@@ -64,7 +64,7 @@ public class GeneralApplicationOutcomeAboutToStartHandler extends FinremCallback
                     .errors(List.of("There are no general application available for decision.")).build();
             }
             log.info("Setting outcome list if existing general application not moved to collection for Case ID: {}", caseId);
-            setOutcomeListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
+            setOutcomeListForNonCollectionGeneralApplication(caseDetails, index, userAuthorisation);
         } else {
             if (referredList.isEmpty()) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
@@ -82,11 +82,10 @@ public class GeneralApplicationOutcomeAboutToStartHandler extends FinremCallback
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private void setOutcomeListForNonCollectionGeneralApplication(FinremCaseData caseData,
+    private void setOutcomeListForNonCollectionGeneralApplication(FinremCaseDetails caseDetails,
                                                                   AtomicInteger index,
-                                                                  String userAuthorisation,
-                                                                  String caseId) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);
+                                                                  String userAuthorisation) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseDetails, userAuthorisation);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 
@@ -94,6 +93,6 @@ public class GeneralApplicationOutcomeAboutToStartHandler extends FinremCallback
         dynamicListElementsList.add(dynamicListElements);
 
         DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationOutcomeList(dynamicList);
+        caseDetails.getData().getGeneralApplicationWrapper().setGeneralApplicationOutcomeList(dynamicList);
     }
 }

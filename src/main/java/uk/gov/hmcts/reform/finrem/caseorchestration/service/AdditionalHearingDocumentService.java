@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
@@ -119,34 +120,76 @@ public class AdditionalHearingDocumentService {
             .build()).build();
     }
 
-    public void stampAndCollectOrderCollection(FinremCaseDetails caseDetails, String authorisationToken) {
+    /**
+     * Stamps and collects orders from unprocessedUploadHearingDocuments, updating uploadHearingOrder and finalOrderCollection.
+     *
+     * @param caseDetails the case details containing the orders
+     * @param authorisationToken the authorisation token for document stamping
+     */
+    public void stampAndUpdateOrderCollections(FinremCaseDetails caseDetails, String authorisationToken) {
         String caseId = caseDetails.getId().toString();
-        log.info("Dealing with Case ID: {}", caseId);
+        log.info("Processing unprocessed upload hearing documents for Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
 
-        List<DirectionOrderCollection> finalOrderCollection = orderDateService.syncCreatedDateAndMarkDocumentStamped(
-            caseData.getFinalOrderCollection(), authorisationToken);
+        List<DirectionOrderCollection> finalOrderCollection = orderDateService
+            .syncCreatedDateAndMarkDocumentStamped(caseData.getFinalOrderCollection(), authorisationToken);
         List<DirectionOrderCollection> newFinalOrderCollection = new ArrayList<>(emptyIfNull(caseData.getFinalOrderCollection()));
-        List<DirectionOrderCollection> uploadHearingOrder
-            = orderDateService.syncCreatedDateAndMarkDocumentNotStamped(caseData.getUploadHearingOrder(), authorisationToken);
-        if (!uploadHearingOrder.isEmpty()) {
-            List<DirectionOrderCollection> orderCollections = uploadHearingOrder.stream().map(doc -> {
-                CaseDocument uploadDraftDocument = doc.getValue().getUploadDraftDocument();
-                LocalDateTime orderDateTime = doc.getValue().getOrderDateTime();
+
+        List<DirectionOrderCollection> unprocessedOrders = Optional.ofNullable(caseData.getUnprocessedUploadHearingDocuments())
+            .orElse(List.of());
+
+        if (!unprocessedOrders.isEmpty()) {
+            List<DirectionOrderCollection> updatedUploadHearingOrder = new ArrayList<>(emptyIfNull(caseData.getUploadHearingOrder()));
+
+            for (DirectionOrderCollection unprocessedOrder : unprocessedOrders) {
+                CaseDocument uploadDraftDocument = unprocessedOrder.getValue().getUploadDraftDocument();
+                LocalDateTime orderDateTime = unprocessedOrder.getValue().getOrderDateTime();
+
+                CaseDocument stampedDocument = getStampedDocs(authorisationToken, caseData, caseDetails.getCaseType(), uploadDraftDocument);
+                log.info("Stamped document {} for Case ID: {}", stampedDocument.getDocumentFilename(), caseId);
+
+                // Replace or add the stamped order in uploadHearingOrder
+                replaceOrAddOrder(updatedUploadHearingOrder, uploadDraftDocument, stampedDocument, orderDateTime);
+
+                // Add to finalOrderCollection if not already present
                 if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, uploadDraftDocument)) {
-                    CaseDocument stampedDocs = getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument);
-                    log.info("Stamped Documents = {} for Case ID: {}", stampedDocs, caseId);
-                    newFinalOrderCollection.add(documentHelper.prepareFinalOrder(stampedDocs));
-                    return getDirectionOrderCollection(doc.getValue(), stampedDocs, orderDateTime);
+                    newFinalOrderCollection.add(documentHelper.prepareFinalOrder(stampedDocument,
+                        unprocessedOrder.getValue().getAdditionalDocuments()));
                 }
-                // This scenario should not come - when uploaded same order again then stamp order instead leaving unstamped.
-                return getDirectionOrderCollection(doc.getValue(), getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument),
-                    orderDateTime);
-            }).toList();
+            }
+
+            caseData.setUploadHearingOrder(updatedUploadHearingOrder);
             caseData.setFinalOrderCollection(newFinalOrderCollection);
-            caseData.setUploadHearingOrder(orderCollections);
-            caseData.setLatestDraftHearingOrder(orderCollections.getLast().getValue().getUploadDraftDocument());
+            if (!updatedUploadHearingOrder.isEmpty()) {
+                caseData.setLatestDraftHearingOrder(updatedUploadHearingOrder.getLast().getValue().getUploadDraftDocument());
+            }
         }
+    }
+
+    /**
+     * Replaces an order in the collection if it exists, otherwise adds it.
+     *
+     * @param orders the list of orders to update
+     * @param originalDoc the original document to match
+     * @param stampedDoc the new stamped document
+     * @param orderDateTime the order date time
+     */
+    private void replaceOrAddOrder(List<DirectionOrderCollection> orders, CaseDocument originalDoc, CaseDocument stampedDoc,
+                                   LocalDateTime orderDateTime) {
+        for (int i = 0; i < orders.size(); i++) {
+            if (orders.get(i).getValue().getUploadDraftDocument().getDocumentUrl().equals(originalDoc.getDocumentUrl())) {
+                orders.set(i, getDirectionOrderCollection(orders.get(i).getValue(), stampedDoc, orderDateTime));
+                return;
+            }
+        }
+        // If not found, add as a new stamped order
+        orders.add(DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(stampedDoc)
+                .orderDateTime(orderDateTime)
+                .isOrderStamped(YesOrNo.YES)
+                .build())
+            .build());
     }
 
     public void storeHearingNotice(FinremCaseDetails caseDetails, String authorisationToken)
@@ -298,14 +341,14 @@ public class AdditionalHearingDocumentService {
         }
     }
 
-    public CaseDocument convertToPdf(CaseDocument document, String authorisationToken, String caseId) {
-        return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
+    public CaseDocument convertToPdf(CaseDocument document, String authorisationToken, CaseType caseType) {
+        return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken, caseType);
     }
 
-    private CaseDocument getStampedDocs(String authorisationToken, FinremCaseData caseData, String caseId, CaseDocument uploadDraftDocument) {
-        CaseDocument caseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(uploadDraftDocument, authorisationToken, caseId);
+    private CaseDocument getStampedDocs(String authorisationToken, FinremCaseData caseData, CaseType caseType, CaseDocument uploadDraftDocument) {
+        CaseDocument caseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(uploadDraftDocument, authorisationToken, caseType);
         StampType stampType = documentHelper.getStampType(caseData);
-        return genericDocumentService.stampDocument(caseDocument, authorisationToken, stampType, caseId);
+        return genericDocumentService.stampDocument(caseDocument, authorisationToken, stampType, caseType);
     }
 
     public void addToFinalOrderCollection(FinremCaseDetails caseDetails, String authorisationToken) {

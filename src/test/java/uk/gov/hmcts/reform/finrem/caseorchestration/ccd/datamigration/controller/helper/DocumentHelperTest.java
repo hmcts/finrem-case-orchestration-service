@@ -63,7 +63,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -309,13 +309,13 @@ class DocumentHelperTest {
         documentCollectionItems.add(dc);
         caseData.setHearingOrderOtherDocuments(documentCollectionItems);
 
-        when(service.convertDocumentIfNotPdfAlready(any(), any(), anyString())).thenReturn(caseDocument());
+        when(service.convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED))).thenReturn(caseDocument());
 
         List<CaseDocument> hearingDocuments2 = documentHelper.getHearingDocumentsAsPdfDocuments(caseDetails, AUTHORIZATION_HEADER);
         assertEquals("app_docs.pdf", hearingDocuments2.getFirst().getDocumentFilename());
         assertEquals(BINARY_URL, hearingDocuments2.getFirst().getDocumentBinaryUrl());
 
-        verify(service).convertDocumentIfNotPdfAlready(any(), any(), anyString());
+        verify(service).convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED));
     }
 
     @Test
@@ -896,9 +896,19 @@ class DocumentHelperTest {
 
     @Test
     void prepareFinalOrder() {
-        DirectionOrderCollection orderCollection = documentHelper.prepareFinalOrder(caseDocument());
-        assertEquals(YesOrNo.YES, orderCollection.getValue().getIsOrderStamped());
+        DocumentCollectionItem additionalDocument = DocumentCollectionItem.builder()
+            .value(caseDocument())
+            .build();
+        CaseDocument finalOrder = caseDocument();
+
+        DirectionOrderCollection orderCollection = documentHelper.prepareFinalOrder(finalOrder, List.of(additionalDocument));
+
         assertNotNull(orderCollection.getValue().getOrderDateTime());
+        assertThat(orderCollection.getValue())
+            .returns(YesOrNo.YES, DirectionOrder::getIsOrderStamped)
+            .returns(finalOrder, DirectionOrder::getUploadDraftDocument)
+            .returns(List.of(additionalDocument), DirectionOrder::getAdditionalDocuments);
+
     }
 
     private static Stream<Arguments> provideOrderCollections() {

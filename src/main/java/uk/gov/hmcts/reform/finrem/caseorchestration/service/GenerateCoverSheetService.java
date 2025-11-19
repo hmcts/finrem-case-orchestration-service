@@ -188,7 +188,7 @@ public class GenerateCoverSheetService {
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, placeholdersMap,
             documentConfiguration.getBulkPrintTemplate(), documentConfiguration.getBulkPrintFileName(),
-            caseDetails.getId().toString());
+            caseDetails.getCaseType());
     }
 
     @SuppressWarnings("java:S1123")
