@@ -135,7 +135,7 @@ public class FinremCallbackRequestFactory {
     public static FinremCallbackRequest from(Long id,
                                              CaseType type,
                                              EventType eventType) {
-        FinremCaseDetails.FinremCaseDetailsBuilder d =
+        FinremCaseDetails.FinremCaseDetailsBuilder after =
             details(id, type, FinremCaseData.builder()
                 .ccdCaseId(String.valueOf(id))
                 .build(), null);
@@ -145,11 +145,7 @@ public class FinremCallbackRequestFactory {
                 .ccdCaseId(String.valueOf(id))
                 .build(), null);
 
-        return FinremCallbackRequest.builder()
-            .eventType(eventType)
-            .caseDetails(d.build())
-            .caseDetailsBefore(before.build())
-            .build();
+        return pair(before, after);
     }
 
     public static FinremCallbackRequest create() {
