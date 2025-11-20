@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 
@@ -49,18 +48,18 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
-        prepareSessionWrapper(callbackRequest.getCaseDetails(), userAuthorisation);
+        prepareSessionWrapper(callbackRequest.getCaseDetails().getData(), userAuthorisation);
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
             .build();
     }
 
-    private void prepareSessionWrapper(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
-        String caseId = finremCaseDetails.getCaseIdAsString();
+    private void prepareSessionWrapper(FinremCaseData finremCaseData, String userAuthorisation) {
+        String caseId = finremCaseData.getCcdCaseId();
 
         CaseRole caseRole = caseRoleService.getUserCaseRole(caseId, userAuthorisation);
-        finremCaseDetails.getData().getSessionWrapper().setLoginAsApplicantSolicitor(YesOrNo.forValue(APP_SOLICITOR.equals(caseRole)));
-        finremCaseDetails.getData().getSessionWrapper().setLoginAsRespondentSolicitor(YesOrNo.forValue(RESP_SOLICITOR.equals(caseRole)));
+        finremCaseData.getSessionWrapper().setLoginAsApplicantSolicitor(YesOrNo.forValue(APP_SOLICITOR.equals(caseRole)));
+        finremCaseData.getSessionWrapper().setLoginAsRespondentSolicitor(YesOrNo.forValue(RESP_SOLICITOR.equals(caseRole)));
     }
 }
