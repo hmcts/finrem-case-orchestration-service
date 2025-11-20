@@ -89,12 +89,10 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         CaseDocumentParty loggedInUserRole =
             getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
 
-
         managedCollections.forEach(doc -> {
             doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole);
             setDefaultsForWithoutPrejudiceDocumentType(doc);
         });
-
 
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.addUploadedDocumentToDocumentCollectionType(callbackRequest, managedCollections));

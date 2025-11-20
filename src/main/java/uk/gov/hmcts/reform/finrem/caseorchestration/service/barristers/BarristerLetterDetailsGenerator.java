@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.barristers.BarristerLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
@@ -52,6 +53,7 @@ public class BarristerLetterDetailsGenerator extends BaseContestedLetterDetailsG
             .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
             .barristerFirmName(barristerFirmName)
             .reference(barristerOrgId)
+            .caseType(CaseType.forValue(caseDetails.getCaseTypeId()))
             .build();
     }
 }
