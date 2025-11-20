@@ -30,10 +30,17 @@ public class FinremCallbackRequestFactory {
     }
 
     public static FinremCallbackRequest from(Long id, FinremCaseData caseData) {
+        if (id != null) {
+            caseData.setCcdCaseId(String.valueOf(id));
+        }
         return from(id, NULL_CASE_TYPE, caseData, NULL_STATE);
     }
 
     public static FinremCallbackRequest from(Long id, FinremCaseData caseDataBefore, FinremCaseData caseData) {
+        if (id != null) {
+            caseDataBefore.setCcdCaseId(String.valueOf(id));
+            caseData.setCcdCaseId(String.valueOf(id));
+        }
         return from(FinremCaseDetailsBuilderFactory.from(id, NULL_CASE_TYPE, caseDataBefore, NULL_STATE),
             FinremCaseDetailsBuilderFactory.from(id, NULL_CASE_TYPE, caseData, NULL_STATE));
     }
@@ -43,10 +50,16 @@ public class FinremCallbackRequestFactory {
     }
 
     public static FinremCallbackRequest from(Long id, CaseType caseType, FinremCaseData caseData) {
+        if (id != null) {
+            caseData.setCcdCaseId(String.valueOf(id));
+        }
         return from(FinremCaseDetailsBuilderFactory.from(id, caseType, caseData));
     }
 
     public static FinremCallbackRequest from(Long id, CaseType caseType, FinremCaseData caseData, State state) {
+        if (id != null) {
+            caseData.setCcdCaseId(String.valueOf(id));
+        }
         return from(FinremCaseDetailsBuilderFactory.from(id, caseType, caseData, state));
     }
 
@@ -107,6 +120,9 @@ public class FinremCallbackRequestFactory {
     }
 
     public static FinremCallbackRequest create(Long id, CaseType caseType, EventType eventType, FinremCaseData caseData) {
+        if (id != null) {
+            caseData.setCcdCaseId(String.valueOf(id));
+        }
         caseData.setCcdCaseType(caseType);
         return FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
@@ -120,6 +136,10 @@ public class FinremCallbackRequestFactory {
 
     public static FinremCallbackRequest create(Long id, CaseType caseType, EventType eventType, FinremCaseData caseData,
                                                FinremCaseData caseDataBefore) {
+        if (id != null) {
+            caseData.setCcdCaseId(String.valueOf(id));
+            caseDataBefore.setCcdCaseId(String.valueOf(id));
+        }
         caseData.setCcdCaseType(caseType);
         caseDataBefore.setCcdCaseType(caseType);
 
