@@ -48,10 +48,7 @@ class StopRepresentingClientSubmittedHandlerTest {
 
     @Test
     void givenAnyCase_whenHandled_thenReturnConfirmationMessages() {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .build();
-
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(request, AUTH_TOKEN);
         assertThat(response.getConfirmationBody()).isEqualTo("<br /><br />");
         assertThat(response.getConfirmationHeader()).isEqualTo("# Notice of change request submitted");
