@@ -58,10 +58,6 @@ public class UploadApprovedOrderContestedAboutToSubmitHandler extends FinremCall
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        // Set the case ID so that requests to CDAM don't fail.
-        // This is a temporary workaround until the request to CDAM is fixed to
-        // send the case type ID and not the case ID. See DFR-4138
-        caseData.setCcdCaseId(caseDetails.getCaseIdAsString());
 
         uploadApprovedOrderService.processApprovedOrdersMh(caseDetails, userAuthorisation);
 
