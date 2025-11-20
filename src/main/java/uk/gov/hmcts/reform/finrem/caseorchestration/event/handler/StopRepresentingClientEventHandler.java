@@ -28,7 +28,7 @@ public class StopRepresentingClientEventHandler {
 
     @EventListener
     @Async
-    public void handleCaseDataChange(final StopRepresentingClientEvent event) {
+    public void handleEvent(final StopRepresentingClientEvent event) {
         String caseId = event.getCaseId();
         String sysAuthToken = systemUserService.getSysUserToken();
         ccdDataStoreService.removeUserCaseRole(caseId,
