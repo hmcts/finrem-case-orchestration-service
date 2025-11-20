@@ -73,9 +73,6 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
                 .build()
         );
 
-        // REVISIT: this line should be removed after DFR-4138 release, but breaks when removed currently.
-        finremCaseData.setCcdCaseId(caseDetails.getCaseIdAsString());
-
         finremCaseData.getManageHearingsWrapper().setWorkingVacatedHearing(
             WorkingVacatedHearing.builder()
                 .chooseHearings(hearingService.generateSelectableHearingsAsDynamicList(caseDetails, userAuthorisation))
