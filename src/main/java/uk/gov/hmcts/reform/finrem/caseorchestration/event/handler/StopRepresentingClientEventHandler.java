@@ -6,39 +6,40 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuditEventService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StopRepresentingClientEventHandler {
 
     private final AuditEventService auditEventService;
-    private final IdamAuthService idamClient;
     private final SystemUserService systemUserService;
     private final CcdDataStoreService ccdDataStoreService;
+    private final CaseRoleService caseRoleService;
 
     @EventListener
     @Async
     public void handleEvent(final StopRepresentingClientEvent event) {
         String caseId = event.getCaseId();
         String sysAuthToken = systemUserService.getSysUserToken();
-        ccdDataStoreService.removeUserCaseRole(caseId,
-            sysAuthToken, getInvokerDetails(event.getUserAuthorisation(), caseId).getId(), APP_SOLICITOR.getCcdCode());
+        CaseRole caseRole = caseRoleService.getUserCaseRole(caseId, event.getUserAuthorisation());
+        ccdDataStoreService.removeUserCaseRole(caseId, sysAuthToken,
+            getInvokerUserId(caseId),
+            caseRole.getCcdCode());
     }
 
-    private UserDetails getInvokerDetails(String authToken, String caseId) {
+    private String getInvokerUserId(String caseId) {
         String event = STOP_REPRESENTING_CLIENT.getCcdType();
         AuditEvent auditEvent = auditEventService.getLatestAuditEventByName(caseId, event)
-            .orElseThrow(() -> new IllegalStateException(format("%s - Could not find %s event in audit", caseId,event)));
-        return idamClient.getUserByUserId(authToken, auditEvent.getUserId());
+            .orElseThrow(() -> new IllegalStateException(format("%s - Could not find %s event in audit", caseId, event)));
+        return auditEvent.getUserId();
     }
 }

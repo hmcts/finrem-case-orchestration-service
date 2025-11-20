@@ -8,14 +8,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuditEventService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.Optional;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -31,17 +29,18 @@ class StopRepresentingClientEventHandlerTest {
     @Mock
     private AuditEventService auditEventService;
     @Mock
-    private IdamAuthService idamClient;
-    @Mock
     private SystemUserService systemUserService;
     @Mock
     private CcdDataStoreService ccdDataStoreService;
+    @Mock
+    private CaseRoleService caseRoleService;
 
     private StopRepresentingClientEventHandler underTest;
 
     @BeforeEach
     public void setup() {
-        underTest = new StopRepresentingClientEventHandler(auditEventService, idamClient, systemUserService, ccdDataStoreService);
+        underTest = new StopRepresentingClientEventHandler(auditEventService, systemUserService, ccdDataStoreService,
+            caseRoleService);
     }
 
     @Test
@@ -49,15 +48,13 @@ class StopRepresentingClientEventHandlerTest {
         when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
         when(auditEventService.getLatestAuditEventByName(CASE_ID, STOP_REPRESENTING_CLIENT.getCcdType()))
             .thenReturn(Optional.of(AuditEvent.builder().userId(TEST_USER_ID).build()));
-        UserDetails mockedUserDetails = mock(UserDetails.class);
-        when(mockedUserDetails.getId()).thenReturn("mockedUserId");
-        when(idamClient.getUserByUserId(AUTH_TOKEN, TEST_USER_ID)).thenReturn(mockedUserDetails);
+        when(caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
 
         underTest.handleEvent(StopRepresentingClientEvent.builder()
             .caseId(CASE_ID)
             .userAuthorisation(AUTH_TOKEN)
             .build());
 
-        verify(ccdDataStoreService).removeUserCaseRole(CASE_ID, TEST_SYSTEM_TOKEN, "mockedUserId", APP_SOLICITOR.getCcdCode());
+        verify(ccdDataStoreService).removeUserCaseRole(CASE_ID, TEST_SYSTEM_TOKEN, TEST_USER_ID, APP_SOLICITOR.getCcdCode());
     }
 }
