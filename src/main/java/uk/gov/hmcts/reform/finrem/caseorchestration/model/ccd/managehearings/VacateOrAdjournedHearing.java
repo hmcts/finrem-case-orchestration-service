@@ -34,8 +34,7 @@ public class VacateOrAdjournedHearing {
     private List<DocumentCollectionItem> additionalHearingDocs;
     private List<PartyOnCaseCollectionItem> partiesOnCase;
     private YesOrNo wasMigrated;
-    // TODO: Use ENUM for vacateOrAdjournReason
-    private String vacateOrAdjournReason;
+    private VacateOrAdjournReason vacateOrAdjournReason;
     private String specifyOtherReason;
     // TODO: Use Enum for hearingStatus
     private String hearingStatus;
@@ -56,6 +55,7 @@ public class VacateOrAdjournedHearing {
             .additionalHearingDocs(hearing.getAdditionalHearingDocs())
             .partiesOnCase(hearing.getPartiesOnCase())
             .wasMigrated(hearing.getWasMigrated())
+            //TODO: Store vacated/adjourned date
             .vacateOrAdjournReason(vacateHearingInput.getVacateReason())
             .specifyOtherReason(vacateHearingInput.getSpecifyOtherReason())
             .build();

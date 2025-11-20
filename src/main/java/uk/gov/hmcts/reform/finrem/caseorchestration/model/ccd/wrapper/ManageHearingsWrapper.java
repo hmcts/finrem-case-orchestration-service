@@ -43,7 +43,7 @@ public class ManageHearingsWrapper {
     private List<VacatedOrAdjournedHearingsCollectionItem> vacatedOrAdjournedHearings;
     private List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection;
     
-    // TabItems representations maintaining confidentially for parties
+    // TabItem representations maintaining confidentiality for parties
     private List<HearingTabCollectionItem> hearingTabItems;
     private List<HearingTabCollectionItem> applicantHearingTabItems;
     private List<HearingTabCollectionItem> respondentHearingTabItems;

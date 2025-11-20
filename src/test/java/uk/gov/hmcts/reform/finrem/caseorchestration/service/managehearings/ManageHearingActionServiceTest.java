@@ -53,6 +53,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournReason.COURTROOM_UNAVAILABLE;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingActionServiceTest {
@@ -308,7 +309,7 @@ class ManageHearingActionServiceTest {
             .chooseHearings(DynamicList.builder()
                 .value(DynamicListElement.builder().code(hearingId.toString()).build())
                 .build())
-            .vacateReason("Courtroom_Unavailable")
+            .vacateReason(COURTROOM_UNAVAILABLE)
             .build());
 
         hearingWrapper.setHearings(new ArrayList<>(List.of(

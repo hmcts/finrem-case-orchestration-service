@@ -17,7 +17,6 @@ public class WorkingVacatedHearing {
     private DynamicList chooseHearings;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate vacateHearingDate;
-    //TODO: Use ENUM for vacateOrAdjournReason
-    private String vacateReason;
+    private VacateOrAdjournReason vacateReason;
     private String specifyOtherReason;
 }
