@@ -40,6 +40,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             .caseDetailsBefore(finremCaseDetailsBefore)
             .eventType(EventType.getEventType(callbackRequest.getEventId()))
             .build();
+        finremCaseDetails.getData().setCcdCaseId(finremCaseDetails.getCaseIdAsString());
         return callbackRequestWithFinremCaseDetails;
     }
 
