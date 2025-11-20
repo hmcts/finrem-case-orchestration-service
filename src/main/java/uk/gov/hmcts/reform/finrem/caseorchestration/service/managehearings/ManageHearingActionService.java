@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
@@ -132,12 +133,15 @@ public class ManageHearingActionService {
         WorkingVacatedHearing vacateHearingInput = hearingsWrapper.getWorkingVacatedHearing();
         UUID selectedHearingId = UUID.fromString(vacateHearingInput.getChooseHearings().getValue().getCode());
 
-        ManageHearingsCollectionItem hearingToVacate = hearingsWrapper.getHearings().stream()
+        ManageHearingsCollectionItem hearingToVacate = emptyIfNull(hearingsWrapper.getHearings()).stream()
             .filter(item -> selectedHearingId.equals(item.getId()))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("No hearing found with ID: " + selectedHearingId));
 
-        hearingsWrapper.getHearings().remove(hearingToVacate);
+        List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
+            .filter(list -> !list.isEmpty())
+            .orElseThrow(() -> new IllegalStateException("Hearings collection is empty"));
+        hearings.remove(hearingToVacate);
 
         VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.fromHearingToVacatedHearing(hearingToVacate, vacateHearingInput);
 
