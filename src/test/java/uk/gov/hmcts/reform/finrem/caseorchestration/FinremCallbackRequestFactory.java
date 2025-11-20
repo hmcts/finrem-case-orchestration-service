@@ -38,9 +38,10 @@ public class FinremCallbackRequestFactory {
             .build();
     }
 
-    private static FinremCallbackRequest pair(FinremCaseDetails.FinremCaseDetailsBuilder before,
+    private static FinremCallbackRequest pair(EventType eventType, FinremCaseDetails.FinremCaseDetailsBuilder before,
                                               FinremCaseDetails.FinremCaseDetailsBuilder after) {
         return FinremCallbackRequest.builder()
+            .eventType(eventType)
             .caseDetails(after.build())
             .caseDetailsBefore(before.build())
             .build();
@@ -73,7 +74,7 @@ public class FinremCallbackRequestFactory {
     public static FinremCallbackRequest from(Long id,
                                              FinremCaseData before,
                                              FinremCaseData after) {
-        return pair(
+        return pair(null,
             details(id, null, before, null),
             details(id, null, after, null)
         );
@@ -98,14 +99,13 @@ public class FinremCallbackRequestFactory {
         return single(details(id, null, data, state));
     }
 
-
     public static FinremCallbackRequest from(FinremCaseDetails.FinremCaseDetailsBuilder builder) {
         return single(builder);
     }
 
     public static FinremCallbackRequest from(FinremCaseDetails.FinremCaseDetailsBuilder before,
                                              FinremCaseDetails.FinremCaseDetailsBuilder after) {
-        return pair(before, after);
+        return pair(null, before, after);
     }
 
     public static FinremCallbackRequest from(EventType eventType,
@@ -140,12 +140,12 @@ public class FinremCallbackRequestFactory {
                 .ccdCaseId(String.valueOf(id))
                 .build(), null);
 
-        FinremCaseDetails.FinremCaseDetailsBuilder before=
+        FinremCaseDetails.FinremCaseDetailsBuilder before =
             details(id, type, FinremCaseData.builder()
                 .ccdCaseId(String.valueOf(id))
                 .build(), null);
 
-        return pair(before, after);
+        return pair(eventType, before, after);
     }
 
     public static FinremCallbackRequest create() {
