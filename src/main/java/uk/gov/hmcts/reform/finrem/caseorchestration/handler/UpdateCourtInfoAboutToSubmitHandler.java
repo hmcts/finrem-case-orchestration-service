@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 @Service
 public class UpdateCourtInfoAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private CourtDetailsMapper courtDetailsMapper;
+    private final CourtDetailsMapper courtDetailsMapper;
 
     @Autowired
     public UpdateCourtInfoAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
@@ -29,14 +29,14 @@ public class UpdateCourtInfoAboutToSubmitHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.UPDATE_COURT_INFO.equals(eventType));
+            && EventType.UPDATE_COURT_INFO.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("About to Submit handler for FR_updateCourtInfo Case ID: {}", caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getData();
 
