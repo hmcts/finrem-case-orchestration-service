@@ -46,7 +46,7 @@ class SolicitorCreateContestedAboutToStartHandlerTest {
     void testHandle() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, SOLICITOR_CREATE, caseData);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, SOLICITOR_CREATE, caseData);
 
         underTest.handle(callbackRequest, AUTH_TOKEN);
 

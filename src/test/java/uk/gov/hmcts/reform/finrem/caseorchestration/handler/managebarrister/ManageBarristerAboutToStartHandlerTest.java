@@ -87,7 +87,7 @@ class ManageBarristerAboutToStartHandlerTest {
     private FinremCallbackRequest createCallbackRequest() {
         FinremCaseData caseData = FinremCaseData.builder()
             .build();
-        return FinremCallbackRequestFactory.create(Long.valueOf(TestConstants.CASE_ID), CaseType.CONTESTED,
+        return FinremCallbackRequestFactory.from(Long.valueOf(TestConstants.CASE_ID), CaseType.CONTESTED,
             EventType.MANAGE_BARRISTER, caseData);
     }
 }
