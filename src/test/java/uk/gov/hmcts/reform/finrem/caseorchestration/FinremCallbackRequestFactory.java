@@ -24,7 +24,7 @@ public class FinremCallbackRequestFactory {
                                                                       CaseType caseType,
                                                                       FinremCaseData data,
                                                                       State state) {
-        setCaseIdAndType(id, null, data);
+        setCaseIdAndType(id, caseType, data);
         return FinremCaseDetails.builder()
             .id(id)
             .caseType(caseType)
