@@ -99,7 +99,7 @@ public class HearingService {
         if (featureToggleService.isManageHearingEnabled()) {
             populateManageHearings(caseData, dynamicListElements, elementToSortingKeyMap, userAuthorisation);
         } else {
-            // old-style
+            // TO BE REMOVED old-style
             populateTopLevelHearings(caseData, dynamicListElements, elementToSortingKeyMap);
             populateInterimHearings(caseData, dynamicListElements, elementToSortingKeyMap);
             populateHearingsCreatedFromProcessOrder(caseData, dynamicListElements, elementToSortingKeyMap);

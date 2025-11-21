@@ -10,7 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 
 import java.util.Collections;
@@ -26,13 +28,22 @@ import java.util.UUID;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManageHearingsWrapper {
+    
+    // Working data representations
+    private ManageHearingsAction manageHearingsActionSelection;
+    private UUID workingHearingId;
+    private WorkingHearing workingHearing;
+    private WorkingVacatedHearing workingVacatedHearing;
+    private YesOrNo relistHearingSelection;
     private YesOrNo isAddHearingChosen;
     private YesOrNo isFinalOrder;
-    private ManageHearingsAction manageHearingsActionSelection;
-    private WorkingHearing workingHearing;
+
+    // Hearing data Repositories 
     private List<ManageHearingsCollectionItem> hearings;
+    private List<VacatedOrAdjournedHearingsCollectionItem> vacatedOrAdjournedHearings;
     private List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection;
-    private UUID workingHearingId;
+    
+    // TabItem representations maintaining confidentiality for parties
     private List<HearingTabCollectionItem> hearingTabItems;
     private List<HearingTabCollectionItem> applicantHearingTabItems;
     private List<HearingTabCollectionItem> respondentHearingTabItems;
