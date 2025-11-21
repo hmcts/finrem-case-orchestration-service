@@ -7,6 +7,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockingDetails;
+
 public class FinremCallbackRequestFactory {
 
     private FinremCallbackRequestFactory() {
@@ -18,15 +21,13 @@ public class FinremCallbackRequestFactory {
        ----------------------------------------------------------- */
 
     private static FinremCaseDetails.FinremCaseDetailsBuilder details(Long id,
-                                                                      CaseType type,
+                                                                      CaseType caseType,
                                                                       FinremCaseData data,
                                                                       State state) {
-        if (data != null && id != null) {
-            data.setCcdCaseId(String.valueOf(id));
-        }
+        setCaseIdAndType(id, null, data);
         return FinremCaseDetails.builder()
             .id(id)
-            .caseType(type)
+            .caseType(caseType)
             .state(state)
             .data(data);
     }
@@ -52,11 +53,7 @@ public class FinremCallbackRequestFactory {
        ----------------------------------------------------------- */
 
     public static FinremCallbackRequest fromId(Long id) {
-        FinremCaseData data = FinremCaseData.builder()
-            .ccdCaseId(id == null ? null : String.valueOf(id))
-            .build();
-
-        return single(details(id, null, data, null));
+        return single(details(id, null, FinremCaseData.builder().build(), null));
     }
 
     public static FinremCallbackRequest from() {
@@ -81,16 +78,16 @@ public class FinremCallbackRequestFactory {
     }
 
     public static FinremCallbackRequest from(Long id,
-                                             CaseType type,
+                                             CaseType caseType,
                                              FinremCaseData data) {
-        return single(details(id, type, data, null));
+        return single(details(id, caseType, data, null));
     }
 
     public static FinremCallbackRequest from(Long id,
-                                             CaseType type,
+                                             CaseType caseType,
                                              FinremCaseData data,
                                              State state) {
-        return single(details(id, type, data, state));
+        return single(details(id, caseType, data, state));
     }
 
     public static FinremCallbackRequest from(Long id,
@@ -133,15 +130,15 @@ public class FinremCallbackRequestFactory {
     }
 
     public static FinremCallbackRequest from(Long id,
-                                             CaseType type,
+                                             CaseType caseType,
                                              EventType eventType) {
         FinremCaseDetails.FinremCaseDetailsBuilder after =
-            details(id, type, FinremCaseData.builder()
+            details(id, caseType, FinremCaseData.builder()
                 .ccdCaseId(String.valueOf(id))
                 .build(), null);
 
         FinremCaseDetails.FinremCaseDetailsBuilder before =
-            details(id, type, FinremCaseData.builder()
+            details(id, caseType, FinremCaseData.builder()
                 .ccdCaseId(String.valueOf(id))
                 .build(), null);
 
@@ -149,31 +146,38 @@ public class FinremCallbackRequestFactory {
     }
 
     public static FinremCallbackRequest from(Long id,
-                                             CaseType type,
+                                             CaseType caseType,
                                              EventType eventType,
-                                             FinremCaseData data,
-                                             FinremCaseData before) {
-
-        data.setCcdCaseType(type);
-        before.setCcdCaseType(type);
-
+                                             FinremCaseData data) {
         return FinremCallbackRequest.builder()
             .eventType(eventType)
-            .caseDetails(details(id, type, data, null).build())
-            .caseDetailsBefore(details(id, type, before, null).build())
+            .caseDetails(details(id, caseType, data, null).build())
             .build();
     }
 
-    public static FinremCallbackRequest create(Long id,
-                                               CaseType type,
-                                               EventType eventType,
-                                               FinremCaseData data) {
-
-        data.setCcdCaseType(type);
-
+    public static FinremCallbackRequest from(Long id,
+                                             CaseType caseType,
+                                             EventType eventType,
+                                             FinremCaseData data,
+                                             FinremCaseData before) {
         return FinremCallbackRequest.builder()
             .eventType(eventType)
-            .caseDetails(details(id, type, data, null).build())
+            .caseDetails(details(id, caseType, data, null).build())
+            .caseDetailsBefore(details(id, caseType, before, null).build())
             .build();
+    }
+
+    private static void setCaseIdAndType(Long id, CaseType caseType, FinremCaseData caseData) {
+        if (caseData == null || id == null) {
+            return;
+        }
+
+        if (mockingDetails(caseData).isMock()) {
+            lenient().when(caseData.getCcdCaseId()).thenReturn(String.valueOf(id));
+        } else {
+            caseData.setCcdCaseId(String.valueOf(id));
+        }
+
+        caseData.setCcdCaseType(caseType);
     }
 }
