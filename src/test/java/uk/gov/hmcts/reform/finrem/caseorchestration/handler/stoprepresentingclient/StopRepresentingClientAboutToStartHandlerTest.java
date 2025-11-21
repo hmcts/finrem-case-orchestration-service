@@ -45,8 +45,8 @@ class StopRepresentingClientAboutToStartHandlerTest {
     void givenAsApplicantSolicitor_whenHandled_thenSessionWrapperPopulated() {
         when(caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
 
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
-            FinremCaseData.builder().build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
+            FinremCaseData.builder().ccdCaseId(CASE_ID).build());
         FinremCaseData finremCaseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
         assertThat(finremCaseData.getSessionWrapper()).isNotNull();
         assertThat(finremCaseData.getSessionWrapper().getLoginAsApplicantSolicitor()).isEqualTo(YesOrNo.YES);
