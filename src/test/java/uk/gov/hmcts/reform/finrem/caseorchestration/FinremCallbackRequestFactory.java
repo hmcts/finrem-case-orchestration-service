@@ -174,10 +174,11 @@ public class FinremCallbackRequestFactory {
 
         if (mockingDetails(caseData).isMock()) {
             lenient().when(caseData.getCcdCaseId()).thenReturn(String.valueOf(id));
+            lenient().when(caseData.getCcdCaseType()).thenReturn(caseType);
         } else {
             caseData.setCcdCaseId(String.valueOf(id));
+            caseData.setCcdCaseType(caseType);
         }
 
-        caseData.setCcdCaseType(caseType);
     }
 }
