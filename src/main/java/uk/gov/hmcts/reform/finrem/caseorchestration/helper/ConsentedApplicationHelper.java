@@ -34,7 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ConsentedApplicationHelper {
 
     public void setConsentVariationOrderLabelField(FinremCaseData caseData) {
-        if (Boolean.TRUE.equals(isVariationOrder(caseData))) {
+        if (isVariationOrder(caseData)) {
             caseData.getConsentOrderWrapper().setConsentVariationOrderLabelC(VARIATION_ORDER_CAMELCASE_LABEL_VALUE);
             caseData.getConsentOrderWrapper().setConsentVariationOrderLabelL(VARIATION_ORDER_LOWERCASE_LABEL_VALUE);
             caseData.getConsentOrderWrapper().setOtherDocLabel(CV_OTHER_DOC_LABEL_VALUE);
@@ -85,11 +85,20 @@ public class ConsentedApplicationHelper {
             return CONSENT;
         }
 
-        return Boolean.TRUE.equals(isVariationOrder(caseData))
+        return isVariationOrder(caseData)
             ? VARIATION
             : CONSENT;
     }
 
+    /**
+     * Validates the selected region for a consent application.
+     *
+     * <p>If the allocated region is the High Court, this method returns an error
+     * message. Otherwise, it returns an empty list.</p>
+     *
+     * @param caseData the case data containing the selected region
+     * @return a list of validation error messages, or an empty list if valid
+     */
     public List<String> validateRegionList(FinremCaseData caseData) {
         boolean isHighCourt =
             Region.HIGHCOURT.equals(
