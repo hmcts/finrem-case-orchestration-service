@@ -148,8 +148,20 @@ public class FinremCallbackRequestFactory {
         return pair(eventType, before, after);
     }
 
-    public static FinremCallbackRequest create() {
-        return single(FinremCaseDetailsBuilderFactory.from());
+    public static FinremCallbackRequest from(Long id,
+                                             CaseType type,
+                                             EventType eventType,
+                                             FinremCaseData data,
+                                             FinremCaseData before) {
+
+        data.setCcdCaseType(type);
+        before.setCcdCaseType(type);
+
+        return FinremCallbackRequest.builder()
+            .eventType(eventType)
+            .caseDetails(details(id, type, data, null).build())
+            .caseDetailsBefore(details(id, type, before, null).build())
+            .build();
     }
 
     public static FinremCallbackRequest create(Long id,
@@ -162,22 +174,6 @@ public class FinremCallbackRequestFactory {
         return FinremCallbackRequest.builder()
             .eventType(eventType)
             .caseDetails(details(id, type, data, null).build())
-            .build();
-    }
-
-    public static FinremCallbackRequest create(Long id,
-                                               CaseType type,
-                                               EventType eventType,
-                                               FinremCaseData data,
-                                               FinremCaseData before) {
-
-        data.setCcdCaseType(type);
-        before.setCcdCaseType(type);
-
-        return FinremCallbackRequest.builder()
-            .eventType(eventType)
-            .caseDetails(details(id, type, data, null).build())
-            .caseDetailsBefore(details(id, type, before, null).build())
             .build();
     }
 }
