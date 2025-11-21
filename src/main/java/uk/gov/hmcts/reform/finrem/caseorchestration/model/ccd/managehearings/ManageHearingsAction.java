@@ -10,7 +10,8 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public enum ManageHearingsAction {
-    ADD_HEARING("Add_Hearing");
+    ADD_HEARING("Add_Hearing"),
+    VACATE_HEARING("Vacate_Hearing");
 
     private final String value;
 
