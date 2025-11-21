@@ -81,9 +81,6 @@ public class ManageHearingActionService {
 
         generateHearingNotice(finremCaseDetails, authToken, documentMap);
 
-        // PT: Test code.  Move to wherever performVacateHearing is implemented
-//        generateVacateHearingNotice(finremCaseDetails, authToken, documentMap);
-
         // FDR Hearings that are not express cases do not generate Form C or Form G, they
         // will have been generated at the time of the FDA hearing.
         boolean shouldGenerateFormC = HearingType.FDA.equals(hearingType)
@@ -266,7 +263,6 @@ public class ManageHearingActionService {
         );
     }
 
-    // PT: Test code.  Move to wherever performVacateHearing is implemented
     private void generateVacateHearingNotice(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         documentMap.put(
             HEARING_NOTICE_DOCUMENT,
