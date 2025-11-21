@@ -5,29 +5,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Service
-public class UpdateCourtInfoAboutToSubmitHandler extends FinremCallbackHandler {
+public class UpdateCourtInfoMidHandler extends FinremCallbackHandler {
 
-    private CourtDetailsMapper courtDetailsMapper;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     @Autowired
-    public UpdateCourtInfoAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                               CourtDetailsMapper courtDetailsMapper) {
-        super(mapper);
-        this.courtDetailsMapper = courtDetailsMapper;
+    public UpdateCourtInfoMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                     ConsentedApplicationHelper consentedApplicationHelper) {
+        super(finremCaseDetailsMapper);
+        this.consentedApplicationHelper = consentedApplicationHelper;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+        return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
             && EventType.UPDATE_COURT_INFO.equals(eventType);
     }
@@ -35,18 +38,12 @@ public class UpdateCourtInfoAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData caseData = caseDetails.getData();
 
-        caseData.getRegionWrapper()
-            .setAllocatedRegionWrapper(
-                courtDetailsMapper.getLatestAllocatedCourt(
-                    callbackRequest.getCaseDetailsBefore().getData().getRegionWrapper().getAllocatedRegionWrapper(),
-                    caseData.getRegionWrapper().getAllocatedRegionWrapper(),
-                    true));
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        List<String> errors = new ArrayList<>(consentedApplicationHelper.validateRegionList(caseData));
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 }

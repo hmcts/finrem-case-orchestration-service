@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 @Slf4j
 public class ConsentedApplicationHelper {
-
-    private final DocumentConfiguration documentConfiguration;
 
     public void setConsentVariationOrderLabelField(FinremCaseData caseData) {
         if (Boolean.TRUE.equals(isVariationOrder(caseData))) {
@@ -82,12 +80,6 @@ public class ConsentedApplicationHelper {
         });
     }
 
-    public String getNotApprovedOrderNotificationFileName(FinremCaseData caseData) {
-        return Boolean.TRUE.equals(isVariationOrder(caseData))
-            ? documentConfiguration.getVariationOrderNotApprovedCoverLetterFileName()
-            : documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName();
-    }
-
     public String getOrderType(FinremCaseData caseData) {
         if (caseData.isContestedApplication()) {
             return CONSENT;
@@ -96,5 +88,18 @@ public class ConsentedApplicationHelper {
         return Boolean.TRUE.equals(isVariationOrder(caseData))
             ? VARIATION
             : CONSENT;
+    }
+
+    public List<String> validateRegionList(FinremCaseData caseData) {
+        boolean isHighCourt =
+            Region.HIGHCOURT.equals(
+                caseData.getRegionWrapper()
+                    .getAllocatedRegionWrapper()
+                    .getRegionList()
+            );
+
+        return isHighCourt
+            ? List.of("You cannot select the High Court for a consent application.")
+            : List.of();
     }
 }

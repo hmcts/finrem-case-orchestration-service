@@ -9,13 +9,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
@@ -28,15 +28,18 @@ public class SolicitorCreateConsentedMidHandler extends FinremCallbackHandler {
     private final ConsentOrderService consentOrderService;
     private final InternationalPostalService internationalPostalService;
     private final ObjectMapper objectMapper;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     public SolicitorCreateConsentedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               ConsentOrderService consentOrderService,
                                               InternationalPostalService internationalPostalService,
-                                              ObjectMapper objectMapper) {
+                                              ObjectMapper objectMapper,
+                                              ConsentedApplicationHelper consentedApplicationHelper) {
         super(finremCaseDetailsMapper);
         this.consentOrderService = consentOrderService;
         this.internationalPostalService = internationalPostalService;
         this.objectMapper = objectMapper;
+        this.consentedApplicationHelper = consentedApplicationHelper;
     }
 
     @Override
@@ -59,22 +62,9 @@ public class SolicitorCreateConsentedMidHandler extends FinremCallbackHandler {
         errors.addAll(internationalPostalService.validate(caseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
-        errors.addAll(validateRegionList(caseData));
+        errors.addAll(consentedApplicationHelper.validateRegionList(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
-    }
-
-    private List<String> validateRegionList(FinremCaseData caseData) {
-        boolean isHighCourt =
-            Region.HIGHCOURT.equals(
-                caseData.getRegionWrapper()
-                    .getAllocatedRegionWrapper()
-                    .getRegionList()
-            );
-
-        return isHighCourt
-            ? List.of("You cannot select the High Court for a consent application.")
-            : List.of();
     }
 }
