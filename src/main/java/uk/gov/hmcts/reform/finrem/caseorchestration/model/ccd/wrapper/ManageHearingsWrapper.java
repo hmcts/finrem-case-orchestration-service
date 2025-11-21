@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Vac
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +45,7 @@ public class ManageHearingsWrapper {
     private List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection;
     
     // TabItem representations maintaining confidentiality for parties
+    // Hearing Tab Items
     private List<HearingTabCollectionItem> hearingTabItems;
     private List<HearingTabCollectionItem> applicantHearingTabItems;
     private List<HearingTabCollectionItem> respondentHearingTabItems;
@@ -51,6 +53,9 @@ public class ManageHearingsWrapper {
     private List<HearingTabCollectionItem> int2HearingTabItems;
     private List<HearingTabCollectionItem> int3HearingTabItems;
     private List<HearingTabCollectionItem> int4HearingTabItems;
+
+    // Vacated Or Adjourned Hearing Tab Items
+    private List<VacatedOrAdjournedHearingTabCollectionItem> vacatedOrAdjournedHearingTabItems;
 
     /**
      * Retrieves a {@link ManageHearingsCollectionItem} from the hearings list by its UUID.

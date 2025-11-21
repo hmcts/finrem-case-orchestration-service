@@ -12,7 +12,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabItem;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -49,6 +52,30 @@ public class HearingTabDataMapper {
             .tabAdditionalInformation(getAdditionalInformation(hearing))
             .tabHearingDocuments(tryToMapHearingDocumentsToTabData(
                 hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
+            .build();
+    }
+
+    public VacatedOrAdjournedHearingTabItem mapVacatedOrAdjournedHearingToTabData(VacatedOrAdjournedHearingsCollectionItem hearingCollectionItem,
+                                                                                  List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection) {
+
+        VacateOrAdjournedHearing hearing = hearingCollectionItem.getValue();
+
+        return VacatedOrAdjournedHearingTabItem.builder()
+            .tabHearingType(hearing.getHearingType().getId())
+            .tabCourtSelection(getCourtName(hearing.getHearingCourtSelection()))
+            .tabAttendance(hearing.getHearingMode().getDisplayValue())
+            .tabDateTime(getFormattedDateTime(hearing.getHearingDate(), hearing.getHearingTime()))
+            .tabTimeEstimate(hearing.getHearingTimeEstimate())
+            .tabConfidentialParties(getConfidentialParties(hearing))
+            .tabAdditionalInformation(getAdditionalInformation(hearing))
+            .tabHearingDocuments(tryToMapHearingDocumentsToTabData(
+                hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
+            .tabVacatedOrAdjournedDate(hearing.getVacatedOrAdjournedDate() != null
+                ? hearing.getVacatedOrAdjournedDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+                : null)
+            .tabVacateOrAdjournReason(hearing.getVacateOrAdjournReason().getDescription())
+            .tabSpecifyOtherReason(hearing.getSpecifyOtherReason())
+            .tabHearingStatus(hearing.getHearingStatus().getDescription())
             .build();
     }
 
@@ -128,6 +155,20 @@ public class HearingTabDataMapper {
         return getAdditionalInformation(hearing.getAdditionalHearingInformation());
     }
 
+    /**
+     * Retrieves the additional hearing information from the given {@link Hearing} object.
+     *
+     * <p>
+     * This method delegates to {@link #getAdditionalInformation(String)} using the
+     * value from {@code hearing.getAdditionalHearingInformation()}.
+     *
+     * @param hearing the {@link Hearing} object containing the additional information
+     * @return the formatted or processed additional hearing information, or {@code null} if none is available
+     */
+    public String getAdditionalInformation(VacateOrAdjournedHearing hearing) {
+        return getAdditionalInformation(hearing.getAdditionalHearingInformation());
+    }
+
     private String getHearingType(Hearing hearing) {
         return hearing.getHearingType().getId();
     }
@@ -137,6 +178,14 @@ public class HearingTabDataMapper {
     }
 
     private String getConfidentialParties(Hearing hearing) {
+        return hearing.getPartiesOnCase() != null
+            ? hearing.getPartiesOnCase().stream()
+            .map(PartyOnCaseCollectionItem::getValue).map(PartyOnCase::getLabel)
+            .collect(Collectors.joining(", "))
+            : DEFAULT_CONFIDENTIAL_PARTIES;
+    }
+
+    private String getConfidentialParties(VacateOrAdjournedHearing hearing) {
         return hearing.getPartiesOnCase() != null
             ? hearing.getPartiesOnCase().stream()
             .map(PartyOnCaseCollectionItem::getValue).map(PartyOnCase::getLabel)
@@ -156,6 +205,26 @@ public class HearingTabDataMapper {
         List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
         UUID hearingId,
         Hearing hearing) {
+        try {
+            return mapHearingDocumentsToTabData(hearingDocumentsCollection, hearingId, hearing);
+        } catch (NullPointerException npe) {
+            log.error("NullPointerException mapping hearing documents to tab data.", npe);
+            return List.of();
+        }
+    }
+
+    /**
+     * Wraps the call to map hearing documents to tab data with error handling.
+     * If an exception occurs during the mapping process, logs the error and returns an empty list
+     * @param hearingDocumentsCollection the collection of hearing documents to filter and process
+     * @param hearingId                  the unique identifier of the hearing to match documents against
+     * @return a list of {@link DocumentCollectionItem} representing documents associated with the hearing,
+     *         or an empty list if an error occurs
+     */
+    private List<DocumentCollectionItem> tryToMapHearingDocumentsToTabData(
+        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
+        UUID hearingId,
+        VacateOrAdjournedHearing hearing) {
         try {
             return mapHearingDocumentsToTabData(hearingDocumentsCollection, hearingId, hearing);
         } catch (NullPointerException npe) {
@@ -213,6 +282,48 @@ public class HearingTabDataMapper {
                             .categoryId(HEARING_NOTICES.getDocumentCategoryId())
                             .build()
                     ).build())
+            .toList()
+            : List.of();
+
+        return Stream.concat(
+            hearingDocuments.stream(),
+            additionalDocs.stream()
+        ).toList();
+    }
+
+    private List<DocumentCollectionItem> mapHearingDocumentsToTabData(
+        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
+        UUID hearingId,
+        VacateOrAdjournedHearing hearing) {
+
+        List<DocumentCollectionItem> hearingDocuments = hearingDocumentsCollection != null
+            ? hearingDocumentsCollection.stream()
+            .filter(doc -> hearingId.equals(doc.getValue().getHearingId()))
+            .map(doc -> DocumentCollectionItem.builder()
+                .value(CaseDocument
+                    .builder()
+                    .documentUrl(doc.getValue().getHearingDocument().getDocumentUrl())
+                    .documentFilename(doc.getValue().getHearingDocument().getDocumentFilename())
+                    .uploadTimestamp(doc.getValue().getHearingDocument().getUploadTimestamp())
+                    .documentBinaryUrl(doc.getValue().getHearingDocument().getDocumentBinaryUrl())
+                    .categoryId(HEARING_NOTICES.getDocumentCategoryId())
+                    .build())
+                .build())
+            .toList()
+            : List.of();
+
+        List<DocumentCollectionItem> additionalDocs = hearing.getAdditionalHearingDocs() != null
+            ? hearing.getAdditionalHearingDocs().stream()
+            .map(doc -> DocumentCollectionItem.builder()
+                .value(CaseDocument
+                    .builder()
+                    .documentUrl(doc.getValue().getDocumentUrl())
+                    .documentFilename(doc.getValue().getDocumentFilename())
+                    .uploadTimestamp(doc.getValue().getUploadTimestamp())
+                    .documentBinaryUrl(doc.getValue().getDocumentBinaryUrl())
+                    .categoryId(HEARING_NOTICES.getDocumentCategoryId())
+                    .build()
+                ).build())
             .toList()
             : List.of();
 
