@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.VacateHearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -47,6 +48,7 @@ public class ManageHearingsDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final HearingNoticeLetterDetailsMapper hearingNoticeLetterDetailsMapper;
+    private final VacateHearingNoticeLetterDetailsMapper vacateHearingNoticeLetterDetailsMapper;
     private final ManageHearingFormCLetterDetailsMapper manageHearingFormCLetterDetailsMapper;
     private final ManageHearingFormGLetterDetailsMapper formGLetterDetailsMapper;
     private final ExpressCaseService expressCaseService;
@@ -69,6 +71,28 @@ public class ManageHearingsDocumentService {
             documentDataMap,
             documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails),
             documentConfiguration.getManageHearingNoticeFileName(),
+            finremCaseDetails.getCaseType()
+        );
+    }
+
+    /**
+     * Generates a notice document to say that a hearing is being vacated.
+     * Includes the given hearing and case details.
+     *
+     * @param finremCaseDetails  the case details containing case data
+     * @param authorisationToken the authorisation token for document generation
+     * @return the generated vacate hearing notice as a {@link CaseDocument}
+     */
+    public CaseDocument generateVacateHearingNotice(FinremCaseDetails finremCaseDetails,
+                                              String authorisationToken) {
+
+        Map<String, Object> documentDataMap = vacateHearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
+
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(
+            authorisationToken,
+            documentDataMap,
+            documentConfiguration.getVacateHearingNoticeTemplate(finremCaseDetails),
+            documentConfiguration.getVacateHearingNoticeFileName(),
             finremCaseDetails.getCaseType()
         );
     }

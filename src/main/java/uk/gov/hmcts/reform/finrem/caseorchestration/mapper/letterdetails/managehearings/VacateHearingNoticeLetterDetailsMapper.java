@@ -14,10 +14,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehe
 import java.time.LocalDate;
 
 @Component
-public class HearingNoticeLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
+public class VacateHearingNoticeLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
 
-    public HearingNoticeLetterDetailsMapper(CourtDetailsConfiguration courtDetailsConfiguration,
-                                            ObjectMapper objectMapper) {
+    public VacateHearingNoticeLetterDetailsMapper(CourtDetailsConfiguration courtDetailsConfiguration,
+                                                  ObjectMapper objectMapper) {
         super(objectMapper, courtDetailsConfiguration);
     }
 
@@ -30,20 +30,18 @@ public class HearingNoticeLetterDetailsMapper extends AbstractManageHearingsLett
             buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt());
 
         return HearingNoticeLetterDetails.builder()
-            .ccdCaseNumber(caseDetails.getCaseIdAsString())
+            .ccdCaseNumber(caseDetails.getId().toString())
             .applicantName(caseData.getFullApplicantName())
             .respondentName(caseData.getRespondentFullName())
             .letterDate(LocalDate.now().toString())
             .hearingType(hearing.getHearingType().getId())
             .hearingDate(hearing.getHearingDate().toString())
             .hearingTime(hearing.getHearingTime())
-            .hearingTimeEstimate(hearing.getHearingTimeEstimate())
             .courtDetails(courtTemplateFields)
             .hearingVenue(courtTemplateFields.getCourtContactDetailsAsOneLineAddressString())
-            .attendance(hearing.getHearingMode() != null ? hearing.getHearingMode().getDisplayValue() : "")
-            .additionalHearingInformation(hearing.getAdditionalHearingInformation() != null ? hearing.getAdditionalHearingInformation() : "")
             .typeOfApplication(getSchedule1OrMatrimonial(caseData))
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
+            .vacateHearingReasons("A reason to vacate") // implemented following DFR-3907
             .build();
     }
 }
