@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
@@ -41,6 +42,8 @@ public class HearingNoticeLetterDetailsMapper extends AbstractManageHearingsLett
             .hearingVenue(courtTemplateFields.getCourtContactDetailsAsOneLineAddressString())
             .attendance(hearing.getHearingMode() != null ? hearing.getHearingMode().getDisplayValue() : "")
             .additionalHearingInformation(hearing.getAdditionalHearingInformation() != null ? hearing.getAdditionalHearingInformation() : "")
+            .typeOfApplication(getSchedule1OrMatrimonial(caseData))
+            .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
             .build();
     }
 }
