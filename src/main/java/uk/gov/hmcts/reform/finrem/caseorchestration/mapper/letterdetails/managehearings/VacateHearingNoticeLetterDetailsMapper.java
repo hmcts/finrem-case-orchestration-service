@@ -39,7 +39,7 @@ public class VacateHearingNoticeLetterDetailsMapper extends AbstractManageHearin
             .hearingTime(hearing.getHearingTime())
             .courtDetails(courtTemplateFields)
             .hearingVenue(courtTemplateFields.getCourtContactDetailsAsOneLineAddressString())
-            .typeOfApplication(getDefaultTypeOfApplicationIfNotPresent(caseData))
+            .typeOfApplication(getSchedule1OrMatrimonial(caseData))
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
             .vacateHearingReasons("A reason to vacate") // implemented following DFR-3907
             .build();

@@ -42,7 +42,7 @@ public class HearingNoticeLetterDetailsMapper extends AbstractManageHearingsLett
             .hearingVenue(courtTemplateFields.getCourtContactDetailsAsOneLineAddressString())
             .attendance(hearing.getHearingMode() != null ? hearing.getHearingMode().getDisplayValue() : "")
             .additionalHearingInformation(hearing.getAdditionalHearingInformation() != null ? hearing.getAdditionalHearingInformation() : "")
-            .typeOfApplication(getDefaultTypeOfApplicationIfNotPresent(caseData))
+            .typeOfApplication(getSchedule1OrMatrimonial(caseData))
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
             .build();
     }

@@ -62,12 +62,11 @@ public abstract class AbstractManageHearingsLetterMapper {
     }
 
     /*
-    * Returns the type of application from the case data. If not present, returns the default value.
-    * This can be used by a template for conditional logic that determines content.
-    * @param caseData the {@link FinremCaseData} containing case-specific data
-    * @return the type of application or the default value if not present
-    */
-    public String getDefaultTypeOfApplicationIfNotPresent(FinremCaseData caseData) {
+     * Returns a string to say whether the case is schedule 1 or matrimonial.
+     * @param caseData the {@link FinremCaseData} containing case-specific data.
+     * @return the string to say whether schedule 1 or matrimonial.
+     */
+    public String getSchedule1OrMatrimonial(FinremCaseData caseData) {
         if (ObjectUtils.isNotEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())) {
             return caseData.getScheduleOneWrapper().getTypeOfApplication().getValue();
         }
