@@ -25,7 +25,7 @@ public class HearingNoticeLetterDetails implements DocumentTemplateDetails {
     private String hearingVenue;
     private String attendance;
     private String additionalHearingInformation;
-    private String vacateHearingReasons;  // PT: debug why this isn't tracking through
+    private String vacateHearingReasons;
     private String typeOfApplication;
     private String civilPartnership;
 }
