@@ -24,4 +24,6 @@ public class HearingNoticeLetterDetails implements DocumentTemplateDetails {
     private String hearingVenue;
     private String attendance;
     private String additionalHearingInformation;
+    private String typeOfApplication;
+    private String civilPartnership;
 }
