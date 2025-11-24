@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 
 import java.util.List;
 import java.util.UUID;
