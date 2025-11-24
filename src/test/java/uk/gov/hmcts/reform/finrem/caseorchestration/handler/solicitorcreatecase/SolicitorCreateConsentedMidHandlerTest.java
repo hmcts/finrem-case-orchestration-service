@@ -96,7 +96,7 @@ class SolicitorCreateConsentedMidHandlerTest {
 
         FinremCaseData caseData = FinremCaseData.builder().build();
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONSENTED, SOLICITOR_CREATE, caseData);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONSENTED, SOLICITOR_CREATE, caseData);
 
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
