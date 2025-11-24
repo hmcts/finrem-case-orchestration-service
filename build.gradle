@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.67'
     id 'au.com.dius.pact' version '4.6.18'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1918'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1940'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -32,7 +32,7 @@ def versions = [
         springDoc            : '1.8.0',
         wiremock             : '3.0.1',
         apacheLogging        : '2.25.2',
-        idamClient           : '3.0.4',
+        idamClient           : '3.0.5',
         springHateoas        : '1.5.6',
         tika                 : '3.2.3',
         amClient             : '1.59.2',
