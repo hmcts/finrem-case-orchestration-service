@@ -54,7 +54,6 @@ public class ContactDetailsWrapper {
     private String respondentSolicitorReference;
     @JsonProperty("rSolicitorAddress")
     private Address respondentSolicitorAddress;
-    private YesOrNo respondentSolicitorServiceAddressConfidential;
     @JsonProperty("rSolicitorPhone")
     private String respondentSolicitorPhone;
     @JsonProperty("rSolicitorEmail")
