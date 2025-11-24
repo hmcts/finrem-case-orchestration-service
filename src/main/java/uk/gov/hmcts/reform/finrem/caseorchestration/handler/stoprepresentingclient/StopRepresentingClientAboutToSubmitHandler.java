@@ -50,6 +50,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         List<String> warnings = new ArrayList<>();
         if (isHavingClientConsent(finremCaseData) || isHavingJudicialApproval(finremCaseData)) {
             warnings.add(WARNING_MESSAGE);
+        } else {
+            throw new IllegalStateException("Client consent or judicial approval is required but missing.");
         }
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

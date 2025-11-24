@@ -3,9 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.stoprepresentingcli
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
@@ -16,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
@@ -43,17 +41,11 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             Arguments.of(ABOUT_TO_SUBMIT, CONSENTED, STOP_REPRESENTING_CLIENT));
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void givenHavingClientConsent_whenHandled_thenWarningsPopulated(boolean loginAsApplicant) {
+    @Test
+    void givenHavingClientConsent_whenHandled_thenWarningsPopulated() {
         FinremCaseData caseData = FinremCaseData.builder()
             .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                .clientConsentOnAppSolStopRep(loginAsApplicant ? YesOrNo.YES : mock(YesOrNo.class))
-                .clientConsentOnRespSolStopRep(!loginAsApplicant ? YesOrNo.YES : mock(YesOrNo.class))
-                .build())
-            .sessionWrapper(SessionWrapper.builder()
-                .loginAsApplicantSolicitor(YesOrNo.forValue(loginAsApplicant))
-                .loginAsRespondentSolicitor(YesOrNo.forValue(!loginAsApplicant))
+                .stopRepClientConsent(YesOrNo.YES)
                 .build())
             .build();
 
@@ -64,17 +56,11 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         );
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void givenHavingJudicialApproval_whenHandled_thenWarningsPopulated(boolean loginAsApplicant) {
+    @Test
+    void givenHavingJudicialApproval_whenHandled_thenWarningsPopulated() {
         FinremCaseData caseData = FinremCaseData.builder()
             .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                .judicialApprovalOnAppSolStopRep(loginAsApplicant ? YesOrNo.YES : mock(YesOrNo.class))
-                .judicialApprovalOnRespSolStopRep(!loginAsApplicant ? YesOrNo.YES : mock(YesOrNo.class))
-                .build())
-            .sessionWrapper(SessionWrapper.builder()
-                .loginAsApplicantSolicitor(YesOrNo.forValue(loginAsApplicant))
-                .loginAsRespondentSolicitor(YesOrNo.forValue(!loginAsApplicant))
+                .stopRepJudicialApproval(YesOrNo.YES)
                 .build())
             .build();
 
@@ -83,5 +69,16 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             "Are you sure you wish to stop representing your client? "
                 + "If you continue your access to this access will be removed"
         );
+    }
+
+    @Test
+    void givenNoJudicialApprovalOrClientConsent_whenHandled_thenThrowIllegalStateException() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder().build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
+        assertThatThrownBy(() -> underTest.handle(request, AUTH_TOKEN).getWarnings())
+            .hasMessage("Client consent or judicial approval is required but missing.");
     }
 }
