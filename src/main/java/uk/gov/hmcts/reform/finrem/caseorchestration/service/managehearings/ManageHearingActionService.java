@@ -10,15 +10,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -256,8 +256,6 @@ public class ManageHearingActionService {
         List<ManageHearingsCollectionItem> hearings = hearingsWrapper.getHearings();
 
         List<HearingTabCollectionItem> hearingTabItems = mapAndSortHearings(hearings, caseData);
-        List<VacatedOrAdjournedHearingTabCollectionItem> vacatedOrAdjournedHearingTabItems =
-            mapAndSortVacatedAndAdjournedHearings(hearingsWrapper.getVacatedOrAdjournedHearings(), caseData);
 
         Map<String, List<HearingTabCollectionItem>> partyTabItems = new LinkedHashMap<>();
         partyTabItems.put(APPLICANT, filterHearingTabItems(hearingTabItems, APPLICANT));
@@ -268,6 +266,10 @@ public class ManageHearingActionService {
         partyTabItems.put(INTERVENER4, filterHearingTabItems(hearingTabItems, INTERVENER4));
 
         caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
+
+        List<VacatedOrAdjournedHearingTabCollectionItem> vacatedOrAdjournedHearingTabItems =
+            mapAndSortVacatedAndAdjournedHearings(hearingsWrapper.getVacatedOrAdjournedHearings(), caseData);
+
         caseData.getManageHearingsWrapper().setVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems);
 
         hearingsWrapper.setApplicantHearingTabItems(partyTabItems.get(APPLICANT));

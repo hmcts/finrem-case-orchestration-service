@@ -7,12 +7,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -58,9 +58,10 @@ public class HearingTabDataMapper {
             .build();
     }
 
-    public VacatedOrAdjournedHearingTabItem mapVacatedOrAdjournedHearingToTabData(VacatedOrAdjournedHearingsCollectionItem hearingCollectionItem,
-                                                                                  List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection) {
-
+    public VacatedOrAdjournedHearingTabItem mapVacatedOrAdjournedHearingToTabData(VacatedOrAdjournedHearingsCollectionItem
+                                                                                      hearingCollectionItem,
+                                                                                  List<ManageHearingDocumentsCollectionItem>
+                                                                                      hearingDocumentsCollection) {
         VacateOrAdjournedHearing hearing = hearingCollectionItem.getValue();
 
         return VacatedOrAdjournedHearingTabItem.builder()

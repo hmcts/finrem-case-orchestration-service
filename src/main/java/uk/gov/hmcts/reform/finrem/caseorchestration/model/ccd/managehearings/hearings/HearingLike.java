@@ -11,16 +11,28 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface HearingLike {
+
     LocalDate getHearingDate();
+
     HearingType getHearingType();
+
     String getHearingTimeEstimate();
+
     String getHearingTime();
+
     Court getHearingCourtSelection();
+
     HearingMode getHearingMode();
+
     String getAdditionalHearingInformation();
+
     YesOrNo getHearingNoticePrompt();
+
     YesOrNo getAdditionalHearingDocPrompt();
+
     List<DocumentCollectionItem> getAdditionalHearingDocs();
+
     List<PartyOnCaseCollectionItem> getPartiesOnCase();
+
     YesOrNo getWasMigrated();
 }

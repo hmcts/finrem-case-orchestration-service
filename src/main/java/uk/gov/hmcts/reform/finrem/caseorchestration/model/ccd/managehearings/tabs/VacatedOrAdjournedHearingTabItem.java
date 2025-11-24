@@ -35,13 +35,14 @@ public class VacatedOrAdjournedHearingTabItem {
     private String tabHearingStatus;
 
     /**
-     * Creates a new HearingTabItem with all fields copied from the provided hearingTabItem,
+     * Creates a new HearingTabItem with all fields copied from the provided hearingTabItem
      * and marks all hearing documents as duplicates. The documents are deep-copied.
      *
      * @param hearingTabItem the source HearingTabItem
      * @return a new HearingTabItem with duplicated documents catagorised as SYSTEM_DUPLICATES
      */
-    public static VacatedOrAdjournedHearingTabItem fromVacatedOrAdjournedHearingTabItemMarkDuplicateDocs(VacatedOrAdjournedHearingTabItem hearingTabItem) {
+    public static VacatedOrAdjournedHearingTabItem fromVacatedOrAdjournedHearingTabItemMarkDuplicateDocs(
+        VacatedOrAdjournedHearingTabItem hearingTabItem) {
         List<DocumentCollectionItem> duplicatedDocuments = hearingTabItem.getTabHearingDocuments().stream()
             .map(documentCollectionItem -> {
                 var documentValueCopy = documentCollectionItem.getValue().toBuilder()
