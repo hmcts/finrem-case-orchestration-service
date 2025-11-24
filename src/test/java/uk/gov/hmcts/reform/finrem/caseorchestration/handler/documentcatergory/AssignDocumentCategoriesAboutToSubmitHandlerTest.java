@@ -12,12 +12,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DocumentCategoryAssigner;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-public class AssignDocumentCategoriesAboutToSubmitHandlerTest {
+class AssignDocumentCategoriesAboutToSubmitHandlerTest {
 
     @InjectMocks
     private AssignDocumentCategoriesAboutToSubmitHandler handler;
@@ -26,20 +26,14 @@ public class AssignDocumentCategoriesAboutToSubmitHandlerTest {
     DocumentCategoryAssigner documentCategoryAssigner;
 
     @Test
-    public void shouldHandleEvent() {
-        assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.ASSIGN_DOCUMENT_CATEGORIES));
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.ASSIGN_DOCUMENT_CATEGORIES);
     }
 
     @Test
-    public void shouldNotHandleEvent() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.ASSIGN_DOCUMENT_CATEGORIES));
-    }
-
-    @Test
-    public void shouldCallAssignDocumentCategories() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.create();
-        handler.handle(callbackRequest, "authToken");
+    void shouldCallAssignDocumentCategories() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+        handler.handle(callbackRequest, AUTH_TOKEN);
         verify(documentCategoryAssigner).assignDocumentCategories(callbackRequest.getCaseDetails().getData());
     }
-
 }

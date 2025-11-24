@@ -50,7 +50,7 @@ class PaperCaseCreateContestedMidHandlerTest {
 
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, NEW_PAPER_CASE, caseData);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, NEW_PAPER_CASE, caseData);
 
         // Mock static methods
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
