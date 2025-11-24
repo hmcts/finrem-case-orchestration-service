@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -80,10 +81,10 @@ class FinremCallbackHandlerTest {
     private DefaultFinremCallbackHandler defaultFinremCallbackHandler;
     private DefaultAboutToSubmitCallbackHandler defaultAboutToSubmitCallbackHandler;
 
-    private static  final Map<String, Object> TESTING_DATA_IN_MAP = Map.of(
+    private static final Map<String, Object> TESTING_DATA_IN_MAP = Map.of(
         "retained", YesOrNo.YES,
-        "loginAsApplicantSolicitor", YesOrNo.YES,
-        "loginAsRespondentSolicitor", YesOrNo.NO
+        "stopRepJudicialApproval", YesOrNo.YES,
+        "clientAddressForService", Address.builder().addressLine1("Test Address").build()
     );
 
     @BeforeEach
