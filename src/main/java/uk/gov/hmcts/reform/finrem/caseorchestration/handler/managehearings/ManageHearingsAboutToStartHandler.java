@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -24,12 +26,16 @@ import java.util.List;
 public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
     private final PartyService partyService;
     private final ValidateHearingService validateHearingService;
+    private final HearingService hearingService;
 
     public ManageHearingsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                             PartyService partyService, ValidateHearingService validateHearingService) {
+                                             PartyService partyService,
+                                             ValidateHearingService validateHearingService,
+                                             HearingService hearingService) {
         super(finremCaseDetailsMapper);
         this.partyService = partyService;
         this.validateHearingService = validateHearingService;
+        this.hearingService = hearingService;
     }
 
     @Override
@@ -64,6 +70,12 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
             WorkingHearing.builder()
                 .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
                 .withHearingTypes(HearingType.values())
+                .build()
+        );
+
+        finremCaseData.getManageHearingsWrapper().setWorkingVacatedHearing(
+            WorkingVacatedHearing.builder()
+                .chooseHearings(hearingService.generateSelectableHearingsAsDynamicList(caseDetails, userAuthorisation))
                 .build()
         );
 
