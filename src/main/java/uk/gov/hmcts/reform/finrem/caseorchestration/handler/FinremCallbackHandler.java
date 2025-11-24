@@ -10,10 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SessionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnotation;
@@ -110,6 +109,6 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      * @return a list of classes containing {@code @TemporaryField}-annotated fields
      */
     private static List<Class> getClassesWithTemporaryFieldAnnotation() {
-        return Arrays.asList(SessionWrapper.class);
+        return List.of(StopRepresentationWrapper.class);
     }
 }

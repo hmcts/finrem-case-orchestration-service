@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -16,11 +18,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StopRepresentationWrapper {
 
-    private YesOrNo clientConsentOnAppSolStopRep;
+    @TemporaryField
+    private YesOrNo stopRepClientConsent;
 
-    private YesOrNo judicialApprovalOnAppSolStopRep;
+    @TemporaryField
+    private YesOrNo stopRepJudicialApproval;
 
-    private YesOrNo clientConsentOnRespSolStopRep;
+    @TemporaryField
+    private Address clientAddressForService;
 
-    private YesOrNo judicialApprovalOnRespSolStopRep;
+    @TemporaryField
+    private YesOrNo clientAddressForServiceConfidential;
+
+    @TemporaryField
+    private String clientAddressForServiceConfidentialLabel;
 }

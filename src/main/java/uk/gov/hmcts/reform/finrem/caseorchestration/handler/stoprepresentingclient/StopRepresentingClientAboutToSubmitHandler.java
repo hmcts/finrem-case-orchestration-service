@@ -59,16 +59,10 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private boolean isHavingClientConsent(FinremCaseData finremCaseData) {
-        return finremCaseData.getSessionWrapper().isLoginAsApplicantSolicitor()
-            && YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getClientConsentOnAppSolStopRep())
-            || finremCaseData.getSessionWrapper().isLoginAsRespondentSolicitor()
-            && YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getClientConsentOnRespSolStopRep());
+        return YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getStopRepClientConsent());
     }
 
     private boolean isHavingJudicialApproval(FinremCaseData finremCaseData) {
-        return finremCaseData.getSessionWrapper().isLoginAsApplicantSolicitor()
-            && YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnAppSolStopRep())
-            || finremCaseData.getSessionWrapper().isLoginAsRespondentSolicitor()
-            && YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getJudicialApprovalOnRespSolStopRep());
+        return YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getStopRepJudicialApproval());
     }
 }
