@@ -29,7 +29,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManageHearingsWrapper {
-    
+
     // Working data representations
     private ManageHearingsAction manageHearingsActionSelection;
     private UUID workingHearingId;
@@ -39,13 +39,12 @@ public class ManageHearingsWrapper {
     private YesOrNo isAddHearingChosen;
     private YesOrNo isFinalOrder;
 
-    // Hearing data Repositories 
+    // Hearing data Repositories
     private List<ManageHearingsCollectionItem> hearings;
     private List<VacatedOrAdjournedHearingsCollectionItem> vacatedOrAdjournedHearings;
     private List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection;
-    
+
     // TabItem representations maintaining confidentiality for parties
-    // Hearing Tab Items
     private List<HearingTabCollectionItem> hearingTabItems;
     private List<HearingTabCollectionItem> applicantHearingTabItems;
     private List<HearingTabCollectionItem> respondentHearingTabItems;
