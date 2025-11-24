@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -42,6 +43,9 @@ class HearingsAboutToStartHandlerTest {
 
     @Mock
     private HearingService hearingService;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     @InjectMocks
     private ManageHearingsAboutToStartHandler handler;
@@ -102,6 +106,8 @@ class HearingsAboutToStartHandlerTest {
     @Test
     void givenVacateAHearing_shouldCallGenerateSelectableHearingsAsDynamicList() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.VACATE_HEARING);
+
+        when(featureToggleService.isVacateHearingEnabled()).thenReturn(true);
 
         when(validateHearingService.validateManageHearingErrors(callbackRequest.getCaseDetails().getData()))
             .thenReturn(List.of());
