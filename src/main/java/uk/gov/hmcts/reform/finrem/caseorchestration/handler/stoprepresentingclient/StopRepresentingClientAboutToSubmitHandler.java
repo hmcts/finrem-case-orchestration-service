@@ -53,11 +53,23 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         } else {
             throw new IllegalStateException("Client consent or judicial approval is required but missing.");
         }
+
+        log.info("{} - Stop representing a client with a {}", finremCaseData.getCcdCaseId(), describeApprovalSource(finremCaseData));
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
             .warnings(warnings)
             .build();
+    }
+
+    private String describeApprovalSource(FinremCaseData finremCaseData) {
+        if (isHavingClientConsent(finremCaseData)) {
+            return "client consent";
+        } else if (isHavingJudicialApproval(finremCaseData)) {
+            return "judicial approval";
+        } else {
+            throw new IllegalStateException("Unreachable code.");
+        }
     }
 
     private boolean isHavingClientConsent(FinremCaseData finremCaseData) {

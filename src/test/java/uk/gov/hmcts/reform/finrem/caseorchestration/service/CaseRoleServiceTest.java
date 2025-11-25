@@ -8,10 +8,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -38,6 +41,7 @@ class CaseRoleServiceTest {
 
         // then
         assertThat(result).isNull();
+        assertFalse(caseRoleService.isLoginWithApplicantSolicitor(FinremCaseData.builder().ccdCaseId(CASE_ID).build(), AUTH_TOKEN));
     }
 
     @Test
@@ -51,6 +55,7 @@ class CaseRoleServiceTest {
 
         // then
         assertThat(result).isEqualTo(CaseRole.CASEWORKER);
+        assertFalse(caseRoleService.isLoginWithApplicantSolicitor(FinremCaseData.builder().ccdCaseId(CASE_ID).build(), AUTH_TOKEN));
     }
 
     @Test
@@ -66,6 +71,7 @@ class CaseRoleServiceTest {
 
         // then
         assertThat(result).isNull();
+        assertFalse(caseRoleService.isLoginWithApplicantSolicitor(FinremCaseData.builder().ccdCaseId(CASE_ID).build(), AUTH_TOKEN));
     }
 
     @Test
@@ -81,6 +87,7 @@ class CaseRoleServiceTest {
 
         // then
         assertThat(result).isEqualTo(CaseRole.CASEWORKER);
+        assertFalse(caseRoleService.isLoginWithApplicantSolicitor(FinremCaseData.builder().ccdCaseId(CASE_ID).build(), AUTH_TOKEN));
     }
 
     @Test
@@ -98,6 +105,7 @@ class CaseRoleServiceTest {
 
         // then
         assertThat(result).isEqualTo(APP_SOLICITOR);
+        assertTrue(caseRoleService.isLoginWithApplicantSolicitor(FinremCaseData.builder().ccdCaseId(CASE_ID).build(), AUTH_TOKEN));
     }
 
     @Test
@@ -115,6 +123,7 @@ class CaseRoleServiceTest {
 
         // then
         assertThat(result).isEqualTo(APP_SOLICITOR);
+        assertTrue(caseRoleService.isLoginWithApplicantSolicitor(FinremCaseData.builder().ccdCaseId(CASE_ID).build(), AUTH_TOKEN));
     }
 
     @Test
@@ -133,6 +142,7 @@ class CaseRoleServiceTest {
 
         // then
         assertThat(result).isEqualTo(APP_SOLICITOR);
+        assertTrue(caseRoleService.isLoginWithApplicantSolicitor(FinremCaseData.builder().ccdCaseId(CASE_ID).build(), AUTH_TOKEN));
     }
 
     @Test
@@ -151,6 +161,6 @@ class CaseRoleServiceTest {
 
         // then
         assertThat(result).isEqualTo(APP_SOLICITOR);
+        assertTrue(caseRoleService.isLoginWithApplicantSolicitor(FinremCaseData.builder().ccdCaseId(CASE_ID).build(), AUTH_TOKEN));
     }
-
 }
