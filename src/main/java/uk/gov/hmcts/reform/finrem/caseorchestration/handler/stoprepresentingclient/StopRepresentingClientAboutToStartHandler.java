@@ -45,7 +45,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
         prepareStopRepresentationWrapper(callbackRequest.getCaseDetails().getData(), userAuthorisation);
-        
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
             .build();
