@@ -18,8 +18,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -42,27 +40,29 @@ class StopRepresentingClientAboutToStartHandlerTest {
 
     @Test
     void givenAsApplicantSolicitor_whenHandled_thenPopulateCorrectLabel() {
-        when(caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
+        FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
+        when(caseRoleService.isLoginWithApplicantSolicitor(givenFinremCaseData, AUTH_TOKEN)).thenReturn(true);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
-            FinremCaseData.builder().build());
+            givenFinremCaseData);
         FinremCaseData finremCaseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
         assertThat(finremCaseData.getStopRepresentationWrapper().getClientAddressForServiceConfidentialLabel())
             .isEqualTo("Keep the Applicant's contact details private from the Respondent?");
 
-        verify(caseRoleService).getUserCaseRole(CASE_ID, AUTH_TOKEN);
+        verify(caseRoleService).isLoginWithApplicantSolicitor(givenFinremCaseData, AUTH_TOKEN);
     }
 
     @Test
     void givenAsRespondentSolicitor_whenHandled_thenPopulateCorrectLabel() {
-        when(caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN)).thenReturn(RESP_SOLICITOR);
+        FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
+        when(caseRoleService.isLoginWithApplicantSolicitor(givenFinremCaseData, AUTH_TOKEN)).thenReturn(false);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
-            FinremCaseData.builder().build());
+            givenFinremCaseData);
         FinremCaseData finremCaseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
         assertThat(finremCaseData.getStopRepresentationWrapper().getClientAddressForServiceConfidentialLabel())
             .isEqualTo("Keep the Respondent's contact details private from the Applicant?");
 
-        verify(caseRoleService).getUserCaseRole(CASE_ID, AUTH_TOKEN);
+        verify(caseRoleService).isLoginWithApplicantSolicitor(givenFinremCaseData, AUTH_TOKEN);
     }
 }
