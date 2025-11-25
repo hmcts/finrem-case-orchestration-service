@@ -139,27 +139,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendConsentOrderNotApprovedEmail() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
-
-        verify(notificationService).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendConsentOrderNotApprovedEmail() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(false);
-
-        notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, never()).sendContestOrderNotApprovedEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
     public void sendConsentOrderAvailableEmail() {
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
@@ -179,61 +158,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any(CaseDetails.class));
         verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void sendContestOrderNotApprovedEmail() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        notificationsController.sendConsentOrderNotApprovedEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService).sendContestOrderNotApprovedEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendContestOrderNotApprovedEmail() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
-
-        notificationsController.sendConsentOrderNotApprovedEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService, never()).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any(CaseDetails.class));
-        verify(notificationService, never()).sendContestOrderNotApprovedEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
-    public void givenContestedCase_whenShouldSendRespondentNotification_thenShouldTriggerRespondentEmail() {
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CaseType.CONTESTED.getCcdType());
-        notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
-
-        verify(notificationService).sendContestOrderNotApprovedEmailRespondent(any(CaseDetails.class));
-        verify(notificationService, never()).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void givenConsentedCase_whenShouldSendRespondentNotification_thenShouldNotTriggerContestedRespondentEmail() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
-        notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendContestOrderNotApprovedEmailRespondent(any(CaseDetails.class));
-    }
-
-    @Test
-    public void givenConsentedCase_whenSendConsentOrderNotApproved_thenShouldTriggerConsentedRespondentEmail() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CaseType.CONSENTED.getCcdType());
-        notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
-
-        verify(notificationService).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any(CaseDetails.class));
     }
 
     @Test
