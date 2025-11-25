@@ -52,6 +52,7 @@ public enum CaseDocumentType {
 
     // Document types related to the Manage Hearings event:
     HEARING_NOTICE("Hearing notice"),
+    VACATE_HEARING_NOTICE("Vacate hearing notice"),
     FORM_C("Form C"),
     FORM_C_FAST_TRACK("Form C - Fast Track"),
     FORM_C_EXPRESS("Form C - Express"),

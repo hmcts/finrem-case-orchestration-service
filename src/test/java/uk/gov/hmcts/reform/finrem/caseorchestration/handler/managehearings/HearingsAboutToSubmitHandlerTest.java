@@ -178,7 +178,7 @@ class HearingsAboutToSubmitHandlerTest {
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
-        verify(manageHearingActionService).performVacateHearing(request.getCaseDetails());
+        verify(manageHearingActionService).performVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
     }
 
     private WorkingHearing createHearingToAdd() {

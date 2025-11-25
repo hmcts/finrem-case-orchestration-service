@@ -28,7 +28,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManageHearingsWrapper {
-    
+
     // Working data representations
     private ManageHearingsAction manageHearingsActionSelection;
     private UUID workingHearingId;
@@ -38,11 +38,11 @@ public class ManageHearingsWrapper {
     private YesOrNo isAddHearingChosen;
     private YesOrNo isFinalOrder;
 
-    // Hearing data Repositories 
+    // Hearing data Repositories
     private List<ManageHearingsCollectionItem> hearings;
     private List<VacatedOrAdjournedHearingsCollectionItem> vacatedOrAdjournedHearings;
     private List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection;
-    
+
     // TabItem representations maintaining confidentiality for parties
     private List<HearingTabCollectionItem> hearingTabItems;
     private List<HearingTabCollectionItem> applicantHearingTabItems;
@@ -64,6 +64,26 @@ public class ManageHearingsWrapper {
      */
     public ManageHearingsCollectionItem getManageHearingsCollectionItemById(UUID requiredId) {
         return Optional.ofNullable(hearings)
+            .orElseGet(Collections::emptyList)
+            .stream()
+            .filter(Objects::nonNull)
+            .filter(item -> requiredId != null && requiredId.equals(item.getId()))
+            .findFirst()
+            .orElse(null);
+    }
+
+    /**
+     * Retrieves a {@link VacatedOrAdjournedHearingsCollectionItem} from the hearings list by its UUID.
+     *
+     * <p>
+     * If the list is {@code null} or no item matches the provided ID, this method returns {@code null}.
+     * </p>
+     *
+     * @param requiredId the UUID of the hearing item to retrieve
+     * @return the matching {@link VacatedOrAdjournedHearingsCollectionItem}, or {@code null} if not found
+     */
+    public VacatedOrAdjournedHearingsCollectionItem getVacatedOrAdjournedHearingsCollectionItemById(UUID requiredId) {
+        return Optional.ofNullable(vacatedOrAdjournedHearings)
             .orElseGet(Collections::emptyList)
             .stream()
             .filter(Objects::nonNull)

@@ -317,7 +317,7 @@ class ManageHearingActionServiceTest {
             ManageHearingsCollectionItem.builder().id(hearing1ID).value(hearing1).build()
         )));
 
-        manageHearingActionService.performVacateHearing(finremCaseDetails);
+        manageHearingActionService.performVacateHearing(finremCaseDetails, AUTH_TOKEN);
 
         assertThat(hearingWrapper.getHearings())
             .hasSize(1)
