@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 @AllArgsConstructor
 @NoArgsConstructor
 public class HearingNoticeLetterDetails implements DocumentTemplateDetails {
+    // These are shared for both hearing notice and vacate hearing notice
     private String ccdCaseNumber;
     private String applicantName;
     private String respondentName;
@@ -24,6 +25,7 @@ public class HearingNoticeLetterDetails implements DocumentTemplateDetails {
     private String hearingVenue;
     private String attendance;
     private String additionalHearingInformation;
+    private String vacateHearingReasons;
     private String typeOfApplication;
     private String civilPartnership;
 }
