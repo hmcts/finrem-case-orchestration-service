@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
@@ -56,7 +56,6 @@ public class InterimHearingService {
     private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
-    private final InterimHearingHelper interimHearingHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
@@ -193,7 +192,6 @@ public class InterimHearingService {
                                                          List<InterimHearingCollection> newInterimHearingList,
                                                          String authorisationToken) {
 
-
         String caseId = caseDetails.getId().toString();
         log.info("preparing for bulk print document for Case ID: {}", caseId);
         List<CaseDocument> newInterimHearingNotices = prepareInterimHearingRequiredNoticeDocument(caseDetails,
@@ -209,7 +207,7 @@ public class InterimHearingService {
             .map(documentHelper::mapToBulkPrintDocument).collect(Collectors.toList());
         caseDocumentsHolder.getBulkPrintDocuments().addAll(documents);
 
-        addUploadedDocumentsToBulkPrintList(caseId, newInterimHearingList, caseDocumentsHolder, authorisationToken);
+        addUploadedDocumentsToBulkPrintList(caseDetails, newInterimHearingList, caseDocumentsHolder, authorisationToken);
 
         List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = new ArrayList<>();
         bulkPrintDocumentsList.addAll(
@@ -221,23 +219,24 @@ public class InterimHearingService {
         return caseDocumentsHolder;
     }
 
-    private void addUploadedDocumentsToBulkPrintList(String caseId,
+    private void addUploadedDocumentsToBulkPrintList(FinremCaseDetails caseDetails,
                                                      List<InterimHearingCollection> interimHearingList,
                                                      CaseDocumentsHolder caseDocumentsHolder,
                                                      String authorisationToken) {
         List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(interimHearingList);
-        interimCaseData.forEach(interimData -> addToBulkPrintList(caseId, interimData, caseDocumentsHolder, authorisationToken));
+        interimCaseData.forEach(interimData -> addToBulkPrintList(caseDetails.getCaseIdAsString(), interimData,
+            caseDocumentsHolder, authorisationToken, caseDetails.getCaseType()));
     }
 
     private void addToBulkPrintList(String caseId, Map<String, Object> interimData,
-                                    CaseDocumentsHolder caseDocumentsHolder, String authorisationToken) {
+                                    CaseDocumentsHolder caseDocumentsHolder, String authorisationToken, CaseType caseType) {
         String isDocUploaded = nullToEmpty(interimData.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
         if ("Yes".equalsIgnoreCase(isDocUploaded)) {
             log.warn("Additional uploaded interim document found for printing for Case ID: {}", caseId);
             CaseDocument caseDocument =
                 documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments =
-                genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
+                genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseType);
             caseDocumentsHolder.getBulkPrintDocuments().add(
                 documentHelper.mapToBulkPrintDocument(additionalUploadedDocuments));
         }

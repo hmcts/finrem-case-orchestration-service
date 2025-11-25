@@ -71,7 +71,7 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
 
     private CaseDetails caseDetails;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Before
     public void setUp() {
@@ -107,7 +107,6 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
 
         when(caseDataService.buildFullApplicantName(caseDetails)).thenReturn("Poor Guy");
         when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("Contested Respondent");
-
 
         generalApplicationRejectionLetterGenerator =
             new GeneralApplicationRejectionLetterGenerator(new ObjectMapper(), caseDataService,

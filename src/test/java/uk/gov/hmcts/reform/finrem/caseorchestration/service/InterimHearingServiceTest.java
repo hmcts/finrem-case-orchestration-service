@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,7 +16,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -65,8 +63,6 @@ public class InterimHearingServiceTest {
     @Mock
     private NotificationService notificationService;
     @Mock
-    private InterimHearingHelper interimHearingHelper;
-    @Mock
     private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
     @Spy
@@ -89,14 +85,7 @@ public class InterimHearingServiceTest {
     private static final String AUTH_TOKEN = "tokien:)";
     private static final String TWO_OLD_TWO_NEW_INTERIM_HEARING =
         "/fixtures/contested/interim-hearing-two-old-two-new-collections.json";
-    private static final String ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON =
-        "/fixtures/contested/interim-hearing-two-collection-modified.json";
     private static final String LEGACY_INTERIM_HEARING = "/fixtures/contested/interim-hearing-three-collection-no-track.json";
-
-    @BeforeAll
-    public void setUp() {
-        when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenCallRealMethod();
-    }
 
     @Test
     public void given2Old2NewInterimHearing1UploadedDoc_whenAddHearingNotices_then2InterimHearingDocs() {
@@ -123,7 +112,6 @@ public class InterimHearingServiceTest {
     @Test
     public void given3NewInterimHearing1UploadedDoc_whenAddHearingNotices_then3InterimHearingDocs() {
         FinremCaseDetails caseDetails = buildFinremCaseDetails(LEGACY_INTERIM_HEARING);
-
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
@@ -302,9 +290,7 @@ public class InterimHearingServiceTest {
 
     protected FinremCaseDetails buildFinremCaseDetails(String testJson) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
-            FinremCaseDetails caseDetails =
-                objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-            return caseDetails;
+            return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

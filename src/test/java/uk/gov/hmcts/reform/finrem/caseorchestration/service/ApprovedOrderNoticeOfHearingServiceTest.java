@@ -152,7 +152,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             eq(AUTH_TOKEN),
             placeholdersMapCaptor.capture(),
             eq(documentConfiguration.getAdditionalHearingTemplate()),
-            eq(documentConfiguration.getAdditionalHearingFileName()), eq("123"));
+            eq(documentConfiguration.getAdditionalHearingFileName()), eq(CONTESTED));
 
         Map<String, Object> caseDetailsMap = convertToMap(placeholdersMapCaptor.getValue().get(CASE_DETAILS));
         Map<String, Object> data2 = convertToMap(caseDetailsMap.get(CASE_DATA));
@@ -177,7 +177,6 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-
 
         data.getContactDetailsWrapper().setApplicantFmName("Poor");
         data.getContactDetailsWrapper().setApplicantLname("Poor");
@@ -214,7 +213,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             eq(AUTH_TOKEN),
             placeholdersMapCaptor.capture(),
             eq(documentConfiguration.getAdditionalHearingTemplate()),
-            eq(documentConfiguration.getAdditionalHearingFileName()), eq("123"));
+            eq(documentConfiguration.getAdditionalHearingFileName()), eq(CONTESTED));
 
         Map<String, Object> caseDetailsMap = convertToMap(placeholdersMapCaptor.getValue().get(CASE_DETAILS));
         Map<String, Object> data2 = convertToMap(caseDetailsMap.get(CASE_DATA));

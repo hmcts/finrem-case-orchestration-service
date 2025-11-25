@@ -275,7 +275,7 @@ public class DocumentHelper {
 
         // use a utility to handle directionDetailsCollectionList being null as well as empty
         return !CollectionUtils.isEmpty(directionDetailsCollectionList) && YES_VALUE.equalsIgnoreCase(
-            nullToEmpty(directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()));
+            nullToEmpty(directionDetailsCollectionList.getFirst().getDirectionDetailsCollection().getIsAnotherHearingYN()));
     }
 
     public boolean hasAnotherHearing(FinremCaseData caseData) {
@@ -609,7 +609,7 @@ public class DocumentHelper {
             documentCollectionItems.forEach(doc -> {
                 CaseDocument caseDocument = doc.getValue();
                 CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken,
-                    String.valueOf(caseDetails.getId()));
+                    caseDetails.getCaseType());
                 pdfDocuments.add(DocumentCollectionItem.builder().value(pdfDocument).build());
                 documents.add(pdfDocument);
             });
@@ -715,10 +715,11 @@ public class DocumentHelper {
             .anyMatch(filename -> filename.equals(caseDocument.getDocumentFilename()));
     }
 
-    public DirectionOrderCollection prepareFinalOrder(CaseDocument document) {
+    public DirectionOrderCollection prepareFinalOrder(CaseDocument document, List<DocumentCollectionItem> additionalDocs) {
         return DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
                 .uploadDraftDocument(document)
+                .additionalDocuments(additionalDocs)
                 .isOrderStamped(YesOrNo.YES)
                 .orderDateTime(LocalDateTime.now())
                 .build())

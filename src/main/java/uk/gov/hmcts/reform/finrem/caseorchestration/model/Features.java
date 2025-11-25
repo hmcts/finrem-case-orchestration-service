@@ -15,7 +15,8 @@ public enum Features {
     INTERVENER_ENABLED("intervener_enabled"),
     CASE_FILE_VIEW_ENABLED("case_file_view_enabled"),
     EXPRESS_PILOT_ENABLED("express_pilot_enabled"),
-    MANAGE_HEARING_ENABLED("manage_hearing_enabled");
+    MANAGE_HEARING_ENABLED("manage_hearing_enabled"),
+    VACATE_HEARING_ENABLED("vacate_hearing_enabled");
 
     private final String name;
 }

@@ -99,7 +99,7 @@ public class HearingService {
         if (featureToggleService.isManageHearingEnabled()) {
             populateManageHearings(caseData, dynamicListElements, elementToSortingKeyMap, userAuthorisation);
         } else {
-            // old-style
+            // TO BE REMOVED old-style
             populateTopLevelHearings(caseData, dynamicListElements, elementToSortingKeyMap);
             populateInterimHearings(caseData, dynamicListElements, elementToSortingKeyMap);
             populateHearingsCreatedFromProcessOrder(caseData, dynamicListElements, elementToSortingKeyMap);
@@ -242,6 +242,7 @@ public class HearingService {
 
     /**
      * Filters the provided list of hearings based on the confidentiality rules for the current user's case role.
+     *
      * <p>
      * If the user is a caseworker or has no case role, all hearings are returned. Otherwise, only hearings
      * associated with the user's solicitor role are included.

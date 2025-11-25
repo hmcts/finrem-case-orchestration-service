@@ -33,7 +33,7 @@ public class ManageHearingFormGLetterDetailsMapper extends AbstractManageHearing
             .applicantLName(contactDetails.getApplicantLname())
             .respondentFmName(contactDetails.getRespondentFmName())
             .respondentLName(contactDetails.getRespondentLname())
-            .caseNumber(caseData.getDivorceCaseNumber())
+            .caseNumber(caseDetails.getCaseIdAsString())
             .courtDetails(courtTemplateFields)
             .hearingDate(String.valueOf(hearing.getHearingDate()))
             .solicitorReference(contactDetails.getSolicitorReference())
