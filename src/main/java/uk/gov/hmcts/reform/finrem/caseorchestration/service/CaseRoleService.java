@@ -6,9 +6,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.util.List;
 import java.util.Optional;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 
 @Service
 @Slf4j
@@ -42,6 +45,8 @@ public class CaseRoleService {
             List<CaseAssignedUserRole> caseAssignedUserRoleList = caseAssignedUserRole.getCaseAssignedUserRoles();
 
             if (!caseAssignedUserRoleList.isEmpty()) {
+                // Using getFirst() to maintain consistency with the existing logic in
+                // CaseAssignedRoleService.setCaseAssignedUserRole.
                 String loggedInUserCaseRole = caseAssignedUserRoleList.getFirst().getCaseRole();
                 return CaseRole.forValue(loggedInUserCaseRole);
             }
@@ -61,5 +66,17 @@ public class CaseRoleService {
     public CaseRole getUserOrCaseworkerCaseRole(String id, String auth) {
         return Optional.ofNullable(getUserCaseRole(id, auth))
             .orElse(CaseRole.CASEWORKER);
+    }
+
+    /**
+     * Checks whether the current user is logged in as the applicant's solicitor.
+     *
+     * @param finremCaseData      the case data containing the CCD case ID
+     * @param userAuthorisation   the authorisation token of the current user
+     * @return true if the user has the applicant solicitor case role; false otherwise
+     */
+    public boolean isLoginWithApplicantSolicitor(FinremCaseData finremCaseData, String userAuthorisation) {
+        CaseRole caseRole = getUserCaseRole(finremCaseData.getCcdCaseId(), userAuthorisation);
+        return APP_SOLICITOR.equals(caseRole);
     }
 }
