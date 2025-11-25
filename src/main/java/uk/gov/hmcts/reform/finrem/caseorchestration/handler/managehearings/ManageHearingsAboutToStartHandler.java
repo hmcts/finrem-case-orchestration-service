@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -27,15 +28,18 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
     private final PartyService partyService;
     private final ValidateHearingService validateHearingService;
     private final HearingService hearingService;
+    private final FeatureToggleService featureToggleService;
 
     public ManageHearingsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                              PartyService partyService,
                                              ValidateHearingService validateHearingService,
-                                             HearingService hearingService) {
+                                             HearingService hearingService,
+                                             FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
         this.partyService = partyService;
         this.validateHearingService = validateHearingService;
         this.hearingService = hearingService;
+        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -72,12 +76,14 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
                 .withHearingTypes(HearingType.values())
                 .build()
         );
-
-        finremCaseData.getManageHearingsWrapper().setWorkingVacatedHearing(
-            WorkingVacatedHearing.builder()
-                .chooseHearings(hearingService.generateSelectableHearingsAsDynamicList(caseDetails, userAuthorisation))
-                .build()
-        );
+        
+        if (featureToggleService.isVacateHearingEnabled()) {
+            finremCaseData.getManageHearingsWrapper().setWorkingVacatedHearing(
+                WorkingVacatedHearing.builder()
+                    .chooseHearings(hearingService.generateSelectableHearingsAsDynamicList(caseDetails, userAuthorisation))
+                    .build()
+            );
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)
