@@ -64,6 +64,10 @@ public class VacatedOrAdjournedHearingTabItem {
             .tabAdditionalInformation(hearingTabItem.getTabAdditionalInformation())
             .tabHearingDocuments(duplicatedDocuments)
             .tabWasMigrated(hearingTabItem.getTabWasMigrated())
+            .tabHearingStatus(hearingTabItem.getTabHearingStatus())
+            .tabVacatedOrAdjournedDate(hearingTabItem.getTabVacatedOrAdjournedDate())
+            .tabVacateOrAdjournReason(hearingTabItem.getTabVacateOrAdjournReason())
+            .tabSpecifyOtherReason(hearingTabItem.getTabSpecifyOtherReason())
             .build();
     }
 }
