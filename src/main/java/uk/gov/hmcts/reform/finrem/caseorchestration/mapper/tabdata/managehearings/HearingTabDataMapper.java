@@ -77,7 +77,7 @@ public class HearingTabDataMapper {
             .tabVacatedOrAdjournedDate(getVacatedOrAdjournedDate(hearing))
             .tabVacateOrAdjournReason(getVacatedOrAdjournedReason(hearing))
             .tabSpecifyOtherReason(hearing.getSpecifyOtherReason())
-            .tabHearingStatus(hearing.getHearingStatus().getDescription())
+            .tabHearingStatus(getVacatedOrAdjournedStatus(hearing))
             .build();
     }
 

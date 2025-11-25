@@ -19,15 +19,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -53,6 +58,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.VACATE_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournReason.COURTROOM_UNAVAILABLE;
 
 @ExtendWith(MockitoExtension.class)
@@ -378,6 +384,45 @@ class ManageHearingActionServiceTest {
     }
 
     @Test
+    void updateTabData_shouldAddVacatedOrAdjournedHearingToTabCollectionInCorrectOrder() {
+        VacateOrAdjournedHearing hearing1 = createVacatedHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
+        hearing1.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(APPLICANT)
+                    .label("Applicant")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing2 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
+        hearing2.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(RESPONDENT)
+                    .label("Respondent")
+                    .build())
+                .build()
+        ));
+
+        hearingWrapper.setVacatedOrAdjournedHearings(new ArrayList<>(List.of(
+            createHearingCollectionItem(hearing2),
+            createHearingCollectionItem(hearing1)
+        )));
+
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(any(), any()))
+            .thenReturn(createVacatedOrAdjournedHearingTabItem("Respondent Hearing", "15 Jul 2025 11:00", APPLICANT, VACATE_HEARING),
+                createVacatedOrAdjournedHearingTabItem("Applicant Hearing", "20 Jul 2025 10:00", RESPONDENT, VACATE_HEARING));
+
+        manageHearingActionService.updateTabData(finremCaseDetails.getData());
+
+        List<VacatedOrAdjournedHearingTabCollectionItem> hearingTabItems = hearingWrapper.getVacatedOrAdjournedHearingTabItems();
+        assertThat(hearingTabItems).hasSize(2);
+        assertThat(hearingTabItems.get(0).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
+        assertThat(hearingTabItems.get(1).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
+    }
+
+    @Test
     void updateTabData_shouldAddHearingToTabCollectionInCorrectOrderWhenManageHearingsMigrationHadDone() {
         Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
         hearing1.setPartiesOnCase(List.of(
@@ -570,13 +615,26 @@ class ManageHearingActionServiceTest {
             .hearingTimeEstimate(estimate)
             .partiesOnCase(List.of(PartyOnCaseCollectionItem
                 .builder()
-                    .value(PartyOnCase
-                        .builder()
-                        .label("Applicant")
-                        .role(APPLICANT)
-                        .build())
+                .value(PartyOnCase
+                    .builder()
+                    .label("Applicant")
+                    .role(APPLICANT)
+                    .build())
                 .build()))
             .wasMigrated(migrated ? YesOrNo.YES : null)
+            .build();
+    }
+
+    private VacateOrAdjournedHearing createVacatedHearing(HearingType type, String time, String estimate, LocalDate date) {
+        return VacateOrAdjournedHearing.builder()
+            .hearingType(type)
+            .hearingDate(date)
+            .hearingTime(time)
+            .hearingTimeEstimate(estimate)
+            .wasMigrated(YesOrNo.NO)
+            .vacatedOrAdjournedDate(LocalDate.now())
+            .vacateOrAdjournReason(COURTROOM_UNAVAILABLE)
+            .hearingStatus(VACATE_HEARING)
             .build();
     }
 
@@ -594,6 +652,13 @@ class ManageHearingActionServiceTest {
             .build();
     }
 
+    private VacatedOrAdjournedHearingsCollectionItem createHearingCollectionItem(VacateOrAdjournedHearing hearing) {
+        return VacatedOrAdjournedHearingsCollectionItem.builder()
+            .id(UUID.randomUUID())
+            .value(hearing)
+            .build();
+    }
+
     private HearingTabItem createHearingTabItem(String type, String dateTime, String parties) {
         return createHearingTabItem(type, dateTime, parties, false);
     }
@@ -603,6 +668,27 @@ class ManageHearingActionServiceTest {
             .tabHearingType(type)
             .tabDateTime(dateTime)
             .tabConfidentialParties(parties)
+            .tabWasMigrated(migrated ? YesOrNo.YES : null)
+            .build();
+    }
+
+    private VacatedOrAdjournedHearingTabItem createVacatedOrAdjournedHearingTabItem(String type,
+                                                                                    String dateTime,
+                                                                                    String parties,
+                                                                                    ManageHearingsAction status) {
+        return createVacatedOrAdjournedHearingTabItem(type, dateTime, parties, status, false);
+    }
+
+    private VacatedOrAdjournedHearingTabItem createVacatedOrAdjournedHearingTabItem(String type,
+                                                                                    String dateTime,
+                                                                                    String parties,
+                                                                                    ManageHearingsAction status,
+                                                                                    boolean migrated) {
+        return VacatedOrAdjournedHearingTabItem.builder()
+            .tabHearingType(type)
+            .tabDateTime(dateTime)
+            .tabConfidentialParties(parties)
+            .tabHearingStatus(status.getDescription())
             .tabWasMigrated(migrated ? YesOrNo.YES : null)
             .build();
     }
