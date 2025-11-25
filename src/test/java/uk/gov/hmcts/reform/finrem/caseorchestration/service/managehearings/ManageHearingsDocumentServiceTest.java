@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.VacateHearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -61,6 +62,8 @@ class ManageHearingsDocumentServiceTest {
     private DocumentConfiguration documentConfiguration;
     @Mock
     private HearingNoticeLetterDetailsMapper hearingNoticeLetterDetailsMapper;
+    @Mock
+    private VacateHearingNoticeLetterDetailsMapper vacateHearingNoticeLetterDetailsMapper;
     @Mock
     private ManageHearingFormCLetterDetailsMapper manageHearingFormCLetterDetailsMapper;
     @Mock
@@ -110,15 +113,10 @@ class ManageHearingsDocumentServiceTest {
             .build();
     }
 
-    @Test
-    void shouldGenerateHearingNotice() {
+    @ParameterizedTest
+    @MethodSource("hearingNoticeTestSetup")
+    void shouldGenerateHearingNotice(Map<String, Object> documentDataMap, CaseDocument expectedDocument) {
         // Arrange
-        Map<String, Object> documentDataMap = Map.of("key", "value");
-        CaseDocument expectedDocument = CaseDocument
-            .builder()
-            .documentFilename(HEARING_NOTICE_FILE_NAME)
-            .build();
-
         when(hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails))
             .thenReturn(documentDataMap);
         when(documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails))
@@ -141,6 +139,45 @@ class ManageHearingsDocumentServiceTest {
         verify(documentConfiguration).getManageHearingNoticeFileName();
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
             AUTH_TOKEN, documentDataMap, HEARING_NOTICE_TEMPLATE, "hearingNoticeFileName", CONTESTED);
+    }
+
+    @ParameterizedTest
+    @MethodSource("hearingNoticeTestSetup")
+    void shouldGenerateVacateHearingNotice(Map<String, Object> documentDataMap, CaseDocument expectedDocument) {
+        // Arrange
+        when(vacateHearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails))
+            .thenReturn(documentDataMap);
+        when(documentConfiguration.getVacateHearingNoticeTemplate(finremCaseDetails))
+            .thenReturn(HEARING_NOTICE_TEMPLATE);
+        when(documentConfiguration.getVacateHearingNoticeFileName())
+            .thenReturn(HEARING_NOTICE_FILE_NAME);
+
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(
+            AUTH_TOKEN, documentDataMap, HEARING_NOTICE_TEMPLATE, HEARING_NOTICE_FILE_NAME, CONTESTED))
+            .thenReturn(expectedDocument);
+
+        // Act
+        CaseDocument actualDocument =
+            manageHearingsDocumentService.generateVacateHearingNotice(finremCaseDetails, AUTH_TOKEN);
+
+        // Assert
+        assertEquals(expectedDocument, actualDocument);
+        verify(vacateHearingNoticeLetterDetailsMapper).getDocumentTemplateDetailsAsMap(finremCaseDetails);
+        verify(documentConfiguration).getVacateHearingNoticeTemplate(finremCaseDetails);
+        verify(documentConfiguration).getVacateHearingNoticeFileName();
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            AUTH_TOKEN, documentDataMap, HEARING_NOTICE_TEMPLATE, "hearingNoticeFileName", CONTESTED);
+    }
+
+    /*
+     * Used by shouldGenerateHearingNotice and shouldGenerateVacateHearingNotice
+     */
+    private static Stream<Arguments> hearingNoticeTestSetup() {
+        return Stream.of(
+            Arguments.of(
+                Map.of("key", "value"),
+                CaseDocument.builder().documentFilename(HEARING_NOTICE_FILE_NAME).build())
+        );
     }
 
     @ParameterizedTest

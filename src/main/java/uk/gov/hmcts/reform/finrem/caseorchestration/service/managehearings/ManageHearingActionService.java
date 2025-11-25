@@ -306,6 +306,16 @@ public class ManageHearingActionService {
         );
     }
 
+    private void generateVacateHearingNotice(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
+        documentMap.put(
+            HEARING_NOTICE_DOCUMENT,
+            new DocumentRecord(
+                manageHearingsDocumentService.generateVacateHearingNotice(finremCaseDetails, authToken),
+                CaseDocumentType.HEARING_NOTICE
+            )
+        );
+    }
+
     private void generateFormC(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         CaseDocumentType formCType = manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails).getLeft();
         documentMap.put(
