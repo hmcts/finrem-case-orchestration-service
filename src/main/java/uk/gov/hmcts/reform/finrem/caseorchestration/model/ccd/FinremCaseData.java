@@ -869,7 +869,6 @@ public class FinremCaseData implements HasCaseDocument {
         return getSelectedCourtStringFromCourt(court);
     }
 
-    // PT todo consider test
     @JsonIgnore
     public String getSelectedCourtStringFromCourt(Court court) {
         CourtListWrapper courtList = court.getDefaultCourtListWrapper();

@@ -31,7 +31,7 @@ public class VacateHearingNoticeLetterDetailsMapper extends AbstractManageHearin
 
         ManageHearingsWrapper hearingsWrapper =  caseData.getManageHearingsWrapper();
         WorkingVacatedHearing workingVacatedHearing = hearingsWrapper.getWorkingVacatedHearing();
-        UUID workingVacatedHearingId = UUID.fromString(workingVacatedHearing.getChooseHearings().getValue().getCode());
+        UUID workingVacatedHearingId = hearingsWrapper.getWorkingVacatedHearingId(workingVacatedHearing);
 
         VacateOrAdjournedHearing vacatedOrAdjournedHearing =
             hearingsWrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingVacatedHearingId).getValue();

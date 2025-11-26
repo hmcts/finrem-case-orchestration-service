@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
@@ -90,5 +92,19 @@ public class ManageHearingsWrapper {
             .filter(item -> requiredId != null && requiredId.equals(item.getId()))
             .findFirst()
             .orElse(null);
+    }
+
+    /**
+     * Returns the UUID for workingVacatedHearing.getChooseHearings().getValue().getCode().
+     * Throws IllegalArgumentException when any segment is missing or code is not a valid UUID.
+     */
+    public static UUID getWorkingVacatedHearingId(WorkingVacatedHearing workingVacatedHearing) {
+        return Optional.ofNullable(workingVacatedHearing)
+            .map(WorkingVacatedHearing::getChooseHearings)
+            .map(DynamicList::getValue)
+            .map(DynamicListElement::getCode)
+            .map(UUID::fromString)
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Invalid or missing working vacated hearing UUID"));
     }
 }
