@@ -126,7 +126,7 @@ public class ManageHearingActionService {
      *
      * @param finremCaseDetails case details containing hearing and case data
      */
-    public void performVacateHearing(FinremCaseDetails finremCaseDetails) {
+    public void performVacateHearing(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
 
@@ -149,6 +149,10 @@ public class ManageHearingActionService {
             .id(hearingToVacate.getId())
             .value(vacatedHearing)
             .build();
+
+        if (YesOrNo.YES.equals(hearingsWrapper.getIsRelistSelected())) {
+            performAddHearing(finremCaseDetails, authToken);
+        }
 
         if (hearingsWrapper.getVacatedOrAdjournedHearings() == null) {
             hearingsWrapper.setVacatedOrAdjournedHearings(new ArrayList<>());
