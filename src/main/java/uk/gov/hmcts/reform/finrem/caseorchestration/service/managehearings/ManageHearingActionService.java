@@ -156,6 +156,7 @@ public class ManageHearingActionService {
         hearingsWrapper.getVacatedOrAdjournedHearings().add(vacatedItem);
 
         hearingsWrapper.setWorkingVacatedHearing(null);
+        hearingsWrapper.setIsRelistSelected(null);
     }
 
     /**

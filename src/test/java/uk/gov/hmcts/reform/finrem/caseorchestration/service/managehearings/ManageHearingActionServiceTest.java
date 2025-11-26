@@ -305,6 +305,8 @@ class ManageHearingActionServiceTest {
         Hearing hearing = createHearing(HearingType.FDR, "10:00", "30mins", LocalDate.now());
         Hearing hearing1 = createHearing(HearingType.FH, "11:00", "1hr", LocalDate.now().plusDays(1));
 
+        hearingWrapper.setIsRelistSelected(YesOrNo.NO);
+
         hearingWrapper.setWorkingVacatedHearing(WorkingVacatedHearing.builder()
             .chooseHearings(DynamicList.builder()
                 .value(DynamicListElement.builder().code(hearingId.toString()).build())
@@ -336,6 +338,10 @@ class ManageHearingActionServiceTest {
                 assertThat(vacatedHearing.getValue().getHearingTime()).isEqualTo("10:00");
                 assertThat(vacatedHearing.getValue().getHearingTimeEstimate()).isEqualTo("30mins");
             });
+
+        assertThat(hearingWrapper.getManageHearingsActionSelection()).isNull();
+        assertThat(hearingWrapper.getWorkingVacatedHearing()).isNull();
+        assertThat(hearingWrapper.getIsRelistSelected()).isNull();
     }
 
     @Test
@@ -570,11 +576,11 @@ class ManageHearingActionServiceTest {
             .hearingTimeEstimate(estimate)
             .partiesOnCase(List.of(PartyOnCaseCollectionItem
                 .builder()
-                    .value(PartyOnCase
-                        .builder()
-                        .label("Applicant")
-                        .role(APPLICANT)
-                        .build())
+                .value(PartyOnCase
+                    .builder()
+                    .label("Applicant")
+                    .role(APPLICANT)
+                    .build())
                 .build()))
             .wasMigrated(migrated ? YesOrNo.YES : null)
             .build();
