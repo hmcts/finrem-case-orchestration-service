@@ -152,7 +152,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
-    private Condition<NoticeOfChangeParty> expectedParty(boolean isApplicantSolicitor) {
+    private static Condition<NoticeOfChangeParty> expectedParty(boolean isApplicantSolicitor) {
         return new Condition<>(party ->
             isApplicantSolicitor ? APPLICANT.equals(party) : RESPONDENT.equals(party),
             "expected APPLICANT if applicant solicitor, otherwise RESPONDENT");

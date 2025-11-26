@@ -40,6 +40,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private final CaseRoleService caseRoleService;
 
+    record StopRepresentingRequest(FinremCaseData finremCaseData, boolean isLoginWithApplicantSolicitor) {}
+
     private static final String WARNING_MESSAGE =
         "Are you sure you wish to stop representing your client? "
             + "If you continue your access to this access will be removed";
@@ -58,11 +60,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             && Arrays.asList(CONTESTED, CONSENTED).contains(caseType)
             && STOP_REPRESENTING_CLIENT.equals(eventType);
     }
-
-    record StopRepresentingRequest (
-        FinremCaseData finremCaseData,
-        boolean isLoginWithApplicantSolicitor
-    ) {}
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
