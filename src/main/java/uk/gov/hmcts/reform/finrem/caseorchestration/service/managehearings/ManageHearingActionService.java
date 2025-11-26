@@ -113,11 +113,6 @@ public class ManageHearingActionService {
             generateOutOfCourtResolution(finremCaseDetails, authToken, documentMap);
         }
 
-        // PT Todo - could need feature toggle if you keep
-        if (YesOrNo.YES.equals(hearingWrapper.getRelistHearingSelection())) {
-            generateVacateHearingNotice(finremCaseDetails, authToken, documentMap);
-        }
-
         setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
 
         addDocumentsToCollection(documentMap, hearingWrapper);
