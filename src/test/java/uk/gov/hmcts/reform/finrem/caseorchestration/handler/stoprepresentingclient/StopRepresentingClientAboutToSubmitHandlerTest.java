@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.stoprepresentingclient;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
@@ -24,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -32,6 +35,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.Callback
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -82,6 +87,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         assertThat(logs.getInfos()).hasSize(2).contains(format(
             format("%s - %s solicitor stops representing a client with a client consent", CASE_ID,
                 isApplicantSolicitor ? "applicant" : "respondent")));
+        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
     @ParameterizedTest
@@ -102,12 +108,14 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         assertThat(logs.getInfos()).hasSize(2).contains(format(
             format("%s - %s solicitor stops representing a client with a judicial approval", CASE_ID,
                 isApplicantSolicitor ? "applicant" : "respondent")));
+        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenNoJudicialApprovalOrClientConsent_whenHandled_thenThrowIllegalStateException(boolean isApplicantSolicitor) {
-        lenient().when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(isApplicantSolicitor);
+        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+            .thenReturn(isApplicantSolicitor);
         FinremCaseData caseData = FinremCaseData.builder()
             .stopRepresentationWrapper(StopRepresentationWrapper.builder().build())
             .build();
@@ -121,5 +129,32 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             format("%s - applicant solicitor stops representing a client with a client consent", CASE_ID),
             format("%s - respondent solicitor stops representing a client with a client consent", CASE_ID)
         );
+        verify(caseRoleService).isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenLoginAsApplicant_whenHandled_thenPopulatePartyToChangeRepresented(boolean isApplicantSolicitor) {
+        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+            .thenReturn(isApplicantSolicitor);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            .extracting(FinremCaseData::getContactDetailsWrapper)
+            .extracting(ContactDetailsWrapper::getNocParty)
+            .is(expectedParty(isApplicantSolicitor));
+        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+    }
+
+    private Condition<NoticeOfChangeParty> expectedParty(boolean isApplicantSolicitor) {
+        return new Condition<>(party ->
+            isApplicantSolicitor ? APPLICANT.equals(party) : RESPONDENT.equals(party),
+            "expected APPLICANT if applicant solicitor, otherwise RESPONDENT");
     }
 }

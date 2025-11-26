@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.stoprepresentingclient;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -15,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 
@@ -56,39 +59,38 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             && STOP_REPRESENTING_CLIENT.equals(eventType);
     }
 
+    record StopRepresentingRequest (
+        FinremCaseData finremCaseData,
+        boolean isLoginWithApplicantSolicitor
+    ) {}
+
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
-        List<String> warnings = new ArrayList<>();
-        if (isHavingClientConsent(finremCaseData) || isHavingJudicialApproval(finremCaseData)) {
-            warnings.add(WARNING_MESSAGE);
-        } else {
-            throw new IllegalStateException("Client consent or judicial approval is required but missing.");
-        }
-
+        final FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        final FinremCaseData finremCaseData = finremCaseDetails.getData();
         final boolean isLoginWithApplicantSolicitor =
             caseRoleService.isLoginWithApplicantSolicitor(finremCaseData, userAuthorisation);
-        log.info("{} - {} solicitor stops representing a client with a {}", finremCaseData.getCcdCaseId(),
-            resolveNocParty(isLoginWithApplicantSolicitor).getValue(), describeApprovalSource(finremCaseData));
+        final List<String> warnings = new ArrayList<>();
+        StopRepresentingRequest stopRepresentingRequest = new StopRepresentingRequest(finremCaseData, isLoginWithApplicantSolicitor);
 
-        Address clientAddressForService = finremCaseData.getStopRepresentationWrapper().getClientAddressForService();
-        boolean isAddressConfidential = YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getClientAddressForServiceConfidential());
+        populateWarnings(finremCaseData, warnings);
+        logStopRepresentingRequest(stopRepresentingRequest);
+        setPartyToChangeRepresented(stopRepresentingRequest);
+        setServiceAddress(stopRepresentingRequest, getServiceAddressConfig(finremCaseData));
+        processRepresentationChange(finremCaseData, finremCaseData.getCcdCaseType());
+        processNocWorkflow(finremCaseData);
+        
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(callbackRequest.getCaseDetails().getData())
+            .warnings(warnings)
+            .build();
+    }
 
-        finremCaseData.getContactDetailsWrapper().setNocParty(resolveNocParty(isLoginWithApplicantSolicitor));
-        if (isLoginWithApplicantSolicitor) {
-            finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-            finremCaseData.getContactDetailsWrapper().setApplicantAddress(clientAddressForService);
-            finremCaseData.getContactDetailsWrapper().setApplicantAddressHiddenFromRespondent(YesOrNo.forValue(isAddressConfidential));
-        } else {
-            setRespondentUnrepresented(finremCaseDetails);
-            finremCaseData.getContactDetailsWrapper().setRespondentAddress(clientAddressForService);
-            finremCaseData.getContactDetailsWrapper().setRespondentAddressHiddenFromApplicant(YesOrNo.forValue(isAddressConfidential));
-        }
-        updateContactDetailsService.handleRepresentationChange(finremCaseData, finremCaseDetails.getCaseType());
+    private void processNocWorkflow(FinremCaseData finremCaseData) {
+        // TODO
         //        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         //        CaseDetails caseDetailsBefore = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetailsBefore());
         //
@@ -97,18 +99,63 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         //            .getData();
         //
         //        finremCaseData = finremCaseDetailsMapper.mapToFinremCaseData(updateCaseData, caseDetails.getCaseTypeId());
-        
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .warnings(warnings)
-            .build();
     }
 
-    private void setRespondentUnrepresented(FinremCaseDetails finremCaseDetails) {
-        if (finremCaseDetails.isConsentedApplication()) {
-            finremCaseDetails.getData().getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+    private void processRepresentationChange(FinremCaseData finremCaseData, CaseType caseType) {
+        updateContactDetailsService.handleRepresentationChange(finremCaseData, caseType);
+    }
+
+    private void populateWarnings(FinremCaseData finremCaseData, List<String> warnings) {
+        if (isHavingClientConsent(finremCaseData) || isHavingJudicialApproval(finremCaseData)) {
+            warnings.add(WARNING_MESSAGE);
         } else {
-            finremCaseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+            throw new IllegalStateException("Client consent or judicial approval is required but missing.");
+        }
+    }
+
+    private void logStopRepresentingRequest(StopRepresentingRequest representingRequest) {
+        log.info("{} - {} solicitor stops representing a client with a {}", representingRequest.finremCaseData.getCcdCaseId(),
+            resolveNocParty(representingRequest.isLoginWithApplicantSolicitor).getValue(),
+            describeApprovalSource(representingRequest.finremCaseData));
+    }
+
+    private Pair<Address, Boolean> getServiceAddressConfig(FinremCaseData finremCaseData) {
+        StopRepresentationWrapper wrapper = finremCaseData.getStopRepresentationWrapper();
+        return Pair.of(wrapper.getClientAddressForService(), YesOrNo.isYes(wrapper.getClientAddressForServiceConfidential()));
+    }
+
+    private void setPartyToChangeRepresented(StopRepresentingRequest stopRepresentingRequest) {
+        stopRepresentingRequest.finremCaseData.getContactDetailsWrapper()
+            .setNocParty(resolveNocParty(stopRepresentingRequest.isLoginWithApplicantSolicitor));
+    }
+
+    private void setServiceAddress(StopRepresentingRequest stopRepresentingRequest,
+                                   Pair<Address, Boolean> serviceAddressConfig) {
+        Address serviceAddress = serviceAddressConfig.getLeft();
+        boolean isConfidential = Boolean.TRUE.equals(serviceAddressConfig.getRight());
+
+        ContactDetailsWrapper contactDetailsWrapper = stopRepresentingRequest.finremCaseData.getContactDetailsWrapper();
+
+        if (stopRepresentingRequest.isLoginWithApplicantSolicitor) {
+            setApplicantUnrepresented(stopRepresentingRequest.finremCaseData);
+            contactDetailsWrapper.setApplicantAddress(serviceAddress);
+            contactDetailsWrapper.setApplicantAddressHiddenFromRespondent(YesOrNo.forValue(isConfidential));
+        } else {
+            setRespondentUnrepresented(stopRepresentingRequest.finremCaseData);
+            contactDetailsWrapper.setRespondentAddress(serviceAddress);
+            contactDetailsWrapper.setRespondentAddressHiddenFromApplicant(YesOrNo.forValue(isConfidential));
+        }
+    }
+
+    private void setApplicantUnrepresented(FinremCaseData finremCaseData) {
+        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+    }
+
+    private void setRespondentUnrepresented(FinremCaseData finremCaseData) {
+        if (finremCaseData.isConsentedApplication()) {
+            finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+        } else {
+            finremCaseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
         }
     }
 
