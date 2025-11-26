@@ -50,7 +50,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.Inte
 @RequiredArgsConstructor
 public class AssignCaseAccessService {
 
-    private static final String CREATOR_ROLE = "[CREATOR]";
+    private static final String CREATOR_ROLE = CaseRole.CREATOR.getCcdCode();
     private final AssignCaseAccessServiceConfiguration assignCaseAccessServiceConfiguration;
     private final AssignCaseAccessRequestMapper assignCaseAccessRequestMapper;
     private final IdamService idamService;
@@ -59,7 +59,6 @@ public class AssignCaseAccessService {
     private final AuthTokenGenerator serviceAuthTokenGenerator;
     private final CaseDataApiV2 caseDataApi;
     private final SystemUserService systemUserService;
-    private final FeatureToggleService featureToggleService;
 
     public void assignCaseAccess(CaseDetails caseDetails, String authorisationToken) {
         String userId = idamService.getIdamUserId(authorisationToken);
@@ -164,38 +163,59 @@ public class AssignCaseAccessService {
             .build();
     }
 
+    /**
+     * Finds and revokes the creator role for the given case.
+     *
+     * <p>This method is deprecated and only kept for backwards compatibility.
+     * It accepts a {@link CaseDetails} object, extracts the case ID, and delegates
+     * to {@link #findAndRevokeCreatorRole(String)}.</p>
+     *
+     * @param caseDetails the case details containing the ID of the case
+     * @return a response containing the result of the creator role revocation
+     * @deprecated use {@link #findAndRevokeCreatorRole(String)} instead
+     */
+    @Deprecated
     public CaseAssignmentUserRolesResponse findAndRevokeCreatorRole(CaseDetails caseDetails) {
+        return findAndRevokeCreatorRole(String.valueOf(caseDetails.getId()));
+    }
 
-        log.info("About to start revoking creator role for Case ID: {}", caseDetails.getId());
-        List<CaseAssignmentUserRole> allRoles = getUserRoles(caseDetails.getId().toString())
+    /**
+     * Finds and revokes the creator role for the case with the given ID.
+     *
+     * @param caseIdInString the ID of the case, as a string
+     * @return a response containing the result of the creator role revocation
+     */
+    public CaseAssignmentUserRolesResponse findAndRevokeCreatorRole(String caseIdInString) {
+        log.info("Going to find and revoke creator role for Case ID: {}", caseIdInString);
+        List<CaseAssignmentUserRole> allRoles = getUserRoles(caseIdInString)
             .getCaseAssignmentUserRoles();
 
         if (allRoles.isEmpty()) {
-            log.info("No user roles found for Case ID: {}", caseDetails.getId());
+            log.info("No user roles found for Case ID: {}", caseIdInString);
             return null;
         }
 
         List<CaseAssignmentUserRole> creatorRoles = getCreatorRoles(allRoles);
 
         if (creatorRoles.isEmpty()) {
-            log.info("No creator role found for Case ID: {}", caseDetails.getId());
+            log.info("No creator role found for Case ID: {}", caseIdInString);
             return null;
         }
 
         if (creatorRoles.size() > 1) {
             throw new IllegalStateException(
-                    String.format("Multiple creator roles found for case ID: %s", caseDetails.getId()));
+                    String.format("Multiple creator roles found for case ID: %s", caseIdInString));
         }
 
         Optional<CaseAssignmentUserRole> userToRemove = getUserToRemove(creatorRoles, allRoles);
 
         if (userToRemove.isEmpty()) {
-            log.info("Applicant solicitor did not create case with ID {}", caseDetails.getId());
+            log.info("Applicant solicitor did not create case with ID {}", caseIdInString);
             return null;
         }
 
-        log.info("Attempting to revoke CREATOR role for case {}", caseDetails.getId());
-        return revokeCreatorRole(caseDetails, userToRemove.get().getUserId());
+        log.info("Attempting to revoke CREATOR role for case {}", caseIdInString);
+        return revokeCreatorRole(caseIdInString, userToRemove.get().getUserId());
     }
 
     public boolean isCreatorRoleActiveOnCase(CaseDetails caseDetails) {
@@ -248,7 +268,7 @@ public class AssignCaseAccessService {
     private Optional<CaseAssignmentUserRole> getUserToRemove(List<CaseAssignmentUserRole> creatorRoles,
                                                              List<CaseAssignmentUserRole> allRoles) {
         final Predicate<CaseAssignmentUserRole> creatorWasApplicantSolicitor = solicitorRole ->
-            solicitorRole.getUserId().equals(creatorRoles.get(0).getUserId())
+            solicitorRole.getUserId().equals(creatorRoles.getFirst().getUserId())
                 && solicitorRole.getCaseRole().equals(APP_SOLICITOR_POLICY);
 
         return allRoles.stream()
@@ -256,10 +276,10 @@ public class AssignCaseAccessService {
             .findFirst();
     }
 
-    private CaseAssignmentUserRolesResponse revokeCreatorRole(CaseDetails caseDetails, String userId) {
+    private CaseAssignmentUserRolesResponse revokeCreatorRole(String caseId, String userId) {
 
         CaseAssignmentUserRolesRequest revokeAccessRequest = CaseAssignmentUserRolesRequest.builder()
-            .caseAssignmentUserRolesWithOrganisation(buildRevokeAccessRequest(caseDetails, userId)).build();
+            .caseAssignmentUserRolesWithOrganisation(buildRevokeAccessRequest(caseId, userId)).build();
 
         CaseAssignmentUserRolesResponse response = caseDataApi.removeCaseUserRoles(
             systemUserService.getSysUserToken(),
@@ -270,10 +290,10 @@ public class AssignCaseAccessService {
         return response;
     }
 
-    private List<CaseAssignmentUserRoleWithOrganisation> buildRevokeAccessRequest(CaseDetails caseDetails,
+    private List<CaseAssignmentUserRoleWithOrganisation> buildRevokeAccessRequest(String caseId,
                                                                                   String userId) {
         return List.of(CaseAssignmentUserRoleWithOrganisation.builder()
-            .caseDataId(caseDetails.getId().toString())
+            .caseDataId(caseId)
             .caseRole(CREATOR_ROLE)
             .userId(userId)
             .build());
