@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
@@ -23,8 +22,5 @@ public abstract class CheckSolicitorIsDigitalServiceBase {
             || organisationPolicy.getOrganisation().getOrganisationID() == null;
     }
 
-    @Deprecated
     public abstract boolean isSolicitorDigital(CaseDetails caseDetails);
-
-    public abstract boolean isSolicitorDigital(FinremCaseData finremCaseData);
 }
