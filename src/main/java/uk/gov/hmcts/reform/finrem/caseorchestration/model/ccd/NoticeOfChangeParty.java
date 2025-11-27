@@ -25,4 +25,8 @@ public enum NoticeOfChangeParty {
             .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
+
+    public static boolean isApplicantForRepresentationChange(FinremCaseData finremCaseData) {
+        return APPLICANT.equals(finremCaseData.getContactDetailsWrapper().getNocParty());
+    }
 }
