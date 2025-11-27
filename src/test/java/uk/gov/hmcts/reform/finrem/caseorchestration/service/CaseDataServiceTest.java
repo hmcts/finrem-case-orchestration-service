@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -92,6 +93,34 @@ class CaseDataServiceTest {
             .build();
 
         finremCaseDetailsMapper =  new FinremCaseDetailsMapper(objectMapper);
+    }
+
+    @Test
+    void isLitigantRepresented_shouldReturnTrue() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantRepresented(YesOrNo.YES)
+                .build())
+            .build();
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseData, true));
+
+        // consent
+        finremCaseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONSENTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .consentedRespondentRepresented(YesOrNo.YES)
+                .build())
+            .build();
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseData, false));
+
+        // contested
+        finremCaseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .build())
+            .build();
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseData, false));
     }
 
     @Test
