@@ -446,6 +446,7 @@ public class CaseDataService {
         return notificationRequestPayload;
     }
 
+    @Deprecated
     public boolean isLitigantRepresented(CaseDetails caseDetails, boolean isApplicant) {
         String isRepresented = (String) caseDetails.getData().get(getLitigantRepresentedKey(caseDetails, isApplicant));
 
