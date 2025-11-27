@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
@@ -13,17 +15,26 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisation
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG2_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
@@ -37,18 +48,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AddedSolicitorServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AddedSolicitorServiceTest {
 
-    private static final String TEST_APP_ORG_ID = "AppTestId";
+    private static final String TEST_APP_ORG_ID = TEST_ORG_ID;
     private static final String TEST_APP_ORG_NAME = "AppTestOrgName";
     private static final String APP_SOL_FORENAME = "Applicant";
     private static final String APP_SOL_SURNAME = "Solicitor";
     private static final String APP_SOL_NAME = APP_SOL_FORENAME + " " + APP_SOL_SURNAME;
     private static final String APP_SOL_EMAIL = "appsolicitor@gmail.com";
 
-    private static final String TEST_RESP_ORG_ID = "RespTestId";
+    private static final String TEST_RESP_ORG_ID = TEST_ORG2_ID;
     private static final String TEST_RESP_ORG_NAME = "RespTestOrgName";
     private static final String RESP_SOL_FORENAME = "Respondent";
     private static final String RESP_SOL_SURNAME = "Solicitor";
@@ -69,13 +81,13 @@ public class AddedSolicitorServiceTest {
 
     private CaseDetails caseDetails;
 
-    @Before
-    public void setUp() {
-        caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).data(new HashMap<>()).build();
+    @BeforeEach
+    void setUp() {
+        caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).id(CASE_ID).data(new HashMap<>()).build();
     }
 
     @Test
-    public void givenAppSolicitor_whenGetAddedSolicitorAsSolicitor_thenGetCorrectAddedSolicitor() {
+    void givenAppSolicitor_whenGetAddedSolicitorAsSolicitor_thenGetCorrectAddedSolicitor() {
         DynamicList appSolRoleList = getApplicantCaseRole();
 
         ChangeOrganisationRequest changeRequest = getApplicantChangeRequest(appSolRoleList);
@@ -86,7 +98,7 @@ public class AddedSolicitorServiceTest {
             .email(APP_SOL_EMAIL)
             .build();
 
-        ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd, changeRequest);
+        final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd, changeRequest);
         assertEquals(APP_SOL_NAME, addedSolicitor.getName());
         assertEquals(APP_SOL_EMAIL, addedSolicitor.getEmail());
         assertEquals(TEST_APP_ORG_ID, addedSolicitor.getOrganisation().getOrganisationID());
@@ -94,7 +106,7 @@ public class AddedSolicitorServiceTest {
     }
 
     @Test
-    public void givenRespSolicitor_whenGetAddedSolicitorAsSolicitor_thenGetCorrectAddedSolicitor() {
+    void givenRespSolicitor_whenGetAddedSolicitorAsSolicitor_thenGetCorrectAddedSolicitor() {
         DynamicList respSolRoleList = getRespondentCaseRole();
         ChangeOrganisationRequest changeRequest = getRespondentChangeRequest(respSolRoleList);
 
@@ -104,7 +116,7 @@ public class AddedSolicitorServiceTest {
             .email(RESP_SOL_EMAIL)
             .build();
 
-        ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd, changeRequest);
+        final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd, changeRequest);
         assertEquals(RESP_SOL_NAME, addedSolicitor.getName());
         assertEquals(RESP_SOL_EMAIL, addedSolicitor.getEmail());
         assertEquals(TEST_RESP_ORG_ID, addedSolicitor.getOrganisation().getOrganisationID());
@@ -112,7 +124,7 @@ public class AddedSolicitorServiceTest {
     }
 
     @Test
-    public void givenAppSolicitorContested_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor() {
+    void givenAppSolicitorContested_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor() {
         OrganisationPolicy applicantOrgPolicy = OrganisationPolicy.builder()
             .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
             .organisation(Organisation.builder().organisationID(TEST_APP_ORG_ID).organisationName(TEST_APP_ORG_NAME).build())
@@ -123,16 +135,37 @@ public class AddedSolicitorServiceTest {
         caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, applicantOrgPolicy);
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
+        when(caseDataService.isLitigantRepresented(caseDetails, true)).thenReturn(false);
 
-        ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
-        assertEquals(APP_SOL_NAME, addedSolicitor.getName());
-        assertEquals(APP_SOL_EMAIL, addedSolicitor.getEmail());
-        assertEquals(TEST_APP_ORG_ID, addedSolicitor.getOrganisation().getOrganisationID());
-        assertEquals(TEST_APP_ORG_NAME, addedSolicitor.getOrganisation().getOrganisationName());
+        final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
+        verify(caseDataService).isLitigantRepresented(caseDetails, true);
+
+        reset(caseDataService);
+
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantSolicitorName(APP_SOL_NAME)
+                .applicantSolicitorEmail(APP_SOL_EMAIL)
+                .nocParty(NoticeOfChangeParty.APPLICANT)
+                .build())
+            .applicantOrganisationPolicy(applicantOrgPolicy)
+            .build();
+
+        when(caseDataService.isLitigantRepresented(finremCaseData, true)).thenReturn(false);
+        ChangedRepresentative addedSolicitor2 = addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData);
+        verify(caseDataService).isLitigantRepresented(finremCaseData, true);
+
+        Stream.of(addedSolicitor, addedSolicitor2).forEach(actual -> {
+            assertEquals(APP_SOL_NAME, actual.getName());
+            assertEquals(APP_SOL_EMAIL, actual.getEmail());
+            assertEquals(TEST_APP_ORG_ID, actual.getOrganisation().getOrganisationID());
+            assertEquals(TEST_APP_ORG_NAME, actual.getOrganisation().getOrganisationName());
+        });
     }
 
     @Test
-    public void givenAppSolicitorConsented_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor() {
+    void givenAppSolicitorConsented_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor() {
         OrganisationPolicy applicantOrgPolicy = OrganisationPolicy.builder()
             .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
             .organisation(Organisation.builder().organisationID(TEST_APP_ORG_ID).organisationName(TEST_APP_ORG_NAME).build())
@@ -144,16 +177,36 @@ public class AddedSolicitorServiceTest {
         caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, applicantOrgPolicy);
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+        when(caseDataService.isLitigantRepresented(caseDetails, true)).thenReturn(false);
+        final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
+        verify(caseDataService).isLitigantRepresented(caseDetails, true);
 
-        ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
-        assertEquals(APP_SOL_NAME, addedSolicitor.getName());
-        assertEquals(APP_SOL_EMAIL, addedSolicitor.getEmail());
-        assertEquals(TEST_APP_ORG_ID, addedSolicitor.getOrganisation().getOrganisationID());
-        assertEquals(TEST_APP_ORG_NAME, addedSolicitor.getOrganisation().getOrganisationName());
+        reset(caseDataService);
+
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONSENTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .solicitorName(APP_SOL_NAME)
+                .solicitorEmail(APP_SOL_EMAIL)
+                .nocParty(NoticeOfChangeParty.APPLICANT)
+                .build())
+            .applicantOrganisationPolicy(applicantOrgPolicy)
+            .build();
+        when(caseDataService.isLitigantRepresented(finremCaseData, true)).thenReturn(false);
+        ChangedRepresentative addedSolicitor2 = addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData);
+        verify(caseDataService).isLitigantRepresented(finremCaseData, true);
+
+        Stream.of(addedSolicitor, addedSolicitor2).forEach(actual -> {
+            assertEquals(APP_SOL_NAME, actual.getName());
+            assertEquals(APP_SOL_EMAIL, actual.getEmail());
+            assertEquals(TEST_APP_ORG_ID, actual.getOrganisation().getOrganisationID());
+            assertEquals(TEST_APP_ORG_NAME, actual.getOrganisation().getOrganisationName());
+        });
     }
 
-    @Test
-    public void givenRespSolicitor_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor() {
+    @ParameterizedTest
+    @EnumSource(CaseType.class)
+    void givenRespSolicitor_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor(CaseType caseType) {
         OrganisationPolicy respondentOrgPolicy = OrganisationPolicy.builder()
             .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
             .organisation(Organisation.builder().organisationID(TEST_RESP_ORG_ID).organisationName(TEST_RESP_ORG_NAME).build())
@@ -164,20 +217,42 @@ public class AddedSolicitorServiceTest {
         caseDetails.getData().put(NOC_PARTY, RESPONDENT);
         caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY, respondentOrgPolicy);
 
-        ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
-        assertEquals(RESP_SOL_NAME, addedSolicitor.getName());
-        assertEquals(RESP_SOL_EMAIL, addedSolicitor.getEmail());
-        assertEquals(TEST_RESP_ORG_ID, addedSolicitor.getOrganisation().getOrganisationID());
-        assertEquals(TEST_RESP_ORG_NAME, addedSolicitor.getOrganisation().getOrganisationName());
+        when(caseDataService.isLitigantRepresented(caseDetails, false)).thenReturn(false);
+        final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
+        verify(caseDataService).isLitigantRepresented(caseDetails, false);
+
+        reset(caseDataService);
+
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .ccdCaseType(caseType)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentSolicitorName(RESP_SOL_NAME)
+                .respondentSolicitorEmail(RESP_SOL_EMAIL)
+                .nocParty(NoticeOfChangeParty.RESPONDENT)
+                .build())
+            .respondentOrganisationPolicy(respondentOrgPolicy)
+            .build();
+
+        when(caseDataService.isLitigantRepresented(finremCaseData, false)).thenReturn(false);
+        ChangedRepresentative addedSolicitor2 = addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData);
+        verify(caseDataService).isLitigantRepresented(finremCaseData, false);
+
+        Stream.of(addedSolicitor, addedSolicitor2).forEach(actual -> {
+            assertEquals(RESP_SOL_NAME, actual.getName());
+            assertEquals(RESP_SOL_EMAIL, actual.getEmail());
+            assertEquals(TEST_RESP_ORG_ID, actual.getOrganisation().getOrganisationID());
+            assertEquals(TEST_RESP_ORG_NAME, actual.getOrganisation().getOrganisationName());
+        });
     }
 
     @Test
-    public void givenNonDigitalApplicantSolicitor_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor() {
+    void givenNonDigitalApplicantSolicitor_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor() {
         OrganisationPolicy applicantOrgPolicy = OrganisationPolicy.builder()
             .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
             .organisation(Organisation.builder().build())
             .build();
 
+        // CaseDetails
         caseDetails.getData().put(CONTESTED_SOLICITOR_NAME, APP_SOL_NAME);
         caseDetails.getData().put(CONTESTED_SOLICITOR_EMAIL, APP_SOL_EMAIL);
         caseDetails.getData().put(NOC_PARTY, APPLICANT);
@@ -186,15 +261,42 @@ public class AddedSolicitorServiceTest {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
         when(caseDataService.isLitigantRepresented(caseDetails, true)).thenReturn(true);
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
+        final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
+        verify(caseDataService, times(2)).isConsentedApplication(caseDetails);
+        verify(caseDataService).isLitigantRepresented(caseDetails, true);
+        verify(checkApplicantSolicitorIsDigitalService).isSolicitorDigital(caseDetails);
 
-        ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
-        assertEquals(APP_SOL_NAME, addedSolicitor.getName());
-        assertEquals(APP_SOL_EMAIL, addedSolicitor.getEmail());
-        assertNull(addedSolicitor.getOrganisation());
+        reset(caseDataService, checkApplicantSolicitorIsDigitalService);
+
+        // FinremCaseData
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantSolicitorName(APP_SOL_NAME)
+                .applicantSolicitorEmail(APP_SOL_EMAIL)
+                .nocParty(NoticeOfChangeParty.APPLICANT)
+                .build())
+            .applicantOrganisationPolicy(applicantOrgPolicy)
+            .build();
+
+        when(caseDataService.isLitigantRepresented(finremCaseData, true)).thenReturn(true);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(finremCaseData)).thenReturn(false);
+        ChangedRepresentative addedSolicitor2 = addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData);
+        verify(caseDataService).isLitigantRepresented(finremCaseData, true);
+        verify(checkApplicantSolicitorIsDigitalService).isSolicitorDigital(finremCaseData);
+
+        Stream.of(addedSolicitor, addedSolicitor2).forEach(
+            actual -> {
+                assertEquals(APP_SOL_NAME, actual.getName());
+                assertEquals(APP_SOL_EMAIL, actual.getEmail());
+                assertNull(actual.getOrganisation());
+            }
+        );
     }
 
-    @Test
-    public void givenNonDigitalRespondentSolicitor_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor() {
+    @ParameterizedTest
+    @EnumSource(CaseType.class)
+    void givenNonDigitalRespondentSolicitor_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor(CaseType caseType) {
         OrganisationPolicy respondentOrgPolicy = OrganisationPolicy.builder()
             .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
             .organisation(Organisation.builder().build())
@@ -207,11 +309,34 @@ public class AddedSolicitorServiceTest {
 
         when(caseDataService.isLitigantRepresented(caseDetails, false)).thenReturn(true);
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
+        final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
+        verify(caseDataService).isLitigantRepresented(caseDetails, false);
+        verify(checkRespondentSolicitorIsDigitalService).isSolicitorDigital(caseDetails);
 
-        ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
-        assertEquals(RESP_SOL_NAME, addedSolicitor.getName());
-        assertEquals(RESP_SOL_EMAIL, addedSolicitor.getEmail());
-        assertNull(addedSolicitor.getOrganisation());
+        reset(caseDataService, checkRespondentSolicitorIsDigitalService);
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .ccdCaseType(caseType)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentSolicitorName(RESP_SOL_NAME)
+                .respondentSolicitorEmail(RESP_SOL_EMAIL)
+                .nocParty(NoticeOfChangeParty.RESPONDENT)
+                .build())
+            .respondentOrganisationPolicy(respondentOrgPolicy)
+            .build();
+
+        when(caseDataService.isLitigantRepresented(finremCaseData, false)).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(finremCaseData)).thenReturn(false);
+        final ChangedRepresentative addedSolicitor2 = addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData);
+        verify(caseDataService).isLitigantRepresented(finremCaseData, false);
+        verify(checkRespondentSolicitorIsDigitalService).isSolicitorDigital(finremCaseData);
+
+        Stream.of(addedSolicitor, addedSolicitor2).forEach(
+            actual -> {
+                assertEquals(RESP_SOL_NAME, actual.getName());
+                assertEquals(RESP_SOL_EMAIL, actual.getEmail());
+                assertNull(actual.getOrganisation());
+            }
+        );
     }
 
     private DynamicList getApplicantCaseRole() {
