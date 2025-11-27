@@ -26,7 +26,25 @@ public enum NoticeOfChangeParty {
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 
+    /**
+     * Checks if the party selected for the change in representation
+     * is the applicant.
+     *
+     * @param finremCaseData the case data containing the party selection
+     * @return true if the selected party is the applicant; false otherwise
+     */
     public static boolean isApplicantForRepresentationChange(FinremCaseData finremCaseData) {
         return APPLICANT.equals(finremCaseData.getContactDetailsWrapper().getNocParty());
+    }
+
+    /**
+     * Checks if the party selected for the change in representation
+     * is the respondent.
+     *
+     * @param finremCaseData the case data containing the party selection
+     * @return true if the selected party is the respondent; false otherwise
+     */
+    public static boolean isRespondentForRepresentationChange(FinremCaseData finremCaseData) {
+        return RESPONDENT.equals(finremCaseData.getContactDetailsWrapper().getNocParty());
     }
 }
