@@ -102,7 +102,7 @@ class VacateHearingNoticeLetterDetailsMapperTest {
         if (VacateOrAdjournReason.OTHER.equals(vacateOrAdjournReason)) {
             assertThat(vacateHearingNoticeDetails.getVacateHearingReasons()).isEqualTo("illness");
         } else {
-            assertThat(vacateHearingNoticeDetails.getVacateHearingReasons()).isEqualTo("Other - Adjourned generally");
+            assertThat(vacateHearingNoticeDetails.getVacateHearingReasons()).isEqualTo(vacateOrAdjournReason.getDisplayValue());
         }
     }
 
@@ -151,7 +151,7 @@ class VacateHearingNoticeLetterDetailsMapperTest {
      * No working hearing required.
      */
     private FinremCaseDetails buildCaseDetails(YesOrNo civilPartnership, String schedule1OrMatrimonial,
-                                               VacateOrAdjournReason vacateOrAdjournReason){
+                                               VacateOrAdjournReason vacateOrAdjournReason) {
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
             .civilPartnership(civilPartnership)

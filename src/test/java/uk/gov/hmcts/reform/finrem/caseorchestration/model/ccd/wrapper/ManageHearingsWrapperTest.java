@@ -98,7 +98,7 @@ class ManageHearingsWrapperTest {
     // assert null given for null or empty collections, when we look for a vacated hearing item by id.
     @ParameterizedTest
     @MethodSource("nullVacatedOrAdjournedHearingItems")
-    void when_getVacatedOrAdjournedHearingsCollectionItemById_should_return_null (ManageHearingsWrapper hearingsWrapper) {
+    void when_getVacatedOrAdjournedHearingsCollectionItemById_should_return_null(ManageHearingsWrapper hearingsWrapper) {
         assertNull(hearingsWrapper.getVacatedOrAdjournedHearingsCollectionItemById(testUuid));
     }
 

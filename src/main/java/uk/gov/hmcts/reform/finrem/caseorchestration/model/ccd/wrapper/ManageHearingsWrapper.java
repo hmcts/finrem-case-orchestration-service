@@ -97,6 +97,8 @@ public class ManageHearingsWrapper {
     /**
      * Returns the UUID for workingVacatedHearing.getChooseHearings().getValue().getCode().
      * Throws IllegalArgumentException when any segment is missing or code is not a valid UUID.
+     * @param workingVacatedHearing Working copy of the hearing instance currently being processed.
+     * @return UUID which is the unique id for the working vacated hearing (corresponds to an actual vacated hearing).
      */
     public static UUID getWorkingVacatedHearingId(WorkingVacatedHearing workingVacatedHearing) {
         return Optional.ofNullable(workingVacatedHearing)

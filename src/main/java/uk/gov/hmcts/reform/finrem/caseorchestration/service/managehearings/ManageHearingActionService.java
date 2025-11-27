@@ -156,11 +156,16 @@ public class ManageHearingActionService {
         }
         hearingsWrapper.getVacatedOrAdjournedHearings().add(vacatedItem);
 
-        // generate vacate hearing notice
         Map<String, DocumentRecord> documentMap = new HashMap<>();
-        if (YesOrNo.NO.equals(hearingsWrapper.getRelistHearingSelection())) {
-            generateVacateHearingNotice(finremCaseDetails, authToken, documentMap);
-        }
+
+        /*
+        * Suggest reusing performAddHearing's new hearing doc gen methods here.
+        * if (YesOrNo.YES.equals(hearingsWrapper.getRelistHearingSelection())) {
+        * }
+        */
+
+        generateVacateHearingNotice(finremCaseDetails, authToken, documentMap);
+
         setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
 
         addDocumentsToCollection(documentMap, hearingsWrapper);
