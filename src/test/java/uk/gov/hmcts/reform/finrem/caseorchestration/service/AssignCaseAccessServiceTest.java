@@ -178,6 +178,8 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = buildCaseDetails();
         CaseAssignmentUserRolesResponse response = assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
         assertThat(response.getStatusMessage()).isEqualTo("Success");
+        response = assignCaseAccessService.findAndRevokeCreatorRole("123");
+        assertThat(response.getStatusMessage()).isEqualTo("Success");
     }
 
     @Test
@@ -193,6 +195,8 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
 
         CaseAssignmentUserRolesResponse response = assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
         assertThat(response).isNull();
+        response = assignCaseAccessService.findAndRevokeCreatorRole("123");
+        assertThat(response).isNull();
     }
 
     @Test
@@ -207,6 +211,8 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withBody(mapper.writeValueAsString(generateResourceWithNoCreatorRole()))));
 
         CaseAssignmentUserRolesResponse response = assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
+        assertThat(response).isNull();
+        response = assignCaseAccessService.findAndRevokeCreatorRole("123");
         assertThat(response).isNull();
     }
 
