@@ -49,6 +49,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -69,7 +70,6 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
 
     public static final String TEST_USER_ID = "someUserId";
     public static final String SOME_OTHER_USER_ID = "someOtherUserId";
-    public static final String AUTH_TOKEN = "tolkien:)";
     public static final String CASE_ID = "1234567890";
     private static final String CREATOR_ROLE = "[CREATOR]";
     private static final String ORG_ID = "otherID";
@@ -178,6 +178,8 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = buildCaseDetails();
         CaseAssignmentUserRolesResponse response = assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
         assertThat(response.getStatusMessage()).isEqualTo("Success");
+        response = assignCaseAccessService.findAndRevokeCreatorRole("123");
+        assertThat(response.getStatusMessage()).isEqualTo("Success");
     }
 
     @Test
@@ -193,6 +195,8 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
 
         CaseAssignmentUserRolesResponse response = assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
         assertThat(response).isNull();
+        response = assignCaseAccessService.findAndRevokeCreatorRole("123");
+        assertThat(response).isNull();
     }
 
     @Test
@@ -207,6 +211,8 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withBody(mapper.writeValueAsString(generateResourceWithNoCreatorRole()))));
 
         CaseAssignmentUserRolesResponse response = assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
+        assertThat(response).isNull();
+        response = assignCaseAccessService.findAndRevokeCreatorRole("123");
         assertThat(response).isNull();
     }
 

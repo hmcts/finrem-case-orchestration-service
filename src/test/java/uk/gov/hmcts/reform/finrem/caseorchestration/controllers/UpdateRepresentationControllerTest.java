@@ -96,7 +96,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
     }
 
     protected OngoingStubbing<CaseAssignmentUserRolesResponse> whenRevokeCreatorCaseAccessValid() {
-        return when(assignCaseAccessService.findAndRevokeCreatorRole(any()));
+        return when(assignCaseAccessService.findAndRevokeCreatorRole(any(CaseDetails.class)));
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
