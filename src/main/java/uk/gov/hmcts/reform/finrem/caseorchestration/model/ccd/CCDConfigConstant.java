@@ -68,7 +68,6 @@ public class CCDConfigConstant {
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
     public static final String CONTESTED_SOLICITOR_DX_NUMBER = "applicantSolicitorDXnumber";
     public static final String CONSENTED_SOLICITOR_DX_NUMBER = "solicitorDXnumber";
-    public static final String APPLICANT_SHARE_DOCUMENTS = "applicantShareDocs";
     public static final String APPLICANT_ORGANISATION_POLICY = "ApplicantOrganisationPolicy";
     public static final String CONTESTED_SOLICITOR_PHONE = "applicantSolicitorPhone";
 
@@ -86,7 +85,6 @@ public class CCDConfigConstant {
     public static final String RESP_SOLICITOR_EMAIL = "rSolicitorEmail";
     public static final String RESP_SOLICITOR_DX_NUMBER = "rSolicitorDXnumber";
     public static final String RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT = "RespSolNotificationsEmailConsent";
-    public static final String RESPONDENT_SHARE_DOCUMENTS = "respondentShareDocs";
     public static final String RESPONDENT_ORGANISATION_POLICY = "RespondentOrganisationPolicy";
 
     //Court related
@@ -296,7 +294,6 @@ public class CCDConfigConstant {
     public static final String CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT = "latestRefusalOrder";
     public static final String CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME = "refusalOrderJudgeName";
     public static final String CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE = "refusalOrderJudgeType";
-    public static final String CONTESTED_APPLICATION_NOT_APPROVED_DATE = "refusalOrderDate";
 
     // Application Approved (Contested)
     public static final String CONTESTED_ORDER_APPROVED_JUDGE_TYPE = "orderApprovedJudgeType";
@@ -556,16 +553,8 @@ public class CCDConfigConstant {
     //Manage Barristers
     public static final String APPLICANT_BARRISTER_COLLECTION = "appBarristerCollection";
     public static final String RESPONDENT_BARRISTER_COLLECTION = "respBarristerCollection";
-    public static final String INTERVENER_BARRISTER_1_COLLECTION = "intvr1BarristerCollection";
-    public static final String INTERVENER_BARRISTER_2_COLLECTION = "intvr2BarristerCollection";
-    public static final String INTERVENER_BARRISTER_3_COLLECTION = "intvr3BarristerCollection";
-    public static final String INTERVENER_BARRISTER_4_COLLECTION = "intvr4BarristerCollection";
     public static final String APPLICANT_BARRISTER_ROLE = "[APPBARRISTER]";
     public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
-    public static final String INTERVENER_BARRISTER_1_ROLE = "[INTVRBARRISTER1]";
-    public static final String INTERVENER_BARRISTER_2_ROLE = "[INTVRBARRISTER2]";
-    public static final String INTERVENER_BARRISTER_3_ROLE = "[INTVRBARRISTER3]";
-    public static final String INTERVENER_BARRISTER_4_ROLE = "[INTVRBARRISTER4]";
     public static final String CASEWORKER_ROLE = "[CASEWORKER]";
     public static final String CASEWORKER_ROLE_FIELD_SHOW_LABEL = "CASEWORKER";
     public static final String MANAGE_BARRISTER_PARTY = "barristerParty";

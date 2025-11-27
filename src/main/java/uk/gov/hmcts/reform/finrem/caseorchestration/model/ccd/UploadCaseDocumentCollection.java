@@ -22,7 +22,6 @@ public class UploadCaseDocumentCollection implements CaseDocumentTabData, HasCas
 
     private String id;
 
-    @EqualsAndHashCode.Exclude
     @JsonProperty("value")
     private UploadCaseDocument uploadCaseDocument;
 
