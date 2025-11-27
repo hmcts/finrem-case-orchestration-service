@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -142,19 +143,11 @@ public class CaseDataService {
         return buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
     }
 
-    public String buildFullApplicantName(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getFullApplicantName();
-    }
-
     public String buildFullRespondentName(CaseDetails caseDetails) {
         boolean isConsentedApplication = isConsentedApplication(caseDetails);
         return buildFullName(caseDetails.getData(),
             isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
             isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME);
-    }
-
-    public String buildFullRespondentName(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getRespondentFullName();
     }
 
     public String buildFullIntervener1Name(CaseDetails caseDetails) {
@@ -453,10 +446,24 @@ public class CaseDataService {
         return notificationRequestPayload;
     }
 
+    @Deprecated
     public boolean isLitigantRepresented(CaseDetails caseDetails, boolean isApplicant) {
         String isRepresented = (String) caseDetails.getData().get(getLitigantRepresentedKey(caseDetails, isApplicant));
 
         return YES_VALUE.equalsIgnoreCase(isRepresented);
+    }
+
+    /**
+     * Checks if the specified party (applicant or respondent) is represented.
+     *
+     * @param finremCaseData the case data containing representation details
+     * @param isApplicant    true to check the applicant's representation status,
+     *                       false to check the respondent's
+     * @return true if the selected party is represented (Yes), otherwise false
+     */
+    public boolean isLitigantRepresented(FinremCaseData finremCaseData, boolean isApplicant) {
+        return YesOrNo.isYes(isApplicant ? finremCaseData.getContactDetailsWrapper().getApplicantRepresented()
+            : getRespondentRepresented(finremCaseData));
     }
 
     private String getLitigantRepresentedKey(CaseDetails caseDetails, boolean isApplicant) {
@@ -466,5 +473,11 @@ public class CaseDataService {
     private String getRespondentRepresentedKey(CaseDetails caseDetails) {
         return isConsentedApplication(caseDetails)
             ? CONSENTED_RESPONDENT_REPRESENTED : CONTESTED_RESPONDENT_REPRESENTED;
+    }
+
+    private YesOrNo getRespondentRepresented(FinremCaseData finremCaseData) {
+        return finremCaseData.isConsentedApplication()
+            ? finremCaseData.getContactDetailsWrapper().getConsentedRespondentRepresented()
+            : finremCaseData.getContactDetailsWrapper().getContestedRespondentRepresented();
     }
 }
