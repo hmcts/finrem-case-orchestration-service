@@ -96,34 +96,6 @@ class CaseDataServiceTest {
     }
 
     @Test
-    void isLitigantRepresented_shouldReturnTrue() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .applicantRepresented(YesOrNo.YES)
-                .build())
-            .build();
-        assertTrue(caseDataService.isLitigantRepresented(finremCaseData, true));
-
-        // consent
-        finremCaseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONSENTED)
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .consentedRespondentRepresented(YesOrNo.YES)
-                .build())
-            .build();
-        assertTrue(caseDataService.isLitigantRepresented(finremCaseData, false));
-
-        // contested
-        finremCaseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONTESTED)
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .contestedRespondentRepresented(YesOrNo.YES)
-                .build())
-            .build();
-        assertTrue(caseDataService.isLitigantRepresented(finremCaseData, false));
-    }
-
-    @Test
     void isRespondentSolicitorResponsibleToDraftOrder_shouldReturnTrue() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, RESPONDENT_SOLICITOR);
@@ -727,6 +699,34 @@ class CaseDataServiceTest {
             = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONSENTED.getCcdType()).id(123L).build();
 
         assertTrue(caseDataService.isLitigantRepresented(finremCaseDetails, false));
+    }
+
+    @Test
+    void isLitigantRepresented_shouldReturnTrue() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantRepresented(YesOrNo.YES)
+                .build())
+            .build();
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseData, true));
+
+        // consent
+        finremCaseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONSENTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .consentedRespondentRepresented(YesOrNo.YES)
+                .build())
+            .build();
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseData, false));
+
+        // contested
+        finremCaseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .build())
+            .build();
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseData, false));
     }
 
     private static RespondToOrderData getRespondToOrderData(String s) {
