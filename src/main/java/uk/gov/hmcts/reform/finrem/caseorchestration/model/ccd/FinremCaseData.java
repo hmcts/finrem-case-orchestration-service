@@ -878,6 +878,11 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     public String getSelectedHearingCourt() {
         Court court = getManageHearingsWrapper().getWorkingHearing().getHearingCourtSelection();
+        return getSelectedCourtStringFromCourt(court);
+    }
+
+    @JsonIgnore
+    public String getSelectedCourtStringFromCourt(Court court) {
         CourtListWrapper courtList = court.getDefaultCourtListWrapper();
 
         return Map.of(
