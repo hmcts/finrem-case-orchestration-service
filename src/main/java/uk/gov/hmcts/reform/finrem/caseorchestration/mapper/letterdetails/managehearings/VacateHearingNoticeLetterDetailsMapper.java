@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
@@ -16,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehe
 
 import java.time.LocalDate;
 import java.util.UUID;
+
+import static java.util.Optional.ofNullable;
 
 @Component
 public class VacateHearingNoticeLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
@@ -34,7 +37,10 @@ public class VacateHearingNoticeLetterDetailsMapper extends AbstractManageHearin
         UUID workingVacatedHearingId = hearingsWrapper.getWorkingVacatedHearingId(workingVacatedHearing);
 
         VacateOrAdjournedHearing vacatedOrAdjournedHearing =
-            hearingsWrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingVacatedHearingId).getValue();
+            ofNullable(hearingsWrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingVacatedHearingId))
+                .map(VacatedOrAdjournedHearingsCollectionItem::getValue)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    String.format("Could not find a vacated hearing with id %s", workingVacatedHearingId)));
 
         CourtDetailsTemplateFields courtTemplateFields =
             buildCourtDetailsTemplateFields(caseData.getSelectedCourtStringFromCourt(vacatedOrAdjournedHearing.getHearingCourtSelection()));

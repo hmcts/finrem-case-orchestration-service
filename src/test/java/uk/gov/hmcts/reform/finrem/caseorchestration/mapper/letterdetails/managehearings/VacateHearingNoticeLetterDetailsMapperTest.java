@@ -54,6 +54,8 @@ class VacateHearingNoticeLetterDetailsMapperTest {
 
     private VacateHearingNoticeLetterDetailsMapper vacateHearingNoticeLetterDetailsMapper;
 
+    private static final String testUuid = "c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb";
+
     @BeforeEach
     void setUp() {
         vacateHearingNoticeLetterDetailsMapper =
@@ -62,7 +64,7 @@ class VacateHearingNoticeLetterDetailsMapperTest {
 
     @ParameterizedTest
     @MethodSource("provideHearingDetailsAffectingLogic")
-    void shouldBuildDocumentTemplateDetails(YesOrNo civilPartnership, String schedule1OrMatrimonial,
+    void should_buildDocumentTemplateDetails(YesOrNo civilPartnership, String schedule1OrMatrimonial,
                                             VacateOrAdjournReason vacateOrAdjournReason) {
         // Arrange
         FinremCaseDetails caseDetails = buildCaseDetails(civilPartnership, schedule1OrMatrimonial, vacateOrAdjournReason);
@@ -123,7 +125,7 @@ class VacateHearingNoticeLetterDetailsMapperTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenWorkingVacatedHearingIsNull() {
+    void when_workingVacatedHearing_given_null_throws_exception() {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder().workingVacatedHearing(null).build())
@@ -138,6 +140,32 @@ class VacateHearingNoticeLetterDetailsMapperTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> vacateHearingNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
         assertThat(exception.getMessage()).isEqualTo("Invalid or missing working vacated hearing UUID");
+    }
+
+    @Test
+    void when_getVacatedOrAdjournedHearingsCollectionItemById_given_wrong_id_throws_exception() {
+        // Arrange
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .workingVacatedHearing(WorkingVacatedHearing.builder()
+                    .chooseHearings(DynamicList.builder()
+                        .value(DynamicListElement.builder()
+                            .code(testUuid)
+                            .build())
+                        .build())
+                    .build())
+                .build())
+            .build();
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(caseData)
+            .build();
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> vacateHearingNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
+        assertThat(exception.getMessage()).isEqualTo("Could not find a vacated hearing with id c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb");
     }
 
     /*
@@ -171,13 +199,13 @@ class VacateHearingNoticeLetterDetailsMapperTest {
                     .workingVacatedHearing(WorkingVacatedHearing.builder()
                         .chooseHearings(DynamicList.builder()
                             .value(DynamicListElement.builder()
-                                .code("c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb")
+                                .code(testUuid)
                                 .build())
                             .build())
                         .build())
                     .vacatedOrAdjournedHearings(List.of(
                         VacatedOrAdjournedHearingsCollectionItem.builder()
-                            .id(UUID.fromString("c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb"))
+                            .id(UUID.fromString(testUuid))
                             .value(VacateOrAdjournedHearing.builder()
                                 .hearingType(HearingType.FDR)
                                 .hearingDate(LocalDate.of(2025, 8, 1))
