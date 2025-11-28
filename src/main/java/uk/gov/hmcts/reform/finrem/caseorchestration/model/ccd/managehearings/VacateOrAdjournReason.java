@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
+//Note: Expecting better display values that are more appropriate for the notice.  To follow.
 @RequiredArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public enum VacateOrAdjournReason {
@@ -22,11 +23,11 @@ public enum VacateOrAdjournReason {
     CASE_STAYED("Case_Stayed", "Other - Case stayed"),
     ADJOURNED("Adjourned", "Other - Adjourned generally"),
     CASE_TRANSFERRED("Case_Transferred", "Other - Case transferred"),
-    OTHER("Other", "Other");
+    OTHER("Other", "Other - Please specify");
 
     private final String value;
     @Getter
-    private final String description;
+    private final String displayValue;
 
     @JsonValue
     public String getValue() {

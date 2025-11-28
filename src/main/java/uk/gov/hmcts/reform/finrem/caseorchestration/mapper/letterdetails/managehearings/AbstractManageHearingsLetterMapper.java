@@ -74,6 +74,11 @@ public abstract class AbstractManageHearingsLetterMapper {
     }
 
     protected CourtDetailsTemplateFields buildCourtDetailsTemplateFields(String courtSelection) {
+
+        if (courtSelection == null || courtSelection.isBlank()) {
+            throw new IllegalArgumentException("courtSelection must be provided and not blank");
+        }
+
         CourtDetails courtDetails = courtDetailsConfiguration.getCourts().get(courtSelection);
 
         return CourtDetailsTemplateFields.builder()

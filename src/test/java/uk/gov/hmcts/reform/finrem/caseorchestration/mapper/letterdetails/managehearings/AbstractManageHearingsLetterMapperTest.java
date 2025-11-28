@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manage
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,7 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractManageHearingsLetterMapperTest {
@@ -30,6 +33,12 @@ class AbstractManageHearingsLetterMapperTest {
     void setUp() {
         testClass =
             new TestAbstractManageHearingsLetterMapper(new ObjectMapper(), courtDetailsConfiguration);
+    }
+
+    @Test
+    void when_buildCourtDetailsTemplateFields_given_null_raises_exception() {
+        assertThat(assertThrows(IllegalArgumentException.class, () -> testClass.buildCourtDetailsTemplateFields(null)).getMessage())
+            .isEqualTo("courtSelection must be provided and not blank");
     }
 
     @ParameterizedTest

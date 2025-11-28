@@ -48,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VACATE_HEARING_NOTICE_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.getHearingType;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
@@ -127,7 +128,7 @@ public class ManageHearingActionService {
      *
      * @param finremCaseDetails case details containing hearing and case data
      */
-    public void performVacateHearing(FinremCaseDetails finremCaseDetails) {
+    public void performVacateHearing(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
 
@@ -156,6 +157,21 @@ public class ManageHearingActionService {
         }
         hearingsWrapper.getVacatedOrAdjournedHearings().add(vacatedItem);
 
+        Map<String, DocumentRecord> documentMap = new HashMap<>();
+
+        /*
+        * Suggest reusing performAddHearing's new hearing doc gen methods here.
+        * if (YesOrNo.YES.equals(hearingsWrapper.getRelistHearingSelection())) {
+        * }
+        */
+
+        generateVacateHearingNotice(finremCaseDetails, authToken, documentMap);
+
+        setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
+
+        addDocumentsToCollection(documentMap, hearingsWrapper);
+
+        // clear the working hearing
         hearingsWrapper.setWorkingVacatedHearing(null);
     }
 
@@ -327,10 +343,10 @@ public class ManageHearingActionService {
 
     private void generateVacateHearingNotice(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         documentMap.put(
-            HEARING_NOTICE_DOCUMENT,
+            VACATE_HEARING_NOTICE_DOCUMENT,
             new DocumentRecord(
                 manageHearingsDocumentService.generateVacateHearingNotice(finremCaseDetails, authToken),
-                CaseDocumentType.HEARING_NOTICE
+                CaseDocumentType.VACATE_HEARING_NOTICE
             )
         );
     }
