@@ -32,6 +32,34 @@ public class UpdateRepresentationWorkflowService {
     private final AssignCaseAccessService assignCaseAccessService;
     private final SystemUserService systemUserService;
 
+    public void handleNoticeOfChangeWorkflow(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
+                                             String userAuthorisation) {
+        String caseId = finremCaseData.getCcdCaseId();
+
+        // trying to revoke creator role if any
+        assignCaseAccessService.findAndRevokeCreatorRole(caseId);
+        noticeOfChangeService.updateRepresentation(finremCaseData, userAuthorisation,
+            originalFinremCaseData);
+
+        // TODO
+        /*
+        if (isNoOrganisationsToAddOrRemove(caseDetails)) {
+            persistDefaultOrganisationPolicy(caseDetails);
+
+            setDefaultChangeOrganisationRequest(caseDetails);
+
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        }
+
+        caseDetails.getData().putAll(caseData);
+        caseDetails = noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails,
+            originalCaseDetails);
+
+        return assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), caseDetails);
+        */
+    }
+
+    // invoked by UpdateContactDetailsAboutToSubmitHandler
     public AboutToStartOrSubmitCallbackResponse handleNoticeOfChangeWorkflow(CaseDetails caseDetails,
                                                                              String authorisationToken,
                                                                              CaseDetails originalCaseDetails) {

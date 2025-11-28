@@ -78,24 +78,11 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         setPartyToChangeRepresented(stopRepresentingRequest);
         setServiceAddress(stopRepresentingRequest, getServiceAddressConfig(finremCaseData));
         processRepresentationChange(finremCaseData, finremCaseData.getCcdCaseType());
-        processNocWorkflow(finremCaseData);
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
             .warnings(warnings)
             .build();
-    }
-
-    private void processNocWorkflow(FinremCaseData finremCaseData) {
-        // TODO
-        //        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-        //        CaseDetails caseDetailsBefore = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetailsBefore());
-        //
-        //        Map<String, Object> updateCaseData = TODO nocWorkflowService
-        //            .handleNoticeOfChangeWorkflow(caseDetails, userAuthorisation, caseDetailsBefore)
-        //            .getData();
-        //
-        //        finremCaseData = finremCaseDetailsMapper.mapToFinremCaseData(updateCaseData, caseDetails.getCaseTypeId());
     }
 
     private void processRepresentationChange(FinremCaseData finremCaseData, CaseType caseType) {

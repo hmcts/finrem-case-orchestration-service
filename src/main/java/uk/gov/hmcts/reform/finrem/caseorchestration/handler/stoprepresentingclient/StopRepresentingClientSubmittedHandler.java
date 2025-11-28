@@ -46,11 +46,11 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
-        String caseId = callbackRequest.getCaseDetails().getCaseIdAsString();
 
         applicationEventPublisher.publishEvent(StopRepresentingClientEvent.builder()
             .userAuthorisation(userAuthorisation)
-            .caseId(caseId)
+            .data(callbackRequest.getCaseDetails().getData())
+            .originalData(callbackRequest.getCaseDetailsBefore().getData()) // TODO check if before data is available
             .build());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

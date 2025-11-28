@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -56,18 +57,19 @@ class StopRepresentingClientSubmittedHandlerTest {
 
     @Test
     void givenAnyCase_whenHandled_thenPublishStopRepresentingClientEvent() {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .build();
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
 
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
-            CONTESTED, caseData);
+            caseDataBefore, caseData);
 
         underTest.handle(request, AUTH_TOKEN);
 
-        ArgumentCaptor<StopRepresentingClientEvent>  eventCaptor = ArgumentCaptor.forClass(StopRepresentingClientEvent.class);
+        ArgumentCaptor<StopRepresentingClientEvent> eventCaptor = ArgumentCaptor.forClass(StopRepresentingClientEvent.class);
         verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
 
-        assertThat(eventCaptor.getValue().getCaseId()).isEqualTo(CASE_ID);
+        assertThat(eventCaptor.getValue().getData()).isEqualTo(caseData);
+        assertThat(eventCaptor.getValue().getOriginalData()).isEqualTo(caseDataBefore);
         assertThat(eventCaptor.getValue().getUserAuthorisation()).isEqualTo(AUTH_TOKEN);
     }
 }
