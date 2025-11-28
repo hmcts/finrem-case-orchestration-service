@@ -333,7 +333,8 @@ public class ManageHearingActionService {
             .toList());
     }
 
-    private List<VacatedOrAdjournedHearingTabCollectionItem> filterVacatedOrAdjournedHearingTabItems(List<VacatedOrAdjournedHearingTabCollectionItem> hearingTabItems, String party) {
+    private List<VacatedOrAdjournedHearingTabCollectionItem> filterVacatedOrAdjournedHearingTabItems(
+        List<VacatedOrAdjournedHearingTabCollectionItem> hearingTabItems, String party) {
         return nullIfEmpty(emptyIfNull(hearingTabItems).stream()
             .filter(hearingTabItem -> YesOrNo.isYes(hearingTabItem.getValue().getTabWasMigrated())
                 || hearingTabItem.getValue().getTabConfidentialParties().contains(party))
