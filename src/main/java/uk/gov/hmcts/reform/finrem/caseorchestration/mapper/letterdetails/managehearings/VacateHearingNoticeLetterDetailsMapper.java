@@ -6,7 +6,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfigura
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournReason;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.HearingNoticeLetterDetails;
@@ -30,7 +34,7 @@ public class VacateHearingNoticeLetterDetailsMapper extends AbstractManageHearin
 
         ManageHearingsWrapper hearingsWrapper =  caseData.getManageHearingsWrapper();
         WorkingVacatedHearing workingVacatedHearing = hearingsWrapper.getWorkingVacatedHearing();
-        UUID workingVacatedHearingId = hearingsWrapper.getWorkingVacatedHearingId(workingVacatedHearing);
+        UUID workingVacatedHearingId = ManageHearingsWrapper.getWorkingVacatedHearingId(workingVacatedHearing);
 
         VacateOrAdjournedHearing vacatedOrAdjournedHearing =
             ofNullable(hearingsWrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingVacatedHearingId))

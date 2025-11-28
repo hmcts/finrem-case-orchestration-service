@@ -198,7 +198,7 @@ class HearingTabDataMapperTest {
             .anyMatch(doc -> doc.getValue().getDocumentFilename().equals(DOCUMENT_1_FILENAME)));
         assertTrue(result.getTabHearingDocuments().stream()
             .anyMatch(doc -> doc.getValue().getDocumentFilename().equals(DOCUMENT_2_FILENAME)));
-        assertEquals(OTHER.getDescription(), result.getTabVacateOrAdjournReason());
+        assertEquals(OTHER.getDisplayValue(), result.getTabVacateOrAdjournReason());
         assertEquals(OTHER_REASON, result.getTabSpecifyOtherReason());
         assertEquals(VACATED_OR_ADJOURNED_DATE, result.getTabVacatedOrAdjournedDate());
         assertEquals(ManageHearingsAction.VACATE_HEARING.getDescription(), result.getTabHearingStatus());
