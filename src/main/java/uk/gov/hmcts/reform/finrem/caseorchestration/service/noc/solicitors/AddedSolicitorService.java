@@ -85,7 +85,6 @@ public class AddedSolicitorService {
                 : finremCaseData.getRespondentOrganisationPolicy()));
     }
 
-    @Deprecated
     private ChangedRepresentative getChangedRepresentative(CaseDetails caseDetails, boolean isApplicant, String litigantOrgPolicy) {
 
         return getOrgPolicy(caseDetails, litigantOrgPolicy)
@@ -103,13 +102,11 @@ public class AddedSolicitorService {
             .orElse(null);
     }
 
-    @Deprecated
     private Optional<OrganisationPolicy> getOrgPolicy(CaseDetails caseDetails, String orgPolicy) {
         return Optional.ofNullable(new ObjectMapper().convertValue(caseDetails.getData().get(orgPolicy),
             OrganisationPolicy.class));
     }
 
-    @Deprecated
     private String getSolicitorName(CaseDetails caseDetails, boolean isApplicant) {
         return isApplicant
             ? getApplicantSolicitorName(caseDetails)
@@ -122,14 +119,12 @@ public class AddedSolicitorService {
             : nullToEmpty(finremCaseData.getRespondentSolicitorName());
     }
 
-    @Deprecated
     private String getApplicantSolicitorName(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         return caseDataService.isConsentedApplication(caseDetails)
             ? nullToEmpty(caseData.get(CONSENTED_SOLICITOR_NAME)) : nullToEmpty(caseData.get(CONTESTED_SOLICITOR_NAME));
     }
 
-    @Deprecated
     private String getSolicitorEmail(CaseDetails caseDetails, boolean isApplicant) {
         return isApplicant
             ? getApplicantSolicitorEmail(caseDetails)
@@ -142,14 +137,12 @@ public class AddedSolicitorService {
             : nullToEmpty(finremCaseData.getContactDetailsWrapper().getRespondentSolicitorEmail());
     }
 
-    @Deprecated
     private String getApplicantSolicitorEmail(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         return caseDataService.isConsentedApplication(caseDetails)
             ? nullToEmpty(caseData.get(SOLICITOR_EMAIL)) : nullToEmpty(caseData.get(CONTESTED_SOLICITOR_EMAIL));
     }
 
-    @Deprecated
     private boolean isSolicitorDigital(CaseDetails caseDetails, boolean isApplicant) {
         return isApplicant
             ? checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
@@ -162,7 +155,6 @@ public class AddedSolicitorService {
             : checkRespondentSolicitorIsDigitalService.isSolicitorDigital(finremCaseData);
     }
 
-    @Deprecated
     private ChangedRepresentative getAddedSolicitor(CaseDetails caseDetails,
                                                     boolean isApplicant,
                                                     Organisation organisation) {
