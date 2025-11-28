@@ -39,9 +39,7 @@
       "respondentLName": "Smith",
       "respondentPhone": "7411201631",
       "respondentRepresented": "Yes",
-      "respondentFMName": "Jane",
-      "appRespondentFMName": "Jane",
-      "appRespondentLName": "Smith"
+      "respondentFMName": "Jane"
     }
   }
 }
