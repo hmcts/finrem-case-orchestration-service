@@ -4,6 +4,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -299,8 +301,9 @@ class ManageHearingActionServiceTest {
         verify(manageHearingsDocumentService, never()).generateFormG(finremCaseDetails, AUTH_TOKEN);
     }
 
-    @Test
-    void performVacateHearing_shouldVacateHearing() {
+    @ParameterizedTest
+    @EnumSource(value = YesOrNo.class, names = {"NO", "YES"})
+    void performVacateHearing_shouldVacateHearing(YesOrNo hearingWasRelisted) {
         UUID hearingId = UUID.randomUUID();
         UUID hearing1ID = UUID.randomUUID();
         Hearing hearing = createHearing(HearingType.FDR, "10:00", "30mins", LocalDate.now());
@@ -318,8 +321,10 @@ class ManageHearingActionServiceTest {
             ManageHearingsCollectionItem.builder().id(hearing1ID).value(hearing1).build()
         )));
 
-        when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(true);
-        when(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)).thenReturn(true);
+        hearingWrapper.setIsRelistSelected(hearingWasRelisted);
+
+        lenient().when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(true);
+        lenient().when(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)).thenReturn(true);
 
         manageHearingActionService.performVacateHearing(finremCaseDetails, AUTH_TOKEN);
 
@@ -341,10 +346,14 @@ class ManageHearingActionServiceTest {
                 assertThat(vacatedHearing.getValue().getHearingTimeEstimate()).isEqualTo("30mins");
             });
 
+        if (hearingWasRelisted == YesOrNo.NO) {
+            // As hearing wasn't relisted, performVacateHearing responsible for coversheets.
+            verify(hearingCorrespondenceHelper).shouldPostToApplicant(finremCaseDetails);
+            verify(hearingCorrespondenceHelper).shouldPostToRespondent(finremCaseDetails);
+            verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(finremCaseDetails, AUTH_TOKEN);
+        }
+
         verify(manageHearingsDocumentService).generateVacateHearingNotice(finremCaseDetails, AUTH_TOKEN);
-        verify(hearingCorrespondenceHelper).shouldPostToApplicant(finremCaseDetails);
-        verify(hearingCorrespondenceHelper).shouldPostToRespondent(finremCaseDetails);
-        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(finremCaseDetails, AUTH_TOKEN);
 
         assertThat(hearingWrapper.getHearingDocumentsCollection().size()).isEqualTo(1);
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingCaseDocumentType().getId())
