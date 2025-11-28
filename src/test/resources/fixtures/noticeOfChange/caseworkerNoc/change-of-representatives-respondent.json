@@ -4,7 +4,7 @@
   "case_details": {
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
-    "case_type_id": "ContestedFinancialRemedy",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
@@ -61,6 +61,5 @@
         }
       ]
     }
-  }
   }
 }
