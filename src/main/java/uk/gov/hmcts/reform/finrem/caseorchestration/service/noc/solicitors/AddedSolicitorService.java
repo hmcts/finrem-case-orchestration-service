@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -25,6 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
@@ -45,8 +47,10 @@ public class AddedSolicitorService {
             .build();
     }
 
+    @Deprecated
     public ChangedRepresentative getAddedSolicitorAsCaseworker(CaseDetails caseDetails) {
         final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+
         final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 
         if (caseDataService.isLitigantRepresented(caseDetails, isApplicant)
@@ -57,11 +61,44 @@ public class AddedSolicitorService {
         return getChangedRepresentative(caseDetails, isApplicant, litigantOrgPolicy);
     }
 
+    /**
+     * Returns the solicitor added by a caseworker during a change of representation.
+     *
+     * <p>This method determines whether the change applies to the applicant or the respondent.
+     * If the party is represented by a non-digital solicitor, it returns the newly added solicitor.
+     * Otherwise, it returns the updated representative details based on the relevant
+     * organisation policy (applicant or respondent).</p>
+     *
+     * @param finremCaseData the case data containing representation and policy details
+     * @return the updated {@link ChangedRepresentative} for the affected party
+     */
+    public ChangedRepresentative getAddedSolicitorAsCaseworker(FinremCaseData finremCaseData) {
+        final boolean isApplicant = isApplicantForRepresentationChange(finremCaseData);
+
+        if (caseDataService.isLitigantRepresented(finremCaseData, isApplicant)
+            && !isSolicitorDigital(finremCaseData, isApplicant)) {
+            return getAddedSolicitor(finremCaseData, isApplicant, null);
+        }
+
+        return getChangedRepresentative(finremCaseData, isApplicant,
+            Optional.of(isApplicant ? finremCaseData.getApplicantOrganisationPolicy()
+                : finremCaseData.getRespondentOrganisationPolicy()));
+    }
+
     private ChangedRepresentative getChangedRepresentative(CaseDetails caseDetails, boolean isApplicant, String litigantOrgPolicy) {
 
         return getOrgPolicy(caseDetails, litigantOrgPolicy)
             .map(OrganisationPolicy::getOrganisation)
             .map(organisation -> getAddedSolicitor(caseDetails, isApplicant, organisation))
+            .orElse(null);
+    }
+
+    private ChangedRepresentative getChangedRepresentative(FinremCaseData finremCaseData, boolean isApplicant,
+                                                           Optional<OrganisationPolicy> organisationPolicy) {
+
+        return organisationPolicy
+            .map(OrganisationPolicy::getOrganisation)
+            .map(organisation -> getAddedSolicitor(finremCaseData, isApplicant, organisation))
             .orElse(null);
     }
 
@@ -76,6 +113,12 @@ public class AddedSolicitorService {
             : nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NAME));
     }
 
+    private String getSolicitorName(FinremCaseData finremCaseData, boolean isApplicant) {
+        return isApplicant
+            ? nullToEmpty(finremCaseData.getAppSolicitorName())
+            : nullToEmpty(finremCaseData.getRespondentSolicitorName());
+    }
+
     private String getApplicantSolicitorName(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         return caseDataService.isConsentedApplication(caseDetails)
@@ -86,6 +129,12 @@ public class AddedSolicitorService {
         return isApplicant
             ? getApplicantSolicitorEmail(caseDetails)
             : nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_EMAIL));
+    }
+
+    private String getSolicitorEmail(FinremCaseData finremCaseData, boolean isApplicant) {
+        return isApplicant
+            ? nullToEmpty(finremCaseData.getAppSolicitorEmail())
+            : nullToEmpty(finremCaseData.getContactDetailsWrapper().getRespondentSolicitorEmail());
     }
 
     private String getApplicantSolicitorEmail(CaseDetails caseDetails) {
@@ -100,6 +149,12 @@ public class AddedSolicitorService {
             : checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
     }
 
+    private boolean isSolicitorDigital(FinremCaseData finremCaseData, boolean isApplicant) {
+        return isApplicant
+            ? checkApplicantSolicitorIsDigitalService.isSolicitorDigital(finremCaseData)
+            : checkRespondentSolicitorIsDigitalService.isSolicitorDigital(finremCaseData);
+    }
+
     private ChangedRepresentative getAddedSolicitor(CaseDetails caseDetails,
                                                     boolean isApplicant,
                                                     Organisation organisation) {
@@ -108,6 +163,15 @@ public class AddedSolicitorService {
             .email(getSolicitorEmail(caseDetails, isApplicant))
             .organisation(organisation)
             .build();
+    }
 
+    private ChangedRepresentative getAddedSolicitor(FinremCaseData finremCaseData,
+                                                    boolean isApplicant,
+                                                    Organisation organisation) {
+        return ChangedRepresentative.builder()
+            .name(getSolicitorName(finremCaseData, isApplicant))
+            .email(getSolicitorEmail(finremCaseData, isApplicant))
+            .organisation(organisation)
+            .build();
     }
 }

@@ -9,16 +9,20 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.AddedSolicitorService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.RemovedSolicitorService;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
@@ -57,29 +63,22 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     @MockitoBean
     private RemovedSolicitorService removedSolicitorService;
 
-    private CallbackRequest callbackRequest;
-
-    private final Function<Map<String, Object>, List<Element<RepresentationUpdate>>> getFirstChangeElement =
+    private final Function<Map<String, Object>, List<Element<RepresentationUpdate>>> getRepresentationUpdateHistory =
         this::convertToUpdateHistory;
+
+    private final Function<FinremCaseData, List<RepresentationUpdateHistoryCollection>> getRepresentationUpdateHistoryFinrem =
+        this::convertToUpdateHistoryFinrem;
 
     @Before
     public void setUp() {
         mapper.registerModule(new JavaTimeModule());
-    }
-
-    private void setUpCaseDetails(String fileName) throws Exception {
-        try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream(PATH + fileName)) {
-            callbackRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
-        }
+        when(mockIdamService.getIdamFullName(AUTH_TOKEN)).thenReturn("Claire Mumford");
     }
 
     @Test
     public void shouldUpdateRepresentationAndGenerateRepresentationUpdateHistory_whenCaseDataIsValid() throws Exception {
-        setUpCaseDetails("change-of-representatives.json");
-
         setUpHelper();
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
             .organisation(Organisation.builder()
@@ -96,12 +95,25 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
 
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
-                authTokenGenerator.generate(),
+                AUTH_TOKEN,
                 originalDetails);
 
-            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+            RepresentationUpdate actualChange = getRepresentationUpdateHistory.apply(caseData).getFirst().getValue();
+            RepresentationUpdate expectedChange = RepresentationUpdate.builder()
+                .party("applicant")
+                .clientName("John Smith")
+                .by("Claire Mumford")
+                .via("Notice of Change")
+                .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
+                .added(ChangedRepresentative.builder()
+                    .email("sirsolicitor1@gmail.com")
+                    .name("Sir Solicitor")
+                    .organisation(Organisation.builder()
+                        .organisationID("A31PTVA")
+                        .organisationName("FRApplicantSolicitorFirm")
+                        .build())
+                    .build())
+                .build();
 
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
             assertThat(actualChange.getParty().toLowerCase()).isEqualTo(expectedChange.getParty().toLowerCase());
@@ -111,11 +123,38 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldUpdateRepresentationAndGenerateRepresentationUpdateHistory_whenCaseDataIsValid_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("change-of-representatives-before.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-representatives-original-data.json");
+        final ChangedRepresentative addingChangedRepresentative = mock(ChangedRepresentative.class);
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData))
+            .thenReturn(addingChangedRepresentative);
+
+        // Act
+        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+
+        // Verify
+        // finremCaseData is updated. The following verification is performed on finremCaseData
+        List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
+        RepresentationUpdate actualChange = actual.getLast().getValue();
+        RepresentationUpdate expectedChange = RepresentationUpdate.builder()
+            .party("Applicant")
+            .clientName("John Smith")
+            .by("Claire Mumford")
+            .via("Notice of Change")
+            .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
+            .added(addingChangedRepresentative)
+            .build();
+
+        assertRepresentationUpdate(actualChange, expectedChange);
+    }
+
+    @Test
     public void shouldUpdateRepresentationAndUpdateRepresentationUpdateHistory_whenChangeAlreadyPopulated() throws Exception {
-        setUpCaseDetails("change-of-representatives.json");
         setUpHelper();
 
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
             .organisation(Organisation.builder()
@@ -129,12 +168,25 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             InputStream is = getClass().getResourceAsStream(PATH + "change-of-reps-populated-original.json");
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
-                authTokenGenerator.generate(),
+                AUTH_TOKEN,
                 originalDetails);
-            List<Element<RepresentationUpdate>> actual = getFirstChangeElement.apply(caseData);
+            List<Element<RepresentationUpdate>> actual = getRepresentationUpdateHistory.apply(caseData);
             RepresentationUpdate actualChange = actual.get(1).getValue();
-            RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+            RepresentationUpdate expectedChange = RepresentationUpdate.builder()
+                .party("applicant")
+                .clientName("John Smith")
+                .by("Claire Mumford")
+                .via("Notice of Change")
+                .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
+                .added(ChangedRepresentative.builder()
+                    .email("sirsolicitor1@gmail.com")
+                    .name("Sir Solicitor")
+                    .organisation(Organisation.builder()
+                        .organisationID("A31PTVA")
+                        .organisationName("FRApplicantSolicitorFirm")
+                        .build())
+                    .build())
+                .build();
 
             assertThat(actual).hasSize(2);
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
@@ -145,10 +197,51 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyUnpopulated() throws Exception {
-        setUpCaseDetails("consented-change-of-reps.json");
+    public void shouldUpdateRepresentationAndUpdateRepresentationUpdateHistory_whenChangeAlreadyPopulated_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("change-of-representatives.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-reps-populated-original.json");
+        final ChangedRepresentative addingChangedRepresentative = mock(ChangedRepresentative.class);
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData))
+            .thenReturn(addingChangedRepresentative);
 
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+        // Act
+        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+
+        // Verify
+        // finremCaseData is updated. The following verification is performed on finremCaseData
+        List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
+
+        assertThat(actual).hasSize(2);
+
+        // Verify the original data to be kept
+        RepresentationUpdate firstElement = actual.getFirst().getValue();
+        RepresentationUpdate historyDataToBeKept = getRepresentationUpdateHistory.apply(
+            readCaseDetailsData("change-of-representatives.json")
+        ).getFirst().getValue();
+        assertThat(firstElement)
+            .usingRecursiveComparison()
+            .withComparatorForFields(String.CASE_INSENSITIVE_ORDER, "party")
+            .isEqualTo(historyDataToBeKept);
+        assertRepresentationUpdate(firstElement, historyDataToBeKept);
+
+        // Verify the new history appended
+        RepresentationUpdate lastElement = actual.getLast().getValue();
+        RepresentationUpdate expectedNewElement = RepresentationUpdate.builder()
+            .added(addingChangedRepresentative)
+            .party("Applicant")
+            .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
+            .clientName("John Smith")
+            .by("Claire Mumford")
+            .via("Notice of Change")
+            .build();
+        assertRepresentationUpdate(lastElement, expectedNewElement);
+        assertThat(firstElement.getDate()).isBefore(lastElement.getDate());
+    }
+
+    @Test
+    public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyUnpopulated() throws Exception {
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
             .organisation(Organisation.builder()
@@ -166,10 +259,22 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             InputStream is = getClass().getResourceAsStream(PATH + "consented-change-of-reps-original.json");
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
-                authTokenGenerator.generate(), originalDetails);
-            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+                AUTH_TOKEN, originalDetails);
+            RepresentationUpdate actualChange = getRepresentationUpdateHistory.apply(caseData).getFirst().getValue();
+            RepresentationUpdate expectedChange = RepresentationUpdate.builder()
+                .party("applicant")
+                .clientName("John Smith")
+                .by("Claire Mumford")
+                .via("Notice of Change")
+                .added(ChangedRepresentative.builder()
+                    .email("sirsolicitor1@gmail.com")
+                    .name("Sir Solicitor")
+                    .organisation(Organisation.builder()
+                        .organisationID("A31PTVA")
+                        .organisationName("FRApplicantSolicitorFirm")
+                        .build())
+                    .build())
+                .build();
 
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
             assertThat(actualChange.getParty().toLowerCase()).isEqualTo(expectedChange.getParty().toLowerCase());
@@ -179,11 +284,40 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyUnpopulated_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("consented-change-of-reps-before.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("consented-change-of-reps-original.json");
+        final ChangedRepresentative addingChangedRepresentative = mock(ChangedRepresentative.class);
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData))
+            .thenReturn(addingChangedRepresentative);
+
+        // Act
+        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+
+        // Verify
+        // finremCaseData is updated. The following verification is performed on finremCaseData
+        List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
+
+        RepresentationUpdate expectedNewElement = RepresentationUpdate.builder()
+            .party("Applicant")
+            .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
+            .clientName("John Smith")
+            .by("Claire Mumford")
+            .via("Notice of Change")
+            .added(addingChangedRepresentative)
+            .build();
+
+        // Verify expected RepresentationUpdate appended
+        RepresentationUpdate firstElement = actual.getLast().getValue();
+        assertRepresentationUpdate(firstElement, expectedNewElement);
+    }
+
+    @Test
     public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyPopulated() throws Exception {
-        setUpCaseDetails("consented-change-of-reps.json");
         setUpHelper();
 
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
             .organisation(Organisation.builder()
@@ -198,11 +332,24 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             InputStream is = getClass().getResourceAsStream(PATH + "consented-change-of-reps-original.json");
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
-                authTokenGenerator.generate(), originalDetails);
-            List<Element<RepresentationUpdate>> actual = getFirstChangeElement.apply(caseData);
+                AUTH_TOKEN, originalDetails);
+            List<Element<RepresentationUpdate>> actual = getRepresentationUpdateHistory.apply(caseData);
             RepresentationUpdate actualChange = actual.get(1).getValue();
-            RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+            RepresentationUpdate expectedChange = RepresentationUpdate.builder()
+                .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
+                .party("Applicant")
+                .clientName("John Smith")
+                .by("Claire Mumford")
+                .via("Notice of Change")
+                .added(ChangedRepresentative.builder()
+                    .email("sirsolicitor1@gmail.com")
+                    .name("Sir Solicitor")
+                    .organisation(Organisation.builder()
+                        .organisationID("A31PTVA")
+                        .organisationName("FRApplicantSolicitorFirm")
+                        .build())
+                    .build())
+                .build();
 
             assertThat(actual).hasSize(2);
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
@@ -213,12 +360,48 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyPopulated_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("consented-change-of-reps.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("consented-change-of-reps-original.json");
+        final ChangedRepresentative addingChangedRepresentative = mock(ChangedRepresentative.class);
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData)).thenReturn(addingChangedRepresentative);
+
+        // Act
+        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+
+        // Verify
+        // finremCaseData is updated. The following verification is performed on finremCaseData
+        List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
+        assertThat(actual).hasSize(2);
+
+        // Verify the original data to be kept
+        RepresentationUpdate firstElement = actual.getFirst().getValue();
+        RepresentationUpdate historyDataToBeKept = getRepresentationUpdateHistory.apply(
+            readCaseDetailsData("consented-change-of-reps.json")
+        ).getFirst().getValue();
+        assertRepresentationUpdate(firstElement, historyDataToBeKept);
+
+        // Verify the new history appended
+        RepresentationUpdate lastElement = actual.getLast().getValue();
+        RepresentationUpdate expectedNewElement = RepresentationUpdate.builder()
+            .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
+            .party("Applicant")
+            .clientName("John Smith")
+            .by("Claire Mumford")
+            .via("Notice of Change")
+            .added(addingChangedRepresentative)
+            .build();
+        assertRepresentationUpdate(lastElement, expectedNewElement);
+        assertThat(firstElement.getDate()).isBefore(lastElement.getDate());
+    }
+
+    @Test
     public void shouldUpdateRepresentationUpdateHistory_whenNatureIsRemoving() throws Exception {
-        setUpCaseDetails("change-of-reps-removing.json");
         setUpHelper();
         when(mockCaseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(), eq(true))).thenReturn(
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(CaseDetails.class), eq(true))).thenReturn(
             ChangedRepresentative.builder()
                 .name("Sir Solicitor")
                 .email("sirsolicitor1@gmail.com")
@@ -234,11 +417,23 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             InputStream is = getClass().getResourceAsStream(PATH + "change-of-reps-removing-original.json");
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
-                authTokenGenerator.generate(),
+                AUTH_TOKEN,
                 originalDetails);
-            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+            RepresentationUpdate actualChange = getRepresentationUpdateHistory.apply(caseData).getFirst().getValue();
+            RepresentationUpdate expectedChange = RepresentationUpdate.builder()
+                .party("applicant")
+                .clientName("John Smith")
+                .by("Claire Mumford")
+                .via("Notice of Change")
+                .removed(ChangedRepresentative.builder()
+                    .email("sirsolicitor1@gmail.com")
+                    .name("Sir Solicitor")
+                    .organisation(Organisation.builder()
+                        .organisationID("A31PTVA")
+                        .organisationName("FRApplicantSolicitorFirm")
+                        .build())
+                    .build())
+                .build();
 
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
             assertThat(actualChange.getParty().toLowerCase()).isEqualTo(expectedChange.getParty().toLowerCase());
@@ -248,12 +443,37 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateRepresentationUpdateHistory_whenNatureIsReplacing() throws Exception {
-        setUpCaseDetails("change-of-reps-replacing.json");
+    public void shouldUpdateRepresentationUpdateHistory_whenNatureIsRemoving_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("change-of-reps-removing-before.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-reps-removing-original.json");
+        final ChangedRepresentative mockedChangedRepresentative = mock(ChangedRepresentative.class);
 
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(originalFinremCaseData, true))
+            .thenReturn(mockedChangedRepresentative);
+
+        // Act
+        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+
+        // Verify
+        List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
+        RepresentationUpdate actualChange = actual.getLast().getValue();
+        RepresentationUpdate expectedChange = RepresentationUpdate.builder()
+            .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
+            .party("Applicant")
+            .clientName("John Smith")
+            .by("Claire Mumford")
+            .via("Notice of Change")
+            .removed(mockedChangedRepresentative)
+            .build();
+        assertRepresentationUpdate(actualChange, expectedChange);
+    }
+
+    @Test
+    public void shouldUpdateRepresentationUpdateHistory_whenNatureIsReplacing() throws Exception {
         setUpHelper();
 
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(
             ChangedRepresentative.builder()
                 .name("TestAppSolName")
                 .email("testappsol123@gmail.com")
@@ -262,7 +482,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
                     .organisationName("FRApplicantNewSolFirm")
                     .build())
                 .build());
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(), eq(true))).thenReturn(
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(CaseDetails.class), eq(true))).thenReturn(
             ChangedRepresentative.builder()
                 .name("Sir Solicitor")
                 .email("sirsolicitor1@gmail.com")
@@ -278,12 +498,32 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             InputStream is = getClass().getResourceAsStream(PATH + "change-of-reps-replacing-original.json");
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
-                authTokenGenerator.generate(),
+                AUTH_TOKEN,
                 originalDetails);
 
-            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            RepresentationUpdate expected = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+            RepresentationUpdate actualChange = getRepresentationUpdateHistory.apply(caseData).getFirst().getValue();
+            RepresentationUpdate expected = RepresentationUpdate.builder()
+                .party("applicant")
+                .clientName("John Smith")
+                .by("Claire Mumford")
+                .via("Notice of Change")
+                .added(ChangedRepresentative.builder()
+                    .email("testappsol123@gmail.com")
+                    .name("TestAppSolName")
+                    .organisation(Organisation.builder()
+                        .organisationID("A31PTVU")
+                        .organisationName("FRApplicantNewSolFirm")
+                        .build())
+                    .build())
+                .removed(ChangedRepresentative.builder()
+                    .email("sirsolicitor1@gmail.com")
+                    .name("Sir Solicitor")
+                    .organisation(Organisation.builder()
+                        .organisationID("A31PTVA")
+                        .organisationName("FRApplicantSolicitorFirm")
+                        .build())
+                    .build())
+                .build();
 
             assertThat(actualChange.getClientName()).isEqualTo(expected.getClientName());
             assertThat(actualChange.getParty().toLowerCase()).isEqualTo(expected.getParty().toLowerCase());
@@ -294,13 +534,44 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldUpdateRepresentationUpdateHistory_whenNatureIsReplacing_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("change-of-reps-replacing-before.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-reps-replacing-original.json");
+        final ChangedRepresentative mockedAddedChangedRepresentative = mock(ChangedRepresentative.class);
+        final ChangedRepresentative mockedRemovedChangedRepresentative = mock(ChangedRepresentative.class);
+
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData))
+            .thenReturn(mockedAddedChangedRepresentative);
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(originalFinremCaseData, true))
+            .thenReturn(mockedRemovedChangedRepresentative);
+
+        // Act
+        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+
+        // Verify
+        List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
+        RepresentationUpdate actualChange = actual.getLast().getValue();
+        RepresentationUpdate expected = RepresentationUpdate.builder()
+            .party("Applicant")
+            .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
+            .clientName("John Smith")
+            .by("Claire Mumford")
+            .via("Notice of Change")
+            .added(mockedAddedChangedRepresentative)
+            .removed(mockedRemovedChangedRepresentative)
+            .build();
+
+        assertRepresentationUpdate(actualChange, expected);
+    }
+
+    @Test
     public void shouldUpdateRepresentationUpdateHistoryRespondent() throws Exception {
-        setUpCaseDetails("change-of-representatives-respondent.json");
         when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
         when(mockCaseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(mockCaseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
-        when(mockCaseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Jane Smith");
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(
+        when(mockCaseDataService.buildFullRespondentName(any(CaseDetails.class))).thenReturn("Jane Smith");
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(
             ChangedRepresentative.builder()
                 .name("Test respondent Solicitor")
                 .email("padmaja.ramisetti@gmail.com")
@@ -318,17 +589,55 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
 
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
-                authTokenGenerator.generate(),
+                AUTH_TOKEN,
                 originalDetails);
-            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            RepresentationUpdate expected = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+            RepresentationUpdate actualChange = getRepresentationUpdateHistory.apply(caseData).getFirst().getValue();
+            RepresentationUpdate expected = RepresentationUpdate.builder()
+                .party("respondent")
+                .clientName("Jane Smith")
+                .by("Claire Mumford")
+                .via("Notice of Change")
+                .added(ChangedRepresentative.builder()
+                    .email("padmaja.ramisetti@gmail.com")
+                    .name("Test respondent Solicitor")
+                    .organisation(Organisation.builder()
+                        .organisationID("A31PTVU")
+                        .organisationName("FRRespondentSolicitorFirm")
+                        .build())
+                    .build())
+                .build();
 
             assertThat(actualChange.getClientName()).isEqualTo(expected.getClientName());
             assertThat(actualChange.getParty().toLowerCase()).isEqualTo(expected.getParty().toLowerCase());
             assertThat(actualChange.getAdded()).isEqualTo(expected.getAdded());
             assertThat(actualChange.getBy()).isEqualTo(expected.getBy());
         }
+    }
+
+    @Test
+    public void shouldUpdateRepresentationUpdateHistoryRespondent_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("change-of-representatives-respondent-before.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-representatives-respondent-original.json");
+        final ChangedRepresentative mockedAddedChangedRepresentative = mock(ChangedRepresentative.class);
+
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData))
+            .thenReturn(mockedAddedChangedRepresentative);
+
+        // Act
+        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+
+        List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
+        RepresentationUpdate actualChange = actual.getLast().getValue();
+        RepresentationUpdate expected = RepresentationUpdate.builder()
+            .party("respondent")
+            .clientName("Jane Smith")
+            .by("Claire Mumford")
+            .via("Notice of Change")
+            .added(mockedAddedChangedRepresentative)
+            .build();
+
+        assertRepresentationUpdate(actualChange, expected);
     }
 
     @Test
@@ -381,14 +690,43 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             });
     }
 
-    private void setUpHelper() {
+    private List<RepresentationUpdateHistoryCollection> convertToUpdateHistoryFinrem(FinremCaseData caseData) {
+        return caseData.getRepresentationUpdateHistory();
+    }
 
-        when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
-        when(mockCaseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("John Smith");
-        when(mockCaseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Jane Smith");
+    private void setUpHelper() {
+        when(mockCaseDataService.buildFullApplicantName(any(CaseDetails.class))).thenReturn("John Smith");
+        when(mockCaseDataService.buildFullRespondentName(any(CaseDetails.class))).thenReturn("Jane Smith");
         when(mockCaseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(mockCaseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(mockCaseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
     }
 
+    private FinremCaseData readFinremCaseData(String fileName) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
+            FinremCallbackRequest actualRequest = mapper.readValue(resourceAsStream, FinremCallbackRequest.class);
+            FinremCaseData ret = actualRequest.getCaseDetails().getData();
+            ret.setCcdCaseType(actualRequest.getCaseDetails().getCaseType());
+            return ret;
+        } catch (Exception exception) {
+            throw new IllegalStateException("Fail to read FinremCaseData from the given JSON file", exception);
+        }
+    }
+
+    private Map<String, Object> readCaseDetailsData(String fileName) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
+            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            return actualRequest.getCaseDetails().getData();
+        } catch (Exception exception) {
+            throw new IllegalStateException("Fail to read CaseDetails.data from the given JSON file", exception);
+        }
+    }
+
+    private void assertRepresentationUpdate(RepresentationUpdate newElement, RepresentationUpdate expectedNewElement) {
+        assertThat(newElement)
+            .usingRecursiveComparison()
+            .ignoringFields("date")
+            .withComparatorForFields(String.CASE_INSENSITIVE_ORDER, "party")
+            .isEqualTo(expectedNewElement);
+    }
 }

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
@@ -29,9 +30,20 @@ public class CheckApplicantSolicitorIsDigitalService extends CheckSolicitorIsDig
         return !isOrganisationEmpty(applicantPolicy) && isApplicantRepresented;
     }
 
+    @Override
+    public boolean isSolicitorDigital(FinremCaseData caseData) {
+        OrganisationPolicy applicantPolicy = getApplicantOrganisationPolicy(caseData);
+        boolean isApplicantRepresented = caseDataService.isApplicantRepresentedByASolicitor(caseData);
+        return !isOrganisationEmpty(applicantPolicy) && isApplicantRepresented;
+    }
+
     private OrganisationPolicy getApplicantOrganisationPolicy(Map<String, Object> caseData) {
         return new ObjectMapper().convertValue(caseData.get(APPLICANT_ORGANISATION_POLICY),
             OrganisationPolicy.class);
+    }
+
+    private OrganisationPolicy getApplicantOrganisationPolicy(FinremCaseData finremCaseData) {
+        return finremCaseData.getApplicantOrganisationPolicy();
     }
 
     private boolean getApplicantIsRepresented(Map<String, Object> caseData) {
