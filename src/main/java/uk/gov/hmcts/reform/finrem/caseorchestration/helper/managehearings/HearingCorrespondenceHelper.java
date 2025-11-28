@@ -62,7 +62,6 @@ public class HearingCorrespondenceHelper {
                 .getValue();
     }
 
-    //TODO: Move to Static classs helpers method
     /**
      * Retrieves the {@link HearingTabItem} currently in context based on the working hearing ID from the case data.
      *
