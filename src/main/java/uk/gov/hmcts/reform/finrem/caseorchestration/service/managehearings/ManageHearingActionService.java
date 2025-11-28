@@ -172,6 +172,7 @@ public class ManageHearingActionService {
 
         // clear the working hearing
         hearingsWrapper.setWorkingVacatedHearing(null);
+        hearingsWrapper.setIsRelistSelected(null);
     }
 
     /**

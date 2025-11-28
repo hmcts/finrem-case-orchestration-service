@@ -41,7 +41,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
@@ -350,7 +349,9 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingCaseDocumentType().getId())
             .isEqualTo(CaseDocumentType.VACATE_HEARING_NOTICE.getId());
 
-        assertNull(hearingWrapper.getWorkingVacatedHearing());
+        assertThat(hearingWrapper.getManageHearingsActionSelection()).isNull();
+        assertThat(hearingWrapper.getWorkingVacatedHearing()).isNull();
+        assertThat(hearingWrapper.getIsRelistSelected()).isNull();
     }
 
     @Test
@@ -585,11 +586,11 @@ class ManageHearingActionServiceTest {
             .hearingTimeEstimate(estimate)
             .partiesOnCase(List.of(PartyOnCaseCollectionItem
                 .builder()
-                    .value(PartyOnCase
-                        .builder()
-                        .label("Applicant")
-                        .role(APPLICANT)
-                        .build())
+                .value(PartyOnCase
+                    .builder()
+                    .label("Applicant")
+                    .role(APPLICANT)
+                    .build())
                 .build()))
             .wasMigrated(migrated ? YesOrNo.YES : null)
             .build();
