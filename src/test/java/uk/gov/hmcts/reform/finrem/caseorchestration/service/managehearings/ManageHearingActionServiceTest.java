@@ -41,6 +41,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
@@ -305,8 +306,6 @@ class ManageHearingActionServiceTest {
         Hearing hearing = createHearing(HearingType.FDR, "10:00", "30mins", LocalDate.now());
         Hearing hearing1 = createHearing(HearingType.FH, "11:00", "1hr", LocalDate.now().plusDays(1));
 
-        hearingWrapper.setIsRelistSelected(YesOrNo.NO);
-
         hearingWrapper.setWorkingVacatedHearing(WorkingVacatedHearing.builder()
             .chooseHearings(DynamicList.builder()
                 .value(DynamicListElement.builder().code(hearingId.toString()).build())
@@ -319,7 +318,10 @@ class ManageHearingActionServiceTest {
             ManageHearingsCollectionItem.builder().id(hearing1ID).value(hearing1).build()
         )));
 
-        manageHearingActionService.performVacateHearing(finremCaseDetails);
+        when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(true);
+        when(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)).thenReturn(true);
+
+        manageHearingActionService.performVacateHearing(finremCaseDetails, AUTH_TOKEN);
 
         assertThat(hearingWrapper.getHearings())
             .hasSize(1)
@@ -338,6 +340,15 @@ class ManageHearingActionServiceTest {
                 assertThat(vacatedHearing.getValue().getHearingTime()).isEqualTo("10:00");
                 assertThat(vacatedHearing.getValue().getHearingTimeEstimate()).isEqualTo("30mins");
             });
+
+        verify(manageHearingsDocumentService).generateVacateHearingNotice(finremCaseDetails, AUTH_TOKEN);
+        verify(hearingCorrespondenceHelper).shouldPostToApplicant(finremCaseDetails);
+        verify(hearingCorrespondenceHelper).shouldPostToRespondent(finremCaseDetails);
+        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(finremCaseDetails, AUTH_TOKEN);
+
+        assertThat(hearingWrapper.getHearingDocumentsCollection().size()).isEqualTo(1);
+        assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingCaseDocumentType().getId())
+            .isEqualTo(CaseDocumentType.VACATE_HEARING_NOTICE.getId());
 
         assertThat(hearingWrapper.getManageHearingsActionSelection()).isNull();
         assertThat(hearingWrapper.getWorkingVacatedHearing()).isNull();

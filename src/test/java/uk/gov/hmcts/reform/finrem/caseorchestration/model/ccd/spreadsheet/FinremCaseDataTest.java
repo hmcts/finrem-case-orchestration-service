@@ -5,14 +5,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ClevelandCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthEastFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 
 import java.io.File;
@@ -173,6 +178,46 @@ class FinremCaseDataTest {
             .build();
 
         assertEquals(ClevelandCourt.FR_CLEVELAND_HC_LIST_1.getSelectedCourtId(), data.getSelectedAllocatedCourt());
+    }
+
+    @Test
+    void testGetSelectedHearingCourtStringFromCourt() {
+
+        // Arrange
+        Court court = Court.builder()
+            .region(Region.LONDON)
+            .londonList(RegionLondonFrc.LONDON)
+            .courtListWrapper(DefaultCourtListWrapper.builder()
+                .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                .build())
+            .build();
+
+        FinremCaseData data = FinremCaseData.builder().build();
+
+        // Act and Assert
+        assertEquals(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT.getSelectedCourtId(), data.getSelectedCourtStringFromCourt(court));
+    }
+
+    @Test
+    void testGetSelectedHearingCourt() {
+
+        // Arrange
+        FinremCaseData data = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .workingHearing(WorkingHearing.builder()
+                    .hearingCourtSelection(Court.builder()
+                        .region(Region.LONDON)
+                        .londonList(RegionLondonFrc.LONDON)
+                        .courtListWrapper(DefaultCourtListWrapper.builder()
+                            .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                            .build())
+                        .build())
+                    .build())
+                .build())
+            .build();
+
+        // Act and Assert
+        assertEquals(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT.getSelectedCourtId(), data.getSelectedHearingCourt());
     }
 
     /**

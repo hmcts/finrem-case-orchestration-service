@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -17,8 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
@@ -26,7 +23,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournReason;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacatedOrAdjournedHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehe
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,6 +54,8 @@ class VacateHearingNoticeLetterDetailsMapperTest {
 
     private VacateHearingNoticeLetterDetailsMapper vacateHearingNoticeLetterDetailsMapper;
 
+    private static final String testUuid = "c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb";
+
     @BeforeEach
     void setUp() {
         vacateHearingNoticeLetterDetailsMapper =
@@ -60,59 +63,11 @@ class VacateHearingNoticeLetterDetailsMapperTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideHearingDetails")
-    void shouldBuildDocumentTemplateDetails(YesOrNo civilPartnership, String schedule1OrMatrimonial) {
+    @MethodSource("provideHearingDetailsAffectingLogic")
+    void should_buildDocumentTemplateDetails(YesOrNo civilPartnership, String schedule1OrMatrimonial,
+                                            VacateOrAdjournReason vacateOrAdjournReason) {
         // Arrange
-        FinremCaseData caseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONTESTED)
-            .civilPartnership(civilPartnership)
-            .contactDetailsWrapper(ContactDetailsWrapper
-                .builder()
-                .applicantFmName("John")
-                .applicantLname("Doe")
-                .respondentFmName("Jane")
-                .respondentLname("Smith")
-                .solicitorReference(TestConstants.TEST_SOLICITOR_REFERENCE)
-                .respondentSolicitorReference(TestConstants.TEST_RESP_SOLICITOR_REFERENCE)
-                .build())
-            .scheduleOneWrapper(ScheduleOneWrapper
-                .builder()
-                .typeOfApplication(Schedule1OrMatrimonialAndCpList.forValue(schedule1OrMatrimonial))
-                .build())
-            .manageHearingsWrapper(
-                ManageHearingsWrapper.builder()
-                    .workingHearing(WorkingHearing.builder()
-                        .hearingTypeDynamicList(DynamicList.builder()
-                            .value(DynamicListElement.builder()
-                                .code(HearingType.FDR.name())
-                                .label(HearingType.FDR.getId())
-                                .build())
-                            .build())
-                        .hearingDate(LocalDate.of(2025, 8, 1))
-                        .hearingTime("10:00 AM")
-                        .hearingCourtSelection(Court.builder()
-                            .region(Region.LONDON)
-                            .londonList(RegionLondonFrc.LONDON)
-                            .courtListWrapper(DefaultCourtListWrapper.builder()
-                                .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
-                                .build())
-                            .build())
-                        .partiesOnCaseMultiSelectList(DynamicMultiSelectList.builder()
-                            .value(List.of(
-                                DynamicMultiSelectListElement.builder()
-                                    .code("[APPSOLICITOR]")
-                                    .label("Applicant Solicitor - Hamzah")
-                                    .build()
-                            ))
-                            .build())
-                        .build())
-                    .build())
-            .build();
-
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(Long.valueOf(CASE_ID))
-            .data(caseData)
-            .build();
+        FinremCaseDetails caseDetails = buildCaseDetails(civilPartnership, schedule1OrMatrimonial, vacateOrAdjournReason);
 
         CourtDetailsTemplateFields courtTemplateFields = CourtDetailsTemplateFields.builder()
             .courtName("London Court")
@@ -146,28 +101,60 @@ class VacateHearingNoticeLetterDetailsMapperTest {
         assertThat(vacateHearingNoticeDetails.getCivilPartnership()).isEqualTo(civilPartnership.getYesOrNo());
         assertThat(vacateHearingNoticeDetails.getTypeOfApplication()).isEqualTo(schedule1OrMatrimonial);
 
-        // Note: Hard coded until dependent code merged.
-        assertThat(vacateHearingNoticeDetails.getVacateHearingReasons()).isEqualTo("A reason to vacate");
+        if (VacateOrAdjournReason.OTHER.equals(vacateOrAdjournReason)) {
+            assertThat(vacateHearingNoticeDetails.getVacateHearingReasons()).isEqualTo("illness");
+        } else {
+            assertThat(vacateHearingNoticeDetails.getVacateHearingReasons()).isEqualTo(vacateOrAdjournReason.getDisplayValue());
+        }
     }
 
-    private static Stream<Arguments> provideHearingDetails() {
+    private static Stream<Arguments> provideHearingDetailsAffectingLogic() {
         return Stream.of(
             Arguments.of(
                 YesOrNo.YES,
-                Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989.getValue()
+                Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989.getValue(),
+                VacateOrAdjournReason.OTHER
+
             ),
             Arguments.of(
                 YesOrNo.NO,
-                Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.getValue()
+                Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.getValue(),
+                VacateOrAdjournReason.ADJOURNED
             )
         );
     }
 
     @Test
-    void shouldThrowExceptionWhenWorkingHearingIsNull() {
+    void when_workingVacatedHearing_given_null_throws_exception() {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(ManageHearingsWrapper.builder().workingHearing(null).build())
+            .manageHearingsWrapper(ManageHearingsWrapper.builder().workingVacatedHearing(null).build())
+            .build();
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(caseData)
+            .build();
+
+        // Act & Assert, static method getWorkingVacatedHearingId on ManageHearingsWrapper raises the exception.
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> vacateHearingNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
+        assertThat(exception.getMessage()).isEqualTo("Invalid or missing working vacated hearing UUID");
+    }
+
+    @Test
+    void when_getVacatedOrAdjournedHearingsCollectionItemById_given_wrong_id_throws_exception() {
+        // Arrange
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .workingVacatedHearing(WorkingVacatedHearing.builder()
+                    .chooseHearings(DynamicList.builder()
+                        .value(DynamicListElement.builder()
+                            .code(testUuid)
+                            .build())
+                        .build())
+                    .build())
+                .build())
             .build();
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
@@ -178,6 +165,68 @@ class VacateHearingNoticeLetterDetailsMapperTest {
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> vacateHearingNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
-        assertThat(exception.getMessage()).isEqualTo("Working hearing is null");
+        assertThat(exception.getMessage()).isEqualTo("Could not find a vacated hearing with id c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb");
+    }
+
+    /*
+     * case includes this minimum detail for the mapper:
+     * - contact details
+     * - civil partnership details
+     * - scheduleOneWrapper
+     * - manageHearingsWrapper with a:
+     *   - working vacated hearing
+     *   - vacated/adjourned hearing
+     * No working hearing required.
+     */
+    private FinremCaseDetails buildCaseDetails(YesOrNo civilPartnership, String schedule1OrMatrimonial,
+                                               VacateOrAdjournReason vacateOrAdjournReason) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .civilPartnership(civilPartnership)
+            .contactDetailsWrapper(ContactDetailsWrapper
+                .builder()
+                .applicantFmName("John")
+                .applicantLname("Doe")
+                .respondentFmName("Jane")
+                .respondentLname("Smith")
+                .build())
+            .scheduleOneWrapper(ScheduleOneWrapper
+                .builder()
+                .typeOfApplication(Schedule1OrMatrimonialAndCpList.forValue(schedule1OrMatrimonial))
+                .build())
+            .manageHearingsWrapper(
+                ManageHearingsWrapper.builder()
+                    .workingVacatedHearing(WorkingVacatedHearing.builder()
+                        .chooseHearings(DynamicList.builder()
+                            .value(DynamicListElement.builder()
+                                .code(testUuid)
+                                .build())
+                            .build())
+                        .build())
+                    .vacatedOrAdjournedHearings(List.of(
+                        VacatedOrAdjournedHearingsCollectionItem.builder()
+                            .id(UUID.fromString(testUuid))
+                            .value(VacateOrAdjournedHearing.builder()
+                                .hearingType(HearingType.FDR)
+                                .hearingDate(LocalDate.of(2025, 8, 1))
+                                .hearingTime("10:00 AM")
+                                .vacateOrAdjournReason(vacateOrAdjournReason)
+                                .specifyOtherReason("illness")
+                                .hearingCourtSelection(Court.builder()
+                                    .region(Region.LONDON)
+                                    .londonList(RegionLondonFrc.LONDON)
+                                    .courtListWrapper(DefaultCourtListWrapper.builder()
+                                        .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                                        .build())
+                                    .build())
+                                .build())
+                            .build()))
+                    .build())
+            .build();
+
+        return FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(caseData)
+            .build();
     }
 }
