@@ -181,7 +181,7 @@ public class HearingTabDataMapper {
 
     private String getVacatedOrAdjournedReason(VacateOrAdjournedHearing hearing) {
         return hearing.getVacateOrAdjournReason() != null
-            ? hearing.getVacateOrAdjournReason().getDescription() : DEFAULT_REASON;
+            ? hearing.getVacateOrAdjournReason().getDisplayValue() : DEFAULT_REASON;
     }
 
     private String getVacatedOrAdjournedStatus(VacateOrAdjournedHearing hearing) {
