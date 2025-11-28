@@ -158,20 +158,15 @@ public class ManageHearingActionService {
 
         Map<String, DocumentRecord> documentMap = new HashMap<>();
 
-        /*
-        * Suggest reusing performAddHearing's new hearing doc gen methods here.
-        * if (YesOrNo.YES.equals(hearingsWrapper.getRelistHearingSelection())) {
-        * }
-        */
-
         generateVacateHearingNotice(finremCaseDetails, authToken, documentMap);
 
-        setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
+        generateVacateNoticeCoverSheetIfHearingNotRelisted(hearingsWrapper, finremCaseDetails, authToken);
 
         addDocumentsToCollection(documentMap, hearingsWrapper);
 
-        // clear the working hearing
+        // clear the working values
         hearingsWrapper.setWorkingVacatedHearing(null);
+        hearingsWrapper.setIsRelistSelected(null);
     }
 
     /**
@@ -370,6 +365,20 @@ public class ManageHearingActionService {
 
         if (hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)) {
             generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
+        }
+    }
+
+    /*
+     * Used when Vacating a hearing to generate cover sheets for a notice if a hearing has not been relisted.
+     * If a hearing HAS been relisted, then performAddHearing generates these coversheets instead.
+     * @param hearingsWrapper which is required to see if a hearing is being relisted
+     * @param finremCaseDetails case details containing hearing and case data
+     * @param authToken         authorization token for secure resource access
+     */
+    private void generateVacateNoticeCoverSheetIfHearingNotRelisted(ManageHearingsWrapper hearingsWrapper,
+                                                                    FinremCaseDetails finremCaseDetails, String authToken) {
+        if (YesOrNo.NO.equals(hearingsWrapper.getIsRelistSelected())) {
+            setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
         }
     }
 }
