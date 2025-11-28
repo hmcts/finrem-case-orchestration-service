@@ -338,6 +338,7 @@ public class ManageHearingsDocumentService {
     private List<CaseDocument> getHearingDocumentsThatAreAlwaysPosted(FinremCaseDetails finremCaseDetails) {
         return Stream.of(
                 getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.HEARING_NOTICE),
+                getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.VACATE_HEARING_NOTICE),
                 getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.OUT_OF_COURT_RESOLUTION),
                 getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER),
                 getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.PFD_NCDR_COVER_LETTER),
