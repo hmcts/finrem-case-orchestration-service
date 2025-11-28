@@ -79,7 +79,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         setUpCaseDetails("change-of-representatives.json");
 
         setUpHelper();
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
             .organisation(Organisation.builder()
@@ -99,9 +99,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
                 authTokenGenerator.generate(),
                 originalDetails);
 
-            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
+            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).getFirst().getValue();
             RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+                .getData()).getFirst().getValue();
 
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
             assertThat(actualChange.getParty().toLowerCase()).isEqualTo(expectedChange.getParty().toLowerCase());
@@ -115,7 +115,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         setUpCaseDetails("change-of-representatives.json");
         setUpHelper();
 
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
             .organisation(Organisation.builder()
@@ -134,7 +134,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             List<Element<RepresentationUpdate>> actual = getFirstChangeElement.apply(caseData);
             RepresentationUpdate actualChange = actual.get(1).getValue();
             RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+                .getData()).getFirst().getValue();
 
             assertThat(actual).hasSize(2);
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
@@ -148,7 +148,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyUnpopulated() throws Exception {
         setUpCaseDetails("consented-change-of-reps.json");
 
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
             .organisation(Organisation.builder()
@@ -167,9 +167,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(), originalDetails);
-            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
+            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).getFirst().getValue();
             RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+                .getData()).getFirst().getValue();
 
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
             assertThat(actualChange.getParty().toLowerCase()).isEqualTo(expectedChange.getParty().toLowerCase());
@@ -183,7 +183,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         setUpCaseDetails("consented-change-of-reps.json");
         setUpHelper();
 
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
             .organisation(Organisation.builder()
@@ -202,7 +202,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             List<Element<RepresentationUpdate>> actual = getFirstChangeElement.apply(caseData);
             RepresentationUpdate actualChange = actual.get(1).getValue();
             RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+                .getData()).getFirst().getValue();
 
             assertThat(actual).hasSize(2);
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
@@ -218,7 +218,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         setUpHelper();
         when(mockCaseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(), eq(true))).thenReturn(
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(CaseDetails.class), eq(true))).thenReturn(
             ChangedRepresentative.builder()
                 .name("Sir Solicitor")
                 .email("sirsolicitor1@gmail.com")
@@ -236,9 +236,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),
                 originalDetails);
-            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
+            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).getFirst().getValue();
             RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+                .getData()).getFirst().getValue();
 
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
             assertThat(actualChange.getParty().toLowerCase()).isEqualTo(expectedChange.getParty().toLowerCase());
@@ -253,7 +253,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
         setUpHelper();
 
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(
             ChangedRepresentative.builder()
                 .name("TestAppSolName")
                 .email("testappsol123@gmail.com")
@@ -262,7 +262,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
                     .organisationName("FRApplicantNewSolFirm")
                     .build())
                 .build());
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(), eq(true))).thenReturn(
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(CaseDetails.class), eq(true))).thenReturn(
             ChangedRepresentative.builder()
                 .name("Sir Solicitor")
                 .email("sirsolicitor1@gmail.com")
@@ -281,9 +281,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
                 authTokenGenerator.generate(),
                 originalDetails);
 
-            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
+            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).getFirst().getValue();
             RepresentationUpdate expected = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+                .getData()).getFirst().getValue();
 
             assertThat(actualChange.getClientName()).isEqualTo(expected.getClientName());
             assertThat(actualChange.getParty().toLowerCase()).isEqualTo(expected.getParty().toLowerCase());
@@ -299,8 +299,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
         when(mockCaseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(mockCaseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
-        when(mockCaseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Jane Smith");
-        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(
+        when(mockCaseDataService.buildFullRespondentName(any(CaseDetails.class))).thenReturn("Jane Smith");
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any(CaseDetails.class))).thenReturn(
             ChangedRepresentative.builder()
                 .name("Test respondent Solicitor")
                 .email("padmaja.ramisetti@gmail.com")
@@ -320,9 +320,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),
                 originalDetails);
-            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
+            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).getFirst().getValue();
             RepresentationUpdate expected = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
+                .getData()).getFirst().getValue();
 
             assertThat(actualChange.getClientName()).isEqualTo(expected.getClientName());
             assertThat(actualChange.getParty().toLowerCase()).isEqualTo(expected.getParty().toLowerCase());
@@ -382,10 +382,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     private void setUpHelper() {
-
         when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
-        when(mockCaseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("John Smith");
-        when(mockCaseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Jane Smith");
+        when(mockCaseDataService.buildFullApplicantName(any(CaseDetails.class))).thenReturn("John Smith");
+        when(mockCaseDataService.buildFullRespondentName(any(CaseDetails.class))).thenReturn("Jane Smith");
         when(mockCaseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(mockCaseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(mockCaseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
