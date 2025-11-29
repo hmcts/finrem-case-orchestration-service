@@ -68,8 +68,8 @@ class StopRepresentingClientSubmittedHandlerTest {
         ArgumentCaptor<StopRepresentingClientEvent> eventCaptor = ArgumentCaptor.forClass(StopRepresentingClientEvent.class);
         verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
 
-        assertThat(eventCaptor.getValue().getData()).isEqualTo(caseData);
-        assertThat(eventCaptor.getValue().getOriginalData()).isEqualTo(caseDataBefore);
+        assertThat(eventCaptor.getValue().getCaseDetails().getData()).isEqualTo(caseData);
+        assertThat(eventCaptor.getValue().getCaseDetailsBefore().getData()).isEqualTo(caseDataBefore);
         assertThat(eventCaptor.getValue().getUserAuthorisation()).isEqualTo(AUTH_TOKEN);
     }
 }

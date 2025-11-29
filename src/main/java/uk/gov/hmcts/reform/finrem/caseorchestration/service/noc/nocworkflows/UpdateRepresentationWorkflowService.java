@@ -17,8 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.util.Map;
-import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
@@ -34,29 +34,13 @@ public class UpdateRepresentationWorkflowService {
 
     public void handleNoticeOfChangeWorkflow(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
                                              String userAuthorisation) {
-        String caseId = finremCaseData.getCcdCaseId();
-
-        // trying to revoke creator role if any
-        assignCaseAccessService.findAndRevokeCreatorRole(caseId);
         noticeOfChangeService.updateRepresentation(finremCaseData, userAuthorisation,
             originalFinremCaseData);
 
-        // TODO
-        /*
-        if (isNoOrganisationsToAddOrRemove(caseDetails)) {
-            persistDefaultOrganisationPolicy(caseDetails);
-
-            setDefaultChangeOrganisationRequest(caseDetails);
-
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        if (safeChangeOrganisationRequest(finremCaseData).isNoOrganisationsToAddOrRemove()) {
+            persistDefaultOrganisationPolicy(finremCaseData);
+            setDefaultChangeOrganisationRequest(finremCaseData);
         }
-
-        caseDetails.getData().putAll(caseData);
-        caseDetails = noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails,
-            originalCaseDetails);
-
-        return assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), caseDetails);
-        */
     }
 
     // invoked by UpdateContactDetailsAboutToSubmitHandler
@@ -90,7 +74,7 @@ public class UpdateRepresentationWorkflowService {
     private boolean isNoOrganisationsToAddOrRemove(CaseDetails caseDetails) {
         ChangeOrganisationRequest changeRequest = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
-        return isOrganisationsEmpty(changeRequest);
+        return changeRequest.isNoOrganisationsToAddOrRemove();
     }
 
     private void setDefaultChangeOrganisationRequest(CaseDetails caseDetails) {
@@ -107,14 +91,17 @@ public class UpdateRepresentationWorkflowService {
         caseDetails.getData().put(CHANGE_ORGANISATION_REQUEST, defaultRequest);
     }
 
-    private boolean isOrganisationsEmpty(ChangeOrganisationRequest changeRequest) {
-        boolean addedIsEmpty = Optional.ofNullable(changeRequest.getOrganisationToAdd()).isEmpty()
-            || Optional.ofNullable(changeRequest.getOrganisationToAdd().getOrganisationID()).isEmpty();
-
-        boolean removedIsEmpty = Optional.ofNullable(changeRequest.getOrganisationToRemove()).isEmpty()
-            || Optional.ofNullable(changeRequest.getOrganisationToRemove().getOrganisationID()).isEmpty();
-
-        return addedIsEmpty && removedIsEmpty;
+    private void setDefaultChangeOrganisationRequest(FinremCaseData finremCaseData) {
+        ChangeOrganisationRequest defaultRequest = ChangeOrganisationRequest.builder()
+            .requestTimestamp(null)
+            .organisationToAdd(null)
+            .organisationToRemove(null)
+            .approvalRejectionTimestamp(null)
+            .approvalStatus(null)
+            .caseRoleId(null)
+            .reason(null)
+            .build();
+        finremCaseData.setChangeOrganisationRequestField(defaultRequest);
     }
 
     public void persistDefaultOrganisationPolicy(CaseDetails caseDetails) {
@@ -163,5 +150,10 @@ public class UpdateRepresentationWorkflowService {
             .orgPolicyReference(null)
             .orgPolicyCaseAssignedRole(role.getCcdCode())
             .build();
+    }
+
+    private ChangeOrganisationRequest safeChangeOrganisationRequest(FinremCaseData data) {
+        return ofNullable(data.getChangeOrganisationRequestField())
+            .orElseGet(() -> ChangeOrganisationRequest.builder().build());
     }
 }

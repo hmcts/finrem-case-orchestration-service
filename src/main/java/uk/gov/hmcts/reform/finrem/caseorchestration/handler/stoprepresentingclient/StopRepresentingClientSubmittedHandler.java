@@ -49,8 +49,8 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
         applicationEventPublisher.publishEvent(StopRepresentingClientEvent.builder()
             .userAuthorisation(userAuthorisation)
-            .data(callbackRequest.getCaseDetails().getData())
-            .originalData(callbackRequest.getCaseDetailsBefore().getData()) // TODO check if before data is available
+            .caseDetails(callbackRequest.getCaseDetails())
+            .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
             .build());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

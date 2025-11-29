@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfCha
 @Service
 public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
-    private final UpdateContactDetailsService updateContactDetailsService;
+    private final UpdateRepresentationWorkflowService nocWorkflowService;
 
     private final CaseRoleService caseRoleService;
 
@@ -47,11 +47,11 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             + "If you continue your access to this access will be removed";
 
     public StopRepresentingClientAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                      UpdateContactDetailsService updateContactDetailsService,
+                                                      UpdateRepresentationWorkflowService nocWorkflowService,
                                                       CaseRoleService caseRoleService) {
         super(finremCaseDetailsMapper);
-        this.updateContactDetailsService = updateContactDetailsService;
         this.caseRoleService = caseRoleService;
+        this.nocWorkflowService = nocWorkflowService;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         logStopRepresentingRequest(stopRepresentingRequest);
         setPartyToChangeRepresented(stopRepresentingRequest);
         setServiceAddress(stopRepresentingRequest, getServiceAddressConfig(finremCaseData));
-        processRepresentationChange(finremCaseData, finremCaseData.getCcdCaseType());
+        processRepresentationChange(finremCaseData, finremCaseDetails.getData(), userAuthorisation);
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
@@ -85,8 +85,11 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             .build();
     }
 
-    private void processRepresentationChange(FinremCaseData finremCaseData, CaseType caseType) {
-        updateContactDetailsService.handleRepresentationChange(finremCaseData, caseType);
+    private void processRepresentationChange(FinremCaseData finremCaseData,
+                                             FinremCaseData finremCaseDataBefore,
+                                             String userAuthorisation) {
+        nocWorkflowService.handleNoticeOfChangeWorkflow(finremCaseData, finremCaseDataBefore,
+            userAuthorisation);
     }
 
     private void populateWarnings(FinremCaseData finremCaseData, List<String> warnings) {
