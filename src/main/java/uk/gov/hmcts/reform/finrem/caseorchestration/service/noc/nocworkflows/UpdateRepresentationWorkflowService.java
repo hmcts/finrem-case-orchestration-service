@@ -17,8 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.util.Map;
-import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
@@ -32,6 +32,18 @@ public class UpdateRepresentationWorkflowService {
     private final AssignCaseAccessService assignCaseAccessService;
     private final SystemUserService systemUserService;
 
+    public void handleNoticeOfChangeWorkflow(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
+                                             String userAuthorisation) {
+        noticeOfChangeService.updateRepresentation(finremCaseData, userAuthorisation,
+            originalFinremCaseData);
+
+        if (safeChangeOrganisationRequest(finremCaseData).isNoOrganisationsToAddOrRemove()) {
+            persistDefaultOrganisationPolicy(finremCaseData);
+            setDefaultChangeOrganisationRequest(finremCaseData);
+        }
+    }
+
+    // invoked by UpdateContactDetailsAboutToSubmitHandler
     public AboutToStartOrSubmitCallbackResponse handleNoticeOfChangeWorkflow(CaseDetails caseDetails,
                                                                              String authorisationToken,
                                                                              CaseDetails originalCaseDetails) {
@@ -62,7 +74,7 @@ public class UpdateRepresentationWorkflowService {
     private boolean isNoOrganisationsToAddOrRemove(CaseDetails caseDetails) {
         ChangeOrganisationRequest changeRequest = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
-        return isOrganisationsEmpty(changeRequest);
+        return changeRequest.isNoOrganisationsToAddOrRemove();
     }
 
     private void setDefaultChangeOrganisationRequest(CaseDetails caseDetails) {
@@ -79,14 +91,17 @@ public class UpdateRepresentationWorkflowService {
         caseDetails.getData().put(CHANGE_ORGANISATION_REQUEST, defaultRequest);
     }
 
-    private boolean isOrganisationsEmpty(ChangeOrganisationRequest changeRequest) {
-        boolean addedIsEmpty = Optional.ofNullable(changeRequest.getOrganisationToAdd()).isEmpty()
-            || Optional.ofNullable(changeRequest.getOrganisationToAdd().getOrganisationID()).isEmpty();
-
-        boolean removedIsEmpty = Optional.ofNullable(changeRequest.getOrganisationToRemove()).isEmpty()
-            || Optional.ofNullable(changeRequest.getOrganisationToRemove().getOrganisationID()).isEmpty();
-
-        return addedIsEmpty && removedIsEmpty;
+    private void setDefaultChangeOrganisationRequest(FinremCaseData finremCaseData) {
+        ChangeOrganisationRequest defaultRequest = ChangeOrganisationRequest.builder()
+            .requestTimestamp(null)
+            .organisationToAdd(null)
+            .organisationToRemove(null)
+            .approvalRejectionTimestamp(null)
+            .approvalStatus(null)
+            .caseRoleId(null)
+            .reason(null)
+            .build();
+        finremCaseData.setChangeOrganisationRequestField(defaultRequest);
     }
 
     public void persistDefaultOrganisationPolicy(CaseDetails caseDetails) {
@@ -135,5 +150,10 @@ public class UpdateRepresentationWorkflowService {
             .orgPolicyReference(null)
             .orgPolicyCaseAssignedRole(role.getCcdCode())
             .build();
+    }
+
+    private ChangeOrganisationRequest safeChangeOrganisationRequest(FinremCaseData data) {
+        return ofNullable(data.getChangeOrganisationRequestField())
+            .orElseGet(() -> ChangeOrganisationRequest.builder().build());
     }
 }
