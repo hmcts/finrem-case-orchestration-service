@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
@@ -50,9 +49,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-
-    @Mock
-    private UpdateContactDetailsService updateContactDetailsService;
 
     @Mock
     private UpdateRepresentationWorkflowService nocWorkflowService;
