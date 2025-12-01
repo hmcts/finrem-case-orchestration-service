@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +33,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class ConsentedApplicationHelper {
 
-    private final DocumentConfiguration documentConfiguration;
-
     public void setConsentVariationOrderLabelField(FinremCaseData caseData) {
-        if (Boolean.TRUE.equals(isVariationOrder(caseData))) {
+        if (isVariationOrder(caseData)) {
             caseData.getConsentOrderWrapper().setConsentVariationOrderLabelC(VARIATION_ORDER_CAMELCASE_LABEL_VALUE);
             caseData.getConsentOrderWrapper().setConsentVariationOrderLabelL(VARIATION_ORDER_LOWERCASE_LABEL_VALUE);
             caseData.getConsentOrderWrapper().setOtherDocLabel(CV_OTHER_DOC_LABEL_VALUE);
@@ -82,19 +80,35 @@ public class ConsentedApplicationHelper {
         });
     }
 
-    public String getNotApprovedOrderNotificationFileName(FinremCaseData caseData) {
-        return Boolean.TRUE.equals(isVariationOrder(caseData))
-            ? documentConfiguration.getVariationOrderNotApprovedCoverLetterFileName()
-            : documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName();
-    }
-
     public String getOrderType(FinremCaseData caseData) {
         if (caseData.isContestedApplication()) {
             return CONSENT;
         }
 
-        return Boolean.TRUE.equals(isVariationOrder(caseData))
+        return isVariationOrder(caseData)
             ? VARIATION
             : CONSENT;
+    }
+
+    /**
+     * Validates the selected region for a consent application.
+     *
+     * <p>If the allocated region is the High Court, this method returns an error
+     * message. Otherwise, it returns an empty list.</p>
+     *
+     * @param caseData the case data containing the selected region
+     * @return a list of validation error messages, or an empty list if valid
+     */
+    public List<String> validateRegionList(FinremCaseData caseData) {
+        boolean isHighCourt =
+            Region.HIGHCOURT.equals(
+                caseData.getRegionWrapper()
+                    .getAllocatedRegionWrapper()
+                    .getRegionList()
+            );
+
+        return isHighCourt
+            ? List.of("You cannot select the High Court for a consent application.")
+            : List.of();
     }
 }
