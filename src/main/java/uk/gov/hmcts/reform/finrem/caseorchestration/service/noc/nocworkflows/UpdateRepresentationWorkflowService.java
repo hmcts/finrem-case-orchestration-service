@@ -32,8 +32,22 @@ public class UpdateRepresentationWorkflowService {
     private final AssignCaseAccessService assignCaseAccessService;
     private final SystemUserService systemUserService;
 
-    public void handleNoticeOfChangeWorkflow(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
-                                             String userAuthorisation) {
+    /**
+     * Prepares the change of organisation request and updates the related organisation policies.
+     *
+     * <p>
+     * This method first updates the party representation details by comparing the current
+     * {@code finremCaseData} with {@code originalFinremCaseData}. It then checks whether there are
+     * any organisations to add or remove. If no changes are required, it sets the default
+     * organisation policy and creates a default change-of-organisation request structure.
+     *
+     * @param finremCaseData          the case data to be updated with the latest representation details
+     * @param originalFinremCaseData  the original case data used to detect representation changes
+     * @param userAuthorisation       the authorisation token of the user performing the action
+     */
+    public void prepareChangeOrganisationRequestAndOrganisationPolicy(FinremCaseData finremCaseData,
+                                                                      FinremCaseData originalFinremCaseData,
+                                                                      String userAuthorisation) {
         noticeOfChangeService.updateRepresentation(finremCaseData, userAuthorisation,
             originalFinremCaseData);
 
@@ -43,7 +57,6 @@ public class UpdateRepresentationWorkflowService {
         }
     }
 
-    // invoked by UpdateContactDetailsAboutToSubmitHandler
     public AboutToStartOrSubmitCallbackResponse handleNoticeOfChangeWorkflow(CaseDetails caseDetails,
                                                                              String authorisationToken,
                                                                              CaseDetails originalCaseDetails) {

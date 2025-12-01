@@ -90,7 +90,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     private void processRepresentationChange(FinremCaseData finremCaseData,
                                              FinremCaseData finremCaseDataBefore,
                                              String userAuthorisation) {
-        nocWorkflowService.handleNoticeOfChangeWorkflow(finremCaseData, finremCaseDataBefore,
+        nocWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseData, finremCaseDataBefore,
             userAuthorisation);
     }
 
