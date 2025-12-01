@@ -6,12 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -22,11 +24,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
+import java.util.stream.Stream;
+
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -134,9 +139,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenLoginAsApplicant_whenHandled_thenPopulatePartyToChangeRepresented(boolean isApplicantSolicitor) {
+    void givenLoginAsApplicantFlag_whenHandled_thenPopulatePartyToChangeRepresented(boolean loginAsApplicantFlag) {
         when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
-            .thenReturn(isApplicantSolicitor);
+            .thenReturn(loginAsApplicantFlag);
 
         FinremCaseData caseData = FinremCaseData.builder()
             .stopRepresentationWrapper(StopRepresentationWrapper.builder()
@@ -148,8 +153,45 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         assertThat(underTest.handle(request, AUTH_TOKEN).getData())
             .extracting(FinremCaseData::getContactDetailsWrapper)
             .extracting(ContactDetailsWrapper::getNocParty)
-            .is(expectedParty(isApplicantSolicitor));
+            .is(expectedParty(loginAsApplicantFlag));
         verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void givenLoginAsApplicantFlag_whenHandled_thenPopulateServiceAddress(
+        boolean loginAsApplicantFlag, boolean addressConfidentiality) {
+        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+            .thenReturn(loginAsApplicantFlag);
+
+        Address serviceAddress = mock(Address.class);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .clientAddressForService(serviceAddress)
+                .clientAddressForServiceConfidential(YesOrNo.forValue(addressConfidentiality))
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            .extracting(FinremCaseData::getContactDetailsWrapper)
+            .extracting(
+                loginAsApplicantFlag ? ContactDetailsWrapper::getApplicantAddress : ContactDetailsWrapper::getRespondentAddress,
+                loginAsApplicantFlag ? ContactDetailsWrapper::getApplicantAddressHiddenFromRespondent
+                    : ContactDetailsWrapper::getRespondentAddressHiddenFromApplicant)
+            .contains(serviceAddress,  YesOrNo.forValue(addressConfidentiality));
+        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+    }
+
+    static Stream<Arguments> givenLoginAsApplicantFlag_whenHandled_thenPopulateServiceAddress() {
+        return Stream.of(
+            Arguments.of(true, true),
+            Arguments.of(false, true),
+            Arguments.of(true, false),
+            Arguments.of(false, false)
+        );
     }
 
     private static Condition<NoticeOfChangeParty> expectedParty(boolean isApplicantSolicitor) {
