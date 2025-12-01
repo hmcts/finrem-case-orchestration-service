@@ -103,7 +103,6 @@ public class NoticeOfChangeService {
     public void updateRepresentation(FinremCaseData finremCaseData, String authorizationToken,
                                      FinremCaseData originalFinremCaseData) {
         log.info("{} - Going to update representation", finremCaseData.getCcdCaseId());
-
         updateRepresentationUpdateHistory(finremCaseData, authorizationToken, originalFinremCaseData);
         ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(finremCaseData, originalFinremCaseData);
         finremCaseData.setChangeOrganisationRequestField(changeRequest);

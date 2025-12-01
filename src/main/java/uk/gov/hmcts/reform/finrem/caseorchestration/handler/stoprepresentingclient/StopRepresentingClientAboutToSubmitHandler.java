@@ -112,8 +112,14 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private void setPartyToChangeRepresented(StopRepresentingRequest stopRepresentingRequest) {
+        NoticeOfChangeParty noticeOfChangeParty = resolveNocParty(stopRepresentingRequest.isLoginWithApplicantSolicitor);
         stopRepresentingRequest.finremCaseData.getContactDetailsWrapper()
-            .setNocParty(resolveNocParty(stopRepresentingRequest.isLoginWithApplicantSolicitor));
+            .setNocParty(noticeOfChangeParty);
+        if (APPLICANT.equals(noticeOfChangeParty)) {
+            stopRepresentingRequest.finremCaseData.setApplicantOrganisationPolicy(null);
+        } else {
+            stopRepresentingRequest.finremCaseData.setRespondentOrganisationPolicy(null);
+        }
     }
 
     private void setServiceAddress(StopRepresentingRequest stopRepresentingRequest,
