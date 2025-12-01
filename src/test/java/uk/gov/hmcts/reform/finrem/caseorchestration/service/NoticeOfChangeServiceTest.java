@@ -132,7 +132,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .thenReturn(addingChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentation(finremCaseData, originalFinremCaseData, AUTH_TOKEN);
 
         // Verify
         // finremCaseData is updated. The following verification is performed on finremCaseData
@@ -206,7 +206,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .thenReturn(addingChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentation(finremCaseData, originalFinremCaseData, AUTH_TOKEN);
 
         // Verify
         // finremCaseData is updated. The following verification is performed on finremCaseData
@@ -293,7 +293,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .thenReturn(addingChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentation(finremCaseData, originalFinremCaseData, AUTH_TOKEN);
 
         // Verify
         // finremCaseData is updated. The following verification is performed on finremCaseData
@@ -368,7 +368,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         when(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData)).thenReturn(addingChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentation(finremCaseData, originalFinremCaseData, AUTH_TOKEN);
 
         // Verify
         // finremCaseData is updated. The following verification is performed on finremCaseData
@@ -453,7 +453,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .thenReturn(mockedChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentation(finremCaseData, originalFinremCaseData, AUTH_TOKEN);
 
         // Verify
         List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
@@ -547,7 +547,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .thenReturn(mockedRemovedChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentation(finremCaseData, originalFinremCaseData, AUTH_TOKEN);
 
         // Verify
         List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
@@ -625,7 +625,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .thenReturn(mockedAddedChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentation(finremCaseData, originalFinremCaseData, AUTH_TOKEN);
 
         List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
         RepresentationUpdate actualChange = actual.getLast().getValue();

@@ -27,12 +27,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
@@ -42,8 +47,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateRepresentationWorkflowServiceTest {
-
-    private static final String AUTH_TOKEN = "AuthToken";
 
     @Mock
     NoticeOfChangeService noticeOfChangeService;
@@ -272,6 +275,53 @@ public class UpdateRepresentationWorkflowServiceTest {
         assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(),
             data.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
         assertNull(data.getRespondentOrganisationPolicy().getOrgPolicyReference());
+    }
+
+    @Test
+    public void givenNoOrganisationsToAddOrRemove_whenPrepareChangeOrganisationRequest_thenAddDefaultRole() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        ChangeOrganisationRequest cor = mock(ChangeOrganisationRequest.class);
+        when(cor.isNoOrganisationsToAddOrRemove()).thenReturn(false);
+        finremCaseData.setChangeOrganisationRequestField(cor);
+        FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
+
+        when(finremCaseDataBefore.getApplicantOrganisationPolicy()).thenReturn(null);
+
+        updateRepresentationWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseData, finremCaseDataBefore,
+            AUTH_TOKEN);
+
+        verify(noticeOfChangeService).updateRepresentation(finremCaseData, finremCaseDataBefore, AUTH_TOKEN);
+        verify(finremCaseData, never()).setApplicantOrganisationPolicy(any(OrganisationPolicy.class));
+        verify(finremCaseData, never()).setRespondentOrganisationPolicy(any(OrganisationPolicy.class));
+    }
+
+    @Test
+    public void givenHavingOrganisationsToAddOrRemove_whenPrepareChangeOrganisationRequest_thenAddDefaultRole() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        ChangeOrganisationRequest cor = mock(ChangeOrganisationRequest.class);
+        when(cor.isNoOrganisationsToAddOrRemove()).thenReturn(true);
+        finremCaseData.setChangeOrganisationRequestField(cor);
+        FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
+
+        when(finremCaseDataBefore.getApplicantOrganisationPolicy()).thenReturn(null);
+
+        updateRepresentationWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseData, finremCaseDataBefore,
+            AUTH_TOKEN);
+
+        final Organisation emptyOrganisation = Organisation.builder().organisationID(null).organisationName(null).build();
+        assertThat(finremCaseData.getApplicantOrganisationPolicy())
+            .extracting(OrganisationPolicy::getOrgPolicyCaseAssignedRole,
+                OrganisationPolicy::getOrganisation)
+            .contains(CaseRole.APP_SOLICITOR.getCcdCode(), emptyOrganisation);
+
+        assertThat(finremCaseData.getRespondentOrganisationPolicy())
+            .extracting(OrganisationPolicy::getOrgPolicyCaseAssignedRole,
+                OrganisationPolicy::getOrganisation)
+            .contains(CaseRole.RESP_SOLICITOR.getCcdCode(), emptyOrganisation);
+
+        verify(noticeOfChangeService).updateRepresentation(finremCaseData, finremCaseDataBefore, AUTH_TOKEN);
+        verify(finremCaseData).setApplicantOrganisationPolicy(any(OrganisationPolicy.class));
+        verify(finremCaseData).setRespondentOrganisationPolicy(any(OrganisationPolicy.class));
     }
 
     private OrganisationPolicy getOrganisationPolicy(CaseRole role) {

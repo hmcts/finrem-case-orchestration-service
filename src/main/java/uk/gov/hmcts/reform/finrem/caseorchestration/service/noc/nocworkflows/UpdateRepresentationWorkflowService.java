@@ -48,8 +48,7 @@ public class UpdateRepresentationWorkflowService {
     public void prepareChangeOrganisationRequestAndOrganisationPolicy(FinremCaseData finremCaseData,
                                                                       FinremCaseData originalFinremCaseData,
                                                                       String userAuthorisation) {
-        noticeOfChangeService.updateRepresentation(finremCaseData, userAuthorisation,
-            originalFinremCaseData);
+        noticeOfChangeService.updateRepresentation(finremCaseData, originalFinremCaseData, userAuthorisation);
 
         if (safeChangeOrganisationRequest(finremCaseData).isNoOrganisationsToAddOrRemove()) {
             persistDefaultOrganisationPolicy(finremCaseData);
