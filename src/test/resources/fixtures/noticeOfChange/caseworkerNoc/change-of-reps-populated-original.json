@@ -4,7 +4,7 @@
   "case_details": {
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
-    "case_type_id": "ContestedFinancialRemedy",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
@@ -34,10 +34,11 @@
       "respondentRepresented": "Yes",
       "respondentPhone": "7411201631",
       "respondentFMName": "Jane",
-      "RepresentationUpdateHistory": {
-        "ChangeOfRepresentation": [
-          {
-            "party": "applicant",
+      "RepresentationUpdateHistory": [
+        {
+          "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
+          "value": {
+            "party": "Applicant",
             "name": "John Smith",
             "date": "2020-06-01T15:00:00.000",
             "by": "Claire Mumford",
@@ -51,8 +52,8 @@
               }
             }
           }
-        ]
-      }
+        }
+      ]
     }
   }
 }

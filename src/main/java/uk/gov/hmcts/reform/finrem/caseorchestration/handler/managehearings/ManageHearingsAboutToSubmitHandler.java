@@ -12,7 +12,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
@@ -53,14 +55,16 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
-        ManageHearingsAction actionSelection = finremCaseData
-            .getManageHearingsWrapper()
-            .getManageHearingsActionSelection();
+        ManageHearingsWrapper hearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        ManageHearingsAction actionSelection = hearingsWrapper.getManageHearingsActionSelection();
 
-        if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
+        if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)
+            || (YesOrNo.YES.equals(hearingsWrapper.getIsRelistSelected()))) {
             manageHearingActionService.performAddHearing(finremCaseDetails, userAuthorisation);
             finremCaseData.setState(PREPARE_FOR_HEARING.getId());
-        } else if (ManageHearingsAction.VACATE_HEARING.equals(actionSelection)) {
+        }
+
+        if (ManageHearingsAction.VACATE_HEARING.equals(actionSelection)) {
             manageHearingActionService.performVacateHearing(finremCaseDetails, userAuthorisation);
         }
 
