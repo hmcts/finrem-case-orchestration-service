@@ -67,7 +67,9 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
         final FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        final FinremCaseDetails finremCaseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         final FinremCaseData finremCaseData = finremCaseDetails.getData();
+        final FinremCaseData finremCaseDataBefore = finremCaseDetailsBefore.getData();
         final boolean isLoginWithApplicantSolicitor =
             caseRoleService.isLoginWithApplicantSolicitor(finremCaseData, userAuthorisation);
         final List<String> warnings = new ArrayList<>();
@@ -77,7 +79,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         logStopRepresentingRequest(stopRepresentingRequest);
         setPartyToChangeRepresented(stopRepresentingRequest);
         setServiceAddress(stopRepresentingRequest, getServiceAddressConfig(finremCaseData));
-        processRepresentationChange(finremCaseData, finremCaseDetails.getData(), userAuthorisation);
+        processRepresentationChange(finremCaseData, finremCaseDataBefore, userAuthorisation);
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())

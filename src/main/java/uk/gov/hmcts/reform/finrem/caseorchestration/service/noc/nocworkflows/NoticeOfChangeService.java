@@ -162,7 +162,7 @@ public class NoticeOfChangeService {
         OrganisationPolicy organisationPolicy = isApplicant ? finremCaseData.getApplicantOrganisationPolicy()
             : finremCaseData.getRespondentOrganisationPolicy();
         OrganisationPolicy originalOrganisationPolicy = isApplicant ? originalFinremCaseData.getApplicantOrganisationPolicy()
-            : finremCaseData.getRespondentOrganisationPolicy();
+            : originalFinremCaseData.getRespondentOrganisationPolicy();
 
         final DynamicList role = generateCaseRoleIdAsDynamicList(isApplicant ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY);
 

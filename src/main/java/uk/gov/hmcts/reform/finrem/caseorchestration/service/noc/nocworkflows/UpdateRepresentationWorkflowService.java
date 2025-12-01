@@ -11,21 +11,17 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
 @Service
 @RequiredArgsConstructor
@@ -44,8 +40,6 @@ public class UpdateRepresentationWorkflowService {
         if (safeChangeOrganisationRequest(finremCaseData).isNoOrganisationsToAddOrRemove()) {
             persistDefaultOrganisationPolicy(finremCaseData);
             setDefaultChangeOrganisationRequest(finremCaseData);
-        } else {
-            revertOriginalOrgPolicyFromOriginalFinremCaseData(finremCaseData, originalFinremCaseData);
         }
     }
 
@@ -161,34 +155,5 @@ public class UpdateRepresentationWorkflowService {
     private ChangeOrganisationRequest safeChangeOrganisationRequest(FinremCaseData data) {
         return ofNullable(data.getChangeOrganisationRequestField())
             .orElseGet(() -> ChangeOrganisationRequest.builder().build());
-    }
-
-    // aac handles org policy modification based on the Change Organisation Request,
-    // so we need to revert the org policies to their value before the event started
-    private void revertOriginalOrgPolicyFromOriginalFinremCaseData(FinremCaseData finremCaseData,
-                                                                   FinremCaseData originalFinremCaseData) {
-        final boolean isApplicant = NoticeOfChangeParty.isApplicantForRepresentationChange(finremCaseData);
-        final OrganisationPolicy litigantOrgPolicy = isApplicant
-            ? originalFinremCaseData.getApplicantOrganisationPolicy()
-            : originalFinremCaseData.getRespondentOrganisationPolicy();
-
-        if (hasInvalidOrgPolicy(finremCaseData, isApplicant)) {
-            if (isApplicant) {
-                finremCaseData.setApplicantOrganisationPolicy(litigantOrgPolicy);
-            } else {
-                finremCaseData.setRespondentOrganisationPolicy(litigantOrgPolicy);
-            }
-        }
-    }
-
-    private boolean hasInvalidOrgPolicy(FinremCaseData finremCaseData, boolean isApplicant) {
-        Optional<OrganisationPolicy> orgPolicy = Optional.ofNullable(isApplicant
-            ? finremCaseData.getApplicantOrganisationPolicy()
-            : finremCaseData.getRespondentOrganisationPolicy());
-
-        return orgPolicy.isEmpty()
-            || orgPolicy.get().getOrgPolicyCaseAssignedRole() == null
-            || !orgPolicy.get().getOrgPolicyCaseAssignedRole().equalsIgnoreCase(
-            isApplicant ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY);
     }
 }
