@@ -36,7 +36,7 @@ public class ManageHearingsWrapper {
     private UUID workingHearingId;
     private WorkingHearing workingHearing;
     private WorkingVacatedHearing workingVacatedHearing;
-    private YesOrNo relistHearingSelection;
+    private YesOrNo isRelistSelected;
     private YesOrNo isAddHearingChosen;
     private YesOrNo isFinalOrder;
 
