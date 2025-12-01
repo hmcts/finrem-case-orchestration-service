@@ -14,9 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisation
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ChangeOfRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -27,22 +31,25 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class NoticeOfChangeService {
-
-    private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
 
     private final CaseDataService caseDataService;
     private final IdamService idamService;
@@ -67,6 +74,7 @@ public class NoticeOfChangeService {
         this.removedSolicitorService = removedSolicitorService;
     }
 
+    @Deprecated
     public Map<String, Object> updateRepresentation(CaseDetails caseDetails,
                                                     String authorizationToken,
                                                     CaseDetails originalCaseDetails) {
@@ -77,6 +85,28 @@ public class NoticeOfChangeService {
         caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
 
         return caseData;
+    }
+
+    /**
+     * Updates the representation details on the case.
+     *
+     * <p>
+     * This method logs the update action, records the representation change
+     * in the update history, and generates a new {@link ChangeOrganisationRequest}
+     * based on the current and original case data. The generated request is then
+     * saved on the case.
+     *
+     * @param finremCaseData          the current case data to update
+     * @param authorizationToken      the authorisation token for the update
+     * @param originalFinremCaseData  the case data before any representation changes
+     */
+    public void updateRepresentation(FinremCaseData finremCaseData, String authorizationToken,
+                                     FinremCaseData originalFinremCaseData) {
+        log.info("{} - Going to update representation", finremCaseData.getCcdCaseId());
+
+        updateRepresentationUpdateHistory(finremCaseData, authorizationToken, originalFinremCaseData);
+        ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(finremCaseData, originalFinremCaseData);
+        finremCaseData.setChangeOrganisationRequestField(changeRequest);
     }
 
     private Map<String, Object> updateRepresentationUpdateHistory(CaseDetails caseDetails,
@@ -92,6 +122,25 @@ public class NoticeOfChangeService {
         return caseData;
     }
 
+    private void updateRepresentationUpdateHistory(FinremCaseData finremCaseData,
+                                                   String authToken,
+                                                   FinremCaseData originalFinremCaseData) {
+        RepresentationUpdateHistory current = buildCurrentUpdateHistory(finremCaseData);
+
+        RepresentationUpdateHistory history = changeOfRepresentationService.generateRepresentationUpdateHistory(
+            buildChangeOfRepresentationRequest(authToken, finremCaseData, current, originalFinremCaseData));
+
+        // modifying finremCaseData reference object
+        finremCaseData.setRepresentationUpdateHistory(
+            nullIfEmpty(history.getRepresentationUpdateHistory()).stream()
+                .map(element -> RepresentationUpdateHistoryCollection.builder()
+                    .id(element.getId())
+                    .value(element.getValue())
+                    .build())
+                .collect(Collectors.toList())
+        );
+    }
+
     private ChangeOrganisationRequest generateChangeOrganisationRequest(CaseDetails caseDetails,
                                                                         CaseDetails originalDetails) {
 
@@ -103,6 +152,25 @@ public class NoticeOfChangeService {
             .map(OrganisationPolicy::getOrganisation).orElse(null);
 
         final Organisation organisationToRemove = Optional.ofNullable(getOrgPolicy(originalDetails, litigantOrgPolicy))
+            .map(OrganisationPolicy::getOrganisation).orElse(null);
+
+        return buildChangeOrganisationRequest(role, organisationToAdd, organisationToRemove);
+    }
+
+    private ChangeOrganisationRequest generateChangeOrganisationRequest(FinremCaseData finremCaseData,
+                                                                        FinremCaseData originalFinremCaseData) {
+        final boolean isApplicant = NoticeOfChangeParty.isApplicantForRepresentationChange(finremCaseData);
+        OrganisationPolicy organisationPolicy = isApplicant ? finremCaseData.getApplicantOrganisationPolicy()
+            : finremCaseData.getRespondentOrganisationPolicy();
+        OrganisationPolicy originalOrganisationPolicy = isApplicant ? originalFinremCaseData.getApplicantOrganisationPolicy()
+            : finremCaseData.getRespondentOrganisationPolicy();
+
+        final DynamicList role = generateCaseRoleIdAsDynamicList(isApplicant ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY);
+
+        final Organisation organisationToAdd = Optional.ofNullable(organisationPolicy)
+            .map(OrganisationPolicy::getOrganisation).orElse(null);
+
+        final Organisation organisationToRemove = Optional.ofNullable(originalOrganisationPolicy)
             .map(OrganisationPolicy::getOrganisation).orElse(null);
 
         return buildChangeOrganisationRequest(role, organisationToAdd, organisationToRemove);
@@ -141,11 +209,37 @@ public class NoticeOfChangeService {
             .build();
     }
 
+    private ChangeOfRepresentationRequest buildChangeOfRepresentationRequest(String authToken,
+                                                                             FinremCaseData finremCaseData,
+                                                                             RepresentationUpdateHistory current,
+                                                                             FinremCaseData originalFinremCaseData) {
+        final boolean isApplicant = isApplicantForRepresentationChange(finremCaseData);
+
+        return ChangeOfRepresentationRequest.builder()
+            .by(idamService.getIdamFullName(authToken))
+            .party(isApplicant ? APPLICANT : RESPONDENT)
+            .clientName(getClientName(finremCaseData, isApplicant))
+            .current(current)
+            .addedRepresentative(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData))
+            .removedRepresentative(removedSolicitorService.getRemovedSolicitorAsCaseworker(originalFinremCaseData, isApplicant))
+            .build();
+    }
+
     private RepresentationUpdateHistory buildCurrentUpdateHistory(Map<String, Object> caseData) {
         return RepresentationUpdateHistory.builder()
             .representationUpdateHistory(objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY),
                 new TypeReference<>() {
                 }))
+            .build();
+    }
+
+    private RepresentationUpdateHistory buildCurrentUpdateHistory(FinremCaseData finremCaseData) {
+        return RepresentationUpdateHistory.builder()
+            .representationUpdateHistory(
+                emptyIfNull(finremCaseData.getRepresentationUpdateHistory()).stream().map(
+                    a -> Element.element(a.getId(), a.getValue())
+                ).collect(Collectors.toList())
+            )
             .build();
     }
 
@@ -189,5 +283,10 @@ public class NoticeOfChangeService {
         return isApplicant
             ? caseDataService.buildFullApplicantName(caseDetails)
             : caseDataService.buildFullRespondentName(caseDetails);
+    }
+
+    private String getClientName(FinremCaseData finremCaseData, boolean isApplicant) {
+        return isApplicant ? finremCaseData.getFullApplicantName()
+            : finremCaseData.getRespondentFullName();
     }
 }
