@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -45,7 +46,7 @@ class StopRepresentingClientEventHandlerTest {
     @BeforeEach
     public void setup() {
         underTest = new StopRepresentingClientEventHandler(assignCaseAccessService, systemUserService, finremCaseDetailsMapper);
-        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+        lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
     }
 
     @Test
@@ -83,6 +84,28 @@ class StopRepresentingClientEventHandlerTest {
         verify(assignCaseAccessService, never()).applyDecision(TEST_SYSTEM_TOKEN, mockInvalidCaseDetails);
     }
 
-    // TODO test RESPONDENT
-    // TODO test hasInvalidOrgPolicy
+    @Test
+    void givenOrganisationsToAddOrRemove_whenHandled_thenDoesNotCallAssignmentApi() {
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        ChangeOrganisationRequest changeRequest = mock(ChangeOrganisationRequest.class);
+        when(changeRequest.isNoOrganisationsToAddOrRemove()).thenReturn(true);
+        caseData.getContactDetailsWrapper().setNocParty(NoticeOfChangeParty.APPLICANT);
+        when(caseData.getChangeOrganisationRequestField()).thenReturn(changeRequest);
+        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+
+        when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().data(caseData).build();
+
+        StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
+            .userAuthorisation(AUTH_TOKEN)
+            .build();
+
+        underTest.handleEvent(event);
+
+        verify(assignCaseAccessService).findAndRevokeCreatorRole(CASE_ID);
+        verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
+    }
 }
