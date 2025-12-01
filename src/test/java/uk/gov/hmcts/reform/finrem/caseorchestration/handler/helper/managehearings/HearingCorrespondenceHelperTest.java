@@ -260,9 +260,8 @@ class HearingCorrespondenceHelperTest {
      */
     @ParameterizedTest
     @MethodSource("provideInvalidNoticeOnlyCases")
-    void shouldPostHearingNoticeOnlyReturnsFalse(Hearing hearing) {
+    void shouldPostHearingNoticeOnlyReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
         // Arrange case
-        FinremCaseDetails finremCaseDetails = finremCaseDetails();
         lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
         // Act
         boolean result = helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing);
@@ -277,17 +276,21 @@ class HearingCorrespondenceHelperTest {
      */
     static Stream<Arguments> provideInvalidNoticeOnlyCases() {
         return Stream.of(
-            // Case: valid action, but hearingType is missing
+            // Case: invalid ManageHearingsAction, hearing type is OK
             arguments(
-                Hearing.builder().build()
+                finremCaseDetails(null), Hearing.builder().hearingType(HearingType.MPS).build()
+            ),
+            // Case: valid action, but hearing is null
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), null
             ),
             // Case: Hearing type is wrong.
             arguments(
-                Hearing.builder().hearingType(HearingType.FDA).build()
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDA).build()
             ),
             // Case: valid action, but FDR invalid for non-express case
             arguments(
-                Hearing.builder().hearingType(HearingType.FDR).build()
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDR).build()
             )
         );
     }
@@ -301,7 +304,7 @@ class HearingCorrespondenceHelperTest {
     @Test
     void shouldPostAllHearingDocumentsReturnsTrue() {
         // Arrange case
-        FinremCaseDetails finremCaseDetails = finremCaseDetails();
+        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADD_HEARING);
         Hearing fdaHearing = Hearing.builder().hearingType(HearingType.FDA).build();
         // This mock is just for the FDR case.  FDR cases that are express have all docs posted.
         lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
@@ -322,9 +325,8 @@ class HearingCorrespondenceHelperTest {
      */
     @ParameterizedTest
     @MethodSource("provideCasesSoShouldPostAllHearingDocumentsReturnsFalse")
-    void shouldPostAllHearingDocumentsReturnsFalse(Hearing hearing) {
+    void shouldPostAllHearingDocumentsReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
         // Arrange.  This mock is just for the FDR case.  FDR cases that are not express don't have all docs posted.
-        FinremCaseDetails finremCaseDetails = finremCaseDetails();
         lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
         // Act
         boolean result = helper.shouldPostAllHearingDocuments(finremCaseDetails, hearing);
@@ -339,17 +341,21 @@ class HearingCorrespondenceHelperTest {
      */
     static Stream<Arguments> provideCasesSoShouldPostAllHearingDocumentsReturnsFalse() {
         return Stream.of(
-            // Case: valid action, but hearingType is missing
+            // Case: valid action, but hearing is null
             arguments(
-                Hearing.builder().build()
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), null
+            ),
+            // ManageHearingsAction is null, so a failing condition.
+            arguments(
+                finremCaseDetails(null), Hearing.builder().hearingType(HearingType.FDA).build()
             ),
             // Action is ADD_HEARING, which is valid. However, hearing types are wrong.
             arguments(
-                Hearing.builder().hearingType(HearingType.MPS).build()
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.MPS).build()
             ),
             // Calling test must mock the express case service to return true for this Case.  Then FDR will mean false returned.
             arguments(
-                Hearing.builder().hearingType(HearingType.FDR).build()
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDR).build()
             )
         );
     }
@@ -377,15 +383,6 @@ class HearingCorrespondenceHelperTest {
             .data(FinremCaseData.builder()
                 .manageHearingsWrapper(ManageHearingsWrapper.builder()
                     .manageHearingsActionSelection(action)
-                    .build())
-                .build())
-            .build();
-    }
-
-    private static FinremCaseDetails finremCaseDetails() {
-        return FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
-                .manageHearingsWrapper(ManageHearingsWrapper.builder()
                     .build())
                 .build())
             .build();
