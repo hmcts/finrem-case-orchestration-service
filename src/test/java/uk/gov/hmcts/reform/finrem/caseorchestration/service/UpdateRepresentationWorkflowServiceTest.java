@@ -285,8 +285,6 @@ public class UpdateRepresentationWorkflowServiceTest {
         finremCaseData.setChangeOrganisationRequestField(cor);
         FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
 
-        when(finremCaseDataBefore.getApplicantOrganisationPolicy()).thenReturn(null);
-
         updateRepresentationWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseData, finremCaseDataBefore,
             AUTH_TOKEN);
 
@@ -302,8 +300,6 @@ public class UpdateRepresentationWorkflowServiceTest {
         when(cor.isNoOrganisationsToAddOrRemove()).thenReturn(true);
         finremCaseData.setChangeOrganisationRequestField(cor);
         FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
-
-        when(finremCaseDataBefore.getApplicantOrganisationPolicy()).thenReturn(null);
 
         updateRepresentationWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseData, finremCaseDataBefore,
             AUTH_TOKEN);
