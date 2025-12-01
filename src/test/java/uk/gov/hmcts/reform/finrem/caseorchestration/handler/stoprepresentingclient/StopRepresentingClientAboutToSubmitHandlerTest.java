@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -159,7 +160,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
     @ParameterizedTest
     @MethodSource
-    void givenLoginAsApplicantFlag_whenHandled_thenPopulateServiceAddress(
+    void givenLoginAsApplicantFlag_whenHandled_thenPopulateServiceAddress(CaseType caseType,
         boolean loginAsApplicantFlag, boolean addressConfidentiality) {
         when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
             .thenReturn(loginAsApplicantFlag);
@@ -174,23 +175,30 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .build())
             .build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, caseData);
         assertThat(underTest.handle(request, AUTH_TOKEN).getData())
             .extracting(FinremCaseData::getContactDetailsWrapper)
             .extracting(
                 loginAsApplicantFlag ? ContactDetailsWrapper::getApplicantAddress : ContactDetailsWrapper::getRespondentAddress,
                 loginAsApplicantFlag ? ContactDetailsWrapper::getApplicantAddressHiddenFromRespondent
-                    : ContactDetailsWrapper::getRespondentAddressHiddenFromApplicant)
-            .contains(serviceAddress,  YesOrNo.forValue(addressConfidentiality));
+                    : ContactDetailsWrapper::getRespondentAddressHiddenFromApplicant,
+                loginAsApplicantFlag ? ContactDetailsWrapper::getApplicantRepresented : (CONTESTED.equals(caseType)
+                    ? ContactDetailsWrapper::getContestedRespondentRepresented
+                    : ContactDetailsWrapper::getConsentedRespondentRepresented))
+            .contains(serviceAddress,  YesOrNo.forValue(addressConfidentiality), YesOrNo.NO);
         verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
     static Stream<Arguments> givenLoginAsApplicantFlag_whenHandled_thenPopulateServiceAddress() {
         return Stream.of(
-            Arguments.of(true, true),
-            Arguments.of(false, true),
-            Arguments.of(true, false),
-            Arguments.of(false, false)
+            Arguments.of(CONSENTED, true, true),
+            Arguments.of(CONSENTED, false, true),
+            Arguments.of(CONSENTED, true, false),
+            Arguments.of(CONSENTED, false, false),
+            Arguments.of(CONTESTED, true, true),
+            Arguments.of(CONTESTED, false, true),
+            Arguments.of(CONTESTED, true, false),
+            Arguments.of(CONTESTED, false, false)
         );
     }
 
