@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ManageHearingsCollectionItem {
+public class VacatedOrAdjournedHearingsCollectionItem {
     private UUID id;
-    private Hearing value;
+    private VacateOrAdjournedHearing value;
 }
