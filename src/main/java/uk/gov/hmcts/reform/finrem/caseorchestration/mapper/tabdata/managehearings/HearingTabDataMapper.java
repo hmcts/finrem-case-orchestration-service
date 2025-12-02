@@ -7,12 +7,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabItem;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +37,8 @@ public class HearingTabDataMapper {
     private static final String DEFAULT_HEARING_MODE = "Hearing mode not specified";
     private static final String DEFAULT_DATE_TIME = "Date and time not provided";
     private static final String DEFAULT_CONFIDENTIAL_PARTIES = "Parties not specified";
+    private static final String DEFAULT_REASON = "No reason provided";
+    private static final String DEFAULT_STATUS = "No status provided";
 
     public HearingTabItem mapHearingToTabData(ManageHearingsCollectionItem hearingCollectionItem,
                                               List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection) {
@@ -52,6 +58,29 @@ public class HearingTabDataMapper {
             .build();
     }
 
+    public VacatedOrAdjournedHearingTabItem mapVacatedOrAdjournedHearingToTabData(VacatedOrAdjournedHearingsCollectionItem
+                                                                                      hearingCollectionItem,
+                                                                                  List<ManageHearingDocumentsCollectionItem>
+                                                                                      hearingDocumentsCollection) {
+        VacateOrAdjournedHearing hearing = hearingCollectionItem.getValue();
+
+        return VacatedOrAdjournedHearingTabItem.builder()
+            .tabHearingType(getHearingType(hearing))
+            .tabCourtSelection(getCourtName(hearing))
+            .tabAttendance(getHearingMode(hearing))
+            .tabDateTime(getFormattedDateTime(hearing))
+            .tabTimeEstimate(hearing.getHearingTimeEstimate())
+            .tabConfidentialParties(getConfidentialParties(hearing))
+            .tabAdditionalInformation(getAdditionalInformation(hearing))
+            .tabHearingDocuments(tryToMapHearingDocumentsToTabData(
+                hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
+            .tabVacatedOrAdjournedDate(getVacatedOrAdjournedDate(hearing))
+            .tabVacateOrAdjournReason(getVacatedOrAdjournedReason(hearing))
+            .tabSpecifyOtherReason(hearing.getSpecifyOtherReason())
+            .tabHearingStatus(getVacatedOrAdjournedStatus(hearing))
+            .build();
+    }
+
     /**
      * Retrieves the name of the court associated with the given {@link Court} object.
      * Resilient method; If the court details cannot be mapped, handles with a generic message.
@@ -59,7 +88,7 @@ public class HearingTabDataMapper {
      * @param court the {@link Court} object to retrieve the court name for
      * @return the name of the court
      */
-    public String getCourtName(Court court) {
+    private String getCourtName(Court court) {
         final String courtNameNotAvailable = "Court name not available";
         try {
             return courtDetailsMapper.convertToFrcCourtDetails(court).getCourtName();
@@ -76,7 +105,7 @@ public class HearingTabDataMapper {
      * @param hearing the {@link Hearing} object to retrieve the court name for
      * @return the name of the court
      */
-    public String getCourtName(Hearing hearing) {
+    private String getCourtName(HearingLike hearing) {
         return getCourtName(hearing.getHearingCourtSelection());
     }
 
@@ -88,7 +117,7 @@ public class HearingTabDataMapper {
      * @param hearingTime the hearing time to append to the date
      * @return a formatted date-time string (e.g., "27 Jun 2025 10:00 AM"), or a default value if the date is null
      */
-    public String getFormattedDateTime(LocalDate hearingDate, String hearingTime) {
+    private String getFormattedDateTime(LocalDate hearingDate, String hearingTime) {
         return hearingDate != null
             ? hearingDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy")) + " " + hearingTime
             : DEFAULT_DATE_TIME;
@@ -100,7 +129,7 @@ public class HearingTabDataMapper {
      * @param hearing the {@link Hearing} to extract and format date and time from
      * @return a formatted date-time string, or a default value if the date is null
      */
-    public String getFormattedDateTime(Hearing hearing) {
+    private String getFormattedDateTime(HearingLike hearing) {
         return getFormattedDateTime(hearing.getHearingDate(), hearing.getHearingTime());
     }
 
@@ -110,7 +139,7 @@ public class HearingTabDataMapper {
      * @param additionalHearingInformation the string containing additional information
      * @return the additional information or a blank space if {@code null}
      */
-    public String getAdditionalInformation(String additionalHearingInformation) {
+    private String getAdditionalInformation(String additionalHearingInformation) {
         return additionalHearingInformation != null ? additionalHearingInformation : " ";
     }
 
@@ -124,24 +153,40 @@ public class HearingTabDataMapper {
      * @param hearing the {@link Hearing} object containing the additional information
      * @return the formatted or processed additional hearing information, or {@code null} if none is available
      */
-    public String getAdditionalInformation(Hearing hearing) {
+    private String getAdditionalInformation(HearingLike hearing) {
         return getAdditionalInformation(hearing.getAdditionalHearingInformation());
     }
 
-    private String getHearingType(Hearing hearing) {
+    private String getHearingType(HearingLike hearing) {
         return hearing.getHearingType().getId();
     }
 
-    private String getHearingMode(Hearing hearing) {
+    private String getHearingMode(HearingLike hearing) {
         return hearing.getHearingMode() != null ? hearing.getHearingMode().getDisplayValue() : DEFAULT_HEARING_MODE;
     }
 
-    private String getConfidentialParties(Hearing hearing) {
+    private String getConfidentialParties(HearingLike hearing) {
         return hearing.getPartiesOnCase() != null
             ? hearing.getPartiesOnCase().stream()
             .map(PartyOnCaseCollectionItem::getValue).map(PartyOnCase::getLabel)
             .collect(Collectors.joining(", "))
             : DEFAULT_CONFIDENTIAL_PARTIES;
+    }
+
+    private String getVacatedOrAdjournedDate(VacateOrAdjournedHearing hearing) {
+        return hearing.getVacatedOrAdjournedDate() != null
+            ? hearing.getVacatedOrAdjournedDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+            : DEFAULT_DATE_TIME;
+    }
+
+    private String getVacatedOrAdjournedReason(VacateOrAdjournedHearing hearing) {
+        return hearing.getVacateOrAdjournReason() != null
+            ? hearing.getVacateOrAdjournReason().getDisplayValue() : DEFAULT_REASON;
+    }
+
+    private String getVacatedOrAdjournedStatus(VacateOrAdjournedHearing hearing) {
+        return hearing.getHearingStatus() != null
+            ? hearing.getHearingStatus().getDescription() : DEFAULT_STATUS;
     }
 
     /**
@@ -155,7 +200,7 @@ public class HearingTabDataMapper {
     private List<DocumentCollectionItem> tryToMapHearingDocumentsToTabData(
         List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
         UUID hearingId,
-        Hearing hearing) {
+        HearingLike hearing) {
         try {
             return mapHearingDocumentsToTabData(hearingDocumentsCollection, hearingId, hearing);
         } catch (NullPointerException npe) {
@@ -183,7 +228,7 @@ public class HearingTabDataMapper {
     private List<DocumentCollectionItem> mapHearingDocumentsToTabData(
         List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
         UUID hearingId,
-        Hearing hearing) {
+        HearingLike hearing) {
 
         List<DocumentCollectionItem> hearingDocuments = hearingDocumentsCollection != null
             ? hearingDocumentsCollection.stream()

@@ -76,7 +76,7 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
                 .withHearingTypes(HearingType.values())
                 .build()
         );
-        
+
         if (featureToggleService.isVacateHearingEnabled()) {
             finremCaseData.getManageHearingsWrapper().setWorkingVacatedHearing(
                 WorkingVacatedHearing.builder()
