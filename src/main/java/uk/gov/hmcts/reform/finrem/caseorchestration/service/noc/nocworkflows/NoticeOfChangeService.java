@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -88,24 +89,51 @@ public class NoticeOfChangeService {
     }
 
     /**
-     * Updates the representation details on the case.
+     * Populates the {@code ChangeOrganisationRequest} field on the given {@link FinremCaseData}.
      *
-     * <p>
-     * This method logs the update action, records the representation change
-     * in the update history, and generates a new {@link ChangeOrganisationRequest}
-     * based on the current and original case data. The generated request is then
-     * saved on the case.
+     * <p>This method generates a new {@code ChangeOrganisationRequest} using the current and
+     * original case data, and then sets it on the {@code finremCaseData} object.</p>
      *
-     * @param finremCaseData          the current case data to update
-     * @param originalFinremCaseData  the case data before any representation changes
-     * @param authorisationToken      the authorisation token for the update
+     * @param finremCaseData          the case data to update
+     * @param originalFinremCaseData  the original case data before any organisation changes
      */
-    public void updateRepresentation(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
-                                     String authorisationToken) {
-        log.info("{} - Going to update representation", finremCaseData.getCcdCaseId());
-        updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, authorisationToken);
+    public void populateChangeOrganisationRequestField(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData) {
         ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(finremCaseData, originalFinremCaseData);
         finremCaseData.setChangeOrganisationRequestField(changeRequest);
+    }
+
+    /**
+     * Updates the representation update history on the given {@link FinremCaseData} object.
+     *
+     * <p>This method builds the current representation change details and sends them to the
+     * {@code changeOfRepresentationService} to generate an updated history. The returned
+     * history is then copied onto the {@code finremCaseData} object.</p>
+     *
+     * <p>The {@code viaEventType} parameter indicates the event type that triggered this update.</p>
+     *
+     * @param finremCaseData          the case data to update
+     * @param originalFinremCaseData  the original case data before any changes
+     * @param viaEventType            the event type that triggered this update
+     * @param authToken               the authorisation token used for the request
+     */
+    public void updateRepresentationUpdateHistory(FinremCaseData finremCaseData,
+                                                  FinremCaseData originalFinremCaseData,
+                                                  EventType viaEventType,
+                                                  String authToken) {
+        RepresentationUpdateHistory current = buildCurrentUpdateHistory(finremCaseData);
+
+        RepresentationUpdateHistory history = changeOfRepresentationService.generateRepresentationUpdateHistory(
+            buildChangeOfRepresentationRequest(authToken, finremCaseData, current, originalFinremCaseData), viaEventType);
+
+        // modifying finremCaseData reference object
+        finremCaseData.setRepresentationUpdateHistory(
+            nullIfEmpty(history.getRepresentationUpdateHistory()).stream()
+                .map(element -> RepresentationUpdateHistoryCollection.builder()
+                    .id(element.getId())
+                    .value(element.getValue())
+                    .build())
+                .collect(Collectors.toList())
+        );
     }
 
     private Map<String, Object> updateRepresentationUpdateHistory(CaseDetails caseDetails,
@@ -119,25 +147,6 @@ public class NoticeOfChangeService {
 
         caseData.put(REPRESENTATION_UPDATE_HISTORY, history.getRepresentationUpdateHistory());
         return caseData;
-    }
-
-    private void updateRepresentationUpdateHistory(FinremCaseData finremCaseData,
-                                                   FinremCaseData originalFinremCaseData,
-                                                   String authToken) {
-        RepresentationUpdateHistory current = buildCurrentUpdateHistory(finremCaseData);
-
-        RepresentationUpdateHistory history = changeOfRepresentationService.generateRepresentationUpdateHistory(
-            buildChangeOfRepresentationRequest(authToken, finremCaseData, current, originalFinremCaseData));
-
-        // modifying finremCaseData reference object
-        finremCaseData.setRepresentationUpdateHistory(
-            nullIfEmpty(history.getRepresentationUpdateHistory()).stream()
-                .map(element -> RepresentationUpdateHistoryCollection.builder()
-                    .id(element.getId())
-                    .value(element.getValue())
-                    .build())
-                .collect(Collectors.toList())
-        );
     }
 
     private ChangeOrganisationRequest generateChangeOrganisationRequest(CaseDetails caseDetails,

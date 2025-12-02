@@ -8,6 +8,7 @@ import org.apache.tika.utils.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -36,19 +37,25 @@ public class UpdateRepresentationWorkflowService {
      * Prepares the change of organisation request and updates the related organisation policies.
      *
      * <p>
-     * This method first updates the party representation details by comparing the current
-     * {@code finremCaseData} with {@code originalFinremCaseData}. It then checks whether there are
-     * any organisations to add or remove. If no changes are required, it sets the default
-     * organisation policy and creates a default change-of-organisation request structure.
+     * This method updates the party representation history by comparing the current {@code finremCaseData}
+     * with {@code originalFinremCaseData}, using the provided {@code viaEventType} to indicate the event
+     * that triggered the update. It then populates the {@code ChangeOrganisationRequest} field on the case data.
+     * If there are no organisations to add or remove, it sets the default organisation policy and creates
+     * a default change-of-organisation request structure.
+     *
+     * <p>All modifications are applied directly to the provided {@code finremCaseData} object.</p>
      *
      * @param finremCaseData          the case data to be updated with the latest representation details
      * @param originalFinremCaseData  the original case data used to detect representation changes
+     * @param viaEventType            the event type that triggered this update
      * @param userAuthorisation       the authorisation token of the user performing the action
      */
     public void prepareChangeOrganisationRequestAndOrganisationPolicy(FinremCaseData finremCaseData,
                                                                       FinremCaseData originalFinremCaseData,
+                                                                      EventType viaEventType,
                                                                       String userAuthorisation) {
-        noticeOfChangeService.updateRepresentation(finremCaseData, originalFinremCaseData, userAuthorisation);
+        noticeOfChangeService.updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, viaEventType, userAuthorisation);
+        noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
 
         if (safeChangeOrganisationRequest(finremCaseData).isNoOrganisationsToAddOrRemove()) {
             persistDefaultOrganisationPolicy(finremCaseData);

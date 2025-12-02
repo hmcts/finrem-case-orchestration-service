@@ -51,7 +51,8 @@ class BarristerRepresentationUpdateBuilderTest {
         Barrister barrister = createBarrister();
 
         RepresentationUpdate representationUpdate = builder.buildBarristerAdded(
-            new BarristerRepresentationUpdateBuilder.BarristerUpdateParams(caseData, AUTH_TOKEN, barristerParty, barrister));
+            new BarristerRepresentationUpdateBuilder.BarristerUpdateParams(caseData, AUTH_TOKEN, barristerParty, barrister,
+                null));
         assertThat(representationUpdate.getRemoved()).isNull();
         assertThat(representationUpdate.getAdded().getName()).isEqualTo("barristerName");
         assertThat(representationUpdate.getAdded().getEmail()).isEqualTo("barristerEmail");
@@ -71,7 +72,7 @@ class BarristerRepresentationUpdateBuilderTest {
         Barrister barrister = createBarrister();
 
         RepresentationUpdate representationUpdate = builder.buildBarristerRemoved(
-            new BarristerRepresentationUpdateBuilder.BarristerUpdateParams(caseData, AUTH_TOKEN, barristerParty, barrister));
+            new BarristerRepresentationUpdateBuilder.BarristerUpdateParams(caseData, AUTH_TOKEN, barristerParty, barrister, null));
         assertThat(representationUpdate.getAdded()).isNull();
         assertThat(representationUpdate.getRemoved().getName()).isEqualTo("barristerName");
         assertThat(representationUpdate.getRemoved().getEmail()).isEqualTo("barristerEmail");

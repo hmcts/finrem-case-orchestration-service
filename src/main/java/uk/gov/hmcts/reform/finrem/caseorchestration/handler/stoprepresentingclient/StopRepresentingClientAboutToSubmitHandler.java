@@ -107,15 +107,15 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
                                              FinremCaseData finremCaseDataBefore,
                                              String userAuthorisation) {
         nocWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseDetails.getData(),
-            finremCaseDataBefore, userAuthorisation);
+            finremCaseDataBefore, STOP_REPRESENTING_CLIENT, userAuthorisation);
 
         barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
             manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, CaseRole.APP_SOLICITOR),
-            userAuthorisation);
+            STOP_REPRESENTING_CLIENT, userAuthorisation);
 
         barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
             manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, CaseRole.RESP_SOLICITOR),
-            userAuthorisation);
+            STOP_REPRESENTING_CLIENT, userAuthorisation);
     }
 
     private void populateWarnings(FinremCaseData finremCaseData, List<String> warnings) {

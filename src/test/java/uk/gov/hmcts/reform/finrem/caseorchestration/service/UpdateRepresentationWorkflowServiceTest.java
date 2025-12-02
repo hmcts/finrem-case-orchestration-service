@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -225,11 +226,14 @@ class UpdateRepresentationWorkflowServiceTest {
         when(cor.isNoOrganisationsToAddOrRemove()).thenReturn(false);
         finremCaseData.setChangeOrganisationRequestField(cor);
         FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
+        EventType eventType = mock(EventType.class);
 
-        updateRepresentationWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseData, finremCaseDataBefore,
+        updateRepresentationWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseData, finremCaseDataBefore, eventType,
             AUTH_TOKEN);
 
-        verify(noticeOfChangeService).updateRepresentation(finremCaseData, finremCaseDataBefore, AUTH_TOKEN);
+        verify(noticeOfChangeService).updateRepresentationUpdateHistory(finremCaseData, finremCaseDataBefore, eventType,
+            AUTH_TOKEN);
+        verify(noticeOfChangeService).populateChangeOrganisationRequestField(finremCaseData, finremCaseDataBefore);
         verify(finremCaseData, never()).setApplicantOrganisationPolicy(any(OrganisationPolicy.class));
         verify(finremCaseData, never()).setRespondentOrganisationPolicy(any(OrganisationPolicy.class));
     }
@@ -241,9 +245,10 @@ class UpdateRepresentationWorkflowServiceTest {
         when(cor.isNoOrganisationsToAddOrRemove()).thenReturn(true);
         finremCaseData.setChangeOrganisationRequestField(cor);
         FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
+        EventType eventType = mock(EventType.class);
 
         updateRepresentationWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseData, finremCaseDataBefore,
-            AUTH_TOKEN);
+            eventType, AUTH_TOKEN);
 
         final Organisation emptyOrganisation = Organisation.builder().organisationID(null).organisationName(null).build();
         assertThat(finremCaseData.getApplicantOrganisationPolicy())
@@ -256,7 +261,9 @@ class UpdateRepresentationWorkflowServiceTest {
                 OrganisationPolicy::getOrganisation)
             .contains(CaseRole.RESP_SOLICITOR.getCcdCode(), emptyOrganisation);
 
-        verify(noticeOfChangeService).updateRepresentation(finremCaseData, finremCaseDataBefore, AUTH_TOKEN);
+        verify(noticeOfChangeService).updateRepresentationUpdateHistory(finremCaseData, finremCaseDataBefore, eventType,
+            AUTH_TOKEN);
+        verify(noticeOfChangeService).populateChangeOrganisationRequestField(finremCaseData, finremCaseDataBefore);
         verify(finremCaseData).setApplicantOrganisationPolicy(any(OrganisationPolicy.class));
         verify(finremCaseData).setRespondentOrganisationPolicy(any(OrganisationPolicy.class));
     }

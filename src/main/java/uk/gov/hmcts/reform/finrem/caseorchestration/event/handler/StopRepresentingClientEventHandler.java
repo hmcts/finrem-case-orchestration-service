@@ -38,16 +38,12 @@ public class StopRepresentingClientEventHandler {
     public void handleEvent(StopRepresentingClientEvent event) {
         // Enable @Async to display the success page,
         // but only if EXUI-3746 allows hiding the "Close and return to case details" button.
-        FinremCaseData finremCaseData = event.getCaseDetails().getData();
-        FinremCaseData finremCaseDataBefore = event.getCaseDetailsBefore().getData();
+        final FinremCaseData finremCaseData = event.getCaseDetails().getData();
+        final FinremCaseData finremCaseDataBefore = event.getCaseDetailsBefore().getData();
         final long caseId = event.getCaseDetails().getId();
 
         // trying to revoke creator role if any
         assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
-
-        revertOrgPolicyToOriginalOrgPolicy(finremCaseData, finremCaseDataBefore);
-        assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), finremCaseDetailsMapper
-            .mapToCaseDetails(event.getCaseDetails()));
 
         BarristerChange applicantBarristerChange = manageBarristerService
             .getBarristerChange(event.getCaseDetails(), finremCaseDataBefore, CaseRole.APP_SOLICITOR);
@@ -56,6 +52,10 @@ public class StopRepresentingClientEventHandler {
         BarristerChange respondentBarristerChange = manageBarristerService
             .getBarristerChange(event.getCaseDetails(), finremCaseDataBefore, CaseRole.RESP_SOLICITOR);
         barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, respondentBarristerChange);
+
+        revertOrgPolicyToOriginalOrgPolicy(finremCaseData, finremCaseDataBefore);
+        assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), finremCaseDetailsMapper
+            .mapToCaseDetails(event.getCaseDetails()));
     }
 
     // aac handles org policy modification based on the Change Organisation Request,
