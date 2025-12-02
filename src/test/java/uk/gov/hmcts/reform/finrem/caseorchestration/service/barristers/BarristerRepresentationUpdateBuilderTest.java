@@ -46,13 +46,13 @@ class BarristerRepresentationUpdateBuilderTest {
 
     @ParameterizedTest
     @MethodSource("barristersData")
-    void testBuildBarristerAdded(BarristerParty barristerParty, String expectedClientName, String expectedParty) {
+    void testBuildBarristerAdded(BarristerParty barristerParty, String expectedClientName, String expectedParty, String via, String expectedVia) {
         FinremCaseData caseData = createCaseData(barristerParty);
         Barrister barrister = createBarrister();
 
         RepresentationUpdate representationUpdate = builder.buildBarristerAdded(
             new BarristerRepresentationUpdateBuilder.BarristerUpdateParams(caseData, AUTH_TOKEN, barristerParty, barrister,
-                null));
+                via));
         assertThat(representationUpdate.getRemoved()).isNull();
         assertThat(representationUpdate.getAdded().getName()).isEqualTo("barristerName");
         assertThat(representationUpdate.getAdded().getEmail()).isEqualTo("barristerEmail");
@@ -60,19 +60,19 @@ class BarristerRepresentationUpdateBuilderTest {
 
         assertThat(representationUpdate)
             .returns("Test User", RepresentationUpdate::getBy)
-            .returns(MANAGE_BARRISTERS, RepresentationUpdate::getVia)
+            .returns(expectedVia, RepresentationUpdate::getVia)
             .returns(expectedClientName, RepresentationUpdate::getClientName)
             .returns(expectedParty, RepresentationUpdate::getParty);
     }
 
     @ParameterizedTest
     @MethodSource("barristersData")
-    void testBuildBarristerRemoved(BarristerParty barristerParty, String expectedClientName, String expectedParty) {
+    void testBuildBarristerRemoved(BarristerParty barristerParty, String expectedClientName, String expectedParty, String via, String expectedVia) {
         FinremCaseData caseData = createCaseData(barristerParty);
         Barrister barrister = createBarrister();
 
         RepresentationUpdate representationUpdate = builder.buildBarristerRemoved(
-            new BarristerRepresentationUpdateBuilder.BarristerUpdateParams(caseData, AUTH_TOKEN, barristerParty, barrister, null));
+            new BarristerRepresentationUpdateBuilder.BarristerUpdateParams(caseData, AUTH_TOKEN, barristerParty, barrister, via));
         assertThat(representationUpdate.getAdded()).isNull();
         assertThat(representationUpdate.getRemoved().getName()).isEqualTo("barristerName");
         assertThat(representationUpdate.getRemoved().getEmail()).isEqualTo("barristerEmail");
@@ -80,19 +80,19 @@ class BarristerRepresentationUpdateBuilderTest {
 
         assertThat(representationUpdate)
             .returns("Test User", RepresentationUpdate::getBy)
-            .returns(MANAGE_BARRISTERS, RepresentationUpdate::getVia)
+            .returns(expectedVia, RepresentationUpdate::getVia)
             .returns(expectedClientName, RepresentationUpdate::getClientName)
             .returns(expectedParty, RepresentationUpdate::getParty);
     }
 
     private static Stream<Arguments> barristersData() {
         return Stream.of(
-            Arguments.of(BarristerParty.APPLICANT, "applicantFirst applicantLast", APPLICANT),
-            Arguments.of(BarristerParty.RESPONDENT, "respondentFirst respondentLast", RESPONDENT),
-            Arguments.of(BarristerParty.INTERVENER1, "intervenerOne", INTERVENER),
-            Arguments.of(BarristerParty.INTERVENER2, "intervenerTwo", INTERVENER),
-            Arguments.of(BarristerParty.INTERVENER3, "intervenerThree", INTERVENER),
-            Arguments.of(BarristerParty.INTERVENER4, "intervenerFour", INTERVENER)
+            Arguments.of(BarristerParty.APPLICANT, "applicantFirst applicantLast", APPLICANT, null, MANAGE_BARRISTERS),
+            Arguments.of(BarristerParty.RESPONDENT, "respondentFirst respondentLast", RESPONDENT, "ABC", "ABC"),
+            Arguments.of(BarristerParty.INTERVENER1, "intervenerOne", INTERVENER, "DDD", "DDD"),
+            Arguments.of(BarristerParty.INTERVENER2, "intervenerTwo", INTERVENER, null, MANAGE_BARRISTERS),
+            Arguments.of(BarristerParty.INTERVENER3, "intervenerThree", INTERVENER, "111", "111"),
+            Arguments.of(BarristerParty.INTERVENER4, "intervenerFour", INTERVENER, "222", "222")
         );
     }
 
