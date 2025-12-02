@@ -88,18 +88,17 @@ public class NoticeOfChangeService {
         return caseData;
     }
 
-    /**
-     * Populates the {@code ChangeOrganisationRequest} field on the given {@link FinremCaseData}.
-     *
-     * <p>This method generates a new {@code ChangeOrganisationRequest} using the current and
-     * original case data, and then sets it on the {@code finremCaseData} object.</p>
-     *
-     * @param finremCaseData          the case data to update
-     * @param originalFinremCaseData  the original case data before any organisation changes
-     */
-    public void populateChangeOrganisationRequestField(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData) {
-        ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(finremCaseData, originalFinremCaseData);
-        finremCaseData.setChangeOrganisationRequestField(changeRequest);
+    private Map<String, Object> updateRepresentationUpdateHistory(CaseDetails caseDetails,
+                                                                  String authToken,
+                                                                  CaseDetails originalDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        RepresentationUpdateHistory current = buildCurrentUpdateHistory(caseData);
+
+        final RepresentationUpdateHistory history = changeOfRepresentationService.generateRepresentationUpdateHistory(
+            buildChangeOfRepresentationRequest(authToken, caseDetails, current, originalDetails));
+
+        caseData.put(REPRESENTATION_UPDATE_HISTORY, history.getRepresentationUpdateHistory());
+        return caseData;
     }
 
     /**
@@ -136,17 +135,18 @@ public class NoticeOfChangeService {
         );
     }
 
-    private Map<String, Object> updateRepresentationUpdateHistory(CaseDetails caseDetails,
-                                                                  String authToken,
-                                                                  CaseDetails originalDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        RepresentationUpdateHistory current = buildCurrentUpdateHistory(caseData);
-
-        final RepresentationUpdateHistory history = changeOfRepresentationService.generateRepresentationUpdateHistory(
-            buildChangeOfRepresentationRequest(authToken, caseDetails, current, originalDetails));
-
-        caseData.put(REPRESENTATION_UPDATE_HISTORY, history.getRepresentationUpdateHistory());
-        return caseData;
+    /**
+     * Populates the {@code ChangeOrganisationRequest} field on the given {@link FinremCaseData}.
+     *
+     * <p>This method generates a new {@code ChangeOrganisationRequest} using the current and
+     * original case data, and then sets it on the {@code finremCaseData} object.</p>
+     *
+     * @param finremCaseData          the case data to update
+     * @param originalFinremCaseData  the original case data before any organisation changes
+     */
+    public void populateChangeOrganisationRequestField(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData) {
+        ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(finremCaseData, originalFinremCaseData);
+        finremCaseData.setChangeOrganisationRequestField(changeRequest);
     }
 
     private ChangeOrganisationRequest generateChangeOrganisationRequest(CaseDetails caseDetails,
