@@ -4,7 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PdfDocumentConfig;
@@ -15,7 +20,6 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -34,21 +38,46 @@ public class DocmosisPdfGenerationService {
     @Value("${service.pdf-service.accessKey}")
     private String pdfServiceAccessKey;
 
+    @Retryable(
+       // Only retry Docmosis request network or server errors
+        value = {
+            HttpServerErrorException.class,   // 5oos
+            ResourceAccessException.class     // timeouts, connection issues
+        },
+        backoff = @Backoff(
+            delay = 1000,      // 1s
+            multiplier = 2.0   // 1s, 2s, 4s
+        )
+    )
     public byte[] generateDocFrom(String templateName, Map<String, Object> placeholders) {
-        checkArgument(!isNullOrEmpty(templateName), "document generation template cannot be empty");
+        checkArgument(templateName != null && !templateName.isBlank(),
+            "document generation template cannot be empty");
         checkNotNull(placeholders, "placeholders map cannot be null");
 
-        log.info("Making request to pdf service to generate pdf document with template [{}], "
-            + "placeholders of size [{}], pdfServiceEndpoint [{}] ",
+        log.info("Calling Docmosis to generate pdf. template=[{}], placeholdersSize=[{}], endpoint=[{}]",
             templateName, placeholders.size(), pdfServiceEndpoint);
 
         try {
             ResponseEntity<byte[]> response =
                 restTemplate.postForEntity(pdfServiceEndpoint, request(templateName, placeholders), byte[].class);
+
             removePdfConfigEntriesFromCaseData(placeholders);
             return response.getBody();
-        } catch (Exception e) {
-            throw new PdfGenerationException("Failed to request PDF from REST endpoint " + e.getMessage(), e);
+
+            // Retryable exceptions – log and rethrow so @Retryable can handle them
+        } catch (HttpServerErrorException | ResourceAccessException ex) {
+            log.warn("Docmosis transient failure for template [{}], will be retried. Message: {}",
+                templateName, ex.getMessage(), ex);
+            throw ex; // important: keep the same type so retry happens
+
+            // Non-retryable exceptions – handle once and wrap in PdfGenerationException
+        } catch (Exception ex) {
+            log.error("Non-retryable error when generating PDF for template [{}]: {}",
+                templateName, ex.getMessage(), ex);
+            throw new PdfGenerationException(
+                String.format("Failed to generate PDF from Docmosis for template [%s]", templateName),
+                ex
+            );
         }
     }
 
@@ -84,5 +113,33 @@ public class DocmosisPdfGenerationService {
         data.put(pdfDocumentConfig.getHmctsImgKey(), pdfDocumentConfig.getHmctsImgVal());
 
         return data;
+    }
+
+    // Called when retries for HttpServerErrorException are exhausted
+    @Recover
+    public byte[] recover(HttpServerErrorException ex,
+                          String templateName,
+                          Map<String, Object> placeholders) {
+        log.error("Docmosis returned 5xx after retries for template [{}]. Status: {}, Body: {}",
+            templateName, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
+
+        throw new PdfGenerationException(
+            String.format("Failed to generate PDF from Docmosis after retries for template [%s]", templateName),
+            ex
+        );
+    }
+
+    // Called when retries for ResourceAccessException are exhausted
+    @Recover
+    public byte[] recover(ResourceAccessException ex,
+                          String templateName,
+                          Map<String, Object> placeholders) {
+        log.error("Docmosis network issue after retries for template [{}]. Message: {}",
+            templateName, ex.getMessage(), ex);
+
+        throw new PdfGenerationException(
+            String.format("Failed to generate PDF from Docmosis due to network issues for template [%s]", templateName),
+            ex
+        );
     }
 }
