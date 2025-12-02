@@ -10,16 +10,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournedHearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -283,6 +284,11 @@ public class ManageHearingActionService {
 
         caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
 
+        List<VacatedOrAdjournedHearingTabCollectionItem> vacatedOrAdjournedHearingTabItems =
+            mapAndSortVacatedAndAdjournedHearings(hearingsWrapper.getVacatedOrAdjournedHearings(), caseData);
+
+        caseData.getManageHearingsWrapper().setVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems);
+
         hearingsWrapper.setApplicantHearingTabItems(partyTabItems.get(APPLICANT));
         hearingsWrapper.setRespondentHearingTabItems(partyTabItems.get(RESPONDENT));
         hearingsWrapper.setInt1HearingTabItems(partyTabItems.get(INTERVENER1));
@@ -310,6 +316,19 @@ public class ManageHearingActionService {
         return nullIfEmpty(emptyIfNull(hearingTabItems).stream()
             .filter(hearingTabItem -> YesOrNo.isYes(hearingTabItem.getValue().getTabWasMigrated())
                 || hearingTabItem.getValue().getTabConfidentialParties().contains(party))
+            .toList());
+    }
+
+    private List<VacatedOrAdjournedHearingTabCollectionItem> mapAndSortVacatedAndAdjournedHearings(
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedOrAdjournedHearings, FinremCaseData caseData) {
+        return nullIfEmpty(emptyIfNull(vacatedOrAdjournedHearings).stream()
+            .sorted(Comparator.comparing(hearing -> hearing.getValue().getHearingDate()))
+            .map(hearing -> VacatedOrAdjournedHearingTabCollectionItem.builder()
+                .id(hearing.getId())
+                .value(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(
+                    hearing,
+                    caseData.getManageHearingsWrapper().getHearingDocumentsCollection()))
+                .build())
             .toList());
     }
 
