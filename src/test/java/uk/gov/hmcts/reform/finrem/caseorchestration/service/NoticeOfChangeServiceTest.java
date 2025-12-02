@@ -2,15 +2,24 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -23,9 +32,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Remov
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,6 +79,26 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
     private final Function<FinremCaseData, List<RepresentationUpdateHistoryCollection>> getRepresentationUpdateHistoryFinrem =
         this::convertToUpdateHistoryFinrem;
+
+    private static MockedStatic<LocalDateTime> localDateTimeMock;
+
+    @BeforeClass
+    public static void setUpClass() {
+        LocalDateTime fixed = LocalDateTime.of(2024, 1, 1, 12, 0);
+
+        localDateTimeMock = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS);
+
+        localDateTimeMock.when(LocalDateTime::now)
+            .thenReturn(fixed);
+
+        localDateTimeMock.when(() -> LocalDateTime.now(ZoneId.systemDefault()))
+            .thenReturn(fixed);
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        localDateTimeMock.close();
+    }
 
     @Before
     public void setUp() {
@@ -148,6 +179,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .build();
 
         assertRepresentationUpdate(actualChange, expectedChange);
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVA", null);
     }
 
     @Test
@@ -237,6 +269,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .build();
         assertRepresentationUpdate(lastElement, expectedNewElement);
         assertThat(firstElement.getDate()).isBefore(lastElement.getDate());
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVA", null);
     }
 
     @Test
@@ -311,6 +344,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         // Verify expected RepresentationUpdate appended
         RepresentationUpdate firstElement = actual.getLast().getValue();
         assertRepresentationUpdate(firstElement, expectedNewElement);
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVA", null);
     }
 
     @Test
@@ -394,6 +428,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .build();
         assertRepresentationUpdate(lastElement, expectedNewElement);
         assertThat(firstElement.getDate()).isBefore(lastElement.getDate());
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVA", null);
     }
 
     @Test
@@ -467,6 +502,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .removed(mockedChangedRepresentative)
             .build();
         assertRepresentationUpdate(actualChange, expectedChange);
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVA", "A31PTVA");
     }
 
     @Test
@@ -563,6 +599,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .build();
 
         assertRepresentationUpdate(actualChange, expected);
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVU", "A31PTVA");
     }
 
     @Test
@@ -638,6 +675,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .build();
 
         assertRepresentationUpdate(actualChange, expected);
+        assertChangeOrganisationField(finremCaseData, false,"A31PTVU", null);
     }
 
     @Test
@@ -728,5 +766,50 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .ignoringFields("date")
             .withComparatorForFields(String.CASE_INSENSITIVE_ORDER, "party")
             .isEqualTo(expectedNewElement);
+    }
+
+    private void assertChangeOrganisationField(FinremCaseData finremCaseData, boolean isApplicant,
+                                               String organisationIdToAdd, String organisationIdToRemove) {
+
+        String role = isApplicant ? CaseRole.APP_SOLICITOR.getCcdCode() : CaseRole.RESP_SOLICITOR.getCcdCode();
+
+        assertThat(finremCaseData.getChangeOrganisationRequestField())
+            .extracting(ChangeOrganisationRequest::getCaseRoleId,
+                ChangeOrganisationRequest::getApprovalStatus,
+                ChangeOrganisationRequest::getRequestTimestamp,
+                ChangeOrganisationRequest::getApprovalRejectionTimestamp
+            )
+            .contains(
+                DynamicList.builder()
+                    .value(DynamicListElement.builder()
+                        .code(role)
+                        .label(role)
+                        .build())
+                    .listItems(List.of(DynamicListElement.builder()
+                        .code(role)
+                        .label(role)
+                        .build()))
+                    .build(),
+                ChangeOrganisationApprovalStatus.APPROVED,
+                LocalDateTime.of(2024, 1, 1, 12, 0),
+                LocalDateTime.of(2024, 1, 1, 12, 0));
+
+        if (organisationIdToAdd != null) {
+            assertThat(finremCaseData.getChangeOrganisationRequestField().getOrganisationToAdd())
+                .extracting(Organisation::getOrganisationID)
+                .isEqualTo(organisationIdToAdd);
+        } else {
+            assertThat(finremCaseData.getChangeOrganisationRequestField().getOrganisationToAdd()).isNull();
+        }
+
+        assertThat(Optional.ofNullable(finremCaseData.getChangeOrganisationRequestField().getOrganisationToAdd())
+            .map(Organisation::getOrganisationID)
+            .orElse(null))
+            .isEqualTo(organisationIdToAdd);
+
+        assertThat(Optional.ofNullable(finremCaseData.getChangeOrganisationRequestField().getOrganisationToRemove())
+            .map(Organisation::getOrganisationID)
+            .orElse(null))
+            .isEqualTo(organisationIdToRemove);
     }
 }
