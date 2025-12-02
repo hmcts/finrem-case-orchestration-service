@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarni
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -62,7 +61,6 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
             finremCaseDetailsMapper,
             hearingOrderService,
             contestedOrderApprovedLetterService,
-            uploadedDraftOrderCategoriser,
             documentWarningsHelper
         );
         inOrder = Mockito.inOrder(hearingOrderService, uploadedDraftOrderCategoriser, contestedOrderApprovedLetterService);
@@ -85,33 +83,6 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
                 .satisfies(warnings -> assertThat(warnings).containsExactly("warnings 1"));
 
         verify(documentWarningsHelper).getDocumentWarnings(eq(callbackRequest), any(Function.class), eq(AUTH_TOKEN));
-    }
-
-    @Test
-    void givenApprovedOrdersProvided_whenHandle_thenMoveToDraftDirectionOrderCollection() {
-        List<DraftDirectionOrderCollection> uploadingApprovedOrders = List.of(
-            DraftDirectionOrderCollection.builder().value(DraftDirectionOrder.builder().build()).build()
-        );
-
-        FinremCaseData caseData = FinremCaseData.builder().build();
-        DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
-        draftDirectionWrapper.setJudgeApprovedOrderCollection(uploadingApprovedOrders);
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
-            .id(Long.valueOf(CASE_ID))
-            .caseType(CaseType.CONTESTED)
-            .state(State.SCHEDULING_AND_HEARING)
-            .data(caseData).build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .eventType(EventType.JUDGE_DRAFT_ORDER)
-            .caseDetails(finremCaseDetails)
-            .build();
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        FinremCaseData result = response.getData();
-
-        assertThat(result.getDraftDirectionWrapper().getJudgeApprovedOrderCollection()).isNull();
-        assertThat(result.getDraftDirectionWrapper().getDraftDirectionOrderCollection()).isEqualTo(uploadingApprovedOrders);
     }
 
     @Test
