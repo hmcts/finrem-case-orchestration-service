@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthWestFrc
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthEastFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthWestFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 
 import java.util.Map;
 import java.util.stream.Stream;
