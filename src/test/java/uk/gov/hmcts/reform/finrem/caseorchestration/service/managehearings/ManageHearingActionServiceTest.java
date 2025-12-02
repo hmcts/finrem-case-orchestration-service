@@ -869,4 +869,5 @@ class ManageHearingActionServiceTest {
             .tabWasMigrated(migrated ? YesOrNo.YES : null)
             .build();
     }
+
 }
