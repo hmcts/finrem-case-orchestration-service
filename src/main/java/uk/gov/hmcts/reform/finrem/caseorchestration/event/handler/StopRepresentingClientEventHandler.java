@@ -35,7 +35,7 @@ public class StopRepresentingClientEventHandler {
         assignCaseAccessService.findAndRevokeCreatorRole(finremCaseData.getCcdCaseId());
 
         if (!safeChangeOrganisationRequest(finremCaseData).isNoOrganisationsToAddOrRemove()) {
-            revertOriginalOrgPolicyFromOriginalFinremCaseData(event.getCaseDetails().getData(), event.getCaseDetailsBefore().getData());
+            revertOrgPolicyToOriginalOrgPolicy(event.getCaseDetails().getData(), event.getCaseDetailsBefore().getData());
             assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), finremCaseDetailsMapper
                 .mapToCaseDetails(event.getCaseDetails()));
         }
@@ -43,8 +43,8 @@ public class StopRepresentingClientEventHandler {
 
     // aac handles org policy modification based on the Change Organisation Request,
     // so we need to revert the org policies to their value before the event started
-    private void revertOriginalOrgPolicyFromOriginalFinremCaseData(FinremCaseData finremCaseData,
-                                                                   FinremCaseData originalFinremCaseData) {
+    private void revertOrgPolicyToOriginalOrgPolicy(FinremCaseData finremCaseData,
+                                                    FinremCaseData originalFinremCaseData) {
         final boolean isApplicant = NoticeOfChangeParty.isApplicantForRepresentationChange(finremCaseData);
         final OrganisationPolicy litigantOrgPolicy = isApplicant
             ? originalFinremCaseData.getApplicantOrganisationPolicy()

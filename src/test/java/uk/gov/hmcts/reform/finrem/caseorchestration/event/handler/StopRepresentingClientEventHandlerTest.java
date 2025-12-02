@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.event.handler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -49,18 +51,26 @@ class StopRepresentingClientEventHandlerTest {
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
     }
 
-    @Test
-    void givenOrganisationsToAddOrRemove_whenHandled_thenCallAssignmentApi() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenOrganisationsToAddOrRemove_whenHandled_thenCallAssignmentApi(boolean isApplicant) {
         FinremCaseData caseData = spy(FinremCaseData.class);
+        caseData.getContactDetailsWrapper().setNocParty(isApplicant ? NoticeOfChangeParty.APPLICANT : NoticeOfChangeParty.RESPONDENT);
+
         ChangeOrganisationRequest changeRequest = mock(ChangeOrganisationRequest.class);
         when(changeRequest.isNoOrganisationsToAddOrRemove()).thenReturn(false);
-        caseData.getContactDetailsWrapper().setNocParty(NoticeOfChangeParty.APPLICANT);
-        when(caseData.getChangeOrganisationRequestField()).thenReturn(changeRequest);
-        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
-        OrganisationPolicy originalAppOrgPolicy = mock(OrganisationPolicy.class);
-        when(caseDataBefore.getApplicantOrganisationPolicy()).thenReturn(originalAppOrgPolicy);
 
         when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+        when(caseData.getChangeOrganisationRequestField()).thenReturn(changeRequest);
+
+        // Setting original org policy
+        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+        OrganisationPolicy originalOrgPolicy = mock(OrganisationPolicy.class);
+        if (isApplicant) {
+            when(caseDataBefore.getApplicantOrganisationPolicy()).thenReturn(originalOrgPolicy);
+        } else {
+            when(caseDataBefore.getRespondentOrganisationPolicy()).thenReturn(originalOrgPolicy);
+        }
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().data(caseData).build();
 
@@ -70,11 +80,16 @@ class StopRepresentingClientEventHandlerTest {
             .userAuthorisation(AUTH_TOKEN)
             .build();
 
-        CaseDetails mockValidCaseDetails = mock(CaseDetails.class);
+        // Setting up invalid case details
         CaseDetails mockInvalidCaseDetails = mock(CaseDetails.class);
-        lenient().when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(mockInvalidCaseDetails);
+        lenient().when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class)))
+            .thenReturn(mockInvalidCaseDetails);
+
+        // Setting up valid case details
+        CaseDetails mockValidCaseDetails = mock(CaseDetails.class);
         when(finremCaseDetailsMapper.mapToCaseDetails(argThat(cd
-            -> cd.getData().getApplicantOrganisationPolicy().equals(originalAppOrgPolicy)
+            -> getOrganisationPolicy(cd.getData(), isApplicant).equals(originalOrgPolicy)
+            // verifying original appl/resp org policy should be set to finremCaseData
         ))).thenReturn(mockValidCaseDetails);
 
         underTest.handleEvent(event);
@@ -107,5 +122,35 @@ class StopRepresentingClientEventHandlerTest {
 
         verify(assignCaseAccessService).findAndRevokeCreatorRole(CASE_ID);
         verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
+    }
+
+
+    @Test
+    void givenNullChangeOrganisationRequest_whenHandled_thenDoesNotCallAssignmentApi() {
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        caseData.getContactDetailsWrapper().setNocParty(NoticeOfChangeParty.APPLICANT);
+        when(caseData.getChangeOrganisationRequestField()).thenReturn(null);
+        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+
+        when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().data(caseData).build();
+
+        StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
+            .userAuthorisation(AUTH_TOKEN)
+            .build();
+
+        underTest.handleEvent(event);
+
+        verify(assignCaseAccessService).findAndRevokeCreatorRole(CASE_ID);
+        verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
+    }
+
+
+    private OrganisationPolicy getOrganisationPolicy(FinremCaseData caseData, boolean isApplicant) {
+        return isApplicant ? caseData.getApplicantOrganisationPolicy() :
+            caseData.getRespondentOrganisationPolicy();
     }
 }
