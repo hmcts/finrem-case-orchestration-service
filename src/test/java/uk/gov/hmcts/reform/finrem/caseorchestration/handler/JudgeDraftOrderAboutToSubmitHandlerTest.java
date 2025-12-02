@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +45,6 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
     @Mock
     private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
     @Mock
-    private UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
-    @Mock
     private DocumentWarningsHelper documentWarningsHelper;
     @Spy
     private ObjectMapper objectMapper;
@@ -63,7 +60,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
             contestedOrderApprovedLetterService,
             documentWarningsHelper
         );
-        inOrder = Mockito.inOrder(hearingOrderService, uploadedDraftOrderCategoriser, contestedOrderApprovedLetterService);
+        inOrder = Mockito.inOrder(hearingOrderService, contestedOrderApprovedLetterService);
     }
 
     @Test
@@ -96,10 +93,8 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
 
     private void verifyExpectedInvocations(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
         inOrder.verify(hearingOrderService).stampAndStoreJudgeApprovedOrders(finremCaseDetails, AUTH_TOKEN);
         inOrder.verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
-        inOrder.verify(uploadedDraftOrderCategoriser).categorise(finremCaseData);
     }
 
     private FinremCallbackRequest setupTestDataWithoutAdditionalDocs() {
