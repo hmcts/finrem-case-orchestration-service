@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
@@ -62,10 +64,16 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     @Mock
     private CaseRoleService caseRoleService;
 
+    @Mock
+    private ManageBarristerService manageBarristerService;
+
+    @Mock
+    private BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
+
     @BeforeEach
     public void setup() {
         underTest = new StopRepresentingClientAboutToSubmitHandler(finremCaseDetailsMapper, nocWorkflowService,
-            caseRoleService);
+            caseRoleService, manageBarristerService, barristerChangeCaseAccessUpdater);
     }
 
     @Test

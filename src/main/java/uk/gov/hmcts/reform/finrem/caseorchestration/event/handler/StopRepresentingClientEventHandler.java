@@ -6,18 +6,22 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
-
-import static java.util.Optional.ofNullable;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StopRepresentingClientEventHandler {
+
+    // This class is made to interact with AAC only
+    // Given event.caseDetails is READ-ONLY
 
     private final AssignCaseAccessService assignCaseAccessService;
 
@@ -25,21 +29,33 @@ public class StopRepresentingClientEventHandler {
 
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    private final ManageBarristerService manageBarristerService;
+
+    private final BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
+
     @EventListener
     // @Async
     public void handleEvent(StopRepresentingClientEvent event) {
         // Enable @Async to display the success page,
         // but only if EXUI-3746 allows hiding the "Close and return to case details" button.
         FinremCaseData finremCaseData = event.getCaseDetails().getData();
+        FinremCaseData finremCaseDataBefore = event.getCaseDetailsBefore().getData();
+        final long caseId = event.getCaseDetails().getId();
 
         // trying to revoke creator role if any
-        assignCaseAccessService.findAndRevokeCreatorRole(finremCaseData.getCcdCaseId());
+        assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
 
-        if (!safeChangeOrganisationRequest(finremCaseData).isNoOrganisationsToAddOrRemove()) {
-            revertOrgPolicyToOriginalOrgPolicy(event.getCaseDetails().getData(), event.getCaseDetailsBefore().getData());
-            assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), finremCaseDetailsMapper
-                .mapToCaseDetails(event.getCaseDetails()));
-        }
+        revertOrgPolicyToOriginalOrgPolicy(finremCaseData, finremCaseDataBefore);
+        assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), finremCaseDetailsMapper
+            .mapToCaseDetails(event.getCaseDetails()));
+
+        BarristerChange applicantBarristerChange = manageBarristerService
+            .getBarristerChange(event.getCaseDetails(), finremCaseDataBefore, CaseRole.APP_SOLICITOR);
+        barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, applicantBarristerChange);
+
+        BarristerChange respondentBarristerChange = manageBarristerService
+            .getBarristerChange(event.getCaseDetails(), finremCaseDataBefore, CaseRole.RESP_SOLICITOR);
+        barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, respondentBarristerChange);
     }
 
     // aac handles org policy modification based on the Change Organisation Request,
@@ -57,10 +73,5 @@ public class StopRepresentingClientEventHandler {
         } else {
             finremCaseData.setRespondentOrganisationPolicy(litigantOrgPolicy);
         }
-    }
-
-    private ChangeOrganisationRequest safeChangeOrganisationRequest(FinremCaseData data) {
-        return ofNullable(data.getChangeOrganisationRequestField())
-            .orElseGet(() -> ChangeOrganisationRequest.builder().build());
     }
 }

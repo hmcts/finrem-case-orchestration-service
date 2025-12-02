@@ -43,12 +43,42 @@ public class BarristerChangeCaseAccessUpdater {
         updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
     }
 
+    /**
+     * Executes barrister access changes for a case.
+     *
+     * <p>
+     * This method determines the appropriate {@link CaseRole} for the barrister party,
+     * then interacts with the Assign Case Access Service to update user access
+     * on the case. All barristers listed in {@code barristerChange.getAdded()} are
+     * granted access, and all barristers listed in {@code barristerChange.getRemoved()}
+     * have their access removed.
+     *
+     * @param caseDetails      the case details containing the case ID
+     * @param barristerChange  the object describing which barristers to add or remove
+     */
     private void executeBarristerChange(FinremCaseDetails caseDetails, BarristerChange barristerChange) {
+        executeBarristerChange(caseDetails.getId(), barristerChange);
+    }
+
+    /**
+     * Executes barrister access changes for a case.
+     *
+     * <p>
+     * This method determines the appropriate {@link CaseRole} for the barrister party,
+     * then interacts with the Assign Case Access Service to update user access
+     * on the case. All barristers listed in {@code barristerChange.getAdded()} are
+     * granted access, and all barristers listed in {@code barristerChange.getRemoved()}
+     * have their access removed.
+     *
+     * @param caseId           the case ID
+     * @param barristerChange  the object describing which barristers to add or remove
+     */
+    public void executeBarristerChange(long caseId, BarristerChange barristerChange) {
         CaseRole caseRole = manageBarristerService.getBarristerCaseRole(barristerChange.getBarristerParty());
         barristerChange.getAdded()
-            .forEach(barristerToAdd -> addUserToCase(caseDetails.getId(), caseRole, barristerToAdd));
+            .forEach(barristerToAdd -> addUserToCase(caseId, caseRole, barristerToAdd));
         barristerChange.getRemoved()
-            .forEach(barristerToRemove -> removeUserFromCase(caseDetails.getId(), caseRole, barristerToRemove));
+            .forEach(barristerToRemove -> removeUserFromCase(caseId, caseRole, barristerToRemove));
     }
 
     private void addUserToCase(long caseId, CaseRole caseRole, Barrister barristerToAdd) {
@@ -70,7 +100,21 @@ public class BarristerChangeCaseAccessUpdater {
         );
     }
 
-    private void updateRepresentationUpdateHistoryForCase(FinremCaseDetails caseDetails, BarristerChange barristerChange,
+    /**
+     * Updates the representation update history for a case when barrister access changes occur.
+     *
+     * <p>
+     * This method records each barrister added to, or removed from, the case by creating
+     * new {@link RepresentationUpdateHistoryCollection} entries. It uses the provided
+     * {@code barristerChange} details to determine which users were added or removed,
+     * builds the appropriate history records, and appends them to the case's existing
+     * representation update history. The updated history is then saved back to the case data.
+     *
+     * @param caseDetails     the case containing the current case data
+     * @param barristerChange the details of barristers added to or removed from the case
+     * @param authToken       the authorisation token used to fetch user and case information
+     */
+    public void updateRepresentationUpdateHistoryForCase(FinremCaseDetails caseDetails, BarristerChange barristerChange,
                                                           String authToken) {
         FinremCaseData caseData = caseDetails.getData();
         List<RepresentationUpdateHistoryCollection> representationUpdateHistory =

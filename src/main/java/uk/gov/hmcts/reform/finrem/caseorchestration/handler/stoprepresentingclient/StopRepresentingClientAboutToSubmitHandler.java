@@ -11,20 +11,28 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -40,6 +48,10 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private final CaseRoleService caseRoleService;
 
+    private final ManageBarristerService manageBarristerService;
+
+    private final BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
+
     record StopRepresentingRequest(FinremCaseData finremCaseData, boolean isLoginWithApplicantSolicitor) {}
 
     private static final String WARNING_MESSAGE =
@@ -48,10 +60,14 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     public StopRepresentingClientAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                       UpdateRepresentationWorkflowService nocWorkflowService,
-                                                      CaseRoleService caseRoleService) {
+                                                      CaseRoleService caseRoleService,
+                                                      ManageBarristerService manageBarristerService,
+                                                      BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater) {
         super(finremCaseDetailsMapper);
         this.caseRoleService = caseRoleService;
         this.nocWorkflowService = nocWorkflowService;
+        this.manageBarristerService = manageBarristerService;
+        this.barristerChangeCaseAccessUpdater = barristerChangeCaseAccessUpdater;
     }
 
     @Override
@@ -79,7 +95,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         logStopRepresentingRequest(stopRepresentingRequest);
         setPartyToChangeRepresented(stopRepresentingRequest);
         setServiceAddress(stopRepresentingRequest, getServiceAddressConfig(finremCaseData));
-        processRepresentationChange(finremCaseData, finremCaseDataBefore, userAuthorisation);
+        processRepresentationChange(finremCaseDetails, finremCaseDataBefore, userAuthorisation);
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
@@ -87,10 +103,18 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             .build();
     }
 
-    private void processRepresentationChange(FinremCaseData finremCaseData,
+    private void processRepresentationChange(FinremCaseDetails finremCaseDetails,
                                              FinremCaseData finremCaseDataBefore,
                                              String userAuthorisation) {
-        nocWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseData, finremCaseDataBefore,
+        nocWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseDetails.getData(),
+            finremCaseDataBefore, userAuthorisation);
+
+        barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
+            manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, CaseRole.APP_SOLICITOR),
+            userAuthorisation);
+
+        barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
+            manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, CaseRole.RESP_SOLICITOR),
             userAuthorisation);
     }
 
@@ -118,8 +142,36 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         stopRepresentingRequest.finremCaseData.getContactDetailsWrapper()
             .setNocParty(noticeOfChangeParty);
         if (APPLICANT.equals(noticeOfChangeParty)) {
+            Optional.of(stopRepresentingRequest.finremCaseData)
+                .map(FinremCaseData::getApplicantOrganisationPolicy)
+                .map(OrganisationPolicy::getOrganisation)
+                .map(Organisation::getOrganisationID).ifPresent(orgIdToRemove ->
+                    emptyIfNull(stopRepresentingRequest.finremCaseData.getBarristerCollectionWrapper().getApplicantBarristers())
+                    .removeIf(el ->
+                        el.getValue().getOrganisation() != null
+                            && orgIdToRemove.equals(
+                                Optional.of(el.getValue())
+                                    .map(Barrister::getOrganisation)
+                                    .map(Organisation::getOrganisationID)
+                                    .orElse(null)
+                            )
+                    ));
             stopRepresentingRequest.finremCaseData.setApplicantOrganisationPolicy(null);
         } else {
+            Optional.of(stopRepresentingRequest.finremCaseData)
+                .map(FinremCaseData::getRespondentOrganisationPolicy)
+                .map(OrganisationPolicy::getOrganisation)
+                .map(Organisation::getOrganisationID).ifPresent(orgIdToRemove ->
+                    emptyIfNull(stopRepresentingRequest.finremCaseData.getBarristerCollectionWrapper().getRespondentBarristers())
+                        .removeIf(el ->
+                            el.getValue().getOrganisation() != null
+                                && orgIdToRemove.equals(
+                                Optional.of(el.getValue())
+                                    .map(Barrister::getOrganisation)
+                                    .map(Organisation::getOrganisationID)
+                                    .orElse(null)
+                            )
+                        ));
             stopRepresentingRequest.finremCaseData.setRespondentOrganisationPolicy(null);
         }
     }
