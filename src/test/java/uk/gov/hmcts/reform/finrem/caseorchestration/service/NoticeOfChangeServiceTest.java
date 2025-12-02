@@ -291,9 +291,6 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         // Arrange
         FinremCaseData finremCaseData = readFinremCaseData("change-of-representatives.json");
         FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-reps-populated-original.json");
-//        final ChangedRepresentative addingChangedRepresentative = mock(ChangedRepresentative.class);
-//        when(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData))
-//            .thenReturn(addingChangedRepresentative);
 
         // Act
         noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
