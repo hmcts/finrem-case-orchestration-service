@@ -28,7 +28,8 @@ public class StopRepresentingClientEventHandler {
     @EventListener
     // @Async
     public void handleEvent(StopRepresentingClientEvent event) {
-        // @Async if success message screen needed
+        // Enable @Async to display the success page,
+        // but only if EXUI-3746 allows hiding the "Close and return to case details" button.
         FinremCaseData finremCaseData = event.getCaseDetails().getData();
 
         // trying to revoke creator role if any
@@ -43,6 +44,7 @@ public class StopRepresentingClientEventHandler {
 
     // aac handles org policy modification based on the Change Organisation Request,
     // so we need to revert the org policies to their value before the event started
+    // Refer to NoticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess
     private void revertOrgPolicyToOriginalOrgPolicy(FinremCaseData finremCaseData,
                                                     FinremCaseData originalFinremCaseData) {
         final boolean isApplicant = NoticeOfChangeParty.isApplicantForRepresentationChange(finremCaseData);

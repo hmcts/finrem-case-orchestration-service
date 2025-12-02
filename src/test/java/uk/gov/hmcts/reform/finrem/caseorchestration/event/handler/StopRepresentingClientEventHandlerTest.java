@@ -124,7 +124,6 @@ class StopRepresentingClientEventHandlerTest {
         verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
     }
 
-
     @Test
     void givenNullChangeOrganisationRequest_whenHandled_thenDoesNotCallAssignmentApi() {
         FinremCaseData caseData = spy(FinremCaseData.class);
@@ -147,7 +146,6 @@ class StopRepresentingClientEventHandlerTest {
         verify(assignCaseAccessService).findAndRevokeCreatorRole(CASE_ID);
         verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
     }
-
 
     private OrganisationPolicy getOrganisationPolicy(FinremCaseData caseData, boolean isApplicant) {
         return isApplicant ? caseData.getApplicantOrganisationPolicy() :
