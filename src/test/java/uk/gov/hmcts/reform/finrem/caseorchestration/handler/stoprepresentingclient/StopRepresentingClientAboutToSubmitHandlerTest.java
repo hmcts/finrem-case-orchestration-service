@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.stoprepresentingclient;
 
 import org.assertj.core.api.Condition;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,10 +15,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
@@ -27,6 +33,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -163,6 +171,107 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             .extracting(FinremCaseData::getContactDetailsWrapper)
             .extracting(ContactDetailsWrapper::getNocParty)
             .is(expectedParty(loginAsApplicantFlag));
+        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+    }
+
+    @Test
+    void givenNoSameOrganisationBarrister_whenHandled_thenDoesNotRemoveBarrister() {
+        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+            .thenReturn(true);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .applicantOrganisationPolicy(OrganisationPolicy.builder()
+                .organisation(Organisation.builder().organisationID("BBB").build())
+                .build())
+            .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
+                .applicantBarristers(new ArrayList<>(List.of(
+                    BarristerCollectionItem.builder()
+                        .value(Barrister.builder()
+                            .organisation(Organisation.builder().organisationID("AAA").build())
+                            .build())
+                        .build()
+                )))
+                .build())
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            .extracting(FinremCaseData::getBarristerCollectionWrapper)
+            .extracting(BarristerCollectionWrapper::getApplicantBarristers,
+                InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+            .hasSize(1);
+
+        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenLoginAsApplicantFlag_whenHandled_thenRemoveApplicantBarristerAccordingly(boolean loginAsApplicantFlag) {
+        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+            .thenReturn(loginAsApplicantFlag);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .applicantOrganisationPolicy(OrganisationPolicy.builder()
+                .organisation(Organisation.builder().organisationID("AAA").build())
+                .build())
+            .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
+                .applicantBarristers(new ArrayList<>(List.of(
+                    BarristerCollectionItem.builder()
+                        .value(Barrister.builder()
+                            .organisation(Organisation.builder().organisationID("AAA").build())
+                            .build())
+                        .build()
+                )))
+                .build())
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            .extracting(FinremCaseData::getBarristerCollectionWrapper)
+            .extracting(BarristerCollectionWrapper::getApplicantBarristers,
+                InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+            .hasSize(loginAsApplicantFlag ? 0 : 1);
+
+        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenLoginAsApplicantFlag_whenHandled_thenRemoveRespondentBarristerAccordingly(boolean loginAsApplicantFlag) {
+        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+            .thenReturn(loginAsApplicantFlag);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .respondentOrganisationPolicy(OrganisationPolicy.builder()
+                .organisation(Organisation.builder().organisationID("AAA").build())
+                .build())
+            .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
+                .respondentBarristers(new ArrayList<>(List.of(
+                    BarristerCollectionItem.builder()
+                        .value(Barrister.builder()
+                            .organisation(Organisation.builder().organisationID("AAA").build())
+                            .build())
+                        .build()
+                )))
+                .build())
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            .extracting(FinremCaseData::getBarristerCollectionWrapper)
+            .extracting(BarristerCollectionWrapper::getRespondentBarristers,
+                InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+            .hasSize(loginAsApplicantFlag ? 1 : 0);
+
         verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
