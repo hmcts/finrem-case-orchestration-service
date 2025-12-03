@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -43,23 +44,34 @@ public class HearingCorrespondenceHelper {
      * @return the {@link Hearing} associated with the current working hearing ID
      * @throws IllegalStateException if the hearings list is missing, or no matching hearing is found
      */
-    public Hearing getHearingInContext(FinremCaseData finremCaseData) {
+    public HearingLike getHearingInContext(FinremCaseData finremCaseData) {
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
-        UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
 
-        List<ManageHearingsCollectionItem> hearings = manageHearingsWrapper.getHearings();
+        if (ManageHearingsAction.ADD_HEARING.equals(manageHearingsWrapper.getManageHearingsActionSelection())) {
+            UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
 
-        if (hearings == null) {
-            throw new IllegalStateException(
+            List<ManageHearingsCollectionItem> hearings = manageHearingsWrapper.getHearings();
+
+            if (hearings == null) {
+                throw new IllegalStateException(
                     "No hearings available to search for. Working hearing ID is: " + hearingId
-            );
-        }
+                );
+            }
 
-        return manageHearingsWrapper.getHearings().stream()
+            return  manageHearingsWrapper.getHearings().stream()
                 .filter(h -> hearingId.equals(h.getId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
                 .getValue();
+        }
+
+        if (ManageHearingsAction.VACATE_HEARING.equals(finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection())) {
+            UUID workingVacatedHearingId = manageHearingsWrapper.getWorkingVacatedHearingId();
+            return manageHearingsWrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingVacatedHearingId).getValue();
+            //  Pt todo * Throws IllegalArgumentException when any segment is missing or code is not a valid UUID.
+        }
+
+        return null;
     }
 
     /**
@@ -94,7 +106,7 @@ public class HearingCorrespondenceHelper {
      * @param hearing The hearing to check.
      * @return true if notification is required, false otherwise.
      */
-    public boolean shouldNotSendNotification(Hearing hearing) {
+    public boolean shouldNotSendNotification(HearingLike hearing) {
         return YesOrNo.isNoOrNull(hearing.getHearingNoticePrompt());
     }
 
@@ -131,16 +143,17 @@ public class HearingCorrespondenceHelper {
     }
 
     /**
+     * PT todo rename and consider chage visibility to private.  Also the bit JT hated could be refactored easily
      * Determines if a hearing should only send a notice. And should NOT send additional hearing documents.
      * To return true:
-     * - the Action must be ADD_HEARING.
+     * - the Action must be ADD_HEARING (the action for adding a hearing or relisting a vacated hearing)
      * - the HearingType must appear in the noticeOnlyHearingTypes set.
      * - FDR hearings are an exception, they're notice only when the case is NOT an express case.
      * @param finremCaseDetails case details
      * @param hearing the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
      */
-    public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+    public boolean shouldPostHearingNoticeSomething(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
         Set<HearingType> noticeOnlyHearingTypes = Set.of(
             HearingType.MPS,
             HearingType.FH,
@@ -154,7 +167,7 @@ public class HearingCorrespondenceHelper {
         );
 
         boolean isNoticeOnlyHearingType = Optional.ofNullable(hearing)
-            .map(Hearing::getHearingType)
+            .map(HearingLike::getHearingType)
             .map(hearingType ->
                 noticeOnlyHearingTypes.contains(hearingType)
                     || (HearingType.FDR.equals(hearingType)
@@ -167,10 +180,41 @@ public class HearingCorrespondenceHelper {
         return isAddHearingAction(actionSelection) && isNoticeOnlyHearingType;
     }
 
+    // PT todo, docs, check test
+    public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
+        // We want false for No and Null values, so !Yes does this.
+        boolean hearingIsNotRelisted =
+            !YesOrNo.YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getIsRelistSelected());
+
+        return hearingIsNotRelisted && shouldPostHearingNoticeSomething(finremCaseDetails, hearing);
+    }
+
+    // PT todo, docs, check test
+    public boolean shouldPostHearingAndVacateNotices(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
+    // PT todo , refactor, docs,ringAndVacateNotices(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+        boolean hearingIsRelisted =
+            YesOrNo.YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getIsRelistSelected());
+
+        return hearingIsRelisted && shouldPostHearingNoticeSomething(finremCaseDetails, hearing);
+    }
+
+    /**
+     * pt todo test, check visivility
+     * Determines if a hearing should only send a Vacate hearing notice.
+     * To return true the Action must be VACATE_HEARING.
+     * (Whenever a vacated hearing is relisted, the action is ADD_HEARING)
+     * @param finremCaseDetails case details
+     * @return true if the hearing should only send a notice, false otherwise
+     */
+    public boolean shouldPostVacateNoticeOnly(FinremCaseDetails finremCaseDetails) {
+        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
+        return isVacateHearingAction(actionSelection);
+    }
+
     /**
      * Determines if a hearing should send a full set of hearing documents (not just a notice).
      * To return true:
-     * - the Action must be ADD_HEARING.
+     * - the Action must be ADD_HEARING (the action for adding a hearing or relisting a vacated hearing)
      * - the HearingType must be FDA (First Directions Appointment).
      * - OR this is an express case and the hearingType is FDR.
      * Express cases don't require an FDA hearing, so documents are posted for the FDR instead.
@@ -178,10 +222,10 @@ public class HearingCorrespondenceHelper {
      * @param hearing the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
      */
-    public boolean shouldPostAllHearingDocuments(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+    public boolean shouldPostAllHearingDocuments(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
 
         boolean allDocumentsNeedPosting = Optional.ofNullable(hearing)
-            .map(Hearing::getHearingType)
+            .map(HearingLike::getHearingType)
             .map(hearingType ->
                 hearingType == HearingType.FDA
                     || (hearingType == HearingType.FDR && expressCaseService.isExpressCase(finremCaseDetails.getData()))
@@ -213,5 +257,14 @@ public class HearingCorrespondenceHelper {
      */
     private boolean isAddHearingAction(ManageHearingsAction actionSelection) {
         return ManageHearingsAction.ADD_HEARING.equals(actionSelection);
+    }
+
+    /**
+     * Determines if the action selection is to vacate a hearing.
+     * @param actionSelection the action selection to check
+     * @return true if the action selection is VACATE_HEARING, false otherwise
+     */
+    private boolean isVacateHearingAction(ManageHearingsAction actionSelection) {
+        return ManageHearingsAction.VACATE_HEARING.equals(actionSelection);
     }
 }

@@ -15,17 +15,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -43,6 +46,7 @@ public class ManageHearingsCorresponder {
     private final DocumentHelper documentHelper;
     private final BulkPrintService bulkPrintService;
     private final GenericDocumentService genericDocumentService;
+    private final HearingOrderService hearingOrderService;
 
     /**
      * Begin sending hearing correspondence to parties, included based on the callback request data.
@@ -58,7 +62,9 @@ public class ManageHearingsCorresponder {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
-        Hearing hearing = hearingCorrespondenceHelper.getHearingInContext(finremCaseData);
+        HearingLike hearing = hearingCorrespondenceHelper.getHearingInContext(finremCaseData);
+
+        doTestThingRemovedThis(finremCaseData);
 
         if (hearingCorrespondenceHelper.shouldNotSendNotification(hearing)) {
             return;
@@ -93,7 +99,7 @@ public class ManageHearingsCorresponder {
      */
     private void sendHearingCorrespondenceByParty(String role,
                                                   FinremCaseDetails finremCaseDetails,
-                                                  Hearing hearing,
+                                                  HearingLike hearing,
                                                   String userAuthorisation) {
         CaseRole caseRole = CaseRole.forValue(role);
         switch (caseRole) {
@@ -128,7 +134,7 @@ public class ManageHearingsCorresponder {
      * @param hearing the hearing for which the notification is being sent
      * @param userAuthorisation the user authorisation token for sending notifications
      */
-    private void processCorrespondenceForApplicant(FinremCaseDetails finremCaseDetails, Hearing hearing, String userAuthorisation) {
+    private void processCorrespondenceForApplicant(FinremCaseDetails finremCaseDetails, HearingLike hearing, String userAuthorisation) {
         processCorrespondenceForParty(
             finremCaseDetails,
             hearing,
@@ -149,7 +155,7 @@ public class ManageHearingsCorresponder {
      * @param hearing the hearing for which the notification is being sent
      * @param userAuthorisation the user authorisation token for sending notifications
      */
-    private void processCorrespondenceForRespondent(FinremCaseDetails finremCaseDetails, Hearing hearing, String userAuthorisation) {
+    private void processCorrespondenceForRespondent(FinremCaseDetails finremCaseDetails, HearingLike hearing, String userAuthorisation) {
         processCorrespondenceForParty(
             finremCaseDetails,
             hearing,
@@ -164,7 +170,7 @@ public class ManageHearingsCorresponder {
     /**
      * Used by processCorrespondenceForIntervener.  Forwards Intervener One data to processCorrespondenceForIntervener.
      */
-    private void processCorrespondenceForIntervenerOne(FinremCaseDetails finremCaseDetails, Hearing hearing,
+    private void processCorrespondenceForIntervenerOne(FinremCaseDetails finremCaseDetails, HearingLike hearing,
                                                        String auth, CaseRole role) {
         IntervenerWrapper intervenerOne = finremCaseDetails.getData().getIntervenerOneWrapperIfPopulated();
 
@@ -179,7 +185,7 @@ public class ManageHearingsCorresponder {
     /**
      * Used by processCorrespondenceForIntervener. Forwards Intervener Two data to processCorrespondenceForIntervener.
      */
-    private void processCorrespondenceForIntervenerTwo(FinremCaseDetails finremCaseDetails, Hearing hearing,
+    private void processCorrespondenceForIntervenerTwo(FinremCaseDetails finremCaseDetails, HearingLike hearing,
                                                        String auth, CaseRole role) {
         IntervenerWrapper intervenerTwo = finremCaseDetails.getData().getIntervenerTwoWrapperIfPopulated();
 
@@ -194,7 +200,7 @@ public class ManageHearingsCorresponder {
     /**
      * Used by processCorrespondenceForIntervener. Forwards Intervener Three data to processCorrespondenceForIntervener.
      */
-    private void processCorrespondenceForIntervenerThree(FinremCaseDetails finremCaseDetails, Hearing hearing,
+    private void processCorrespondenceForIntervenerThree(FinremCaseDetails finremCaseDetails, HearingLike hearing,
                                                          String auth, CaseRole role) {
         IntervenerWrapper intervenerThree = finremCaseDetails.getData().getIntervenerThreeWrapperIfPopulated();
 
@@ -209,7 +215,7 @@ public class ManageHearingsCorresponder {
     /**
      * Used by processCorrespondenceForIntervener. Forwards Intervener Four data to processCorrespondenceForIntervener.
      */
-    private void processCorrespondenceForIntervenerFour(FinremCaseDetails finremCaseDetails, Hearing hearing,
+    private void processCorrespondenceForIntervenerFour(FinremCaseDetails finremCaseDetails, HearingLike hearing,
                                                         String auth, CaseRole role) {
         IntervenerWrapper intervenerFour = finremCaseDetails.getData().getIntervenerFourWrapperIfPopulated();
 
@@ -237,7 +243,7 @@ public class ManageHearingsCorresponder {
      * encapsulates the common logic for sending hearing correspondence for each intervener.
      */
     private void processCorrespondenceForIntervener(FinremCaseDetails finremCaseDetails,
-                                                    Hearing hearing,
+                                                    HearingLike hearing,
                                                     String userAuthorisation,
                                                     CaseRole caseRole,
                                                     IntervenerWrapper intervener) {
@@ -268,7 +274,7 @@ public class ManageHearingsCorresponder {
      */
     private void processCorrespondenceForParty(
         FinremCaseDetails finremCaseDetails,
-        Hearing hearing,
+        HearingLike hearing,
         CaseRole caseRole,
         String userAuthorisation,
         BooleanSupplier shouldEmailPartySolicitor,
@@ -286,6 +292,12 @@ public class ManageHearingsCorresponder {
             if (hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing)) {
                 postHearingNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
             }
+            if (hearingCorrespondenceHelper.shouldPostVacateNoticeOnly(finremCaseDetails)) {
+                postVacateNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
+            }
+            if (hearingCorrespondenceHelper.shouldPostHearingAndVacateNotices(finremCaseDetails, hearing)) {
+                postHearingAndVacateNotices(finremCaseDetails, caseRole, userAuthorisation);
+            }
             if (hearingCorrespondenceHelper.shouldPostAllHearingDocuments(finremCaseDetails, hearing)) {
                 postAllHearingDocuments(finremCaseDetails, caseRole, userAuthorisation);
             }
@@ -299,6 +311,8 @@ public class ManageHearingsCorresponder {
      * @param userAuthorisation the user authorisation token.
      */
     private void postHearingNoticeOnly(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
+
+        // PT todo use common func
         CaseDocument hearingNotice = manageHearingsDocumentService
             .getHearingNotice(finremCaseDetails);
 
@@ -309,6 +323,88 @@ public class ManageHearingsCorresponder {
 
         List<CaseDocument> hearingDocuments = new ArrayList<>(List.of(hearingNotice));
 
+
+        // PT todo - use common func
+        hearingDocuments.addAll(manageHearingsDocumentService
+            .getAdditionalHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
+
+        List<CaseDocument> convertedHearingDocuments = convertDocumentsToPdf(
+            hearingDocuments, userAuthorisation, finremCaseDetails.getCaseType());
+
+        List<BulkPrintDocument> bulkPrintDocuments =
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(convertedHearingDocuments);
+
+        printDocuments(
+            finremCaseDetails,
+            userAuthorisation,
+            bulkPrintDocuments,
+            caseRole
+        );
+
+        log.info("Request sent to Bulk Print to post notice to the {} party. Request sent for case ID: {}",
+            caseRole, finremCaseDetails.getId());
+    }
+
+    /**
+     * pt todo test
+     * Gets the vacate hearing notice then sends it to the Bulk Print service.
+     * @param finremCaseDetails the case details.
+     * @param caseRole the case role of the party to whom the notice is being sent.
+     * @param userAuthorisation the user authorisation token.
+     */
+    private void postVacateNoticeOnly(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
+        CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
+
+        // PT todo - use common func
+        if (vacateHearingNotice == null) {
+            log.warn("Vacate hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
+            return;
+        }
+
+        List<CaseDocument> vacateHearingDocuments = new ArrayList<>(List.of(vacateHearingNotice));
+
+        List<BulkPrintDocument> bulkPrintDocuments =
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(vacateHearingDocuments);
+
+        printDocuments(
+            finremCaseDetails,
+            userAuthorisation,
+            bulkPrintDocuments,
+            caseRole
+        );
+
+        log.info("Request sent to Bulk Print to post Vacate Hearing notice to the {} party. Request sent for case ID: {}",
+            caseRole, finremCaseDetails.getId());
+    }
+
+    /**
+     * Gets the hearing notice then sends it to the Bulk Print service.
+     * @param finremCaseDetails the case details.
+     * @param caseRole the case role of the party to whom the notice is being sent.
+     * @param userAuthorisation the user authorisation token.
+     */
+    private void postHearingAndVacateNotices(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
+
+        // abstract to a private function reuse
+        CaseDocument hearingNotice = manageHearingsDocumentService
+            .getHearingNotice(finremCaseDetails);
+
+        if (hearingNotice == null) {
+            log.warn("Hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
+            return;
+        }
+
+        // abstract to a private function reuse
+        CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
+
+        if (vacateHearingNotice == null) {
+            log.warn("Vacate hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
+            return;
+        }
+
+        List<CaseDocument> hearingDocuments = new ArrayList<>(List.of(hearingNotice, vacateHearingNotice));
+
+        // PT todo - abstract below this line
         hearingDocuments.addAll(manageHearingsDocumentService
             .getAdditionalHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
 
@@ -415,5 +511,12 @@ public class ManageHearingsCorresponder {
         return documents.stream()
             .map(document -> genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseType))
             .toList();
+    }
+
+    // Remove once DFR-4323 completed to limit who corres sent to.
+    private void doTestThingRemovedThis(FinremCaseData finremCaseData) {
+        UUID uuid = finremCaseData.getManageHearingsWrapper().getWorkingVacatedHearingId();
+        VacateOrAdjournedHearing vacatedHearing = finremCaseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingsCollectionItemById(uuid).getValue();
+        vacatedHearing.setHearingNoticePrompt(YesOrNo.YES);
     }
 }

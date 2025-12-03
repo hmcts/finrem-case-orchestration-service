@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -36,7 +36,7 @@ public class ManageHearingsNotificationRequestMapper {
      */
     public NotificationRequest buildHearingNotificationForApplicantSolicitor(
             FinremCaseDetails finremCaseDetails,
-            Hearing hearing) {
+            HearingLike hearing) {
 
         PartySpecificDetails partySpecificDetails = new PartySpecificDetails(
                 finremCaseDetails.getData().getAppSolicitorEmail(),
@@ -58,7 +58,7 @@ public class ManageHearingsNotificationRequestMapper {
      */
     public NotificationRequest buildHearingNotificationForRespondentSolicitor(
             FinremCaseDetails finremCaseDetails,
-            Hearing hearing) {
+            HearingLike hearing) {
 
         PartySpecificDetails partySpecificDetails = new PartySpecificDetails(
                 finremCaseDetails.getData().getRespondentSolicitorEmailForContested(),
@@ -73,7 +73,7 @@ public class ManageHearingsNotificationRequestMapper {
      * @return NotificationRequest for the intervener specified in the CaseRole.
      */
     public NotificationRequest buildHearingNotificationForIntervenerSolicitor(
-        FinremCaseDetails finremCaseDetails, Hearing hearing, IntervenerWrapper intervener) {
+        FinremCaseDetails finremCaseDetails, HearingLike hearing, IntervenerWrapper intervener) {
 
         PartySpecificDetails partySpecificDetails = new PartySpecificDetails(
                 intervener.getIntervenerSolEmail(),
@@ -94,7 +94,7 @@ public class ManageHearingsNotificationRequestMapper {
      */
     private NotificationRequest buildHearingNotificationForParty(
             FinremCaseDetails finremCaseDetails,
-            Hearing hearing,
+            HearingLike hearing,
             PartySpecificDetails partySpecificDetails) {
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();

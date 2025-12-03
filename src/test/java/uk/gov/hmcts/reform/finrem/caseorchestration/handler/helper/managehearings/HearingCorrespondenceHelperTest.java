@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -67,13 +68,14 @@ class HearingCorrespondenceHelperTest {
         UUID hearingId = UUID.randomUUID();
         Hearing hearing = new Hearing();
         ManageHearingsWrapper wrapper = new ManageHearingsWrapper();
+        wrapper.setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
         wrapper.setHearings(List.of(new ManageHearingsCollectionItem(hearingId, hearing)));
         wrapper.setWorkingHearingId(hearingId);
 
         FinremCaseData caseData = new FinremCaseData();
         caseData.setManageHearingsWrapper(wrapper);
 
-        Hearing result = helper.getHearingInContext(caseData);
+        HearingLike result = helper.getHearingInContext(caseData);
 
         assertEquals(hearing, result);
     }
@@ -85,6 +87,7 @@ class HearingCorrespondenceHelperTest {
 
         Hearing hearing = new Hearing();
         ManageHearingsWrapper wrapper = new ManageHearingsWrapper();
+        wrapper.setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
         wrapper.setHearings(List.of(new ManageHearingsCollectionItem(hearingId, hearing)));
         wrapper.setWorkingHearingId(nonMatchingWorkingHearingId);
 
@@ -97,12 +100,14 @@ class HearingCorrespondenceHelperTest {
         assertTrue(exception.getMessage().contains("Hearing not found for the given ID"));
     }
 
+    // PT todo - more tests needed to cover vacate action and missing action
     @Test
     void shouldThrowExceptionWhenGetHearingInContextCalledForEmptyHearingCollection() {
         UUID hearingId = UUID.randomUUID();
 
         ManageHearingsWrapper wrapper = new ManageHearingsWrapper();
         wrapper.setWorkingHearingId(hearingId);
+        wrapper.setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
 
         FinremCaseData caseData = new FinremCaseData();
         caseData.setManageHearingsWrapper(wrapper);

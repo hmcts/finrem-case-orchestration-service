@@ -159,12 +159,6 @@ public class ManageHearingActionService {
 
         Map<String, DocumentRecord> documentMap = new HashMap<>();
 
-        /*
-        * Suggest reusing performAddHearing's new hearing doc gen methods here.
-        * if (YesOrNo.YES.equals(hearingsWrapper.getRelistHearingSelection())) {
-        * }
-        */
-
         generateVacateHearingNotice(finremCaseDetails, authToken, documentMap);
 
         setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
