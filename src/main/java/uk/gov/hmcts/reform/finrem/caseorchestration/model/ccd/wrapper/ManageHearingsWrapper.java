@@ -48,6 +48,7 @@ public class ManageHearingsWrapper {
 
     // TabItem representations maintaining confidentiality for parties
     private List<HearingTabCollectionItem> hearingTabItems;
+
     private List<HearingTabCollectionItem> applicantHearingTabItems;
     private List<HearingTabCollectionItem> respondentHearingTabItems;
     private List<HearingTabCollectionItem> int1HearingTabItems;
@@ -57,6 +58,13 @@ public class ManageHearingsWrapper {
 
     // Vacated Or Adjourned Hearing Tab Items
     private List<VacatedOrAdjournedHearingTabCollectionItem> vacatedOrAdjournedHearingTabItems;
+
+    private List<VacatedOrAdjournedHearingTabCollectionItem> applicantVacOrAdjHearingTabItems;
+    private List<VacatedOrAdjournedHearingTabCollectionItem> respondentVacOrAdjHearingTabItems;
+    private List<VacatedOrAdjournedHearingTabCollectionItem> int1VacOrAdjHearingTabItems;
+    private List<VacatedOrAdjournedHearingTabCollectionItem> int2VacOrAdjHearingTabItems;
+    private List<VacatedOrAdjournedHearingTabCollectionItem> int3VacOrAdjHearingTabItems;
+    private List<VacatedOrAdjournedHearingTabCollectionItem> int4VacOrAdjHearingTabItems;
 
     /**
      * Retrieves a {@link ManageHearingsCollectionItem} from the hearings list by its UUID.
