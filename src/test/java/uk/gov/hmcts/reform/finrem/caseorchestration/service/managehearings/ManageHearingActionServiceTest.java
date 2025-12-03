@@ -55,6 +55,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
@@ -533,6 +536,139 @@ class ManageHearingActionServiceTest {
     }
 
     @Test
+    void updateTabData_shouldAddVacatedOrAdjHearingToTabCollectionInCorrectOrder() {
+        VacateOrAdjournedHearing hearing1 = createVacatedHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
+        hearing1.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(APPLICANT)
+                    .label("Applicant")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing2 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
+        hearing2.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(RESPONDENT)
+                    .label("Respondent")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing3 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 1));
+        hearing3.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(INTERVENER1)
+                    .label("Intervener1")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing4 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 12, 1));
+        hearing4.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(INTERVENER2)
+                    .label("Intervener2")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing5 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 12, 15));
+        hearing5.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(INTERVENER3)
+                    .label("Intervener3")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing6 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 12, 25));
+        hearing6.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(INTERVENER4)
+                    .label("Intervener2")
+                    .build())
+                .build()
+        ));
+
+        hearingWrapper.setVacatedOrAdjournedHearings(new ArrayList<>(List.of(
+            createHearingCollectionItem(hearing6),
+            createHearingCollectionItem(hearing5),
+            createHearingCollectionItem(hearing4),
+            createHearingCollectionItem(hearing3),
+            createHearingCollectionItem(hearing2),
+            createHearingCollectionItem(hearing1)
+        )));
+
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing1)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 1", "20 Jul 2025 10:00", APPLICANT)
+            );
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing2)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 2", "15 Jul 2025 10:00", RESPONDENT)
+            );
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing3)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 3", "1 Jul 2025 10:00", INTERVENER1)
+            );
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing4)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 4", "1 Dec 2025 10:00", INTERVENER2)
+            );
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing5)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 5", "15 Dec 2025 10:00", INTERVENER3)
+            );
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing6)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 6", "25 Dec 2025 10:00", INTERVENER4)
+            );
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(hearingWrapper)
+            .build();
+
+        // Act
+        manageHearingActionService.updateTabData(caseData);
+
+        assertThat(hearingWrapper.getVacatedOrAdjournedHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly(
+                "1 Jul 2025 10:00",
+                "15 Jul 2025 10:00",
+                "20 Jul 2025 10:00",
+                "1 Dec 2025 10:00",
+                "15 Dec 2025 10:00",
+                "25 Dec 2025 10:00"
+            );
+        assertThat(hearingWrapper.getApplicantVacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("20 Jul 2025 10:00");
+        assertThat(hearingWrapper.getRespondentVacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("15 Jul 2025 10:00");
+        assertThat(hearingWrapper.getInt1VacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("1 Jul 2025 10:00");
+        assertThat(hearingWrapper.getInt2VacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("1 Dec 2025 10:00");
+        assertThat(hearingWrapper.getInt3VacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("15 Dec 2025 10:00");
+        assertThat(hearingWrapper.getInt4VacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("25 Dec 2025 10:00");
+    }
+
+    @Test
     void updateTabData_shouldNotPopulateHearingTabItemsIfEmptyHearingsProvided() {
         hearingWrapper.setHearings(null);
 
@@ -550,6 +686,14 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getInt2HearingTabItems()).isNull();
         assertThat(hearingWrapper.getInt3HearingTabItems()).isNull();
         assertThat(hearingWrapper.getInt4HearingTabItems()).isNull();
+
+        assertThat(hearingWrapper.getVacatedOrAdjournedHearings()).isNull();
+        assertThat(hearingWrapper.getApplicantVacOrAdjHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getRespondentVacOrAdjHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt1VacOrAdjHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt2VacOrAdjHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt3VacOrAdjHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt4VacOrAdjHearingTabItems()).isNull();
     }
 
     @Test
@@ -594,6 +738,10 @@ class ManageHearingActionServiceTest {
     }
 
     private ArgumentMatcher<ManageHearingsCollectionItem> hasHearing(Hearing expected) {
+        return entry -> entry != null && expected.equals(entry.getValue());
+    }
+
+    private ArgumentMatcher<VacatedOrAdjournedHearingsCollectionItem> hasHearing(VacateOrAdjournedHearing expected) {
         return entry -> entry != null && expected.equals(entry.getValue());
     }
 
@@ -688,6 +836,19 @@ class ManageHearingActionServiceTest {
             .build();
     }
 
+    private VacatedOrAdjournedHearingTabItem createVacatedHearingTabItem(String type, String dateTime, String parties) {
+        return createVacatedHearingTabItem(type, dateTime, parties, false);
+    }
+
+    private VacatedOrAdjournedHearingTabItem createVacatedHearingTabItem(String type, String dateTime, String parties, boolean migrated) {
+        return VacatedOrAdjournedHearingTabItem.builder()
+            .tabHearingType(type)
+            .tabDateTime(dateTime)
+            .tabConfidentialParties(parties)
+            .tabWasMigrated(migrated ? YesOrNo.YES : null)
+            .build();
+    }
+
     private VacatedOrAdjournedHearingTabItem createVacatedOrAdjournedHearingTabItem(String type,
                                                                                     String dateTime,
                                                                                     String parties,
@@ -708,4 +869,5 @@ class ManageHearingActionServiceTest {
             .tabWasMigrated(migrated ? YesOrNo.YES : null)
             .build();
     }
+
 }
