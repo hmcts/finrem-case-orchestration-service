@@ -39,9 +39,9 @@ public class DocmosisPdfGenerationService {
     private String pdfServiceAccessKey;
 
     @Retryable(
-       // Only retry Docmosis request network or server errors
+       // Only retry Docmosis network request or server errors
         value = {
-            HttpServerErrorException.class,   // 5oos
+            HttpServerErrorException.class,   // 500s
             ResourceAccessException.class     // timeouts, connection issues
         },
         backoff = @Backoff(
@@ -117,7 +117,7 @@ public class DocmosisPdfGenerationService {
 
     // Called when retries for HttpServerErrorException are exhausted
     @Recover
-    public byte[] recover(HttpServerErrorException ex,
+    public void recover(HttpServerErrorException ex,
                           String templateName,
                           Map<String, Object> placeholders) {
         log.error("Docmosis returned 5xx after retries for template [{}]. Status: {}, Body: {}",
@@ -131,7 +131,7 @@ public class DocmosisPdfGenerationService {
 
     // Called when retries for ResourceAccessException are exhausted
     @Recover
-    public byte[] recover(ResourceAccessException ex,
+    public void recover(ResourceAccessException ex,
                           String templateName,
                           Map<String, Object> placeholders) {
         log.error("Docmosis network issue after retries for template [{}]. Message: {}",
