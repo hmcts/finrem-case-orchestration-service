@@ -3,7 +3,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.sonarqube' version '7.0.1.6134'
-    id 'org.springframework.boot' version '3.5.7'
+    id 'org.springframework.boot' version '3.5.8'
     id 'com.github.ben-manes.versions' version '0.53.0'
     id 'uk.gov.hmcts.java' version '0.12.67'
     id 'au.com.dius.pact' version '4.6.18'
@@ -442,10 +442,10 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jacksonDatabind
     developmentOnly group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.loadbalancer
 
-    implementation("org.apache.poi:poi:5.4.1") {
+    implementation("org.apache.poi:poi:5.5.1") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
-    implementation("org.apache.poi:poi-ooxml:5.4.1") {
+    implementation("org.apache.poi:poi-ooxml:5.5.1") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
 

@@ -10,16 +10,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournedHearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -268,6 +269,7 @@ public class ManageHearingActionService {
         List<HearingTabCollectionItem> hearingTabItems = mapAndSortHearings(hearings, caseData);
 
         Map<String, List<HearingTabCollectionItem>> partyTabItems = new LinkedHashMap<>();
+
         partyTabItems.put(APPLICANT, filterHearingTabItems(hearingTabItems, APPLICANT));
         partyTabItems.put(RESPONDENT, filterHearingTabItems(hearingTabItems, RESPONDENT));
         partyTabItems.put(INTERVENER1, filterHearingTabItems(hearingTabItems, INTERVENER1));
@@ -275,14 +277,33 @@ public class ManageHearingActionService {
         partyTabItems.put(INTERVENER3, filterHearingTabItems(hearingTabItems, INTERVENER3));
         partyTabItems.put(INTERVENER4, filterHearingTabItems(hearingTabItems, INTERVENER4));
 
-        caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
-
+        hearingsWrapper.setHearingTabItems(hearingTabItems);
         hearingsWrapper.setApplicantHearingTabItems(partyTabItems.get(APPLICANT));
         hearingsWrapper.setRespondentHearingTabItems(partyTabItems.get(RESPONDENT));
         hearingsWrapper.setInt1HearingTabItems(partyTabItems.get(INTERVENER1));
         hearingsWrapper.setInt2HearingTabItems(partyTabItems.get(INTERVENER2));
         hearingsWrapper.setInt3HearingTabItems(partyTabItems.get(INTERVENER3));
         hearingsWrapper.setInt4HearingTabItems(partyTabItems.get(INTERVENER4));
+
+        List<VacatedOrAdjournedHearingTabCollectionItem> vacatedOrAdjournedHearingTabItems =
+            mapAndSortVacatedAndAdjournedHearings(hearingsWrapper.getVacatedOrAdjournedHearings(), caseData);
+
+        Map<String, List<VacatedOrAdjournedHearingTabCollectionItem>> vacatedOrAdjournedPartyTabItems = new LinkedHashMap<>();
+
+        vacatedOrAdjournedPartyTabItems.put(APPLICANT, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, APPLICANT));
+        vacatedOrAdjournedPartyTabItems.put(RESPONDENT, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, RESPONDENT));
+        vacatedOrAdjournedPartyTabItems.put(INTERVENER1, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, INTERVENER1));
+        vacatedOrAdjournedPartyTabItems.put(INTERVENER2, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, INTERVENER2));
+        vacatedOrAdjournedPartyTabItems.put(INTERVENER3, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, INTERVENER3));
+        vacatedOrAdjournedPartyTabItems.put(INTERVENER4, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, INTERVENER4));
+
+        hearingsWrapper.setVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems);
+        hearingsWrapper.setApplicantVacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(APPLICANT));
+        hearingsWrapper.setRespondentVacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(RESPONDENT));
+        hearingsWrapper.setInt1VacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(INTERVENER1));
+        hearingsWrapper.setInt2VacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(INTERVENER2));
+        hearingsWrapper.setInt3VacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(INTERVENER3));
+        hearingsWrapper.setInt4VacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(INTERVENER4));
 
         manageHearingsDocumentService.categoriseSystemDuplicateDocs(hearings,
             hearingsWrapper.getHearingDocumentsCollection());
@@ -304,6 +325,27 @@ public class ManageHearingActionService {
         return nullIfEmpty(emptyIfNull(hearingTabItems).stream()
             .filter(hearingTabItem -> YesOrNo.isYes(hearingTabItem.getValue().getTabWasMigrated())
                 || hearingTabItem.getValue().getTabConfidentialParties().contains(party))
+            .toList());
+    }
+
+    private List<VacatedOrAdjournedHearingTabCollectionItem> filterVacatedOrAdjournedHearingTabItems(
+        List<VacatedOrAdjournedHearingTabCollectionItem> hearingTabItems, String party) {
+        return nullIfEmpty(emptyIfNull(hearingTabItems).stream()
+            .filter(hearingTabItem -> YesOrNo.isYes(hearingTabItem.getValue().getTabWasMigrated())
+                || hearingTabItem.getValue().getTabConfidentialParties().contains(party))
+            .toList());
+    }
+
+    private List<VacatedOrAdjournedHearingTabCollectionItem> mapAndSortVacatedAndAdjournedHearings(
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedOrAdjournedHearings, FinremCaseData caseData) {
+        return nullIfEmpty(emptyIfNull(vacatedOrAdjournedHearings).stream()
+            .sorted(Comparator.comparing(hearing -> hearing.getValue().getHearingDate()))
+            .map(hearing -> VacatedOrAdjournedHearingTabCollectionItem.builder()
+                .id(hearing.getId())
+                .value(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(
+                    hearing,
+                    caseData.getManageHearingsWrapper().getHearingDocumentsCollection()))
+                .build())
             .toList());
     }
 

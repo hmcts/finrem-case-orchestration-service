@@ -21,15 +21,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -52,9 +57,13 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.VACATE_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournReason.COURTROOM_UNAVAILABLE;
 
 @ExtendWith(MockitoExtension.class)
@@ -403,6 +412,45 @@ class ManageHearingActionServiceTest {
     }
 
     @Test
+    void updateTabData_shouldAddVacatedOrAdjournedHearingToTabCollectionInCorrectOrder() {
+        VacateOrAdjournedHearing hearing1 = createVacatedHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
+        hearing1.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(APPLICANT)
+                    .label("Applicant")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing2 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
+        hearing2.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(RESPONDENT)
+                    .label("Respondent")
+                    .build())
+                .build()
+        ));
+
+        hearingWrapper.setVacatedOrAdjournedHearings(new ArrayList<>(List.of(
+            createHearingCollectionItem(hearing2),
+            createHearingCollectionItem(hearing1)
+        )));
+
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(any(), any()))
+            .thenReturn(createVacatedOrAdjournedHearingTabItem("Respondent Hearing", "15 Jul 2025 11:00", APPLICANT, VACATE_HEARING),
+                createVacatedOrAdjournedHearingTabItem("Applicant Hearing", "20 Jul 2025 10:00", RESPONDENT, VACATE_HEARING));
+
+        manageHearingActionService.updateTabData(finremCaseDetails.getData());
+
+        List<VacatedOrAdjournedHearingTabCollectionItem> hearingTabItems = hearingWrapper.getVacatedOrAdjournedHearingTabItems();
+        assertThat(hearingTabItems).hasSize(2);
+        assertThat(hearingTabItems.get(0).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
+        assertThat(hearingTabItems.get(1).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
+    }
+
+    @Test
     void updateTabData_shouldAddHearingToTabCollectionInCorrectOrderWhenManageHearingsMigrationHadDone() {
         Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
         hearing1.setPartiesOnCase(List.of(
@@ -497,6 +545,139 @@ class ManageHearingActionServiceTest {
     }
 
     @Test
+    void updateTabData_shouldAddVacatedOrAdjHearingToTabCollectionInCorrectOrder() {
+        VacateOrAdjournedHearing hearing1 = createVacatedHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
+        hearing1.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(APPLICANT)
+                    .label("Applicant")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing2 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
+        hearing2.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(RESPONDENT)
+                    .label("Respondent")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing3 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 1));
+        hearing3.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(INTERVENER1)
+                    .label("Intervener1")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing4 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 12, 1));
+        hearing4.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(INTERVENER2)
+                    .label("Intervener2")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing5 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 12, 15));
+        hearing5.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(INTERVENER3)
+                    .label("Intervener3")
+                    .build())
+                .build()
+        ));
+
+        VacateOrAdjournedHearing hearing6 = createVacatedHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 12, 25));
+        hearing6.setPartiesOnCase(List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(PartyOnCase.builder()
+                    .role(INTERVENER4)
+                    .label("Intervener2")
+                    .build())
+                .build()
+        ));
+
+        hearingWrapper.setVacatedOrAdjournedHearings(new ArrayList<>(List.of(
+            createHearingCollectionItem(hearing6),
+            createHearingCollectionItem(hearing5),
+            createHearingCollectionItem(hearing4),
+            createHearingCollectionItem(hearing3),
+            createHearingCollectionItem(hearing2),
+            createHearingCollectionItem(hearing1)
+        )));
+
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing1)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 1", "20 Jul 2025 10:00", APPLICANT)
+            );
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing2)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 2", "15 Jul 2025 10:00", RESPONDENT)
+            );
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing3)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 3", "1 Jul 2025 10:00", INTERVENER1)
+            );
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing4)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 4", "1 Dec 2025 10:00", INTERVENER2)
+            );
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing5)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 5", "15 Dec 2025 10:00", INTERVENER3)
+            );
+        when(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(argThat(hasHearing(hearing6)), any()))
+            .thenReturn(
+                createVacatedHearingTabItem("Applicant Hearing 6", "25 Dec 2025 10:00", INTERVENER4)
+            );
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(hearingWrapper)
+            .build();
+
+        // Act
+        manageHearingActionService.updateTabData(caseData);
+
+        assertThat(hearingWrapper.getVacatedOrAdjournedHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly(
+                "1 Jul 2025 10:00",
+                "15 Jul 2025 10:00",
+                "20 Jul 2025 10:00",
+                "1 Dec 2025 10:00",
+                "15 Dec 2025 10:00",
+                "25 Dec 2025 10:00"
+            );
+        assertThat(hearingWrapper.getApplicantVacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("20 Jul 2025 10:00");
+        assertThat(hearingWrapper.getRespondentVacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("15 Jul 2025 10:00");
+        assertThat(hearingWrapper.getInt1VacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("1 Jul 2025 10:00");
+        assertThat(hearingWrapper.getInt2VacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("1 Dec 2025 10:00");
+        assertThat(hearingWrapper.getInt3VacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("15 Dec 2025 10:00");
+        assertThat(hearingWrapper.getInt4VacOrAdjHearingTabItems())
+            .extracting(item -> item.getValue().getTabDateTime())
+            .containsExactly("25 Dec 2025 10:00");
+    }
+
+    @Test
     void updateTabData_shouldNotPopulateHearingTabItemsIfEmptyHearingsProvided() {
         hearingWrapper.setHearings(null);
 
@@ -514,6 +695,14 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getInt2HearingTabItems()).isNull();
         assertThat(hearingWrapper.getInt3HearingTabItems()).isNull();
         assertThat(hearingWrapper.getInt4HearingTabItems()).isNull();
+
+        assertThat(hearingWrapper.getVacatedOrAdjournedHearings()).isNull();
+        assertThat(hearingWrapper.getApplicantVacOrAdjHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getRespondentVacOrAdjHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt1VacOrAdjHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt2VacOrAdjHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt3VacOrAdjHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt4VacOrAdjHearingTabItems()).isNull();
     }
 
     @Test
@@ -561,6 +750,10 @@ class ManageHearingActionServiceTest {
         return entry -> entry != null && expected.equals(entry.getValue());
     }
 
+    private ArgumentMatcher<VacatedOrAdjournedHearingsCollectionItem> hasHearing(VacateOrAdjournedHearing expected) {
+        return entry -> entry != null && expected.equals(entry.getValue());
+    }
+
     private WorkingHearing createWorkingHearing(LocalDate date) {
         return WorkingHearing.builder()
             .hearingTypeDynamicList(DynamicList.builder()
@@ -605,6 +798,19 @@ class ManageHearingActionServiceTest {
             .build();
     }
 
+    private VacateOrAdjournedHearing createVacatedHearing(HearingType type, String time, String estimate, LocalDate date) {
+        return VacateOrAdjournedHearing.builder()
+            .hearingType(type)
+            .hearingDate(date)
+            .hearingTime(time)
+            .hearingTimeEstimate(estimate)
+            .wasMigrated(YesOrNo.NO)
+            .vacatedOrAdjournedDate(LocalDate.now())
+            .vacateOrAdjournReason(COURTROOM_UNAVAILABLE)
+            .hearingStatus(VACATE_HEARING)
+            .build();
+    }
+
     private CaseDocument createCaseDocument(String filename, String url) {
         return CaseDocument.builder()
             .documentFilename(filename)
@@ -614,6 +820,13 @@ class ManageHearingActionServiceTest {
 
     private ManageHearingsCollectionItem createHearingCollectionItem(Hearing hearing) {
         return ManageHearingsCollectionItem.builder()
+            .id(UUID.randomUUID())
+            .value(hearing)
+            .build();
+    }
+
+    private VacatedOrAdjournedHearingsCollectionItem createHearingCollectionItem(VacateOrAdjournedHearing hearing) {
+        return VacatedOrAdjournedHearingsCollectionItem.builder()
             .id(UUID.randomUUID())
             .value(hearing)
             .build();
@@ -631,4 +844,39 @@ class ManageHearingActionServiceTest {
             .tabWasMigrated(migrated ? YesOrNo.YES : null)
             .build();
     }
+
+    private VacatedOrAdjournedHearingTabItem createVacatedHearingTabItem(String type, String dateTime, String parties) {
+        return createVacatedHearingTabItem(type, dateTime, parties, false);
+    }
+
+    private VacatedOrAdjournedHearingTabItem createVacatedHearingTabItem(String type, String dateTime, String parties, boolean migrated) {
+        return VacatedOrAdjournedHearingTabItem.builder()
+            .tabHearingType(type)
+            .tabDateTime(dateTime)
+            .tabConfidentialParties(parties)
+            .tabWasMigrated(migrated ? YesOrNo.YES : null)
+            .build();
+    }
+
+    private VacatedOrAdjournedHearingTabItem createVacatedOrAdjournedHearingTabItem(String type,
+                                                                                    String dateTime,
+                                                                                    String parties,
+                                                                                    ManageHearingsAction status) {
+        return createVacatedOrAdjournedHearingTabItem(type, dateTime, parties, status, false);
+    }
+
+    private VacatedOrAdjournedHearingTabItem createVacatedOrAdjournedHearingTabItem(String type,
+                                                                                    String dateTime,
+                                                                                    String parties,
+                                                                                    ManageHearingsAction status,
+                                                                                    boolean migrated) {
+        return VacatedOrAdjournedHearingTabItem.builder()
+            .tabHearingType(type)
+            .tabDateTime(dateTime)
+            .tabConfidentialParties(parties)
+            .tabHearingStatus(status.getDescription())
+            .tabWasMigrated(migrated ? YesOrNo.YES : null)
+            .build();
+    }
+
 }
