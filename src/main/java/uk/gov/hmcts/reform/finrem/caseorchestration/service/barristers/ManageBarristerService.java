@@ -112,6 +112,19 @@ public class ManageBarristerService {
     public BarristerChange getBarristerChange(FinremCaseDetails caseDetails, FinremCaseData caseDataBefore,
                                               CaseRole caseRole) {
         BarristerParty barristerParty = getManageBarristerParty(caseDetails, caseRole);
+        return getBarristerChange(caseDetails, caseDataBefore, barristerParty);
+    }
+
+    /**
+     * Calculates the changes made to barristers in the Manage Barrister event.
+     *
+     * @param caseDetails    the current case details
+     * @param caseDataBefore the case data before the event
+     * @param barristerParty the barrister party
+     * @return the barrister changes
+     */
+    public BarristerChange getBarristerChange(FinremCaseDetails caseDetails, FinremCaseData caseDataBefore,
+                                              BarristerParty barristerParty) {
         List<Barrister> barristers = getEventBarristers(caseDetails.getData(), barristerParty)
             .stream()
             .map(BarristerCollectionItem::getValue)

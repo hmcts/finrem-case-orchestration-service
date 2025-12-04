@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -41,7 +42,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
     @Test
     void givenAsApplicantSolicitor_whenHandled_thenPopulateCorrectLabel() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
-        when(caseRoleService.isLoginWithApplicantSolicitor(givenFinremCaseData, AUTH_TOKEN)).thenReturn(true);
+        when(caseRoleService.isApplicantRepresentative(givenFinremCaseData, AUTH_TOKEN)).thenReturn(true);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
             givenFinremCaseData);
@@ -49,13 +50,14 @@ class StopRepresentingClientAboutToStartHandlerTest {
         assertThat(finremCaseData.getStopRepresentationWrapper().getClientAddressForServiceConfidentialLabel())
             .isEqualTo("Keep the Applicant's contact details private from the Respondent?");
 
-        verify(caseRoleService).isLoginWithApplicantSolicitor(givenFinremCaseData, AUTH_TOKEN);
+        verify(caseRoleService).isApplicantRepresentative(givenFinremCaseData, AUTH_TOKEN);
     }
 
     @Test
     void givenAsRespondentSolicitor_whenHandled_thenPopulateCorrectLabel() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
-        when(caseRoleService.isLoginWithApplicantSolicitor(givenFinremCaseData, AUTH_TOKEN)).thenReturn(false);
+        when(caseRoleService.isApplicantRepresentative(givenFinremCaseData, AUTH_TOKEN)).thenReturn(false);
+        when(caseRoleService.isRespondentRepresentative(givenFinremCaseData, AUTH_TOKEN)).thenReturn(true);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
             givenFinremCaseData);
@@ -63,6 +65,24 @@ class StopRepresentingClientAboutToStartHandlerTest {
         assertThat(finremCaseData.getStopRepresentationWrapper().getClientAddressForServiceConfidentialLabel())
             .isEqualTo("Keep the Respondent's contact details private from the Applicant?");
 
-        verify(caseRoleService).isLoginWithApplicantSolicitor(givenFinremCaseData, AUTH_TOKEN);
+        verify(caseRoleService).isApplicantRepresentative(givenFinremCaseData, AUTH_TOKEN);
+        verify(caseRoleService).isRespondentRepresentative(givenFinremCaseData, AUTH_TOKEN);
+
+    }
+
+    @Test
+    void givenAsCaseworker_whenHandled_thenExceptionIsThrown() {
+        FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
+        when(caseRoleService.isApplicantRepresentative(givenFinremCaseData, AUTH_TOKEN)).thenReturn(false);
+        when(caseRoleService.isRespondentRepresentative(givenFinremCaseData, AUTH_TOKEN)).thenReturn(false);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
+            givenFinremCaseData);
+        assertThatThrownBy(() -> underTest.handle(callbackRequest, AUTH_TOKEN))
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessage("It supports applicant/respondent representatives only");
+
+        verify(caseRoleService).isApplicantRepresentative(givenFinremCaseData, AUTH_TOKEN);
+        verify(caseRoleService).isRespondentRepresentative(givenFinremCaseData, AUTH_TOKEN);
     }
 }
