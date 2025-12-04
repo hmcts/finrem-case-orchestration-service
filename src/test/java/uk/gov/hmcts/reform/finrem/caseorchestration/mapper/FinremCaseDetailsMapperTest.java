@@ -147,6 +147,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FinremCaseDetailsMapperTest {
@@ -262,7 +263,14 @@ class FinremCaseDetailsMapperTest {
     }
 
     @Test
-    void shouldReturnMapWithNull_() throws JsonProcessingException {
+    void shouldPopulateNullStateAndCaseTypeId() {
+        CaseDetails mappedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(FinremCaseDetails.builder().build());
+        assertNull(mappedCaseDetails.getCaseTypeId());
+        assertNull(mappedCaseDetails.getState());
+    }
+
+    @Test
+    void shouldReturnMapWithNull() throws JsonProcessingException {
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .state(State.CASE_ADDED)
