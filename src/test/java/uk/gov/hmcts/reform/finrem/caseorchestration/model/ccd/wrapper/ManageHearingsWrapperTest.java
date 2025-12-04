@@ -145,9 +145,9 @@ class ManageHearingsWrapperTest {
 
         // PT todo - uncomment and fix
         // Act & Assert
-//        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-//            () -> ManageHearingsWrapper.getWorkingVacatedHearingId(vacatedHearing));
-//        assertThat(exception.getMessage()).isEqualTo("Invalid or missing working vacated hearing UUID");
+        // IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        // () -> ManageHearingsWrapper.getWorkingVacatedHearingId(vacatedHearing));
+        // assertThat(exception.getMessage()).isEqualTo("Invalid or missing working vacated hearing UUID");
     }
 
 }

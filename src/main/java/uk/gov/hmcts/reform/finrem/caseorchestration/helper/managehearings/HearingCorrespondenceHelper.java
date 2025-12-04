@@ -191,7 +191,7 @@ public class HearingCorrespondenceHelper {
 
     // PT todo, docs, check test
     public boolean shouldPostHearingAndVacateNotices(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
-    // PT todo , refactor, docs,ringAndVacateNotices(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+        // PT todo , refactor, docs,ringAndVacateNotices(FinremCaseDetails finremCaseDetails, Hearing hearing) {
         boolean hearingIsRelisted =
             YesOrNo.YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getIsRelistSelected());
 

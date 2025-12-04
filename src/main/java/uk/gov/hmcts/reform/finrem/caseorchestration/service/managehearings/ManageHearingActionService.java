@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.Hearin
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -133,12 +135,12 @@ public class ManageHearingActionService {
         ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
 
         WorkingVacatedHearing vacateHearingInput = hearingsWrapper.getWorkingVacatedHearing();
-        UUID selectedHearingId = UUID.fromString(vacateHearingInput.getChooseHearings().getValue().getCode());
+        setWorkingVacatedHearingId(hearingsWrapper, vacateHearingInput);
 
         ManageHearingsCollectionItem hearingToVacate = emptyIfNull(hearingsWrapper.getHearings()).stream()
-            .filter(item -> selectedHearingId.equals(item.getId()))
+            .filter(item -> hearingsWrapper.getWorkingVacatedHearingId().equals(item.getId()))
             .findFirst()
-            .orElseThrow(() -> new IllegalStateException("No hearing found with ID: " + selectedHearingId));
+            .orElseThrow(() -> new IllegalStateException("No hearing found with ID: " + hearingsWrapper.getWorkingVacatedHearingId()));
 
         List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
             .filter(list -> !list.isEmpty())
@@ -237,10 +239,12 @@ public class ManageHearingActionService {
             CaseDocument caseDocument = documentRecord.caseDocument();
             CaseDocumentType caseDocumentType = documentRecord.caseDocumentType();
 
+            UUID hearingId = getHearingIdForDocument(hearingsWrapper, caseDocumentType);
+
             manageHearingDocuments.add(
                 ManageHearingDocumentsCollectionItem.builder()
                     .value(ManageHearingDocument.builder()
-                        .hearingId(hearingsWrapper.getWorkingHearingId())
+                        .hearingId(hearingId)
                         .hearingDocument(caseDocument)
                         .hearingCaseDocumentType(caseDocumentType)
                         .build())
@@ -249,6 +253,23 @@ public class ManageHearingActionService {
         });
 
         hearingsWrapper.setHearingDocumentsCollection(manageHearingDocuments);
+    }
+
+    /*
+     * Usually generated documents are associated to the newly created hearing, so workingHearingId is used.
+     * However, Vacate notices are associated to the hearing that was vacated, so workingVacatedHearingId is used instead.
+     * @param hearingsWrapper - used to get the appropriate id.
+     * @param caseDocumentType - the type of document being checked.  Expects HEARING_NOTICE or VACATE_HEARING_NOTICE.
+     * @return the appropriate UUID
+     */
+    private UUID getHearingIdForDocument(ManageHearingsWrapper hearingsWrapper,
+                                         CaseDocumentType caseDocumentType) {
+
+        if (CaseDocumentType.VACATE_HEARING_NOTICE.equals(caseDocumentType)) {
+            return hearingsWrapper.getWorkingVacatedHearingId();
+        }
+
+        return hearingsWrapper.getWorkingHearingId();
     }
 
     /**
@@ -408,5 +429,18 @@ public class ManageHearingActionService {
         if (hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)) {
             generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
         }
+    }
+
+    /*
+     * Sets workingVacatedHearingId, or reassigns to a new value if vacate hearing has already run for the case.
+     */
+    private void setWorkingVacatedHearingId(ManageHearingsWrapper hearingsWrapper, WorkingVacatedHearing vacateHearingInput) {
+        hearingsWrapper.setWorkingVacatedHearingId(
+            Optional.ofNullable(vacateHearingInput)
+                .map(WorkingVacatedHearing::getChooseHearings)
+                .map(DynamicList::getValue)
+                .map(DynamicListElement::getCode)
+                .map(UUID::fromString)
+                .orElse(null));
     }
 }

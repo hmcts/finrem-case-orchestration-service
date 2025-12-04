@@ -516,7 +516,8 @@ public class ManageHearingsCorresponder {
     // Remove once DFR-4323 completed to limit who corres sent to.
     private void doTestThingRemovedThis(FinremCaseData finremCaseData) {
         UUID uuid = finremCaseData.getManageHearingsWrapper().getWorkingVacatedHearingId();
-        VacateOrAdjournedHearing vacatedHearing = finremCaseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingsCollectionItemById(uuid).getValue();
+        VacateOrAdjournedHearing vacatedHearing =
+            finremCaseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingsCollectionItemById(uuid).getValue();
         vacatedHearing.setHearingNoticePrompt(YesOrNo.YES);
     }
 }
