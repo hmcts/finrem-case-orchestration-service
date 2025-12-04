@@ -237,10 +237,12 @@ public class ManageHearingActionService {
             CaseDocument caseDocument = documentRecord.caseDocument();
             CaseDocumentType caseDocumentType = documentRecord.caseDocumentType();
 
+            UUID hearingId = getHearingIdForDocument(hearingsWrapper, caseDocumentType);
+
             manageHearingDocuments.add(
                 ManageHearingDocumentsCollectionItem.builder()
                     .value(ManageHearingDocument.builder()
-                        .hearingId(hearingsWrapper.getWorkingHearingId())
+                        .hearingId(hearingId)
                         .hearingDocument(caseDocument)
                         .hearingCaseDocumentType(caseDocumentType)
                         .build())
@@ -249,6 +251,24 @@ public class ManageHearingActionService {
         });
 
         hearingsWrapper.setHearingDocumentsCollection(manageHearingDocuments);
+    }
+
+    /*
+     * Usually generated documents are associated to the newly created hearing, so workingHearingId is used.
+     * However, Vacate notices are associated to the hearing that was vacated, so workingVacatedHearingId is used instead.
+     * @param hearingsWrapper - used to get the appropriate id.
+     * @param caseDocumentType - the type of document being checked.  Expects HEARING_NOTICE or VACATE_HEARING_NOTICE.
+     * @return the appropriate UUID
+     */
+    private UUID getHearingIdForDocument(ManageHearingsWrapper hearingsWrapper,
+                                         CaseDocumentType caseDocumentType) {
+
+        if (CaseDocumentType.VACATE_HEARING_NOTICE.equals(caseDocumentType)) {
+            WorkingVacatedHearing workingVacatedHearing = hearingsWrapper.getWorkingVacatedHearing();
+            return ManageHearingsWrapper.getWorkingVacatedHearingId(workingVacatedHearing);
+        }
+
+        return hearingsWrapper.getWorkingHearingId();
     }
 
     /**

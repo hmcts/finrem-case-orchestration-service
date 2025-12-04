@@ -115,6 +115,8 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(1);
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingDocument())
             .isEqualTo(hearingNotice);
+        assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingId())
+            .isEqualTo(hearingWrapper.getWorkingHearingId());
     }
 
     @Test
@@ -165,6 +167,7 @@ class ManageHearingActionServiceTest {
                 pfdNcdrDocuments.get(PFD_NCDR_COMPLIANCE_LETTER),
                 pfdNcdrDocuments.get(PFD_NCDR_COVER_LETTER),
                 outOfCourtResolution);
+        assertDocumentsAssignedToWorkingHearingId();
     }
 
     @Test
@@ -214,6 +217,8 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getHearingDocumentsCollection())
             .extracting(item -> item.getValue().getHearingCaseDocumentType())
             .doesNotContain(CaseDocumentType.PFD_NCDR_COVER_LETTER);
+        assertDocumentsAssignedToWorkingHearingId();
+
     }
 
     @Test
@@ -261,6 +266,7 @@ class ManageHearingActionServiceTest {
                 pfdNcdrDocuments.get(PFD_NCDR_COMPLIANCE_LETTER),
                 pfdNcdrDocuments.get(PFD_NCDR_COVER_LETTER),
                 outOfCourtResolution);
+        assertDocumentsAssignedToWorkingHearingId();
     }
 
     @Test
@@ -305,6 +311,7 @@ class ManageHearingActionServiceTest {
                 pfdNcdrDocuments.get(PFD_NCDR_COMPLIANCE_LETTER),
                 pfdNcdrDocuments.get(PFD_NCDR_COVER_LETTER),
                 outOfCourtResolution);
+        assertDocumentsAssignedToWorkingHearingId();
 
         verify(manageHearingsDocumentService, never()).generateFormG(finremCaseDetails, AUTH_TOKEN);
     }
@@ -312,21 +319,21 @@ class ManageHearingActionServiceTest {
     @ParameterizedTest
     @EnumSource(value = YesOrNo.class, names = {"NO", "YES"})
     void performVacateHearing_shouldVacateHearing(YesOrNo hearingWasRelisted) {
-        UUID hearingId = UUID.randomUUID();
-        UUID hearing1ID = UUID.randomUUID();
-        Hearing hearing = createHearing(HearingType.FDR, "10:00", "30mins", LocalDate.now());
-        Hearing hearing1 = createHearing(HearingType.FH, "11:00", "1hr", LocalDate.now().plusDays(1));
+        UUID hearingToVacateId = UUID.randomUUID();
+        UUID hearingToKeepID = UUID.randomUUID();
+        Hearing hearingToVacate = createHearing(HearingType.FDR, "10:00", "30mins", LocalDate.now());
+        Hearing hearingToKeep = createHearing(HearingType.FH, "11:00", "1hr", LocalDate.now().plusDays(1));
 
         hearingWrapper.setWorkingVacatedHearing(WorkingVacatedHearing.builder()
             .chooseHearings(DynamicList.builder()
-                .value(DynamicListElement.builder().code(hearingId.toString()).build())
+                .value(DynamicListElement.builder().code(hearingToVacateId.toString()).build())
                 .build())
             .vacateReason(COURTROOM_UNAVAILABLE)
             .build());
 
         hearingWrapper.setHearings(new ArrayList<>(List.of(
-            ManageHearingsCollectionItem.builder().id(hearingId).value(hearing).build(),
-            ManageHearingsCollectionItem.builder().id(hearing1ID).value(hearing1).build()
+            ManageHearingsCollectionItem.builder().id(hearingToVacateId).value(hearingToVacate).build(),
+            ManageHearingsCollectionItem.builder().id(hearingToKeepID).value(hearingToKeep).build()
         )));
 
         hearingWrapper.setIsRelistSelected(hearingWasRelisted);
@@ -340,7 +347,7 @@ class ManageHearingActionServiceTest {
             .hasSize(1)
             .first()
             .satisfies(remainingHearing -> {
-                assertThat(remainingHearing.getId()).isEqualTo(hearing1ID);
+                assertThat(remainingHearing.getId()).isEqualTo(hearingToKeepID);
                 assertThat(remainingHearing.getValue().getHearingType()).isEqualTo(HearingType.FH);
             });
 
@@ -348,14 +355,14 @@ class ManageHearingActionServiceTest {
             .hasSize(1)
             .first()
             .satisfies(vacatedHearing -> {
-                assertThat(vacatedHearing.getId()).isEqualTo(hearingId);
+                assertThat(vacatedHearing.getId()).isEqualTo(hearingToVacateId);
                 assertThat(vacatedHearing.getValue().getHearingType()).isEqualTo(HearingType.FDR);
                 assertThat(vacatedHearing.getValue().getHearingTime()).isEqualTo("10:00");
                 assertThat(vacatedHearing.getValue().getHearingTimeEstimate()).isEqualTo("30mins");
             });
 
         if (hearingWasRelisted == YesOrNo.NO) {
-            // As hearing wasn't relisted, performVacateHearing responsible for coversheets.
+            // As hearingToVacate wasn't relisted, performVacateHearing responsible for coversheets.
             verify(hearingCorrespondenceHelper).shouldPostToApplicant(finremCaseDetails);
             verify(hearingCorrespondenceHelper).shouldPostToRespondent(finremCaseDetails);
             verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(finremCaseDetails, AUTH_TOKEN);
@@ -366,6 +373,8 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getHearingDocumentsCollection().size()).isEqualTo(1);
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingCaseDocumentType().getId())
             .isEqualTo(CaseDocumentType.VACATE_HEARING_NOTICE.getId());
+        assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingId())
+            .isEqualTo(hearingToVacateId);
 
         assertThat(hearingWrapper.getManageHearingsActionSelection()).isNull();
         assertThat(hearingWrapper.getWorkingVacatedHearing()).isNull();
@@ -879,4 +888,12 @@ class ManageHearingActionServiceTest {
             .build();
     }
 
+    private void assertDocumentsAssignedToWorkingHearingId() {
+        assertThat(hearingWrapper.getHearingDocumentsCollection())
+            .allSatisfy(doc ->
+                assertThat(doc.getValue().getHearingId())
+                    .as("Doc hearingId must equal workingHearingId")
+                    .isEqualTo(hearingWrapper.getWorkingHearingId())
+            );
+    }
 }
