@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
@@ -100,18 +101,26 @@ public class UpdateContactDetailsService {
     }
 
     /**
-     * Orchestrates representation change for applicant and respondent.
+     * Orchestrates the representation change for the applicant or respondent,
+     * based on the value selected in the NoC field
+     * labelled: "Select Party to which the change in representation applies:".
      *
-     * @param  caseData  FinremCaseData to apply representation change to
-     * @param  caseType CaseType of the case to change representation.
+     * <p>
+     * If the applicant is selected, this method clears the applicant solicitor
+     * details according to the provided {@code caseType}. If the respondent is
+     * selected, it clears the respondent solicitor details accordingly.
+     *
+     * @param caseData the {@link FinremCaseData} instance to update
+     * @param caseType the {@link CaseType} used to determine which solicitor
+     *                 contact details should be cleared
      */
     public void handleRepresentationChange(FinremCaseData caseData, CaseType caseType) {
-        String nocPart = caseData.getContactDetailsWrapper().getNocParty().getValue();
-        if (APPLICANT.equalsIgnoreCase(nocPart)) {
+        NoticeOfChangeParty nocPart = caseData.getContactDetailsWrapper().getNocParty();
+        if (NoticeOfChangeParty.APPLICANT.equals(nocPart)) {
             removeApplicantSolicitorDetails(caseData, caseType);
         }
 
-        if (RESPONDENT.equalsIgnoreCase(nocPart)) {
+        if (NoticeOfChangeParty.RESPONDENT.equals(nocPart)) {
             removeRespondentDetails(caseData, caseType);
         }
     }
