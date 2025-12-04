@@ -40,6 +40,7 @@ public class VacateOrAdjournedHearing implements HearingLike {
     private List<DocumentCollectionItem> additionalHearingDocs;
     private List<PartyOnCaseCollectionItem> partiesOnCase;
     private YesOrNo wasMigrated;
+    private YesOrNo wasVacOrAdjNoticeSent;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate vacatedOrAdjournedDate;
@@ -48,7 +49,8 @@ public class VacateOrAdjournedHearing implements HearingLike {
     private ManageHearingsAction hearingStatus;
 
     public static VacateOrAdjournedHearing fromHearingToVacatedHearing(ManageHearingsCollectionItem hearingToVacate,
-                                                                       WorkingVacatedHearing vacateHearingInput) {
+                                                                       WorkingVacatedHearing vacateHearingInput,
+                                                                       YesOrNo wasVacateOrAdjournNoticeSent) {
         Hearing hearing = hearingToVacate.getValue();
         return VacateOrAdjournedHearing.builder()
             .hearingDate(hearing.getHearingDate())
@@ -67,6 +69,7 @@ public class VacateOrAdjournedHearing implements HearingLike {
             .vacateOrAdjournReason(vacateHearingInput.getVacateReason())
             .hearingStatus(ManageHearingsAction.VACATE_HEARING)
             .specifyOtherReason(vacateHearingInput.getSpecifyOtherReason())
+            .wasVacOrAdjNoticeSent(wasVacateOrAdjournNoticeSent)
             .build();
     }
 }
