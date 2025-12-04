@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarni
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -23,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +45,6 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
     @Mock
     private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
     @Mock
-    private UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
-    @Mock
     private DocumentWarningsHelper documentWarningsHelper;
     @Spy
     private ObjectMapper objectMapper;
@@ -62,10 +58,9 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
             finremCaseDetailsMapper,
             hearingOrderService,
             contestedOrderApprovedLetterService,
-            uploadedDraftOrderCategoriser,
             documentWarningsHelper
         );
-        inOrder = Mockito.inOrder(hearingOrderService, uploadedDraftOrderCategoriser, contestedOrderApprovedLetterService);
+        inOrder = Mockito.inOrder(hearingOrderService, contestedOrderApprovedLetterService);
     }
 
     @Test
@@ -88,33 +83,6 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenApprovedOrdersProvided_whenHandle_thenMoveToDraftDirectionOrderCollection() {
-        List<DraftDirectionOrderCollection> uploadingApprovedOrders = List.of(
-            DraftDirectionOrderCollection.builder().value(DraftDirectionOrder.builder().build()).build()
-        );
-
-        FinremCaseData caseData = FinremCaseData.builder().build();
-        DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
-        draftDirectionWrapper.setJudgeApprovedOrderCollection(uploadingApprovedOrders);
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
-            .id(Long.valueOf(CASE_ID))
-            .caseType(CaseType.CONTESTED)
-            .state(State.SCHEDULING_AND_HEARING)
-            .data(caseData).build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .eventType(EventType.JUDGE_DRAFT_ORDER)
-            .caseDetails(finremCaseDetails)
-            .build();
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        FinremCaseData result = response.getData();
-
-        assertThat(result.getDraftDirectionWrapper().getJudgeApprovedOrderCollection()).isNull();
-        assertThat(result.getDraftDirectionWrapper().getDraftDirectionOrderCollection()).isEqualTo(uploadingApprovedOrders);
-    }
-
-    @Test
     void givenNoAdditionalDocsUploaded_whenHandle_thenNoAdditionalDocsProcessed() {
         FinremCallbackRequest callbackRequest = setupTestDataWithoutAdditionalDocs();
 
@@ -125,10 +93,8 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
 
     private void verifyExpectedInvocations(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
         inOrder.verify(hearingOrderService).stampAndStoreJudgeApprovedOrders(finremCaseDetails, AUTH_TOKEN);
         inOrder.verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
-        inOrder.verify(uploadedDraftOrderCategoriser).categorise(finremCaseData);
     }
 
     private FinremCallbackRequest setupTestDataWithoutAdditionalDocs() {
