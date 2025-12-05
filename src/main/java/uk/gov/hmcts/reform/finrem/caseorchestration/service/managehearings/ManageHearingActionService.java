@@ -167,6 +167,12 @@ public class ManageHearingActionService {
 
         addDocumentsToCollection(documentMap, hearingsWrapper);
 
+        // PT todo - test this set correctly
+        // populate whether hearing was relisted in a system case field for the submitted handler to query.
+        hearingsWrapper.setWasRelistSelected(
+            YesOrNo.YES.equals(hearingsWrapper.getIsRelistSelected()) ? YesOrNo.YES : YesOrNo.NO
+        );
+
         // clear the working hearing
         hearingsWrapper.setWorkingVacatedHearing(null);
         hearingsWrapper.setIsRelistSelected(null);

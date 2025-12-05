@@ -292,15 +292,16 @@ public class ManageHearingsCorresponder {
         if (shouldPostToParty.getAsBoolean()) {
             if (hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing)) {
                 postHearingNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
-            }
-            if (hearingCorrespondenceHelper.shouldPostVacateNoticeOnly(finremCaseDetails)) {
+            } else if (hearingCorrespondenceHelper.shouldPostVacateNoticeOnly(finremCaseDetails)) {
                 postVacateNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
-            }
-            if (hearingCorrespondenceHelper.shouldPostHearingAndVacateNotices(finremCaseDetails, hearing)) {
+            } else if (hearingCorrespondenceHelper.shouldPostHearingAndVacateNotices(finremCaseDetails, hearing)) {
                 postHearingAndVacateNotices(finremCaseDetails, caseRole, userAuthorisation);
-            }
-            if (hearingCorrespondenceHelper.shouldPostAllHearingDocuments(finremCaseDetails, hearing)) {
+            } else if (hearingCorrespondenceHelper.shouldPostAllHearingDocuments(finremCaseDetails, hearing)) {
                 postAllHearingDocuments(finremCaseDetails, caseRole, userAuthorisation);
+            } else {
+                throw new IllegalStateException(
+                    String.format("Case %s not in a supported state to send correspondence.  Arrange to send correspondence manually",
+                        finremCaseDetails.getCaseIdAsString()));
             }
         }
     }
@@ -447,7 +448,8 @@ public class ManageHearingsCorresponder {
 
         // PT todo This is new: abstract to a private function reuse - smarten up long condition, maybe lose the log/check
         CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
-        if (ManageHearingsAction.VACATE_HEARING.equals(finremCaseDetails.getData().getManageHearingsWrapper().getManageHearingsActionSelection()) && vacateHearingNotice == null) {
+        if (ManageHearingsAction.VACATE_HEARING.equals(
+            finremCaseDetails.getData().getManageHearingsWrapper().getManageHearingsActionSelection()) && vacateHearingNotice == null) {
             log.warn("Vacate hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
             return;
         } else {

@@ -324,21 +324,21 @@ class HearingCorrespondenceHelperTest {
         assertTrue(fdrResult);
     }
 
-    // PT todo uncomment and fix
     /**
+     * PT todo uncommment and fix
      * Confirms that shouldPostAllHearingDocuments returns false for the passed arguments.
      * When a case needs documents posted, shouldPostAllHearingDocuments decides if all hearing docs need posting.
      */
-//    @ParameterizedTest
-//    @MethodSource("provideCasesSoShouldPostAllHearingDocumentsReturnsFalse")
-//    void shouldPostAllHearingDocumentsReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
-//        // Arrange.  This mock is just for the FDR case.  FDR cases that are not express don't have all docs posted.
-//        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
-//        // Act
-//        boolean result = helper.shouldPostAllHearingDocuments(finremCaseDetails, hearing);
-//        // Assert
-//        assertFalse(result);
-//    }
+    @ParameterizedTest
+    @MethodSource("provideCasesSoShouldPostAllHearingDocumentsReturnsFalse")
+    void shouldPostAllHearingDocumentsReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+        // Arrange.  This mock is just for the FDR case.  FDR cases that are not express don't have all docs posted.
+        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
+        // Act
+        boolean result = helper.shouldPostAllHearingDocuments(finremCaseDetails, hearing);
+        // Assert
+        assertFalse(result);
+    }
 
     /**
      * Used by shouldPostAllHearingDocumentsReturnsFalse.
