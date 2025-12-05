@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
@@ -385,7 +386,7 @@ public class ManageHearingsCorresponder {
      */
     private void postHearingAndVacateNotices(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
 
-        // abstract to a private function reuse
+        // PT todo abstract to a private function reuse
         CaseDocument hearingNotice = manageHearingsDocumentService
             .getHearingNotice(finremCaseDetails);
 
@@ -394,7 +395,7 @@ public class ManageHearingsCorresponder {
             return;
         }
 
-        // abstract to a private function reuse
+        // PT todo abstract to a private function reuse
         CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
 
         if (vacateHearingNotice == null) {
@@ -442,6 +443,15 @@ public class ManageHearingsCorresponder {
         if (isEmpty(hearingDocuments)) {
             log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());
             return;
+        }
+
+        // PT todo This is new: abstract to a private function reuse - smarten up long condition, maybe lose the log/check
+        CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
+        if (ManageHearingsAction.VACATE_HEARING.equals(finremCaseDetails.getData().getManageHearingsWrapper().getManageHearingsActionSelection()) && vacateHearingNotice == null) {
+            log.warn("Vacate hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
+            return;
+        } else {
+            hearingDocuments.add(vacateHearingNotice);
         }
 
         List<CaseDocument> convertedHearingDocuments = convertDocumentsToPdf(

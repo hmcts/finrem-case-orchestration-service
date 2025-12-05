@@ -182,20 +182,23 @@ public class HearingCorrespondenceHelper {
 
     // PT todo, docs, check test
     public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
-        // We want false for No and Null values, so !Yes does this.
-        boolean hearingIsNotRelisted =
-            !YesOrNo.YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getIsRelistSelected());
+        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
 
-        return hearingIsNotRelisted && shouldPostHearingNoticeSomething(finremCaseDetails, hearing);
+        return isAddHearingAction(actionSelection)
+            && shouldPostHearingNoticeSomething(finremCaseDetails, hearing);
     }
 
     // PT todo, docs, check test
     public boolean shouldPostHearingAndVacateNotices(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
-        // PT todo , refactor, docs,ringAndVacateNotices(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+        // PT todo , refactor, docs,ringAndVacateNotices(FinremCaseDetails finremCaseDetails, Hearing hearing)
+
+        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
         boolean hearingIsRelisted =
             YesOrNo.YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getIsRelistSelected());
 
-        return hearingIsRelisted && shouldPostHearingNoticeSomething(finremCaseDetails, hearing);
+        return isVacateHearingAction(actionSelection)
+            && hearingIsRelisted
+            && shouldPostHearingNoticeSomething(finremCaseDetails, hearing);
     }
 
     /**
@@ -208,9 +211,13 @@ public class HearingCorrespondenceHelper {
      */
     public boolean shouldPostVacateNoticeOnly(FinremCaseDetails finremCaseDetails) {
         ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
-        return isVacateHearingAction(actionSelection);
+        boolean hearingIsNotRelisted =
+            YesOrNo.NO.equals(finremCaseDetails.getData().getManageHearingsWrapper().getIsRelistSelected());
+
+        return isVacateHearingAction(actionSelection) && hearingIsNotRelisted;
     }
 
+    // PT todo - update docs, action selection not used now.
     /**
      * Determines if a hearing should send a full set of hearing documents (not just a notice).
      * To return true:
@@ -224,6 +231,10 @@ public class HearingCorrespondenceHelper {
      */
     public boolean shouldPostAllHearingDocuments(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
 
+//        I want to run this when
+//        its ADD and the hearing check
+//        it's vacate and relist and the hearing check.
+
         boolean allDocumentsNeedPosting = Optional.ofNullable(hearing)
             .map(HearingLike::getHearingType)
             .map(hearingType ->
@@ -232,9 +243,11 @@ public class HearingCorrespondenceHelper {
             )
             .orElse(false);
 
-        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
+//        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
 
-        return isAddHearingAction(actionSelection) && allDocumentsNeedPosting;
+        // PT todo remove the action selection check?
+//        return isAddHearingAction(actionSelection) && allDocumentsNeedPosting;
+        return allDocumentsNeedPosting;
     }
 
     /**
