@@ -536,7 +536,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-reps-removing-original.json");
         final ChangedRepresentative mockedChangedRepresentative = mock(ChangedRepresentative.class);
 
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(originalFinremCaseData, true))
+        when(removedSolicitorService.getChangedRepresentative(finremCaseData, originalFinremCaseData))
             .thenReturn(mockedChangedRepresentative);
 
         // Act
@@ -644,7 +644,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
         when(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData))
             .thenReturn(mockedAddedChangedRepresentative);
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(originalFinremCaseData, true))
+        when(removedSolicitorService.getChangedRepresentative(finremCaseData, originalFinremCaseData))
             .thenReturn(mockedRemovedChangedRepresentative);
 
         // Act

@@ -52,10 +52,14 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private void prepareStopRepresentationWrapper(FinremCaseData finremCaseData, String userAuthorisation) {
-        finremCaseData.getStopRepresentationWrapper().setClientAddressForServiceConfidentialLabel(
-            caseRoleService.isLoginWithApplicantSolicitor(finremCaseData, userAuthorisation)
-                ? "Keep the Applicant's contact details private from the Respondent?"
-                : "Keep the Respondent's contact details private from the Applicant?"
-        );
+        String label = null;
+        if (caseRoleService.isApplicantRepresentative(finremCaseData, userAuthorisation)) {
+            label = "Keep the Applicant's contact details private from the Respondent?";
+        } else if (caseRoleService.isRespondentRepresentative(finremCaseData, userAuthorisation)) {
+            label = "Keep the Respondent's contact details private from the Applicant?";
+        } else {
+            throw new UnsupportedOperationException("It supports applicant/respondent representatives only");
+        }
+        finremCaseData.getStopRepresentationWrapper().setClientAddressForServiceConfidentialLabel(label);
     }
 }
