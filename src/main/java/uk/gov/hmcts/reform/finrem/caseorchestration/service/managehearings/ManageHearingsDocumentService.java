@@ -358,11 +358,11 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Hearings have a core set of documents that need to be posted.
+     * FDA Hearings (and FDR hearings for express cases)  have a core set of documents that need to be posted whem
+     * listed or relisted.
      * These are the documents that are always posted.
      * <ul>
      *     <li>Hearing Notice</li>
-     *     <li>Form A</li>
      *     <li>Out of Court Resolution</li>
      *     <li>PDF NCDR Compliance Letter</li>
      *     <li>PDF NCDR Cover Letter</li>
@@ -379,8 +379,7 @@ public class ManageHearingsDocumentService {
                 getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.VACATE_HEARING_NOTICE),
                 getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.OUT_OF_COURT_RESOLUTION),
                 getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER),
-                getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.PFD_NCDR_COVER_LETTER),
-                finremCaseDetails.getData().getMiniFormA()
+                getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.PFD_NCDR_COVER_LETTER)
             )
             .filter(Objects::nonNull)
             .collect(Collectors.toList());

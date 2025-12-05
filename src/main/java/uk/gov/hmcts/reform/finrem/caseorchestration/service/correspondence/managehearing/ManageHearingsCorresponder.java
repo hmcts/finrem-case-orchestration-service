@@ -299,8 +299,10 @@ public class ManageHearingsCorresponder {
             } else if (hearingCorrespondenceHelper.shouldPostAllHearingDocuments(finremCaseDetails, hearing)) {
                 postAllHearingDocuments(finremCaseDetails, caseRole, userAuthorisation);
             } else {
+                // PT todo - test for this.
                 throw new IllegalStateException(
-                    String.format("Case %s not in a supported state to send correspondence.  Arrange to send correspondence manually",
+                    String.format("Case %s not in a supported state to send hearing correspondence. "
+                        + "Arrange sending correspondence manually.",
                         finremCaseDetails.getCaseIdAsString()));
             }
         }
@@ -454,6 +456,16 @@ public class ManageHearingsCorresponder {
             return;
         } else {
             hearingDocuments.add(vacateHearingNotice);
+        }
+
+        // Pt Todo - split and tidy
+        // Mini Form A only posted when hearing is added. Doesn't change when a hearing is relisted, so not sent.
+        if (ManageHearingsAction.ADD_HEARING.equals(
+            finremCaseDetails.getData().getManageHearingsWrapper().getManageHearingsActionSelection())) {
+            CaseDocument miniFormA = finremCaseDetails.getData().getMiniFormA();
+            if (miniFormA != null) {
+                hearingDocuments.add(miniFormA);
+            }
         }
 
         List<CaseDocument> convertedHearingDocuments = convertDocumentsToPdf(
