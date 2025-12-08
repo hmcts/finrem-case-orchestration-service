@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHear
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -34,6 +35,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
 
 @RequiredArgsConstructor
 @Service
@@ -92,14 +95,17 @@ public class ManageHearingsCorresponder {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         ManageHearingsWrapper wrapper = finremCaseData.getManageHearingsWrapper();
 
-        if (hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseDetails)) {
+        boolean isVacatedAndRelistedHearing = hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseDetails);
+
+        if (isVacatedAndRelistedHearing) {
             sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }
 
         VacateOrAdjournedHearing vacateOrAdjournedHearing = hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(
-            wrapper, wrapper.getWorkingHearingId());
+            wrapper, wrapper.getWorkingVacatedHearingId());
 
-        if (hearingCorrespondenceHelper.shouldNotSendNotification(vacateOrAdjournedHearing)) {
+        if (!isVacatedAndRelistedHearing &&
+            hearingCorrespondenceHelper.shouldNotSendNotification(vacateOrAdjournedHearing)) {
             return;
         }
 
@@ -318,10 +324,19 @@ public class ManageHearingsCorresponder {
         BooleanSupplier shouldPostToParty,
         Supplier<NotificationRequest> notificationRequestSupplier) {
 
+        EmailTemplateNames emailTemplateName;
+
+        if (hearing instanceof VacateOrAdjournedHearing) {
+            emailTemplateName = FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
+        } else {
+            emailTemplateName = FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
+        }
+
         if (shouldEmailPartySolicitor.getAsBoolean()) {
             notificationService.sendHearingNotificationToSolicitor(
                 notificationRequestSupplier.get(),
-                caseRole.toString()
+                caseRole.toString(),
+                emailTemplateName
             );
         }
 
