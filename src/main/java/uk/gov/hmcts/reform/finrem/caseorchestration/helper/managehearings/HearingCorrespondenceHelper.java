@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -50,31 +51,47 @@ public class HearingCorrespondenceHelper {
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
 
         if (ManageHearingsAction.ADD_HEARING.equals(manageHearingsWrapper.getManageHearingsActionSelection())) {
-            UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
-
-            List<ManageHearingsCollectionItem> hearings = manageHearingsWrapper.getHearings();
-
-            if (hearings == null) {
-                throw new IllegalStateException(
-                    "No hearings available to search for. Working hearing ID is: " + hearingId
-                );
-            }
-
-            return  manageHearingsWrapper.getHearings().stream()
-                .filter(h -> hearingId.equals(h.getId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
-                .getValue();
+            return getActiveHearingInContext(manageHearingsWrapper, manageHearingsWrapper.getWorkingHearingId());
         }
 
         if (ManageHearingsAction.VACATE_HEARING.equals(finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection())) {
             UUID workingVacatedHearingId = manageHearingsWrapper.getWorkingVacatedHearingId();
-            return Optional.ofNullable(manageHearingsWrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingVacatedHearingId))
-                .map(VacatedOrAdjournedHearingsCollectionItem::getValue)
-                .orElseThrow(() -> new IllegalStateException("Vacated hearing not found for the given ID: " + workingVacatedHearingId));
+           return getVacateOrAdjournedHearingInContext(manageHearingsWrapper, workingVacatedHearingId);
         }
 
         return null;
+    }
+
+    public Hearing getActiveHearingInContext(ManageHearingsWrapper wrapper, UUID workingHearingId) {
+
+        List<ManageHearingsCollectionItem> hearings = wrapper.getHearings();
+
+        if (hearings == null) {
+            throw new IllegalStateException(
+                "No hearings available to search for. Working hearing ID is: " + workingHearingId
+            );
+        }
+
+        return wrapper.getHearings().stream()
+            .filter(h -> workingHearingId.equals(h.getId()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + workingHearingId))
+            .getValue();
+    }
+
+    public VacateOrAdjournedHearing getVacateOrAdjournedHearingInContext(ManageHearingsWrapper wrapper, UUID workingHearingId) {
+
+        List<VacatedOrAdjournedHearingsCollectionItem> hearings = wrapper.getVacatedOrAdjournedHearings();
+
+        if (hearings == null) {
+            throw new IllegalStateException(
+                "No vacated or adjourned hearings available to search for. Working hearing ID is: " + workingHearingId
+            );
+        }
+
+        return Optional.ofNullable(wrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingHearingId))
+            .map(VacatedOrAdjournedHearingsCollectionItem::getValue)
+            .orElseThrow(() -> new IllegalStateException("Vacated hearing not found for the given ID: " + workingHearingId));
     }
 
     /**
@@ -110,7 +127,7 @@ public class HearingCorrespondenceHelper {
      * @return true if notification is required, false otherwise.
      */
     public boolean shouldNotSendNotification(HearingLike hearing) {
-        return YesOrNo.isNoOrNull(hearing.getHearingNoticePrompt());
+       return !hearing.shouldSendNotifications();
     }
 
     /**
