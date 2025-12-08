@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
@@ -30,6 +31,7 @@ public class HearingCorrespondenceHelper {
     private final ExpressCaseService expressCaseService;
 
     /**
+     * PT todo - update tests
      * Retrieves the {@link Hearing} currently in context based on the working hearing ID from the case data.
      *
      * <p>This method accesses the {@link ManageHearingsWrapper} from the given {@link FinremCaseData},
@@ -67,8 +69,9 @@ public class HearingCorrespondenceHelper {
 
         if (ManageHearingsAction.VACATE_HEARING.equals(finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection())) {
             UUID workingVacatedHearingId = manageHearingsWrapper.getWorkingVacatedHearingId();
-            return manageHearingsWrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingVacatedHearingId).getValue();
-            //  Pt todo * Throws IllegalArgumentException when any segment is missing or code is not a valid UUID.
+            return Optional.ofNullable(manageHearingsWrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingVacatedHearingId))
+                .map(VacatedOrAdjournedHearingsCollectionItem::getValue)
+                .orElseThrow(() -> new IllegalStateException("Vacated hearing not found for the given ID: " + workingVacatedHearingId));
         }
 
         return null;
@@ -175,7 +178,13 @@ public class HearingCorrespondenceHelper {
             .orElse(false);
     }
 
-    // PT todo, docs, check test
+    // PT todo, unit test
+    /*
+     * Some, newly added hearings, only send a hearing notice (and bulk cover sheet).
+     * Returns true user is adding a new hearing and the hearing is the right type.
+     * @param finremCaseDetails used to get action selection
+     * @param hearing used to check the hearing itself
+     */
     public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
         ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
 
@@ -183,10 +192,14 @@ public class HearingCorrespondenceHelper {
             && isHearingThatOnlyNeedsNotice(finremCaseDetails, hearing);
     }
 
-    // PT todo, docs, check test
+    // PT todo, unit test
+    /*
+     * Some, vacated and relisted hearings, only send a hearing and vacate notices (and bulk cover sheet).
+     * Returns true user is vacating and relisting a hearing and the hearing is the right type.
+     * @param finremCaseDetails used to get action selection
+     * @param hearing used to check the hearing itself
+     */
     public boolean shouldPostHearingAndVacateNotices(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
-        // PT todo , refactor, docs,ringAndVacateNotices(FinremCaseDetails finremCaseDetails, Hearing hearing)
-
         ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
 
         boolean hearingIsRelisted =
@@ -197,13 +210,12 @@ public class HearingCorrespondenceHelper {
             && isHearingThatOnlyNeedsNotice(finremCaseDetails, hearing);
     }
 
-    /**
-     * pt todo test, check visivility
-     * Determines if a hearing should only send a Vacate hearing notice.
-     * To return true the Action must be VACATE_HEARING.
-     * (Whenever a vacated hearing was relisted, the action is ADD_HEARING)
-     * @param finremCaseDetails case details
-     * @return true if the hearing should only send a notice, false otherwise
+    // PT todo, unit test
+    /*
+     * Some vacated hearings only send a vacate notice (and bulk cover sheet).
+     * Returns true user is vacating a hearing and not relisting another hearing.
+     * @param finremCaseDetails used to get action selection
+     * @param hearing used to check the hearing itself
      */
     public boolean shouldPostVacateNoticeOnly(FinremCaseDetails finremCaseDetails) {
         ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
@@ -214,17 +226,10 @@ public class HearingCorrespondenceHelper {
         return isVacateHearingAction(actionSelection) && hearingNotRelisted;
     }
 
-    // PT todo - update docs, action selection not used now.
-    /**
-     * Determines if a hearing should send a full set of hearing documents (not just a notice).
-     * To return true:
-     * - the Action must be ADD_HEARING (the action for adding a hearing or relisting a vacated hearing)
-     * - the HearingType must be FDA (First Directions Appointment).
-     * - OR this is an express case and the hearingType is FDR.
-     * Express cases don't require an FDA hearing, so documents are posted for the FDR instead.
-     * @param finremCaseDetails case details
-     * @param hearing the hearing to check
-     * @return true if the hearing should only send a notice, false otherwise
+    // PT Remove this?  Its works, but seems safer to post everything at this point.
+    /*
+     * @param finremCaseDetails used to get action selection
+     * @param hearing used to check the hearing itself
      */
     public boolean shouldPostAllHearingDocuments(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
 
@@ -250,12 +255,24 @@ public class HearingCorrespondenceHelper {
      * @param finremCaseDetails the case details containing the Manage Hearings Wrapper
      * @return the ManageHearingsAction or null if not present
      */
-    private ManageHearingsAction getManageHearingsAction(FinremCaseDetails finremCaseDetails) {
+    public ManageHearingsAction getManageHearingsAction(FinremCaseDetails finremCaseDetails) {
         return Optional.ofNullable(finremCaseDetails)
             .map(FinremCaseDetails::getData)
             .map(FinremCaseData::getManageHearingsWrapper)
             .map(ManageHearingsWrapper::getManageHearingsActionSelection)
             .orElse(null);
+    }
+
+    /*
+     * PT todo: test
+     * Returns true is a hearing was vacated and relisted
+     * @param finremCaseDetails queried to see if the vacate action was chosen and if the hearing was relisted.
+     */
+    public boolean isVacatedAndRelistedHearing(FinremCaseDetails finremCaseDetails) {
+        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
+        boolean hearingRelisted = YesOrNo.YES.equals(
+            finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
+        return isVacateHearingAction(actionSelection) && hearingRelisted;
     }
 
     /**

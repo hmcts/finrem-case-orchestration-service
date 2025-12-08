@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
@@ -47,7 +46,6 @@ public class ManageHearingsCorresponder {
     private final DocumentHelper documentHelper;
     private final BulkPrintService bulkPrintService;
     private final GenericDocumentService genericDocumentService;
-    private final HearingOrderService hearingOrderService;
 
     /**
      * Begin sending hearing correspondence to parties, included based on the callback request data.
@@ -296,14 +294,8 @@ public class ManageHearingsCorresponder {
                 postVacateNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
             } else if (hearingCorrespondenceHelper.shouldPostHearingAndVacateNotices(finremCaseDetails, hearing)) {
                 postHearingAndVacateNotices(finremCaseDetails, caseRole, userAuthorisation);
-            } else if (hearingCorrespondenceHelper.shouldPostAllHearingDocuments(finremCaseDetails, hearing)) {
-                postAllHearingDocuments(finremCaseDetails, caseRole, userAuthorisation);
             } else {
-                // PT todo - test for this.
-                throw new IllegalStateException(
-                    String.format("Case %s not in a supported state to send hearing correspondence. "
-                        + "Arrange sending correspondence manually.",
-                        finremCaseDetails.getCaseIdAsString()));
+                postAllAvailableHearingDocuments(finremCaseDetails, caseRole, userAuthorisation);
             }
         }
     }
@@ -316,37 +308,18 @@ public class ManageHearingsCorresponder {
      */
     private void postHearingNoticeOnly(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
 
-        // PT todo use common func
-        CaseDocument hearingNotice = manageHearingsDocumentService
-            .getHearingNotice(finremCaseDetails);
+        CaseDocument hearingNotice = manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
 
         if (hearingNotice == null) {
-            log.warn("Hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
+            logNullHearingNotice(caseRole, finremCaseDetails.getCaseIdAsString());
             return;
         }
 
         List<CaseDocument> hearingDocuments = new ArrayList<>(List.of(hearingNotice));
-
-
-        // PT todo - use common func
         hearingDocuments.addAll(manageHearingsDocumentService
             .getAdditionalHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
 
-        List<CaseDocument> convertedHearingDocuments = convertDocumentsToPdf(
-            hearingDocuments, userAuthorisation, finremCaseDetails.getCaseType());
-
-        List<BulkPrintDocument> bulkPrintDocuments =
-            documentHelper.getCaseDocumentsAsBulkPrintDocuments(convertedHearingDocuments);
-
-        printDocuments(
-            finremCaseDetails,
-            userAuthorisation,
-            bulkPrintDocuments,
-            caseRole
-        );
-
-        log.info("Request sent to Bulk Print to post notice to the {} party. Request sent for case ID: {}",
-            caseRole, finremCaseDetails.getId());
+        convertDocumentsAndSendToBulkPrint(hearingDocuments, finremCaseDetails, userAuthorisation, caseRole);
     }
 
     /**
@@ -359,26 +332,13 @@ public class ManageHearingsCorresponder {
     private void postVacateNoticeOnly(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
         CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
 
-        // PT todo - use common func
         if (vacateHearingNotice == null) {
-            log.warn("Vacate hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
+            logNullVacateNotice(caseRole, finremCaseDetails.getCaseIdAsString());
             return;
         }
 
-        List<CaseDocument> vacateHearingDocuments = new ArrayList<>(List.of(vacateHearingNotice));
-
-        List<BulkPrintDocument> bulkPrintDocuments =
-            documentHelper.getCaseDocumentsAsBulkPrintDocuments(vacateHearingDocuments);
-
-        printDocuments(
-            finremCaseDetails,
-            userAuthorisation,
-            bulkPrintDocuments,
-            caseRole
-        );
-
-        log.info("Request sent to Bulk Print to post Vacate Hearing notice to the {} party. Request sent for case ID: {}",
-            caseRole, finremCaseDetails.getId());
+        convertDocumentsAndSendToBulkPrint(
+            new ArrayList<>(List.of(vacateHearingNotice)), finremCaseDetails, userAuthorisation, caseRole);
     }
 
     /**
@@ -388,30 +348,72 @@ public class ManageHearingsCorresponder {
      * @param userAuthorisation the user authorisation token.
      */
     private void postHearingAndVacateNotices(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
-
-        // PT todo abstract to a private function reuse
-        CaseDocument hearingNotice = manageHearingsDocumentService
-            .getHearingNotice(finremCaseDetails);
+        CaseDocument hearingNotice = manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
 
         if (hearingNotice == null) {
-            log.warn("Hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
+            logNullHearingNotice(caseRole, finremCaseDetails.getCaseIdAsString());
             return;
         }
 
-        // PT todo abstract to a private function reuse
         CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
 
         if (vacateHearingNotice == null) {
-            log.warn("Vacate hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
+            logNullVacateNotice(caseRole, finremCaseDetails.getCaseIdAsString());
             return;
         }
 
         List<CaseDocument> hearingDocuments = new ArrayList<>(List.of(hearingNotice, vacateHearingNotice));
 
-        // PT todo - abstract below this line
         hearingDocuments.addAll(manageHearingsDocumentService
             .getAdditionalHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
 
+        convertDocumentsAndSendToBulkPrint(hearingDocuments, finremCaseDetails, userAuthorisation, caseRole);
+    }
+
+    /**
+     * Gets all the documents available for a hearing.
+     * A mini form A is generated once so ony needs posting once, so don't send when vacating any hearing.
+     * @param finremCaseDetails the case details.
+     * @param caseRole the case role of the party to whom the documents are being sent.
+     * @param userAuthorisation the user authorisation token.
+     */
+    private void postAllAvailableHearingDocuments(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
+        // Add system generated hearing documents to bundle
+        List<CaseDocument> hearingDocuments = new ArrayList<>(
+            manageHearingsDocumentService.getHearingDocumentsToPost(finremCaseDetails)
+        );
+
+        // Add any additional documents to bundle
+        hearingDocuments.addAll(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
+            finremCaseDetails.getData().getManageHearingsWrapper()));
+
+        // Add a vacate notice to the bundle (when found)
+        CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
+        if (hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseDetails) && vacateHearingNotice != null) {
+            hearingDocuments.add(vacateHearingNotice);
+        }
+
+        // Add mini form A to bundle when adding a hearing
+        ManageHearingsAction actionSelection = hearingCorrespondenceHelper.getManageHearingsAction(finremCaseDetails);
+        if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
+            CaseDocument miniFormA = finremCaseDetails.getData().getMiniFormA();
+            if (miniFormA != null) {
+                hearingDocuments.add(miniFormA);
+            }
+        }
+
+        if (isEmpty(hearingDocuments)) {
+            log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());
+            return;
+        }
+
+        convertDocumentsAndSendToBulkPrint(hearingDocuments, finremCaseDetails, userAuthorisation, caseRole);
+    }
+
+    private void convertDocumentsAndSendToBulkPrint(List<CaseDocument> hearingDocuments,
+                                                    FinremCaseDetails finremCaseDetails,
+                                                    String userAuthorisation,
+                                                    CaseRole caseRole) {
         List<CaseDocument> convertedHearingDocuments = convertDocumentsToPdf(
             hearingDocuments, userAuthorisation, finremCaseDetails.getCaseType());
 
@@ -426,62 +428,6 @@ public class ManageHearingsCorresponder {
         );
 
         log.info("Request sent to Bulk Print to post notice to the {} party. Request sent for case ID: {}",
-            caseRole, finremCaseDetails.getId());
-    }
-
-    /**
-     * Gets the correct hearing documents then sends them to the Bulk Print service.
-     * @param finremCaseDetails the case details.
-     * @param caseRole the case role of the party to whom the documents are being sent.
-     * @param userAuthorisation the user authorisation token.
-     */
-    private void postAllHearingDocuments(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
-        List<CaseDocument> hearingDocuments = new ArrayList<>(
-            manageHearingsDocumentService.getHearingDocumentsToPost(finremCaseDetails)
-        );
-
-        hearingDocuments.addAll(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
-            finremCaseDetails.getData().getManageHearingsWrapper()));
-
-        if (isEmpty(hearingDocuments)) {
-            log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());
-            return;
-        }
-
-        // PT todo This is new: abstract to a private function reuse - smarten up long condition, maybe lose the log/check
-        CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
-        if (ManageHearingsAction.VACATE_HEARING.equals(
-            finremCaseDetails.getData().getManageHearingsWrapper().getManageHearingsActionSelection()) && vacateHearingNotice == null) {
-            log.warn("Vacate hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
-            return;
-        } else {
-            hearingDocuments.add(vacateHearingNotice);
-        }
-
-        // Pt Todo - split and tidy
-        // Mini Form A only posted when hearing is added. Doesn't change when a hearing is relisted, so not sent.
-        if (ManageHearingsAction.ADD_HEARING.equals(
-            finremCaseDetails.getData().getManageHearingsWrapper().getManageHearingsActionSelection())) {
-            CaseDocument miniFormA = finremCaseDetails.getData().getMiniFormA();
-            if (miniFormA != null) {
-                hearingDocuments.add(miniFormA);
-            }
-        }
-
-        List<CaseDocument> convertedHearingDocuments = convertDocumentsToPdf(
-            hearingDocuments, userAuthorisation, finremCaseDetails.getCaseType());
-
-        List<BulkPrintDocument> bulkPrintDocuments =
-            documentHelper.getCaseDocumentsAsBulkPrintDocuments(convertedHearingDocuments);
-
-        printDocuments(
-            finremCaseDetails,
-            userAuthorisation,
-            bulkPrintDocuments,
-            caseRole
-        );
-
-        log.info("Request sent to Bulk Print to post hearing documents to the {} party. Request sent for case ID: {}",
             caseRole, finremCaseDetails.getId());
     }
 
@@ -543,5 +489,13 @@ public class ManageHearingsCorresponder {
         VacateOrAdjournedHearing vacatedHearing =
             finremCaseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingsCollectionItemById(uuid).getValue();
         vacatedHearing.setHearingNoticePrompt(YesOrNo.YES);
+    }
+
+    private void logNullHearingNotice(CaseRole caseRole, String caseId) {
+        log.warn("Hearing notice is null. No document sent to {} for case ID: {}", caseRole, caseId);
+    }
+
+    private static void logNullVacateNotice(CaseRole caseRole, String caseId) {
+        log.warn("Vacate hearing notice is null. No document sent to {} for case ID: {}", caseRole, caseId);
     }
 }
