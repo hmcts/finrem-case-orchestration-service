@@ -164,7 +164,7 @@ public class ManageHearingActionService {
 
         generateVacateHearingNotice(finremCaseDetails, authToken, documentMap);
 
-        setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
+        generateVacateNoticeCoverSheetIfHearingNotRelisted(hearingsWrapper, finremCaseDetails, authToken);
 
         addDocumentsToCollection(documentMap, hearingsWrapper);
 
@@ -441,6 +441,8 @@ public class ManageHearingActionService {
 
     /*
      * Sets workingVacatedHearingId, or reassigns to a new value if vacate hearing has already run for the case.
+     * @param hearingsWrapper the target to set.
+     * @param vacateHearingInput the vacated hearing
      */
     private void setWorkingVacatedHearingId(ManageHearingsWrapper hearingsWrapper, WorkingVacatedHearing vacateHearingInput) {
         hearingsWrapper.setWorkingVacatedHearingId(
@@ -450,5 +452,18 @@ public class ManageHearingActionService {
                 .map(DynamicListElement::getCode)
                 .map(UUID::fromString)
                 .orElse(null));
+    }
+
+     /* Used when Vacating a hearing to generate cover sheets for a notice if a hearing has not been relisted.
+     * If a hearing HAS been relisted, then performAddHearing generates these coversheets instead.
+     * @param hearingsWrapper which is required to see if a hearing is being relisted
+     * @param finremCaseDetails case details containing hearing and case data
+     * @param authToken         authorization token for secure resource access
+     */
+    private void generateVacateNoticeCoverSheetIfHearingNotRelisted(ManageHearingsWrapper hearingsWrapper,
+                                                                    FinremCaseDetails finremCaseDetails, String authToken) {
+        if (YesOrNo.NO.equals(hearingsWrapper.getIsRelistSelected())) {
+            setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
+        }
     }
 }
