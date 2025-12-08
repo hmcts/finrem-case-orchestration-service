@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
@@ -589,6 +590,7 @@ class ManageHearingsDocumentServiceTest {
      * For FDA hearings on fast track cases, check that correct documents returned by getHearingDocumentsToPost.
      * Fast track Form C, Hearing Notice, Form A, Out of court resolution, PFD NCDR Compliance Letter and Cover Letter
      */
+    figuring out why form a not in here
     @Test
     void getHearingDocumentsToPostShouldReturnFdaFastTrackDocuments() {
         // Arrange
@@ -603,6 +605,8 @@ class ManageHearingsDocumentServiceTest {
         );
 
         finremCaseDetails.setData(finremCaseData);
+
+        finremCaseData.getManageHearingsWrapper().setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
 
         // Act
         List<CaseDocument> result = manageHearingsDocumentService.getHearingDocumentsToPost(finremCaseDetails);

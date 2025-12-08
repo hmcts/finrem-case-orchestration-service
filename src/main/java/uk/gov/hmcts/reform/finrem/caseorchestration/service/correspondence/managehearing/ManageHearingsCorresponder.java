@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -28,7 +27,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -62,8 +60,6 @@ public class ManageHearingsCorresponder {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         HearingLike hearing = hearingCorrespondenceHelper.getHearingInContext(finremCaseData);
-
-        doTestThingRemovedThis(finremCaseData);
 
         if (hearingCorrespondenceHelper.shouldNotSendNotification(hearing)) {
             return;
@@ -481,14 +477,6 @@ public class ManageHearingsCorresponder {
         return documents.stream()
             .map(document -> genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseType))
             .toList();
-    }
-
-    // Remove once DFR-4323 completed to limit who corres sent to.
-    private void doTestThingRemovedThis(FinremCaseData finremCaseData) {
-        UUID uuid = finremCaseData.getManageHearingsWrapper().getWorkingVacatedHearingId();
-        VacateOrAdjournedHearing vacatedHearing =
-            finremCaseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingsCollectionItemById(uuid).getValue();
-        vacatedHearing.setHearingNoticePrompt(YesOrNo.YES);
     }
 
     private void logNullHearingNotice(CaseRole caseRole, String caseId) {

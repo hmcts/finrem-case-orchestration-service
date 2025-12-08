@@ -226,30 +226,6 @@ public class HearingCorrespondenceHelper {
         return isVacateHearingAction(actionSelection) && hearingNotRelisted;
     }
 
-    // PT Remove this?  Its works, but seems safer to post everything at this point.
-    /*
-     * @param finremCaseDetails used to get action selection
-     * @param hearing used to check the hearing itself
-     */
-    public boolean shouldPostAllHearingDocuments(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
-
-        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
-        boolean hearingRelisted = YesOrNo.YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
-
-        boolean isVacatedAndRelistedHearing = isVacateHearingAction(actionSelection) && hearingRelisted;
-        boolean isAddedHearing = isAddHearingAction(actionSelection);
-
-        boolean allDocumentsNeedPosting = Optional.ofNullable(hearing)
-            .map(HearingLike::getHearingType)
-            .map(hearingType ->
-                hearingType == HearingType.FDA
-                    || (hearingType == HearingType.FDR && expressCaseService.isExpressCase(finremCaseDetails.getData()))
-            )
-            .orElse(false);
-
-        return allDocumentsNeedPosting && (isAddedHearing || isVacatedAndRelistedHearing);
-    }
-
     /**
      * Retrieves the action selection, e.g. ADD_HEARING, from the Manage Hearings Wrapper in the case details.
      * @param finremCaseDetails the case details containing the Manage Hearings Wrapper

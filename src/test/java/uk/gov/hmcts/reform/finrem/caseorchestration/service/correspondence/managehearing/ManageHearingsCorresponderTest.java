@@ -154,7 +154,6 @@ class ManageHearingsCorresponderTest {
         // Verify
         verify(notificationService).sendHearingNotificationToSolicitor(notificationRequest, CaseRole.APP_SOLICITOR.toString());
         verify(hearingCorrespondenceHelper, never()).shouldPostHearingNoticeOnly(any(), any());
-        verify(hearingCorrespondenceHelper, never()).shouldPostAllHearingDocuments(any(), any());
         verify(bulkPrintService, never()).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
     }
 
@@ -186,7 +185,6 @@ class ManageHearingsCorresponderTest {
         // Verify
         verify(notificationService).sendHearingNotificationToSolicitor(notificationRequest, CaseRole.RESP_SOLICITOR.toString());
         verify(hearingCorrespondenceHelper, never()).shouldPostHearingNoticeOnly(any(), any());
-        verify(hearingCorrespondenceHelper, never()).shouldPostAllHearingDocuments(any(), any());
         verify(bulkPrintService, never()).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
     }
 
@@ -230,7 +228,6 @@ class ManageHearingsCorresponderTest {
             verify(notificationService).sendHearingNotificationToSolicitor(notificationRequest, role.toString());
         }
         verify(hearingCorrespondenceHelper, never()).shouldPostHearingNoticeOnly(any(), any());
-        verify(hearingCorrespondenceHelper, never()).shouldPostAllHearingDocuments(any(), any());
         verify(bulkPrintService, never()).printIntervenerDocuments(any(), (FinremCaseDetails) any(), any(), any());
     }
 
@@ -389,7 +386,6 @@ class ManageHearingsCorresponderTest {
      * - shouldNotSendNotification returns false
      * - shouldPostToApplicant returns true
      * - shouldPostHearingNoticeOnly returns false
-     * - shouldPostAllHearingDocuments returns true
      * Check Bulk Print was called.
      * Confirms that the correct log message is generated.
      */
@@ -407,7 +403,6 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
-        when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
         when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
 
@@ -419,7 +414,7 @@ class ManageHearingsCorresponderTest {
         verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(), any(), any());
         verify(bulkPrintService).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
         assertThat(logs.getInfos())
-            .contains("Request sent to Bulk Print to post hearing documents to the APP_SOLICITOR party. Request sent for case ID: 123");
+            .contains("Request sent to Bulk Print to post notice to the APP_SOLICITOR party. Request sent for case ID: 123");
     }
 
     /**
@@ -427,7 +422,6 @@ class ManageHearingsCorresponderTest {
      * - shouldNotSendNotification returns false
      * - shouldPostToRespondent returns true
      * - shouldPostHearingNoticeOnly returns false
-     * - shouldPostAllHearingDocuments returns true
      * Check Bulk Print was called.
      * Confirms that the correct log message is generated.
      */
@@ -444,7 +438,6 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
-        when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
         when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
         when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
@@ -457,14 +450,13 @@ class ManageHearingsCorresponderTest {
         verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
         assertThat(logs.getInfos())
-            .contains("Request sent to Bulk Print to post hearing documents to the RESP_SOLICITOR party. Request sent for case ID: 123");
+            .contains("Request sent to Bulk Print to post notice to the RESP_SOLICITOR party. Request sent for case ID: 123");
     }
 
     /**
      * Checks that sendHearingCorrespondence recognises that hearing documents should be posted to interveners
      * - shouldNotSendNotification returns false
      * - shouldPostHearingNoticeOnly returns false
-     * - shouldPostAllHearingDocuments returns true
      * Check Bulk Print was called.
      * Confirms that the correct log message is generated.
      */
@@ -489,7 +481,6 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
-        when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
         when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
         when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
@@ -504,7 +495,7 @@ class ManageHearingsCorresponderTest {
 
         caseRoles.forEach(role -> {
             assertThat(logs.getInfos()).contains(
-                "Request sent to Bulk Print to post hearing documents to the " + role + " party. Request sent for case ID: 123");
+                "Request sent to Bulk Print to post notice to the " + role + " party. Request sent for case ID: 123");
         });
     }
 
@@ -562,7 +553,6 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
-        when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
@@ -657,7 +647,6 @@ class ManageHearingsCorresponderTest {
      * - shouldNotSendNotification returns false
      * - postingToApplicant returns true
      * - shouldPostHearingNoticeOnly returns false
-     * - shouldPostAllHearingDocuments returns true
      * Check bulk print was not called and a warning log is generated.
      */
     @Test
@@ -676,7 +665,6 @@ class ManageHearingsCorresponderTest {
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
-        when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
 
         // Act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
