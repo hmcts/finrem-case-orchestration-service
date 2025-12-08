@@ -44,6 +44,7 @@ public class ManageHearingsWrapper {
     private YesOrNo wasRelistSelected;
     private YesOrNo isAddHearingChosen;
     private YesOrNo isFinalOrder;
+    private YesOrNo shouldSendVacateOrAdjNotice;
 
     // Hearing data Repositories
     private List<ManageHearingsCollectionItem> hearings;
