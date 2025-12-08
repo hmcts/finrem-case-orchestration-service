@@ -32,7 +32,7 @@ public class HearingCorrespondenceHelper {
     private final ExpressCaseService expressCaseService;
 
     /**
-     * PT todo - update tests
+     * PT todo - need this still?
      * Retrieves the {@link Hearing} currently in context based on the working hearing ID from the case data.
      *
      * <p>This method accesses the {@link ManageHearingsWrapper} from the given {@link FinremCaseData},
@@ -62,6 +62,7 @@ public class HearingCorrespondenceHelper {
         return null;
     }
 
+    // pt todo doc and test
     public Hearing getActiveHearingInContext(ManageHearingsWrapper wrapper, UUID workingHearingId) {
 
         List<ManageHearingsCollectionItem> hearings = wrapper.getHearings();
@@ -205,7 +206,7 @@ public class HearingCorrespondenceHelper {
     public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
         ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
 
-        return isAddHearingAction(actionSelection)
+        return isAddHearingAction(actionSelection) || isVacatedAndRelistedHearing(finremCaseDetails)
             && isHearingThatOnlyNeedsNotice(finremCaseDetails, hearing);
     }
 

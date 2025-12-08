@@ -590,7 +590,6 @@ class ManageHearingsDocumentServiceTest {
      * For FDA hearings on fast track cases, check that correct documents returned by getHearingDocumentsToPost.
      * Fast track Form C, Hearing Notice, Form A, Out of court resolution, PFD NCDR Compliance Letter and Cover Letter
      */
-    figuring out why form a not in here
     @Test
     void getHearingDocumentsToPostShouldReturnFdaFastTrackDocuments() {
         // Arrange

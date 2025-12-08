@@ -93,23 +93,20 @@ public class ManageHearingsCorresponder {
         ManageHearingsWrapper wrapper = finremCaseData.getManageHearingsWrapper();
 
         if (hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseDetails)) {
-            Hearing relistedHearing = hearingCorrespondenceHelper.getActiveHearingInContext(wrapper, wrapper.getWorkingHearingId());
-
-            for (PartyOnCaseCollectionItem partyCollection : relistedHearing.getPartiesOnCase()) {
-                PartyOnCase party = partyCollection.getValue();
-                if (party != null) {
-                    sendHearingCorrespondenceByParty(
-                        party.getRole(),
-                        finremCaseDetails,
-                        relistedHearing,
-                        userAuthorisation
-                    );
-                }
-            }
+            sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }
 
         VacateOrAdjournedHearing vacateOrAdjournedHearing = hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(
             wrapper, wrapper.getWorkingHearingId());
+
+        if (hearingCorrespondenceHelper.shouldNotSendNotification(vacateOrAdjournedHearing)) {
+            return;
+        }
+
+        List<PartyOnCaseCollectionItem> partiesOnCaseCollection = vacateOrAdjournedHearing.getPartiesOnCase();
+        if (partiesOnCaseCollection == null || partiesOnCaseCollection.isEmpty()) {
+            return;
+        }
 
         for (PartyOnCaseCollectionItem partyCollection : vacateOrAdjournedHearing.getPartiesOnCase()) {
             PartyOnCase party = partyCollection.getValue();
@@ -333,9 +330,6 @@ public class ManageHearingsCorresponder {
                 postHearingNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
             } else if (hearingCorrespondenceHelper.shouldPostVacateNoticeOnly(finremCaseDetails)) {
                 postVacateNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
-                //TODO: remove as no longer posting single hearing bundles.
-//            } else if (hearingCorrespondenceHelper.shouldPostHearingAndVacateNotices(finremCaseDetails, hearing)) {
-//                postHearingAndVacateNotices(finremCaseDetails, caseRole, userAuthorisation);
             } else {
                 postAllAvailableHearingDocuments(finremCaseDetails, caseRole, userAuthorisation);
             }
@@ -354,7 +348,8 @@ public class ManageHearingsCorresponder {
         CaseDocument hearingNotice = manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
 
         if (hearingNotice == null) {
-            logNullHearingNotice(caseRole, finremCaseDetails.getCaseIdAsString());
+            log.warn("Hearing notice is null. No document sent to {} for case ID: {}", caseRole,
+                finremCaseDetails.getCaseIdAsString());
             return;
         }
 
@@ -377,42 +372,13 @@ public class ManageHearingsCorresponder {
         CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
 
         if (vacateHearingNotice == null) {
-            logNullVacateNotice(caseRole, finremCaseDetails.getCaseIdAsString());
+            log.warn("Vacate hearing notice is null. No document sent to {} for case ID: {}", caseRole,
+                finremCaseDetails.getCaseIdAsString());
             return;
         }
 
         convertDocumentsAndSendToBulkPrint(
             new ArrayList<>(List.of(vacateHearingNotice)), finremCaseDetails, userAuthorisation, caseRole);
-    }
-
-    /**
-     * Gets the hearing notice then sends it to the Bulk Print service.
-     *
-     * @param finremCaseDetails the case details.
-     * @param caseRole          the case role of the party to whom the notice is being sent.
-     * @param userAuthorisation the user authorisation token.
-     */
-    private void postHearingAndVacateNotices(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
-        CaseDocument hearingNotice = manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
-
-        if (hearingNotice == null) {
-            logNullHearingNotice(caseRole, finremCaseDetails.getCaseIdAsString());
-            return;
-        }
-
-        CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
-
-        if (vacateHearingNotice == null) {
-            logNullVacateNotice(caseRole, finremCaseDetails.getCaseIdAsString());
-            return;
-        }
-
-        List<CaseDocument> hearingDocuments = new ArrayList<>(List.of(hearingNotice, vacateHearingNotice));
-
-        hearingDocuments.addAll(manageHearingsDocumentService
-            .getAdditionalHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
-
-        convertDocumentsAndSendToBulkPrint(hearingDocuments, finremCaseDetails, userAuthorisation, caseRole);
     }
 
     /**
@@ -527,13 +493,5 @@ public class ManageHearingsCorresponder {
         return documents.stream()
             .map(document -> genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseType))
             .toList();
-    }
-
-    private void logNullHearingNotice(CaseRole caseRole, String caseId) {
-        log.warn("Hearing notice is null. No document sent to {} for case ID: {}", caseRole, caseId);
-    }
-
-    private static void logNullVacateNotice(CaseRole caseRole, String caseId) {
-        log.warn("Vacate hearing notice is null. No document sent to {} for case ID: {}", caseRole, caseId);
     }
 }
