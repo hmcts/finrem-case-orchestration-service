@@ -305,8 +305,7 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Retrieves the case's current working hearing.
-     * Then uses that to get the most recent hearing document with the passed CaseDocumentType argument.
+     * Gets the most recent hearing document with the passed CaseDocumentType argument.
      * If no notice is found, returns an empty list.
      *
      * @param finremCaseDetails the case details containing the hearing documents.
@@ -317,22 +316,11 @@ public class ManageHearingsDocumentService {
                                                             CaseDocumentType documentType) {
         ManageHearingsWrapper wrapper = finremCaseDetails.getData().getManageHearingsWrapper();
         UUID hearingId = wrapper.getWorkingHearingId();
-
-        return wrapper.getHearingDocumentsCollection().stream()
-            .map(ManageHearingDocumentsCollectionItem::getValue)
-            .filter(Objects::nonNull)
-            .filter(doc -> Objects.equals(hearingId, doc.getHearingId()))
-            .filter(doc -> Objects.equals(documentType, doc.getHearingCaseDocumentType()))
-            .map(ManageHearingDocument::getHearingDocument)
-            .filter(Objects::nonNull)
-            .max(Comparator.comparing(CaseDocument::getUploadTimestamp,
-                Comparator.nullsLast(Comparator.naturalOrder())))
-            .orElse(null);
+        return getCaseDocumentByTypeAndHearingUuid(documentType, wrapper, hearingId);
     }
 
     /**
-     * Retrieves the case's current working hearing.
-     * Then uses that to get the most recent hearing document with the passed CaseDocumentType argument.
+     * Gets the most recent Vacated hearing document with the passed CaseDocumentType argument.
      * If no notice is found, returns an empty list.
      *
      * @param finremCaseDetails the case details containing the hearing documents.
@@ -343,8 +331,17 @@ public class ManageHearingsDocumentService {
                                                             CaseDocumentType documentType) {
         ManageHearingsWrapper wrapper = finremCaseDetails.getData().getManageHearingsWrapper();
         UUID hearingId = wrapper.getWorkingVacatedHearingId();
+        return getCaseDocumentByTypeAndHearingUuid(documentType, wrapper, hearingId);
+    }
 
-        // pt todo - this logic used above - abstract if poss.
+    /**
+     * Retrieves a case document filtered on the UUID of the hearing and document type.
+     *
+     * @param wrapper the ManageHearings wrapper holding the docs
+     * @param documentType      a {@link CaseDocumentType} identifying the type of hearing document.
+     * @return a {@link CaseDocument}
+     */
+    private CaseDocument getCaseDocumentByTypeAndHearingUuid(CaseDocumentType documentType, ManageHearingsWrapper wrapper, UUID hearingId) {
         return wrapper.getHearingDocumentsCollection().stream()
             .map(ManageHearingDocumentsCollectionItem::getValue)
             .filter(Objects::nonNull)

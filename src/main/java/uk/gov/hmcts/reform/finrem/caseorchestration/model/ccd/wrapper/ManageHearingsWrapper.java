@@ -109,12 +109,9 @@ public class ManageHearingsWrapper {
             .orElse(null);
     }
 
-    // PT todo - update now that we use new private var first
     /**
      * Returns the UUID for workingVacatedHearing.getChooseHearings().getValue().getCode().
-     * Distinct workingVacatedHearingId value required for:
-     * a) assignment to a VACATE_HEARING_NOTICE document
-     * b) for use by the submitted handler, to find and post the vacate hearing notice.
+     * workingVacatedHearingId for working vacated hearings, workingVacatedHearingId for new relisted hearings
      * @return UUID which is the unique id for the working vacated hearing (corresponds to an actual vacated hearing).
      */
     public UUID getWorkingVacatedHearingId() {
