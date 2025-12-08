@@ -145,7 +145,8 @@ public class ManageHearingActionService {
             .orElseThrow(() -> new IllegalStateException("Hearings collection is empty"));
         hearings.remove(hearingToVacate);
 
-        VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.fromHearingToVacatedHearing(hearingToVacate, vacateHearingInput);
+        VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.fromHearingToVacatedHearing(hearingToVacate,
+            vacateHearingInput, hearingsWrapper.getShouldSendVacateOrAdjNotice());
 
         VacatedOrAdjournedHearingsCollectionItem vacatedItem = VacatedOrAdjournedHearingsCollectionItem.builder()
             .id(hearingToVacate.getId())
@@ -168,6 +169,7 @@ public class ManageHearingActionService {
         // clear the working values
         hearingsWrapper.setWorkingVacatedHearing(null);
         hearingsWrapper.setIsRelistSelected(null);
+        hearingsWrapper.setShouldSendVacateOrAdjNotice(null);
     }
 
     /**

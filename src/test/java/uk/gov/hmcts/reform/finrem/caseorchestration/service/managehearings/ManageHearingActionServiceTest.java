@@ -379,6 +379,7 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getManageHearingsActionSelection()).isNull();
         assertThat(hearingWrapper.getWorkingVacatedHearing()).isNull();
         assertThat(hearingWrapper.getIsRelistSelected()).isNull();
+        assertThat(hearingWrapper.getShouldSendVacateOrAdjNotice()).isNull();
     }
 
     @Test
