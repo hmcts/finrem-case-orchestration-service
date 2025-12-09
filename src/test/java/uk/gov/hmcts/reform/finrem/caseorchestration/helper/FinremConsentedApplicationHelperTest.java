@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -23,15 +21,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class FinremConsentedApplicationHelperTest {
 
-    @Mock
-    private DocumentConfiguration documentConfigurationMock;
-
     @Test
     public void isVariationOrder() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         callbackRequest.getCaseDetails().getData().getNatureApplicationWrapper().setNatureOfApplication2(
             List.of(NatureApplication.VARIATION_ORDER, NatureApplication.PENSION_SHARING_ORDER, NatureApplication.LUMP_SUM_ORDER));
-        ConsentedApplicationHelper helper = new ConsentedApplicationHelper(documentConfigurationMock);
+        ConsentedApplicationHelper helper = new ConsentedApplicationHelper();
         assertTrue(helper.isVariationOrder(callbackRequest.getCaseDetails().getData()));
     }
 
@@ -42,7 +37,7 @@ public class FinremConsentedApplicationHelperTest {
         data.getNatureApplicationWrapper().setNatureOfApplication2(
             List.of(NatureApplication.VARIATION_ORDER, NatureApplication.PENSION_SHARING_ORDER, NatureApplication.LUMP_SUM_ORDER));
 
-        ConsentedApplicationHelper helper = new ConsentedApplicationHelper(documentConfigurationMock);
+        ConsentedApplicationHelper helper = new ConsentedApplicationHelper();
         helper.setConsentVariationOrderLabelField(data);
 
         assertEquals(VARIATION_ORDER_CAMELCASE_LABEL_VALUE, data.getConsentOrderWrapper().getConsentVariationOrderLabelC());
@@ -55,7 +50,7 @@ public class FinremConsentedApplicationHelperTest {
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
 
-        ConsentedApplicationHelper helper = new ConsentedApplicationHelper(documentConfigurationMock);
+        ConsentedApplicationHelper helper = new ConsentedApplicationHelper();
         helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
 
         assertEquals(CONSENT_ORDER_CAMELCASE_LABEL_VALUE, data.getConsentOrderWrapper().getConsentVariationOrderLabelC());

@@ -36,9 +36,8 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to preview general letter for Case ID: {}", caseDetails.getId());
         validateCaseData(callbackRequest);
         List<String> errors = getErrorsForCreatingPreviewOrFinalLetter(caseDetails);
 
@@ -74,7 +73,7 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
         Optional.ofNullable(wrapper.getGeneralLetterUploadedDocuments())
             .filter(list -> !list.isEmpty())
             .ifPresent(list -> generalLetterService.validateEncryptionOnUploadedDocuments(
-                list, userAuthorisation, String.valueOf(caseDetails.getId()), errors));
+                list, userAuthorisation, caseDetails.getCaseIdAsString(), errors));
     }
 
     private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> buildCallbackResponse(FinremCaseDetails caseDetails,

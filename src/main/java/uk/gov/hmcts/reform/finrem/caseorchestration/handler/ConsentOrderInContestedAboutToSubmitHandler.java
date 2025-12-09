@@ -56,7 +56,7 @@ public class ConsentOrderInContestedAboutToSubmitHandler extends FinremCallbackH
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-        final String caseId = String.valueOf(finremCaseDetails.getId());
+        final String caseId = finremCaseDetails.getCaseIdAsString();
         FinremCaseData caseData = finremCaseDetails.getData();
 
         // Logic moving from MiniFormAController.java

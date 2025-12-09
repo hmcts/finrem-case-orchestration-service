@@ -64,6 +64,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER_RECIPIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 
 public class GeneralLetterServiceTest extends BaseServiceTest {
 
@@ -196,7 +197,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
         assertThat(generalLetterData, hasSize(1));
         verifyDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), null, caseDocument());
-        verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument(), AUTH_TOKEN, String.valueOf(caseDetails.getId()));
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument(), AUTH_TOKEN, CONSENTED);
         verify(genericDocumentService, times(1)).generateDocument(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();

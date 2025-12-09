@@ -47,7 +47,7 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
             hasSize(5));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 
@@ -78,7 +78,6 @@ public class IntervenerThreeOtherDocumentsHandlerTest extends BaseManageDocument
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.CARE_PLAN, CaseDocumentParty.INTERVENER_THREE),
             is(DocumentCategory.ADMINISTRATIVE_DOCUMENTS_OTHER)
         );
-
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES,

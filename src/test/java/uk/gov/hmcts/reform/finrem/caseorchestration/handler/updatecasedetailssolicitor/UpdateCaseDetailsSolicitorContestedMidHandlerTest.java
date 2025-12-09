@@ -67,7 +67,7 @@ class UpdateCaseDetailsSolicitorContestedMidHandlerTest {
 
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR, caseData);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR, caseData);
 
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))

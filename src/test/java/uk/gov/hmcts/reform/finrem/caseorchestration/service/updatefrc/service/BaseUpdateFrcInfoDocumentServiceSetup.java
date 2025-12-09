@@ -27,9 +27,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
 
-public class BaseUpdateFrcInfoDocumentServiceSetup {
+class BaseUpdateFrcInfoDocumentServiceSetup {
 
     @Mock
     protected GenericDocumentService genericDocumentService;
@@ -55,8 +56,6 @@ public class BaseUpdateFrcInfoDocumentServiceSetup {
     private static final String ADDRESSEE_NAME = "addresseeName";
     private static final String CASE_DETAILS = "caseDetails";
     private static final String CASE_DATA = "case_data";
-
-    private Map caseData = null;
     protected CaseDetails caseDetails = null;
 
     protected UpdateFrcInfoLetterDetails updateFrcInfoLetterDetails;
@@ -67,10 +66,14 @@ public class BaseUpdateFrcInfoDocumentServiceSetup {
     private String letterDate;
 
     @BeforeEach
-    public void setUp() {
-        caseData = Map.of(DIVORCE_CASE_NUMBER, "divCaseReference", SOLICITOR_REFERENCE,
+    void setUp() {
+        Map<String, Object> caseData = Map.of(DIVORCE_CASE_NUMBER, "divCaseReference", SOLICITOR_REFERENCE,
             "solicitorReference");
-        caseDetails = CaseDetails.builder().id(1234L).data(caseData).build();
+        caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .caseTypeId(CONTESTED.getCcdType())
+            .data(caseData)
+            .build();
 
         letterDate = DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now());
         updateFrcInfoLetterDetails = UpdateFrcInfoLetterDetails.builder()
@@ -91,7 +94,7 @@ public class BaseUpdateFrcInfoDocumentServiceSetup {
             .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
                 updateFrcInfoLetterDetailsCaptor.capture(),
                 any(),
-                any(), eq("1234"));
+                any(), eq(CONTESTED));
     }
 
     protected void assertPlaceHoldersMap(Map placeholdersMap) {

@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.RespondentLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -107,6 +108,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_BARRISTER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_BARRISTER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
 
 @RunWith(SpringRunner.class)
@@ -120,7 +122,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTes
     RespondentLetterAddresseeGenerator.class, IntervenerOneLetterAddresseeGenerator.class, IntervenerTwoLetterAddresseeGenerator.class,
     IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class,
     InternationalPostalService.class, CourtDetailsConfiguration.class, BarristerLetterServiceAdapter.class,
-    FinremNotificationRequestMapper.class, CaseRoleService.class})
+    FinremNotificationRequestMapper.class, CaseRoleService.class, NotificationRequestBuilderFactory.class})
 public class ManageBarristersITest implements IntegrationTest {
 
     private static final String SERVICE_AUTH_TOKEN = "serviceAuth";
@@ -364,7 +366,7 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenValidRequest_WhenManageBarristerAddedSubmitted_thenProcess() throws URISyntaxException {
+    public void givenValidRequest_WhenManageBarristerAddedSubmitted_thenProcess() {
         CaseDocument addedDocument = CaseDocument.builder().documentBinaryUrl(ADDED_BIN_URL).build();
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
@@ -372,7 +374,7 @@ public class ManageBarristersITest implements IntegrationTest {
                 .build());
         when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
         when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(), any(), any(), eq(CASE_ID)))
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(), any(), any(), eq(CONTESTED)))
             .thenReturn(addedDocument);
         when(organisationApi.findOrganisationByOrgId(any(), any(), any())).thenReturn(organisationsResponse());
 
@@ -391,7 +393,7 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenValidRequest_WhenManageBarristerRemovedSubmitted_thenProcess() throws URISyntaxException {
+    public void givenValidRequest_WhenManageBarristerRemovedSubmitted_thenProcess() {
         CaseDocument removedDocument = CaseDocument.builder().documentBinaryUrl(REMOVED_BIN_URL).build();
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
@@ -399,7 +401,7 @@ public class ManageBarristersITest implements IntegrationTest {
                 .build());
         when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
         when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(), any(), any(), eq(CASE_ID)))
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(), any(), any(), eq(CONTESTED)))
             .thenReturn(removedDocument);
         when(organisationApi.findOrganisationByOrgId(any(), any(), any())).thenReturn(organisationsResponse());
 

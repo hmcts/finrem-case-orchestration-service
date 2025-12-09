@@ -24,6 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMEN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_LETTER_RECIPIENT_CHECK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.VACATE_HEARING_ENABLED;
 
 /**
  * To add a feature toggle flag:
@@ -95,6 +96,13 @@ public class FeatureToggleService {
      */
     public boolean isManageHearingEnabled() {
         return isFeatureEnabled(MANAGE_HEARING_ENABLED);
+    }
+
+    /*
+     * Used for enable vacate hearing feature
+     */
+    public boolean isVacateHearingEnabled() {
+        return isFeatureEnabled(VACATE_HEARING_ENABLED);
     }
 
     /**

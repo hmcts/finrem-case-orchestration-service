@@ -49,19 +49,18 @@ public class UploadApprovedOrderConsentedAboutToSubmitHandler extends FinremCall
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
-
-        String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = finremCaseDetails.getData();
 
         CaseDocument approvedConsentOrder = caseData.getConsentOrderWrapper().getUploadApprovedConsentOrder();
-        CaseDocument approvedConsentOrderPdf = genericDocumentService.convertDocumentIfNotPdfAlready(approvedConsentOrder, userAuthorisation, caseId);
+        CaseDocument approvedConsentOrderPdf = genericDocumentService.convertDocumentIfNotPdfAlready(approvedConsentOrder,
+            userAuthorisation, finremCaseDetails.getCaseType());
         caseData.getConsentOrderWrapper().setUploadApprovedConsentOrder(approvedConsentOrderPdf);
 
         caseData.setLatestConsentOrder(caseData.getConsentOrderWrapper().getUploadApprovedConsentOrder());
         consentOrderApprovedDocumentService
             .addGeneratedApprovedConsentOrderDocumentsToCase(userAuthorisation, finremCaseDetails);
-        
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData)
             .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, data ->

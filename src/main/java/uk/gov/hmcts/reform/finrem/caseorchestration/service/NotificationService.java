@@ -684,7 +684,6 @@ public class NotificationService {
 
     private void sendGeneralEmail(FinremCaseDetails caseDetails, String authToken, EmailTemplateNames templateName) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForGeneralEmail(caseDetails);
-        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
         if (isGeneralEmailWithAttachment(caseDetails)) {
             addGeneralEmailAttachment(caseDetails, notificationRequest, authToken);
         }

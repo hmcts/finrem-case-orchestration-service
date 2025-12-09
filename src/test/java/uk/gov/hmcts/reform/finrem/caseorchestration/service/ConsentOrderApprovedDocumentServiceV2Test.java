@@ -1,116 +1,134 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ActiveProfiles;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 
-@ActiveProfiles("test-mock-feign-clients-generic")
-public class ConsentOrderApprovedDocumentServiceV2Test extends BaseServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ConsentOrderApprovedDocumentServiceV2Test {
 
-    private static final String DEFAULT_COVERSHEET_URL = "defaultCoversheetUrl";
-    private static final String CONSENT_ORDER_APPROVED_COVER_LETTER_URL = "consentOrderApprovedCoverLetterUrl";
+    private static final String CONSENT_ORDER_APPROVED_COVER_LETTER_FILENAME = "consentOrderApprovedCoverLetter.pdf";
+    private static final String APPROVED_CONSENT_ORDER_TEMPLATE = "FL-FRM-LET-ENG-00095.docx";
 
-    @Autowired
-    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
-    @Autowired
+    @Mock
+    private CaseDataService caseDataService;
+    @Mock
     private DocumentHelper documentHelper;
-    @Autowired
+    @Mock
+    private CaseDetails caseDetails;
+    @Mock
+    private ConsentedApplicationHelper consentedApplicationHelper;
+    @Mock
+    private DocumentConfiguration documentConfiguration;
+    @Mock
     private GenericDocumentService genericDocumentService;
-    @Value("${document.approvedConsentOrderFileName}")
-    private String documentApprovedConsentOrderFileName;
+    @Mock
+    private CaseDocument caseDocument;
+    @Mock
+    private BulkPrintDocument bulkPrintDocument;
+
+    @InjectMocks
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
     private FinremCaseDetails finremCaseDetails;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         finremCaseDetails = defaultConsentedFinremCaseDetails();
-        this.finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper());
-
-        Document defaultCoversheet = document();
-        defaultCoversheet.setBinaryUrl(DEFAULT_COVERSHEET_URL);
-
-        Document consentOrderApprovedCoverLetter = document();
-        consentOrderApprovedCoverLetter.setBinaryUrl(CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
     }
 
     @Test
-    public void whenPreparingApplicantLetterPack() {
-        Mockito.reset(genericDocumentService);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
+    void shouldReturnEmptyListWhenNotPaperApplication() {
+        isPaperApplication(false);
+        List<BulkPrintDocument> result = consentOrderApprovedDocumentService
+            .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, APPLICANT);
 
-        FinremCaseDetails finremCaseDetailsTemp = documentHelper.deepCopy(finremCaseDetails, FinremCaseDetails.class);
-        when(genericDocumentService.generateDocument(any(), any(), any(), any()))
-            .thenReturn(caseDocument(FILE_URL, documentApprovedConsentOrderFileName, BINARY_URL));
-        addConsentOrderApprovedDataToCaseDetails(finremCaseDetailsTemp);
-        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService
-            .prepareApplicantLetterPack(finremCaseDetailsTemp, AUTH_TOKEN);
-
-        assertThat(documents, hasSize(0));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void whenPreparingApplicantLetterPack_paperApplication() {
-        Mockito.reset(genericDocumentService);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
+    void shouldAddApprovedConsentOrderCoverLetterForApplicant() {
+        isPaperApplication(true);
+        mockPrepareLetterTemplateData(APPLICANT);
+        isVariationOrder(false);
+        mockApprovedConsentOrder();
 
-        FinremCaseDetails finremCaseDetailsTemp = documentHelper.deepCopy(finremCaseDetails, FinremCaseDetails.class);
-        finremCaseDetailsTemp.getData().setPaperApplication(YesOrNo.YES);
-        when(genericDocumentService.generateDocument(any(), any(), any(), any()))
-            .thenReturn(caseDocument(FILE_URL, documentApprovedConsentOrderFileName, BINARY_URL));
-        addConsentOrderApprovedDataToCaseDetails(finremCaseDetailsTemp);
-        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService
-            .prepareApplicantLetterPack(finremCaseDetailsTemp, AUTH_TOKEN);
+        List<BulkPrintDocument> result = consentOrderApprovedDocumentService
+            .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, APPLICANT);
 
-        assertThat(documents, hasSize(1));
-        assertThat(documents.getFirst().getBinaryFileUrl(), is(BINARY_URL));
+        assertThat(result.getFirst()).isEqualTo(bulkPrintDocument);
     }
 
-    private void addConsentOrderApprovedDataToCaseDetails(FinremCaseDetails caseDetails) {
-        ApprovedOrder.ApprovedOrderBuilder builder = ApprovedOrder.builder();
-        builder.orderLetter(caseDocument());
-        builder.consentOrder(caseDocument());
+    @Test
+    void shouldAddApprovedConsentOrderCoverLetterForRespondent() {
+        isPaperApplication(true);
+        mockPrepareLetterTemplateData(RESPONDENT);
+        isVariationOrder(false);
+        mockApprovedConsentOrder();
 
-        List<PensionTypeCollection> pensionTypeCollections = new ArrayList<>();
-        PensionType pensionType = PensionType.builder().typeOfDocument(PensionDocumentType.FORM_PPF1)
-            .pensionDocument(caseDocument()).build();
-        PensionTypeCollection typeCollection = PensionTypeCollection.builder().typedCaseDocument(pensionType).build();
-        pensionTypeCollections.add(typeCollection);
-        builder.pensionDocuments(pensionTypeCollections);
+        List<BulkPrintDocument> result = consentOrderApprovedDocumentService
+            .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN,DocumentHelper.PaperNotificationRecipient.RESPONDENT);
 
-        List<ConsentOrderCollection> approvedOrderCollection = new ArrayList<>();
-        approvedOrderCollection.add(ConsentOrderCollection.builder().approvedOrder(builder.build()).build());
+        assertThat(result.getFirst()).isEqualTo(bulkPrintDocument);
+    }
 
-        caseDetails.getData().setApprovedOrderCollection(approvedOrderCollection);
+    @Test
+    void shouldAddApprovedConsentOrderCoverLetterForVariationOrder() {
+        isPaperApplication(true);
+        mockPrepareLetterTemplateData(APPLICANT);
+        isVariationOrder(true);
+        when(documentConfiguration.getApprovedVariationOrderNotificationFileName()).thenReturn("VariationOrderApprovedCoverLetter.pdf");
+        when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn(APPROVED_CONSENT_ORDER_TEMPLATE);
+        when(genericDocumentService.generateDocument(any(String.class), any(CaseDetails.class), any(String.class), any(String.class)))
+            .thenReturn(caseDocument);
+        when(documentHelper.mapToBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
+
+        List<BulkPrintDocument> result = consentOrderApprovedDocumentService
+            .addApprovedConsentOrderCoverLetter(finremCaseDetails, AUTH_TOKEN, APPLICANT);
+
+        assertThat(result.getFirst()).isEqualTo(bulkPrintDocument);
+    }
+
+    private void mockApprovedConsentOrder() {
+        when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(CONSENT_ORDER_APPROVED_COVER_LETTER_FILENAME);
+        when(documentConfiguration.getApprovedConsentOrderNotificationTemplate()).thenReturn(APPROVED_CONSENT_ORDER_TEMPLATE);
+        when(genericDocumentService.generateDocument(any(String.class), any(CaseDetails.class), any(String.class), any(String.class)))
+            .thenReturn(caseDocument);
+        when(documentHelper.mapToBulkPrintDocument(any(CaseDocument.class))).thenReturn(bulkPrintDocument);
+    }
+
+    private void isPaperApplication(Boolean value) {
+        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(value);
+    }
+
+    private void isVariationOrder(Boolean value) {
+        when(consentedApplicationHelper.isVariationOrder(any(FinremCaseData.class))).thenReturn(value);
+    }
+
+    private void mockPrepareLetterTemplateData(DocumentHelper.PaperNotificationRecipient recipient) {
+        when(documentHelper.prepareLetterTemplateData(any(FinremCaseDetails.class), eq(recipient)))
+            .thenReturn(caseDetails);
     }
 }

@@ -10,13 +10,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -27,6 +31,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
@@ -43,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VACATE_HEARING_NOTICE_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.getHearingType;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
@@ -116,6 +122,57 @@ public class ManageHearingActionService {
     }
 
     /**
+     * Vacates a selected hearing from the case, transferring its details to the vacated hearings collection.
+     * Removes the specified hearing from the active hearings list and creates a corresponding vacated hearing entry
+     * with additional information provided by the user.
+     *
+     * @param finremCaseDetails case details containing hearing and case data
+     */
+    public void performVacateHearing(FinremCaseDetails finremCaseDetails, String authToken) {
+        FinremCaseData caseData = finremCaseDetails.getData();
+        ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
+
+        WorkingVacatedHearing vacateHearingInput = hearingsWrapper.getWorkingVacatedHearing();
+        UUID selectedHearingId = UUID.fromString(vacateHearingInput.getChooseHearings().getValue().getCode());
+
+        ManageHearingsCollectionItem hearingToVacate = emptyIfNull(hearingsWrapper.getHearings()).stream()
+            .filter(item -> selectedHearingId.equals(item.getId()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No hearing found with ID: " + selectedHearingId));
+
+        List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
+            .filter(list -> !list.isEmpty())
+            .orElseThrow(() -> new IllegalStateException("Hearings collection is empty"));
+        hearings.remove(hearingToVacate);
+
+        VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.fromHearingToVacatedHearing(hearingToVacate,
+            vacateHearingInput, hearingsWrapper.getShouldSendVacateOrAdjNotice());
+
+        VacatedOrAdjournedHearingsCollectionItem vacatedItem = VacatedOrAdjournedHearingsCollectionItem.builder()
+            .id(hearingToVacate.getId())
+            .value(vacatedHearing)
+            .build();
+
+        if (hearingsWrapper.getVacatedOrAdjournedHearings() == null) {
+            hearingsWrapper.setVacatedOrAdjournedHearings(new ArrayList<>());
+        }
+        hearingsWrapper.getVacatedOrAdjournedHearings().add(vacatedItem);
+
+        Map<String, DocumentRecord> documentMap = new HashMap<>();
+
+        generateVacateHearingNotice(finremCaseDetails, authToken, documentMap);
+
+        generateVacateNoticeCoverSheetIfHearingNotRelisted(hearingsWrapper, finremCaseDetails, authToken);
+
+        addDocumentsToCollection(documentMap, hearingsWrapper);
+
+        // clear the working values
+        hearingsWrapper.setWorkingVacatedHearing(null);
+        hearingsWrapper.setIsRelistSelected(null);
+        hearingsWrapper.setShouldSendVacateOrAdjNotice(null);
+    }
+
+    /**
      * Sets the working hearing in the `ManageHearingsWrapper` based on the working hearing ID.
      * Retrieves the hearing associated with the `workingHearingId` from the hearings collection
      * and maps it to a working hearing. If no hearing is found with the specified ID, an exception is thrown.
@@ -182,10 +239,12 @@ public class ManageHearingActionService {
             CaseDocument caseDocument = documentRecord.caseDocument();
             CaseDocumentType caseDocumentType = documentRecord.caseDocumentType();
 
+            UUID hearingId = getHearingIdForDocument(hearingsWrapper, caseDocumentType);
+
             manageHearingDocuments.add(
                 ManageHearingDocumentsCollectionItem.builder()
                     .value(ManageHearingDocument.builder()
-                        .hearingId(hearingsWrapper.getWorkingHearingId())
+                        .hearingId(hearingId)
                         .hearingDocument(caseDocument)
                         .hearingCaseDocumentType(caseDocumentType)
                         .build())
@@ -194,6 +253,24 @@ public class ManageHearingActionService {
         });
 
         hearingsWrapper.setHearingDocumentsCollection(manageHearingDocuments);
+    }
+
+    /*
+     * Usually generated documents are associated to the newly created hearing, so workingHearingId is used.
+     * However, Vacate notices are associated to the hearing that was vacated, so workingVacatedHearingId is used instead.
+     * @param hearingsWrapper - used to get the appropriate id.
+     * @param caseDocumentType - the type of document being checked.  Expects HEARING_NOTICE or VACATE_HEARING_NOTICE.
+     * @return the appropriate UUID
+     */
+    private UUID getHearingIdForDocument(ManageHearingsWrapper hearingsWrapper,
+                                         CaseDocumentType caseDocumentType) {
+
+        if (CaseDocumentType.VACATE_HEARING_NOTICE.equals(caseDocumentType)) {
+            WorkingVacatedHearing workingVacatedHearing = hearingsWrapper.getWorkingVacatedHearing();
+            return ManageHearingsWrapper.getWorkingVacatedHearingId(workingVacatedHearing);
+        }
+
+        return hearingsWrapper.getWorkingHearingId();
     }
 
     /**
@@ -214,6 +291,7 @@ public class ManageHearingActionService {
         List<HearingTabCollectionItem> hearingTabItems = mapAndSortHearings(hearings, caseData);
 
         Map<String, List<HearingTabCollectionItem>> partyTabItems = new LinkedHashMap<>();
+
         partyTabItems.put(APPLICANT, filterHearingTabItems(hearingTabItems, APPLICANT));
         partyTabItems.put(RESPONDENT, filterHearingTabItems(hearingTabItems, RESPONDENT));
         partyTabItems.put(INTERVENER1, filterHearingTabItems(hearingTabItems, INTERVENER1));
@@ -221,14 +299,33 @@ public class ManageHearingActionService {
         partyTabItems.put(INTERVENER3, filterHearingTabItems(hearingTabItems, INTERVENER3));
         partyTabItems.put(INTERVENER4, filterHearingTabItems(hearingTabItems, INTERVENER4));
 
-        caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
-
+        hearingsWrapper.setHearingTabItems(hearingTabItems);
         hearingsWrapper.setApplicantHearingTabItems(partyTabItems.get(APPLICANT));
         hearingsWrapper.setRespondentHearingTabItems(partyTabItems.get(RESPONDENT));
         hearingsWrapper.setInt1HearingTabItems(partyTabItems.get(INTERVENER1));
         hearingsWrapper.setInt2HearingTabItems(partyTabItems.get(INTERVENER2));
         hearingsWrapper.setInt3HearingTabItems(partyTabItems.get(INTERVENER3));
         hearingsWrapper.setInt4HearingTabItems(partyTabItems.get(INTERVENER4));
+
+        List<VacatedOrAdjournedHearingTabCollectionItem> vacatedOrAdjournedHearingTabItems =
+            mapAndSortVacatedAndAdjournedHearings(hearingsWrapper.getVacatedOrAdjournedHearings(), caseData);
+
+        Map<String, List<VacatedOrAdjournedHearingTabCollectionItem>> vacatedOrAdjournedPartyTabItems = new LinkedHashMap<>();
+
+        vacatedOrAdjournedPartyTabItems.put(APPLICANT, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, APPLICANT));
+        vacatedOrAdjournedPartyTabItems.put(RESPONDENT, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, RESPONDENT));
+        vacatedOrAdjournedPartyTabItems.put(INTERVENER1, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, INTERVENER1));
+        vacatedOrAdjournedPartyTabItems.put(INTERVENER2, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, INTERVENER2));
+        vacatedOrAdjournedPartyTabItems.put(INTERVENER3, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, INTERVENER3));
+        vacatedOrAdjournedPartyTabItems.put(INTERVENER4, filterVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems, INTERVENER4));
+
+        hearingsWrapper.setVacatedOrAdjournedHearingTabItems(vacatedOrAdjournedHearingTabItems);
+        hearingsWrapper.setApplicantVacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(APPLICANT));
+        hearingsWrapper.setRespondentVacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(RESPONDENT));
+        hearingsWrapper.setInt1VacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(INTERVENER1));
+        hearingsWrapper.setInt2VacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(INTERVENER2));
+        hearingsWrapper.setInt3VacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(INTERVENER3));
+        hearingsWrapper.setInt4VacOrAdjHearingTabItems(vacatedOrAdjournedPartyTabItems.get(INTERVENER4));
 
         manageHearingsDocumentService.categoriseSystemDuplicateDocs(hearings,
             hearingsWrapper.getHearingDocumentsCollection());
@@ -253,12 +350,43 @@ public class ManageHearingActionService {
             .toList());
     }
 
+    private List<VacatedOrAdjournedHearingTabCollectionItem> filterVacatedOrAdjournedHearingTabItems(
+        List<VacatedOrAdjournedHearingTabCollectionItem> hearingTabItems, String party) {
+        return nullIfEmpty(emptyIfNull(hearingTabItems).stream()
+            .filter(hearingTabItem -> YesOrNo.isYes(hearingTabItem.getValue().getTabWasMigrated())
+                || hearingTabItem.getValue().getTabConfidentialParties().contains(party))
+            .toList());
+    }
+
+    private List<VacatedOrAdjournedHearingTabCollectionItem> mapAndSortVacatedAndAdjournedHearings(
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedOrAdjournedHearings, FinremCaseData caseData) {
+        return nullIfEmpty(emptyIfNull(vacatedOrAdjournedHearings).stream()
+            .sorted(Comparator.comparing(hearing -> hearing.getValue().getHearingDate()))
+            .map(hearing -> VacatedOrAdjournedHearingTabCollectionItem.builder()
+                .id(hearing.getId())
+                .value(hearingTabDataMapper.mapVacatedOrAdjournedHearingToTabData(
+                    hearing,
+                    caseData.getManageHearingsWrapper().getHearingDocumentsCollection()))
+                .build())
+            .toList());
+    }
+
     private void generateHearingNotice(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         documentMap.put(
             HEARING_NOTICE_DOCUMENT,
             new DocumentRecord(
                 manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, authToken),
                 CaseDocumentType.HEARING_NOTICE
+            )
+        );
+    }
+
+    private void generateVacateHearingNotice(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
+        documentMap.put(
+            VACATE_HEARING_NOTICE_DOCUMENT,
+            new DocumentRecord(
+                manageHearingsDocumentService.generateVacateHearingNotice(finremCaseDetails, authToken),
+                CaseDocumentType.VACATE_HEARING_NOTICE
             )
         );
     }
@@ -301,6 +429,20 @@ public class ManageHearingActionService {
 
         if (hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)) {
             generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
+        }
+    }
+
+    /*
+     * Used when Vacating a hearing to generate cover sheets for a notice if a hearing has not been relisted.
+     * If a hearing HAS been relisted, then performAddHearing generates these coversheets instead.
+     * @param hearingsWrapper which is required to see if a hearing is being relisted
+     * @param finremCaseDetails case details containing hearing and case data
+     * @param authToken         authorization token for secure resource access
+     */
+    private void generateVacateNoticeCoverSheetIfHearingNotRelisted(ManageHearingsWrapper hearingsWrapper,
+                                                                    FinremCaseDetails finremCaseDetails, String authToken) {
+        if (YesOrNo.NO.equals(hearingsWrapper.getIsRelistSelected())) {
+            setApplicantAndRespondentCoverSheets(finremCaseDetails, authToken);
         }
     }
 }

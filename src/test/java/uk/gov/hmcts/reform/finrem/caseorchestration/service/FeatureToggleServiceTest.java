@@ -57,7 +57,8 @@ public class FeatureToggleServiceTest {
         "feature.toggle.intervener_enabled=false",
         "feature.toggle.case_file_view_enabled=false",
         "feature.toggle.express_pilot_enabled=false",
-        "feature.toggle.manage_hearing_enabled=false"
+        "feature.toggle.manage_hearing_enabled=false",
+        "feature.toggle.vacate_hearing_enabled=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff extends BaseServiceTest {
 
@@ -114,6 +115,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void isManageHearingEnabled() {
             assertThat(featureToggleService.isManageHearingEnabled(), is(false));
+        }
+
+        @Test
+        public void isVacateHearingEnabled() {
+            assertThat(featureToggleService.isVacateHearingEnabled(), is(false));
         }
     }
 }

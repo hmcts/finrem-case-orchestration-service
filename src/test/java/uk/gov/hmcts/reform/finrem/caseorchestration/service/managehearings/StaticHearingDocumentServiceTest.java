@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentStorageException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -21,12 +22,13 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
 class StaticHearingDocumentServiceTest {
@@ -76,7 +78,7 @@ class StaticHearingDocumentServiceTest {
             .documentUrl("http://localhost:1234/5646")
             .build();
 
-        CaseDocument caseDocument = staticHearingDocumentService.uploadPfdNcdrComplianceLetter(CASE_ID, AUTH_TOKEN);
+        CaseDocument caseDocument = staticHearingDocumentService.uploadPfdNcdrComplianceLetter(CONTESTED, AUTH_TOKEN);
 
         assertThat(caseDocument).isEqualTo(expectedCaseDocument);
     }
@@ -85,7 +87,7 @@ class StaticHearingDocumentServiceTest {
     void givenBadGateway_whenUploadPfdNcdrComplianceLetter_thenThrowsException() {
         mockUploadDocument(HttpStatus.BAD_GATEWAY, "http://localhost:1234/743543", "PfdNcdrComplianceLetter.pdf");
 
-        assertThatThrownBy(() -> staticHearingDocumentService.uploadPfdNcdrComplianceLetter(CASE_ID, AUTH_TOKEN))
+        assertThatThrownBy(() -> staticHearingDocumentService.uploadPfdNcdrComplianceLetter(CONTESTED, AUTH_TOKEN))
             .isInstanceOf(DocumentStorageException.class)
             .hasMessage("Failed to store PFD NCDR Compliance Letter");
     }
@@ -95,7 +97,7 @@ class StaticHearingDocumentServiceTest {
         try (MockedStatic<FileUtils> fileUtilsMock = mockStatic(FileUtils.class)) {
             fileUtilsMock.when(() -> FileUtils.readResourceAsByteArray(anyString())).thenThrow(new IOException());
 
-            assertThatThrownBy(() -> staticHearingDocumentService.uploadPfdNcdrComplianceLetter(CASE_ID, AUTH_TOKEN))
+            assertThatThrownBy(() -> staticHearingDocumentService.uploadPfdNcdrComplianceLetter(CONTESTED, AUTH_TOKEN))
                 .isInstanceOf(DocumentStorageException.class)
                 .hasMessage("Failed to get PFD NCDR Compliance Letter");
         }
@@ -111,7 +113,7 @@ class StaticHearingDocumentServiceTest {
             .documentUrl("http://localhost:1234/23232")
             .build();
 
-        CaseDocument caseDocument = staticHearingDocumentService.uploadPfdNcdrCoverLetter("1234", AUTH_TOKEN);
+        CaseDocument caseDocument = staticHearingDocumentService.uploadPfdNcdrCoverLetter(CONTESTED, AUTH_TOKEN);
 
         assertThat(caseDocument).isEqualTo(expectedCaseDocument);
     }
@@ -120,7 +122,7 @@ class StaticHearingDocumentServiceTest {
     void givenBadGateway_whenUploadPfdNcdrCoverLetter_thenThrowsException() {
         mockUploadDocument(HttpStatus.BAD_GATEWAY, "http://localhost:1234/8766", "PfdNcdrCoverLetter.pdf");
 
-        assertThatThrownBy(() -> staticHearingDocumentService.uploadPfdNcdrCoverLetter("1234", AUTH_TOKEN))
+        assertThatThrownBy(() -> staticHearingDocumentService.uploadPfdNcdrCoverLetter(CONTESTED, AUTH_TOKEN))
             .isInstanceOf(DocumentStorageException.class)
             .hasMessage("Failed to store PFD NCDR Cover Letter");
     }
@@ -130,7 +132,7 @@ class StaticHearingDocumentServiceTest {
         try (MockedStatic<FileUtils> fileUtilsMock = mockStatic(FileUtils.class)) {
             fileUtilsMock.when(() -> FileUtils.readResourceAsByteArray(anyString())).thenThrow(new IOException());
 
-            assertThatThrownBy(() -> staticHearingDocumentService.uploadPfdNcdrCoverLetter("1234", AUTH_TOKEN))
+            assertThatThrownBy(() -> staticHearingDocumentService.uploadPfdNcdrCoverLetter(CONTESTED, AUTH_TOKEN))
                 .isInstanceOf(DocumentStorageException.class)
                 .hasMessage("Failed to get PFD NCDR Cover Letter");
         }
@@ -146,7 +148,7 @@ class StaticHearingDocumentServiceTest {
             .documentUrl("http://localhost:1234/5646")
             .build();
 
-        CaseDocument caseDocument = staticHearingDocumentService.uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN);
+        CaseDocument caseDocument = staticHearingDocumentService.uploadOutOfCourtResolutionDocument(CONTESTED, AUTH_TOKEN);
 
         assertThat(caseDocument).isEqualTo(expectedCaseDocument);
     }
@@ -155,7 +157,7 @@ class StaticHearingDocumentServiceTest {
     void givenBadGateway_whenUploadOutOfCourtResolution_thenThrowsException() {
         mockUploadDocument(HttpStatus.BAD_GATEWAY, "http://localhost:1234/743543", "OutOfFamilyCourtResolution.pdf");
 
-        assertThatThrownBy(() -> staticHearingDocumentService.uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN))
+        assertThatThrownBy(() -> staticHearingDocumentService.uploadOutOfCourtResolutionDocument(CONTESTED, AUTH_TOKEN))
             .isInstanceOf(DocumentStorageException.class)
             .hasMessage("Failed to store Out of Court Resolution Document");
     }
@@ -165,7 +167,7 @@ class StaticHearingDocumentServiceTest {
         try (MockedStatic<FileUtils> fileUtilsMock = mockStatic(FileUtils.class)) {
             fileUtilsMock.when(() -> FileUtils.readResourceAsByteArray(anyString())).thenThrow(new IOException());
 
-            assertThatThrownBy(() -> staticHearingDocumentService.uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN))
+            assertThatThrownBy(() -> staticHearingDocumentService.uploadOutOfCourtResolutionDocument(CONTESTED, AUTH_TOKEN))
                 .isInstanceOf(DocumentStorageException.class)
                 .hasMessage("Failed to get Out of Court Resolution Document");
         }
@@ -178,6 +180,6 @@ class StaticHearingDocumentServiceTest {
             .fileName(fileName)
             .build();
 
-        when(uploadService.upload(anyList(), anyString(), anyString())).thenReturn(List.of(fileUploadResponse));
+        when(uploadService.upload(anyList(), any(CaseType.class), anyString())).thenReturn(List.of(fileUploadResponse));
     }
 }

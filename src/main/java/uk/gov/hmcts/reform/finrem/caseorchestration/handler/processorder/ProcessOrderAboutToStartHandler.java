@@ -44,7 +44,7 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return ABOUT_TO_START.equals(callbackType)
             && CONTESTED.equals(caseType)
-            && (EventType.DIRECTION_UPLOAD_ORDER.equals(eventType) || EventType.PROCESS_ORDER.equals(eventType));
+            && EventType.PROCESS_ORDER.equals(eventType);
     }
 
     @Override
@@ -55,14 +55,16 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
         log.info("Invoking contested event {} about to start callback for Case ID: {}", callbackRequest.getEventType(), caseId);
         FinremCaseData caseData = caseDetails.getData();
 
+        processOrderService.populateUnprocessedUploadHearingDocuments(caseData);
         processOrderService.populateUnprocessedApprovedDocuments(caseData);
         populateMetaDataFields(caseData);
 
-        String error = "There are no draft orders to be processed.";
         List<String> errors = new ArrayList<>();
-        if (CollectionUtils.isEmpty(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
-            && CollectionUtils.isEmpty(caseData.getUploadHearingOrder())) {
+        if (processOrderService.hasNoApprovedOrdersToProcess(caseData)) {
+            String error = "There are no draft orders to be processed.";
             errors.add(error);
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData).errors(errors).build();
         }
 
         // Initialise Working Hearings if the event is PROCESS_ORDER
@@ -82,7 +84,7 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
 
     private void populateMetaDataFields(FinremCaseData caseData) {
         caseData.getDraftOrdersWrapper().setIsLegacyApprovedOrderPresent(YesOrNo.forValue(!CollectionUtils
-            .isEmpty(caseData.getUploadHearingOrder())));
+            .isEmpty(caseData.getUnprocessedUploadHearingDocuments())));
         caseData.getDraftOrdersWrapper().setIsUnprocessedApprovedDocumentPresent(YesOrNo.forValue(!ofNullable(caseData.getDraftOrdersWrapper()
             .getUnprocessedApprovedDocuments()).orElse(List.of()).isEmpty()));
     }

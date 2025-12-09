@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RejectGeneralApplicationDocumentServiceTest extends BaseServiceTest {
@@ -52,7 +53,11 @@ public class RejectGeneralApplicationDocumentServiceTest extends BaseServiceTest
 
     @Before
     public void setUp() {
-        caseDetails = CaseDetails.builder().id(Long.valueOf(caseId)).data(new HashMap<>()).build();
+        caseDetails = CaseDetails.builder()
+            .id(Long.valueOf(caseId))
+            .caseTypeId(CONTESTED.getCcdType())
+            .data(new HashMap<>())
+            .build();
         documentConfiguration = new DocumentConfiguration();
 
         rejectGeneralApplicationDocumentService = new RejectGeneralApplicationDocumentService(generalApplicationRejectionLetterGenerator,
@@ -65,7 +70,7 @@ public class RejectGeneralApplicationDocumentServiceTest extends BaseServiceTest
         when(generalApplicationRejectionLetterGenerator.generate(any(), any(), any())).thenReturn(letterDetails());
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(),
             eq(documentConfiguration.getGeneralApplicationRejectionTemplate()),
-            eq(documentConfiguration.getGeneralApplicationRejectionFileName()), eq(caseId))).thenReturn(expectedCaseDocument());
+            eq(documentConfiguration.getGeneralApplicationRejectionFileName()), eq(CONTESTED))).thenReturn(expectedCaseDocument());
 
         CaseDocument actualDocument = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(caseDetails,
             AUTH_TOKEN,
@@ -75,7 +80,7 @@ public class RejectGeneralApplicationDocumentServiceTest extends BaseServiceTest
 
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersMapCaptor.capture(),
             eq(documentConfiguration.getGeneralApplicationRejectionTemplate()),
-            eq(documentConfiguration.getGeneralApplicationRejectionFileName()), eq(caseId));
+            eq(documentConfiguration.getGeneralApplicationRejectionFileName()), eq(CONTESTED));
 
         Map<String, Object> templateMapData = getCaseDataFromCaptor();
 

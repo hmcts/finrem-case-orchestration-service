@@ -126,6 +126,7 @@ class ManageHearingFormGLetterDetailsMapperTest {
 
         // Assert
         FormGLetterDetails formGLetterDetails = (FormGLetterDetails) result;
+        assertThat(formGLetterDetails.getCaseNumber()).isEqualTo(CASE_ID);
         assertThat(formGLetterDetails.getApplicantFmName()).isEqualTo("John");
         assertThat(formGLetterDetails.getApplicantLName()).isEqualTo("Doe");
         assertThat(formGLetterDetails.getRespondentFmName()).isEqualTo("Jane");

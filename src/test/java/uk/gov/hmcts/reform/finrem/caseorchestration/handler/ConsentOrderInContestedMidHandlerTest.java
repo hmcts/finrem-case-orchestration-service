@@ -30,12 +30,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -159,6 +161,7 @@ class ConsentOrderInContestedMidHandlerTest {
         ConsentOrderWrapper mockedConsentOrderWrapper = mockConsentOrderWrapper();
 
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
+        when(mockedCaseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
         when(mockedCaseDetails.getData()).thenReturn(mockedCaseData);
         when(mockedCaseDetails.getData().getConsentOrder()).thenReturn(caseDocument("consentOrder.pdf"));
         when(mockedCaseDetails.getData().getConsentOrderWrapper()).thenReturn(mockedConsentOrderWrapper);
@@ -187,7 +190,7 @@ class ConsentOrderInContestedMidHandlerTest {
 
     private void verifyValidateEncryptionOnUploadedDocument(int times) {
         verify(bulkPrintDocumentService, times(times))
-            .validateEncryptionOnUploadedDocument(any(CaseDocument.class), anyString(), anyList(), anyString());
+            .validateEncryptionOnUploadedDocument(any(CaseDocument.class), eq(CASE_ID), anyList(), anyString());
     }
 
     private void setupConsentOtherDocumentCollection(FinremCallbackRequest finremCallbackRequest) {

@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumentServiceSetup {
@@ -67,7 +68,7 @@ class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumen
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             updateFrcInfoLetterDetailsCaptor.capture(),
             eq(LIT_DOC_TEMPLATE),
-            eq(LIT_DOC_FILENAME), eq("1234")))
+            eq(LIT_DOC_FILENAME), eq(CONTESTED)))
             .thenReturn(new CaseDocument(APP_LITIGANT_URL, LIT_DOC_FILENAME, null, "", null));
         when(updateFrcInfoLetterDetailsGenerator.generate(any(), any(), any())).thenReturn(updateFrcInfoLetterDetails);
     }
@@ -80,7 +81,7 @@ class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumen
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             updateFrcInfoLetterDetailsCaptor.capture(),
             eq(SOL_DOC_TEMPLATE),
-            eq(SOL_DOC_FILENAME), eq("1234")))
+            eq(SOL_DOC_FILENAME), eq(CONTESTED)))
             .thenReturn(new CaseDocument(APP_SOLICITOR_URL, SOL_DOC_FILENAME, null, "", null));
         when(updateFrcInfoLetterDetailsGenerator.generate(any(), any(), any())).thenReturn(updateFrcInfoLetterDetails);
     }

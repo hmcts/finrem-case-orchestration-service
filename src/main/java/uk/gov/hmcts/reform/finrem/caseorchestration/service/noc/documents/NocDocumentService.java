@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
@@ -25,14 +26,14 @@ public abstract class NocDocumentService {
 
     public CaseDocument generateNoticeOfChangeLetter(String authToken,
                                                      NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
-                                                     String caseId) {
+                                                     CaseType caseType) {
 
         log.info("Calling the GenericDocumentService with template {} and filename {}",
             getNocDocumentTemplate().getTemplateName(), getNocDocumentTemplate().getDocumentFileName());
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken,
             convertNoticeOfChangeLetterDetailsToMap(noticeOfChangeLetterDetails),
             getNocDocumentTemplate().getTemplateName(),
-            getNocDocumentTemplate().getDocumentFileName(), caseId);
+            getNocDocumentTemplate().getDocumentFileName(), caseType);
     }
 
     private Map<String, Object> convertNoticeOfChangeLetterDetailsToMap(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {

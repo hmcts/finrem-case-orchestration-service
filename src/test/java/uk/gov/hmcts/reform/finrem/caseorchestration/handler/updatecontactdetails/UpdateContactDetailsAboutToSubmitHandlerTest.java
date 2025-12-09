@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -30,15 +31,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.HashMap;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,8 +70,8 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     @Test
     void shouldHandleContestedAndConsentedCaseTypes() {
         assertCanHandle(handler,
-                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPDATE_CONTACT_DETAILS),
-                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPDATE_CONTACT_DETAILS)
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPDATE_CONTACT_DETAILS),
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPDATE_CONTACT_DETAILS)
         );
     }
 
@@ -90,12 +95,11 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
 
         handler.handle(request, AUTH_TOKEN);
 
-        verify(updateContactDetailsService, times(1)).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
+        verify(updateContactDetailsService).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
         verify(updateContactDetailsService, never()).handleRepresentationChange(finremCaseData, caseType);
         verify(onlineFormDocumentService, never()).generateContestedMiniForm(any(), any());
         verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(), any(), any());
     }
-
 
     /*
      * Passed CONTESTED, CONSENTED and UNKNOWN Case types.
@@ -119,7 +123,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         var response = handler.handle(request, AUTH_TOKEN);
 
         assertNotNull(response);
-        verify(updateContactDetailsService, times(1)).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
+        verify(updateContactDetailsService).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
         verify(updateContactDetailsService, never()).handleRepresentationChange(finremCaseData, caseType);
         verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(), any(), any());
 
@@ -148,7 +152,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         var response = handler.handle(request, AUTH_TOKEN);
 
         assertNotNull(response);
-        verify(updateContactDetailsService, times(1)).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
+        verify(updateContactDetailsService).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
         verify(updateContactDetailsService, never()).handleRepresentationChange(finremCaseData, caseType);
         verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(), any(), any());
 
@@ -193,12 +197,11 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
 
         assertNotNull(response);
 
-        verify(updateContactDetailsService, times(1)).handleRepresentationChange(finremCaseData, caseType);
-        verify(nocWorkflowService, times(1)).handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetailsBefore);
+        verify(updateContactDetailsService).handleRepresentationChange(finremCaseData, caseType);
+        verify(nocWorkflowService).handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetailsBefore);
         verify(updateContactDetailsService, never()).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
 
         checkGenerateContestedMiniFormCalledForContested(caseType, request);
-
     }
 
     @Test
@@ -211,8 +214,28 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
 
             handler.handle(callbackRequest, AUTH_TOKEN);
             // Check that updateRespondentInRefugeTab is called with our case details instance
-            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
-            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails), times(1));
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails));
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails));
+        }
+    }
+
+    @Test
+    void givenInvalidOrganisationPolicy_whenHandle_thenReturnsValidationError() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseDetails caseDetailsBefore = mock(FinremCaseDetails.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(caseDetails.getData()).thenReturn(finremCaseData);
+
+        try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class)) {
+            mockedStatic.when(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData))
+                .thenReturn(List.of("VALIDATION FAILED"));
+
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+            mockedStatic.verify(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
+            assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
         }
     }
 
@@ -243,18 +266,18 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
-                .builder()
-                .eventType(EventType.UPDATE_CONTACT_DETAILS)
-                .caseDetails(FinremCaseDetails.builder().id(123L)
-                        .data(new FinremCaseData()).build())
-                .caseDetailsBefore(FinremCaseDetails.builder().id(123L)
-                    .data(new FinremCaseData()).build())
-                .build();
+            .builder()
+            .eventType(EventType.UPDATE_CONTACT_DETAILS)
+            .caseDetails(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID))
+                .data(new FinremCaseData()).build())
+            .caseDetailsBefore(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID))
+                .data(new FinremCaseData()).build())
+            .build();
     }
 
     private FinremCallbackRequest createRequest(CaseType caseType, FinremCaseData finremCaseData) {
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(1727874196328932L, caseType, finremCaseData);
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, finremCaseData);
         FinremCaseDetails finremCaseDetailsBefore = new FinremCaseDetails();
         request.setCaseDetailsBefore(finremCaseDetailsBefore);
         return request;
@@ -263,7 +286,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     private void checkGenerateContestedMiniFormCalledForContested(CaseType caseType, FinremCallbackRequest request) {
 
         if (CaseType.CONTESTED.equals(caseType)) {
-            verify(onlineFormDocumentService, times(1)).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
+            verify(onlineFormDocumentService).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
 
         } else if (CaseType.CONSENTED.equals(caseType)) {
             verify(onlineFormDocumentService, never()).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
@@ -271,6 +294,5 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         } else {
             verify(onlineFormDocumentService, never()).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
         }
-
     }
 }

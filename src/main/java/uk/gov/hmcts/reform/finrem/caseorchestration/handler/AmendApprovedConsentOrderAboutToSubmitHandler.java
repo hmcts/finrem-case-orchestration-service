@@ -59,22 +59,22 @@ public class AmendApprovedConsentOrderAboutToSubmitHandler extends FinremCallbac
         StampType stampType = documentHelper.getStampType(caseData);
 
         //Compare existing orders for updates
+        CaseType caseType = caseDetails.getCaseType();
         for (int i = 0; i < collection.size(); i++) {
             ConsentOrderCollection currentOrder = collection.get(i);
             ConsentOrderCollection previousOrder = i < collectionBefore.size() ? collectionBefore.get(i) : null;
 
             ApprovedOrder currentApprovedOrder = currentOrder.getApprovedOrder();
-            String caseId = caseDetails.getId().toString();
 
             //If the user has added a new order
             if (previousOrder == null) {
                 currentApprovedOrder.setOrderLetter(
                     genericDocumentService.stampDocument(currentApprovedOrder.getOrderLetter(), userAuthorisation,
-                        stampType, caseId)
+                        stampType, caseType)
                 );
                 currentApprovedOrder.setConsentOrder(
                     genericDocumentService.stampDocument(currentApprovedOrder.getConsentOrder(), userAuthorisation,
-                        stampType, caseId)
+                        stampType, caseType)
                 );
                 continue;
             }
@@ -85,7 +85,7 @@ public class AmendApprovedConsentOrderAboutToSubmitHandler extends FinremCallbac
                 currentApprovedOrder.setOrderLetter(
                     stampIfUpdated(currentApprovedOrder.getOrderLetter(),
                         previousApprovedOrder.getOrderLetter(),
-                        userAuthorisation, stampType, caseId
+                        userAuthorisation, stampType, caseType
                     )
                 );
             }
@@ -94,7 +94,7 @@ public class AmendApprovedConsentOrderAboutToSubmitHandler extends FinremCallbac
                     stampIfUpdated(
                         currentApprovedOrder.getConsentOrder(),
                         previousApprovedOrder.getConsentOrder(),
-                        userAuthorisation, stampType, caseId
+                        userAuthorisation, stampType, caseType
                     )
                 );
             }
@@ -104,7 +104,7 @@ public class AmendApprovedConsentOrderAboutToSubmitHandler extends FinremCallbac
                         .map(pensionDoc -> {
                             PensionType pensionTypeDoc = pensionDoc.getTypedCaseDocument();
                             pensionTypeDoc.setPensionDocument(genericDocumentService.stampDocument(
-                                pensionTypeDoc.getPensionDocument(), userAuthorisation, stampType, caseDetails.getId().toString()));
+                                pensionTypeDoc.getPensionDocument(), userAuthorisation, stampType, caseType));
                             return pensionDoc;
                         }).toList()
                 );
@@ -119,9 +119,9 @@ public class AmendApprovedConsentOrderAboutToSubmitHandler extends FinremCallbac
         return !current.getDocumentUrl().equals(previous.getDocumentUrl());
     }
 
-    private CaseDocument stampIfUpdated(CaseDocument current, CaseDocument previous, String userAuth, StampType stampType, String caseId) {
+    private CaseDocument stampIfUpdated(CaseDocument current, CaseDocument previous, String userAuth, StampType stampType, CaseType caseType) {
         return isDocumentUpdated(current, previous)
-            ? genericDocumentService.stampDocument(current, userAuth, stampType, caseId)
+            ? genericDocumentService.stampDocument(current, userAuth, stampType, caseType)
             : current;
     }
 }

@@ -43,7 +43,7 @@ public class ApplicantChronologiesStatementCollectionServiceTest extends BaseMan
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
             hasSize(3));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 

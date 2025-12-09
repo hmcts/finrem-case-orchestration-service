@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -67,10 +66,7 @@ class ProcessOrderAboutToStartHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest,
-            Arguments.of(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.PROCESS_ORDER),
-            Arguments.of(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER)
-        );
+        assertCanHandle(underTest, CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.PROCESS_ORDER);
     }
 
     @Test
@@ -102,7 +98,8 @@ class ProcessOrderAboutToStartHandlerTest {
     @Test
     void shouldPopulateIsHavingOldDraftOrders() {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
-            .uploadHearingOrder(List.of(DirectionOrderCollection.builder().build()))
+            .uploadHearingOrder(List.of(DirectionOrderCollection.builder()
+                .value(DirectionOrder.builder().isOrderStamped(YesOrNo.NO).build()).build()))
             .build());
         assertEquals(YesOrNo.YES, underTest.handle(finremCallbackRequest, AUTH_TOKEN).getData().getDraftOrdersWrapper()
             .getIsLegacyApprovedOrderPresent());
@@ -154,12 +151,13 @@ class ProcessOrderAboutToStartHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(EventType.PROCESS_ORDER, FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder()
+                .uploadHearingOrder(List.of(DirectionOrderCollection.builder()
+                    .value(DirectionOrder.builder().isOrderStamped(YesOrNo.NO).build()).build()))
                 .manageHearingsWrapper(ManageHearingsWrapper
                     .builder()
                     .workingHearing(null)
                     .build())
                 .build()));
-
         when(partyService.getAllActivePartyList(callbackRequest.getCaseDetails()))
             .thenReturn(DynamicMultiSelectList
                 .builder()

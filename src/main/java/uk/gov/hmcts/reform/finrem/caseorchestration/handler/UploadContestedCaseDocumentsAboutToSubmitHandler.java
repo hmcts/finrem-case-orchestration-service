@@ -80,7 +80,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         FinremCaseData caseData = caseDetails.getData();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = getValidatedResponse(caseData);
 
-        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
+        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentsWrapper()
+            .getManageCaseDocumentCollection();
         if (response.hasErrors()) {
             return response;
         }
@@ -88,12 +89,10 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         CaseDocumentParty loggedInUserRole =
             getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
 
-
         managedCollections.forEach(doc -> {
             doc.getUploadCaseDocument().setCaseDocumentParty(loggedInUserRole);
             setDefaultsForWithoutPrejudiceDocumentType(doc);
         });
-
 
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.addUploadedDocumentToDocumentCollectionType(callbackRequest, managedCollections));
@@ -111,7 +110,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
 
     private void validateManageCaseDocumentsTypes(FinremCaseData finremCaseData, List<String> errors) {
         List<UploadCaseDocumentCollection> managedCollections =
-            finremCaseData.getManageCaseDocumentCollection();
+            finremCaseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection();
 
         if (CollectionUtils.isEmpty(managedCollections)) {
             return;
@@ -137,11 +136,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
     }
 
     private boolean isAnyDocumentPresent(FinremCaseData caseData) {
-        return CollectionUtils.isNotEmpty(caseData.getManageCaseDocumentCollection());
+        return CollectionUtils.isNotEmpty(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection());
     }
 
     private boolean isAnyTrialBundleDocumentPresent(FinremCaseData caseData) {
-        return caseData.getManageCaseDocumentCollection().stream()
+        return caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection().stream()
             .map(uploadCaseDocumentCollection ->
                 uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType())
             .anyMatch(caseDocumentType -> caseDocumentType.equals(TRIAL_BUNDLE));

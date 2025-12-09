@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assert
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ActiveProfiles("test-mock-feign-clients")
 public class GenericDocumentServiceTest extends BaseServiceTest {
@@ -49,26 +50,26 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldStampDocument() {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, CONTESTED))
             .thenReturn(document());
 
         CaseDocument stampDocument =
-            genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, caseId);
+            genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, CONTESTED);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock).stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId);
+        verify(pdfStampingServiceMock).stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, CONTESTED);
     }
 
     @Test
     public void shouldAnnexStampDocument() {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, caseId))
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, CONTESTED))
             .thenReturn(document());
 
         CaseDocument stampDocument = genericDocumentService
-            .annexStampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, caseId);
+            .annexStampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, CONTESTED);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock).stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, caseId);
+        verify(pdfStampingServiceMock).stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, CONTESTED);
     }
 
     @Test

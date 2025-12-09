@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstructionProcessable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTimeDirection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
@@ -21,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.util.List;
@@ -96,7 +96,7 @@ class HearingProcessorTest {
         when(nonMatchingElement.match(targetDoc)).thenReturn(false);
 
         AnotherHearingRequest anotherHearingRequest = spy(AnotherHearingRequest.class);
-        when(anotherHearingRequest.getTypeOfHearing()).thenReturn(InterimTypeOfHearing.FH);
+        when(anotherHearingRequest.getTypeOfHearing()).thenReturn(HearingType.FH);
         when(anotherHearingRequest.getAdditionalTime()).thenReturn("30 minutes");
         when(anotherHearingRequest.getTimeEstimate()).thenReturn(HearingTimeDirection.STANDARD_TIME);
         when(anotherHearingRequest.getAnyOtherListingInstructions()).thenReturn("Test instructions");
@@ -155,7 +155,6 @@ class HearingProcessorTest {
         CaseDocument draftOrderDocument = CaseDocument.builder().documentUrl("NEW_DOC1.doc").build();
         CaseDocument psaDocument = CaseDocument.builder().documentUrl("NEW_DOC2.doc").build();
 
-
         DraftOrderDocumentReview draftReview = DraftOrderDocumentReview.builder()
             .draftOrderDocument(draftOrderDocument)
             .build();
@@ -173,7 +172,7 @@ class HearingProcessorTest {
                     .judgeApproval1(JudgeApproval.builder().document(draftOrderDocument).build())
                     .build(),
                 AnotherHearingRequest.builder()
-                    .typeOfHearing(InterimTypeOfHearing.FH)
+                    .typeOfHearing(HearingType.FH)
                     .additionalTime("Test additional time")
                     .timeEstimate(HearingTimeDirection.STANDARD_TIME)
                     .anyOtherListingInstructions("Test other listing instruction")
@@ -190,7 +189,7 @@ class HearingProcessorTest {
                     .judgeApproval1(JudgeApproval.builder().document(draftOrderDocument).build())
                     .build(),
                 AnotherHearingRequest.builder()
-                    .typeOfHearing(InterimTypeOfHearing.FH)
+                    .typeOfHearing(HearingType.FH)
                     .additionalTime("Test additional time")
                     .timeEstimate(HearingTimeDirection.STANDARD_TIME)
                     .anyOtherListingInstructions("Test other listing instruction")

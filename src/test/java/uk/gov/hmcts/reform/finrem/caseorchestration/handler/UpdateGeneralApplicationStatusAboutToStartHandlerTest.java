@@ -38,7 +38,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -139,9 +138,9 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
         CaseDocument document = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
-        when(service.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(document);
+        when(service.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CaseType.CONTESTED))).thenReturn(document);
         GeneralApplicationCollectionData migratedData =
-            helper.mapExistingGeneralApplicationToData(data, AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString());
+            helper.mapExistingGeneralApplicationToData(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         migratedData.getGeneralApplicationItems().setGeneralApplicationStatus(GeneralApplicationStatus.REFERRED.getId());
         collection.add(migratedData);
         generalApplicationService.updateGeneralApplicationCollectionData(collection, callbackRequest.getCaseDetails());
@@ -163,9 +162,9 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
         CaseDocument document = CaseDocument.builder().documentFilename("InterimHearingNotice.pdf")
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
-        when(service.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(document);
+        when(service.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CaseType.CONTESTED))).thenReturn(document);
         GeneralApplicationCollectionData migratedData =
-            helper.mapExistingGeneralApplicationToData(data, AUTH_TOKEN, callbackRequest.getCaseDetails().getId().toString());
+            helper.mapExistingGeneralApplicationToData(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         migratedData.getGeneralApplicationItems().setGeneralApplicationStatus(GeneralApplicationStatus.REFERRED.getId());
         collection.add(migratedData);
         generalApplicationService.updateGeneralApplicationCollectionData(collection, callbackRequest.getCaseDetails());

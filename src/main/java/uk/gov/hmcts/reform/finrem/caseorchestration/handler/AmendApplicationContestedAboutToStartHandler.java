@@ -69,10 +69,9 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
         RefugeWrapperUtils.populateRespondentInRefugeQuestion(caseDetails);
 
         // setCurrentUserCaseRoleType so applicantInRefugeQuestion and respondentInRefugeQuestion labels show correctly.
-        String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseDetails.getId().toString(),
+        String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseDetails.getCaseIdAsString(),
                 userAuthorisation);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
-
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())

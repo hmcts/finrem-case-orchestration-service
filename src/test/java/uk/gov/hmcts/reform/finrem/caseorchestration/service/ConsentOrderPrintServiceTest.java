@@ -316,7 +316,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(coverSheetService.generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
-        when(consentOrderApprovedDocumentService.prepareApplicantLetterPack(any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
+        when(consentOrderApprovedDocumentService.addApprovedConsentOrderCoverLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            eq(DocumentHelper.PaperNotificationRecipient.RESPONDENT)))
             .thenReturn(bulkPrintDocuments);
 
         FinremCaseDetails finremCaseDetails = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails,

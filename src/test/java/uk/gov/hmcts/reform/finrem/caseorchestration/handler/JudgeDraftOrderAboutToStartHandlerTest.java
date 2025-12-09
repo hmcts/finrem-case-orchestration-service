@@ -42,14 +42,13 @@ class JudgeDraftOrderAboutToStartHandlerTest {
     }
 
     @Test
-    void givenLegacyDraftOrdersExist_whenHandle_thenShouldPopulateJudgeApprovedOrderCollection() {
-        DraftDirectionOrderCollection previousJudgeApprovedOrder;
+    void givenLegacyDraftOrdersExist_whenHandle_thenShouldPopulateAnEmptyDraftDirectionOrder() {
         FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder();
         builder.draftDirectionWrapper(DraftDirectionWrapper.builder()
             .draftDirectionOrderCollection(List.of(
                 legacyDraftOrder("1"),
                 legacyDraftOrder("2"),
-                previousJudgeApprovedOrder = previousJudgeApprovedOrder("1")
+                previousJudgeApprovedOrder()
             ))
             .build());
 
@@ -59,14 +58,12 @@ class JudgeDraftOrderAboutToStartHandlerTest {
 
         FinremCaseData toBeTested = response.getData();
 
-        assertThat(toBeTested.getDraftDirectionWrapper())
-            .extracting(DraftDirectionWrapper::getJudgeApprovedOrderCollection)
-            .satisfies(judgeApprovedOrderCollection ->
-                assertThat(judgeApprovedOrderCollection).containsExactly(previousJudgeApprovedOrder));
+        assertThat(toBeTested.getDraftDirectionWrapper().getJudgeApprovedOrderCollection())
+            .containsOnly(DraftDirectionOrderCollection.EMPTY_COLLECTION);
     }
 
     @Test
-    void givenNoPreviousJudgesApprovedOrder_whenHandle_thenShouldPopulateEmptyJudgeApprovedOrderCollection() {
+    void givenNoPreviousJudgesApprovedOrder_whenHandle_thenShouldPopulateAnEmptyDraftDirectionOrder() {
         FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder();
         builder.draftDirectionWrapper(DraftDirectionWrapper.builder()
             .draftDirectionOrderCollection(List.of(
@@ -81,10 +78,8 @@ class JudgeDraftOrderAboutToStartHandlerTest {
 
         FinremCaseData toBeTested = response.getData();
 
-        assertThat(toBeTested.getDraftDirectionWrapper())
-            .extracting(DraftDirectionWrapper::getJudgeApprovedOrderCollection)
-            .satisfies(judgeApprovedOrderCollection ->
-                assertThat(judgeApprovedOrderCollection).isEmpty());
+        assertThat(toBeTested.getDraftDirectionWrapper().getJudgeApprovedOrderCollection())
+            .containsOnly(DraftDirectionOrderCollection.EMPTY_COLLECTION);
     }
 
     @Test
@@ -118,7 +113,8 @@ class JudgeDraftOrderAboutToStartHandlerTest {
             .build();
     }
 
-    private DraftDirectionOrderCollection previousJudgeApprovedOrder(String id) {
+    private DraftDirectionOrderCollection previousJudgeApprovedOrder() {
+        String id = "previousId";
         return DraftDirectionOrderCollection.builder()
             .value(DraftDirectionOrder.builder()
                 .purposeOfDocument(null) // null means judge's approved order

@@ -24,6 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * NewManageCaseDocumentsContestedAboutToSubmitHandler is replacing this handler.
+ *
+ * @deprecated This about-to-submit handler will be removed.
+ */
+@Deprecated(forRemoval = true)
 @Slf4j
 @Service
 public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
@@ -78,7 +84,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
         getValidatedResponse(caseData, warnings);
 
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
-        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentCollection();
+        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentsWrapper()
+            .getManageCaseDocumentCollection();
         addDefaultsToAdministrativeDocuments(managedCollections);
         documentHandlers.forEach(documentCollectionService ->
             documentCollectionService.replaceManagedDocumentsInCollectionType(callbackRequest, managedCollections, true));
@@ -94,7 +101,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     }
 
     private void getValidatedResponse(FinremCaseData caseData, List<String> warnings) {
-        List<UploadCaseDocumentCollection> manageCaseDocumentCollection = caseData.getManageCaseDocumentCollection();
+        List<UploadCaseDocumentCollection> manageCaseDocumentCollection = caseData.getManageCaseDocumentsWrapper()
+            .getManageCaseDocumentCollection();
 
         if (StringUtils.isBlank(caseData.getIntervenerOne().getIntervenerName())
             && isIntervenerPartySelected(CaseDocumentParty.INTERVENER_ONE, manageCaseDocumentCollection)) {

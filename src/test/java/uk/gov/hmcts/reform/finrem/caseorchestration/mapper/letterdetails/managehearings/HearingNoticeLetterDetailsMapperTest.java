@@ -23,12 +23,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.HearingNoticeLetterDetails;
@@ -60,10 +63,12 @@ class HearingNoticeLetterDetailsMapperTest {
     @ParameterizedTest
     @MethodSource("provideHearingDetails")
     void shouldBuildDocumentTemplateDetails(HearingMode hearingMode, String additionalHearingInfo,
-                                            String expectedAttendance, String expectedAdditionalInfo) {
+                                            String expectedAttendance, String expectedAdditionalInfo,
+                                            YesOrNo civilPartnership, String schedule1OrMatrimonial) {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
+            .civilPartnership(civilPartnership)
             .contactDetailsWrapper(ContactDetailsWrapper
                 .builder()
                 .applicantFmName("John")
@@ -72,6 +77,10 @@ class HearingNoticeLetterDetailsMapperTest {
                 .respondentLname("Smith")
                 .solicitorReference(TestConstants.TEST_SOLICITOR_REFERENCE)
                 .respondentSolicitorReference(TestConstants.TEST_RESP_SOLICITOR_REFERENCE)
+                .build())
+            .scheduleOneWrapper(ScheduleOneWrapper
+                .builder()
+                .typeOfApplication(Schedule1OrMatrimonialAndCpList.forValue(schedule1OrMatrimonial))
                 .build())
             .manageHearingsWrapper(
                 ManageHearingsWrapper.builder()
@@ -143,12 +152,28 @@ class HearingNoticeLetterDetailsMapperTest {
         assertThat(hearingNoticeDetails.getAdditionalHearingInformation()).isEqualTo(expectedAdditionalInfo);
         assertThat(hearingNoticeDetails.getCourtDetails()).isEqualTo(courtTemplateFields);
         assertThat(hearingNoticeDetails.getHearingVenue()).isEqualTo("London Court, 123 Court Street, London");
+        assertThat(hearingNoticeDetails.getCivilPartnership()).isEqualTo(civilPartnership.getYesOrNo());
+        assertThat(hearingNoticeDetails.getTypeOfApplication()).isEqualTo(schedule1OrMatrimonial);
     }
 
     private static Stream<Arguments> provideHearingDetails() {
         return Stream.of(
-            Arguments.of(HearingMode.IN_PERSON, "Additional info", "In Person", "Additional info"),
-            Arguments.of(null, null, "", "")
+            Arguments.of(
+                HearingMode.IN_PERSON,
+                "Additional info",
+                "In Person",
+                "Additional info",
+                YesOrNo.YES,
+                Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989.getValue()
+            ),
+            Arguments.of(
+                null,
+                null,
+                "",
+                "",
+                YesOrNo.NO,
+                Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.getValue()
+            )
         );
     }
 

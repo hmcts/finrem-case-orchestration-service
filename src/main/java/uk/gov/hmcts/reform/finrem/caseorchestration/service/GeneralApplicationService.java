@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHel
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -135,10 +136,9 @@ public class GeneralApplicationService {
         if (initialCollectionId != null) {
             GeneralApplicationCollectionData originalGeneralApplicationList
                 = helper.retrieveInitialGeneralApplicationData(
-                caseData,
+                caseDetails,
                 initialCollectionId,
-                userAuthorisation,
-                caseId);
+                userAuthorisation);
             log.info("Case ID: {} Adding initialCollectionId: {}", caseDetails.getId(), initialCollectionId);
             generalApplicationCollectionDataList.add(originalGeneralApplicationList);
         }
@@ -329,12 +329,12 @@ public class GeneralApplicationService {
         generalApplicationItems.setGeneralApplicationCreatedBy(idamService.getIdamFullName(userAuthorisation));
         generalApplicationItems.setGeneralApplicationCreatedDate(LocalDate.now());
         CaseDocument caseDocument =
-            convertToPdf(generalApplicationItems.getGeneralApplicationDocument(), userAuthorisation, caseId);
+            convertToPdf(caseDetails, generalApplicationItems.getGeneralApplicationDocument(), userAuthorisation);
         generalApplicationItems.setGeneralApplicationDocument(caseDocument);
         generalApplicationItems.setGeneralApplicationStatus(GeneralApplicationStatus.CREATED.getId());
         if (generalApplicationItems.getGeneralApplicationDraftOrder() != null) {
             CaseDocument draftDocument =
-                convertToPdf(generalApplicationItems.getGeneralApplicationDraftOrder(), userAuthorisation, caseId);
+                convertToPdf(caseDetails, generalApplicationItems.getGeneralApplicationDraftOrder(), userAuthorisation);
             generalApplicationItems.setGeneralApplicationDraftOrder(draftDocument);
         }
 
@@ -343,7 +343,7 @@ public class GeneralApplicationService {
         if (gaSupportDocuments != null && !gaSupportDocuments.isEmpty()) {
             List<GeneralApplicationSupportingDocumentData> generalApplicationSupportingDocumentDataList
                 = gaSupportDocuments.stream()
-                .map(sd -> processSupportingDocuments(sd.getValue(), userAuthorisation, caseId))
+                .map(sd -> processSupportingDocuments(sd.getValue()))
                 .toList();
             generalApplicationItems.setGaSupportDocuments(generalApplicationSupportingDocumentDataList);
         }
@@ -360,9 +360,7 @@ public class GeneralApplicationService {
     }
 
     private GeneralApplicationSupportingDocumentData processSupportingDocuments(
-        GeneralApplicationSuportingDocumentItems sdItems,
-        String userAuthorisation,
-        String caseId) {
+        GeneralApplicationSuportingDocumentItems sdItems) {
         GeneralApplicationSupportingDocumentData.GeneralApplicationSupportingDocumentDataBuilder builder =
             GeneralApplicationSupportingDocumentData.builder();
         builder.id(UUID.randomUUID().toString());
@@ -372,27 +370,27 @@ public class GeneralApplicationService {
         return builder.build();
     }
 
-    private CaseDocument convertToPdf(CaseDocument caseDocument, String userAuthorisation, String caseId) {
+    private CaseDocument convertToPdf(FinremCaseDetails caseDetails, CaseDocument caseDocument, String userAuthorisation) {
         return genericDocumentService.convertDocumentIfNotPdfAlready(
-            documentHelper.convertToCaseDocument(caseDocument), userAuthorisation, caseId);
+            documentHelper.convertToCaseDocument(caseDocument), userAuthorisation, caseDetails.getCaseType());
     }
 
     public void updateCaseDataSubmit(Map<String, Object> caseData,
                                      CaseDetails caseDetailsBefore,
-                                     String authorisationToken,
-                                     String caseId) {
+                                     String authorisationToken) {
         caseData.put(GENERAL_APPLICATION_PRE_STATE, caseDetailsBefore.getState());
         caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE, LocalDate.now());
 
+        CaseType caseType = CaseType.forValue(caseDetailsBefore.getCaseTypeId());
         CaseDocument applicationDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
             documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)), authorisationToken,
-            caseId);
+            caseType);
         caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, applicationDocument);
 
         if (caseData.get(GENERAL_APPLICATION_DRAFT_ORDER) != null) {
             CaseDocument draftOrderPdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
                 documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER)),
-                authorisationToken, caseId);
+                authorisationToken, caseType);
             caseData.put(GENERAL_APPLICATION_DRAFT_ORDER, draftOrderPdfDocument);
         }
         updateGeneralApplicationDocumentCollection(caseData, applicationDocument);

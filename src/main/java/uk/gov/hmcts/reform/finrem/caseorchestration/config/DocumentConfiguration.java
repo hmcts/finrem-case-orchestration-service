@@ -30,13 +30,6 @@ public class DocumentConfiguration {
     private String rejectedVariationOrderFileName;
     private String coversheetFileName;
     private String rejectedOrderDocType;
-    @Getter(AccessLevel.NONE)
-    private String formCFastTrackTemplate;
-    private String formCFastTrackHighCourtTemplate;
-    @Getter(AccessLevel.NONE)
-    private String formCNonFastTrackTemplate;
-    private String formCNonFastTrackHighCourtTemplate;
-    private String formCExpressCaseTemplate;
     private String formCFileName;
     @Getter(AccessLevel.NONE)
     private String formGTemplate;
@@ -99,6 +92,11 @@ public class DocumentConfiguration {
     @Getter(AccessLevel.NONE)
     private String manageHearingHighCourtNoticeTemplate;
     private String manageHearingNoticeFileName;
+    @Getter(AccessLevel.NONE)
+    private String vacateHearingNoticeTemplate;
+    @Getter(AccessLevel.NONE)
+    private String vacateHearingHighCourtNoticeTemplate;
+    private String vacateHearingNoticeFileName;
     @Getter(AccessLevel.NONE)
     private String manageHearingFormCTemplate;
     @Getter(AccessLevel.NONE)
@@ -167,16 +165,8 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? manageHearingHighCourtFormCTemplate : manageHearingFormCTemplate;
     }
 
-    public String getFormCFastTrackTemplate(CaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? formCFastTrackHighCourtTemplate : formCFastTrackTemplate;
-    }
-
     public String getFormCFastTrackTemplate(FinremCaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? manageHearingFastTrackHighCourtFormCTemplate : manageHearingFastTrackFormCTemplate;
-    }
-
-    public String getFormCNonFastTrackTemplate(CaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? formCNonFastTrackHighCourtTemplate : formCNonFastTrackTemplate;
     }
 
     public String getFormGTemplate(CaseDetails caseDetails) {
@@ -250,6 +240,11 @@ public class DocumentConfiguration {
     public String getManageHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
         return isHighCourtSelected(finremCaseDetails) ? manageHearingHighCourtNoticeTemplate
             : manageHearingNoticeTemplate;
+    }
+
+    public String getVacateHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
+        return isHighCourtSelected(finremCaseDetails) ? vacateHearingHighCourtNoticeTemplate
+            : vacateHearingNoticeTemplate;
     }
 
     private boolean isHighCourtSelected(CaseDetails caseDetails) {

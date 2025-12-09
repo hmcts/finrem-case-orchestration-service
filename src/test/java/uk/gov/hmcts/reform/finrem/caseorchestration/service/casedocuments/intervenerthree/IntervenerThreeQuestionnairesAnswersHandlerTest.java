@@ -41,7 +41,7 @@ public class IntervenerThreeQuestionnairesAnswersHandlerTest extends BaseManageD
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
             hasSize(2));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 

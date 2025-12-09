@@ -53,6 +53,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplication.SCHEDULE_ONE;
@@ -108,7 +109,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             placeholdersMap,
             documentConfiguration.getContestedMiniFormTemplate(emptyCaseDetails()),
             documentConfiguration.getContestedMiniFormFileName(),
-            "1234");
+            CONTESTED);
     }
 
     @Test
@@ -124,7 +125,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             placeholdersMap,
             documentConfiguration.getContestedMiniFormScheduleTemplate(finremCaseDetails),
             documentConfiguration.getContestedMiniFormFileName(),
-            "1234");
+            CONTESTED);
     }
 
     @Test
@@ -140,7 +141,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             placeholdersMap,
             documentConfiguration.getContestedMiniFormTemplate(finremCaseDetails),
             documentConfiguration.getContestedMiniFormFileName(),
-            "1234");
+            CONTESTED);
     }
 
     @Test
@@ -178,7 +179,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(
             AUTH_TOKEN, caseDetails));
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), anyMap(),
-            anyString(), anyString(), anyString());
+            anyString(), anyString(), eq(CONTESTED));
     }
 
     @Test
@@ -192,7 +193,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             AUTH_TOKEN, caseDetails));
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), anyMap(),
             eq(documentConfiguration.getContestedDraftMiniFormTemplate()),
-            eq(documentConfiguration.getContestedDraftMiniFormFileName()), anyString());
+            eq(documentConfiguration.getContestedDraftMiniFormFileName()), eq(CONTESTED));
 
     }
 
@@ -218,7 +219,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(
             AUTH_TOKEN, caseDetails));
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), anyMap(),
-            anyString(), anyString(), anyString());
+            anyString(), anyString(), eq(CONTESTED));
     }
 
     private CaseDetails caseDetails() {
@@ -233,8 +234,11 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     private FinremCaseDetails finremCaseDetails() {
         Long caseId = 1234L;
         ScheduleOneWrapper wrapper = ScheduleOneWrapper.builder().typeOfApplication(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build();
-        return FinremCaseDetails.builder().id(caseId).data(
-            FinremCaseData.builder().scheduleOneWrapper(wrapper).miniFormA(caseDocument()).build()).build();
+        return FinremCaseDetails.builder()
+            .id(caseId)
+            .caseType(CONTESTED)
+            .data(FinremCaseData.builder().scheduleOneWrapper(wrapper).miniFormA(caseDocument()).build())
+            .build();
     }
 
     private CaseDetails consentedInContestedCaseDetails(String payload) throws Exception {
@@ -287,7 +291,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     }
 
     private FinremCaseDetails emptyCaseDetails() {
-        return FinremCaseDetails.builder().id(1234L).data(new FinremCaseData()).build();
+        return FinremCaseDetails.builder().id(1234L).caseType(CONTESTED).data(new FinremCaseData()).build();
     }
 
     protected Map<String, Object> convertToMap(Object object) {

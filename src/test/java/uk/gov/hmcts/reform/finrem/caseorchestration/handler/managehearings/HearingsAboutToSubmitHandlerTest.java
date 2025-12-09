@@ -26,8 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -41,6 +41,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
@@ -160,6 +161,44 @@ class HearingsAboutToSubmitHandlerTest {
         //Assert perform tab data
         assertThat(responseManageHearingsWrapper.getApplicantHearingTabItems())
             .contains(hearingTabItem);
+    }
+
+    @Test
+    void givenValidCaseData_whenHandleVacate_thenPerformVacateHearingCalled() {
+        String caseReference = TestConstants.CASE_ID;
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .manageHearingsActionSelection(ManageHearingsAction.VACATE_HEARING)
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
+            Long.parseLong(caseReference), CaseType.CONTESTED, caseData);
+
+        manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
+
+        verify(manageHearingActionService).performVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
+    }
+
+    @Test
+    void givenValidCaseData_whenHandleVacateWithrelist_thenPerformPerfomrAddAndVacateHearingCalled() {
+        String caseReference = TestConstants.CASE_ID;
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .manageHearingsActionSelection(ManageHearingsAction.VACATE_HEARING)
+                .isRelistSelected(YesOrNo.YES)
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
+            Long.parseLong(caseReference), CaseType.CONTESTED, caseData);
+
+        manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
+
+        verify(manageHearingActionService).performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
+        verify(manageHearingActionService).performVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
     }
 
     private WorkingHearing createHearingToAdd() {

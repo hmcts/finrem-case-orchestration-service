@@ -45,7 +45,7 @@ public class ConsentOrderInContestedMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final String caseId = String.valueOf(caseDetails.getId());
+        final String caseId = caseDetails.getCaseIdAsString();
         FinremCaseData caseData = caseDetails.getData();
 
         List<CaseDocument> caseDocumentList = new ArrayList<>();

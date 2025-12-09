@@ -83,7 +83,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -214,7 +213,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Triple.of(legacyDocs, List.of(),
             Map.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED)))
             .thenReturn(caseDocument("http://fakeurl/stampedDoc", "stampedDoc.pdf"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -264,7 +263,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Triple.of(legacyDocs, List.of(),
             Map.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED)))
             .thenReturn(caseDocument("http://fakeurl/stampedDoc", "stampedDoc.pdf"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -313,10 +312,11 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         // below mocking is used for the second invocation on the event where the selectedDocs is cleared in the 1st about-to-submit logic.
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of())).thenReturn(Triple.of(List.of(), List.of(), Map.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
-            .thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
+            eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED))).thenReturn(caseDocument());
 
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), eq(CONTESTED)))
+            .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -335,9 +335,9 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             + "(22222222-878e-475f-ab8e-b2f667d8af64|app_docs2.pdf)+[]"
             + ") to parties: [" + partyListInString() + "]");
 
-        verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
+        verify(genericDocumentService).stampDocument(any(), any(), any(), eq(CONTESTED));
         verify(generalOrderService).isSelectedOrderMatches(any(), any());
-        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED));
         verify(documentHelper).getStampType(caseData);
         verify(dateService).addCreatedDateInFinalOrder(any(), any());
         verify(sendOrdersCategoriser).categorise(caseData);
@@ -373,9 +373,9 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         assertTrue(orderReceivedAtR1.isAfter(orderReceivedAtR2));
 
-        verify(genericDocumentService, times(1)).stampDocument(any(), any(), any(), anyString());
+        verify(genericDocumentService, times(1)).stampDocument(any(), any(), any(), eq(CONTESTED));
         verify(generalOrderService, times(2)).isSelectedOrderMatches(any(), any());
-        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), eq(CONTESTED));
         verify(documentHelper, times(1)).getStampType(caseData);
         verify(dateService, times(1)).addCreatedDateInFinalOrder(any(), any());
         verify(sendOrdersCategoriser, times(2)).categorise(caseData);
@@ -420,9 +420,9 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .thenReturn(Triple.of(List.of(legacyApprovedOrder = caseDocument("http://fakeurl/1111Legacy", "111.pdf")),
                 List.of(caseDocument("http://fakeurl/2222NewFlow", "222.pdf")), Map.of()));
         when(documentHelper.getStampType(data)).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(genericDocumentService.stampDocument(legacyApprovedOrder, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, "123"))
+        when(genericDocumentService.stampDocument(legacyApprovedOrder, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, CONTESTED))
             .thenReturn(caseDocument("http://fakeurl/stampedDocument", "stampedDocument.pdf"));
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(additionalDocument), eq(AUTH_TOKEN), anyString()))
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(additionalDocument, AUTH_TOKEN, CONTESTED))
             .thenReturn(caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -471,7 +471,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .thenReturn(Triple.of(List.of(legacyDocCaseDocument), List.of(),
                 Map.of(legacyDocCaseDocument, List.of(caseDocument("http://fakeurl/legacyAttachment", "legacyAttachmentDoc.pdf")))));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED)))
             .thenReturn(caseDocument("http://fakeurl/stampedDoc", "stampedDoc.pdf"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -490,7 +490,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .map(CaseDocument::getDocumentUrl)
             .containsExactlyInAnyOrder("http://fakeurl/legacyAttachment");
 
-        verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
+        verify(genericDocumentService).stampDocument(any(), any(), any(), eq(CONTESTED));
         verify(documentHelper).getStampType(caseData);
         verify(sendOrdersCategoriser).categorise(caseData);
         verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
@@ -534,7 +534,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().size());
         assertEquals(1, caseData.getFinalOrderCollection().size());
 
-        verify(genericDocumentService, never()).stampDocument(any(), any(), any(), anyString());
+        verify(genericDocumentService, never()).stampDocument(any(), any(), any(), eq(CONTESTED));
         verify(documentHelper, never()).getStampType(caseData);
         verify(sendOrdersCategoriser).categorise(caseData);
         verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
@@ -594,7 +594,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     additionalHearingDocumentFilename,
                     additionalHearingDocumentUrl + "/binary"))
                 .orElse(null)));
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), eq(CONTESTED)))
             .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -791,7 +791,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .build())
                 .build()
         ));
-      
+
         finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
             .agreedDraftOrderCollection(new ArrayList<>(of(
                 AgreedDraftOrderCollection.builder()

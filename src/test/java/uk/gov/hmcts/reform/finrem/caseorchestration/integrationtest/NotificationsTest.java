@@ -48,7 +48,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -71,7 +70,6 @@ public class NotificationsTest extends BaseTest {
     EmailService emailService;
 
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
-    private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/order-not-approved";
     private static final String NOTICE_OF_CHANGE_URL = "/case-orchestration/notify/notice-of-change";
 
     @Autowired
@@ -106,21 +104,6 @@ public class NotificationsTest extends BaseTest {
             .andExpect(content().json(expectedCaseData()));
         Mockito.verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_AVAILABLE));
 
-    }
-
-    @Test
-    public void notifyConsentOrderNotApproved() throws Exception {
-        when(assignCaseAccessService.searchUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
-            .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
-            .build());
-        webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_NOT_APPROVED_URL)
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(content().json(expectedCaseData()));
-        Mockito.verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_NOT_APPROVED));
     }
 
     @Test

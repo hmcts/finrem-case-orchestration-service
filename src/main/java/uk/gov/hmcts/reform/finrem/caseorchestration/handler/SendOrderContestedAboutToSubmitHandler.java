@@ -152,7 +152,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
         }
-        
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
 
@@ -166,8 +166,8 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         CaseDocument document = caseData.getSendOrderWrapper().getAdditionalDocument();
         if (document != null) {
             log.info("Additional uploaded document with send order {} for Case ID: {}", document, getCaseId(caseDetails));
-            CaseDocument additionalUploadedOrderDoc = genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation,
-                getCaseId(caseDetails));
+            CaseDocument additionalUploadedOrderDoc = genericDocumentService.convertDocumentIfNotPdfAlready(document,
+                userAuthorisation, caseDetails.getCaseType());
             printOrderCollection.add(addToPrintOrderCollection(additionalUploadedOrderDoc));
             caseData.getSendOrderWrapper().setAdditionalDocument(additionalUploadedOrderDoc);
         }
@@ -382,7 +382,8 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             AtomicReference<YesOrNo> result = isOrderAlreadyStamped(caseData, latestHearingOrder);
             if (result.get() == null || result.get().equals(YesOrNo.NO)) {
                 StampType stampType = documentHelper.getStampType(caseData);
-                CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, getCaseId(caseDetails));
+                CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType,
+                    caseDetails.getCaseType());
                 log.info("Stamped Documents = {} for caseId {}", stampedDocs, getCaseId(caseDetails));
                 finalOrderCollection.add(prepareFinalOrderList(stampedDocs, additionalAttachments));
                 log.info("If Existing final order collection = {}", finalOrderCollection);

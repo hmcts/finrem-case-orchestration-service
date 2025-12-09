@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
 class RefusedOrderGeneratorTest {
@@ -46,11 +47,13 @@ class RefusedOrderGeneratorTest {
     @Test
     void shouldGenerateRefuseOrder() {
         // Arrange
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(12345L).build();
-        FinremCaseData caseData = new FinremCaseData();
-        DraftOrdersWrapper draftOrdersWrapper = new DraftOrdersWrapper();
-        caseData.setDraftOrdersWrapper(draftOrdersWrapper);
-        finremCaseDetails.setData(caseData);
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .id(12345L)
+            .caseType(CONTESTED)
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder().build())
+                .build())
+            .build();
 
         String refusalReason = "Insufficient information";
         LocalDateTime refusedDate = LocalDateTime.now();
@@ -59,7 +62,6 @@ class RefusedOrderGeneratorTest {
         String templateName = "templateName";
         String fileName = "fileName.dcc";
         String modifiedFilename = "fileName_ABC.doc";
-        String caseId = "12345";
         CaseDocument expectedDocument = new CaseDocument();
 
         Map<String, Object> templateDetailsMap = Map.of("key", "value");
@@ -77,7 +79,7 @@ class RefusedOrderGeneratorTest {
                 templateDetailsMap,
                 templateName,
                 modifiedFilename, // Match the actual argument
-                caseId
+                CONTESTED
             )).thenReturn(expectedDocument);
 
             // Act
@@ -89,13 +91,14 @@ class RefusedOrderGeneratorTest {
             assertEquals(expectedDocument, result);
 
             // Verify that temporary values are cleared
+            DraftOrdersWrapper draftOrdersWrapper = finremCaseDetails.getData().getDraftOrdersWrapper();
             assertNull(draftOrdersWrapper.getGeneratedOrderReason());
             assertNull(draftOrdersWrapper.getGeneratedOrderRefusedDate());
             assertNull(draftOrdersWrapper.getGeneratedOrderJudgeName());
             assertNull(draftOrdersWrapper.getGeneratedOrderJudgeType());
 
             verify(genericDocumentService).generateDocumentFromPlaceholdersMap(AUTH_TOKEN, templateDetailsMap, templateName, modifiedFilename,
-                caseId);
+                CONTESTED);
             verifyNoMoreInteractions(genericDocumentService);
         }
     }

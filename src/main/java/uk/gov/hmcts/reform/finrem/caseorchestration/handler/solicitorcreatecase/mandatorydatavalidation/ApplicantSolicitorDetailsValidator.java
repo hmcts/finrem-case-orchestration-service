@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
+public class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
 
     @Override
     public List<String> validate(FinremCaseData caseData) {

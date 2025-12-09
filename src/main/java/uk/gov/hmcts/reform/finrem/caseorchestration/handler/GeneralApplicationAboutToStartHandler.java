@@ -51,9 +51,9 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = caseDetails.getId().toString();
-        log.info("Start callback event type {} for Case ID: {}", EventType.GENERAL_APPLICATION, caseId);
+        String caseId = caseDetails.getCaseIdAsString();
         FinremCaseData caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingGeneralApplication =
@@ -62,8 +62,7 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
         log.info("GA AboutToStartHandler beginning existing General Application List size: {} for case ID: {}",
             existingGeneralApplication.size(), caseId);
 
-        GeneralApplicationCollectionData data =
-            helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
+        GeneralApplicationCollectionData data = helper.mapExistingGeneralApplicationToData(caseDetails, userAuthorisation);
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);

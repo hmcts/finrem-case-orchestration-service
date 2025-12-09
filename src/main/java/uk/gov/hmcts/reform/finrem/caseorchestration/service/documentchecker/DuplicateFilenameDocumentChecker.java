@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -64,6 +65,9 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
             Field[] fields = hcd.getClass().getDeclaredFields();
 
             for (Field field : fields) {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    continue; // skip static fields
+                }
                 field.setAccessible(true);
 
                 // Check if the field is a List with a parameterized type

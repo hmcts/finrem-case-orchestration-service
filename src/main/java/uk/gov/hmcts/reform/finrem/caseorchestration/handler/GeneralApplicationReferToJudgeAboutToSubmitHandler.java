@@ -44,11 +44,9 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
         FinremCallbackRequest callbackRequest,
         String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Received on start request to {} for Case ID: {}",
-            EventType.GENERAL_APPLICATION_REFER_TO_JUDGE,
-            caseId);
+        String caseId = caseDetails.getCaseIdAsString();
         FinremCaseData caseData = caseDetails.getData();
         helper.populateGeneralApplicationSender(caseData, caseData.getGeneralApplicationWrapper().getGeneralApplications());
 
@@ -56,7 +54,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
         DynamicList dynamicList = helper.objectToDynamicList(caseData.getGeneralApplicationWrapper().getGeneralApplicationReferList());
 
         if (existingList.isEmpty() && caseData.getGeneralApplicationWrapper().getGeneralApplicationCreatedBy() != null) {
-            migrateExistingApplication(caseDetails, userAuthorisation, caseId);
+            migrateExistingApplication(caseDetails, userAuthorisation);
 
         } else {
             if (dynamicList == null) {
@@ -85,12 +83,12 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler extends FinremCa
             ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(null));
     }
 
-    private void migrateExistingApplication(FinremCaseDetails caseDetails, String userAuthorisation, String caseId) {
+    private void migrateExistingApplication(FinremCaseDetails caseDetails, String userAuthorisation) {
         FinremCaseData caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
         GeneralApplicationCollectionData data =
-            helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
+            helper.mapExistingGeneralApplicationToData(caseDetails, userAuthorisation);
         if (data != null) {
             data.getGeneralApplicationItems().setGeneralApplicationStatus(REFERRED.getId());
             existingGeneralApplication.add(data);

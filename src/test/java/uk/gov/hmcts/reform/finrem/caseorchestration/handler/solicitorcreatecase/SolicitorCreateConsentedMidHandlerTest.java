@@ -15,8 +15,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
@@ -27,7 +31,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +52,8 @@ class SolicitorCreateConsentedMidHandlerTest {
     private InternationalPostalService internationalPostalService;
     @Spy
     private ObjectMapper objectMapper;
+    @Spy
+    private ConsentedApplicationHelper consentedApplicationHelper;
 
     @Test
     void testCanHandle() {
@@ -89,9 +94,9 @@ class SolicitorCreateConsentedMidHandlerTest {
                     List<String> consentErrors,
                     List<String> expectedErrors) {
 
-        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCaseData caseData = FinremCaseData.builder().build();
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONSENTED, SOLICITOR_CREATE, caseData);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONSENTED, SOLICITOR_CREATE, caseData);
 
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
@@ -111,5 +116,20 @@ class SolicitorCreateConsentedMidHandlerTest {
             verify(internationalPostalService).validate(caseData);
             verify(consentOrderService).performCheck(any(CallbackRequest.class), eq(AUTH_TOKEN));
         }
+    }
+
+    @Test
+    void givenHighCourtSelected_whenHandled_thenPopulateAnErrorMessage() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .regionWrapper(RegionWrapper.builder()
+                .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
+                    .regionList(Region.HIGHCOURT)
+                    .build())
+                .build())
+            .build();
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
+        assertThat(response.getErrors()).containsExactly("You cannot select the High Court for a consent application.");
     }
 }

@@ -39,9 +39,8 @@ public class CreateGeneralLetterConsentMidHandler extends FinremCallbackHandler 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to consent general letter for Case ID: {}", caseDetails.getId());
         validateCaseData(callbackRequest);
         FinremCaseData caseData = caseDetails.getData();
         resetInterveners(caseData);
@@ -51,7 +50,7 @@ public class CreateGeneralLetterConsentMidHandler extends FinremCallbackHandler 
             Optional.ofNullable(caseData.getGeneralLetterWrapper().getGeneralLetterUploadedDocuments())
                 .filter(list -> !list.isEmpty())
                 .ifPresent(list -> generalLetterService.validateEncryptionOnUploadedDocuments(
-                    list, userAuthorisation, String.valueOf(caseDetails.getId()), errors));
+                    list, userAuthorisation, caseDetails.getCaseIdAsString(), errors));
 
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).data(caseData).build();
         } else {

@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-public class DraftDirectionOrder implements HasCaseDocument, HasUploadingDocuments {
+public class DraftDirectionOrder implements HasCaseDocument, HasUploadingDocuments, UploadedApprovedOrder {
 
     @JsonProperty("purposeOfDocument")
     String purposeOfDocument;
@@ -32,5 +32,11 @@ public class DraftDirectionOrder implements HasCaseDocument, HasUploadingDocumen
     @JsonIgnore
     public List<CaseDocument> getUploadingDocuments() {
         return uploadDraftDocument != null ? List.of(uploadDraftDocument) : List.of();
+    }
+
+    @JsonIgnore
+    @Override
+    public CaseDocument getApprovedOrder() {
+        return uploadDraftDocument;
     }
 }

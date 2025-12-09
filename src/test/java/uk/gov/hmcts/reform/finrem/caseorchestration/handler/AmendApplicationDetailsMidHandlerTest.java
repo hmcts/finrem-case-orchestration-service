@@ -102,7 +102,7 @@ class AmendApplicationDetailsMidHandlerTest {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCaseData caseDataBefore = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, eventType, caseData, caseDataBefore);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, eventType, caseData, caseDataBefore);
 
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
@@ -136,7 +136,7 @@ class AmendApplicationDetailsMidHandlerTest {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCaseData caseDataBefore = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.create(Long.valueOf(CASE_ID), CONTESTED, eventType, caseData, caseDataBefore);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, eventType, caseData, caseDataBefore);
 
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);

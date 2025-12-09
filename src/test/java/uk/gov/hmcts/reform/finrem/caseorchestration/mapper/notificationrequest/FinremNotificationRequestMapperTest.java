@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
@@ -39,6 +40,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
@@ -65,7 +68,10 @@ class FinremNotificationRequestMapperTest {
     ObjectMapper mapper;
     @Mock
     ConsentedApplicationHelper consentedApplicationHelper;
+    @Mock
+    NotificationRequestBuilderFactory builderFactory;
 
+    private CourtDetailsConfiguration courtDetailsConfiguration;
     private FinremCaseDetails consentedFinremCaseDetails;
     private FinremCaseDetails contestedFinremCaseDetails;
 
@@ -73,6 +79,8 @@ class FinremNotificationRequestMapperTest {
     void setup() {
         // Register the JavaTimeModule for Java 8 Date/Time support
         mapper.registerModule(new JavaTimeModule());
+
+        courtDetailsConfiguration = mock(CourtDetailsConfiguration.class);
         consentedFinremCaseDetails = getConsentedFinremCaseDetails();
         contestedFinremCaseDetails = getContestedFinremCaseDetails();
     }
@@ -387,8 +395,12 @@ class FinremNotificationRequestMapperTest {
 
     @Test
     void givenContestedCaseData_whenGeneralEmail_thenBuildNotificationRequest() {
+        mockNotificationRequestBuilderFactory();
+
+        String emailRecipient = "test@test.com";
         String emailBody = "This is a contested case test email";
         contestedFinremCaseDetails.getData().setGeneralEmailWrapper(GeneralEmailWrapper.builder()
+            .generalEmailRecipient(emailRecipient)
             .generalEmailBody(emailBody)
             .build());
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForGeneralEmail(contestedFinremCaseDetails);
@@ -397,7 +409,7 @@ class FinremNotificationRequestMapperTest {
         assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
         assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
         assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
-        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals(emailRecipient, notificationRequest.getNotificationEmail());
         assertEquals(emailBody, notificationRequest.getGeneralEmailBody());
         assertEquals("contested", notificationRequest.getCaseType());
         assertEquals("nottingham", notificationRequest.getSelectedCourt());
@@ -407,8 +419,12 @@ class FinremNotificationRequestMapperTest {
 
     @Test
     void givenConsentedCaseData_whenGeneralEmail_thenBuildNotificationRequest() {
+        mockNotificationRequestBuilderFactory();
+
+        String emailRecipient = "test@test.com";
         String emailBody = "This is a consented case test email";
         consentedFinremCaseDetails.getData().setGeneralEmailWrapper(GeneralEmailWrapper.builder()
+            .generalEmailRecipient(emailRecipient)
             .generalEmailBody(emailBody)
             .build());
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForGeneralEmail(consentedFinremCaseDetails);
@@ -417,13 +433,17 @@ class FinremNotificationRequestMapperTest {
         assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
         assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
         assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
-        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
-        assertEquals(emailBody, notificationRequest.getGeneralEmailBody());
+        assertEquals(emailRecipient, notificationRequest.getNotificationEmail());
         assertEquals("consented", notificationRequest.getCaseType());
         assertEquals("consent", notificationRequest.getCaseOrderType());
         assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
         assertEquals("David Goodman", notificationRequest.getRespondentName());
         assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+    }
+
+    private void mockNotificationRequestBuilderFactory() {
+        NotificationRequestBuilder builder = new NotificationRequestBuilder(courtDetailsConfiguration, consentedApplicationHelper);
+        when(builderFactory.newInstance()).thenReturn(builder);
     }
 
     @SneakyThrows

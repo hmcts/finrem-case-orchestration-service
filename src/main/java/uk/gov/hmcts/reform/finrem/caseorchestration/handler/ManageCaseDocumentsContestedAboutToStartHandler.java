@@ -14,6 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Legacy
 
 import java.util.List;
 
+/**
+ * Event "FR_manageCaseDocuments" will be replaced by "FR_newManageCaseDocuments soon.
+ * Similar logics have been moved to ManageCaseDocumentsContestedMidHandler
+ *
+ * @deprecated Event "FR_manageCaseDocuments" will be replaced by "FR_newManageCaseDocuments soon.
+ */
+@Deprecated(forRemoval = true)
 @Slf4j
 @Service
 public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallbackHandler {
@@ -39,7 +46,8 @@ public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallb
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        caseData.setManageCaseDocumentCollection(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
+        caseData.getManageCaseDocumentsWrapper()
+            .setManageCaseDocumentCollection(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
 
         migrateLegacyConfidentialCaseDocumentFormat(caseData);
         populateMissingConfidentialFlag(caseData);
@@ -49,14 +57,14 @@ public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallb
 
     private void migrateLegacyConfidentialCaseDocumentFormat(FinremCaseData data) {
         if (data.getConfidentialDocumentsUploaded() != null) {
-            data.getManageCaseDocumentCollection()
+            data.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection()
                 .addAll(getConfidentialCaseDocumentCollectionFromLegacyConfidentialDocs(data));
             data.getConfidentialDocumentsUploaded().clear();
         }
     }
 
     private void populateMissingConfidentialFlag(FinremCaseData caseData) {
-        caseData.getManageCaseDocumentCollection().stream()
+        caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection().stream()
             .filter(this::isConfidentialFlagMissing).forEach(documentCollection ->
                 documentCollection.getUploadCaseDocument().setCaseDocumentConfidentiality(YesOrNo.NO));
     }

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
@@ -60,8 +61,8 @@ public abstract class AbstractLetterHandler implements LetterHandler {
             getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore);
         noticeOfChangeLetterDetails.ifPresent(letter -> {
             log.info("Got the letter details now call the document service to generate the Case Document ");
-            CaseDocument caseDocument =
-                nocDocumentService.generateNoticeOfChangeLetter(authToken, letter, caseDetails.getId().toString());
+            CaseDocument caseDocument = nocDocumentService.generateNoticeOfChangeLetter(authToken, letter,
+                CaseType.forValue(caseDetails.getCaseTypeId()));
             log.info("Generated the case document now send to bulk print");
             UUID uuid = bulkPrintService.sendDocumentForPrint(caseDocument, caseDetails,
                 bulkPrintService.getRecipient(recipient.toString()), authToken);

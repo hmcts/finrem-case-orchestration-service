@@ -52,11 +52,11 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
     @SuppressWarnings({"java:S6541","java:S3776"})
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        log.info("Mid callback event type {} for Case ID: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
-        String caseId = String.valueOf(caseDetails.getId());
+        String caseId = caseDetails.getCaseIdAsString();
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(
             caseId, userAuthorisation);

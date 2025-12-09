@@ -37,7 +37,7 @@ public class IntervenerTwoHearingBundleHandlerTest extends HearingBundleHandlerT
     public void assertExpectedCollectionType() {
         assertThat(getDocumentCollection(),
             hasSize(1));
-        assertThat(caseData.getManageCaseDocumentCollection(),
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
     }
 

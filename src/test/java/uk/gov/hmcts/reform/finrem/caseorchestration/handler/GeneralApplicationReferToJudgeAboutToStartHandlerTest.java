@@ -19,8 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -40,10 +38,6 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest extends BaseH
 
     private GeneralApplicationReferToJudgeAboutToStartHandler handler;
     @Mock
-    private GenericDocumentService service;
-    @Mock
-    private GeneralApplicationService gaService;
-    @Mock
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
@@ -55,7 +49,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest extends BaseH
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        handler = new GeneralApplicationReferToJudgeAboutToStartHandler(finremCaseDetailsMapper, helper, gaService);
+        handler = new GeneralApplicationReferToJudgeAboutToStartHandler(finremCaseDetailsMapper, helper);
     }
 
     @Test
@@ -102,10 +96,9 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest extends BaseH
     @Test
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(GA_NON_COLL_JSON)).build();
-        when(helper.getApplicationItems(callbackRequest.getCaseDetails().getData(), AUTH_TOKEN,
-            callbackRequest.getCaseDetails().getId().toString())).thenReturn(
+        when(helper.getApplicationItems(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(
             callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
-                .get(0).getValue());
+                .getFirst().getValue());
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications().forEach(
             ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -148,7 +141,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest extends BaseH
             getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
         return DynamicRadioList.builder()
-            .value(dynamicListElements.get(0))
+            .value(dynamicListElements.getFirst())
             .listItems(dynamicListElements)
             .build();
     }

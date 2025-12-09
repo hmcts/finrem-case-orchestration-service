@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
@@ -29,14 +28,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
-public class FinremNotificationRequestMapper {
+public class FinremNotificationRequestMapper extends AbstractNotificationRequestMapper {
 
     private static final String RESPONDENT = "Respondent";
     private static final String CONSENTED = "consented";
     private static final String CONTESTED = "contested";
+    private static final String EMPTY_STRING = "";
+
     private final ConsentedApplicationHelper consentedApplicationHelper;
-    protected static final String EMPTY_STRING = "";
+
+    public FinremNotificationRequestMapper(NotificationRequestBuilderFactory notificationRequestBuilderFactory,
+                                           ConsentedApplicationHelper consentedApplicationHelper) {
+        super(notificationRequestBuilderFactory);
+        this.consentedApplicationHelper = consentedApplicationHelper;
+    }
 
     public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData()));
@@ -201,8 +206,15 @@ public class FinremNotificationRequestMapper {
      * @return the populated notification request
      */
     public NotificationRequest getNotificationRequestForGeneralEmail(FinremCaseDetails caseDetails) {
-        SolicitorCaseDataKeysWrapper caseDataKeysWrapper = getApplicantSolicitorCaseData(caseDetails.getData());
-        return buildNotificationRequest(caseDetails, caseDataKeysWrapper);
+        FinremCaseData caseData = caseDetails.getData();
+        SolicitorCaseDataKeysWrapper solicitorCaseData = getApplicantSolicitorCaseData(caseData);
+
+        return notificationRequestBuilder()
+            .withCaseDefaults(caseDetails)
+            .withSolicitorCaseData(solicitorCaseData)
+            .notificationEmail(caseData.getGeneralEmailWrapper().getGeneralEmailRecipient())
+            .generalEmailBody(caseData.getGeneralEmailWrapper().getGeneralEmailBody())
+            .build();
     }
 
     private void setCaseOrderType(NotificationRequest notificationRequest, FinremCaseData caseData) {

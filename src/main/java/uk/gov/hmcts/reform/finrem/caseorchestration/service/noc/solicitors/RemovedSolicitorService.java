@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -40,14 +41,13 @@ public class RemovedSolicitorService {
         this.caseDataService = caseDataService;
         this.checkApplicantSolicitorIsDigitalService = checkApplicantSolicitorIsDigitalService;
         this.checkRespondentSolicitorIsDigitalService = checkRespondentSolicitorIsDigitalService;
-
     }
 
     public ChangedRepresentative getRemovedSolicitorAsSolicitor(CaseDetails caseDetails,
                                                                 ChangeOrganisationRequest changeRequest) {
         log.info("Remove solicitor for Case ID: {}", caseDetails.getId());
         final boolean isApplicant = changeRequest.getCaseRoleId() != null
-                && changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
+            && changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
 
         if (!caseDataService.isLitigantRepresented(caseDetails, isApplicant)) {
             return null;
@@ -60,6 +60,7 @@ public class RemovedSolicitorService {
         return getDigitalRemovedRepresentative(caseDetails, isApplicant, changeRequest);
     }
 
+    @Deprecated
     public ChangedRepresentative getRemovedSolicitorAsCaseworker(CaseDetails caseDetails, final boolean isApplicant) {
 
         final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
@@ -75,11 +76,47 @@ public class RemovedSolicitorService {
         return null;
     }
 
+    /**
+     * Returns the solicitor to be removed for the caseworker, based on whether the
+     * applicant or respondent is selected.
+     *
+     * <p>
+     * If the selected litigant is currently represented, this method builds and returns a
+     * {@link ChangedRepresentative} containing the solicitor’s name, email, and the
+     * organisation being removed. If the litigant is not represented, it returns {@code null}.
+     *
+     * @param finremCaseData  the current case data
+     * @param isApplicant     true if the removal applies to the applicant; false if it applies to the respondent
+     * @return the solicitor details to remove, or null if the litigant is not represented
+     */
+    public ChangedRepresentative getRemovedSolicitorAsCaseworker(FinremCaseData finremCaseData, boolean isApplicant) {
+        final OrganisationPolicy organisationPolicy = isApplicant ? finremCaseData.getApplicantOrganisationPolicy()
+            : finremCaseData.getRespondentOrganisationPolicy();
+
+        if (caseDataService.isLitigantRepresented(finremCaseData, isApplicant)) {
+            return ChangedRepresentative.builder()
+                .name(getSolicitorName(finremCaseData, isApplicant))
+                .email(getSolicitorEmail(finremCaseData, isApplicant))
+                .organisation(getRemovedOrganisation(finremCaseData, organisationPolicy, isApplicant))
+                .build();
+        }
+
+        return null;
+    }
+
     private boolean isSolicitorDigital(CaseDetails caseDetails, boolean isApplicant) {
         final CheckSolicitorIsDigitalServiceBase checkSolicitorIsDigitalService = isApplicant
             ? checkApplicantSolicitorIsDigitalService : checkRespondentSolicitorIsDigitalService;
 
         return checkSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
+    }
+
+    private boolean isSolicitorDigital(FinremCaseData finremCaseData, boolean isApplicant) {
+        if (isApplicant) {
+            return checkApplicantSolicitorIsDigitalService.isSolicitorDigital(finremCaseData);
+        } else {
+            return checkRespondentSolicitorIsDigitalService.isSolicitorDigital(finremCaseData);
+        }
     }
 
     private ChangedRepresentative getNonDigitalRemovedRepresentative(CaseDetails caseDetails, boolean isApplicant) {
@@ -107,10 +144,22 @@ public class RemovedSolicitorService {
             : nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NAME));
     }
 
+    private String getSolicitorName(FinremCaseData finremCaseData, boolean isApplicant) {
+        return isApplicant
+            ? nullToEmpty(finremCaseData.getAppSolicitorName())
+            : nullToEmpty(finremCaseData.getContactDetailsWrapper().getRespondentSolicitorName());
+    }
+
     private String getSolicitorEmail(CaseDetails caseDetails, boolean isApplicant) {
         return isApplicant
             ? getApplicantSolicitorEmail(caseDetails)
             : nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_EMAIL));
+    }
+
+    private String getSolicitorEmail(FinremCaseData finremCaseData, boolean isApplicant) {
+        return isApplicant
+            ? finremCaseData.getAppSolicitorEmail()
+            : nullToEmpty(finremCaseData.getContactDetailsWrapper().getRespondentSolicitorEmail());
     }
 
     private String getApplicantSolicitorName(CaseDetails caseDetails) {
@@ -133,6 +182,16 @@ public class RemovedSolicitorService {
                 OrganisationPolicy.class);
 
         if (!isSolicitorDigital(caseDetails, isApplicant)) {
+            return null;
+        }
+
+        return Optional.ofNullable(organisationPolicy).map(OrganisationPolicy::getOrganisation).orElse(null);
+    }
+
+    private Organisation getRemovedOrganisation(FinremCaseData finremCaseData,
+                                                OrganisationPolicy organisationPolicy,
+                                                boolean isApplicant) {
+        if (!isSolicitorDigital(finremCaseData, isApplicant)) {
             return null;
         }
 
