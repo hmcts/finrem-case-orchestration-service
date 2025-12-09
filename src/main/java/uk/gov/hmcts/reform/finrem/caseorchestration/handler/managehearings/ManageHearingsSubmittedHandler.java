@@ -39,7 +39,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        ManageHearingsWrapper manageHearingsWrapper= callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
+        ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
 
         ManageHearingsAction actionSelection = manageHearingsWrapper.getManageHearingsActionSelection();
 

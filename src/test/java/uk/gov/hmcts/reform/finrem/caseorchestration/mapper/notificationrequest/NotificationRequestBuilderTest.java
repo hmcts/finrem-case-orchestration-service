@@ -146,6 +146,8 @@ class NotificationRequestBuilderTest {
             .contactCourtEmail("test.court@test.net")
             .contactCourtName("Local Court")
             .emailReplyToId("909cb736-eab0-46ac-a7f0-d28d89c8950c")
+            .vacatedHearingDateTime("2025-06-02")
+            .vacatedHearingType("FDA")
             .build();
 
         // Assert all fields are non-null

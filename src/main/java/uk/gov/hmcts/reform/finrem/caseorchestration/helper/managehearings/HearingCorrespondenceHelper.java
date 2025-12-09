@@ -56,9 +56,8 @@ public class HearingCorrespondenceHelper {
 
         if (ManageHearingsAction.VACATE_HEARING.equals(finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection())) {
             UUID workingVacatedHearingId = manageHearingsWrapper.getWorkingVacatedHearingId();
-           return getVacateOrAdjournedHearingInContext(manageHearingsWrapper, workingVacatedHearingId);
+            return getVacateOrAdjournedHearingInContext(manageHearingsWrapper, workingVacatedHearingId);
         }
-
         return null;
     }
 
@@ -128,7 +127,7 @@ public class HearingCorrespondenceHelper {
      * @return true if notification is required, false otherwise.
      */
     public boolean shouldNotSendNotification(HearingLike hearing) {
-       return !hearing.shouldSendNotifications();
+        return !hearing.shouldSendNotifications();
     }
 
     /**

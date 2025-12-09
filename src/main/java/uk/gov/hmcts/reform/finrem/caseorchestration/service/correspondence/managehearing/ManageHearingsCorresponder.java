@@ -349,7 +349,6 @@ public class ManageHearingsCorresponder {
         }
     }
 
-
     /**
      * Gets the hearing notice then sends it to the Bulk Print service.
      *

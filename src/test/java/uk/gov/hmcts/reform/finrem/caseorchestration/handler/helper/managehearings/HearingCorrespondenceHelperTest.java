@@ -75,7 +75,7 @@ class HearingCorrespondenceHelperTest {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setManageHearingsWrapper(wrapper);
 
-        HearingLike result = helper.getHearingInContext(caseData);
+        HearingLike result = helper.getActiveHearingInContext(wrapper, hearingId);
 
         assertEquals(hearing, result);
     }

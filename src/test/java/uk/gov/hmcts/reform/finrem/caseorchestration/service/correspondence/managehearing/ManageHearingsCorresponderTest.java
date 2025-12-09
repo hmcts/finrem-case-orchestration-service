@@ -83,7 +83,7 @@ class ManageHearingsCorresponderTest {
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
         // Act
@@ -98,7 +98,7 @@ class ManageHearingsCorresponderTest {
         FinremCallbackRequest callbackRequest = callbackRequest();
         Hearing hearing = new Hearing();
 
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(true);
 
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
@@ -110,15 +110,15 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldNotSendNotificationsNoPartiesSelected() {
         // Arrange
-        FinremCallbackRequest callbackRequest = callbackRequest();
-
         List<PartyOnCaseCollectionItem> list = new ArrayList<>(List.of());
 
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(list);
 
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+
+        FinremCallbackRequest callbackRequest = callbackRequest();
 
         // Act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
@@ -145,7 +145,7 @@ class ManageHearingsCorresponderTest {
                 hearing)).thenReturn(notificationRequest);
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldEmailToApplicantSolicitor(callbackRequest.getCaseDetails())).thenReturn(true);
 
@@ -177,7 +177,7 @@ class ManageHearingsCorresponderTest {
                 hearing)).thenReturn(notificationRequest);
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldEmailToRespondentSolicitor(callbackRequest.getCaseDetails())).thenReturn(true);
 
@@ -220,7 +220,7 @@ class ManageHearingsCorresponderTest {
                 .thenReturn(notificationRequest);
         }
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
-        when(hearingCorrespondenceHelper.getHearingInContext(finremCaseData)).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
         // Act
@@ -257,7 +257,7 @@ class ManageHearingsCorresponderTest {
 
         // Arrange
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
-        when(hearingCorrespondenceHelper.getHearingInContext(finremCaseData)).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
         // Act
@@ -289,7 +289,7 @@ class ManageHearingsCorresponderTest {
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
@@ -323,7 +323,7 @@ class ManageHearingsCorresponderTest {
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
@@ -365,7 +365,7 @@ class ManageHearingsCorresponderTest {
         // Arrange
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
         when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
@@ -403,7 +403,7 @@ class ManageHearingsCorresponderTest {
         when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
@@ -438,7 +438,7 @@ class ManageHearingsCorresponderTest {
         FinremCallbackRequest callbackRequest = callbackRequest();
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
@@ -482,7 +482,7 @@ class ManageHearingsCorresponderTest {
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
         when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
@@ -521,7 +521,7 @@ class ManageHearingsCorresponderTest {
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(null);
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
@@ -551,7 +551,7 @@ class ManageHearingsCorresponderTest {
         FinremCallbackRequest callbackRequest = callbackRequest();
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
@@ -588,7 +588,7 @@ class ManageHearingsCorresponderTest {
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(null);
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
@@ -629,7 +629,7 @@ class ManageHearingsCorresponderTest {
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(null);
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
 
@@ -665,7 +665,7 @@ class ManageHearingsCorresponderTest {
         when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails()))
             .thenReturn(List.of());
 
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
@@ -699,7 +699,7 @@ class ManageHearingsCorresponderTest {
         FinremCallbackRequest callbackRequest = callbackRequest();
 
         // Arrange
-        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
         // Act

@@ -118,10 +118,11 @@ public class ManageHearingsNotificationRequestMapper {
         // PT todo: currently tests mock to skip this - add tests to consider this
         if (isNewHearingAdded(finremCaseDetails)) {
             newHearing = hearingCorrespondenceHelper.getActiveHearingInContext(
-                manageHearingsWrapper, manageHearingsWrapper.getWorkingHearingId() );
+                manageHearingsWrapper, manageHearingsWrapper.getWorkingHearingId());
         }
 
-        String newHearingType = newHearing != null ? newHearing.getHearingType().getId() : "";
+        String newHearingType =
+            newHearing != null ? newHearing.getHearingType().getId() : hearing.getHearingType().getId();
 
         String applicantSurname = finremCaseData.getContactDetailsWrapper().getApplicantLname();
         String respondentSurname = finremCaseData.getContactDetailsWrapper().getRespondentLname();
@@ -152,6 +153,11 @@ public class ManageHearingsNotificationRequestMapper {
             .build();
     }
 
+    /*
+     * Returns true if a new hearing has been added as a result of adding or relisting a hearing.
+     * @param finremCaseDetails used to get the event action and whether a hearing was relisted
+     * @return true or false.
+     */
     private boolean isNewHearingAdded(FinremCaseDetails finremCaseDetails) {
         ManageHearingsAction actionSelection = hearingCorrespondenceHelper.getManageHearingsAction(finremCaseDetails);
         boolean hearingIsRelisted =

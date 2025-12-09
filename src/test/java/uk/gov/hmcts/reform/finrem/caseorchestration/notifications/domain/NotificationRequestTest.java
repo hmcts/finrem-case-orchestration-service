@@ -23,7 +23,7 @@ class NotificationRequestTest {
             "Consent",
             "rejectedReason", "app", "res", "1234567890", "", "", "", "", null, null,
             "2024-01-01", "judgeName", "2024-01-01", "Feedback by Mr. judge", "ABC.doc",
-            "A Court Name", "test@test.com", emailReplyToId, "vacatedHearingType","vacatedHearingDateTime");
+            "A Court Name", "test@test.com", emailReplyToId,"vacatedHearingDateTime", "vacatedHearingType");
         assertEquals("123456", underTest.getCaseReferenceNumber());
         assertEquals("45623", underTest.getSolicitorReferenceNumber());
         assertEquals("D123", underTest.getDivorceCaseNumber());
@@ -45,8 +45,8 @@ class NotificationRequestTest {
         assertEquals("A Court Name", underTest.getContactCourtName());
         assertEquals("test@test.com", underTest.getContactCourtEmail());
         assertEquals(emailReplyToId, underTest.getEmailReplyToId());
-        assertEquals("vacatedHearingType", underTest.getVacatedHearingType());
         assertEquals("vacatedHearingDateTime", underTest.getVacatedHearingDateTime());
+        assertEquals("vacatedHearingType", underTest.getVacatedHearingType());
     }
 
     @Test

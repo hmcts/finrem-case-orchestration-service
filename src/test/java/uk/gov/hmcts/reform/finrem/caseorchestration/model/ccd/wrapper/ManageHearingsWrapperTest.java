@@ -134,7 +134,7 @@ class ManageHearingsWrapperTest {
             .build();
 
         // Act
-         UUID expectedUuid = wrapper.getWorkingVacatedHearingId();
+        UUID expectedUuid = wrapper.getWorkingVacatedHearingId();
 
         // Assert
         assertThat(expectedUuid).isEqualTo(testUuid);

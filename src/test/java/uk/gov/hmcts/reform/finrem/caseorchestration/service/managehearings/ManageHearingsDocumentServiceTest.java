@@ -579,7 +579,7 @@ class ManageHearingsDocumentServiceTest {
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
             .containsExactlyInAnyOrder(FORM_C_URL, FORM_G_URL, HEARING_NOTICE_FILE_URL, VACATE_HEARING_NOTICE_FILE_URL,
-                FORM_A_URL, OUT_OF_COURT_RESOLUTION_URL, PFD_NCDR_COMPLIANCE_LETTER_URL, PFD_NCDR_COVER_LETTER_URL);
+                OUT_OF_COURT_RESOLUTION_URL, PFD_NCDR_COMPLIANCE_LETTER_URL, PFD_NCDR_COVER_LETTER_URL);
 
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
@@ -588,7 +588,7 @@ class ManageHearingsDocumentServiceTest {
 
     /**
      * For FDA hearings on fast track cases, check that correct documents returned by getHearingDocumentsToPost.
-     * Fast track Form C, Hearing Notice, Form A, Out of court resolution, PFD NCDR Compliance Letter and Cover Letter
+     * Fast track Form C, Hearing Notice, Out of court resolution, PFD NCDR Compliance Letter and Cover Letter
      */
     @Test
     void getHearingDocumentsToPostShouldReturnFdaFastTrackDocuments() {
@@ -614,7 +614,7 @@ class ManageHearingsDocumentServiceTest {
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
             .containsExactlyInAnyOrder(FORM_C_FAST_TRACK_URL, HEARING_NOTICE_FILE_URL, VACATE_HEARING_NOTICE_FILE_URL,
-                FORM_A_URL, OUT_OF_COURT_RESOLUTION_URL, PFD_NCDR_COMPLIANCE_LETTER_URL, PFD_NCDR_COVER_LETTER_URL);
+                OUT_OF_COURT_RESOLUTION_URL, PFD_NCDR_COMPLIANCE_LETTER_URL, PFD_NCDR_COVER_LETTER_URL);
 
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
@@ -647,7 +647,7 @@ class ManageHearingsDocumentServiceTest {
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
             .containsExactlyInAnyOrder(FORM_C_EXPRESS_URL, FORM_G_URL, HEARING_NOTICE_FILE_URL,
-                VACATE_HEARING_NOTICE_FILE_URL, FORM_A_URL, OUT_OF_COURT_RESOLUTION_URL, PFD_NCDR_COMPLIANCE_LETTER_URL,
+                VACATE_HEARING_NOTICE_FILE_URL, OUT_OF_COURT_RESOLUTION_URL, PFD_NCDR_COMPLIANCE_LETTER_URL,
                 PFD_NCDR_COVER_LETTER_URL);
 
         assertThat(result)
@@ -659,7 +659,6 @@ class ManageHearingsDocumentServiceTest {
      * Any documents could be missing.  They may have been intentionally removed. Or out of court resolution documents
      * may only exist for some hearings.
      * When a hearing is vacated, and not relisted, only the Vacate Hearing Notice could be posted.
-     * FORM_A could still be returned, its generated before hearing documents, a lives at the case level.
      * Check that getHearingDocumentsToPost handles missing documents gracefully.
      * Checks both hearing types, as these have distinct private methods to retrieve documents.
      */
@@ -693,14 +692,6 @@ class ManageHearingsDocumentServiceTest {
         List<CaseDocument> resultFda = manageHearingsDocumentService.getHearingDocumentsToPost(finremCaseDetailsFda);
 
         // Assert
-        assertThat(resultFdr)
-            .extracting(CaseDocument::getDocumentUrl)
-            .containsExactlyInAnyOrder(FORM_A_URL);
-
-        assertThat(resultFda)
-            .extracting(CaseDocument::getDocumentUrl)
-            .containsExactlyInAnyOrder(FORM_A_URL);
-
         assertThat(resultFdr)
             .extracting(CaseDocument::getDocumentUrl)
             .doesNotContain(FORM_C_URL, FORM_C_FAST_TRACK_URL, FORM_C_EXPRESS_URL, FORM_G_URL, HEARING_NOTICE_FILE_URL,
@@ -766,7 +757,8 @@ class ManageHearingsDocumentServiceTest {
 
     /**
      * Builds a FinremCaseData object with a ManageHearingsWrapper containing hearing documents.
-     * And sets other attributes using the arguments provided.  MiniFormA is set to a test value.
+     * And sets other attributes using the arguments provided.
+     * MiniFormA is set to a test value, but should never be returned by methods in the subject under test.
      *
      * @param hearingId              used so that tests can check that the correct hearing documents are returned
      * @param hearingDocuments       the list of hearing documents to be included in the case data
