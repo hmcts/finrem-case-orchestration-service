@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -153,11 +154,12 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         if (isApplicantRepresentativeChange) {
             organisationPolicy = caseData.getApplicantOrganisationPolicy();
             barristerCollection = caseData.getBarristerCollectionWrapper().getApplicantBarristers();
-            caseData.setApplicantOrganisationPolicy(null);
+            caseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
         } else {
             organisationPolicy = caseData.getRespondentOrganisationPolicy();
             barristerCollection = caseData.getBarristerCollectionWrapper().getRespondentBarristers();
             caseData.setRespondentOrganisationPolicy(null);
+            caseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
         }
 
         // Extract the Organisation ID to remove (centralized logic)
@@ -227,5 +229,14 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private boolean isHavingJudicialApproval(FinremCaseData finremCaseData) {
         return YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getStopRepJudicialApproval());
+    }
+
+    private OrganisationPolicy getDefaultOrganisationPolicy(CaseRole role) {
+        return OrganisationPolicy
+            .builder()
+            .organisation(Organisation.builder().organisationID(null).organisationName(null).build())
+            .orgPolicyReference(null)
+            .orgPolicyCaseAssignedRole(role.getCcdCode())
+            .build();
     }
 }
