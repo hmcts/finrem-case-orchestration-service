@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClient
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
@@ -15,6 +16,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+
+import java.util.Map;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService.UPDATE_CASE_EVENT;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -32,6 +38,8 @@ public class StopRepresentingClientEventHandler {
     private final ManageBarristerService manageBarristerService;
 
     private final BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
+
+    private final CoreCaseDataService coreCaseDataService;
 
     @EventListener
     // @Async
@@ -56,6 +64,11 @@ public class StopRepresentingClientEventHandler {
         revertOrgPolicyToOriginalOrgPolicy(finremCaseData, finremCaseDataBefore);
         assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), finremCaseDetailsMapper
             .mapToCaseDetails(event.getCaseDetails()));
+
+        coreCaseDataService.performPostSubmitCallback(finremCaseData.getCcdCaseType(), Long.valueOf(finremCaseData.getCcdCaseId()),
+            UPDATE_CASE_EVENT,caseDetails -> Map.of("changeOrganisationRequestField", ChangeOrganisationRequest.builder().build()),
+            true
+        );
     }
 
     // aac handles org policy modification based on the Change Organisation Request,
