@@ -32,4 +32,8 @@ public class SystemUserService {
     public void cacheEvict() {
         log.info("Evicting system user cron cache");
     }
+
+    public String getUserId(String userToken) {
+        return idamAuthService.getUserInfo(userToken).getUid();
+    }
 }
