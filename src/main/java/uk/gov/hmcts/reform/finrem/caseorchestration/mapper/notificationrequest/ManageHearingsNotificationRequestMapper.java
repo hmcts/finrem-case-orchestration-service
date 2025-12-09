@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.Hearin
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
@@ -17,6 +16,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
+import java.time.format.DateTimeFormatter;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.ADD_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.VACATE_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
@@ -112,7 +116,7 @@ public class ManageHearingsNotificationRequestMapper {
         Hearing newHearing = null;
 
         // PT todo: currently tests mock to skip this - add tests to consider this
-        if (vacatingAndRelisting(finremCaseDetails)) {
+        if (isNewHearingAdded(finremCaseDetails)) {
             newHearing = hearingCorrespondenceHelper.getActiveHearingInContext(
                 manageHearingsWrapper, manageHearingsWrapper.getWorkingHearingId() );
         }
@@ -128,7 +132,10 @@ public class ManageHearingsNotificationRequestMapper {
         String selectedFRC = CourtHelper.getFRCForHearing(hearing);
 
         String vacatedHearingType = hearing.getHearingType().getId();
-        String vacatedHearingDateTime = hearing.getHearingTime() + " on " + hearing.getHearingDate();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String formattedDate = hearing.getHearingDate().format(formatter);
+        String vacatedHearingDateTime = formattedDate + " at " + hearing.getHearingTime();
 
         return NotificationRequest.builder()
             .notificationEmail(partySpecificDetails.recipientEmailAddress)
@@ -145,11 +152,10 @@ public class ManageHearingsNotificationRequestMapper {
             .build();
     }
 
-    private boolean vacatingAndRelisting(FinremCaseDetails finremCaseDetails) {
+    private boolean isNewHearingAdded(FinremCaseDetails finremCaseDetails) {
         ManageHearingsAction actionSelection = hearingCorrespondenceHelper.getManageHearingsAction(finremCaseDetails);
-        boolean vacateAction =  ManageHearingsAction.VACATE_HEARING.equals(actionSelection);
         boolean hearingIsRelisted =
-            YesOrNo.YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
-        return vacateAction && hearingIsRelisted;
+            YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
+        return (VACATE_HEARING.equals(actionSelection) && hearingIsRelisted) || ADD_HEARING.equals(actionSelection);
     }
 }
