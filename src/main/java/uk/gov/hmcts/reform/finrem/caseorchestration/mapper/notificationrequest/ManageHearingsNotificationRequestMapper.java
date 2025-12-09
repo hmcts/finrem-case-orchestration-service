@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.Hearin
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -111,7 +113,7 @@ public class ManageHearingsNotificationRequestMapper {
 
         Hearing newHearing = null;
 
-        if (hearingCorrespondenceHelper.shouldPostHearingAndVacateNotices(finremCaseDetails, hearing)) {
+        if (vacatingAndRelisting(finremCaseDetails)) {
             newHearing = hearingCorrespondenceHelper.getActiveHearingInContext(
                 manageHearingsWrapper, manageHearingsWrapper.getWorkingHearingId() );
         }
@@ -142,5 +144,13 @@ public class ManageHearingsNotificationRequestMapper {
             .vacatedHearingType(vacatedHearingType)
             .vacatedHearingDateTime(vacatedHearingDateTime)
             .build();
+    }
+
+    private boolean vacatingAndRelisting(FinremCaseDetails finremCaseDetails) {
+        ManageHearingsAction actionSelection = hearingCorrespondenceHelper.getManageHearingsAction(finremCaseDetails);
+        boolean vacateAction =  ManageHearingsAction.VACATE_HEARING.equals(actionSelection);
+        boolean hearingIsRelisted =
+            YesOrNo.YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
+        return vacateAction && hearingIsRelisted;
     }
 }

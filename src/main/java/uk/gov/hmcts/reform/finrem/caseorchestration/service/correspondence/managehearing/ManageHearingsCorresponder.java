@@ -104,8 +104,7 @@ public class ManageHearingsCorresponder {
         VacateOrAdjournedHearing vacateOrAdjournedHearing = hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(
             wrapper, wrapper.getWorkingVacatedHearingId());
 
-        if (!isVacatedAndRelistedHearing &&
-            hearingCorrespondenceHelper.shouldNotSendNotification(vacateOrAdjournedHearing)) {
+        if (shouldNotSendNotificationForVacatedOrAdjournedHearing(isVacatedAndRelistedHearing, vacateOrAdjournedHearing)) {
             return;
         }
 
@@ -125,7 +124,6 @@ public class ManageHearingsCorresponder {
                 );
             }
         }
-
     }
 
     /**
@@ -341,15 +339,16 @@ public class ManageHearingsCorresponder {
         }
 
         if (shouldPostToParty.getAsBoolean()) {
-            if (hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing)) {
-                postHearingNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
-            } else if (hearingCorrespondenceHelper.shouldPostVacateNoticeOnly(finremCaseDetails)) {
+            if (hearing instanceof VacateOrAdjournedHearing) {
                 postVacateNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
+            } else if (hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing)) {
+                postHearingNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
             } else {
                 postAllAvailableHearingDocuments(finremCaseDetails, caseRole, userAuthorisation);
             }
         }
     }
+
 
     /**
      * Gets the hearing notice then sends it to the Bulk Print service.
@@ -413,12 +412,6 @@ public class ManageHearingsCorresponder {
         // Add any additional documents to bundle
         hearingDocuments.addAll(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             finremCaseDetails.getData().getManageHearingsWrapper()));
-
-        // Add a vacate notice to the bundle (when found)
-        CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
-        if (hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseDetails) && vacateHearingNotice != null) {
-            hearingDocuments.add(vacateHearingNotice);
-        }
 
         // Add mini form A to bundle when adding a hearing
         ManageHearingsAction actionSelection = hearingCorrespondenceHelper.getManageHearingsAction(finremCaseDetails);
@@ -508,5 +501,14 @@ public class ManageHearingsCorresponder {
         return documents.stream()
             .map(document -> genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseType))
             .toList();
+    }
+
+    /*
+     * Only consider shouldNotSendNotification for the vacateOrAdjournedHearing when we are not relisting.
+     * If we are relisting, whether we send notifications is captured on the new hearing.
+     */
+    private boolean shouldNotSendNotificationForVacatedOrAdjournedHearing(boolean isVacatedAndRelistedHearing,
+                                                                          VacateOrAdjournedHearing vacateOrAdjournedHearing) {
+        return (!isVacatedAndRelistedHearing && hearingCorrespondenceHelper.shouldNotSendNotification(vacateOrAdjournedHearing));
     }
 }

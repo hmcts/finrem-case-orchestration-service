@@ -173,7 +173,7 @@ public class HearingCorrespondenceHelper {
      * @param hearing the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
      */
-    public boolean isHearingThatOnlyNeedsNotice(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
+    public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
         Set<HearingType> noticeOnlyHearingTypes = Set.of(
             HearingType.MPS,
             HearingType.FH,
@@ -194,54 +194,6 @@ public class HearingCorrespondenceHelper {
                     && !expressCaseService.isExpressCase(finremCaseDetails.getData()))
             )
             .orElse(false);
-    }
-
-    // PT todo, unit test
-    /*
-     * Some, newly added hearings, only send a hearing notice (and bulk cover sheet).
-     * Returns true user is adding a new hearing and the hearing is the right type.
-     * @param finremCaseDetails used to get action selection
-     * @param hearing used to check the hearing itself
-     */
-    public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
-        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
-
-        return isAddHearingAction(actionSelection) || isVacatedAndRelistedHearing(finremCaseDetails)
-            && isHearingThatOnlyNeedsNotice(finremCaseDetails, hearing);
-    }
-
-    // PT todo, unit test
-    /*
-     * Some, vacated and relisted hearings, only send a hearing and vacate notices (and bulk cover sheet).
-     * Returns true user is vacating and relisting a hearing and the hearing is the right type.
-     * @param finremCaseDetails used to get action selection
-     * @param hearing used to check the hearing itself
-     */
-    public boolean shouldPostHearingAndVacateNotices(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
-        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
-
-        boolean hearingIsRelisted =
-            YesOrNo.YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
-
-        return isVacateHearingAction(actionSelection)
-            && hearingIsRelisted
-            && isHearingThatOnlyNeedsNotice(finremCaseDetails, hearing);
-    }
-
-    // PT todo, unit test
-    /*
-     * Some vacated hearings only send a vacate notice (and bulk cover sheet).
-     * Returns true user is vacating a hearing and not relisting another hearing.
-     * @param finremCaseDetails used to get action selection
-     * @param hearing used to check the hearing itself
-     */
-    public boolean shouldPostVacateNoticeOnly(FinremCaseDetails finremCaseDetails) {
-        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
-
-        boolean hearingNotRelisted =
-            YesOrNo.NO.equals(finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
-
-        return isVacateHearingAction(actionSelection) && hearingNotRelisted;
     }
 
     /**
