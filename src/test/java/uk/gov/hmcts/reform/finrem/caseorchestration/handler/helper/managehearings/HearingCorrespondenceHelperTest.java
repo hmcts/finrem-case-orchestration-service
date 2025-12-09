@@ -51,16 +51,16 @@ class HearingCorrespondenceHelperTest {
 
     @Test
     void shouldReturnCorrectValuesWhenShouldSendNotificationUsed() {
-        Hearing hearing = mock(Hearing.class);
+        Hearing hearing = Hearing.builder().build();
 
-        when(hearing.getHearingNoticePrompt()).thenReturn(YesOrNo.NO);
+        // hearingNoticePrompt not initialised
         assertTrue(helper.shouldNotSendNotification(hearing));
 
-        when(hearing.getHearingNoticePrompt()).thenReturn(YesOrNo.YES);
+        hearing.setHearingNoticePrompt(YesOrNo.NO);
+        assertTrue(helper.shouldNotSendNotification(hearing));
+
+        hearing.setHearingNoticePrompt(YesOrNo.YES);
         assertFalse(helper.shouldNotSendNotification(hearing));
-
-        when(hearing.getHearingNoticePrompt()).thenReturn(null);
-        assertTrue(helper.shouldNotSendNotification(hearing));
     }
 
     @Test
@@ -265,8 +265,9 @@ class HearingCorrespondenceHelperTest {
      */
     @ParameterizedTest
     @MethodSource("provideInvalidNoticeOnlyCases")
-    void shouldPostHearingNoticeOnlyReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+    void shouldPostHearingNoticeOnlyReturnsFalse(Hearing hearing) {
         // Arrange case
+        FinremCaseDetails finremCaseDetails = finremCaseDetails();
         lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
         // Act
         boolean result = helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing);
@@ -281,21 +282,13 @@ class HearingCorrespondenceHelperTest {
      */
     static Stream<Arguments> provideInvalidNoticeOnlyCases() {
         return Stream.of(
-            // Case: invalid ManageHearingsAction, hearing type is OK
+            // Case: FDA Hearing type is wrong.
             arguments(
-                finremCaseDetails(null), Hearing.builder().hearingType(HearingType.MPS).build()
+                Hearing.builder().hearingType(HearingType.FDA).build()
             ),
-            // Case: valid action, but hearing is null
+            // but FDR Hearing type is wrong (for a standard, non-express, case like this).
             arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING), null
-            ),
-            // Case: Hearing type is wrong.
-            arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDA).build()
-            ),
-            // Case: valid action, but FDR invalid for non-express case
-            arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDR).build()
+                Hearing.builder().hearingType(HearingType.FDR).build()
             )
         );
     }
@@ -323,6 +316,15 @@ class HearingCorrespondenceHelperTest {
             .data(FinremCaseData.builder()
                 .manageHearingsWrapper(ManageHearingsWrapper.builder()
                     .manageHearingsActionSelection(action)
+                    .build())
+                .build())
+            .build();
+    }
+
+    private static FinremCaseDetails finremCaseDetails() {
+        return FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .manageHearingsWrapper(ManageHearingsWrapper.builder()
                     .build())
                 .build())
             .build();

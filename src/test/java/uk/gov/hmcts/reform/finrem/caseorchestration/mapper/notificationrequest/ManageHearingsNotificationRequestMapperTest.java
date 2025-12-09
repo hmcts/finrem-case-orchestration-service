@@ -2,12 +2,19 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
@@ -18,9 +25,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mockStatic;
 
+@ExtendWith(MockitoExtension.class)
 class ManageHearingsNotificationRequestMapperTest {
 
-    private final ManageHearingsNotificationRequestMapper mapper = new ManageHearingsNotificationRequestMapper();
+    @Mock
+    HearingCorrespondenceHelper hearingCorrespondenceHelper;
+    @InjectMocks
+    ManageHearingsNotificationRequestMapper mapper;
+
     private FinremCaseDetails caseDetails;
     private Hearing hearing;
     private ContactDetailsWrapper contactDetails;
@@ -58,6 +70,9 @@ class ManageHearingsNotificationRequestMapperTest {
 
         try (MockedStatic<CourtHelper> mocked = mockStatic(CourtHelper.class)) {
 
+            caseDetails.getData().getManageHearingsWrapper().setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
+            caseDetails.getData().getManageHearingsWrapper().setIsRelistSelected(YesOrNo.YES);
+
             // When
             contactDetails.setApplicantSolicitorEmail("applicantsolicitor@example.com");
             contactDetails.setApplicantSolicitorName("The applicant solicitor name");
@@ -80,6 +95,7 @@ class ManageHearingsNotificationRequestMapperTest {
         try (MockedStatic<CourtHelper> mocked = mockStatic(CourtHelper.class)) {
 
             // When
+
             contactDetails.setRespondentSolicitorEmail("respondentsolicitor@example.com");
             contactDetails.setRespondentSolicitorName("The respondent solicitor name");
             mocked.when(() -> CourtHelper.getFRCForHearing(hearing)).thenReturn("MockedCourt");
@@ -123,5 +139,13 @@ class ManageHearingsNotificationRequestMapperTest {
         assertThat(result.getCaseType()).isEqualTo(EmailService.CONTESTED);
         assertThat(result.getHearingType()).isEqualTo(HearingType.FDA.getId());
         assertThat(result.getSelectedCourt()).isEqualTo("MockedCourt");
+    }
+
+    private void hearingDataArrangedForHearingNotification(Hearing hearing) {
+//        hearing.
+    }
+
+    private void hearingDataArrangedForVacateNotification(Hearing hearing) {
+
     }
 }

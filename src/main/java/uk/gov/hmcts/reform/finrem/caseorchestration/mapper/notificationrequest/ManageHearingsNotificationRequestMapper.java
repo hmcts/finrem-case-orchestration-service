@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
@@ -26,7 +25,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 public class ManageHearingsNotificationRequestMapper {
 
     private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
-    private final StringHttpMessageConverter stringHttpMessageConverter;
 
     private record PartySpecificDetails(
         String recipientEmailAddress,
@@ -113,6 +111,7 @@ public class ManageHearingsNotificationRequestMapper {
 
         Hearing newHearing = null;
 
+        // PT todo: currently tests mock to skip this - add tests to consider this
         if (vacatingAndRelisting(finremCaseDetails)) {
             newHearing = hearingCorrespondenceHelper.getActiveHearingInContext(
                 manageHearingsWrapper, manageHearingsWrapper.getWorkingHearingId() );
