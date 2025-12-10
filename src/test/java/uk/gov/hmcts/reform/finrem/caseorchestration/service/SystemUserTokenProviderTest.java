@@ -15,9 +15,10 @@ class SystemUserTokenProviderTest {
 
     @Mock
     private SystemUpdateUserConfiguration systemUpdateUserConfiguration;
+
     @Mock
     private IdamAuthService idamAuthService;
-    @Mock
+
     @InjectMocks
     private SystemUserTokenProvider systemUserTokenProvider;
 
