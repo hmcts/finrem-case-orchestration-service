@@ -74,7 +74,7 @@ public class CoreCaseDataService {
     }
 
     @Recover
-    void recover(Exception e, CaseType caseType, Long caseId, String eventName,
+    public void recover(Exception e, CaseType caseType, Long caseId, String eventName,
                  Function<CaseDetails, Map<String, Object>> changeFunction,
                  boolean submitIfEmpty) {
         throw new RetryFailureException(
