@@ -17,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.InvalidEmailAddressException;
@@ -68,6 +69,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL;
@@ -787,6 +789,50 @@ public class EmailServiceTest {
 
         verify(mockClient).sendEmail(
             eq(emailTemplates.get(FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED.name())),
+            eq("recipient@test.com"),
+            templateFieldsArgumentCaptor.capture(),
+            anyString(), isNull());
+
+        Map<String, Object> actualTemplateFields = templateFieldsArgumentCaptor.getValue();
+        expectedTemplateFields.forEach((k, v) -> assertEquals(v, actualTemplateFields.get(k)));
+    }
+
+    @Test
+    public void testSendVacateHearingNotification() throws NotificationClientException {
+        NotificationRequest nr = NotificationRequest.builder()
+            .notificationEmail("recipient@test.com")
+            .caseReferenceNumber("5457543354")
+            .caseType(EmailService.CONTESTED)
+            .applicantName(APPLICANT_NAME)
+            .respondentName(RESPONDENT_NAME)
+            .solicitorReferenceNumber("1234567890")
+            .hearingType(HearingType.FDA.getId())
+            .selectedCourt("liverpool")
+            .documentName("TEST.doc")
+            .judgeFeedback("Feedback")
+            .hearingDate("30 December 2024")
+            .name("Mary")
+            .vacatedHearingType(HearingType.FDR.getId())
+            .vacatedHearingDateTime("20 July 2025 at 10:00 AM")
+            .build();
+
+        emailService.sendConfirmationEmail(nr, FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR);
+
+        Map<String, Object> expectedTemplateFields = Map.of(
+            "caseReferenceNumber", "5457543354",
+            "applicantName", APPLICANT_NAME,
+            "respondentName", RESPONDENT_NAME,
+            "courtName", "Liverpool FRC",
+            "courtEmail", "FRCLiverpool@Justice.gov.uk",
+            "name", "Mary",
+            "solicitorReferenceNumber", "1234567890",
+            "hearingType", HearingType.FDA.getId(),
+            "vacatedHearingType", HearingType.FDR.getId(),
+            "vacatedHearingDateTime", "20 July 2025 at 10:00 AM"
+        );
+
+        verify(mockClient).sendEmail(
+            eq(emailTemplates.get(FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR.name())),
             eq("recipient@test.com"),
             templateFieldsArgumentCaptor.capture(),
             anyString(), isNull());
