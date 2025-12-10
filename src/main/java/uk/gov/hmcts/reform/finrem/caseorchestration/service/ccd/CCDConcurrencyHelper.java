@@ -27,7 +27,7 @@ public class CCDConcurrencyHelper {
 
     public StartEventResponse startEvent(CaseType caseType, Long caseId, String eventName) {
         String userToken = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(userToken);
+        String systemUpdateUserId = systemUserService.getSysUserTokenUid();
 
         return coreCaseDataApi.startEventForCaseWorker(
             userToken,
@@ -41,7 +41,7 @@ public class CCDConcurrencyHelper {
 
     public void submitEvent(StartEventResponse startEventResponse, CaseType caseType, Long caseId, Map<String, Object> eventData) {
         String userToken = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(userToken);
+        String systemUpdateUserId = systemUserService.getSysUserTokenUid();
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
