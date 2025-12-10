@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails.FinremCaseDetailsBuilder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
+import java.util.Optional;
+
 public class FinremCaseDetailsBuilderFactory {
 
     private FinremCaseDetailsBuilderFactory() {
@@ -61,6 +63,7 @@ public class FinremCaseDetailsBuilderFactory {
 
     public static FinremCaseDetailsBuilder from(Long id, CaseType caseType, FinremCaseData caseData, State state) {
         if (caseData != null) {
+            caseData.setCcdCaseId(Optional.ofNullable(id).map(Object::toString).orElse(null));
             caseData.setCcdCaseType(caseType); // synchronise caseType to caseData
         }
         return FinremCaseDetails.builder().id(id).caseType(caseType).data(caseData).state(state);
