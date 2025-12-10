@@ -90,7 +90,8 @@ class CoreCaseDataServiceTest {
                 });
             when(concurrencyHelper.startEvent(caseType, Long.valueOf(CASE_ID_TWO), EVENT_ID)).thenReturn(secondStartEventRsp);
 
-            Thread t1 = new Thread(() -> coreCaseDataService.performPostSubmitCallback(caseType, Long.valueOf(CASE_ID), EVENT_ID, c -> Map.of("a", "a"), true));
+            Thread t1 = new Thread(() -> coreCaseDataService.performPostSubmitCallback(caseType, Long.valueOf(CASE_ID), EVENT_ID,
+                c -> Map.of("a", "a"), true));
 
             t1.start();
             Thread.sleep(100);
