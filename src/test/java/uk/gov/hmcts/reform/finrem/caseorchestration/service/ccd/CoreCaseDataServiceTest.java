@@ -83,7 +83,6 @@ class CoreCaseDataServiceTest {
             final StartEventResponse secondStartEventRsp =
                 buildStartEventResponse(EVENT_ID, "secondStartEventRsp");
 
-
             when(concurrencyHelper.startEvent(caseType, Long.valueOf(CASE_ID), EVENT_ID))
                 .thenAnswer((Answer<StartEventResponse>) invocationOnMock -> {
                     Thread.sleep(1000);
