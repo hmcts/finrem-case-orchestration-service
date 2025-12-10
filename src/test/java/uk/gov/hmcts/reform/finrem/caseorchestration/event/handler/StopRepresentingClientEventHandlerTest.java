@@ -122,8 +122,8 @@ class StopRepresentingClientEventHandlerTest {
         FinremCaseData caseData = spy(FinremCaseData.class);
         caseData.getContactDetailsWrapper().setNocParty(mock(NoticeOfChangeParty.class));
         FinremCaseData caseDataBefore = mock(FinremCaseData.class);
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(Long.valueOf(CASE_ID))
-            .data(caseData).build();
+        FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+            .build();
 
         StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
             .caseDetails(caseDetails)
