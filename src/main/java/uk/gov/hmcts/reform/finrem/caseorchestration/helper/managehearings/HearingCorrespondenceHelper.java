@@ -31,22 +31,7 @@ public class HearingCorrespondenceHelper {
     private final PaperNotificationService paperNotificationService;
     private final ExpressCaseService expressCaseService;
 
-    /**
-     * PT todo - need this still?
-     * Retrieves the {@link Hearing} currently in context based on the working hearing ID from the case data.
-     *
-     * <p>This method accesses the {@link ManageHearingsWrapper} from the given {@link FinremCaseData},
-     * and uses the working hearing ID, to locate the matching {@link Hearing} in the lis of hearings</p>
-     *
-     * <p>If the hearings list is {@code null}, or if no hearing matches the working hearing ID,
-     * this method throws an {@link IllegalStateException} </p>
-     *
-     * <p>A working hearing refers to the {@link Hearing} a user is actively creating or modifying in the UI.</p>
-     *
-     * @param finremCaseData the case data containing the hearings and context
-     * @return the {@link Hearing} associated with the current working hearing ID
-     * @throws IllegalStateException if the hearings list is missing, or no matching hearing is found
-     */
+
     public HearingLike getHearingInContext(FinremCaseData finremCaseData) {
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
 
@@ -61,7 +46,18 @@ public class HearingCorrespondenceHelper {
         return null;
     }
 
-    // pt todo doc and test
+    /**
+     * Retrieves the {@link Hearing} from the wrapper param using the UUID param.
+     * <p>If the hearings list is {@code null}, or if no hearing matches the working hearing ID,
+     * this method throws an {@link IllegalStateException} </p>
+     *
+     * <p>A working hearing refers to the {@link Hearing} that a user is actively creating or modifying in EXUI.</p>
+     *
+     * @param wrapper the ManageHearingsWrapper instance containing hearings.
+     * @param workingHearingId UUID for the working hearing OK.
+     * @return the {@link Hearing} associated with the current working hearing ID
+     * @throws IllegalStateException if the hearings list is missing, or no matching hearing is found
+     */
     public Hearing getActiveHearingInContext(ManageHearingsWrapper wrapper, UUID workingHearingId) {
 
         List<ManageHearingsCollectionItem> hearings = wrapper.getHearings();
@@ -209,7 +205,6 @@ public class HearingCorrespondenceHelper {
     }
 
     /*
-     * PT todo: test
      * Returns true is a hearing was vacated and relisted
      * @param finremCaseDetails queried to see if the vacate action was chosen and if the hearing was relisted.
      */

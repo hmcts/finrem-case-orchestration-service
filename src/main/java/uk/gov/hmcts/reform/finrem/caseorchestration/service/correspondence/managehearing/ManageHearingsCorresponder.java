@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
@@ -374,7 +373,6 @@ public class ManageHearingsCorresponder {
     }
 
     /**
-     * pt todo test
      * Gets the vacate hearing notice then sends it to the Bulk Print service.
      *
      * @param finremCaseDetails the case details.
@@ -411,15 +409,6 @@ public class ManageHearingsCorresponder {
         // Add any additional documents to bundle
         hearingDocuments.addAll(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
             finremCaseDetails.getData().getManageHearingsWrapper()));
-
-        // Add mini form A to bundle when adding a hearing
-        ManageHearingsAction actionSelection = hearingCorrespondenceHelper.getManageHearingsAction(finremCaseDetails);
-        if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
-            CaseDocument miniFormA = finremCaseDetails.getData().getMiniFormA();
-            if (miniFormA != null) {
-                hearingDocuments.add(miniFormA);
-            }
-        }
 
         if (isEmpty(hearingDocuments)) {
             log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());

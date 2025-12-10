@@ -216,7 +216,6 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * PT todo test
      * Get the vacate hearing notice document, or return null if not found.
      *
      * @param finremCaseDetails the case details containing the hearing documents
@@ -373,10 +372,10 @@ public class ManageHearingsDocumentService {
     private List<CaseDocument> getHearingDocumentsThatAreAlwaysPosted(FinremCaseDetails finremCaseDetails) {
         return Stream.of(
                 getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.HEARING_NOTICE),
-                getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.VACATE_HEARING_NOTICE),
                 getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.OUT_OF_COURT_RESOLUTION),
                 getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER),
-                getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.PFD_NCDR_COVER_LETTER)
+                getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.PFD_NCDR_COVER_LETTER),
+                finremCaseDetails.getData().getMiniFormA()
             )
             .filter(Objects::nonNull)
             .collect(Collectors.toList());

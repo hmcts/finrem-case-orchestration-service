@@ -89,18 +89,16 @@ class HearingCorrespondenceHelperTest {
         ManageHearingsWrapper wrapper = new ManageHearingsWrapper();
         wrapper.setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
         wrapper.setHearings(List.of(new ManageHearingsCollectionItem(hearingId, hearing)));
-        wrapper.setWorkingHearingId(nonMatchingWorkingHearingId);
 
         FinremCaseData caseData = new FinremCaseData();
         caseData.setManageHearingsWrapper(wrapper);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-            helper.getHearingInContext(caseData));
+            helper.getActiveHearingInContext(wrapper, nonMatchingWorkingHearingId));
 
         assertTrue(exception.getMessage().contains("Hearing not found for the given ID"));
     }
 
-    // PT todo - more tests needed to cover vacate action and missing action
     @Test
     void shouldThrowExceptionWhenGetHearingInContextCalledForEmptyHearingCollection() {
         UUID hearingId = UUID.randomUUID();
@@ -113,7 +111,7 @@ class HearingCorrespondenceHelperTest {
         caseData.setManageHearingsWrapper(wrapper);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-            helper.getHearingInContext(caseData));
+            helper.getActiveHearingInContext(wrapper, hearingId));
 
         assertTrue(exception.getMessage().contains(
             String.format("No hearings available to search for. Working hearing ID is: %s",
@@ -309,6 +307,40 @@ class HearingCorrespondenceHelperTest {
 
         // Assert that at least one of the methods returns true.
         // This test changes.  If you keep, changes so that if the 'should' checks fail, then everything sent.
+    }
+
+    @Test
+    void when_isVacatedAndRelistedHearing_returns_true() {
+        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.VACATE_HEARING);
+        finremCaseDetails.getData().getManageHearingsWrapper().setWasRelistSelected(YesOrNo.YES);
+        assertTrue(helper.isVacatedAndRelistedHearing(finremCaseDetails));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideFalseArgsForIsVacatedAndRelistedHearing")
+    void when_isVacatedAndRelistedHearing_returns_false(ManageHearingsAction action, YesOrNo yesOrNo) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetails(action);
+        finremCaseDetails.getData().getManageHearingsWrapper().setWasRelistSelected(yesOrNo);
+        assertFalse(helper.isVacatedAndRelistedHearing(finremCaseDetails));
+    }
+
+    /**
+     * Used by when_isVacatedAndRelistedHearing_returns_false.
+     *
+     * @return Stream of Arguments all of which should cause when_isVacatedAndRelistedHearing_returns_false to return false.
+     */
+    static Stream<Arguments> provideFalseArgsForIsVacatedAndRelistedHearing() {
+        return Stream.of(
+            arguments(
+                ManageHearingsAction.VACATE_HEARING, YesOrNo.NO
+            ),
+            arguments(
+                ManageHearingsAction.ADD_HEARING, YesOrNo.YES
+            ),
+            arguments(
+                ManageHearingsAction.ADD_HEARING, YesOrNo.NO
+            )
+        );
     }
 
     private static FinremCaseDetails finremCaseDetails(ManageHearingsAction action) {

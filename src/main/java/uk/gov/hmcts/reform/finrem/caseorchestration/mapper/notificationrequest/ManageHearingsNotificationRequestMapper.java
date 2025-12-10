@@ -115,7 +115,7 @@ public class ManageHearingsNotificationRequestMapper {
 
         Hearing newHearing = null;
 
-        // PT todo: currently tests mock to skip this - add tests to consider this
+        // PT todo: currently tests mock to skip this - check AL added test
         if (isNewHearingAdded(finremCaseDetails)) {
             newHearing = hearingCorrespondenceHelper.getActiveHearingInContext(
                 manageHearingsWrapper, manageHearingsWrapper.getWorkingHearingId());
