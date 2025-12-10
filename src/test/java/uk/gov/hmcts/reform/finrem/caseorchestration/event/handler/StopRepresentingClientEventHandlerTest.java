@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -51,12 +52,15 @@ class StopRepresentingClientEventHandlerTest {
     @Mock
     private BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
 
+    @Mock
+    private CoreCaseDataService coreCaseDataService;
+
     private StopRepresentingClientEventHandler underTest;
 
     @BeforeEach
     void setup() {
         underTest = new StopRepresentingClientEventHandler(assignCaseAccessService, systemUserService, finremCaseDetailsMapper,
-            manageBarristerService, barristerChangeCaseAccessUpdater);
+            manageBarristerService, barristerChangeCaseAccessUpdater, coreCaseDataService);
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
     }
 
