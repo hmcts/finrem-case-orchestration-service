@@ -158,7 +158,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         } else {
             organisationPolicy = caseData.getRespondentOrganisationPolicy();
             barristerCollection = caseData.getBarristerCollectionWrapper().getRespondentBarristers();
-            caseData.setRespondentOrganisationPolicy(null);
             caseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
         }
 
