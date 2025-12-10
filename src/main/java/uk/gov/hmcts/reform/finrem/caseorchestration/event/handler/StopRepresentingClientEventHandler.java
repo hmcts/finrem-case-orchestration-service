@@ -94,6 +94,6 @@ public class StopRepresentingClientEventHandler {
 
     private void resetChangeOrganisationFieldChange(FinremCaseData finremCaseData) {
         coreCaseDataService.performPostSubmitCallback(finremCaseData.getCcdCaseType(), Long.valueOf(finremCaseData.getCcdCaseId()),
-            INTERNAL_CHANGE_UPDATE_CASE.getCcdType(),caseDetails -> clearChangeOrganisationFieldChange());
+            INTERNAL_CHANGE_UPDATE_CASE.getCcdType(), caseDetails -> clearChangeOrganisationFieldChange());
     }
 }

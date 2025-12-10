@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -24,8 +25,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.Barrister
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
+import java.util.Map;
+import java.util.function.Function;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -35,6 +41,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 @ExtendWith(MockitoExtension.class)
 class StopRepresentingClientEventHandlerTest {
@@ -134,6 +141,35 @@ class StopRepresentingClientEventHandlerTest {
 
         verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
         verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
+    }
+
+    @Test
+    void givenAnyEvents_whenHandled_thenShouldResetChangeOrganisationField() {
+        CaseType caseType = mock(CaseType.class);
+        FinremCaseData caseData = spy(FinremCaseData.class);
+
+        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+        FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), caseType, caseData)
+            .build();
+
+        StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
+            .userAuthorisation(AUTH_TOKEN)
+            .build();
+
+        underTest.handleEvent(event);
+
+        ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> captor = ArgumentCaptor.forClass(Function.class);
+        verify(coreCaseDataService).performPostSubmitCallback(eq(caseType), eq(Long.valueOf(CASE_ID)),
+            eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()), captor.capture());
+
+
+        Function<CaseDetails, Map<String, Object>> fn = captor.getValue();
+        CaseDetails ccdCaseDetails = mock(CaseDetails.class);
+        assertThat(fn.apply(ccdCaseDetails)).containsKey("changeOrganisationRequestField")
+            .extractingByKey("changeOrganisationRequestField")
+            .isNull();
     }
 
     private OrganisationPolicy getOrganisationPolicy(FinremCaseData caseData, boolean isApplicant) {
