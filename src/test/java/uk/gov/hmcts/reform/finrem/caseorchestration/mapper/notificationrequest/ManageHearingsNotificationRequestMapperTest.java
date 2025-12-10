@@ -12,9 +12,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.Hearin
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -24,8 +27,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 import java.time.LocalDate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
+//TODO: Tidy up AL
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsNotificationRequestMapperTest {
 
@@ -68,15 +74,17 @@ class ManageHearingsNotificationRequestMapperTest {
      * Checks the specific notification request attributes for the applicant solicitor.
      */
     @Test
-    void shouldBuildNotificationRequestForApplicantSolicitor() {
+    void shouldBuildNotificationRequestForApplicantSolicitorAddAHearing() {
 
         try (MockedStatic<CourtHelper> mocked = mockStatic(CourtHelper.class)) {
-
-            caseDetails.getData().getManageHearingsWrapper().setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
 
             // When
             contactDetails.setApplicantSolicitorEmail("applicantsolicitor@example.com");
             contactDetails.setApplicantSolicitorName("The applicant solicitor name");
+            when(hearingCorrespondenceHelper.getManageHearingsAction(any()))
+                .thenReturn(ManageHearingsAction.ADD_HEARING);
+            when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any()))
+                .thenReturn(hearing);
             mocked.when(() -> CourtHelper.getFRCForHearing(hearing)).thenReturn("MockedCourt");
             NotificationRequest result = mapper.buildHearingNotificationForApplicantSolicitor(caseDetails, hearing);
 
@@ -84,6 +92,38 @@ class ManageHearingsNotificationRequestMapperTest {
             checkCommonNotificationRequestAttributes(result);
             assertThat(result.getNotificationEmail()).isEqualTo("applicantsolicitor@example.com");
             assertThat(result.getName()).isEqualTo("The applicant solicitor name");
+            assertThat(result.getHearingType()).isEqualTo(HearingType.FDA.getId());
+        }
+    }
+
+    @Test
+    void shouldBuildNotificationRequestForVacatedHearingApplicantSolicitor() {
+
+        try (MockedStatic<CourtHelper> mocked = mockStatic(CourtHelper.class)) {
+
+            caseDetails.getData().getManageHearingsWrapper().setWasRelistSelected(YesOrNo.NO);
+
+            VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing
+                .builder()
+                .vacateOrAdjournReason(VacateOrAdjournReason.CASE_NOT_READY)
+                .hearingType(HearingType.DIR)
+                .hearingDate(LocalDate.now())
+                .hearingTime("10:00 AM")
+                .build();
+
+            // When
+            contactDetails.setApplicantSolicitorEmail("applicantsolicitor@example.com");
+            contactDetails.setApplicantSolicitorName("The applicant solicitor name");
+            when(hearingCorrespondenceHelper.getManageHearingsAction(any()))
+                .thenReturn(ManageHearingsAction.VACATE_HEARING);
+            mocked.when(() -> CourtHelper.getFRCForHearing(vacatedHearing)).thenReturn("MockedCourt");
+            NotificationRequest result = mapper.buildHearingNotificationForApplicantSolicitor(caseDetails, vacatedHearing);
+
+            // AssertThat
+            checkCommonNotificationRequestAttributes(result);
+            assertThat(result.getNotificationEmail()).isEqualTo("applicantsolicitor@example.com");
+            assertThat(result.getName()).isEqualTo("The applicant solicitor name");
+            assertThat(result.getVacatedHearingType()).isEqualTo(HearingType.DIR.getId());
         }
     }
 
@@ -97,6 +137,10 @@ class ManageHearingsNotificationRequestMapperTest {
 
             // When
 
+            when(hearingCorrespondenceHelper.getManageHearingsAction(any()))
+                .thenReturn(ManageHearingsAction.ADD_HEARING);
+            when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any()))
+                .thenReturn(hearing);
             contactDetails.setRespondentSolicitorEmail("respondentsolicitor@example.com");
             contactDetails.setRespondentSolicitorName("The respondent solicitor name");
             mocked.when(() -> CourtHelper.getFRCForHearing(hearing)).thenReturn("MockedCourt");
@@ -106,6 +150,7 @@ class ManageHearingsNotificationRequestMapperTest {
             checkCommonNotificationRequestAttributes(result);
             assertThat(result.getNotificationEmail()).isEqualTo("respondentsolicitor@example.com");
             assertThat(result.getName()).isEqualTo("The respondent solicitor name");
+            assertThat(result.getHearingType()).isEqualTo(HearingType.FDA.getId());
         }
     }
 
@@ -119,6 +164,10 @@ class ManageHearingsNotificationRequestMapperTest {
         try (MockedStatic<CourtHelper> mocked = mockStatic(CourtHelper.class)) {
 
             // When
+            when(hearingCorrespondenceHelper.getManageHearingsAction(any()))
+                .thenReturn(ManageHearingsAction.ADD_HEARING);
+            when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any()))
+                .thenReturn(hearing);
             IntervenerWrapper intervener = new IntervenerOne();
             intervener.setIntervenerSolEmail("intervenersolicitor@example.com");
             intervener.setIntervenerSolName("The intervener solicitor name");
@@ -129,6 +178,7 @@ class ManageHearingsNotificationRequestMapperTest {
             checkCommonNotificationRequestAttributes(result);
             assertThat(result.getNotificationEmail()).isEqualTo("intervenersolicitor@example.com");
             assertThat(result.getName()).isEqualTo("The intervener solicitor name");
+            assertThat(result.getHearingType()).isEqualTo(HearingType.FDA.getId());
         }
     }
 
@@ -138,7 +188,6 @@ class ManageHearingsNotificationRequestMapperTest {
         assertThat(result.getApplicantName()).isEqualTo("Applicant last name");
         assertThat(result.getRespondentName()).isEqualTo("Respondent last name");
         assertThat(result.getCaseType()).isEqualTo(EmailService.CONTESTED);
-        assertThat(result.getHearingType()).isEqualTo(HearingType.FDA.getId());
         assertThat(result.getSelectedCourt()).isEqualTo("MockedCourt");
     }
 }
