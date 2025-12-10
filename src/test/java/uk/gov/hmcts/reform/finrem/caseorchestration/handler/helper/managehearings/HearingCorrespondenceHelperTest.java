@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -83,7 +82,6 @@ class HearingCorrespondenceHelperTest {
     @Test
     void shouldThrowExceptionWhenHearingIdNotFound() {
         UUID hearingId = UUID.randomUUID();
-        UUID nonMatchingWorkingHearingId = UUID.randomUUID();
 
         Hearing hearing = new Hearing();
         ManageHearingsWrapper wrapper = new ManageHearingsWrapper();
@@ -93,6 +91,7 @@ class HearingCorrespondenceHelperTest {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setManageHearingsWrapper(wrapper);
 
+        UUID nonMatchingWorkingHearingId = UUID.randomUUID();
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
             helper.getActiveHearingInContext(wrapper, nonMatchingWorkingHearingId));
 
@@ -289,24 +288,6 @@ class HearingCorrespondenceHelperTest {
                 Hearing.builder().hearingType(HearingType.FDR).build()
             )
         );
-    }
-
-    // PT todo - finish when other tests done
-    /**
-     * Test fails if both methods return false.  This would mean no correspondence is sent for a hearing.
-     * Either shouldPostAllHearingDocuments or shouldPostHearingNoticeOnly must return true.
-     * If the test fails, it's likely that a new HearingType has been added and the logic in one of the methods
-     * needs updating.
-     */
-    @ParameterizedTest
-    @EnumSource(HearingType.class)
-    void shouldAlwaysPostSomeHearingCorrespondence(HearingType hearingType) {
-        // Arrange. The hearing uses the parameterised hearing type.
-        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADD_HEARING);
-        Hearing hearing = Hearing.builder().hearingType(hearingType).build();
-
-        // Assert that at least one of the methods returns true.
-        // This test changes.  If you keep, changes so that if the 'should' checks fail, then everything sent.
     }
 
     @Test

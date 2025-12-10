@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.mana
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.Hearin
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -22,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -40,6 +43,8 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -105,7 +110,7 @@ class ManageHearingsCorresponderTest {
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         verify(hearingCorrespondenceHelper, never())
-                .shouldEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
+            .shouldEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -125,7 +130,7 @@ class ManageHearingsCorresponderTest {
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         verify(hearingCorrespondenceHelper, never())
-                .shouldEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
+            .shouldEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     /**
@@ -143,7 +148,7 @@ class ManageHearingsCorresponderTest {
         FinremCallbackRequest callbackRequest = callbackRequest();
         NotificationRequest notificationRequest = new NotificationRequest();
         when(notificationRequestMapper.buildHearingNotificationForApplicantSolicitor(callbackRequest.getCaseDetails(),
-                hearing)).thenReturn(notificationRequest);
+            hearing)).thenReturn(notificationRequest);
 
         // Arrange
         when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
@@ -175,7 +180,7 @@ class ManageHearingsCorresponderTest {
         FinremCallbackRequest callbackRequest = callbackRequest();
         NotificationRequest notificationRequest = new NotificationRequest();
         when(notificationRequestMapper.buildHearingNotificationForRespondentSolicitor(callbackRequest.getCaseDetails(),
-                hearing)).thenReturn(notificationRequest);
+            hearing)).thenReturn(notificationRequest);
 
         // Arrange
         when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
@@ -237,9 +242,9 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     *  sendHearingCorrespondence needs a null check for each IntervenerWrapper.
-     *  There if an opportunity to check and log if intervener addresses are missing.
-     *  This checks that the logs are present.  And that the null checks are working.
+     * sendHearingCorrespondence needs a null check for each IntervenerWrapper.
+     * There if an opportunity to check and log if intervener addresses are missing.
+     * This checks that the logs are present.  And that the null checks are working.
      */
     @Test
     void shouldSendLogMissingIntervenerAddresses() {
@@ -251,15 +256,13 @@ class ManageHearingsCorresponderTest {
             CaseRole.INTVR_SOLICITOR_4
         );
         List<PartyOnCaseCollectionItem> partyList = buildPartiesList(caseRoles);
-
-        FinremCallbackRequest callbackRequest = callbackRequest();
-        FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
         Hearing hearing = mock(Hearing.class);
 
         // Arrange
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+        FinremCallbackRequest callbackRequest = callbackRequest();
 
         // Act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
@@ -274,7 +277,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Checks that applicant is posted a hearing notice from a call to sendHearingCorrespondence
+     * Checks that applicant is posted a hearing notice from a call to sendHearingCorrespondence.
      * - CaseRole is APP_SOLICITOR
      * - shouldNotSendNotification returns false
      * - shouldPostToApplicant returns true
@@ -308,7 +311,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Checks that applicant is posted a vacate hearing notice from a call to sendVacatedHearingCorrespondence
+     * Checks that applicant is posted a vacate hearing notice from a call to sendVacatedHearingCorrespondence.
      * - CaseRole is APP_SOLICITOR
      * - shouldPostToApplicant returns true
      */
@@ -369,8 +372,9 @@ class ManageHearingsCorresponderTest {
         verify(bulkPrintService).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
         assertThat(logs.getInfos()).contains("Request sent to Bulk Print to post notice to the RESP_SOLICITOR party. Request sent for case ID: 123");
     }
+
     /**
-     * Checks that respondent is posted a vacate hearing notice from a call to sendVacatedHearingCorrespondence
+     * Checks that respondent is posted a vacate hearing notice from a call to sendVacatedHearingCorrespondence.
      * - CaseRole is RESP_SOLICITOR
      * - shouldPostToRespondent returns true
      */
@@ -399,7 +403,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Checks that interveners are posted a hearing notice from a call to sendHearingCorrespondence
+     * Checks that interveners are posted a hearing notice from a call to sendHearingCorrespondence.
      * - CaseRole is an Intervener role
      * - shouldNotSendNotification returns false
      * - shouldPostHearingNoticeOnly returns true
@@ -444,7 +448,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Checks that interveners are posted a vacate hearing notice from a call to sendVacatedHearingCorrespondence
+     * Checks that interveners are posted a vacate hearing notice from a call to sendVacatedHearingCorrespondence.
      * - CaseRole is an Intervener role
      */
     @Test
@@ -498,23 +502,32 @@ class ManageHearingsCorresponderTest {
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
-        callbackRequest.getCaseDetails().getData().setMiniFormA(new CaseDocument());
-        when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
+        ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
 
         // Arrange
         when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
+        when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(allHearingDocuments());
         when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
-            callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
+            manageHearingsWrapper)).thenReturn(additionalHearingDocuments());
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
-        verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(), any(), any());
+        verify(manageHearingsDocumentService).getHearingDocumentsToPost(callbackRequest.getCaseDetails());
+        verify(manageHearingsDocumentService).getAdditionalHearingDocsFromWorkingHearing(manageHearingsWrapper);
+
+        InOrder inOrder = inOrder(genericDocumentService);
+        inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(
+            eq(allHearingDocuments().getFirst()), eq(AUTH_TOKEN), eq(CaseType.CONTESTED));
+        inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(
+            eq(additionalHearingDocuments().getFirst()), eq(AUTH_TOKEN), eq(CaseType.CONTESTED));
+        inOrder.verifyNoMoreInteractions();
+
         verify(bulkPrintService).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
         assertThat(logs.getInfos())
             .contains("Request sent to Bulk Print to post notice to the APP_SOLICITOR party. Request sent for case ID: 123");
@@ -535,22 +548,32 @@ class ManageHearingsCorresponderTest {
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
+        ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
 
         // Arrange
         when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
-        when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
+        when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(allHearingDocuments());
         when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
-            callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
+            manageHearingsWrapper)).thenReturn(additionalHearingDocuments());
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
-        verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(), any(), any());
+        verify(manageHearingsDocumentService).getHearingDocumentsToPost(callbackRequest.getCaseDetails());
+        verify(manageHearingsDocumentService).getAdditionalHearingDocsFromWorkingHearing(manageHearingsWrapper);
+
+        InOrder inOrder = inOrder(genericDocumentService);
+        inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(
+            eq(allHearingDocuments().getFirst()), eq(AUTH_TOKEN), eq(CaseType.CONTESTED));
+        inOrder.verify(genericDocumentService).convertDocumentIfNotPdfAlready(
+            eq(additionalHearingDocuments().getFirst()), eq(AUTH_TOKEN), eq(CaseType.CONTESTED));
+        inOrder.verifyNoMoreInteractions();
+
         verify(bulkPrintService).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
         assertThat(logs.getInfos())
             .contains("Request sent to Bulk Print to post notice to the RESP_SOLICITOR party. Request sent for case ID: 123");
@@ -579,21 +602,33 @@ class ManageHearingsCorresponderTest {
         addIntervenersToCaseData(finremCaseData, doNotMakeRepresented);
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
+        ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
 
         // Arrange
         when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
-        when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
+        when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(allHearingDocuments());
         when(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
-            callbackRequest.getCaseDetails().getData().getManageHearingsWrapper())).thenReturn(List.of(new CaseDocument()));
+            manageHearingsWrapper)).thenReturn(additionalHearingDocuments());
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
-        verify(genericDocumentService, times(8)).convertDocumentIfNotPdfAlready(any(), any(), any());
+        verify(manageHearingsDocumentService, times(4)).getHearingDocumentsToPost(callbackRequest.getCaseDetails());
+        verify(manageHearingsDocumentService, times(4)).getAdditionalHearingDocsFromWorkingHearing(manageHearingsWrapper);
+
+        InOrder inOrder = inOrder(genericDocumentService);
+        for (int i = 0; i < 4; i++) {
+            inOrder.verify(genericDocumentService)
+                .convertDocumentIfNotPdfAlready(eq(allHearingDocuments().getFirst()), eq(AUTH_TOKEN), eq(CaseType.CONTESTED));
+            inOrder.verify(genericDocumentService)
+                .convertDocumentIfNotPdfAlready(eq(additionalHearingDocuments().getFirst()), eq(AUTH_TOKEN), eq(CaseType.CONTESTED));
+        }
+        inOrder.verifyNoMoreInteractions();
+
         verify(bulkPrintService, times(4)).printIntervenerDocuments(any(), (FinremCaseDetails) any(), any(), any());
 
         caseRoles.forEach(role -> {
@@ -915,14 +950,17 @@ class ManageHearingsCorresponderTest {
 
     /**
      * Reusable test setup method to create a FinremCallbackRequest with a case ID and empty case data.
+     *
      * @return a FinremCallbackRequest with a case ID and empty case data.
      */
     private FinremCallbackRequest callbackRequest() {
         return FinremCallbackRequest
-                .builder()
-                .caseDetails(FinremCaseDetails.builder().id(123L)
-                        .data(new FinremCaseData()).build())
-                .build();
+            .builder()
+            .caseDetails(FinremCaseDetails.builder().id(123L)
+                .data(new FinremCaseData())
+                .caseType(CaseType.CONTESTED)
+                .build())
+            .build();
     }
 
     /**
@@ -971,5 +1009,13 @@ class ManageHearingsCorresponderTest {
             .intervenerSolName("Intervener Solicitor 4")
             .intervenerRepresented(makeRepresented)
             .build());
+    }
+
+    private List<CaseDocument> allHearingDocuments() {
+        return List.of(CaseDocument.builder().documentFilename("hearing docs").build());
+    }
+
+    private List<CaseDocument> additionalHearingDocuments() {
+        return List.of(CaseDocument.builder().documentFilename("additional docs").build());
     }
 }

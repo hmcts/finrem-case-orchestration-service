@@ -31,23 +31,9 @@ public class HearingCorrespondenceHelper {
     private final PaperNotificationService paperNotificationService;
     private final ExpressCaseService expressCaseService;
 
-
-    public HearingLike getHearingInContext(FinremCaseData finremCaseData) {
-        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
-
-        if (ManageHearingsAction.ADD_HEARING.equals(manageHearingsWrapper.getManageHearingsActionSelection())) {
-            return getActiveHearingInContext(manageHearingsWrapper, manageHearingsWrapper.getWorkingHearingId());
-        }
-
-        if (ManageHearingsAction.VACATE_HEARING.equals(finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection())) {
-            UUID workingVacatedHearingId = manageHearingsWrapper.getWorkingVacatedHearingId();
-            return getVacateOrAdjournedHearingInContext(manageHearingsWrapper, workingVacatedHearingId);
-        }
-        return null;
-    }
-
     /**
      * Retrieves the {@link Hearing} from the wrapper param using the UUID param.
+     *
      * <p>If the hearings list is {@code null}, or if no hearing matches the working hearing ID,
      * this method throws an {@link IllegalStateException} </p>
      *
@@ -213,15 +199,6 @@ public class HearingCorrespondenceHelper {
         boolean hearingRelisted = YesOrNo.YES.equals(
             finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
         return isVacateHearingAction(actionSelection) && hearingRelisted;
-    }
-
-    /**
-     * Determines if the action selection is to add a hearing.
-     * @param actionSelection the action selection to check
-     * @return true if the action selection is ADD_HEARING, false otherwise
-     */
-    private boolean isAddHearingAction(ManageHearingsAction actionSelection) {
-        return ManageHearingsAction.ADD_HEARING.equals(actionSelection);
     }
 
     /**
