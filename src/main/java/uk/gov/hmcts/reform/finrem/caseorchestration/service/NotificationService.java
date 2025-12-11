@@ -1891,6 +1891,9 @@ public class NotificationService {
 
     /**
      * Email a hearing notification to a solicitor.
+     * Template is one of these:
+     * FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR
+     * FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
      * @param notificationRequest the notification request containing details for the email
      */
     public void sendHearingNotificationToSolicitor(

@@ -107,7 +107,7 @@ class ManageHearingsNotificationRequestMapperTest {
             contactDetails.setApplicantSolicitorEmail(APPLICANT_SOLICITOR_EMAIL);
             contactDetails.setApplicantSolicitorName(APPLICANT_SOLICITOR_NAME);
 
-            VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.builder()
+            final VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.builder()
                 .vacateOrAdjournReason(VacateOrAdjournReason.CASE_NOT_READY)
                 .hearingType(HearingType.DIR)
                 .hearingDate(LocalDate.now())

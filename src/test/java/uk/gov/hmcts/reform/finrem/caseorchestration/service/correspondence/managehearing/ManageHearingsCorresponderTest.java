@@ -329,7 +329,8 @@ class ManageHearingsCorresponderTest {
         VacateOrAdjournedHearing vacateOrAdjournedHearing = mock(VacateOrAdjournedHearing.class);
         when(vacateOrAdjournedHearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
-        when(manageHearingsDocumentService.getVacateHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
+        CaseDocument vacateNotice = buildTestVacateNotice();
+        when(manageHearingsDocumentService.getVacateHearingNotice(callbackRequest.getCaseDetails())).thenReturn(vacateNotice);
 
         // Arrange
         when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any())).thenReturn(vacateOrAdjournedHearing);
@@ -342,7 +343,7 @@ class ManageHearingsCorresponderTest {
         int numberOfVacateDocuments = 1; // Just the Vacate Hearing Notice.
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
         verify(bulkPrintService).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
-        verify(genericDocumentService, times(numberOfVacateDocuments)).convertDocumentIfNotPdfAlready(any(), any(), any());
+        verify(genericDocumentService, times(numberOfVacateDocuments)).convertDocumentIfNotPdfAlready(vacateNotice, AUTH_TOKEN, CaseType.CONTESTED);
         assertThat(logs.getInfos()).contains("Request sent to Bulk Print to post notice to the APP_SOLICITOR party. Request sent for case ID: 123");
     }
 
@@ -471,7 +472,8 @@ class ManageHearingsCorresponderTest {
         VacateOrAdjournedHearing vacateOrAdjournedHearing = mock(VacateOrAdjournedHearing.class);
         when(vacateOrAdjournedHearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
-        when(manageHearingsDocumentService.getVacateHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
+        CaseDocument vacateNotice = buildTestVacateNotice();
+        when(manageHearingsDocumentService.getVacateHearingNotice(callbackRequest.getCaseDetails())).thenReturn(vacateNotice);
 
         // Arrange
         when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any())).thenReturn(vacateOrAdjournedHearing);
@@ -484,7 +486,7 @@ class ManageHearingsCorresponderTest {
         int numberOfVacateDocuments = 1; // Just the Vacate Hearing Notice.
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
-        verify(genericDocumentService, times(numberOfVacateDocuments)).convertDocumentIfNotPdfAlready(any(), any(), any());
+        verify(genericDocumentService, times(numberOfVacateDocuments)).convertDocumentIfNotPdfAlready(vacateNotice, AUTH_TOKEN, CaseType.CONTESTED);
         assertThat(logs.getInfos()).contains("Request sent to Bulk Print to post notice to the RESP_SOLICITOR party. Request sent for case ID: 123");
     }
 
@@ -552,10 +554,11 @@ class ManageHearingsCorresponderTest {
         YesOrNo doNotMakeRepresented = YesOrNo.NO;
         addIntervenersToCaseData(finremCaseData, doNotMakeRepresented);
         VacateOrAdjournedHearing vacateOrAdjournedHearing = mock(VacateOrAdjournedHearing.class);
+        CaseDocument vacateNotice = buildTestVacateNotice();
 
         // Arrange
         when(vacateOrAdjournedHearing.getPartiesOnCase()).thenReturn(partyList);
-        when(manageHearingsDocumentService.getVacateHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
+        when(manageHearingsDocumentService.getVacateHearingNotice(callbackRequest.getCaseDetails())).thenReturn(vacateNotice);
         when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any())).thenReturn(vacateOrAdjournedHearing);
 
         // act
@@ -564,7 +567,7 @@ class ManageHearingsCorresponderTest {
         // Verify
         int numberOfVacateDocuments = 1 * 4; // Just the Vacate Hearing Notice per intervener.
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
-        verify(genericDocumentService, times(numberOfVacateDocuments)).convertDocumentIfNotPdfAlready(any(), any(), any());
+        verify(genericDocumentService, times(numberOfVacateDocuments)).convertDocumentIfNotPdfAlready(vacateNotice, AUTH_TOKEN, CaseType.CONTESTED);
         verify(bulkPrintService, times(4)).printIntervenerDocuments(any(), any(FinremCaseDetails.class), any(), any());
 
         caseRoles.forEach(role -> {
@@ -1091,7 +1094,7 @@ class ManageHearingsCorresponderTest {
         // Act
         corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
-        // Assert getActiveHearingInContext is called, a dependency of sendHearingCorrespondence
+        // Assert
         InOrder inOrder = inOrder(hearingCorrespondenceHelper);
         if (!isVacatedAndRelisted && shouldNotSendNotification) {
             inOrder.verify(hearingCorrespondenceHelper).isVacatedAndRelistedHearing(finremCaseDetails);
@@ -1172,5 +1175,11 @@ class ManageHearingsCorresponderTest {
 
     private List<CaseDocument> additionalHearingDocuments() {
         return List.of(CaseDocument.builder().documentFilename("additional docs").build());
+    }
+
+    private CaseDocument buildTestVacateNotice() {
+        return CaseDocument.builder()
+            .documentFilename("a vacate notice filename")
+            .build();
     }
 }

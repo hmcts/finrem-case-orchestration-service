@@ -61,19 +61,19 @@ public class HearingCorrespondenceHelper {
             .getValue();
     }
 
-    public VacateOrAdjournedHearing getVacateOrAdjournedHearingInContext(ManageHearingsWrapper wrapper, UUID workingHearingId) {
+    public VacateOrAdjournedHearing getVacateOrAdjournedHearingInContext(ManageHearingsWrapper wrapper, UUID workingVacatedHearingId) {
 
         List<VacatedOrAdjournedHearingsCollectionItem> hearings = wrapper.getVacatedOrAdjournedHearings();
 
         if (hearings == null) {
             throw new IllegalStateException(
-                "No vacated or adjourned hearings available to search for. Working hearing ID is: " + workingHearingId
+                "No vacated or adjourned hearings available to search for. Working hearing ID is: " + workingVacatedHearingId
             );
         }
 
-        return Optional.ofNullable(wrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingHearingId))
+        return Optional.ofNullable(wrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingVacatedHearingId))
             .map(VacatedOrAdjournedHearingsCollectionItem::getValue)
-            .orElseThrow(() -> new IllegalStateException("Vacated hearing not found for the given ID: " + workingHearingId));
+            .orElseThrow(() -> new IllegalStateException("Vacated hearing not found for the given ID: " + workingVacatedHearingId));
     }
 
     /**
@@ -145,7 +145,6 @@ public class HearingCorrespondenceHelper {
     }
 
     /**
-     * PT consider chage visibility to private.  Also the bit JT hated could be refactored easily
      * Determines if a hearing should only send a notice. And should NOT send additional hearing documents.
      * To return true:
      * - the HearingType must appear in the noticeOnlyHearingTypes set.
