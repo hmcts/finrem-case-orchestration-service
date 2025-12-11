@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -112,6 +112,7 @@ public class ManageHearingsNotificationRequestMapper {
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
 
         Hearing newHearing = null;
 
@@ -123,14 +124,10 @@ public class ManageHearingsNotificationRequestMapper {
         String newHearingType =
             newHearing != null ? newHearing.getHearingType().getId() : hearing.getHearingType().getId();
 
-        String applicantSurname = finremCaseData.getContactDetailsWrapper().getApplicantLname();
-        String respondentSurname = finremCaseData.getContactDetailsWrapper().getRespondentLname();
-
-        String emailServiceCaseType = CaseType.CONTESTED.equals(finremCaseDetails.getCaseType())
-            ? EmailService.CONTESTED : EmailService.CONSENTED;
+        String applicantSurname = contactDetailsWrapper.getApplicantLname();
+        String respondentSurname = contactDetailsWrapper.getRespondentLname();
 
         String selectedFRC = CourtHelper.getFRCForHearing(hearing);
-
         String vacatedHearingType = hearing.getHearingType().getId();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
@@ -141,11 +138,11 @@ public class ManageHearingsNotificationRequestMapper {
             .notificationEmail(partySpecificDetails.recipientEmailAddress)
             .caseReferenceNumber(String.valueOf(finremCaseDetails.getId()))
             .hearingType(newHearingType)
-            .solicitorReferenceNumber(nullToEmpty(finremCaseData.getContactDetailsWrapper().getSolicitorReference()))
+            .solicitorReferenceNumber(nullToEmpty(contactDetailsWrapper.getSolicitorReference()))
             .applicantName(applicantSurname)
             .respondentName(respondentSurname)
             .name(partySpecificDetails.recipientName)
-            .caseType(emailServiceCaseType)
+            .caseType(EmailService.CONTESTED)
             .selectedCourt(selectedFRC)
             .vacatedHearingType(vacatedHearingType)
             .vacatedHearingDateTime(vacatedHearingDateTime)

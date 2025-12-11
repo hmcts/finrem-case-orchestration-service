@@ -339,11 +339,90 @@ class ManageHearingsCorresponderTest {
         corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Verify
-        Integer numberOfVacateDocuments = 1; // Just the Vacate Hearing Notice.
+        int numberOfVacateDocuments = 1; // Just the Vacate Hearing Notice.
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
         verify(bulkPrintService).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
         verify(genericDocumentService, times(numberOfVacateDocuments)).convertDocumentIfNotPdfAlready(any(), any(), any());
         assertThat(logs.getInfos()).contains("Request sent to Bulk Print to post notice to the APP_SOLICITOR party. Request sent for case ID: 123");
+    }
+
+    /**
+     * Checks that applicant is posted a vacate hearing notice and relisted hearing notice from a call to sendVacatedHearingCorrespondence.
+     * - CaseRole is APP_SOLICITOR
+     * - shouldPostToApplicant returns true
+     */
+    @Test
+    void shouldPostVacateHearingNoticeAndRelistHearingNoticeToApplicant() {
+        // Setup
+
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        VacateOrAdjournedHearing vacateOrAdjournedHearing = mock(VacateOrAdjournedHearing.class);
+        when(vacateOrAdjournedHearing.getPartiesOnCase()).thenReturn(partyList);
+
+        List<PartyOnCaseCollectionItem> relistedParties = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        Hearing relistedHearing = mock(Hearing.class);
+        when(relistedHearing.getPartiesOnCase()).thenReturn(relistedParties);
+
+        FinremCallbackRequest callbackRequest = callbackRequest();
+
+        // Arrange
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any())).thenReturn(relistedHearing);
+        when(hearingCorrespondenceHelper.isVacatedAndRelistedHearing(any())).thenReturn(true);
+        when(manageHearingsDocumentService.getVacateHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
+        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any())).thenReturn(vacateOrAdjournedHearing);
+        when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
+        when((hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(any(), any()))).thenReturn(true);
+        when(manageHearingsDocumentService.getHearingNotice(any())).thenReturn(new CaseDocument());
+
+        // act
+        corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+
+        // Verify
+        int noticesPosted = 2; // Just the Vacate Hearing Notice.
+        verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
+        verify(bulkPrintService, times(noticesPosted)).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
+        verify(genericDocumentService, times(noticesPosted)).convertDocumentIfNotPdfAlready(any(), any(), any());
+        assertThat(logs.getInfos()).contains("Request sent to Bulk Print to post notice to the APP_SOLICITOR party. Request sent for case ID: 123");
+    }
+
+    @Test
+    void shouldNotPostVacateHearingNoticeWhenNoNoticeSelected() {
+        // Setup
+        VacateOrAdjournedHearing vacateOrAdjournedHearing = mock(VacateOrAdjournedHearing.class);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+
+        // Arrange
+        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any())).thenReturn(vacateOrAdjournedHearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(any())).thenReturn(true);
+
+        // act
+        corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+
+        // Verify// Just the Vacate Hearing Notice.
+        verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
+        verify(bulkPrintService,never()).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
+        verify(genericDocumentService, never()).convertDocumentIfNotPdfAlready(any(), any(), any());
+    }
+
+    @Test
+    void shouldNotPostVacateHearingNoticeWhenNoNoticeNoPartiesOnCase() {
+        // Setup
+        VacateOrAdjournedHearing vacateOrAdjournedHearing = mock(VacateOrAdjournedHearing.class);
+        when(vacateOrAdjournedHearing.getPartiesOnCase()).thenReturn(null);
+
+        FinremCallbackRequest callbackRequest = callbackRequest();
+
+        // Arrange
+        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(any(), any())).thenReturn(vacateOrAdjournedHearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(any())).thenReturn(false);
+
+        // act
+        corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+
+        // Verify// Just the Vacate Hearing Notice.
+        verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
+        verify(bulkPrintService,never()).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
+        verify(genericDocumentService, never()).convertDocumentIfNotPdfAlready(any(), any(), any());
     }
 
     /**
@@ -402,7 +481,7 @@ class ManageHearingsCorresponderTest {
         corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Verify
-        Integer numberOfVacateDocuments = 1; // Just the Vacate Hearing Notice.
+        int numberOfVacateDocuments = 1; // Just the Vacate Hearing Notice.
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
         verify(genericDocumentService, times(numberOfVacateDocuments)).convertDocumentIfNotPdfAlready(any(), any(), any());
@@ -483,7 +562,7 @@ class ManageHearingsCorresponderTest {
         corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Verify
-        Integer numberOfVacateDocuments = 1 * 4; // Just the Vacate Hearing Notice per intervener.
+        int numberOfVacateDocuments = 1 * 4; // Just the Vacate Hearing Notice per intervener.
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any(), any());
         verify(genericDocumentService, times(numberOfVacateDocuments)).convertDocumentIfNotPdfAlready(any(), any(), any());
         verify(bulkPrintService, times(4)).printIntervenerDocuments(any(), any(FinremCaseDetails.class), any(), any());
@@ -881,7 +960,6 @@ class ManageHearingsCorresponderTest {
             )
         );
     }
-
 
     /**
      * Checks that sendHearingCorrespondence does not send any documents when no hearing documents are found.
