@@ -105,15 +105,15 @@ class ManageHearingsNotificationRequestMapperTest {
         try (MockedStatic<CourtHelper> mocked = mockStatic(CourtHelper.class)) {
             caseDetails.getData().getManageHearingsWrapper().setWasRelistSelected(YesOrNo.NO);
 
+            contactDetails.setApplicantSolicitorEmail(APPLICANT_SOLICITOR_EMAIL);
+            contactDetails.setApplicantSolicitorName(APPLICANT_SOLICITOR_NAME);
+
             VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.builder()
                 .vacateOrAdjournReason(VacateOrAdjournReason.CASE_NOT_READY)
                 .hearingType(HearingType.DIR)
                 .hearingDate(LocalDate.now())
                 .hearingTime("10:00 AM")
                 .build();
-
-            contactDetails.setApplicantSolicitorEmail(APPLICANT_SOLICITOR_EMAIL);
-            contactDetails.setApplicantSolicitorName(APPLICANT_SOLICITOR_NAME);
 
             when(hearingCorrespondenceHelper.getManageHearingsAction(any()))
                 .thenReturn(ManageHearingsAction.VACATE_HEARING);
@@ -133,13 +133,6 @@ class ManageHearingsNotificationRequestMapperTest {
         try (MockedStatic<CourtHelper> mocked = mockStatic(CourtHelper.class)) {
             caseDetails.getData().getManageHearingsWrapper().setWasRelistSelected(YesOrNo.YES);
 
-            VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.builder()
-                .vacateOrAdjournReason(VacateOrAdjournReason.CASE_NOT_READY)
-                .hearingType(HearingType.DIR)
-                .hearingDate(LocalDate.now())
-                .hearingTime("10:00 AM")
-                .build();
-
             contactDetails.setApplicantSolicitorEmail(APPLICANT_SOLICITOR_EMAIL);
             contactDetails.setApplicantSolicitorName(APPLICANT_SOLICITOR_NAME);
 
@@ -147,6 +140,14 @@ class ManageHearingsNotificationRequestMapperTest {
                 .thenReturn(ManageHearingsAction.VACATE_HEARING);
             when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any()))
                 .thenReturn(hearing);
+
+            VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.builder()
+                .vacateOrAdjournReason(VacateOrAdjournReason.CASE_NOT_READY)
+                .hearingType(HearingType.DIR)
+                .hearingDate(LocalDate.now())
+                .hearingTime("10:00 AM")
+                .build();
+
             mocked.when(() -> CourtHelper.getFRCForHearing(vacatedHearing)).thenReturn(COURT_NAME);
 
             NotificationRequest result = mapper.buildHearingNotificationForApplicantSolicitor(caseDetails, vacatedHearing);
