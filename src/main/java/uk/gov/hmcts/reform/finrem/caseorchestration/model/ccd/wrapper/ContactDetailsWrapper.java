@@ -11,6 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -80,4 +85,64 @@ public class ContactDetailsWrapper {
     @JsonProperty("appRespondentRep")
     private YesOrNo consentedRespondentRepresented;
     private String isAdmin;
+
+    public static Map<String, Object[]> diff(ContactDetailsWrapper a, ContactDetailsWrapper b) {
+        Map<String, Object[]> differences = new HashMap<>();
+
+        try {
+            for (Field field : ContactDetailsWrapper.class.getDeclaredFields()) {
+                field.setAccessible(true);
+                Object v1 = field.get(a);
+                Object v2 = field.get(b);
+
+                if (!areEqualTreatingEmptyAsNull(v1, v2)) {
+                    differences.put(field.getName(), new Object[]{v1, v2});
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        return differences;
+    }
+
+    private static boolean areEqualTreatingEmptyAsNull(Object a, Object b) {
+
+        // Strings: treat "" as null
+        if (a instanceof String || b instanceof String) {
+            String s1 = (a == null || a.toString().isBlank()) ? null : a.toString();
+            String s2 = (b == null || b.toString().isBlank()) ? null : b.toString();
+            return Objects.equals(s1, s2);
+        }
+
+        // Recursively compare nested Address (or other CCD objects)
+        if (a instanceof Address && b instanceof Address) {
+            return Objects.equals(
+                normaliseAddress((Address) a),
+                normaliseAddress((Address) b)
+            );
+        }
+
+        // Everything else uses normal comparison
+        return Objects.equals(a, b);
+    }
+
+    private static Address normaliseAddress(Address addr) {
+        if (addr == null) return null;
+
+        return Address.builder()
+            .addressLine1(normaliseString(addr.getAddressLine1()))
+            .addressLine2(normaliseString(addr.getAddressLine2()))
+            .addressLine3(normaliseString(addr.getAddressLine3()))
+            .postTown(normaliseString(addr.getPostTown()))
+            .county(normaliseString(addr.getCounty()))
+            .postCode(normaliseString(addr.getPostCode()))
+            .country(normaliseString(addr.getCountry()))
+            .build();
+    }
+
+    private static String normaliseString(String value) {
+        return (value == null || value.isBlank()) ? null : value;
+    }
+
 }

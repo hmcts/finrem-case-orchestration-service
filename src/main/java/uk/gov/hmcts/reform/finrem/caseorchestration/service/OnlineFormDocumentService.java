@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.Map;
 import java.util.Objects;
@@ -145,7 +146,7 @@ public class OnlineFormDocumentService {
 
     private CaseDetails translateOptions(CaseDetails caseDetails) {
         CaseDetails copy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        optionIdToValueTranslator.translateOptionsValues.accept(copy);
+        optionIdToValueTranslator.translateFixedListOptions(copy);
 
         return copy;
     }
@@ -171,7 +172,7 @@ public class OnlineFormDocumentService {
 
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
-        optionIdToValueTranslator.translateOptionsValues.accept(caseDetailsCopy);
+        optionIdToValueTranslator.translateFixedListOptions(caseDetailsCopy);
         prepareMiniFormFields(caseDetailsCopy);
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
@@ -215,5 +216,33 @@ public class OnlineFormDocumentService {
         } else {
             caseData.put(ORDER_TYPE, CONSENT);
         }
+    }
+    /**
+     * Refreshes the contested Mini Form A document when contact details have changed.
+     *
+     * <p>
+     * This method checks whether the case is a contested application. If it is,
+     * the updated case details are compared with the previous version. When a
+     * change in contact information is detected, a new contested Mini Form A
+     * document is generated and saved back into the case data.
+     * </p>
+     *
+     * @param finremCaseDetails        the case details after the update
+     * @param finremCaseDetailsBefore  the case details before the update
+     * @param userAuthorisation        the authorisation token used to generate documents
+     */
+    public void refreshContestedMiniFormA(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
+                                          String userAuthorisation) {
+        if (finremCaseDetails.isContestedApplication()) {
+            if (isContactDetailsUpdated(finremCaseDetails, finremCaseDetailsBefore)) {
+                CaseDocument document = generateContestedMiniForm(userAuthorisation, finremCaseDetails);
+                finremCaseDetails.getData().setMiniFormA(document);
+            }
+        }
+    }
+
+    private boolean isContactDetailsUpdated(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
+        return !ContactDetailsWrapper.diff(finremCaseDetails.getData().getContactDetailsWrapper(),
+            finremCaseDetailsBefore.getData().getContactDetailsWrapper()).isEmpty();
     }
 }
