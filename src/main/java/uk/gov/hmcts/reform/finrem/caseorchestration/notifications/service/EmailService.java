@@ -155,6 +155,11 @@ public class EmailService {
             templateVars.put(MANAGE_CASE_BASE_URL, manageCaseBaseUrl);
         }
 
+        if (EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR.name().equals(templateName)) {
+            templateVars.put("vacatedHearingType", notificationRequest.getVacatedHearingType());
+            templateVars.put("vacatedHearingDateTime", notificationRequest.getVacatedHearingDateTime());
+        }
+
         setIntervenerSolicitorDetails(notificationRequest, templateName, templateVars);
 
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE.name().equals(templateName)) {

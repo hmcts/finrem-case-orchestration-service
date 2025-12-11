@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -50,16 +50,16 @@ class HearingCorrespondenceHelperTest {
 
     @Test
     void shouldReturnCorrectValuesWhenShouldSendNotificationUsed() {
-        Hearing hearing = mock(Hearing.class);
+        Hearing hearing = Hearing.builder().build();
 
-        when(hearing.getHearingNoticePrompt()).thenReturn(YesOrNo.NO);
+        // hearingNoticePrompt not initialised
         assertTrue(helper.shouldNotSendNotification(hearing));
 
-        when(hearing.getHearingNoticePrompt()).thenReturn(YesOrNo.YES);
+        hearing.setHearingNoticePrompt(YesOrNo.NO);
+        assertTrue(helper.shouldNotSendNotification(hearing));
+
+        hearing.setHearingNoticePrompt(YesOrNo.YES);
         assertFalse(helper.shouldNotSendNotification(hearing));
-
-        when(hearing.getHearingNoticePrompt()).thenReturn(null);
-        assertTrue(helper.shouldNotSendNotification(hearing));
     }
 
     @Test
@@ -67,13 +67,14 @@ class HearingCorrespondenceHelperTest {
         UUID hearingId = UUID.randomUUID();
         Hearing hearing = new Hearing();
         ManageHearingsWrapper wrapper = new ManageHearingsWrapper();
+        wrapper.setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
         wrapper.setHearings(List.of(new ManageHearingsCollectionItem(hearingId, hearing)));
         wrapper.setWorkingHearingId(hearingId);
 
         FinremCaseData caseData = new FinremCaseData();
         caseData.setManageHearingsWrapper(wrapper);
 
-        Hearing result = helper.getHearingInContext(caseData);
+        HearingLike result = helper.getActiveHearingInContext(wrapper, hearingId);
 
         assertEquals(hearing, result);
     }
@@ -81,18 +82,18 @@ class HearingCorrespondenceHelperTest {
     @Test
     void shouldThrowExceptionWhenHearingIdNotFound() {
         UUID hearingId = UUID.randomUUID();
-        UUID nonMatchingWorkingHearingId = UUID.randomUUID();
 
         Hearing hearing = new Hearing();
         ManageHearingsWrapper wrapper = new ManageHearingsWrapper();
+        wrapper.setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
         wrapper.setHearings(List.of(new ManageHearingsCollectionItem(hearingId, hearing)));
-        wrapper.setWorkingHearingId(nonMatchingWorkingHearingId);
 
         FinremCaseData caseData = new FinremCaseData();
         caseData.setManageHearingsWrapper(wrapper);
 
+        UUID nonMatchingWorkingHearingId = UUID.randomUUID();
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-            helper.getHearingInContext(caseData));
+            helper.getActiveHearingInContext(wrapper, nonMatchingWorkingHearingId));
 
         assertTrue(exception.getMessage().contains("Hearing not found for the given ID"));
     }
@@ -103,12 +104,13 @@ class HearingCorrespondenceHelperTest {
 
         ManageHearingsWrapper wrapper = new ManageHearingsWrapper();
         wrapper.setWorkingHearingId(hearingId);
+        wrapper.setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
 
         FinremCaseData caseData = new FinremCaseData();
         caseData.setManageHearingsWrapper(wrapper);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-            helper.getHearingInContext(caseData));
+            helper.getActiveHearingInContext(wrapper, hearingId));
 
         assertTrue(exception.getMessage().contains(
             String.format("No hearings available to search for. Working hearing ID is: %s",
@@ -260,8 +262,9 @@ class HearingCorrespondenceHelperTest {
      */
     @ParameterizedTest
     @MethodSource("provideInvalidNoticeOnlyCases")
-    void shouldPostHearingNoticeOnlyReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+    void shouldPostHearingNoticeOnlyReturnsFalse(Hearing hearing) {
         // Arrange case
+        FinremCaseDetails finremCaseDetails = finremCaseDetails();
         lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
         // Act
         boolean result = helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing);
@@ -276,106 +279,49 @@ class HearingCorrespondenceHelperTest {
      */
     static Stream<Arguments> provideInvalidNoticeOnlyCases() {
         return Stream.of(
-            // Case: invalid ManageHearingsAction, hearing type is OK
+            // Case: FDA Hearing type is wrong.
             arguments(
-                finremCaseDetails(null), Hearing.builder().hearingType(HearingType.MPS).build()
+                Hearing.builder().hearingType(HearingType.FDA).build()
             ),
-            // Case: valid action, but hearing is null
+            // but FDR Hearing type is wrong (for a standard, non-express, case like this).
             arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING), null
-            ),
-            // Case: Hearing type is wrong.
-            arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDA).build()
-            ),
-            // Case: valid action, but FDR invalid for non-express case
-            arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDR).build()
+                Hearing.builder().hearingType(HearingType.FDR).build()
             )
         );
     }
 
-    /**
-     * Tests happy path for shouldPostAllHearingDocuments::
-     * - Action is ADD_HEARING
-     * - Hearing type comes from a stream of arguments that should all be valid.
-     * When a case needs documents posted, shouldPostAllHearingDocuments decides if all hearing docs need posting.
-     */
     @Test
-    void shouldPostAllHearingDocumentsReturnsTrue() {
-        // Arrange case
-        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADD_HEARING);
-        Hearing fdaHearing = Hearing.builder().hearingType(HearingType.FDA).build();
-        // This mock is just for the FDR case.  FDR cases that are express have all docs posted.
-        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
-        Hearing fdrHearing = Hearing.builder().hearingType(HearingType.FDR).build();
-
-        // Act
-        boolean fdaResult = helper.shouldPostAllHearingDocuments(finremCaseDetails, fdaHearing);
-        boolean fdrResult = helper.shouldPostAllHearingDocuments(finremCaseDetails, fdrHearing);
-
-        // Assert
-        assertTrue(fdaResult);
-        assertTrue(fdrResult);
+    void when_isVacatedAndRelistedHearing_returns_true() {
+        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.VACATE_HEARING);
+        finremCaseDetails.getData().getManageHearingsWrapper().setWasRelistSelected(YesOrNo.YES);
+        assertTrue(helper.isVacatedAndRelistedHearing(finremCaseDetails));
     }
 
-    /**
-     * Confirms that shouldPostAllHearingDocuments returns false for the passed arguments.
-     * When a case needs documents posted, shouldPostAllHearingDocuments decides if all hearing docs need posting.
-     */
     @ParameterizedTest
-    @MethodSource("provideCasesSoShouldPostAllHearingDocumentsReturnsFalse")
-    void shouldPostAllHearingDocumentsReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
-        // Arrange.  This mock is just for the FDR case.  FDR cases that are not express don't have all docs posted.
-        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
-        // Act
-        boolean result = helper.shouldPostAllHearingDocuments(finremCaseDetails, hearing);
-        // Assert
-        assertFalse(result);
+    @MethodSource("provideFalseArgsForIsVacatedAndRelistedHearing")
+    void when_isVacatedAndRelistedHearing_returns_false(ManageHearingsAction action, YesOrNo yesOrNo) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetails(action);
+        finremCaseDetails.getData().getManageHearingsWrapper().setWasRelistSelected(yesOrNo);
+        assertFalse(helper.isVacatedAndRelistedHearing(finremCaseDetails));
     }
 
     /**
-     * Used by shouldPostAllHearingDocumentsReturnsFalse.
+     * Used by when_isVacatedAndRelistedHearing_returns_false.
      *
-     * @return Stream of Arguments all of which should cause shouldPostAllHearingDocuments to return False
+     * @return Stream of Arguments all of which should cause when_isVacatedAndRelistedHearing_returns_false to return false.
      */
-    static Stream<Arguments> provideCasesSoShouldPostAllHearingDocumentsReturnsFalse() {
+    static Stream<Arguments> provideFalseArgsForIsVacatedAndRelistedHearing() {
         return Stream.of(
-            // Case: valid action, but hearing is null
             arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING), null
+                ManageHearingsAction.VACATE_HEARING, YesOrNo.NO
             ),
-            // ManageHearingsAction is null, so a failing condition.
             arguments(
-                finremCaseDetails(null), Hearing.builder().hearingType(HearingType.FDA).build()
+                ManageHearingsAction.ADD_HEARING, YesOrNo.YES
             ),
-            // Action is ADD_HEARING, which is valid. However, hearing types are wrong.
             arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.MPS).build()
-            ),
-            // Calling test must mock the express case service to return true for this Case.  Then FDR will mean false returned.
-            arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDR).build()
+                ManageHearingsAction.ADD_HEARING, YesOrNo.NO
             )
         );
-    }
-
-    /**
-     * Test fails if both methods return false.  This would mean no correspondence is sent for a hearing.
-     * Either shouldPostAllHearingDocuments or shouldPostHearingNoticeOnly must return true.
-     * If the test fails, it's likely that a new HearingType has been added and the logic in one of the methods
-     * needs updating.
-     */
-    @ParameterizedTest
-    @EnumSource(HearingType.class)
-    void shouldAlwaysPostSomeHearingCorrespondence(HearingType hearingType) {
-        // Arrange. The hearing uses the parameterised hearing type.
-        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADD_HEARING);
-        Hearing hearing = Hearing.builder().hearingType(hearingType).build();
-
-        // Assert that at least one of the methods returns true.
-        assertTrue(helper.shouldPostAllHearingDocuments(finremCaseDetails, hearing)
-            || helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing));
     }
 
     private static FinremCaseDetails finremCaseDetails(ManageHearingsAction action) {
@@ -383,6 +329,15 @@ class HearingCorrespondenceHelperTest {
             .data(FinremCaseData.builder()
                 .manageHearingsWrapper(ManageHearingsWrapper.builder()
                     .manageHearingsActionSelection(action)
+                    .build())
+                .build())
+            .build();
+    }
+
+    private static FinremCaseDetails finremCaseDetails() {
+        return FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .manageHearingsWrapper(ManageHearingsWrapper.builder()
                     .build())
                 .build())
             .build();

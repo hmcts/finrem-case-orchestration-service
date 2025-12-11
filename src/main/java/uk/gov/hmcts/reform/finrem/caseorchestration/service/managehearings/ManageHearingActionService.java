@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.Hearin
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -133,12 +135,12 @@ public class ManageHearingActionService {
         ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
 
         WorkingVacatedHearing vacateHearingInput = hearingsWrapper.getWorkingVacatedHearing();
-        UUID selectedHearingId = UUID.fromString(vacateHearingInput.getChooseHearings().getValue().getCode());
+        setWorkingVacatedHearingId(hearingsWrapper, vacateHearingInput);
 
         ManageHearingsCollectionItem hearingToVacate = emptyIfNull(hearingsWrapper.getHearings()).stream()
-            .filter(item -> selectedHearingId.equals(item.getId()))
+            .filter(item -> hearingsWrapper.getWorkingVacatedHearingId().equals(item.getId()))
             .findFirst()
-            .orElseThrow(() -> new IllegalStateException("No hearing found with ID: " + selectedHearingId));
+            .orElseThrow(() -> new IllegalStateException("No hearing found with ID: " + hearingsWrapper.getWorkingVacatedHearingId()));
 
         List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
             .filter(list -> !list.isEmpty())
@@ -166,7 +168,12 @@ public class ManageHearingActionService {
 
         addDocumentsToCollection(documentMap, hearingsWrapper);
 
-        // clear the working values
+        // populate whether hearing was relisted in a system case field for the submitted handler to query.
+        hearingsWrapper.setWasRelistSelected(
+            YesOrNo.YES.equals(hearingsWrapper.getIsRelistSelected()) ? YesOrNo.YES : YesOrNo.NO
+        );
+
+        // clear the working hearing
         hearingsWrapper.setWorkingVacatedHearing(null);
         hearingsWrapper.setIsRelistSelected(null);
         hearingsWrapper.setShouldSendVacateOrAdjNotice(null);
@@ -266,8 +273,7 @@ public class ManageHearingActionService {
                                          CaseDocumentType caseDocumentType) {
 
         if (CaseDocumentType.VACATE_HEARING_NOTICE.equals(caseDocumentType)) {
-            WorkingVacatedHearing workingVacatedHearing = hearingsWrapper.getWorkingVacatedHearing();
-            return ManageHearingsWrapper.getWorkingVacatedHearingId(workingVacatedHearing);
+            return hearingsWrapper.getWorkingVacatedHearingId();
         }
 
         return hearingsWrapper.getWorkingHearingId();
@@ -433,12 +439,26 @@ public class ManageHearingActionService {
     }
 
     /*
-     * Used when Vacating a hearing to generate cover sheets for a notice if a hearing has not been relisted.
+     * Sets workingVacatedHearingId, or reassigns to a new value if vacate hearing has already run for the case.
+     * @param hearingsWrapper the target to set.
+     * @param vacateHearingInput the vacated hearing
+     */
+    private void setWorkingVacatedHearingId(ManageHearingsWrapper hearingsWrapper, WorkingVacatedHearing vacateHearingInput) {
+        hearingsWrapper.setWorkingVacatedHearingId(
+            Optional.ofNullable(vacateHearingInput)
+                .map(WorkingVacatedHearing::getChooseHearings)
+                .map(DynamicList::getValue)
+                .map(DynamicListElement::getCode)
+                .map(UUID::fromString)
+                .orElse(null));
+    }
+
+    /* Used when Vacating a hearing to generate cover sheets for a notice if a hearing has not been relisted.
      * If a hearing HAS been relisted, then performAddHearing generates these coversheets instead.
      * @param hearingsWrapper which is required to see if a hearing is being relisted
      * @param finremCaseDetails case details containing hearing and case data
      * @param authToken         authorization token for secure resource access
-     */
+    */
     private void generateVacateNoticeCoverSheetIfHearingNotRelisted(ManageHearingsWrapper hearingsWrapper,
                                                                     FinremCaseDetails finremCaseDetails, String authToken) {
         if (YesOrNo.NO.equals(hearingsWrapper.getIsRelistSelected())) {

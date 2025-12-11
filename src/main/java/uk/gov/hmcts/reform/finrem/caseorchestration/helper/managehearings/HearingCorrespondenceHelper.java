@@ -9,7 +9,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
@@ -29,37 +32,48 @@ public class HearingCorrespondenceHelper {
     private final ExpressCaseService expressCaseService;
 
     /**
-     * Retrieves the {@link Hearing} currently in context based on the working hearing ID from the case data.
-     *
-     * <p>This method accesses the {@link ManageHearingsWrapper} from the given {@link FinremCaseData},
-     * and uses the working hearing ID, to locate the matching {@link Hearing} in the lis of hearings</p>
+     * Retrieves the {@link Hearing} from the wrapper param using the UUID param.
      *
      * <p>If the hearings list is {@code null}, or if no hearing matches the working hearing ID,
      * this method throws an {@link IllegalStateException} </p>
      *
-     * <p>A working hearing refers to the {@link Hearing} a user is actively creating or modifying in the UI.</p>
+     * <p>A working hearing refers to the {@link Hearing} that a user is actively creating or modifying in EXUI.</p>
      *
-     * @param finremCaseData the case data containing the hearings and context
+     * @param wrapper the ManageHearingsWrapper instance containing hearings.
+     * @param workingHearingId UUID for the working hearing OK.
      * @return the {@link Hearing} associated with the current working hearing ID
      * @throws IllegalStateException if the hearings list is missing, or no matching hearing is found
      */
-    public Hearing getHearingInContext(FinremCaseData finremCaseData) {
-        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
-        UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
+    public Hearing getActiveHearingInContext(ManageHearingsWrapper wrapper, UUID workingHearingId) {
 
-        List<ManageHearingsCollectionItem> hearings = manageHearingsWrapper.getHearings();
+        List<ManageHearingsCollectionItem> hearings = wrapper.getHearings();
 
         if (hearings == null) {
             throw new IllegalStateException(
-                    "No hearings available to search for. Working hearing ID is: " + hearingId
+                "No hearings available to search for. Working hearing ID is: " + workingHearingId
             );
         }
 
-        return manageHearingsWrapper.getHearings().stream()
-                .filter(h -> hearingId.equals(h.getId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
-                .getValue();
+        return wrapper.getHearings().stream()
+            .filter(h -> workingHearingId.equals(h.getId()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + workingHearingId))
+            .getValue();
+    }
+
+    public VacateOrAdjournedHearing getVacateOrAdjournedHearingInContext(ManageHearingsWrapper wrapper, UUID workingVacatedHearingId) {
+
+        List<VacatedOrAdjournedHearingsCollectionItem> hearings = wrapper.getVacatedOrAdjournedHearings();
+
+        if (hearings == null) {
+            throw new IllegalStateException(
+                "No vacated or adjourned hearings available to search for. Working hearing ID is: " + workingVacatedHearingId
+            );
+        }
+
+        return Optional.ofNullable(wrapper.getVacatedOrAdjournedHearingsCollectionItemById(workingVacatedHearingId))
+            .map(VacatedOrAdjournedHearingsCollectionItem::getValue)
+            .orElseThrow(() -> new IllegalStateException("Vacated hearing not found for the given ID: " + workingVacatedHearingId));
     }
 
     /**
@@ -94,8 +108,8 @@ public class HearingCorrespondenceHelper {
      * @param hearing The hearing to check.
      * @return true if notification is required, false otherwise.
      */
-    public boolean shouldNotSendNotification(Hearing hearing) {
-        return YesOrNo.isNoOrNull(hearing.getHearingNoticePrompt());
+    public boolean shouldNotSendNotification(HearingLike hearing) {
+        return !hearing.shouldSendNotifications();
     }
 
     /**
@@ -133,14 +147,13 @@ public class HearingCorrespondenceHelper {
     /**
      * Determines if a hearing should only send a notice. And should NOT send additional hearing documents.
      * To return true:
-     * - the Action must be ADD_HEARING.
      * - the HearingType must appear in the noticeOnlyHearingTypes set.
      * - FDR hearings are an exception, they're notice only when the case is NOT an express case.
      * @param finremCaseDetails case details
      * @param hearing the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
      */
-    public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+    public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
         Set<HearingType> noticeOnlyHearingTypes = Set.of(
             HearingType.MPS,
             HearingType.FH,
@@ -153,44 +166,14 @@ public class HearingCorrespondenceHelper {
             HearingType.PTR
         );
 
-        boolean isNoticeOnlyHearingType = Optional.ofNullable(hearing)
-            .map(Hearing::getHearingType)
+        return Optional.ofNullable(hearing)
+            .map(HearingLike::getHearingType)
             .map(hearingType ->
                 noticeOnlyHearingTypes.contains(hearingType)
                     || (HearingType.FDR.equals(hearingType)
                     && !expressCaseService.isExpressCase(finremCaseDetails.getData()))
             )
             .orElse(false);
-
-        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
-
-        return isAddHearingAction(actionSelection) && isNoticeOnlyHearingType;
-    }
-
-    /**
-     * Determines if a hearing should send a full set of hearing documents (not just a notice).
-     * To return true:
-     * - the Action must be ADD_HEARING.
-     * - the HearingType must be FDA (First Directions Appointment).
-     * - OR this is an express case and the hearingType is FDR.
-     * Express cases don't require an FDA hearing, so documents are posted for the FDR instead.
-     * @param finremCaseDetails case details
-     * @param hearing the hearing to check
-     * @return true if the hearing should only send a notice, false otherwise
-     */
-    public boolean shouldPostAllHearingDocuments(FinremCaseDetails finremCaseDetails, Hearing hearing) {
-
-        boolean allDocumentsNeedPosting = Optional.ofNullable(hearing)
-            .map(Hearing::getHearingType)
-            .map(hearingType ->
-                hearingType == HearingType.FDA
-                    || (hearingType == HearingType.FDR && expressCaseService.isExpressCase(finremCaseDetails.getData()))
-            )
-            .orElse(false);
-
-        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
-
-        return isAddHearingAction(actionSelection) && allDocumentsNeedPosting;
     }
 
     /**
@@ -198,7 +181,7 @@ public class HearingCorrespondenceHelper {
      * @param finremCaseDetails the case details containing the Manage Hearings Wrapper
      * @return the ManageHearingsAction or null if not present
      */
-    private ManageHearingsAction getManageHearingsAction(FinremCaseDetails finremCaseDetails) {
+    public ManageHearingsAction getManageHearingsAction(FinremCaseDetails finremCaseDetails) {
         return Optional.ofNullable(finremCaseDetails)
             .map(FinremCaseDetails::getData)
             .map(FinremCaseData::getManageHearingsWrapper)
@@ -206,12 +189,23 @@ public class HearingCorrespondenceHelper {
             .orElse(null);
     }
 
-    /**
-     * Determines if the action selection is to add a hearing.
-     * @param actionSelection the action selection to check
-     * @return true if the action selection is ADD_HEARING, false otherwise
+    /*
+     * Returns true is a hearing was vacated and relisted
+     * @param finremCaseDetails queried to see if the vacate action was chosen and if the hearing was relisted.
      */
-    private boolean isAddHearingAction(ManageHearingsAction actionSelection) {
-        return ManageHearingsAction.ADD_HEARING.equals(actionSelection);
+    public boolean isVacatedAndRelistedHearing(FinremCaseDetails finremCaseDetails) {
+        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
+        boolean hearingRelisted = YesOrNo.YES.equals(
+            finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
+        return isVacateHearingAction(actionSelection) && hearingRelisted;
+    }
+
+    /**
+     * Determines if the action selection is to vacate a hearing.
+     * @param actionSelection the action selection to check
+     * @return true if the action selection is VACATE_HEARING, false otherwise
+     */
+    private boolean isVacateHearingAction(ManageHearingsAction actionSelection) {
+        return ManageHearingsAction.VACATE_HEARING.equals(actionSelection);
     }
 }

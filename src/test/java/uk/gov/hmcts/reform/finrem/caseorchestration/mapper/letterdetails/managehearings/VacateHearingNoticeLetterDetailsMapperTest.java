@@ -128,7 +128,9 @@ class VacateHearingNoticeLetterDetailsMapperTest {
     void when_workingVacatedHearing_given_null_throws_exception() {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(ManageHearingsWrapper.builder().workingVacatedHearing(null).build())
+            .manageHearingsWrapper(ManageHearingsWrapper.builder().workingVacatedHearing(null)
+                .workingVacatedHearingId(UUID.fromString(testUuid))
+                .build())
             .build();
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
@@ -139,7 +141,7 @@ class VacateHearingNoticeLetterDetailsMapperTest {
         // Act & Assert, static method getWorkingVacatedHearingId on ManageHearingsWrapper raises the exception.
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> vacateHearingNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
-        assertThat(exception.getMessage()).isEqualTo("Invalid or missing working vacated hearing UUID");
+        assertThat(exception.getMessage()).isEqualTo("Could not find a vacated hearing with id " + testUuid);
     }
 
     @Test

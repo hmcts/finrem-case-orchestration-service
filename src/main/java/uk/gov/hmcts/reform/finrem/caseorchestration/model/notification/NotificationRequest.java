@@ -68,4 +68,6 @@ public class NotificationRequest {
     private String contactCourtName;
     private String contactCourtEmail;
     private String emailReplyToId;
+    private String vacatedHearingDateTime;
+    private String vacatedHearingType;
 }

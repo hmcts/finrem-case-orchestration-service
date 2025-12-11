@@ -36,4 +36,8 @@ public class Hearing implements HearingLike {
     private List<DocumentCollectionItem> additionalHearingDocs;
     private List<PartyOnCaseCollectionItem> partiesOnCase;
     private YesOrNo wasMigrated;
+
+    public boolean shouldSendNotifications() {
+        return YesOrNo.YES.equals(this.getHearingNoticePrompt());
+    }
 }

@@ -1660,7 +1660,7 @@ class NotificationServiceTest {
                 .notificationEmail("test@test.com")
                 .caseReferenceNumber("123")
                 .build();
-        notificationService.sendHearingNotificationToSolicitor(nr, CaseRole.APP_SOLICITOR.toString());
+        notificationService.sendHearingNotificationToSolicitor(nr, CaseRole.APP_SOLICITOR.toString(), FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
         assertTrue(logs.getInfos().contains("123 - Sending hearing notification to solicitor with role APP_SOLICITOR"));
         verify(emailService).sendConfirmationEmail(nr, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
     }
