@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -87,28 +88,6 @@ public class NoticeOfChangeService {
         return caseData;
     }
 
-    /**
-     * Updates the representation details on the case.
-     *
-     * <p>
-     * This method logs the update action, records the representation change
-     * in the update history, and generates a new {@link ChangeOrganisationRequest}
-     * based on the current and original case data. The generated request is then
-     * saved on the case.
-     *
-     * @param finremCaseData          the current case data to update
-     * @param authorizationToken      the authorisation token for the update
-     * @param originalFinremCaseData  the case data before any representation changes
-     */
-    public void updateRepresentation(FinremCaseData finremCaseData, String authorizationToken,
-                                     FinremCaseData originalFinremCaseData) {
-        log.info("{} - Going to update representation", finremCaseData.getCcdCaseId());
-
-        updateRepresentationUpdateHistory(finremCaseData, authorizationToken, originalFinremCaseData);
-        ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(finremCaseData, originalFinremCaseData);
-        finremCaseData.setChangeOrganisationRequestField(changeRequest);
-    }
-
     private Map<String, Object> updateRepresentationUpdateHistory(CaseDetails caseDetails,
                                                                   String authToken,
                                                                   CaseDetails originalDetails) {
@@ -122,13 +101,28 @@ public class NoticeOfChangeService {
         return caseData;
     }
 
-    private void updateRepresentationUpdateHistory(FinremCaseData finremCaseData,
-                                                   String authToken,
-                                                   FinremCaseData originalFinremCaseData) {
+    /**
+     * Updates the representation update history on the given {@link FinremCaseData} object.
+     *
+     * <p>This method builds the current representation change details and sends them to the
+     * {@code changeOfRepresentationService} to generate an updated history. The returned
+     * history is then copied onto the {@code finremCaseData} object.</p>
+     *
+     * <p>The {@code viaEventType} parameter indicates the event type that triggered this update.</p>
+     *
+     * @param finremCaseData          the case data to update
+     * @param originalFinremCaseData  the original case data before any changes
+     * @param viaEventType            the event type that triggered this update
+     * @param authToken               the authorisation token used for the request
+     */
+    public void updateRepresentationUpdateHistory(FinremCaseData finremCaseData,
+                                                  FinremCaseData originalFinremCaseData,
+                                                  EventType viaEventType,
+                                                  String authToken) {
         RepresentationUpdateHistory current = buildCurrentUpdateHistory(finremCaseData);
 
         RepresentationUpdateHistory history = changeOfRepresentationService.generateRepresentationUpdateHistory(
-            buildChangeOfRepresentationRequest(authToken, finremCaseData, current, originalFinremCaseData));
+            buildChangeOfRepresentationRequest(authToken, finremCaseData, current, originalFinremCaseData), viaEventType);
 
         // modifying finremCaseData reference object
         finremCaseData.setRepresentationUpdateHistory(
@@ -139,6 +133,20 @@ public class NoticeOfChangeService {
                     .build())
                 .collect(Collectors.toList())
         );
+    }
+
+    /**
+     * Populates the {@code ChangeOrganisationRequest} field on the given {@link FinremCaseData}.
+     *
+     * <p>This method generates a new {@code ChangeOrganisationRequest} using the current and
+     * original case data, and then sets it on the {@code finremCaseData} object.</p>
+     *
+     * @param finremCaseData          the case data to update
+     * @param originalFinremCaseData  the original case data before any organisation changes
+     */
+    public void populateChangeOrganisationRequestField(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData) {
+        ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(finremCaseData, originalFinremCaseData);
+        finremCaseData.setChangeOrganisationRequestField(changeRequest);
     }
 
     private ChangeOrganisationRequest generateChangeOrganisationRequest(CaseDetails caseDetails,
@@ -163,7 +171,7 @@ public class NoticeOfChangeService {
         OrganisationPolicy organisationPolicy = isApplicant ? finremCaseData.getApplicantOrganisationPolicy()
             : finremCaseData.getRespondentOrganisationPolicy();
         OrganisationPolicy originalOrganisationPolicy = isApplicant ? originalFinremCaseData.getApplicantOrganisationPolicy()
-            : finremCaseData.getRespondentOrganisationPolicy();
+            : originalFinremCaseData.getRespondentOrganisationPolicy();
 
         final DynamicList role = generateCaseRoleIdAsDynamicList(isApplicant ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY);
 

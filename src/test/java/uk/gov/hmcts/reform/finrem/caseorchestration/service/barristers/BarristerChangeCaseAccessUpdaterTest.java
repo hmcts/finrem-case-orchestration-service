@@ -3,14 +3,20 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -20,10 +26,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -56,7 +65,7 @@ class BarristerChangeCaseAccessUpdaterTest {
 
     @BeforeEach
     void setUp() {
-        when(manageBarristerService.getBarristerCaseRole(any(BarristerParty.class)))
+        lenient().when(manageBarristerService.getBarristerCaseRole(any(BarristerParty.class)))
             .thenReturn(APP_BARRISTER);
     }
 
@@ -204,6 +213,30 @@ class BarristerChangeCaseAccessUpdaterTest {
         capturedParams.forEach(p -> verifyBarristerUpdateParams(p, caseDetails.getData(), barristers));
 
         assertThat(caseDetails.getData().getRepresentationUpdateHistory()).hasSize(barristers.size());
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void givenBarristersAdded_whenUpdateRepresentationUpdateHistoryForCaseInvoked_thenShouldPopulateCorrectHistory(
+        EventType eventType, String expectedVia
+    ) {
+
+        barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(
+            FinremCaseDetailsBuilderFactory.from().build(),
+            BarristerChange.builder().added(Set.of(Barrister.builder().build())).build(),
+            eventType, AUTH_TOKEN
+        );
+
+        verify(barristerRepresentationUpdateBuilder).buildBarristerAdded(argThat(d ->
+            expectedVia.equals(d.via())));
+    }
+
+    private static Stream<Arguments> givenBarristersAdded_whenUpdateRepresentationUpdateHistoryForCaseInvoked_thenShouldPopulateCorrectHistory() {
+        return Stream.of(
+            Arguments.of(EventType.STOP_REPRESENTING_CLIENT, "Stop representing a client"),
+            Arguments.of(EventType.MANAGE_BARRISTER, CCDConfigConstant.MANAGE_BARRISTERS),
+            Arguments.of(EventType.UPDATE_CONTACT_DETAILS, "UPDATE_CONTACT_DETAILS")
+        );
     }
 
     private void mockOrganisationServiceToReturnUserId(String email, String authToken, String userId) {
