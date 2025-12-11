@@ -82,7 +82,6 @@ class OnlineFormDocumentServiceTest {
 
     private OptionIdToValueTranslator optionIdToValueTranslator;
 
-
     @InjectMocks
     private OnlineFormDocumentService onlineFormDocumentService;
 

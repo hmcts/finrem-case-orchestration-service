@@ -217,6 +217,7 @@ public class OnlineFormDocumentService {
             caseData.put(ORDER_TYPE, CONSENT);
         }
     }
+
     /**
      * Refreshes the contested Mini Form A document when contact details have changed.
      *

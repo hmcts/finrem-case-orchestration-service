@@ -128,7 +128,9 @@ public class ContactDetailsWrapper {
     }
 
     private static Address normaliseAddress(Address addr) {
-        if (addr == null) return null;
+        if (addr == null) {
+            return null;
+        }
 
         return Address.builder()
             .addressLine1(normaliseString(addr.getAddressLine1()))
