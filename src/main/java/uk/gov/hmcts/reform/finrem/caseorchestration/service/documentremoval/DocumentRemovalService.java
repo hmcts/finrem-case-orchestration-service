@@ -118,6 +118,8 @@ public class DocumentRemovalService {
             String[] documentUrlAsArray = docUrl.split("/");
             String docId = documentUrlAsArray[documentUrlAsArray.length - 1];
 
+            LocalDateTime uploadTimestamp = getUploadTimestampFromDocumentNode(documentNode);
+
             documentsCollection.add(
                 DocumentToKeepCollection.builder()
                     .value(DocumentToKeep.builder()
@@ -126,8 +128,9 @@ public class DocumentRemovalService {
                             .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
                             .documentUrl(documentNode.get(DOCUMENT_URL).asText())
                             .documentBinaryUrl(documentNode.get(DOCUMENT_BINARY_URL).asText())
-                            .uploadTimestamp(getUploadTimestampFromDocumentNode(documentNode))
+                            .uploadTimestamp(uploadTimestamp)
                             .build())
+                        .caseDocumentUploadedDate(uploadTimestamp)
                         .build())
                     .build());
         }
