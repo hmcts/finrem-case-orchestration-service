@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.mana
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -38,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -54,6 +59,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsCorresponderTest {
+
+    private static final UUID testUuid = UUID.fromString("c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb");
 
     @Mock
     private HearingCorrespondenceHelper hearingCorrespondenceHelper;
@@ -946,6 +953,76 @@ class ManageHearingsCorresponderTest {
                 )
             )
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans =  {true, false})
+    void when_sendVacatedHearingCorrespondence_and_relisted_then_sendHearingCorrespondence_called_or_not(
+        boolean isVacatedAndRelisted) {
+        // Arrange
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .workingVacatedHearingId(testUuid)
+            .workingHearingId(testUuid)
+            .build();
+        finremCaseDetails.getData().setManageHearingsWrapper(wrapper);
+
+        when(hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseDetails)).thenReturn(isVacatedAndRelisted);
+        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(wrapper, wrapper.getWorkingVacatedHearingId()))
+            .thenReturn(new VacateOrAdjournedHearing());
+        lenient().when(hearingCorrespondenceHelper.getActiveHearingInContext(wrapper, wrapper.getWorkingHearingId()))
+            .thenReturn(new Hearing());
+
+        // Act
+        corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+
+        // Assert getActiveHearingInContext is called, a dependency of sendHearingCorrespondence
+        if (isVacatedAndRelisted) {
+            verify(hearingCorrespondenceHelper).getActiveHearingInContext(wrapper, wrapper.getWorkingHearingId());
+        } else {
+            verify(hearingCorrespondenceHelper, never()).getActiveHearingInContext(wrapper, wrapper.getWorkingHearingId());
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "false, true",
+        "false, false",
+        "true, true",
+        "true, false"
+    })
+    void when_sendVacatedHearingCorrespondence_then_corres_sent_as_required(boolean isVacatedAndRelisted, boolean shouldNotSendNotification) {
+        // Arrange
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .workingVacatedHearingId(testUuid)
+            .workingHearingId(testUuid)
+            .build();
+        finremCaseDetails.getData().setManageHearingsWrapper(wrapper);
+
+        final VacateOrAdjournedHearing vacateOrAdjournedHearing = new VacateOrAdjournedHearing();
+
+        when(hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseDetails)).thenReturn(isVacatedAndRelisted);
+        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(wrapper, wrapper.getWorkingVacatedHearingId()))
+            .thenReturn(new VacateOrAdjournedHearing());
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(any()))
+            .thenReturn(isVacatedAndRelisted);
+
+        // Act
+        corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+
+        // Assert getActiveHearingInContext is called, a dependency of sendHearingCorrespondence
+        InOrder inOrder = inOrder(hearingCorrespondenceHelper);
+        if (!isVacatedAndRelisted && shouldNotSendNotification) {
+            inOrder.verify(hearingCorrespondenceHelper).isVacatedAndRelistedHearing(finremCaseDetails);
+            inOrder.verify(hearingCorrespondenceHelper).shouldNotSendNotification(vacateOrAdjournedHearing);
+            inOrder.verifyNoMoreInteractions();
+        } else {
+            inOrder.verify(hearingCorrespondenceHelper).isVacatedAndRelistedHearing(finremCaseDetails);
+            // process continues
+        }
     }
 
     /**

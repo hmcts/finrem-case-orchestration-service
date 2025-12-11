@@ -103,7 +103,7 @@ class ManageHearingsNotificationRequestMapperTest {
 
             caseDetails.getData().getManageHearingsWrapper().setWasRelistSelected(YesOrNo.NO);
 
-            VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing
+            final VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing
                 .builder()
                 .vacateOrAdjournReason(VacateOrAdjournReason.CASE_NOT_READY)
                 .hearingType(HearingType.DIR)
@@ -112,10 +112,10 @@ class ManageHearingsNotificationRequestMapperTest {
                 .build();
 
             // When
-            contactDetails.setApplicantSolicitorEmail("applicantsolicitor@example.com");
-            contactDetails.setApplicantSolicitorName("The applicant solicitor name");
             when(hearingCorrespondenceHelper.getManageHearingsAction(any()))
                 .thenReturn(ManageHearingsAction.VACATE_HEARING);
+            contactDetails.setApplicantSolicitorEmail("applicantsolicitor@example.com");
+            contactDetails.setApplicantSolicitorName("The applicant solicitor name");
             mocked.when(() -> CourtHelper.getFRCForHearing(vacatedHearing)).thenReturn("MockedCourt");
             NotificationRequest result = mapper.buildHearingNotificationForApplicantSolicitor(caseDetails, vacatedHearing);
 
