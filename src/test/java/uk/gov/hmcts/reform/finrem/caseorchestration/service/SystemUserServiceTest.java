@@ -1,34 +1,47 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfiguration;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
-import static org.mockito.Mockito.verify;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SystemUserServiceTest {
-
-    public static final String AUTH_TOKEN = "tokien:)";
+@ExtendWith(MockitoExtension.class)
+class SystemUserServiceTest {
 
     @Mock
-    private SystemUpdateUserConfiguration systemUpdateUserConfiguration;
+    private SystemUserTokenProvider systemUserTokenProvider;
+
     @Mock
     private IdamAuthService idamAuthService;
+
     @InjectMocks
     private SystemUserService systemUserService;
 
+    @BeforeEach
+    void setUp() {
+        when(systemUserTokenProvider.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+    }
+
     @Test
-    public void givenSysUserConfig_WhenGetSysUserToken_ThenReturnToken() {
-        when(systemUpdateUserConfiguration.getUserName()).thenReturn("username");
-        when(systemUpdateUserConfiguration.getPassword()).thenReturn("password");
+    void testGetSysUserToken() {
+        assertThat(systemUserService.getSysUserToken()).isEqualTo(TEST_SYSTEM_TOKEN);
+    }
 
-        systemUserService.getSysUserToken();
+    @Test
+    void testGetSysUserTokenUid() {
+        String uid = UUID.randomUUID().toString();
+        when(idamAuthService.getUserInfo(TEST_SYSTEM_TOKEN))
+            .thenReturn(UserInfo.builder().uid(uid).build());
 
-        verify(idamAuthService).getAccessToken("username", "password");
+        assertThat(systemUserService.getSysUserTokenUid()).isEqualTo(uid);
     }
 }
