@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 
 import java.util.Arrays;
 
+import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -52,10 +53,15 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private void prepareStopRepresentationWrapper(FinremCaseData finremCaseData, String userAuthorisation) {
-        finremCaseData.getStopRepresentationWrapper().setClientAddressForServiceConfidentialLabel(
-            caseRoleService.isLoginWithApplicantSolicitor(finremCaseData, userAuthorisation)
-                ? "Keep the Applicant's contact details private from the Respondent?"
-                : "Keep the Respondent's contact details private from the Applicant?"
-        );
+        String label = null;
+        if (caseRoleService.isApplicantRepresentative(finremCaseData, userAuthorisation)) {
+            label = "Keep the Applicant's contact details private from the Respondent?";
+        } else if (caseRoleService.isRespondentRepresentative(finremCaseData, userAuthorisation)) {
+            label = "Keep the Respondent's contact details private from the Applicant?";
+        } else {
+            throw new UnsupportedOperationException(format("%s - It supports applicant/respondent representatives only",
+                finremCaseData.getCcdCaseId()));
+        }
+        finremCaseData.getStopRepresentationWrapper().setClientAddressForServiceConfidentialLabel(label);
     }
 }
