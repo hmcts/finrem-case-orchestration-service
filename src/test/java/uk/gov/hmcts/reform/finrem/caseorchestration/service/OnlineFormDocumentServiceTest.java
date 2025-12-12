@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -399,6 +400,36 @@ class OnlineFormDocumentServiceTest {
         // then
         assertThat(after.getData().getMiniFormA()).isEqualTo(newMiniForm);
         verify(onlineFormDocumentService).generateContestedMiniForm(AUTH_TOKEN, after);
+    }
+
+    @Test
+    void shouldNotRegenerateMiniFormAWhenContestedAndContactDetailsUpdated() {
+        FinremCaseDetails after = spy(FinremCaseDetails.class);
+        when(after.isContestedApplication()).thenReturn(false);
+        CaseDocument oldMiniForm = caseDocument("old.pdf");
+        after.setData(FinremCaseData.builder()
+            .miniFormA(oldMiniForm)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantSolicitorName("Bob")
+                .build())
+            .build());
+
+        FinremCaseDetails before = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(FinremCaseData.builder()
+                .miniFormA(oldMiniForm)
+                .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                    .applicantSolicitorName("Alice")
+                    .build())
+                .build())
+            .build();
+
+        // when
+        onlineFormDocumentService.refreshContestedMiniFormA(after, before, AUTH_TOKEN);
+
+        // then
+        assertThat(after.getData().getMiniFormA()).isEqualTo(oldMiniForm);
+        verify(onlineFormDocumentService, never()).generateContestedMiniForm(AUTH_TOKEN, after);
     }
 
     private CaseDetails consentedInContestedCaseDetails(String payload) {
