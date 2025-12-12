@@ -86,6 +86,26 @@ public class ContactDetailsWrapper {
     private YesOrNo consentedRespondentRepresented;
     private String isAdmin;
 
+    /**
+     * Compares two {@link ContactDetailsWrapper} objects field by field and returns a map
+     * of the fields that are different.
+     *
+     * <p>Each entry in the returned map uses the field name as the key, and an
+     * {@code Object[]} with two elements as the value:
+     * <ul>
+     *     <li>index 0 – the value of the field from {@code a}</li>
+     *     <li>index 1 – the value of the field from {@code b}</li>
+     * </ul>
+     *
+     * <p>The comparison treats empty values as {@code null} using
+     * {@code areEqualTreatingEmptyAsNull}. If the values differ, the field is included
+     * in the result.
+     *
+     * @param a the first wrapper to compare
+     * @param b the second wrapper to compare
+     * @return a map of field names to their differing values
+     * @throws RuntimeException if the fields cannot be accessed
+     */
     public static Map<String, Object[]> diff(ContactDetailsWrapper a, ContactDetailsWrapper b) {
         Map<String, Object[]> differences = new HashMap<>();
 
