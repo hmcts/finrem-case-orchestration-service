@@ -80,7 +80,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
             givenFinremCaseData);
         assertThatThrownBy(() -> underTest.handle(callbackRequest, AUTH_TOKEN))
             .isInstanceOf(UnsupportedOperationException.class)
-            .hasMessage("It supports applicant/respondent representatives only");
+            .hasMessage(CASE_ID + " - It supports applicant/respondent representatives only");
 
         verify(caseRoleService).isApplicantRepresentative(givenFinremCaseData, AUTH_TOKEN);
         verify(caseRoleService).isRespondentRepresentative(givenFinremCaseData, AUTH_TOKEN);
