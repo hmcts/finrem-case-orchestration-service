@@ -26,8 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrap
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -397,9 +397,9 @@ class OnlineFormDocumentServiceTest {
 
         //Checklist
         assertThat(data).containsKey(CONSENTED_NATURE_OF_APPLICATION);
-        assertThat(((ArrayList<?>) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(0).toString()).isEqualTo("Periodical Payment Order");
-        assertThat(((ArrayList<?>) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(1).toString()).isEqualTo("Lump Sum Order");
-        assertThat(((ArrayList<?>) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(2).toString()).isEqualTo("Property Adjustment Order");
+        assertThat((List<?>) data.get(CONSENTED_NATURE_OF_APPLICATION))
+            .extracting(Object::toString)
+            .containsExactly("Periodical Payment Order", "Lump Sum Order", "Property Adjustment Order");
 
         assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3A)).isEqualTo("test");
         assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3B)).isEqualTo("test");
@@ -409,8 +409,9 @@ class OnlineFormDocumentServiceTest {
         assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_5)).isEqualTo("No");
 
         assertThat(data).containsKey(CONSENTED_NATURE_OF_APPLICATION_6);
-        assertThat(((ArrayList<?>) data.get(CONSENTED_NATURE_OF_APPLICATION_6)).get(0).toString()).isEqualTo("item1");
-        assertThat(((ArrayList<?>) data.get(CONSENTED_NATURE_OF_APPLICATION_6)).get(1).toString()).isEqualTo("item2");
+        assertThat((List<?>) data.get(CONSENTED_NATURE_OF_APPLICATION_6))
+            .extracting(Object::toString)
+            .containsExactly("item1", "item2");
 
         assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_7)).isEqualTo("test");
 
