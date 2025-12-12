@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.Map;
 import java.util.Objects;
@@ -145,7 +146,7 @@ public class OnlineFormDocumentService {
 
     private CaseDetails translateOptions(CaseDetails caseDetails) {
         CaseDetails copy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        optionIdToValueTranslator.translateOptionsValues.accept(copy);
+        optionIdToValueTranslator.translateFixedListOptions(copy);
 
         return copy;
     }
@@ -171,7 +172,7 @@ public class OnlineFormDocumentService {
 
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
-        optionIdToValueTranslator.translateOptionsValues.accept(caseDetailsCopy);
+        optionIdToValueTranslator.translateFixedListOptions(caseDetailsCopy);
         prepareMiniFormFields(caseDetailsCopy);
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
@@ -215,5 +216,42 @@ public class OnlineFormDocumentService {
         } else {
             caseData.put(ORDER_TYPE, CONSENT);
         }
+    }
+
+    /**
+     * Refreshes the contested Mini Form A document for a case if required.
+     *
+     * <p>The Mini Form A will be regenerated and updated in the case only if all the following conditions are met:
+     * <ul>
+     *     <li>The case is a contested application ({@link FinremCaseDetails#isContestedApplication()} returns true).</li>
+     *     <li>There is an existing Mini Form A in the previous case data.</li>
+     *     <li>The applicant or respondent contact details have been updated, as determined by
+     *         {@link #isContactDetailsUpdated(FinremCaseDetails, FinremCaseDetails)}.</li>
+     * </ul>
+     *
+     * <p>If these conditions are met, a new {@link CaseDocument} is generated using
+     * {@link #generateContestedMiniForm(String, FinremCaseDetails)} and set into the current case data.
+     *
+     * @param finremCaseDetails       the current case details
+     * @param finremCaseDetailsBefore the previous case details
+     * @param userAuthorisation       the authorisation token of the user performing the operation
+     */
+    public void refreshContestedMiniFormA(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
+                                          String userAuthorisation) {
+        if (finremCaseDetails.isContestedApplication()) {
+            if (hasMiniFormA(finremCaseDetailsBefore) && isContactDetailsUpdated(finremCaseDetails, finremCaseDetailsBefore)) {
+                CaseDocument document = generateContestedMiniForm(userAuthorisation, finremCaseDetails);
+                finremCaseDetails.getData().setMiniFormA(document);
+            }
+        }
+    }
+
+    private boolean hasMiniFormA(FinremCaseDetails finremCaseDetailsBefore) {
+        return Optional.ofNullable(finremCaseDetailsBefore.getData().getMiniFormA()).isPresent();
+    }
+
+    private boolean isContactDetailsUpdated(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
+        return !ContactDetailsWrapper.diff(finremCaseDetails.getData().getContactDetailsWrapper(),
+            finremCaseDetailsBefore.getData().getContactDetailsWrapper()).isEmpty();
     }
 }
