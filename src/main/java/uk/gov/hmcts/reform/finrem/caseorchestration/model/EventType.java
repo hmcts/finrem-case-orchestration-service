@@ -10,7 +10,7 @@ import java.util.Arrays;
 @Slf4j
 @RequiredArgsConstructor
 public enum EventType {
-
+    INTERNAL_CHANGE_UPDATE_CASE("internal-change-UPDATE_CASE"),
     MANAGE_HEARINGS("FR_manageHearings"),
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),

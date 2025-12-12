@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CCDConfigConstant {
 
+    public static final String JURISDICTION = "DIVORCE";
+
     //Case related
     public static final String STATE = "state";
     public static final String DIVORCE_CASE_NUMBER = "divorceCaseNumber";

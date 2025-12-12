@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
@@ -174,6 +175,26 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         verify(caseRoleService).isApplicantRepresentative(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenLoginAsApplicantFlag_whenHandled_thenClearOrganisationPolicy(boolean isApplicantRepresentative) {
+        when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+            .thenReturn(isApplicantRepresentative);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            .extracting(isApplicantRepresentative ? FinremCaseData::getApplicantOrganisationPolicy
+                : FinremCaseData::getRespondentOrganisationPolicy)
+            .is(expectedOrganisationPolicy(isApplicantRepresentative));
+        verify(caseRoleService).isApplicantRepresentative(request.getCaseDetails().getData(), AUTH_TOKEN);
+    }
+
     @Test
     void givenNoSameOrganisationBarrister_whenHandled_thenDoesNotRemoveBarrister() {
         when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
@@ -322,6 +343,17 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     private static Condition<NoticeOfChangeParty> expectedParty(boolean isApplicantSolicitor) {
         return new Condition<>(party ->
             isApplicantSolicitor ? APPLICANT.equals(party) : RESPONDENT.equals(party),
+            "expected APPLICANT if applicant solicitor, otherwise RESPONDENT");
+    }
+
+    private static Condition<OrganisationPolicy> expectedOrganisationPolicy(boolean isApplicantSolicitor) {
+        return new Condition<>(orgPolicy -> {
+            if (orgPolicy == null) {
+                return false;
+            }
+            return isApplicantSolicitor ? CaseRole.APP_SOLICITOR.getCcdCode().equals(orgPolicy.getOrgPolicyCaseAssignedRole())
+                : CaseRole.RESP_SOLICITOR.getCcdCode().equals(orgPolicy.getOrgPolicyCaseAssignedRole());
+        },
             "expected APPLICANT if applicant solicitor, otherwise RESPONDENT");
     }
 }
