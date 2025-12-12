@@ -29,8 +29,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -357,7 +359,9 @@ class OnlineFormDocumentServiceTest {
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
             eq("TEMPLATE"), eq("FILE_NAME"));
 
-        verify(genericDocumentService).deleteDocument("oldMiniFormADocumentUrl", AUTH_TOKEN);
+        await().atMost(2, TimeUnit.SECONDS)
+            .untilAsserted(() -> verify(genericDocumentService)
+                .deleteDocument("oldMiniFormADocumentUrl", AUTH_TOKEN));
     }
 
     private CaseDetails consentedInContestedCaseDetails(String payload) {
