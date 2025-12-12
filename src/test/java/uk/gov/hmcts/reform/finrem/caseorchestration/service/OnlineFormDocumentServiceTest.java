@@ -370,20 +370,6 @@ class OnlineFormDocumentServiceTest {
 
     @Test
     void shouldRegenerateMiniFormAWhenContestedAndContactDetailsUpdated() {
-        // given
-        CaseDocument oldMiniForm = caseDocument("old.pdf");
-        CaseDocument newMiniForm = caseDocument("new.pdf");
-
-        FinremCaseDetails before = FinremCaseDetails.builder()
-            .id(Long.valueOf(CASE_ID))
-            .data(FinremCaseData.builder()
-                .miniFormA(oldMiniForm)
-                .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                    .applicantSolicitorName("Alice")
-                    .build())
-                .build())
-            .build();
-
         FinremCaseDetails after = spy(FinremCaseDetails.class);
         when(after.getId()).thenReturn(Long.valueOf(CASE_ID));
         when(after.isContestedApplication()).thenReturn(true);
@@ -393,8 +379,19 @@ class OnlineFormDocumentServiceTest {
                     .build())
                 .build());
 
+        CaseDocument newMiniForm = caseDocument("new.pdf");
         when(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, after))
             .thenReturn(newMiniForm);
+
+        FinremCaseDetails before = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(FinremCaseData.builder()
+                .miniFormA(caseDocument("old.pdf"))
+                .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                    .applicantSolicitorName("Alice")
+                    .build())
+                .build())
+            .build();
 
         // when
         onlineFormDocumentService.refreshContestedMiniFormA(after, before, AUTH_TOKEN);
