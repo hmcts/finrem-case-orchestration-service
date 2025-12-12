@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -79,10 +80,13 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     @Mock
     private BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
 
+    @Mock
+    private OnlineFormDocumentService onlineFormDocumentService;
+
     @BeforeEach
     void setup() {
         underTest = new StopRepresentingClientAboutToSubmitHandler(finremCaseDetailsMapper, nocWorkflowService,
-            caseRoleService, manageBarristerService, barristerChangeCaseAccessUpdater);
+            caseRoleService, manageBarristerService, barristerChangeCaseAccessUpdater, onlineFormDocumentService);
     }
 
     @Test
@@ -338,6 +342,23 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             Arguments.of(CONTESTED, true, false),
             Arguments.of(CONTESTED, false, false)
         );
+    }
+
+    @Test
+    void givenAnyCase_whenHandled_thenMiniFormAGetRefreshed() {
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), FinremCaseData.builder().build(),
+            FinremCaseData.builder()
+                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                    .stopRepClientConsent(YesOrNo.YES)
+                    .build())
+                .build());
+
+        // Act
+        underTest.handle(request, AUTH_TOKEN);
+
+        // Verify
+        verify(onlineFormDocumentService).refreshContestedMiniFormA(request.getCaseDetails(), request.getCaseDetailsBefore(),
+            AUTH_TOKEN);
     }
 
     private static Condition<NoticeOfChangeParty> expectedParty(boolean isApplicantSolicitor) {
