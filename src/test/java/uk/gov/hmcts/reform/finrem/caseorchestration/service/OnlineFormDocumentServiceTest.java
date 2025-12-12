@@ -9,6 +9,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -18,9 +19,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.miniformacontested.ContestedMiniFormADetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
@@ -41,6 +44,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_AUTHORISATION_FIRM;
@@ -62,7 +66,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
 class OnlineFormDocumentServiceTest {
@@ -85,6 +88,7 @@ class OnlineFormDocumentServiceTest {
     private OptionIdToValueTranslator optionIdToValueTranslator;
 
     @InjectMocks
+    @Spy
     private OnlineFormDocumentService onlineFormDocumentService;
 
     @Captor
@@ -362,6 +366,42 @@ class OnlineFormDocumentServiceTest {
         await().atMost(2, TimeUnit.SECONDS)
             .untilAsserted(() -> verify(genericDocumentService)
                 .deleteDocument("oldMiniFormADocumentUrl", AUTH_TOKEN));
+    }
+
+    @Test
+    void shouldRegenerateMiniFormAWhenContestedAndContactDetailsUpdated() {
+        // given
+        CaseDocument oldMiniForm = caseDocument("old.pdf");
+        CaseDocument newMiniForm = caseDocument("new.pdf");
+
+        FinremCaseDetails before = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(FinremCaseData.builder()
+                .miniFormA(oldMiniForm)
+                .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                    .applicantSolicitorName("Alice")
+                    .build())
+                .build())
+            .build();
+
+        FinremCaseDetails after = spy(FinremCaseDetails.class);
+        when(after.getId()).thenReturn(Long.valueOf(CASE_ID));
+        when(after.isContestedApplication()).thenReturn(true);
+        after.setData(FinremCaseData.builder()
+                .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                    .applicantSolicitorName("Bob")
+                    .build())
+                .build());
+
+        when(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, after))
+            .thenReturn(newMiniForm);
+
+        // when
+        onlineFormDocumentService.refreshContestedMiniFormA(after, before, AUTH_TOKEN);
+
+        // then
+        assertThat(after.getData().getMiniFormA()).isEqualTo(newMiniForm);
+        verify(onlineFormDocumentService).generateContestedMiniForm(AUTH_TOKEN, after);
     }
 
     private CaseDetails consentedInContestedCaseDetails(String payload) {

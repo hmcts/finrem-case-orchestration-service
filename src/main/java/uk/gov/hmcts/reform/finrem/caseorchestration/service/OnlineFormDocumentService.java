@@ -219,27 +219,35 @@ public class OnlineFormDocumentService {
     }
 
     /**
-     * Refreshes the contested Mini Form A document when contact details have changed.
+     * Refreshes the contested Mini Form A document for a case if required.
      *
-     * <p>
-     * This method checks whether the case is a contested application. If it is,
-     * the updated case details are compared with the previous version. When a
-     * change in contact information is detected, a new contested Mini Form A
-     * document is generated and saved back into the case data.
-     * </p>
+     * <p>The Mini Form A will be regenerated and updated in the case only if all the following conditions are met:
+     * <ul>
+     *     <li>The case is a contested application ({@link FinremCaseDetails#isContestedApplication()} returns true).</li>
+     *     <li>There is an existing Mini Form A in the previous case data.</li>
+     *     <li>The applicant or respondent contact details have been updated, as determined by
+     *         {@link #isContactDetailsUpdated(FinremCaseDetails, FinremCaseDetails)}.</li>
+     * </ul>
      *
-     * @param finremCaseDetails        the case details after the update
-     * @param finremCaseDetailsBefore  the case details before the update
-     * @param userAuthorisation        the authorisation token used to generate documents
+     * <p>If these conditions are met, a new {@link CaseDocument} is generated using
+     * {@link #generateContestedMiniForm(String, FinremCaseDetails)} and set into the current case data.
+     *
+     * @param finremCaseDetails       the current case details
+     * @param finremCaseDetailsBefore the previous case details
+     * @param userAuthorisation       the authorisation token of the user performing the operation
      */
     public void refreshContestedMiniFormA(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
                                           String userAuthorisation) {
         if (finremCaseDetails.isContestedApplication()) {
-            if (isContactDetailsUpdated(finremCaseDetails, finremCaseDetailsBefore)) {
+            if (hasMiniFormA(finremCaseDetailsBefore) && isContactDetailsUpdated(finremCaseDetails, finremCaseDetailsBefore)) {
                 CaseDocument document = generateContestedMiniForm(userAuthorisation, finremCaseDetails);
                 finremCaseDetails.getData().setMiniFormA(document);
             }
         }
+    }
+
+    private boolean hasMiniFormA(FinremCaseDetails finremCaseDetailsBefore) {
+        return Optional.ofNullable(finremCaseDetailsBefore.getData().getMiniFormA()).isPresent();
     }
 
     private boolean isContactDetailsUpdated(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
