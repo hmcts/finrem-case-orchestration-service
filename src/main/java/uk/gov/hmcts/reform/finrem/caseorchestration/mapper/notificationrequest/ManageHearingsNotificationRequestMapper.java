@@ -4,14 +4,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
+import java.time.format.DateTimeFormatter;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.ADD_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.VACATE_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
@@ -19,10 +28,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @RequiredArgsConstructor
 public class ManageHearingsNotificationRequestMapper {
 
+    private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
+
     private record PartySpecificDetails(
         String recipientEmailAddress,
         String recipientName
-    ) {}
+    ) {
+    }
 
     /**
      * Constructs a {@link NotificationRequest} for sending a hearing notification to the applicant's solicitor.
@@ -31,16 +43,16 @@ public class ManageHearingsNotificationRequestMapper {
      * buildHearingNotificationForParty to fill in the rest from data common to parties. </p>
      *
      * @param finremCaseDetails the case details including case ID, type, and applicant/solicitor info
-     * @param hearing the hearing information
+     * @param hearing           the hearing information
      * @return a fully constructed {@link NotificationRequest}
      */
     public NotificationRequest buildHearingNotificationForApplicantSolicitor(
-            FinremCaseDetails finremCaseDetails,
-            Hearing hearing) {
+        FinremCaseDetails finremCaseDetails,
+        HearingLike hearing) {
 
         PartySpecificDetails partySpecificDetails = new PartySpecificDetails(
-                finremCaseDetails.getData().getAppSolicitorEmail(),
-                nullToEmpty(finremCaseDetails.getData().getAppSolicitorName())
+            finremCaseDetails.getData().getAppSolicitorEmail(),
+            nullToEmpty(finremCaseDetails.getData().getAppSolicitorName())
         );
 
         return buildHearingNotificationForParty(finremCaseDetails, hearing, partySpecificDetails);
@@ -53,16 +65,16 @@ public class ManageHearingsNotificationRequestMapper {
      * buildHearingNotificationForParty to fill in the rest from data common to parties. </p>
      *
      * @param finremCaseDetails the case details including case ID, type, and party solicitor info
-     * @param hearing the hearing information
+     * @param hearing           the hearing information
      * @return a fully constructed {@link NotificationRequest}
      */
     public NotificationRequest buildHearingNotificationForRespondentSolicitor(
-            FinremCaseDetails finremCaseDetails,
-            Hearing hearing) {
+        FinremCaseDetails finremCaseDetails,
+        HearingLike hearing) {
 
         PartySpecificDetails partySpecificDetails = new PartySpecificDetails(
-                finremCaseDetails.getData().getRespondentSolicitorEmailForContested(),
-                nullToEmpty(finremCaseDetails.getData().getRespondentSolicitorName())
+            finremCaseDetails.getData().getRespondentSolicitorEmailForContested(),
+            nullToEmpty(finremCaseDetails.getData().getRespondentSolicitorName())
         );
 
         return buildHearingNotificationForParty(finremCaseDetails, hearing, partySpecificDetails);
@@ -70,14 +82,15 @@ public class ManageHearingsNotificationRequestMapper {
 
     /**
      * Work in progress. Intervener bug means interveners never on the party list.
+     *
      * @return NotificationRequest for the intervener specified in the CaseRole.
      */
     public NotificationRequest buildHearingNotificationForIntervenerSolicitor(
-        FinremCaseDetails finremCaseDetails, Hearing hearing, IntervenerWrapper intervener) {
+        FinremCaseDetails finremCaseDetails, HearingLike hearing, IntervenerWrapper intervener) {
 
         PartySpecificDetails partySpecificDetails = new PartySpecificDetails(
-                intervener.getIntervenerSolEmail(),
-                nullToEmpty(intervener.getIntervenerSolName())
+            intervener.getIntervenerSolEmail(),
+            nullToEmpty(intervener.getIntervenerSolName())
         );
 
         return buildHearingNotificationForParty(finremCaseDetails, hearing, partySpecificDetails);
@@ -87,36 +100,64 @@ public class ManageHearingsNotificationRequestMapper {
      * Builds a {@link NotificationRequest} for a hearing notification.  Uses common data from the case and
      * party specific details.
      *
-     * @param finremCaseDetails  case details.
-     * @param hearing The hearing in context.
+     * @param finremCaseDetails    case details.
+     * @param hearing              The hearing in context.
      * @param partySpecificDetails include details for a specific party (applicant, respondent, or intervener).
      * @return NotificationRequest to the calling public method.
      */
     private NotificationRequest buildHearingNotificationForParty(
-            FinremCaseDetails finremCaseDetails,
-            Hearing hearing,
-            PartySpecificDetails partySpecificDetails) {
+        FinremCaseDetails finremCaseDetails,
+        HearingLike hearing,
+        PartySpecificDetails partySpecificDetails) {
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
 
-        String applicantSurname = finremCaseData.getContactDetailsWrapper().getApplicantLname();
-        String respondentSurname = finremCaseData.getContactDetailsWrapper().getRespondentLname();
+        Hearing newHearing = null;
 
-        String emailServiceCaseType = CaseType.CONTESTED.equals(finremCaseDetails.getCaseType())
-            ? EmailService.CONTESTED : EmailService.CONSENTED;
+        if (isNewHearingAdded(finremCaseDetails)) {
+            newHearing = hearingCorrespondenceHelper.getActiveHearingInContext(
+                manageHearingsWrapper, manageHearingsWrapper.getWorkingHearingId());
+        }
 
-        String selectedFRC  = CourtHelper.getFRCForHearing(hearing);
+        String newHearingType =
+            newHearing != null ? newHearing.getHearingType().getId() : hearing.getHearingType().getId();
+
+        String applicantSurname = contactDetailsWrapper.getApplicantLname();
+        String respondentSurname = contactDetailsWrapper.getRespondentLname();
+
+        String selectedFRC = CourtHelper.getFRCForHearing(hearing);
+        String vacatedHearingType = hearing.getHearingType().getId();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String formattedDate = hearing.getHearingDate().format(formatter);
+        String vacatedHearingDateTime = formattedDate + " at " + hearing.getHearingTime();
 
         return NotificationRequest.builder()
-                .notificationEmail(partySpecificDetails.recipientEmailAddress)
-                .caseReferenceNumber(String.valueOf(finremCaseDetails.getId()))
-                .hearingType(hearing.getHearingType().getId())
-                .solicitorReferenceNumber(nullToEmpty(finremCaseData.getContactDetailsWrapper().getSolicitorReference()))
-                .applicantName(applicantSurname)
-                .respondentName(respondentSurname)
-                .name(partySpecificDetails.recipientName)
-                .caseType(emailServiceCaseType)
-                .selectedCourt(selectedFRC)
-                .build();
+            .notificationEmail(partySpecificDetails.recipientEmailAddress)
+            .caseReferenceNumber(String.valueOf(finremCaseDetails.getId()))
+            .hearingType(newHearingType)
+            .solicitorReferenceNumber(nullToEmpty(contactDetailsWrapper.getSolicitorReference()))
+            .applicantName(applicantSurname)
+            .respondentName(respondentSurname)
+            .name(partySpecificDetails.recipientName)
+            .caseType(EmailService.CONTESTED)
+            .selectedCourt(selectedFRC)
+            .vacatedHearingType(vacatedHearingType)
+            .vacatedHearingDateTime(vacatedHearingDateTime)
+            .build();
+    }
+
+    /*
+     * Returns true if a new hearing has been added as a result of adding or relisting a hearing.
+     * @param finremCaseDetails used to get the event action and whether a hearing was relisted
+     * @return true or false.
+     */
+    private boolean isNewHearingAdded(FinremCaseDetails finremCaseDetails) {
+        ManageHearingsAction actionSelection = hearingCorrespondenceHelper.getManageHearingsAction(finremCaseDetails);
+        boolean hearingIsRelisted =
+            YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
+        return (VACATE_HEARING.equals(actionSelection) && hearingIsRelisted) || ADD_HEARING.equals(actionSelection);
     }
 }
