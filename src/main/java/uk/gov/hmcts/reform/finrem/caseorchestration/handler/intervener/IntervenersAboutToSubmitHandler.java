@@ -52,8 +52,8 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        Long caseId = callbackRequest.getCaseDetails().getId();
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        Long caseId = callbackRequest.getCaseDetails().getId();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
@@ -95,5 +95,4 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             default -> throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
         };
     }
-
 }

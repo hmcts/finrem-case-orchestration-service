@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -48,15 +49,15 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.MANAGE_INTERVENERS.equals(eventType));
+            && EventType.MANAGE_INTERVENERS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
         Long caseId = callbackRequest.getCaseDetails().getId();
-        log.info("Invoking contested event {}, callback {} callback for Case ID: {}",
-            callbackRequest.getEventType(), CallbackType.SUBMITTED, caseId);
+
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         String intervenerType = caseData.getIntervenersList().getValueCode();
