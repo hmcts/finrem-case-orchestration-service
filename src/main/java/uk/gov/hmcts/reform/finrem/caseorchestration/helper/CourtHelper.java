@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 
 import java.util.Map;
 import java.util.Objects;
@@ -666,66 +666,66 @@ public class CourtHelper {
      * @return The financial remedies court as a String.
      */
     @SuppressWarnings("java:S6201") // Sonar wants a method reference for each FRC.  But this would mean coupling to all the regionFRCs.
-    public static String getFRCForHearing(Hearing hearing) {
+    public static String getFRCForHearing(HearingLike hearing) {
 
         String regionString = Optional.ofNullable(hearing)
-            .map(Hearing::getHearingCourtSelection)
+            .map(HearingLike::getHearingCourtSelection)
             .map(Court::getRegion)
             .map(Region::getValue)
             .orElse(null);
 
         if (MIDLANDS.equalsIgnoreCase(regionString)) {
             return Optional.of(hearing)
-                .map(Hearing::getHearingCourtSelection)
+                .map(HearingLike::getHearingCourtSelection)
                 .map(Court::getMidlandsList)
                 .map(regionFRC -> regionFRC.getValue())
                 .orElse(EMPTY);
         }
         if (LONDON.equalsIgnoreCase(regionString)) {
             return Optional.of(hearing)
-                .map(Hearing::getHearingCourtSelection)
+                .map(HearingLike::getHearingCourtSelection)
                 .map(Court::getLondonList)
                 .map(regionFRC -> regionFRC.getValue())
                 .orElse(EMPTY);
         }
         if (NORTHWEST.equalsIgnoreCase(regionString)) {
             return Optional.of(hearing)
-                .map(Hearing::getHearingCourtSelection)
+                .map(HearingLike::getHearingCourtSelection)
                 .map(Court::getNorthWestList)
                 .map(regionFRC -> regionFRC.getValue())
                 .orElse(EMPTY);
         }
         if (NORTHEAST.equalsIgnoreCase(regionString)) {
             return Optional.of(hearing)
-                .map(Hearing::getHearingCourtSelection)
+                .map(HearingLike::getHearingCourtSelection)
                 .map(Court::getNorthEastList)
                 .map(regionFRC -> regionFRC.getValue())
                 .orElse(EMPTY);
         }
         if (SOUTHEAST.equalsIgnoreCase(regionString)) {
             return Optional.of(hearing)
-                .map(Hearing::getHearingCourtSelection)
+                .map(HearingLike::getHearingCourtSelection)
                 .map(Court::getSouthEastList)
                 .map(regionFRC -> regionFRC.getValue())
                 .orElse(EMPTY);
         }
         if (SOUTHWEST.equalsIgnoreCase(regionString)) {
             return Optional.of(hearing)
-                .map(Hearing::getHearingCourtSelection)
+                .map(HearingLike::getHearingCourtSelection)
                 .map(Court::getSouthWestList)
                 .map(regionFRC -> regionFRC.getValue())
                 .orElse(EMPTY);
         }
         if (WALES.equalsIgnoreCase(regionString)) {
             return Optional.of(hearing)
-                .map(Hearing::getHearingCourtSelection)
+                .map(HearingLike::getHearingCourtSelection)
                 .map(Court::getWalesList)
                 .map(regionFRC -> regionFRC.getValue())
                 .orElse(EMPTY);
         }
         if (HIGHCOURT.equalsIgnoreCase(regionString)) {
             return Optional.of(hearing)
-                .map(Hearing::getHearingCourtSelection)
+                .map(HearingLike::getHearingCourtSelection)
                 .map(Court::getHcCourtList)
                 .map(regionFRC -> regionFRC.getValue())
                 .orElse(EMPTY);
