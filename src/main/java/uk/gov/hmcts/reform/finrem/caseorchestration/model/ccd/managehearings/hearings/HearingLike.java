@@ -35,4 +35,6 @@ public interface HearingLike {
     List<PartyOnCaseCollectionItem> getPartiesOnCase();
 
     YesOrNo getWasMigrated();
+
+    boolean shouldSendNotifications();
 }

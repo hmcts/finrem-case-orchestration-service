@@ -368,6 +368,8 @@ class ManageHearingActionServiceTest {
             verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(finremCaseDetails, AUTH_TOKEN);
         }
 
+        assertThat(hearingWrapper.getWasRelistSelected()).isEqualTo(hearingWasRelisted);
+
         verify(manageHearingsDocumentService).generateVacateHearingNotice(finremCaseDetails, AUTH_TOKEN);
 
         assertThat(hearingWrapper.getHearingDocumentsCollection().size()).isEqualTo(1);

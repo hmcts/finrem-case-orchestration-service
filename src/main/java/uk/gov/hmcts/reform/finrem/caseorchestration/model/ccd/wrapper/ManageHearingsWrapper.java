@@ -37,7 +37,9 @@ public class ManageHearingsWrapper {
     private UUID workingHearingId;
     private WorkingHearing workingHearing;
     private WorkingVacatedHearing workingVacatedHearing;
+    private UUID workingVacatedHearingId;
     private YesOrNo isRelistSelected;
+    private YesOrNo wasRelistSelected;
     private YesOrNo isAddHearingChosen;
     private YesOrNo isFinalOrder;
     private YesOrNo shouldSendVacateOrAdjNotice;
@@ -109,17 +111,18 @@ public class ManageHearingsWrapper {
 
     /**
      * Returns the UUID for workingVacatedHearing.getChooseHearings().getValue().getCode().
-     * Throws IllegalArgumentException when any segment is missing or code is not a valid UUID.
-     * @param workingVacatedHearing Working copy of the hearing instance currently being processed.
+     * workingVacatedHearingId for working vacated hearings, workingVacatedHearingId for new relisted hearings
      * @return UUID which is the unique id for the working vacated hearing (corresponds to an actual vacated hearing).
      */
-    public static UUID getWorkingVacatedHearingId(WorkingVacatedHearing workingVacatedHearing) {
-        return Optional.ofNullable(workingVacatedHearing)
-            .map(WorkingVacatedHearing::getChooseHearings)
-            .map(DynamicList::getValue)
-            .map(DynamicListElement::getCode)
-            .map(UUID::fromString)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Invalid or missing working vacated hearing UUID"));
+    public UUID getWorkingVacatedHearingId() {
+        if (workingVacatedHearingId == null) {
+            workingVacatedHearingId = Optional.ofNullable(getWorkingVacatedHearing())
+                .map(WorkingVacatedHearing::getChooseHearings)
+                .map(DynamicList::getValue)
+                .map(DynamicListElement::getCode)
+                .map(UUID::fromString)
+                .orElse(null);
+        }
+        return workingVacatedHearingId;
     }
 }
