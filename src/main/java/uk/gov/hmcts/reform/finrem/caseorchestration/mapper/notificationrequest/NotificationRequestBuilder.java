@@ -56,6 +56,8 @@ public class NotificationRequestBuilder {
     private String contactCourtName;
     private String contactCourtEmail;
     private String emailReplyToId;
+    private String vacatedHearingDateTime;
+    private String vacatedHearingType;
 
     /**
      * Sets default values for the NotificationRequestBuilder based on the provided case details.
@@ -196,6 +198,8 @@ public class NotificationRequestBuilder {
         notificationRequest.setContactCourtName(contactCourtName);
         notificationRequest.setContactCourtEmail(contactCourtEmail);
         notificationRequest.setEmailReplyToId(emailReplyToId);
+        notificationRequest.setVacatedHearingDateTime(vacatedHearingDateTime);
+        notificationRequest.setVacatedHearingType(vacatedHearingType);
 
         return notificationRequest;
     }
@@ -342,6 +346,16 @@ public class NotificationRequestBuilder {
 
     public NotificationRequestBuilder emailReplyToId(String emailReplyToId) {
         this.emailReplyToId = emailReplyToId;
+        return this;
+    }
+
+    public NotificationRequestBuilder vacatedHearingDateTime(String vacatedHearingDateTime) {
+        this.vacatedHearingDateTime = vacatedHearingDateTime;
+        return this;
+    }
+
+    public NotificationRequestBuilder vacatedHearingType(String vacatedHearingType) {
+        this.vacatedHearingType = vacatedHearingType;
         return this;
     }
 }
