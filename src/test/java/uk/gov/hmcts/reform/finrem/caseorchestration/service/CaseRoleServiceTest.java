@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -206,6 +207,7 @@ class CaseRoleServiceTest {
         assertIsApplicantRepresentative(caseData, caseRole, false);
         assertIsRespondentRepresentative(caseData, caseRole, true);
         assertThat(caseRoleService.isIntervenerRepresentative(caseData, AUTH_TOKEN)).isEqualTo(true);
+        assertThat(caseRoleService.getIntervenerIndex(caseData, AUTH_TOKEN)).isEqualTo(Optional.of(index));
     }
 
     @ParameterizedTest
@@ -229,6 +231,7 @@ class CaseRoleServiceTest {
         assertIsApplicantRepresentative(caseData, caseRole, false);
         assertIsRespondentRepresentative(caseData, caseRole, true);
         assertThat(caseRoleService.isIntervenerRepresentative(caseData, AUTH_TOKEN)).isEqualTo(true);
+        assertThat(caseRoleService.getIntervenerIndex(caseData, AUTH_TOKEN)).isEqualTo(Optional.of(index));
     }
 
     private void assertIsRespondentRepresentative(FinremCaseData caseData, CaseRole caseRole, boolean isApplicantTest) {
