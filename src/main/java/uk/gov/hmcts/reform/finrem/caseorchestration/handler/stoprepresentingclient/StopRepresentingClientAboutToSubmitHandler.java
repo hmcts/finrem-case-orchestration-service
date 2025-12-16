@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -57,7 +59,9 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private final OnlineFormDocumentService onlineFormDocumentService;
 
-    record StopRepresentingRequest(FinremCaseData finremCaseData, boolean requestedByApplicantRep) {}
+    record StopRepresentingRequest(FinremCaseData finremCaseData, boolean requestedByApplicantRep,
+                                   boolean requestedByRespondentRep, boolean requestedByIntervenerRep,
+                                   Optional<Integer> intervenerIndex) {}
 
     private static final String WARNING_MESSAGE =
         "Are you sure you wish to stop representing your client? "
@@ -95,7 +99,11 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         final FinremCaseData finremCaseDataBefore = finremCaseDetailsBefore.getData();
         final List<String> warnings = new ArrayList<>();
         StopRepresentingRequest stopRepresentingRequest = new StopRepresentingRequest(finremCaseData,
-            caseRoleService.isApplicantRepresentative(finremCaseData,  userAuthorisation));
+            caseRoleService.isApplicantRepresentative(finremCaseData, userAuthorisation),
+            caseRoleService.isRespondentRepresentative(finremCaseData, userAuthorisation),
+            caseRoleService.isIntervenerRepresentative(finremCaseData, userAuthorisation),
+            caseRoleService.getIntervenerIndex(finremCaseData, userAuthorisation)
+        );
 
         populateWarnings(finremCaseData, warnings);
         logStopRepresentingRequest(stopRepresentingRequest);
@@ -135,7 +143,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private void logStopRepresentingRequest(StopRepresentingRequest representingRequest) {
         log.info("{} - {} representative stops representing a client with a {}", representingRequest.finremCaseData.getCcdCaseId(),
-            resolveNocParty(representingRequest).getValue(),
+            describeRepresentative(representingRequest),
             describeApprovalSource(representingRequest.finremCaseData));
     }
 
@@ -148,23 +156,32 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         FinremCaseData caseData = stopRepresentingRequest.finremCaseData;
         NoticeOfChangeParty noticeOfChangeParty = resolveNocParty(stopRepresentingRequest);
 
-        // Set the party who is being unrepresented
+        // Set the party who is being unrepresented. null if intervener
         caseData.getContactDetailsWrapper().setNocParty(noticeOfChangeParty);
 
-        boolean isApplicantRepresentativeChange = APPLICANT.equals(noticeOfChangeParty);
+        final boolean isApplicantRepresentativeChange = APPLICANT.equals(noticeOfChangeParty);
+        final boolean isRespondentRepresentativeChange = RESPONDENT.equals(noticeOfChangeParty);
 
         // Determine the relevant policies and barrister lists based on the party
-        final OrganisationPolicy organisationPolicy;
-        final List<BarristerCollectionItem> barristerCollection;
+        OrganisationPolicy organisationPolicy = null;
+        List<BarristerCollectionItem> barristerCollection;
 
         if (isApplicantRepresentativeChange) {
             organisationPolicy = caseData.getApplicantOrganisationPolicy();
             barristerCollection = caseData.getBarristerCollectionWrapper().getApplicantBarristers();
             caseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
-        } else {
+        } else if (isRespondentRepresentativeChange) {
             organisationPolicy = caseData.getRespondentOrganisationPolicy();
             barristerCollection = caseData.getBarristerCollectionWrapper().getRespondentBarristers();
             caseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
+        } else {
+            barristerCollection = null; // it implies INTERVENER
+            List<IntervenerWrapper> intervenerWrappers = caseData.getInterveners();
+            stopRepresentingRequest.intervenerIndex()
+                .ifPresent(intervenerIndex -> {
+                    IntervenerWrapper intervener = intervenerWrappers.get(intervenerIndex);
+                    intervener.setIntervenerOrganisation(getDefaultOrganisationPolicy(CaseRole.INTVR_BARRISTER_1));
+                });
         }
 
         // Extract the Organisation ID to remove (centralized logic)
@@ -187,19 +204,22 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
                                                                Pair<Address, Boolean> serviceAddressConfig) {
         Address serviceAddress = serviceAddressConfig.getLeft();
         boolean isConfidential = Boolean.TRUE.equals(serviceAddressConfig.getRight());
-        NoticeOfChangeParty noticeOfChangeParty = resolveNocParty(stopRepresentingRequest);
 
         ContactDetailsWrapper contactDetailsWrapper = stopRepresentingRequest.finremCaseData.getContactDetailsWrapper();
 
-        if (APPLICANT.equals(noticeOfChangeParty)) {
+        if (stopRepresentingRequest.requestedByApplicantRep) {
             setApplicantUnrepresented(stopRepresentingRequest.finremCaseData);
             contactDetailsWrapper.setApplicantAddress(serviceAddress);
             contactDetailsWrapper.setApplicantAddressHiddenFromRespondent(YesOrNo.forValue(isConfidential));
-        } else { // otherwise it is being requested by respondent representatives
+        } else if (stopRepresentingRequest.requestedByRespondentRep) {
             setRespondentUnrepresented(stopRepresentingRequest.finremCaseData);
             contactDetailsWrapper.setRespondentAddress(serviceAddress);
             contactDetailsWrapper.setRespondentAddressHiddenFromApplicant(YesOrNo.forValue(isConfidential));
-        }
+        } else if (stopRepresentingRequest.requestedByIntervenerRep) { // TODO
+//        setRespondentUnrepresented(stopRepresentingRequest.finremCaseData);
+//        contactDetailsWrapper.setRespondentAddress(serviceAddress);
+//        contactDetailsWrapper.setRespondentAddressHiddenFromApplicant(YesOrNo.forValue(isConfidential));
+    }
     }
 
     private void setApplicantUnrepresented(FinremCaseData finremCaseData) {
@@ -215,7 +235,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private NoticeOfChangeParty resolveNocParty(StopRepresentingRequest stopRepresentingRequest) {
-        return stopRepresentingRequest.requestedByApplicantRep ? APPLICANT : RESPONDENT;
+        return stopRepresentingRequest.requestedByApplicantRep ? APPLICANT
+            : (stopRepresentingRequest.requestedByRespondentRep ? RESPONDENT : null);
     }
 
     private String describeApprovalSource(FinremCaseData finremCaseData) {
@@ -225,6 +246,18 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             return "judicial approval";
         } else {
             throw new IllegalStateException("Unreachable code.");
+        }
+    }
+
+    private String describeRepresentative(StopRepresentingRequest representingRequest) {
+        if (representingRequest.requestedByRespondentRep) {
+            return "respondent";
+        } else if (representingRequest.requestedByApplicantRep) {
+            return "applicant";
+        } else if (representingRequest.requestedByIntervenerRep) {
+            return "intervener";
+        } else {
+            throw new IllegalStateException("Unknown representation requested.");
         }
     }
 
