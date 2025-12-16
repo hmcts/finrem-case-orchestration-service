@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ManageHearingsWrapperTest {
 
@@ -123,30 +122,21 @@ class ManageHearingsWrapperTest {
     @Test
     void when_getWorkingVacatedHearingId_shouldFindWorkingVacatedHearingId() {
         // Arrange
-        WorkingVacatedHearing vacatedHearing = WorkingVacatedHearing.builder()
-            .chooseHearings(DynamicList.builder()
-                .value(DynamicListElement.builder()
-                    .code(testUuid.toString())
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .workingVacatedHearing(
+                WorkingVacatedHearing.builder()
+                    .chooseHearings(DynamicList.builder()
+                        .value(DynamicListElement.builder()
+                            .code(testUuid.toString())
+                            .build())
+                        .build())
                     .build())
-                .build())
             .build();
 
         // Act
-        UUID expectedUuid = ManageHearingsWrapper.getWorkingVacatedHearingId(vacatedHearing);
+        UUID expectedUuid = wrapper.getWorkingVacatedHearingId();
 
         // Assert
         assertThat(expectedUuid).isEqualTo(testUuid);
     }
-
-    @Test
-    void when_WorkingVacatedHearing_is_null_getWorkingVacatedHearingId_should_throw() {
-        // Arrange
-        WorkingVacatedHearing vacatedHearing = WorkingVacatedHearing.builder().build();
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> ManageHearingsWrapper.getWorkingVacatedHearingId(vacatedHearing));
-        assertThat(exception.getMessage()).isEqualTo("Invalid or missing working vacated hearing UUID");
-    }
-
 }

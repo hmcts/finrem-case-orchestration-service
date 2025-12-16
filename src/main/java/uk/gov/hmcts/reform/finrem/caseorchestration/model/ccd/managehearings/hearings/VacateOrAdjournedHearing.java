@@ -48,6 +48,10 @@ public class VacateOrAdjournedHearing implements HearingLike {
     private String specifyOtherReason;
     private ManageHearingsAction hearingStatus;
 
+    public boolean shouldSendNotifications() {
+        return YesOrNo.YES.equals(this.getWasVacOrAdjNoticeSent());
+    }
+
     public static VacateOrAdjournedHearing fromHearingToVacatedHearing(ManageHearingsCollectionItem hearingToVacate,
                                                                        WorkingVacatedHearing vacateHearingInput,
                                                                        YesOrNo wasVacateOrAdjournNoticeSent) {

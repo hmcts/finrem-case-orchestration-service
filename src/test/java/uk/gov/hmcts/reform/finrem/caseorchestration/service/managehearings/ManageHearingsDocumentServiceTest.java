@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
@@ -40,7 +41,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -76,6 +76,7 @@ class ManageHearingsDocumentServiceTest {
     private static final String HEARING_NOTICE_TEMPLATE = "hearingNoticeTemplate";
     private static final String HEARING_NOTICE_FILE_NAME = "hearingNoticeFileName";
     private static final String HEARING_NOTICE_FILE_URL = "hearingNoticeURL";
+    private static final String VACATE_HEARING_NOTICE_FILE_URL = "vacateHearingNoticeURL";
 
     private static final String FORM_A_URL = "formAURL";
 
@@ -392,31 +393,20 @@ class ManageHearingsDocumentServiceTest {
     }
 
     // Adds three HearingNotices, to check that the downstream code returns the most recent one
+    // If the tests become flaky on fast systems, because the upload timestamps match, then assign explicit upload timestamps.
     @Test
     void shouldReturnHearingNoticeWhenCorrectHearingIdUsed() {
         // Arrange
         UUID hearingId = UUID.randomUUID();
 
-        ManageHearingDocument oldestDoc = ManageHearingDocument.builder()
-            .hearingId(hearingId)
-            .hearingDocument(CaseDocument.builder().documentUrl("oldest doc url")
-                .uploadTimestamp(LocalDateTime.now().minusDays(2)).build())
-            .hearingCaseDocumentType(CaseDocumentType.HEARING_NOTICE)
-            .build();
+        ManageHearingDocument oldestDoc =
+            buildManageHearingDocument(CaseDocumentType.HEARING_NOTICE, hearingId, "oldest doc url");
 
-        ManageHearingDocument newerDoc = ManageHearingDocument.builder()
-            .hearingId(hearingId)
-            .hearingDocument(CaseDocument.builder().documentUrl("newer doc url")
-                .uploadTimestamp(LocalDateTime.now().minusDays(1)).build())
-            .hearingCaseDocumentType(CaseDocumentType.HEARING_NOTICE)
-            .build();
+        ManageHearingDocument newerDoc =
+            buildManageHearingDocument(CaseDocumentType.HEARING_NOTICE, hearingId, "newer doc url");
 
-        ManageHearingDocument newestDoc = ManageHearingDocument.builder()
-            .hearingId(hearingId)
-            .hearingDocument(CaseDocument.builder().documentUrl("newest doc url")
-                .uploadTimestamp(LocalDateTime.now()).build())
-            .hearingCaseDocumentType(CaseDocumentType.HEARING_NOTICE)
-            .build();
+        ManageHearingDocument newestDoc =
+            buildManageHearingDocument(CaseDocumentType.HEARING_NOTICE, hearingId, "newest doc url");
 
         ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
             .workingHearingId(hearingId)
@@ -434,7 +424,6 @@ class ManageHearingsDocumentServiceTest {
         CaseDocument result = manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
 
         // Assert the newest hearing document is returned
-        assertNotNull(result);
         assertThat(result.getDocumentUrl()).isEqualTo("newest doc url");
     }
 
@@ -444,11 +433,8 @@ class ManageHearingsDocumentServiceTest {
         UUID correctHearingId = UUID.randomUUID();
         UUID incorrectHearingId = UUID.randomUUID();
 
-        CaseDocument someDoc = CaseDocument.builder().documentUrl(HEARING_NOTICE_FILE_NAME).build();
-        ManageHearingDocument doc = ManageHearingDocument.builder()
-            .hearingId(incorrectHearingId)
-            .hearingDocument(someDoc)
-            .build();
+        ManageHearingDocument doc =
+            buildManageHearingDocument(CaseDocumentType.HEARING_NOTICE, incorrectHearingId, "url");
 
         ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
             .workingHearingId(correctHearingId)
@@ -462,6 +448,67 @@ class ManageHearingsDocumentServiceTest {
 
         // Act
         CaseDocument result = manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
+
+        // Assert
+        assertNull(result);
+    }
+
+    // Adds three Vacate Hearing Notices, to check that the downstream code returns the most recent one
+    // If the tests become flaky on fast systems, because the upload timestamps match, then assign explicit upload timestamps.
+    @Test
+    void shouldReturnVacateHearingNoticeWhenCorrectHearingIdUsed() {
+        // Arrange
+        UUID vacateHearingId = UUID.randomUUID();
+
+        ManageHearingDocument oldestDoc =
+            buildManageHearingDocument(CaseDocumentType.VACATE_HEARING_NOTICE, vacateHearingId, "oldest doc url");
+
+        ManageHearingDocument newerDoc =
+            buildManageHearingDocument(CaseDocumentType.VACATE_HEARING_NOTICE, vacateHearingId, "newer doc url");
+
+        ManageHearingDocument newestDoc =
+            buildManageHearingDocument(CaseDocumentType.VACATE_HEARING_NOTICE, vacateHearingId, "newest doc url");
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .workingVacatedHearingId(vacateHearingId)
+            .hearingDocumentsCollection(List.of(
+                ManageHearingDocumentsCollectionItem.builder().value(oldestDoc).build(),
+                ManageHearingDocumentsCollectionItem.builder().value(newestDoc).build(), // put newest in the middle
+                ManageHearingDocumentsCollectionItem.builder().value(newerDoc).build()
+            ))
+            .build();
+
+        FinremCaseData data = FinremCaseData.builder().manageHearingsWrapper(wrapper).build();
+        finremCaseDetails.setData(data);
+
+        // Act
+        CaseDocument result = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
+
+        // Assert the newest hearing document is returned
+        assertThat(result.getDocumentUrl()).isEqualTo("newest doc url");
+    }
+
+    @Test
+    void shouldReturnNullWhenIncorrectVacateHearingIdUsed() {
+        // Arrange
+        UUID correctHearingId = UUID.randomUUID();
+        UUID incorrectHearingId = UUID.randomUUID();
+
+        ManageHearingDocument doc =
+            buildManageHearingDocument(CaseDocumentType.VACATE_HEARING_NOTICE, incorrectHearingId, "url");
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .workingVacatedHearingId(correctHearingId)
+            .hearingDocumentsCollection(List.of(
+                ManageHearingDocumentsCollectionItem.builder().value(doc).build()
+            ))
+            .build();
+
+        FinremCaseData data = FinremCaseData.builder().manageHearingsWrapper(wrapper).build();
+        finremCaseDetails.setData(data);
+
+        // Act
+        CaseDocument result = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
 
         // Assert
         assertNull(result);
@@ -551,7 +598,8 @@ class ManageHearingsDocumentServiceTest {
 
     /**
      * For FDA hearings, check that correct documents returned by getHearingDocumentsToPost.
-     * Form C, Form G, Hearing Notice, Form A, Out of court resolution, PFD NCDR Compliance Letter and Cover Letter
+     * Form C, Form G, Hearing Notice, Vacate Hearing Notice, Form A, Out of court resolution,
+     * PFD NCDR Compliance Letter and Cover Letter
      */
     @Test
     void getHearingDocumentsToPostShouldReturnFdaDocuments() {
@@ -580,12 +628,12 @@ class ManageHearingsDocumentServiceTest {
 
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
-            .doesNotContain(FORM_C_EXPRESS_URL, FORM_C_FAST_TRACK_URL);
+            .doesNotContain(FORM_C_EXPRESS_URL, FORM_C_FAST_TRACK_URL, VACATE_HEARING_NOTICE_FILE_URL);
     }
 
     /**
      * For FDA hearings on fast track cases, check that correct documents returned by getHearingDocumentsToPost.
-     * Fast track Form C, Hearing Notice, Form A, Out of court resolution, PFD NCDR Compliance Letter and Cover Letter
+     * Fast track Form C, Hearing Notice, Out of court resolution, PFD NCDR Compliance Letter and Cover Letter
      */
     @Test
     void getHearingDocumentsToPostShouldReturnFdaFastTrackDocuments() {
@@ -602,6 +650,8 @@ class ManageHearingsDocumentServiceTest {
 
         finremCaseDetails.setData(finremCaseData);
 
+        finremCaseData.getManageHearingsWrapper().setManageHearingsActionSelection(ManageHearingsAction.ADD_HEARING);
+
         // Act
         List<CaseDocument> result = manageHearingsDocumentService.getHearingDocumentsToPost(finremCaseDetails);
 
@@ -613,7 +663,7 @@ class ManageHearingsDocumentServiceTest {
 
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
-            .doesNotContain(FORM_C_EXPRESS_URL, FORM_C_URL, FORM_G_URL);
+            .doesNotContain(FORM_C_EXPRESS_URL, FORM_C_URL, FORM_G_URL, VACATE_HEARING_NOTICE_FILE_URL);
     }
 
     /**
@@ -641,12 +691,13 @@ class ManageHearingsDocumentServiceTest {
         // Assert
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
-            .containsExactlyInAnyOrder(FORM_C_EXPRESS_URL, FORM_G_URL, HEARING_NOTICE_FILE_URL, FORM_A_URL,
-                OUT_OF_COURT_RESOLUTION_URL, PFD_NCDR_COMPLIANCE_LETTER_URL, PFD_NCDR_COVER_LETTER_URL);
+            .containsExactlyInAnyOrder(FORM_C_EXPRESS_URL, FORM_G_URL, HEARING_NOTICE_FILE_URL,
+                FORM_A_URL, OUT_OF_COURT_RESOLUTION_URL, PFD_NCDR_COMPLIANCE_LETTER_URL,
+                PFD_NCDR_COVER_LETTER_URL);
 
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
-            .doesNotContain(FORM_C_URL, FORM_C_FAST_TRACK_URL);
+            .doesNotContain(FORM_C_URL, FORM_C_FAST_TRACK_URL, VACATE_HEARING_NOTICE_FILE_URL);
     }
 
     /**
@@ -756,7 +807,7 @@ class ManageHearingsDocumentServiceTest {
 
     /**
      * Builds a FinremCaseData object with a ManageHearingsWrapper containing hearing documents.
-     * And sets other attributes using the arguments provided.  MiniFormA is set to a test value.
+     * And sets other attributes using the arguments provided. MiniFormA is set to a test value.
      *
      * @param hearingId              used so that tests can check that the correct hearing documents are returned
      * @param hearingDocuments       the list of hearing documents to be included in the case data
@@ -782,6 +833,15 @@ class ManageHearingsDocumentServiceTest {
                     .hearings(getListOfOneHearing(hearingId, hearingType))
                     .hearingDocumentsCollection(hearingDocuments)
                     .build())
+            .build();
+    }
+
+    private ManageHearingDocument buildManageHearingDocument(CaseDocumentType documentType, UUID hearingId, String documentUrl) {
+        return ManageHearingDocument.builder()
+            .hearingId(hearingId)
+            .hearingDocument(CaseDocument.builder().documentUrl(documentUrl)
+                .uploadTimestamp(LocalDateTime.now()).build())
+            .hearingCaseDocumentType(documentType)
             .build();
     }
 }

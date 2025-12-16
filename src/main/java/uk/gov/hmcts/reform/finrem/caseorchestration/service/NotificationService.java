@@ -68,7 +68,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER_CONSENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOC_CASEWORKER;
@@ -1892,11 +1891,15 @@ public class NotificationService {
 
     /**
      * Email a hearing notification to a solicitor.
+     * Template is one of these:
+     * FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR
+     * FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
      * @param notificationRequest the notification request containing details for the email
      */
     public void sendHearingNotificationToSolicitor(
             NotificationRequest notificationRequest,
-            String caseRoleAsString) {
+            String caseRoleAsString,
+            EmailTemplateNames template) {
 
         log.info(
                 "{} - Sending hearing notification to solicitor with role {}",
@@ -1906,7 +1909,7 @@ public class NotificationService {
 
         emailService.sendConfirmationEmail(
                 notificationRequest,
-                FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
+            template
         );
     }
 }

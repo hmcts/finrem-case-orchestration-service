@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
@@ -50,10 +51,10 @@ class HearingsSubmittedHandlerTest {
     }
 
     @Test
-    void shouldHandleSubmittedCallback() {
+    void shouldHandleSubmittedCallbackForAddHearing() {
         // Arrange
         UUID hearingID = UUID.randomUUID();
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, hearingID);
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, hearingID, ManageHearingsAction.ADD_HEARING);
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
@@ -63,13 +64,31 @@ class HearingsSubmittedHandlerTest {
         assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isNullOrEmpty();
         verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder, never()).sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
 
-    private FinremCallbackRequest buildCallbackRequest(UUID hearingID, UUID hearingItemId) {
+    @Test
+    void shouldHandleSubmittedCallbackForVacateHearing() {
+        // Arrange
+        UUID hearingID = UUID.randomUUID();
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, hearingID, ManageHearingsAction.VACATE_HEARING);
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertThat(response.getData()).isNotNull();
+        assertThat(response.getErrors()).isNullOrEmpty();
+        verify(manageHearingsCorresponder, never()).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+    }
+
+    private FinremCallbackRequest buildCallbackRequest(UUID hearingID, UUID hearingItemId, ManageHearingsAction action) {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper
                 .builder()
-                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
+                .manageHearingsActionSelection(action)
                 .workingHearingId(hearingID)
                 .hearings(List.of(
                     ManageHearingsCollectionItem
