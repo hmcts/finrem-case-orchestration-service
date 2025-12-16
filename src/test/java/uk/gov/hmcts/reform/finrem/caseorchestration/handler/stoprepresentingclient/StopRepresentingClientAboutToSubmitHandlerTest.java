@@ -433,5 +433,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         verify(caseRoleService).isApplicantRepresentative(caseData, AUTH_TOKEN);
         verify(caseRoleService).isRespondentRepresentative(caseData, AUTH_TOKEN);
         verify(caseRoleService).isIntervenerRepresentative(caseData, AUTH_TOKEN);
+        verify(caseRoleService).getIntervenerIndex(caseData, AUTH_TOKEN);
     }
 }
