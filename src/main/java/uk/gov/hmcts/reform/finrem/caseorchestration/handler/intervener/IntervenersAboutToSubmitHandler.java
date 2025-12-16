@@ -30,16 +30,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @Slf4j
 @Service
 public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
-    private final IntervenerService service;
+
+    private final IntervenerService intervenerService;
+
     private static final List<String> ADD_OPERATION_CODES = List.of(ADD_INTERVENER_ONE_CODE, ADD_INTERVENER_TWO_CODE,
         ADD_INTERVENER_THREE_CODE, ADD_INTERVENER_FOUR_CODE);
     private static final List<String> DELETE_OPERATION_CODES = List.of(DEL_INTERVENER_ONE_CODE, DEL_INTERVENER_TWO_CODE,
         DEL_INTERVENER_THREE_CODE, DEL_INTERVENER_FOUR_CODE);
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                           IntervenerService service) {
+                                           IntervenerService intervenerService) {
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.intervenerService = intervenerService;
     }
 
     @Override
@@ -52,8 +54,8 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        Long caseId = callbackRequest.getCaseDetails().getId();
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        Long caseId = callbackRequest.getCaseDetails().getId();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
@@ -65,10 +67,10 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             if (isIntervenerPostCodeMissing(intervener)) {
                 errors.add("Postcode field is required for the intervener.");
             } else {
-                service.updateIntervenerDetails(intervener, errors, callbackRequest);
+                intervenerService.updateIntervenerDetails(intervener, errors, callbackRequest);
             }
         } else if (DELETE_OPERATION_CODES.contains(selectedOperationCode)) {
-            service.removeIntervenerDetails(intervener, errors, caseData, caseId);
+            intervenerService.removeIntervenerDetails(intervener, errors, caseData, caseId);
         } else {
             throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
         }
@@ -95,5 +97,4 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             default -> throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
         };
     }
-
 }
