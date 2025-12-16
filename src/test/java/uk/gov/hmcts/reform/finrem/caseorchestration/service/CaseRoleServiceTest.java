@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -182,6 +183,52 @@ class CaseRoleServiceTest {
         // then
         assertThat(result).isEqualTo(APP_SOLICITOR);
         assertTrue(caseRoleService.isApplicantRepresentative(FinremCaseData.builder().ccdCaseId(CASE_ID).build(), AUTH_TOKEN));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 4})
+    void givenIntervenerSolicitorRoleAssigned_whenIsIntervenerRepresentativeCalled_thenReturnTrue(int index) {
+        // given
+        CaseRole caseRole = CaseRole.valueOf("INTVR_SOLICITOR_" + index);
+        CaseAssignedUserRole userRole = CaseAssignedUserRole.builder().caseRole(caseRole.getCcdCode()).build();
+
+        CaseAssignedUserRolesResource resource = new CaseAssignedUserRolesResource();
+        resource.setCaseAssignedUserRoles(List.of(userRole));
+
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN)).thenReturn(resource);
+
+        // when
+        CaseRole result = caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN);
+
+        // then
+        assertThat(result).isEqualTo(caseRole);
+        FinremCaseData caseData = FinremCaseData.builder().ccdCaseId(CASE_ID).build();
+        assertIsApplicantRepresentative(caseData, caseRole, false);
+        assertIsRespondentRepresentative(caseData, caseRole, true);
+        assertThat(caseRoleService.isIntervenerRepresentative(caseData, AUTH_TOKEN)).isEqualTo(true);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 4})
+    void givenIntervenerBarristerRoleAssigned_whenIsIntervenerRepresentativeCalled_thenReturnTrue(int index) {
+        // given
+        CaseRole caseRole = CaseRole.valueOf("INTVR_BARRISTER_" + index);
+        CaseAssignedUserRole userRole = CaseAssignedUserRole.builder().caseRole(caseRole.getCcdCode()).build();
+
+        CaseAssignedUserRolesResource resource = new CaseAssignedUserRolesResource();
+        resource.setCaseAssignedUserRoles(List.of(userRole));
+
+        when(caseAssignedRoleService.getCaseAssignedUserRole(CASE_ID, AUTH_TOKEN)).thenReturn(resource);
+
+        // when
+        CaseRole result = caseRoleService.getUserCaseRole(CASE_ID, AUTH_TOKEN);
+
+        // then
+        assertThat(result).isEqualTo(caseRole);
+        FinremCaseData caseData = FinremCaseData.builder().ccdCaseId(CASE_ID).build();
+        assertIsApplicantRepresentative(caseData, caseRole, false);
+        assertIsRespondentRepresentative(caseData, caseRole, true);
+        assertThat(caseRoleService.isIntervenerRepresentative(caseData, AUTH_TOKEN)).isEqualTo(true);
     }
 
     private void assertIsRespondentRepresentative(FinremCaseData caseData, CaseRole caseRole, boolean isApplicantTest) {

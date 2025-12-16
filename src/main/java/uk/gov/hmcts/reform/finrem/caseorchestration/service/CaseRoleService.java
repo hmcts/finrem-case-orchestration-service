@@ -13,6 +13,14 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_BARRISTER_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_BARRISTER_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_BARRISTER_3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_BARRISTER_4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 
@@ -115,6 +123,31 @@ public class CaseRoleService {
         CaseRole caseRole = getUserCaseRole(finremCaseData.getCcdCaseId(), userAuthorisation);
         return Optional.ofNullable(caseRole)
             .filter(role -> List.of(RESP_SOLICITOR, RESP_BARRISTER).contains(role))
+            .isPresent();
+    }
+
+    /**
+     * Checks if the user associated with the provided authorisation token
+     * has a {@link CaseRole} that represents the **Intervener's legal representative**.
+     *
+     * <p>The method determines this by retrieving the user's specific case role
+     * for the given financial remedy case and checking if it matches one of
+     * the defined intervener representative roles (e.g., Intervener Solicitor or Intervener Barrister).
+     * It safely handles the case where the retrieved user role might be {@code null}.</p>
+     *
+     * @param finremCaseData The case data object, typically containing the CCD Case ID     *
+     *                       required to determine the user's role in the context of the case.
+     * @param userAuthorisation The user's authorisation token (e.g., JWT) used to identify
+     *                          the current user whose role is being checked.
+     * @return {@code true} if the user has a role of **Intervener Solicitor** (INTVR_SOLICITOR_1-4)
+     *         or **Intervener Barrister** (INTVR_BARRISTER_1-4), {@code false} otherwise.
+     * @see CaseRole
+     */
+    public boolean isIntervenerRepresentative(FinremCaseData finremCaseData, String userAuthorisation) {
+        CaseRole caseRole = getUserCaseRole(finremCaseData.getCcdCaseId(), userAuthorisation);
+        return Optional.ofNullable(caseRole)
+            .filter(role -> List.of(INTVR_SOLICITOR_1, INTVR_SOLICITOR_2, INTVR_SOLICITOR_3, INTVR_SOLICITOR_4,
+                INTVR_BARRISTER_1, INTVR_BARRISTER_2, INTVR_BARRISTER_3, INTVR_BARRISTER_4).contains(role))
             .isPresent();
     }
 }
