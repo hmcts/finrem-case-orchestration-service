@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
+import static java.lang.String.format;
+
 @RequiredArgsConstructor
 public enum CaseRole {
     APP_SOLICITOR("[APPSOLICITOR]"),
@@ -33,5 +35,13 @@ public enum CaseRole {
         return Arrays.stream(CaseRole.values())
             .filter(option -> option.getCcdCode().equalsIgnoreCase(ccdCode))
             .findFirst().orElseThrow(IllegalArgumentException::new);
+    }
+
+    public static CaseRole getIntervenerSolicitorByIndex(int index) {
+        return CaseRole.forValue(format("[INTVRSOLICITOR%s]", index));
+    }
+
+    public static CaseRole getIntervenerBarristerByIndex(int index) {
+        return CaseRole.forValue(format("[INTVRBARRISTER%s]", index));
     }
 }
