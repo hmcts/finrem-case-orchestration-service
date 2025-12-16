@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -30,14 +31,13 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.MANAGE_INTERVENERS.equals(eventType));
+            && EventType.MANAGE_INTERVENERS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Invoking contested {} about to start callback for Case ID: {}",
-            callbackRequest.getEventType(), callbackRequest.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
