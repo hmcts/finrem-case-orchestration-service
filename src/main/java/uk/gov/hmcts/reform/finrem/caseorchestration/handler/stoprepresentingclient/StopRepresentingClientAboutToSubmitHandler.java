@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
@@ -269,6 +270,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     private Optional<IntervenerWrapper> getTargetIntervener(StopRepresentingRequest stopRepresentingRequest) {
         List<IntervenerWrapper> intervenerWrappers = stopRepresentingRequest.finremCaseData.getInterveners();
         return stopRepresentingRequest.intervenerIndex()
+            .map(i -> i - 1) // starts with 1
             .map(intervenerWrappers::get);
     }
 
@@ -288,7 +290,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         } else if (representingRequest.requestedByApplicantRep) {
             return "applicant";
         } else if (representingRequest.requestedByIntervenerRep) {
-            return "intervener";
+            return format("intervener %s", representingRequest.intervenerIndex.orElse(null));
         } else {
             throw new IllegalStateException("Unknown representation requested.");
         }
