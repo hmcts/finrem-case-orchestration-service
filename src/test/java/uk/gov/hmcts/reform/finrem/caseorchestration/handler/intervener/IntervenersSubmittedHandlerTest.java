@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -12,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -26,11 +26,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.inter
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_FOUR_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_ONE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_THREE_CODE;
@@ -43,14 +41,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class IntervenersSubmittedHandlerTest {
 
-    public static final String AUTH_TOKEN = "tokien:)";
-
     @InjectMocks
-    private IntervenersSubmittedHandler handler;
+    private IntervenersSubmittedHandler submittedHandler;
 
     @Mock
     private IntervenerAddedCorresponder intervenerAddedCorresponder;
@@ -59,31 +56,15 @@ class IntervenersSubmittedHandlerTest {
     private IntervenerRemovedCorresponder intervenerRemovedCorresponder;
 
     @Mock
-    private IntervenerService service;
+    private IntervenerService intervenerService;
 
     @Test
-    void givenContestedCase_whenICallbackIsAboutToSubmit_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANAGE_INTERVENERS),
-            is(false));
+    void testCanHandle() {
+        assertCanHandle(submittedHandler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.MANAGE_INTERVENERS);
     }
 
     @Test
-    void givenConsentedCase_whenEventIsClose_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
-    }
-
-    @Test
-    void givenContestedCase_whenEventIsManageInteveners_thenHandlerCanHandleEvent() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.MANAGE_INTERVENERS),
-            is(true));
-    }
-
-    @Test
-    void givenContestedCase_whenIntervenerOneActionIsAdded_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerOneActionIsAdded_thenSendCorrespondence() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -104,14 +85,14 @@ class IntervenersSubmittedHandlerTest {
         IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
         finremCaseData.setIntervenerOne(oneWrapper);
-        when(service.setIntervenerAddedChangeDetails(oneWrapper)).thenReturn(intervenerOneChangeDetails);
+        when(intervenerService.setIntervenerAddedChangeDetails(oneWrapper)).thenReturn(intervenerOneChangeDetails);
 
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        submittedHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
-    void givenContestedCase_whenIntervenerTwoActionIsAdded_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerTwoActionIsAdded_thenSendCorrespondence() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -133,14 +114,14 @@ class IntervenersSubmittedHandlerTest {
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
         finremCaseData.setIntervenerTwo(twoWrapper);
 
-        when(service.setIntervenerAddedChangeDetails(twoWrapper)).thenReturn(intervenerTwoChangeDetails);
+        when(intervenerService.setIntervenerAddedChangeDetails(twoWrapper)).thenReturn(intervenerTwoChangeDetails);
 
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        submittedHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
-    void givenContestedCase_whenIntervenerThreeActionIsAdded_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerThreeActionIsAdded_thenSendCorrespondence() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -163,14 +144,14 @@ class IntervenersSubmittedHandlerTest {
             .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
         finremCaseData.setIntervenerThree(threeWrapper);
 
-        when(service.setIntervenerAddedChangeDetails(threeWrapper)).thenReturn(intervenerThreeChangeDetails);
+        when(intervenerService.setIntervenerAddedChangeDetails(threeWrapper)).thenReturn(intervenerThreeChangeDetails);
 
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        submittedHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
-    void givenContestedCase_whenIntervenerFourActionIsAdded_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerFourActionIsAdded_thenSendCorrespondence() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -194,14 +175,14 @@ class IntervenersSubmittedHandlerTest {
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
         finremCaseData.setIntervenerFour(fourWrapper);
 
-        when(service.setIntervenerAddedChangeDetails(fourWrapper)).thenReturn(intervenerFourChangeDetails);
+        when(intervenerService.setIntervenerAddedChangeDetails(fourWrapper)).thenReturn(intervenerFourChangeDetails);
 
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        submittedHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
-    void givenContestedCase_whenIntervenerOneActionIsRemoved_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerOneActionIsRemoved_thenSendCorrespondence() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -225,13 +206,13 @@ class IntervenersSubmittedHandlerTest {
             .builder().intervenerName("One name").intervenerEmail("test@test.com").build();
         finremCaseDataBefore.setIntervenerOne(oneWrapper);
 
-        when(service.setIntervenerRemovedChangeDetails(oneWrapper)).thenReturn(intervenerOneChangeDetails);
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        when(intervenerService.setIntervenerRemovedChangeDetails(oneWrapper)).thenReturn(intervenerOneChangeDetails);
+        submittedHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerRemovedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
-    void givenContestedCase_whenIntervenerTwoActionIsRemoved_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerTwoActionIsRemoved_thenSendCorrespondence() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -255,13 +236,13 @@ class IntervenersSubmittedHandlerTest {
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
         finremCaseDataBefore.setIntervenerTwo(twoWrapper);
 
-        when(service.setIntervenerRemovedChangeDetails(twoWrapper)).thenReturn(intervenerTwoChangeDetails);
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        when(intervenerService.setIntervenerRemovedChangeDetails(twoWrapper)).thenReturn(intervenerTwoChangeDetails);
+        submittedHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerRemovedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
-    void givenContestedCase_whenIntervenerThreeActionIsRemoved_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerThreeActionIsRemoved_thenSendCorrespondence() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -285,13 +266,13 @@ class IntervenersSubmittedHandlerTest {
             .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
         finremCaseDataBefore.setIntervenerThree(threeWrapper);
 
-        when(service.setIntervenerRemovedChangeDetails(threeWrapper)).thenReturn(intervenerThreeChangeDetails);
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        when(intervenerService.setIntervenerRemovedChangeDetails(threeWrapper)).thenReturn(intervenerThreeChangeDetails);
+        submittedHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerRemovedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
-    void givenContestedCase_whenIntervenerFourActionIsRemoved_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerFourActionIsRemoved_thenSendCorrespondence() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -315,19 +296,12 @@ class IntervenersSubmittedHandlerTest {
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
         finremCaseDataBefore.setIntervenerFour(fourWrapper);
 
-        when(service.setIntervenerRemovedChangeDetails(fourWrapper)).thenReturn(intervenerFourChangeDetails);
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        when(intervenerService.setIntervenerRemovedChangeDetails(fourWrapper)).thenReturn(intervenerFourChangeDetails);
+        submittedHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerRemovedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequest
-            .builder()
-            .eventType(EventType.MANAGE_INTERVENERS)
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(new FinremCaseData()).build())
-            .build();
+        return FinremCallbackRequestFactory.from();
     }
 }
