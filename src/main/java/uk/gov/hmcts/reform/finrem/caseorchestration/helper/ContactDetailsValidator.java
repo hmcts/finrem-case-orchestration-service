@@ -25,6 +25,7 @@ public class ContactDetailsValidator {
     static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
     static final String INVALID_EMAIL_ADDRESS_ERROR_MESSAGE = "%s is not a valid Email address.";
     static final String ORGANISATION_POLICY_ERROR = "Solicitor can only represent one party.";
+    static final String INVALID_ORGANISATION_POLICY_ERROR_MESSAGE = "Organisation policy field is required for both parties.";
     static final String INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE = "%s. Method validatePostcodesByRepresentation is only for "
         + "updating contact details on consented cases. Use validateCaseDataAddresses whenever possible.";
 
@@ -194,6 +195,29 @@ public class ContactDetailsValidator {
         }
     }
 
+
+    /**
+     * Checks whether organisation policy is present for both parties in the given {@link FinremCaseData}.
+     *
+     * <p>
+     * This method checks whether the applicant and respondent have an organisation policy associated with them.
+     * An error is added if either organisation ID is empty. If both IDs are present,
+     * no error will be returned.
+     * </p>
+     *
+     * @param caseData the {@link FinremCaseData} object containing organisation policies for both parties
+     * @param errors the list to which error messages will be added if validation fails
+     */
+    public static void checkForEmptyOrganisationPolicy(FinremCaseData caseData, List<String> errors) {
+        OrganisationPolicy applicantOrganisationPolicy = caseData.getApplicantOrganisationPolicy();
+        OrganisationPolicy respondentOrganisationPolicy = caseData.getRespondentOrganisationPolicy();
+        
+        if (isMissingOrganisationPolicy(applicantOrganisationPolicy) 
+            || isMissingOrganisationPolicy(respondentOrganisationPolicy)) {
+            errors.add(INVALID_ORGANISATION_POLICY_ERROR_MESSAGE);
+        }
+    }
+
     /**
      * Validates the email addresses present in the given {@link FinremCaseData}.
      *
@@ -347,6 +371,10 @@ public class ContactDetailsValidator {
                 errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, respondentEmail));
             }
         }
+    }
+    
+    private static boolean isMissingOrganisationPolicy(OrganisationPolicy organisationPolicy) {
+        return getOrganisationId(organisationPolicy).isEmpty();
     }
 
     private static boolean isContested(FinremCaseData caseData) {
