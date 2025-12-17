@@ -187,7 +187,8 @@ public class NoticeOfChangeService {
         }
 
         if (caseRole == null) {
-            log.info("No ChangeOrganisationRequest generated if it's an intervener.");
+            log.info("{} - No ChangeOrganisationRequest generated implies it's triggered by intervener.",
+                finremCaseData.getCcdCaseId());
             return null;
         }
 
@@ -206,7 +207,8 @@ public class NoticeOfChangeService {
 
         boolean noChange = organisationToAdd == null && organisationToRemove == null;
         if (noChange) {
-            log.info("Do not generate change organisation request if there is no change on organisation policy");
+            log.info("{} - No ChangeOrganisationRequest generated due to no changes on organisation policy",
+                finremCaseData.getCcdCaseId());
             return null;
         }
 
