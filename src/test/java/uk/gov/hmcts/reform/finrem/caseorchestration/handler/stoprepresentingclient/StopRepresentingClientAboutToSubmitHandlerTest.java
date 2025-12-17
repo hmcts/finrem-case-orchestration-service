@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -82,13 +81,10 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     @Mock
     private BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
 
-    @Mock
-    private OnlineFormDocumentService onlineFormDocumentService;
-
     @BeforeEach
     void setup() {
         underTest = new StopRepresentingClientAboutToSubmitHandler(finremCaseDetailsMapper, nocWorkflowService,
-            caseRoleService, manageBarristerService, barristerChangeCaseAccessUpdater, onlineFormDocumentService);
+            caseRoleService, manageBarristerService, barristerChangeCaseAccessUpdater);
     }
 
     @Test
@@ -100,27 +96,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
     @Nested
     class LoginAsAnyRepresentativeTests {
-
-        @ParameterizedTest
-        @MethodSource("provideAllLoggedInScenarios")
-        void givenAnyCase_whenHandled_thenMiniFormAIsRefreshed(boolean isApplicantRepresentative, Integer intervenerIndex) {
-            stubIsApplicantSolicitorAndIntervenerIndex(isApplicantRepresentative, intervenerIndex);
-
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), FinremCaseData.builder().build(),
-                FinremCaseData.builder()
-                    .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                        .stopRepClientConsent(YesOrNo.YES)
-                        .build())
-                    .build());
-
-            // Act
-            underTest.handle(request, AUTH_TOKEN);
-
-            // Verify
-            verify(onlineFormDocumentService).refreshContestedMiniFormA(request.getCaseDetails(), request.getCaseDetailsBefore(),
-                AUTH_TOKEN);
-            verifyCaseRoleServiceCalled(request.getCaseDetails().getData());
-        }
 
         @ParameterizedTest
         @MethodSource("provideAllLoggedInScenarios")

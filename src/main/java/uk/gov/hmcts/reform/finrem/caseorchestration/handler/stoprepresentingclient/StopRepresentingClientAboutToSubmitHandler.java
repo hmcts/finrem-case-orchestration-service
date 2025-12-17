@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -60,8 +59,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private final BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
 
-    private final OnlineFormDocumentService onlineFormDocumentService;
-
     record StopRepresentingRequest(FinremCaseData finremCaseData, boolean requestedByApplicantRep,
                                    boolean requestedByRespondentRep, boolean requestedByIntervenerRep,
                                    Optional<Integer> intervenerIndex) {}
@@ -74,14 +71,12 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
                                                       UpdateRepresentationWorkflowService nocWorkflowService,
                                                       CaseRoleService caseRoleService,
                                                       ManageBarristerService manageBarristerService,
-                                                      BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater,
-                                                      OnlineFormDocumentService onlineFormDocumentService) {
+                                                      BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater) {
         super(finremCaseDetailsMapper);
         this.caseRoleService = caseRoleService;
         this.nocWorkflowService = nocWorkflowService;
         this.manageBarristerService = manageBarristerService;
         this.barristerChangeCaseAccessUpdater = barristerChangeCaseAccessUpdater;
-        this.onlineFormDocumentService = onlineFormDocumentService;
     }
 
     @Override
@@ -116,8 +111,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         populateServiceAddressToApplicantOrRespondent(stopRepresentingRequest, serviceAddressConfig);
         populateServiceAddressToIntervener(stopRepresentingRequest, serviceAddressConfig);
 
-        processRepresentationChange(finremCaseDetails, finremCaseDataBefore, userAuthorisation);
-        refreshMiniFormAIfNecessary(finremCaseDetails, finremCaseDetailsBefore, userAuthorisation);
+        processRepresentationChange(stopRepresentingRequest, finremCaseDetails, finremCaseDataBefore, userAuthorisation);
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
@@ -314,10 +308,5 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             .orgPolicyReference(null)
             .orgPolicyCaseAssignedRole(role.getCcdCode())
             .build();
-    }
-
-    private void refreshMiniFormAIfNecessary(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
-                                             String userAuthorisation) {
-        onlineFormDocumentService.refreshContestedMiniFormA(finremCaseDetails, finremCaseDetailsBefore, userAuthorisation);
     }
 }
