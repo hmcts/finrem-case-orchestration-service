@@ -17,17 +17,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -250,33 +252,10 @@ class RemovedSolicitorServiceTest {
         verify(caseDataService).isLitigantRepresented(caseDetails, true);
         verify(caseDataService, times(2)).isConsentedApplication(caseDetails);
 
-        reset(caseDataService, checkApplicantSolicitorIsDigitalService);
-
-        FinremCaseData finremCaseData  = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONTESTED)
-            .ccdCaseId(CASE_ID)
-            .applicantOrganisationPolicy(getApplicantOrgPolicyWithOrganisation())
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .applicantRepresented(YesOrNo.YES)
-                .applicantSolicitorName(APP_SOL_NAME)
-                .applicantSolicitorEmail(APP_SOL_EMAIL)
-                .nocParty(NoticeOfChangeParty.APPLICANT)
-                .build())
-            .build();
-
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(finremCaseData)).thenReturn(true);
-        when(caseDataService.isLitigantRepresented(finremCaseData, true)).thenReturn(true);
-        ChangedRepresentative removedSolicitor2 = removedSolicitorService.getRemovedSolicitorAsCaseworker(finremCaseData,
-            true);
-        verify(checkApplicantSolicitorIsDigitalService).isSolicitorDigital(finremCaseData);
-        verify(caseDataService).isLitigantRepresented(finremCaseData, true);
-
-        Stream.of(removedSolicitor, removedSolicitor2).forEach(result -> {
-            assertEquals(APP_SOL_NAME, result.getName());
-            assertEquals(APP_SOL_EMAIL, result.getEmail());
-            assertEquals(TEST_APP_ORG_ID, result.getOrganisation().getOrganisationID());
-            assertEquals(TEST_APP_ORG_NAME, result.getOrganisation().getOrganisationName());
-        });
+        assertEquals(APP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_APP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_APP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -297,33 +276,10 @@ class RemovedSolicitorServiceTest {
         verify(caseDataService).isLitigantRepresented(caseDetails, true);
         verify(caseDataService, times(2)).isConsentedApplication(caseDetails);
 
-        reset(caseDataService, checkApplicantSolicitorIsDigitalService);
-
-        FinremCaseData finremCaseData  = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONSENTED)
-            .ccdCaseId(CASE_ID)
-            .applicantOrganisationPolicy(getApplicantOrgPolicyWithOrganisation())
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .applicantRepresented(YesOrNo.YES)
-                .solicitorName(APP_SOL_NAME)
-                .solicitorEmail(APP_SOL_EMAIL)
-                .nocParty(NoticeOfChangeParty.APPLICANT)
-                .build())
-            .build();
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(finremCaseData)).thenReturn(true);
-        when(caseDataService.isLitigantRepresented(finremCaseData, true)).thenReturn(true);
-
-        final ChangedRepresentative removedSolicitor2 = removedSolicitorService.getRemovedSolicitorAsCaseworker(finremCaseData,
-            true);
-        verify(checkApplicantSolicitorIsDigitalService).isSolicitorDigital(finremCaseData);
-        verify(caseDataService).isLitigantRepresented(finremCaseData, true);
-
-        Stream.of(removedSolicitor, removedSolicitor2).forEach(result -> {
-            assertEquals(APP_SOL_NAME, result.getName());
-            assertEquals(APP_SOL_EMAIL, result.getEmail());
-            assertEquals(TEST_APP_ORG_ID, result.getOrganisation().getOrganisationID());
-            assertEquals(TEST_APP_ORG_NAME, result.getOrganisation().getOrganisationName());
-        });
+        assertEquals(APP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_APP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_APP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -342,31 +298,9 @@ class RemovedSolicitorServiceTest {
         verify(checkApplicantSolicitorIsDigitalService).isSolicitorDigital(caseDetails);
         verify(caseDataService).isLitigantRepresented(caseDetails, true);
 
-        reset(caseDataService, checkApplicantSolicitorIsDigitalService);
-
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONSENTED)
-            .ccdCaseId(CASE_ID)
-            .applicantOrganisationPolicy(getApplicantOrgPolicyWithoutOrganisation())
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .applicantRepresented(YesOrNo.YES)
-                .solicitorName(APP_SOL_NAME)
-                .solicitorEmail(APP_SOL_EMAIL)
-                .nocParty(NoticeOfChangeParty.APPLICANT)
-                .build())
-            .build();
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(finremCaseData)).thenReturn(false);
-        when(caseDataService.isLitigantRepresented(finremCaseData, true)).thenReturn(true);
-        ChangedRepresentative removedSolicitor2 = removedSolicitorService.getRemovedSolicitorAsCaseworker(finremCaseData,
-            true);
-        verify(checkApplicantSolicitorIsDigitalService).isSolicitorDigital(finremCaseData);
-        verify(caseDataService).isLitigantRepresented(finremCaseData, true);
-
-        Stream.of(removedSolicitor, removedSolicitor2).forEach(result -> {
-            assertEquals(APP_SOL_NAME, result.getName());
-            assertEquals(APP_SOL_EMAIL, result.getEmail());
-            assertNull(result.getOrganisation());
-        });
+        assertEquals(APP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(APP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertNull(removedSolicitor.getOrganisation());
     }
 
     @Test
@@ -384,32 +318,10 @@ class RemovedSolicitorServiceTest {
         verify(checkRespondentSolicitorIsDigitalService).isSolicitorDigital(caseDetails);
         verify(caseDataService).isLitigantRepresented(caseDetails, false);
 
-        reset(caseDataService, checkRespondentSolicitorIsDigitalService);
-
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONTESTED)
-            .ccdCaseId(CASE_ID)
-            .respondentOrganisationPolicy(getRespondentOrgPolicyWithOrganisation())
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .contestedRespondentRepresented(YesOrNo.YES)
-                .respondentSolicitorName(RESP_SOL_NAME)
-                .respondentSolicitorEmail(RESP_SOL_EMAIL)
-                .nocParty(NoticeOfChangeParty.RESPONDENT)
-                .build())
-            .build();
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(finremCaseData)).thenReturn(true);
-        when(caseDataService.isLitigantRepresented(finremCaseData, false)).thenReturn(true);
-        ChangedRepresentative removedSolicitor2 = removedSolicitorService.getRemovedSolicitorAsCaseworker(finremCaseData,
-            false);
-        verify(checkRespondentSolicitorIsDigitalService).isSolicitorDigital(finremCaseData);
-        verify(caseDataService).isLitigantRepresented(finremCaseData, false);
-
-        Stream.of(removedSolicitor, removedSolicitor2).forEach(result -> {
-            assertEquals(RESP_SOL_NAME, result.getName());
-            assertEquals(RESP_SOL_EMAIL, result.getEmail());
-            assertEquals(TEST_RESP_ORG_ID, result.getOrganisation().getOrganisationID());
-            assertEquals(TEST_RESP_ORG_NAME, result.getOrganisation().getOrganisationName());
-        });
+        assertEquals(RESP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_RESP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_RESP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -427,32 +339,10 @@ class RemovedSolicitorServiceTest {
         verify(checkRespondentSolicitorIsDigitalService).isSolicitorDigital(caseDetails);
         verify(caseDataService).isLitigantRepresented(caseDetails, false);
 
-        reset(caseDataService, checkRespondentSolicitorIsDigitalService);
-
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONSENTED)
-            .ccdCaseId(CASE_ID)
-            .respondentOrganisationPolicy(getRespondentOrgPolicyWithOrganisation())
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .consentedRespondentRepresented(YesOrNo.YES)
-                .respondentSolicitorName(RESP_SOL_NAME)
-                .respondentSolicitorEmail(RESP_SOL_EMAIL)
-                .nocParty(NoticeOfChangeParty.RESPONDENT)
-                .build())
-            .build();
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(finremCaseData)).thenReturn(true);
-        when(caseDataService.isLitigantRepresented(finremCaseData, false)).thenReturn(true);
-        ChangedRepresentative removedSolicitor2 = removedSolicitorService.getRemovedSolicitorAsCaseworker(finremCaseData,
-            false);
-        verify(checkRespondentSolicitorIsDigitalService).isSolicitorDigital(finremCaseData);
-        verify(caseDataService).isLitigantRepresented(finremCaseData, false);
-
-        Stream.of(removedSolicitor, removedSolicitor2).forEach(result -> {
-            assertEquals(RESP_SOL_NAME, result.getName());
-            assertEquals(RESP_SOL_EMAIL, result.getEmail());
-            assertEquals(TEST_RESP_ORG_ID, result.getOrganisation().getOrganisationID());
-            assertEquals(TEST_RESP_ORG_NAME, result.getOrganisation().getOrganisationName());
-        });
+        assertEquals(RESP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertEquals(TEST_RESP_ORG_ID, removedSolicitor.getOrganisation().getOrganisationID());
+        assertEquals(TEST_RESP_ORG_NAME, removedSolicitor.getOrganisation().getOrganisationName());
     }
 
     @Test
@@ -470,32 +360,94 @@ class RemovedSolicitorServiceTest {
         verify(checkRespondentSolicitorIsDigitalService).isSolicitorDigital(caseDetails);
         verify(caseDataService).isLitigantRepresented(caseDetails, false);
 
-        reset(caseDataService, checkRespondentSolicitorIsDigitalService);
-
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONSENTED)
-            .ccdCaseId(CASE_ID)
-            .respondentOrganisationPolicy(getRespondentOrgPolicyWithOrganisation())
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .consentedRespondentRepresented(YesOrNo.YES)
-                .respondentSolicitorName(RESP_SOL_NAME)
-                .respondentSolicitorEmail(RESP_SOL_EMAIL)
-                .nocParty(NoticeOfChangeParty.RESPONDENT)
-                .build())
-            .build();
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(finremCaseData)).thenReturn(false);
-        when(caseDataService.isLitigantRepresented(finremCaseData, false)).thenReturn(true);
-        ChangedRepresentative removedSolicitor2 = removedSolicitorService.getRemovedSolicitorAsCaseworker(finremCaseData,
-            false);
-        verify(checkRespondentSolicitorIsDigitalService).isSolicitorDigital(finremCaseData);
-        verify(caseDataService).isLitigantRepresented(finremCaseData, false);
-
-        Stream.of(removedSolicitor, removedSolicitor2).forEach(result -> {
-            assertEquals(RESP_SOL_NAME, result.getName());
-            assertEquals(RESP_SOL_EMAIL, result.getEmail());
-            assertNull(result.getOrganisation());
-        });
+        assertEquals(RESP_SOL_NAME, removedSolicitor.getName());
+        assertEquals(RESP_SOL_EMAIL, removedSolicitor.getEmail());
+        assertNull(removedSolicitor.getOrganisation());
     }
+
+    @Test
+    void givenApplicantForRepresentationChange_whenApplicantWasRepresented_thenReturnChangedRepresentative() {
+        final Organisation removedOrg = Organisation.builder().organisationID("REMOVED_ORG").build();
+
+        FinremCaseData originalFinremCaseData = spy(FinremCaseData.class);
+        when(originalFinremCaseData.getAppSolicitorName()).thenReturn(APP_SOL_NAME);
+        when(originalFinremCaseData.getAppSolicitorEmail()).thenReturn(APP_SOL_EMAIL);
+        originalFinremCaseData.setApplicantOrganisationPolicy(OrganisationPolicy.builder().organisation(removedOrg).build());
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        finremCaseData.setContactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(NoticeOfChangeParty.APPLICANT).build());
+
+        when(caseDataService.isLitigantRepresented(originalFinremCaseData, true)).thenReturn(true);
+
+        assertThat(removedSolicitorService.getChangedRepresentative(finremCaseData, originalFinremCaseData))
+            .extracting(
+                ChangedRepresentative::getName,
+                ChangedRepresentative::getEmail,
+                ChangedRepresentative::getOrganisation)
+            .containsExactly(APP_SOL_NAME, APP_SOL_EMAIL, removedOrg);
+    }
+
+    @Test
+    void givenRespondentForRepresentationChange_whenRespondentWasRepresented_thenReturnChangedRepresentative() {
+        final Organisation removedOrg = Organisation.builder().organisationID("REMOVED_ORG").build();
+
+        ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
+        when(contactDetailsWrapper.getRespondentSolicitorEmail()).thenReturn(RESP_SOL_EMAIL);
+        when(contactDetailsWrapper.getRespondentSolicitorName()).thenReturn(RESP_SOLICITOR_NAME);
+        FinremCaseData originalFinremCaseData = spy(FinremCaseData.class);
+        when(originalFinremCaseData.getContactDetailsWrapper()).thenReturn(contactDetailsWrapper);
+        originalFinremCaseData.setRespondentOrganisationPolicy(OrganisationPolicy.builder().organisation(removedOrg).build());
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        finremCaseData.setContactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(NoticeOfChangeParty.RESPONDENT).build());
+
+        when(caseDataService.isLitigantRepresented(originalFinremCaseData, false)).thenReturn(true);
+
+        assertThat(removedSolicitorService.getChangedRepresentative(finremCaseData, originalFinremCaseData))
+            .extracting(
+                ChangedRepresentative::getName,
+                ChangedRepresentative::getEmail,
+                ChangedRepresentative::getOrganisation)
+            .containsExactly(RESP_SOLICITOR_NAME, RESP_SOL_EMAIL, removedOrg);
+    }
+
+    @Test
+    void givenApplicantForRepresentationChange_whenApplicantWasNotRepresented_thenReturnNull() {
+        Organisation removedOrg = Organisation.builder().organisationID("REMOVED_ORG").build();
+
+        FinremCaseData originalFinremCaseData = spy(FinremCaseData.class);
+        originalFinremCaseData.setApplicantOrganisationPolicy(OrganisationPolicy.builder().organisation(removedOrg).build());
+
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        finremCaseData.setContactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(NoticeOfChangeParty.APPLICANT).build());
+
+        when(caseDataService.isLitigantRepresented(originalFinremCaseData, true)).thenReturn(false);
+
+        assertThat(removedSolicitorService.getChangedRepresentative(finremCaseData, originalFinremCaseData))
+            .isNull();
+    }
+
+    @Test
+    void givenNocPartyMissing_whenGetChangedRepresentative_thenReturnNull() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        finremCaseData.setContactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(null).build());
+
+        assertThat(removedSolicitorService.getChangedRepresentative(finremCaseData, mock(FinremCaseData.class))).isNull();
+    }
+
+    @Test
+    void givenNoLitigantRepresented_whenGetChangedRepresentative_thenReturnNull() {
+        FinremCaseData originalFinremCaseData = mock(FinremCaseData.class);
+        FinremCaseData finremCaseData = spy(FinremCaseData.class);
+        when(finremCaseData.getCcdCaseId()).thenReturn(CASE_ID);
+        finremCaseData.setContactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(NoticeOfChangeParty.APPLICANT).build());
+
+        assertThat(removedSolicitorService.getChangedRepresentative(finremCaseData, originalFinremCaseData)).isNull();
+        assertThat(logs.getInfos()).contains("1234567890 - No applicant or respondent organisation policy provided");
+    }
+
+    @TestLogs
+    private final TestLogger logs = new TestLogger(RemovedSolicitorService.class);
 
     private DynamicList getApplicantCaseRole() {
         DynamicListElement appSolRole = DynamicListElement.builder()

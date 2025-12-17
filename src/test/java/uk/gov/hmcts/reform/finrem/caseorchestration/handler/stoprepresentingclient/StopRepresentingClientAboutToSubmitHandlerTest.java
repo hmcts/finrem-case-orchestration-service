@@ -79,7 +79,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     private BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         underTest = new StopRepresentingClientAboutToSubmitHandler(finremCaseDetailsMapper, nocWorkflowService,
             caseRoleService, manageBarristerService, barristerChangeCaseAccessUpdater);
     }
@@ -94,7 +94,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenHavingClientConsent_whenHandled_thenWarningsPopulated(boolean isApplicantSolicitor) {
-        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(isApplicantSolicitor);
+        when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(isApplicantSolicitor);
         FinremCaseData caseData = FinremCaseData.builder()
             .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                 .stopRepClientConsent(YesOrNo.YES)
@@ -107,15 +107,15 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 + "If you continue your access to this access will be removed"
         );
         assertThat(logs.getInfos()).hasSize(2).contains(format(
-            format("%s - %s solicitor stops representing a client with a client consent", CASE_ID,
+            format("%s - %s representative stops representing a client with a client consent", CASE_ID,
                 isApplicantSolicitor ? "applicant" : "respondent")));
-        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+        verify(caseRoleService).isApplicantRepresentative(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenHavingJudicialApproval_whenHandled_thenWarningsPopulated(boolean isApplicantSolicitor) {
-        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(isApplicantSolicitor);
+        when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(isApplicantSolicitor);
         FinremCaseData caseData = FinremCaseData.builder()
             .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                 .stopRepJudicialApproval(YesOrNo.YES)
@@ -128,15 +128,15 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 + "If you continue your access to this access will be removed"
         );
         assertThat(logs.getInfos()).hasSize(2).contains(format(
-            format("%s - %s solicitor stops representing a client with a judicial approval", CASE_ID,
+            format("%s - %s representative stops representing a client with a judicial approval", CASE_ID,
                 isApplicantSolicitor ? "applicant" : "respondent")));
-        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+        verify(caseRoleService).isApplicantRepresentative(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenNoJudicialApprovalOrClientConsent_whenHandled_thenThrowIllegalStateException(boolean isApplicantSolicitor) {
-        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+        when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
             .thenReturn(isApplicantSolicitor);
         FinremCaseData caseData = FinremCaseData.builder()
             .stopRepresentationWrapper(StopRepresentationWrapper.builder().build())
@@ -146,19 +146,19 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         assertThatThrownBy(() -> underTest.handle(request, AUTH_TOKEN).getWarnings())
             .hasMessage("Client consent or judicial approval is required but missing.");
         assertThat(logs.getInfos()).doesNotContain(
-            format("%s - applicant solicitor stops representing a client with a judicial approval", CASE_ID),
-            format("%s - respondent solicitor stops representing a client with a judicial approval", CASE_ID),
-            format("%s - applicant solicitor stops representing a client with a client consent", CASE_ID),
-            format("%s - respondent solicitor stops representing a client with a client consent", CASE_ID)
+            format("%s - applicant representative stops representing a client with a judicial approval", CASE_ID),
+            format("%s - respondent representative stops representing a client with a judicial approval", CASE_ID),
+            format("%s - applicant representative stops representing a client with a client consent", CASE_ID),
+            format("%s - respondent representative stops representing a client with a client consent", CASE_ID)
         );
-        verify(caseRoleService).isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN));
+        verify(caseRoleService).isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN));
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenLoginAsApplicantFlag_whenHandled_thenPopulatePartyToChangeRepresented(boolean loginAsApplicantFlag) {
-        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
-            .thenReturn(loginAsApplicantFlag);
+    void givenLoginAsApplicantFlag_whenHandled_thenPopulatePartyToChangeRepresented(boolean isApplicantRepresentative) {
+        when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+            .thenReturn(isApplicantRepresentative);
 
         FinremCaseData caseData = FinremCaseData.builder()
             .stopRepresentationWrapper(StopRepresentationWrapper.builder()
@@ -170,13 +170,13 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         assertThat(underTest.handle(request, AUTH_TOKEN).getData())
             .extracting(FinremCaseData::getContactDetailsWrapper)
             .extracting(ContactDetailsWrapper::getNocParty)
-            .is(expectedParty(loginAsApplicantFlag));
-        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+            .is(expectedParty(isApplicantRepresentative));
+        verify(caseRoleService).isApplicantRepresentative(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
     @Test
     void givenNoSameOrganisationBarrister_whenHandled_thenDoesNotRemoveBarrister() {
-        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+        when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
             .thenReturn(true);
 
         FinremCaseData caseData = FinremCaseData.builder()
@@ -204,13 +204,13 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 InstanceOfAssertFactories.list(BarristerCollectionItem.class))
             .hasSize(1);
 
-        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+        verify(caseRoleService).isApplicantRepresentative(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenLoginAsApplicantFlag_whenHandled_thenRemoveApplicantBarristerAccordingly(boolean loginAsApplicantFlag) {
-        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+        when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
             .thenReturn(loginAsApplicantFlag);
 
         FinremCaseData caseData = FinremCaseData.builder()
@@ -238,13 +238,13 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 InstanceOfAssertFactories.list(BarristerCollectionItem.class))
             .hasSize(loginAsApplicantFlag ? 0 : 1);
 
-        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+        verify(caseRoleService).isApplicantRepresentative(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenLoginAsApplicantFlag_whenHandled_thenRemoveRespondentBarristerAccordingly(boolean loginAsApplicantFlag) {
-        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+        when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
             .thenReturn(loginAsApplicantFlag);
 
         FinremCaseData caseData = FinremCaseData.builder()
@@ -272,14 +272,14 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 InstanceOfAssertFactories.list(BarristerCollectionItem.class))
             .hasSize(loginAsApplicantFlag ? 1 : 0);
 
-        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+        verify(caseRoleService).isApplicantRepresentative(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
     @ParameterizedTest
     @MethodSource
     void givenLoginAsApplicantFlag_whenHandled_thenPopulateServiceAddress(CaseType caseType,
         boolean loginAsApplicantFlag, boolean addressConfidentiality) {
-        when(caseRoleService.isLoginWithApplicantSolicitor(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+        when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
             .thenReturn(loginAsApplicantFlag);
 
         Address serviceAddress = mock(Address.class);
@@ -303,7 +303,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     ? ContactDetailsWrapper::getContestedRespondentRepresented
                     : ContactDetailsWrapper::getConsentedRespondentRepresented))
             .contains(serviceAddress,  YesOrNo.forValue(addressConfidentiality), YesOrNo.NO);
-        verify(caseRoleService).isLoginWithApplicantSolicitor(request.getCaseDetails().getData(), AUTH_TOKEN);
+        verify(caseRoleService).isApplicantRepresentative(request.getCaseDetails().getData(), AUTH_TOKEN);
     }
 
     static Stream<Arguments> givenLoginAsApplicantFlag_whenHandled_thenPopulateServiceAddress() {
