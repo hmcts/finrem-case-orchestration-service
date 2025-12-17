@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClient
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -34,10 +35,12 @@ class StopRepresentingClientSubmittedHandlerTest {
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
+    @Mock
+    private CaseRoleService caseRoleService;
 
     @BeforeEach
     public void setup() {
-        underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, applicationEventPublisher);
+        underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, caseRoleService, applicationEventPublisher);
     }
 
     @Test

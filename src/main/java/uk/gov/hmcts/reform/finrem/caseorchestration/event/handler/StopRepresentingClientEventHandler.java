@@ -52,6 +52,7 @@ public class StopRepresentingClientEventHandler {
         final long caseId = event.getCaseDetails().getId();
 
         // trying to revoke creator role if any
+        // TODO only applicant representqtive triggered ths stop representing a client event
         assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
 
         BarristerChange applicantBarristerChange = manageBarristerService
@@ -62,9 +63,13 @@ public class StopRepresentingClientEventHandler {
             .getBarristerChange(event.getCaseDetails(), finremCaseDataBefore, CaseRole.RESP_SOLICITOR);
         barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, respondentBarristerChange);
 
-        revertOrgPolicyToOriginalOrgPolicy(finremCaseData, finremCaseDataBefore);
-        assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), finremCaseDetailsMapper
-            .mapToCaseDetails(event.getCaseDetails()));
+        boolean isApplicantOrRespondentRepresentativeChange = !event.isInvokedByIntervener();
+        if (isApplicantOrRespondentRepresentativeChange) {
+            revertOrgPolicyToOriginalOrgPolicy(finremCaseData, finremCaseDataBefore);
+            assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), finremCaseDetailsMapper
+                .mapToCaseDetails(event.getCaseDetails()));
+        }
+        // TODO handle intervener solicitor revoking logic ,,,
 
         resetChangeOrganisationFieldChange(finremCaseData);
     }
@@ -93,6 +98,7 @@ public class StopRepresentingClientEventHandler {
     }
 
     private void resetChangeOrganisationFieldChange(FinremCaseData finremCaseData) {
+        // TODO check if changeOrganisationField exists
         coreCaseDataService.performPostSubmitCallback(finremCaseData.getCcdCaseType(), Long.valueOf(finremCaseData.getCcdCaseId()),
             INTERNAL_CHANGE_UPDATE_CASE.getCcdType(), caseDetails -> clearChangeOrganisationFieldChange());
     }

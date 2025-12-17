@@ -187,7 +187,8 @@ public class NoticeOfChangeService {
         }
 
         if (caseRole == null) {
-            throw new UnsupportedOperationException("Unsupported representation change");
+            log.info("No ChangeOrganisationRequest generated if it's an intervener.");
+            return null;
         }
 
         OrganisationPolicy originalOrganisationPolicy = null;

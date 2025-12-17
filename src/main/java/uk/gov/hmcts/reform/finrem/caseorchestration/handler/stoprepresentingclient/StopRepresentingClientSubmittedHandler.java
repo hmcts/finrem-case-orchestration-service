@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 
 import java.util.Arrays;
 
@@ -27,11 +28,15 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    private final CaseRoleService caseRoleService;
+
     private static final String CONFIRMATION_HEADER = "# Notice of change request submitted";
 
     public StopRepresentingClientSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                  CaseRoleService caseRoleService,
                                                   ApplicationEventPublisher applicationEventPublisher) {
         super(finremCaseDetailsMapper);
+        this.caseRoleService = caseRoleService;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -51,6 +56,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
             .userAuthorisation(userAuthorisation)
             .caseDetails(callbackRequest.getCaseDetails())
             .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
+            .invokedByIntervener(caseRoleService.isIntervenerRepresentative(callbackRequest.getCaseDetails().getData(), userAuthorisation))
             .build());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

@@ -199,7 +199,7 @@ public class AssignCaseAccessService {
 
         if (creatorRoles.isEmpty()) {
             log.info("No creator role found for Case ID: {}", caseIdInString);
-            return null;
+             return null;
         }
 
         if (creatorRoles.size() > 1) {

@@ -412,6 +412,21 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         }
     }
 
+    @Nested
+    class LoginAsIntervenerRepresentativeTests {
+
+        private void stubIntervenerRep(int index) {
+            when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+                .thenReturn(false);
+            when(caseRoleService.isRespondentRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+                .thenReturn(false);
+            when(caseRoleService.isIntervenerRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+                .thenReturn(true);
+            when(caseRoleService.getIntervenerIndex(any(FinremCaseData.class), eq(AUTH_TOKEN)))
+                .thenReturn(Optional.of(index));
+        }
+    }
+
     private static Condition<NoticeOfChangeParty> expectedParty(boolean isApplicantSolicitor) {
         return new Condition<>(party ->
             isApplicantSolicitor ? APPLICANT.equals(party) : RESPONDENT.equals(party),

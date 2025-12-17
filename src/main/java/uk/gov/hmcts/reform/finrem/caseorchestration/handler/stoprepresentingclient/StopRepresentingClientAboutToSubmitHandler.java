@@ -125,19 +125,22 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             .build();
     }
 
-    private void processRepresentationChange(FinremCaseDetails finremCaseDetails,
+    private void processRepresentationChange(StopRepresentingRequest stopRepresentingRequest,
+                                             FinremCaseDetails finremCaseDetails,
                                              FinremCaseData finremCaseDataBefore,
                                              String userAuthorisation) {
-        nocWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseDetails.getData(),
-            finremCaseDataBefore, STOP_REPRESENTING_CLIENT, userAuthorisation);
+        if (stopRepresentingRequest.requestedByApplicantRep || stopRepresentingRequest.requestedByRespondentRep) {
+            nocWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseDetails.getData(),
+                finremCaseDataBefore, STOP_REPRESENTING_CLIENT, userAuthorisation);
 
-        barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
-            manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, BarristerParty.APPLICANT),
-            STOP_REPRESENTING_CLIENT, userAuthorisation);
+            barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
+                manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, BarristerParty.APPLICANT),
+                STOP_REPRESENTING_CLIENT, userAuthorisation);
 
-        barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
-            manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, BarristerParty.RESPONDENT),
-            STOP_REPRESENTING_CLIENT, userAuthorisation);
+            barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
+                manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, BarristerParty.RESPONDENT),
+                STOP_REPRESENTING_CLIENT, userAuthorisation);
+        }
     }
 
     private void populateWarnings(FinremCaseData finremCaseData, List<String> warnings) {
