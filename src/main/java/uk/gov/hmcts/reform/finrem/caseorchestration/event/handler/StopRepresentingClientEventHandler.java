@@ -96,14 +96,8 @@ public class StopRepresentingClientEventHandler {
         }
     }
 
-    private void handleIntervenerRepresentativeRequest(StopRepresentingClientEvent event) {
-        final FinremCaseData finremCaseData = getFinremCaseDataFromEvent(event);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromEvent(event);
-        // TODO
-    }
-
     private void sendBarristerChangesToCaseAssigmentService(StopRepresentingClientEvent event, BarristerParty barristerParty) {
-        final long caseId = getCaseId(event);;
+        final long caseId = getCaseId(event);
         final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromEvent(event);
 
         BarristerChange barristerChange = manageBarristerService
@@ -153,5 +147,11 @@ public class StopRepresentingClientEventHandler {
         // coreCaseDataService loads the case data again in the internal event call.
         coreCaseDataService.performPostSubmitCallback(caseType, caseId,
             INTERNAL_CHANGE_UPDATE_CASE.getCcdType(), caseDetails -> clearChangeOrganisationRequestField());
+    }
+
+    private void handleIntervenerRepresentativeRequest(StopRepresentingClientEvent event) {
+        final FinremCaseData finremCaseData = getFinremCaseDataFromEvent(event);
+        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromEvent(event);
+        // TODO
     }
 }
