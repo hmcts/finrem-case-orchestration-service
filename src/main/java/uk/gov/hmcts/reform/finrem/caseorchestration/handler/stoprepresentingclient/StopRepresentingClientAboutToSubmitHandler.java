@@ -195,17 +195,15 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         } else {
             barristerCollection = null;
             if (isIntervenerRepresentativeChange) {
-                getTargetIntervener(stopRepresentingRequest).ifPresent(a ->
-                    {
-                        Integer intervenerIndex = Objects.requireNonNull(
-                            stopRepresentingRequest.intervenerIndex.orElse(null),
-                            "intervenerIndex must not be null"
-                        );
-                        a.setIntervenerOrganisation(
-                            getDefaultOrganisationPolicy(getIntervenerSolicitorByIndex(intervenerIndex))
-                        );
-                    }
-                );
+                getTargetIntervener(stopRepresentingRequest).ifPresent(a -> {
+                    Integer intervenerIndex = Objects.requireNonNull(
+                        stopRepresentingRequest.intervenerIndex.orElse(null),
+                        "intervenerIndex must not be null"
+                    );
+                    a.setIntervenerOrganisation(
+                        getDefaultOrganisationPolicy(getIntervenerSolicitorByIndex(intervenerIndex))
+                    );
+                });
                 // TODO for Intv. Barristers intvr?BarristerCollection
             }
         }
@@ -249,13 +247,11 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         Address serviceAddress = serviceAddressConfig.getLeft();
         boolean isConfidential = Boolean.TRUE.equals(serviceAddressConfig.getRight());
 
-        getTargetIntervener(stopRepresentingRequest).ifPresent(intervenerWrapper ->
-            {
-                setIntervenerUnrepresented(intervenerWrapper);
-                intervenerWrapper.setIntervenerAddress(serviceAddress);
-                intervenerWrapper.setIntervenerAddressConfidential(YesOrNo.forValue(isConfidential));
-            }
-        );
+        getTargetIntervener(stopRepresentingRequest).ifPresent(intervenerWrapper -> {
+            setIntervenerUnrepresented(intervenerWrapper);
+            intervenerWrapper.setIntervenerAddress(serviceAddress);
+            intervenerWrapper.setIntervenerAddressConfidential(YesOrNo.forValue(isConfidential));
+        });
     }
 
     private void setApplicantUnrepresented(FinremCaseData finremCaseData) {

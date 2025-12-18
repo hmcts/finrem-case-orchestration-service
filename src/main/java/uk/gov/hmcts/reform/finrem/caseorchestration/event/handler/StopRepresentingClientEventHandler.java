@@ -46,6 +46,24 @@ public class StopRepresentingClientEventHandler {
 
     private final CoreCaseDataService coreCaseDataService;
 
+    private static FinremCaseData getFinremCaseDataBeforeFromEvent(StopRepresentingClientEvent event) {
+        return event.getCaseDetailsBefore().getData();
+    }
+
+    private static FinremCaseData getFinremCaseDataFromEvent(StopRepresentingClientEvent event) {
+        return event.getCaseDetails().getData();
+    }
+
+    private static long getCaseId(StopRepresentingClientEvent event) {
+        return Long.parseLong(getFinremCaseDataFromEvent(event).getCcdCaseId());
+    }
+
+    private static Map<String, Object> clearChangeOrganisationRequestField() {
+        Map<String, Object> map = new HashMap<>();
+        map.put(CHANGE_ORGANISATION_REQUEST, null);
+        return map;
+    }
+
     @EventListener
     // @Async
     public void handleEvent(StopRepresentingClientEvent event) {
@@ -126,29 +144,11 @@ public class StopRepresentingClientEventHandler {
             finremCaseData.getCcdCaseId()));
     }
 
-    private FinremCaseData getFinremCaseDataBeforeFromEvent(StopRepresentingClientEvent event) {
-        return event.getCaseDetailsBefore().getData();
-    }
-
-    private FinremCaseData getFinremCaseDataFromEvent(StopRepresentingClientEvent event) {
-        return event.getCaseDetails().getData();
-    }
-
-    private long getCaseId(StopRepresentingClientEvent event) {
-        return Long.parseLong(getFinremCaseDataFromEvent(event).getCcdCaseId());
-    }
-
     private CaseDetails buildCaseDetailsFromEventCaseData(StopRepresentingClientEvent event) {
         return finremCaseDetailsMapper.mapToCaseDetails(event.getCaseDetails());
     }
 
-    private static Map<String, Object> clearChangeOrganisationRequestField() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(CHANGE_ORGANISATION_REQUEST, null);
-        return map;
-    }
-
-    private void clearChangeOrganisationRequestAfterThisEvent(CaseType caseType, long caseId) {// load the
+    private void clearChangeOrganisationRequestAfterThisEvent(CaseType caseType, long caseId) {
         // to reset the targeted field by case id and case type only
         // coreCaseDataService loads the case data again in the internal event call.
         coreCaseDataService.performPostSubmitCallback(caseType, caseId,
