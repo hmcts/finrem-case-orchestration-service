@@ -58,18 +58,6 @@ public class StopRepresentingClientEventHandler {
         }
     }
 
-    private FinremCaseData getFinremCaseDataBeforeFromEvent(StopRepresentingClientEvent event) {
-        return event.getCaseDetailsBefore().getData();
-    }
-
-    private FinremCaseData getFinremCaseDataFromEvent(StopRepresentingClientEvent event) {
-        return event.getCaseDetails().getData();
-    }
-
-    private long getCaseId(StopRepresentingClientEvent event) {
-        return Long.parseLong(getFinremCaseDataFromEvent(event).getCcdCaseId());
-    }
-
     private void handleApplicantOrRespondentRepresentativeRequest(StopRepresentingClientEvent event) {
         final FinremCaseData finremCaseData = getFinremCaseDataFromEvent(event);
         final CaseType caseType = finremCaseData.getCcdCaseType();
@@ -136,6 +124,18 @@ public class StopRepresentingClientEventHandler {
         }
         throw new IllegalStateException(format("%s - Unexpected state: this line should never be reached",
             finremCaseData.getCcdCaseId()));
+    }
+
+    private FinremCaseData getFinremCaseDataBeforeFromEvent(StopRepresentingClientEvent event) {
+        return event.getCaseDetailsBefore().getData();
+    }
+
+    private FinremCaseData getFinremCaseDataFromEvent(StopRepresentingClientEvent event) {
+        return event.getCaseDetails().getData();
+    }
+
+    private long getCaseId(StopRepresentingClientEvent event) {
+        return Long.parseLong(getFinremCaseDataFromEvent(event).getCcdCaseId());
     }
 
     private CaseDetails buildCaseDetailsFromEventCaseData(StopRepresentingClientEvent event) {
