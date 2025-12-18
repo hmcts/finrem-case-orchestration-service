@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -50,6 +49,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfCha
 @Slf4j
 @Service
 public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
+
+    private static final String UNREACHABLE_MESSAGE = "Unreachable";
 
     private final UpdateRepresentationWorkflowService nocWorkflowService;
 
@@ -152,7 +153,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         if (isHavingClientConsent(finremCaseData) || isHavingJudicialApproval(finremCaseData)) {
             return List.of(WARNING_MESSAGE);
         } else {
-            throw new IllegalStateException("Client consent or judicial approval is required but missing.");
+            throw new IllegalStateException(UNREACHABLE_MESSAGE);
         }
     }
 
@@ -190,14 +191,21 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             barristerCollection = caseData.getBarristerCollectionWrapper().getRespondentBarristers();
             caseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
         } else if (isIntervenerRepresentativeChange) {
-            int intervenerIndex = Objects.requireNonNull(stopRepresentingRequest.intervenerIndex)
+            int intervenerIndex = stopRepresentingRequest.intervenerIndex
                 .orElseThrow(() -> new IllegalStateException("Intervener index is missing"));
+
             CaseRole intervenerCaseRole = getIntervenerSolicitorByIndex(intervenerIndex);
 
-            getIntervenerFromFinremCaseData(stopRepresentingRequest).ifPresent(a ->
-                a.setIntervenerOrganisation(getDefaultOrganisationPolicy(intervenerCaseRole)));
+            var intervener = getIntervenerFromFinremCaseData(stopRepresentingRequest)
+                .orElseThrow(() -> new IllegalStateException("Intervener not found"));
 
-            barristerCollection = caseData.getBarristerCollectionWrapper().getIntervenerBarristersByIndex(intervenerIndex);
+            organisationPolicy = intervener.getIntervenerOrganisation();
+            intervener.setIntervenerOrganisation(
+                getDefaultOrganisationPolicy(intervenerCaseRole)
+            );
+
+            barristerCollection = caseData.getBarristerCollectionWrapper()
+                .getIntervenerBarristersByIndex(intervenerIndex);
             // TODO a clarification is pending
         } else {
             barristerCollection = null;
@@ -284,7 +292,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         } else if (isHavingJudicialApproval(finremCaseData)) {
             return "judicial approval";
         } else {
-            throw new IllegalStateException("Unreachable code.");
+            throw new IllegalStateException(UNREACHABLE_MESSAGE);
         }
     }
 
@@ -296,7 +304,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         } else if (representingRequest.requestedByIntervenerRep) {
             return format("intervener %s", representingRequest.intervenerIndex.orElse(null));
         } else {
-            throw new IllegalStateException("Unknown representation requested.");
+            throw new IllegalStateException(UNREACHABLE_MESSAGE);
         }
     }
 

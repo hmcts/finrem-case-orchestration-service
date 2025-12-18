@@ -13,7 +13,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
@@ -21,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataServ
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
@@ -45,6 +49,8 @@ public class StopRepresentingClientEventHandler {
     private final BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
 
     private final CoreCaseDataService coreCaseDataService;
+
+    private final IntervenerService intervenerService;
 
     private static FinremCaseData getFinremCaseDataBeforeFromEvent(StopRepresentingClientEvent event) {
         return event.getCaseDetailsBefore().getData();
@@ -81,9 +87,9 @@ public class StopRepresentingClientEventHandler {
         final CaseType caseType = finremCaseData.getCcdCaseType();
         final long caseId = getCaseId(event);
 
-        sendBarristerChangesToCaseAssigmentService(event, BarristerParty.APPLICANT);
-        sendBarristerChangesToCaseAssigmentService(event, BarristerParty.RESPONDENT);
-        boolean isNocRequestSent = sendNocRequestToCaseAssigmentService(event);
+        sendBarristerChangesToCaseAssignmentService(event, BarristerParty.APPLICANT);
+        sendBarristerChangesToCaseAssignmentService(event, BarristerParty.RESPONDENT);
+        boolean isNocRequestSent = sendNocRequestToCaseAssignmentService(event);
 
         if (isNocRequestSent) {
             // save a call if changeOrganisationRequestField is null
@@ -91,7 +97,7 @@ public class StopRepresentingClientEventHandler {
         }
     }
 
-    private void sendBarristerChangesToCaseAssigmentService(StopRepresentingClientEvent event, BarristerParty barristerParty) {
+    private void sendBarristerChangesToCaseAssignmentService(StopRepresentingClientEvent event, BarristerParty barristerParty) {
         final long caseId = getCaseId(event);
         final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromEvent(event);
 
@@ -100,7 +106,7 @@ public class StopRepresentingClientEventHandler {
         barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, barristerChange);
     }
 
-    private boolean sendNocRequestToCaseAssigmentService(StopRepresentingClientEvent event) {
+    private boolean sendNocRequestToCaseAssignmentService(StopRepresentingClientEvent event) {
         final FinremCaseData finremCaseData = getFinremCaseDataFromEvent(event);
         final FinremCaseData originalFinremCaseData = getFinremCaseDataBeforeFromEvent(event);
 
@@ -144,9 +150,30 @@ public class StopRepresentingClientEventHandler {
             INTERNAL_CHANGE_UPDATE_CASE.getCcdType(), caseDetails -> clearChangeOrganisationRequestField());
     }
 
+    private boolean isIntervenerOrganisationDifference(IntervenerWrapper intervenerWrapper,
+                                                       IntervenerWrapper originalIntervenerWrapper) {
+        return !Objects.equals(
+            intervenerWrapper.getIntervenerOrganisation(),
+            originalIntervenerWrapper.getIntervenerOrganisation()
+        );
+    }
+
     private void handleIntervenerRepresentativeRequest(StopRepresentingClientEvent event) {
         final FinremCaseData finremCaseData = getFinremCaseDataFromEvent(event);
         final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromEvent(event);
-        // TODO
+
+        finremCaseDataBefore.getInterveners().forEach(originalWrapper -> {
+            IntervenerType it = originalWrapper.getIntervenerType();
+            if (it != null) {
+                finremCaseData.getInterveners().stream()
+                    .filter(wrapper -> it.equals(wrapper.getIntervenerType()))
+                    .findAny()
+                    .ifPresent(wrapper -> {
+                        if (isIntervenerOrganisationDifference(wrapper, originalWrapper)) {
+                            intervenerService.revokeIntervener(event.getCaseDetails().getId(), originalWrapper);
+                        }
+                    });
+            }
+        });
     }
 }

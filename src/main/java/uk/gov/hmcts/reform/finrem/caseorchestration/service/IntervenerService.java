@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
@@ -25,6 +27,34 @@ public class IntervenerService {
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
     private final SystemUserService systemUserService;
+
+    /**
+     * Revokes an intervener solicitor role for the given case.
+     *
+     * <p>
+     * The role is revoked only if both the intervener organisation ID and
+     * solicitor email address are present and not blank.
+     * If either value is missing or empty, the method returns without
+     * performing any action.
+     *
+     * @param caseId            the CCD case ID
+     * @param intervenerWrapper the intervener details containing organisation,
+     *                          solicitor email, and case role information
+     */
+    public void revokeIntervener(long caseId, IntervenerWrapper intervenerWrapper) {
+        String orgId = Optional.ofNullable(intervenerWrapper.getIntervenerOrganisation())
+            .map(OrganisationPolicy::getOrganisation)
+            .map(Organisation::getOrganisationID)
+            .orElse(null);
+
+        String email = intervenerWrapper.getIntervenerSolEmail();
+
+        if (!StringUtils.hasText(orgId) || !StringUtils.hasText(email)) {
+            return;
+        }
+
+        revokeIntervenerRole(caseId, email, orgId, intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode());
+    }
 
     public IntervenerChangeDetails removeIntervenerDetails(IntervenerWrapper intervenerWrapper,
                                                            List<String> errors,
@@ -187,6 +217,10 @@ public class IntervenerService {
         }
     }
 
+    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole) {
+        revokeIntervenerRole(caseId, email, orgId, caseRole, null);
+    }
+
     private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
         Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         if (userId.isPresent()) {
@@ -199,6 +233,8 @@ public class IntervenerService {
     private void logError(Long caseId, List<String> errors) {
         String error = "Could not find intervener with provided email";
         log.info(String.format(error + " for caseId %s", caseId));
-        errors.add(error);
+        if (errors != null) {
+            errors.add(error);
+        }
     }
 }

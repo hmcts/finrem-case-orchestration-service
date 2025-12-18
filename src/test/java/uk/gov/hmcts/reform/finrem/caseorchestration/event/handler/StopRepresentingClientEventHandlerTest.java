@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.event.handler;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,13 +14,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFact
 import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
@@ -37,10 +42,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,112 +72,208 @@ class StopRepresentingClientEventHandlerTest {
     @Mock
     private CoreCaseDataService coreCaseDataService;
 
+    @Mock
+    private IntervenerService intervenerService;
+
     private StopRepresentingClientEventHandler underTest;
 
     @BeforeEach
     void setup() {
         underTest = new StopRepresentingClientEventHandler(assignCaseAccessService, systemUserService, finremCaseDetailsMapper,
-            manageBarristerService, barristerChangeCaseAccessUpdater, coreCaseDataService);
+            manageBarristerService, barristerChangeCaseAccessUpdater, coreCaseDataService, intervenerService);
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void givenAnyEvents_whenHandled_thenShouldInteractWithAssignCaseAccessService(boolean isApplicant) {
-        FinremCaseData caseData = spy(FinremCaseData.class);
-        caseData.getContactDetailsWrapper().setNocParty(isApplicant ? NoticeOfChangeParty.APPLICANT : NoticeOfChangeParty.RESPONDENT);
+    @Nested
+    class IntervenerRepresentativeRequestTests {
 
-        // Setting original org policy
-        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
-        OrganisationPolicy originalOrgPolicy = mock(OrganisationPolicy.class);
-        if (isApplicant) {
-            when(caseDataBefore.getApplicantOrganisationPolicy()).thenReturn(originalOrgPolicy);
-        } else {
-            when(caseDataBefore.getRespondentOrganisationPolicy()).thenReturn(originalOrgPolicy);
+        @Test
+        void givenIntervenerOrganisationChange_whenHandled_thenShouldSendRequestToCaseAssigment() {
+            FinremCaseData caseData = FinremCaseData.builder()
+                .intervenerOne(IntervenerOne.builder()
+                    .intervenerOrganisation(OrganisationPolicy.builder()
+                        .organisation(organisation(null))
+                        .build())
+                    .build())
+                .intervenerTwo(IntervenerTwo.builder()
+                    .intervenerOrganisation(OrganisationPolicy.builder()
+                        .organisation(organisation("BBB"))
+                        .build())
+                    .build())
+                .build();
+
+            // Setting original org policy
+            IntervenerOne intervenerOne = IntervenerOne.builder()
+                .intervenerOrganisation(OrganisationPolicy.builder()
+                    .organisation(organisation("AAA"))
+                    .build())
+                .build();
+            IntervenerTwo intervenerTwo = IntervenerTwo.builder()
+                .intervenerOrganisation(OrganisationPolicy.builder()
+                    .organisation(organisation("BBB"))
+                    .build())
+                .build();
+            FinremCaseData caseDataBefore = FinremCaseData.builder()
+                .intervenerOne(intervenerOne)
+                .intervenerTwo(intervenerTwo)
+                .build();
+
+            FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(
+                Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+                .build();
+
+            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+                .invokedByIntervener(true)
+                .caseDetails(caseDetails)
+                .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
+                .userAuthorisation(AUTH_TOKEN)
+                .build();
+
+            underTest.handleEvent(event);
+
+            verify(intervenerService).revokeIntervener(Long.parseLong(CASE_ID), intervenerOne);
+            verify(intervenerService, never()).revokeIntervener(Long.parseLong(CASE_ID), intervenerTwo);
+            verifyNoMoreInteractions(intervenerService);
+            verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
+        }
+    }
+
+    @Nested
+    class ApplicantOrRespondentRepresentativeRequestTests {
+
+        @Test
+        void givenAnyBarristerChange_whenHandled_thenUpdateBarristerChangeCaseAccess() {
+            FinremCaseData caseData = spy(FinremCaseData.class);
+            caseData.getContactDetailsWrapper().setNocParty(mock(NoticeOfChangeParty.class));
+            FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+            FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+                .build();
+
+            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+                .caseDetails(caseDetails)
+                .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
+                .userAuthorisation(AUTH_TOKEN)
+                .build();
+            BarristerChange applicantBarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
+                .thenReturn(applicantBarristerChange);
+            BarristerChange respondentBarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
+                .thenReturn(respondentBarristerChange);
+
+            underTest.handleEvent(event);
+
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
         }
 
-        FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(
-            Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
-            .build();
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        void givenChangeOrganisationRequestFieldSet_whenHandled_thenShouldSendRevertedCaseDetailsToAssignCaseAccessService(boolean isApplicant) {
+            FinremCaseData caseData = spy(FinremCaseData.class);
+            caseData.getContactDetailsWrapper().setNocParty(isApplicant ? NoticeOfChangeParty.APPLICANT : NoticeOfChangeParty.RESPONDENT);
+            caseData.setChangeOrganisationRequestField(spy(ChangeOrganisationRequest.class));
 
-        StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
-            .userAuthorisation(AUTH_TOKEN)
-            .build();
+            // Setting original org policy
+            FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+            OrganisationPolicy originalOrgPolicy = mock(OrganisationPolicy.class);
+            if (isApplicant) {
+                when(caseDataBefore.getApplicantOrganisationPolicy()).thenReturn(originalOrgPolicy);
+            } else {
+                when(caseDataBefore.getRespondentOrganisationPolicy()).thenReturn(originalOrgPolicy);
+            }
 
-        // Setting up invalid case details
-        CaseDetails mockInvalidCaseDetails = mock(CaseDetails.class);
-        lenient().when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class)))
-            .thenReturn(mockInvalidCaseDetails);
+            FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(
+                    Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+                .build();
 
-        // Setting up valid case details
-        CaseDetails mockValidCaseDetails = mock(CaseDetails.class);
-        when(finremCaseDetailsMapper.mapToCaseDetails(argThat(cd
-            -> getOrganisationPolicy(cd.getData(), isApplicant).equals(originalOrgPolicy)
-            // verifying original appl/resp org policy should be set to finremCaseData
-        ))).thenReturn(mockValidCaseDetails);
+            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+                .invokedByIntervener(false)
+                .caseDetails(caseDetails)
+                .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
+                .userAuthorisation(AUTH_TOKEN)
+                .build();
 
-        underTest.handleEvent(event);
+            // Setting up invalid case details
+            CaseDetails mockInvalidCaseDetails = mock(CaseDetails.class);
+            lenient().when(finremCaseDetailsMapper.mapToCaseDetails(any(FinremCaseDetails.class)))
+                .thenReturn(mockInvalidCaseDetails);
 
-        verify(assignCaseAccessService).findAndRevokeCreatorRole(CASE_ID);
-        verify(assignCaseAccessService).applyDecision(TEST_SYSTEM_TOKEN, mockValidCaseDetails);
-        verify(assignCaseAccessService, never()).applyDecision(TEST_SYSTEM_TOKEN, mockInvalidCaseDetails);
-    }
+            // Setting up valid case details
+            // verifying original applicant/respondent org policy should be set to finremCaseData
+            CaseDetails mockValidCaseDetails = mock(CaseDetails.class);
+            when(finremCaseDetailsMapper.mapToCaseDetails(argThat(cd
+                -> getOrganisationPolicy(cd.getData(), isApplicant).equals(originalOrgPolicy)
+            ))).thenReturn(mockValidCaseDetails);
 
-    @Test
-    void givenAnyEvents_whenHandled_thenShouldInteractWithBarristerChangeCaseAccessUpdater() {
-        FinremCaseData caseData = spy(FinremCaseData.class);
-        caseData.getContactDetailsWrapper().setNocParty(mock(NoticeOfChangeParty.class));
-        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
-        FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
-            .build();
+            underTest.handleEvent(event);
 
-        StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
-            .userAuthorisation(AUTH_TOKEN)
-            .build();
-        BarristerChange applicantBarristerChange = mock(BarristerChange.class);
-        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, CaseRole.APP_SOLICITOR))
-            .thenReturn(applicantBarristerChange);
-        BarristerChange respondentBarristerChange = mock(BarristerChange.class);
-        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, CaseRole.RESP_SOLICITOR))
-            .thenReturn(respondentBarristerChange);
+            verify(assignCaseAccessService).applyDecision(TEST_SYSTEM_TOKEN, mockValidCaseDetails);
+            verify(assignCaseAccessService, never()).applyDecision(TEST_SYSTEM_TOKEN, mockInvalidCaseDetails);
+            verifyNoInteractions(intervenerService);
+        }
 
-        underTest.handleEvent(event);
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        void givenChangeOrganisationRequestFieldNotPopulated_whenHandled_thenShouldNotInteractWithAssignCaseAccessService(boolean isApplicant) {
+            FinremCaseData caseData = spy(FinremCaseData.class);
+            caseData.getContactDetailsWrapper().setNocParty(isApplicant ? NoticeOfChangeParty.APPLICANT : NoticeOfChangeParty.RESPONDENT);
+            caseData.setChangeOrganisationRequestField(null);
 
-        verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
-        verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
-    }
+            // Setting original org policy
+            FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(
+                    Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+                .build();
 
-    @Test
-    void givenAnyEvents_whenHandled_thenShouldResetChangeOrganisationField() {
-        CaseType caseType = mock(CaseType.class);
-        FinremCaseData caseData = spy(FinremCaseData.class);
+            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+                .invokedByIntervener(false)
+                .caseDetails(caseDetails)
+                .caseDetailsBefore(FinremCaseDetails.builder().data(mock(FinremCaseData.class)).build())
+                .userAuthorisation(AUTH_TOKEN)
+                .build();
 
-        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
-        FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), caseType, caseData)
-            .build();
+            underTest.handleEvent(event);
 
-        StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
-            .userAuthorisation(AUTH_TOKEN)
-            .build();
+            verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
+            verifyNoInteractions(intervenerService);
+        }
 
-        underTest.handleEvent(event);
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        void givenNocRequestSent_whenHandled_thenShouldResetChangeOrganisationField(boolean isApplicant) {
+            CaseType caseType = mock(CaseType.class);
+            FinremCaseData caseData = spy(FinremCaseData.class);
+            caseData.getContactDetailsWrapper().setNocParty(isApplicant ? NoticeOfChangeParty.APPLICANT : NoticeOfChangeParty.RESPONDENT);
+            caseData.setChangeOrganisationRequestField(mock(ChangeOrganisationRequest.class));
 
-        ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> captor = ArgumentCaptor.forClass(Function.class);
-        verify(coreCaseDataService).performPostSubmitCallback(eq(caseType), eq(Long.valueOf(CASE_ID)),
-            eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()), captor.capture());
+            FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+            FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), caseType, caseData)
+                .build();
 
+            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+                .invokedByIntervener(false)
+                .caseDetails(caseDetails)
+                .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
+                .userAuthorisation(AUTH_TOKEN)
+                .build();
 
-        Function<CaseDetails, Map<String, Object>> fn = captor.getValue();
-        CaseDetails ccdCaseDetails = mock(CaseDetails.class);
-        assertThat(fn.apply(ccdCaseDetails)).containsKey("changeOrganisationRequestField")
-            .extractingByKey("changeOrganisationRequestField")
-            .isNull();
+            when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(mock(CaseDetails.class));
+
+            underTest.handleEvent(event);
+
+            ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> captor = ArgumentCaptor.forClass(Function.class);
+            verify(coreCaseDataService).performPostSubmitCallback(eq(caseType), eq(Long.valueOf(CASE_ID)),
+                eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()), captor.capture());
+            verify(assignCaseAccessService).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
+
+            Function<CaseDetails, Map<String, Object>> fn = captor.getValue();
+            CaseDetails ccdCaseDetails = mock(CaseDetails.class);
+            assertThat(fn.apply(ccdCaseDetails))
+                .containsKey("changeOrganisationRequestField")
+                .extractingByKey("changeOrganisationRequestField")
+                .isNull();
+            verifyNoInteractions(intervenerService);
+        }
     }
 
     private OrganisationPolicy getOrganisationPolicy(FinremCaseData caseData, boolean isApplicant) {
