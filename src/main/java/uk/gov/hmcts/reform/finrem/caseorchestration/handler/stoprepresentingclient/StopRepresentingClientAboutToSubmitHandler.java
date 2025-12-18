@@ -134,6 +134,19 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
                 manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, BarristerParty.RESPONDENT),
                 STOP_REPRESENTING_CLIENT, userAuthorisation);
+        } else if (stopRepresentingRequest.requestedByIntervenerRep) {
+            barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
+                manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, BarristerParty.INTERVENER1),
+                STOP_REPRESENTING_CLIENT, userAuthorisation);
+            barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
+                manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, BarristerParty.INTERVENER2),
+                STOP_REPRESENTING_CLIENT, userAuthorisation);
+            barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
+                manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, BarristerParty.INTERVENER3),
+                STOP_REPRESENTING_CLIENT, userAuthorisation);
+            barristerChangeCaseAccessUpdater.updateRepresentationUpdateHistoryForCase(finremCaseDetails,
+                manageBarristerService.getBarristerChange(finremCaseDetails, finremCaseDataBefore, BarristerParty.INTERVENER4),
+                STOP_REPRESENTING_CLIENT, userAuthorisation);
         }
     }
 
@@ -163,8 +176,9 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         // Set the party who is being unrepresented. null if intervener
         caseData.getContactDetailsWrapper().setNocParty(noticeOfChangeParty);
 
-        final boolean isApplicantRepresentativeChange = APPLICANT.equals(noticeOfChangeParty);
-        final boolean isRespondentRepresentativeChange = RESPONDENT.equals(noticeOfChangeParty);
+        final boolean isApplicantRepresentativeChange = stopRepresentingRequest.requestedByApplicantRep;
+        final boolean isRespondentRepresentativeChange = stopRepresentingRequest.requestedByRespondentRep;
+        final boolean isIntervenerRepresentativeChange = stopRepresentingRequest.requestedByIntervenerRep;
 
         // Determine the relevant policies and barrister lists based on the party
         OrganisationPolicy organisationPolicy = null;
@@ -179,20 +193,21 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             barristerCollection = caseData.getBarristerCollectionWrapper().getRespondentBarristers();
             caseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
         } else {
-            barristerCollection = null; // it implies INTERVENER
-
-            getTargetIntervener(stopRepresentingRequest).ifPresent(a ->
-                {
-                    Integer intervenerIndex = Objects.requireNonNull(
-                        stopRepresentingRequest.intervenerIndex.orElse(null),
-                        "intervenerIndex must not be null"
-                    );
-                    a.setIntervenerOrganisation(
-                        getDefaultOrganisationPolicy(getIntervenerSolicitorByIndex(intervenerIndex))
-                    );
-                }
-            );
-            // TODO for Intv. Barristers intvr?BarristerCollection
+            barristerCollection = null;
+            if (isIntervenerRepresentativeChange) {
+                getTargetIntervener(stopRepresentingRequest).ifPresent(a ->
+                    {
+                        Integer intervenerIndex = Objects.requireNonNull(
+                            stopRepresentingRequest.intervenerIndex.orElse(null),
+                            "intervenerIndex must not be null"
+                        );
+                        a.setIntervenerOrganisation(
+                            getDefaultOrganisationPolicy(getIntervenerSolicitorByIndex(intervenerIndex))
+                        );
+                    }
+                );
+                // TODO for Intv. Barristers intvr?BarristerCollection
+            }
         }
 
         // Extract the Organisation ID to remove (centralized logic for applicant and respondent representative change only)
