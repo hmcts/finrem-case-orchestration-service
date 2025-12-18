@@ -80,11 +80,6 @@ public class StopRepresentingClientEventHandler {
         final FinremCaseData finremCaseData = getFinremCaseDataFromEvent(event);
         final CaseType caseType = finremCaseData.getCcdCaseType();
         final long caseId = getCaseId(event);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromEvent(event);
-
-        // trying to revoke creator role if any
-        // TODO Verify if only applicant representative triggered ths stop representing a client event
-        assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
 
         sendBarristerChangesToCaseAssigmentService(event, BarristerParty.APPLICANT);
         sendBarristerChangesToCaseAssigmentService(event, BarristerParty.RESPONDENT);
