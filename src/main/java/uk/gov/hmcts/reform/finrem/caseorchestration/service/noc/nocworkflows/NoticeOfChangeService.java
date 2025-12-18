@@ -187,9 +187,7 @@ public class NoticeOfChangeService {
         }
 
         if (caseRole == null) {
-            log.info("{} - No ChangeOrganisationRequest generated implies it's triggered by intervener.",
-                finremCaseData.getCcdCaseId());
-            return null;
+            throw new UnsupportedOperationException("Unsupported representation change");
         }
 
         OrganisationPolicy originalOrganisationPolicy = null;
