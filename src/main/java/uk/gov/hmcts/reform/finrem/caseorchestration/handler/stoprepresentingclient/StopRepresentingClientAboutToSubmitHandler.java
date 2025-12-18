@@ -136,8 +136,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             updateBarristerChangeToRepresentationUpdateHistory(request, BarristerParty.APPLICANT, userAuthorisation);
             updateBarristerChangeToRepresentationUpdateHistory(request, BarristerParty.RESPONDENT, userAuthorisation);
         } else if (request.requestedByIntervenerRep) {
-            updateBarristerChangeToRepresentationUpdateHistory(request, getIntervenerBarristerByIndex(request.intervenerIndex.orElseThrow()),
-                userAuthorisation);
+            updateBarristerChangeToRepresentationUpdateHistory(request, getIntervenerBarristerByIndex(request.intervenerIndex
+                .orElseThrow(() -> new IllegalStateException("Intervener index is missing"))), userAuthorisation);
         }
     }
 
