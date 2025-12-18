@@ -216,6 +216,16 @@ public class ManageHearingsDocumentService {
     }
 
     /**
+     * Get the vacate hearing notice document, or return null if not found.
+     *
+     * @param finremCaseDetails the case details containing the hearing documents
+     * @return a {@link CaseDocument}
+     */
+    public CaseDocument getVacateHearingNotice(FinremCaseDetails finremCaseDetails) {
+        return getByWorkingVacatedHearingAndDocumentType(finremCaseDetails, CaseDocumentType.VACATE_HEARING_NOTICE);
+    }
+
+    /**
      * Retrieves the additional hearing documents from the working hearing in the provided wrapper.
      *
      * <p>
@@ -294,8 +304,7 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Retrieves the case's current working hearing.
-     * Then uses that to get the most recent hearing document with the passed CaseDocumentType argument.
+     * Gets the most recent hearing document with the passed CaseDocumentType argument.
      * If no notice is found, returns an empty list.
      *
      * @param finremCaseDetails the case details containing the hearing documents.
@@ -306,7 +315,32 @@ public class ManageHearingsDocumentService {
                                                             CaseDocumentType documentType) {
         ManageHearingsWrapper wrapper = finremCaseDetails.getData().getManageHearingsWrapper();
         UUID hearingId = wrapper.getWorkingHearingId();
+        return getCaseDocumentByTypeAndHearingUuid(documentType, wrapper, hearingId);
+    }
 
+    /**
+     * Gets the most recent Vacated hearing document with the passed CaseDocumentType argument.
+     * If no notice is found, returns an empty list.
+     *
+     * @param finremCaseDetails the case details containing the hearing documents.
+     * @param documentType      a {@link CaseDocumentType} identifying the type of hearing document.
+     * @return a {@link CaseDocument}
+     */
+    private CaseDocument getByWorkingVacatedHearingAndDocumentType(FinremCaseDetails finremCaseDetails,
+                                                            CaseDocumentType documentType) {
+        ManageHearingsWrapper wrapper = finremCaseDetails.getData().getManageHearingsWrapper();
+        UUID hearingId = wrapper.getWorkingVacatedHearingId();
+        return getCaseDocumentByTypeAndHearingUuid(documentType, wrapper, hearingId);
+    }
+
+    /**
+     * Retrieves a case document filtered on the UUID of the hearing and document type.
+     *
+     * @param wrapper the ManageHearings wrapper holding the docs
+     * @param documentType      a {@link CaseDocumentType} identifying the type of hearing document.
+     * @return a {@link CaseDocument}
+     */
+    private CaseDocument getCaseDocumentByTypeAndHearingUuid(CaseDocumentType documentType, ManageHearingsWrapper wrapper, UUID hearingId) {
         return wrapper.getHearingDocumentsCollection().stream()
             .map(ManageHearingDocumentsCollectionItem::getValue)
             .filter(Objects::nonNull)
@@ -320,11 +354,11 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Hearings have a core set of documents that need to be posted.
+     * FDA Hearings (and FDR hearings for express cases)  have a core set of documents that need to be posted whem
+     * listed or relisted.
      * These are the documents that are always posted.
      * <ul>
      *     <li>Hearing Notice</li>
-     *     <li>Form A</li>
      *     <li>Out of Court Resolution</li>
      *     <li>PDF NCDR Compliance Letter</li>
      *     <li>PDF NCDR Cover Letter</li>
