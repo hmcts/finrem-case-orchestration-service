@@ -27,6 +27,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureOfApplicationSchedule;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
@@ -917,6 +919,25 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
         }
     }
+
+    @Test
+    void givenEmptyOrganisationPolicy_whenHandle_thenHandlerThrowsError() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        when(caseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+        when(caseDetails.getData()).thenReturn(caseData);
+        setupOrganisationPolicy(caseData, null, "ORG.ID");
+
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+
+        assertThat(response.getErrors()).containsExactly(
+            "Organisation policy field is required for both parties."
+        );
+    }
   
     @Test
     void givenDivorceStageReachedIsNull_whenHandled_thenExceptionWasNotThrown() {
@@ -929,6 +950,30 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
+    }
+
+    // setup organisation policy for both respondent and applicant for use in other tests / concerned its repeated considerably -> consented has its own version REFACTOR
+    private static void setupOrganisationPolicy(FinremCaseData caseData, String applicantOrganisationID, String respondentOrganisationID) {
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+            .organisation(Organisation.builder()
+                .organisationID(applicantOrganisationID)
+                .organisationName("Applicant Org")
+                .build())
+            .orgPolicyCaseAssignedRole("APPLICANT_SOLICITOR")
+            .orgPolicyReference("ref-applicant")
+            .build();
+
+        OrganisationPolicy respondentPolicy = OrganisationPolicy.builder()
+            .organisation(Organisation.builder()
+                .organisationID(respondentOrganisationID)
+                .organisationName("Respondent Org")
+                .build())
+            .orgPolicyCaseAssignedRole("RESPONDENT_SOLICITOR")
+            .orgPolicyReference("ref-respondent")
+            .build();
+
+        caseData.setApplicantOrganisationPolicy(applicantOrganisationPolicy);
+        caseData.setRespondentOrganisationPolicy(respondentPolicy);
     }
 
     private <T> void assertContainsOnlyNulls(T target, List<?> functions) {

@@ -25,11 +25,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentSe
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyOrganisationPolicy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -74,6 +76,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
+        List<String> errors = new ArrayList<>();
 
         caseFlagsService.setCaseFlagInformation(finremCaseDetails);
 
@@ -97,8 +100,12 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
             expressCaseService.setExpressCaseEnrollmentStatus(finremCaseDetails.getData());
         }
 
+        // Validations are needed because users can use the browser's back button to bypass the validation in mid-handler
+        checkForEmptyOrganisationPolicy(finremCaseData, finremCaseData.getContactDetailsWrapper(), errors);
+        errors.addAll(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .errors(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData))
+            .errors(errors)
             .data(finremCaseData).build();
     }
 
