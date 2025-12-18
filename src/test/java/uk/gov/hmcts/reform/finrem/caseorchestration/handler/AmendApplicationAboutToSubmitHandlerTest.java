@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -366,18 +365,15 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void givenEmptyOrganisationPolicy_whenHandle_thenHandlerThrowError() {
-        // Arrange
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         setupRespondentOrganisationEmpty(finremCaseData);
         setupApplicantOrganisationEmpty(finremCaseData);
 
-        // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        // Assert
         assertThat(response.getErrors()).containsExactly(
-            "Organisation policy field is required for both parties."
+            "Organisation policy field is required for represented parties."
         );
     }
 
@@ -448,10 +444,14 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
     }
 
     private static void setupRespondentOrganisationEmpty(FinremCaseData caseData) {
+        setupOrganisationPolicy(caseData);
+        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
         caseData.setRespondentOrganisationPolicy(null);
     }
 
     private static void setupApplicantOrganisationEmpty(FinremCaseData caseData) {
+        setupOrganisationPolicy(caseData);
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         caseData.setApplicantOrganisationPolicy(null);
     }
 

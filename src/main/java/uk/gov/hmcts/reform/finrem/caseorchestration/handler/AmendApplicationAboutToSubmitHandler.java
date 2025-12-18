@@ -64,7 +64,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         checkForEmptyRespondentPostcode(caseData.getContactDetailsWrapper(), errors);
         checkForEmptyApplicantSolicitorPostcode(caseData, caseData.getContactDetailsWrapper(), errors);
         checkForEmptyRespondentSolicitorPostcode(caseData, caseData.getContactDetailsWrapper(), errors);
-        checkForEmptyOrganisationPolicy(caseData, errors);
+        checkForEmptyOrganisationPolicy(caseData, caseData.getContactDetailsWrapper(), errors);
 
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);

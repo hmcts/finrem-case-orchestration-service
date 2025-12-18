@@ -127,19 +127,6 @@ class ContactDetailsValidatorTest {
         assertThat(errors).isEmpty();
     }
 
-    /*
-        Tests for when:
-        applicant is empty
-        respondent is empty
-        both empty
-        both present
-
-        arrange
-        act
-        assert
-    * */
-
-
     @Test
     void givenRespondentOrganisationIsEmpty_whenChecked_thenErrorIsReturned() {
         FinremCaseData caseData = mock(FinremCaseData.class);
@@ -148,11 +135,14 @@ class ContactDetailsValidatorTest {
 
         when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
         when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
+        when(caseData.getContactDetailsWrapper()).thenReturn(new ContactDetailsWrapper());
 
         List<String> errors = new ArrayList<>();
-        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, errors);
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .consentedRespondentRepresented(YesOrNo.YES).build();
+        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, wrapper, errors);
 
-        assertThat(errors).containsExactly("Organisation policy field is required for both parties.");
+        assertThat(errors).containsExactly("Organisation policy field is required for represented parties.");
     }
 
     @Test
@@ -163,11 +153,14 @@ class ContactDetailsValidatorTest {
 
         when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
         when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
+        when(caseData.getContactDetailsWrapper()).thenReturn(new ContactDetailsWrapper());
 
         List<String> errors = new ArrayList<>();
-        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, errors);
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.YES).build();
+        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, wrapper, errors);
 
-        assertThat(errors).containsExactly("Organisation policy field is required for both parties.");
+        assertThat(errors).containsExactly("Organisation policy field is required for represented parties.");
     }
 
     @Test
@@ -178,11 +171,15 @@ class ContactDetailsValidatorTest {
 
         when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
         when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
+        when(caseData.getContactDetailsWrapper()).thenReturn(new ContactDetailsWrapper());
+
 
         List<String> errors = new ArrayList<>();
-        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, errors);
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .consentedRespondentRepresented(YesOrNo.YES).build();
+        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, wrapper, errors);
 
-        assertThat(errors).containsExactly("Organisation policy field is required for both parties.");
+        assertThat(errors).containsExactly("Organisation policy field is required for represented parties.");
     }
 
     @Test
@@ -193,10 +190,12 @@ class ContactDetailsValidatorTest {
 
         when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
         when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
+        when(caseData.getContactDetailsWrapper()).thenReturn(new ContactDetailsWrapper());
 
         List<String> errors = new ArrayList<>();
-        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, errors);
-
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .consentedRespondentRepresented(YesOrNo.YES).build();
+        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, wrapper, errors);
 
         assertThat(errors).isEmpty();
     }
