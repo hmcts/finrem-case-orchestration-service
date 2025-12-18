@@ -212,21 +212,17 @@ public class ContactDetailsValidator {
         OrganisationPolicy respondentOrganisationPolicy = caseData.getRespondentOrganisationPolicy();
 
         if (YesOrNo.YES.equals(wrapper.getConsentedRespondentRepresented())) {
-            if(isMissingOrganisationPolicy(respondentOrganisationPolicy)) {
+            if (isMissingOrganisationPolicy(respondentOrganisationPolicy)) {
                 errors.add(INVALID_ORGANISATION_POLICY_ERROR_MESSAGE);
             }
         }
 
         if (YesOrNo.YES.equals(wrapper.getApplicantRepresented())) {
-            if(isMissingOrganisationPolicy(applicantOrganisationPolicy)) {
+            if (isMissingOrganisationPolicy(applicantOrganisationPolicy)) {
                 errors.add(INVALID_ORGANISATION_POLICY_ERROR_MESSAGE);
             }
         }
 
-//        if (isMissingOrganisationPolicy(applicantOrganisationPolicy)
-//            || isMissingOrganisationPolicy(respondentOrganisationPolicy)) {
-//            errors.add(INVALID_ORGANISATION_POLICY_ERROR_MESSAGE);
-//        }
     }
 
     /**
