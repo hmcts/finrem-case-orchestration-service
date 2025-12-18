@@ -928,14 +928,15 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCaseData caseData = spy(FinremCaseData.class);
         when(caseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
         when(caseDetails.getData()).thenReturn(caseData);
-        setupOrganisationPolicy(caseData, null, "ORG.ID");
+
+        setupOrganisationPolicy(caseData);
 
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
 
         assertThat(response.getErrors()).containsExactly(
-            "Organisation policy field is required for both parties."
+            "Organisation policy field is required for represented parties."
         );
     }
   
@@ -953,10 +954,10 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
     }
 
     // setup organisation policy for both respondent and applicant for use in other tests / concerned its repeated considerably -> consented has its own version REFACTOR
-    private static void setupOrganisationPolicy(FinremCaseData caseData, String applicantOrganisationID, String respondentOrganisationID) {
+    private static void setupOrganisationPolicy(FinremCaseData caseData) {
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
             .organisation(Organisation.builder()
-                .organisationID(applicantOrganisationID)
+                .organisationID(null)
                 .organisationName("Applicant Org")
                 .build())
             .orgPolicyCaseAssignedRole("APPLICANT_SOLICITOR")
@@ -965,13 +966,15 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
 
         OrganisationPolicy respondentPolicy = OrganisationPolicy.builder()
             .organisation(Organisation.builder()
-                .organisationID(respondentOrganisationID)
+                .organisationID("ORG.ID")
                 .organisationName("Respondent Org")
                 .build())
             .orgPolicyCaseAssignedRole("RESPONDENT_SOLICITOR")
             .orgPolicyReference("ref-respondent")
             .build();
 
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
         caseData.setApplicantOrganisationPolicy(applicantOrganisationPolicy);
         caseData.setRespondentOrganisationPolicy(respondentPolicy);
     }
