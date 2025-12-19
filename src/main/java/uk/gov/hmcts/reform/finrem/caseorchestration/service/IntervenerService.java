@@ -6,10 +6,13 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
@@ -18,6 +21,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerC
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +36,8 @@ public class IntervenerService {
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
     private final SystemUserService systemUserService;
+    private final ChangeOfRepresentationService changeOfRepresentationService;
+    private final IdamService idamService;
 
     /**
      * Revokes an intervener solicitor role for the given case.
@@ -237,4 +248,37 @@ public class IntervenerService {
             errors.add(error);
         }
     }
+
+    public void updateIntervenerSolicitorStopRepresentingHistory(FinremCaseData finremCaseData,
+                                                                 FinremCaseData originalFinremCaseData,
+                                                                 int intervenerIndex, String userAuthorisation) {
+        // modifying finremCaseData reference object
+        RepresentationUpdateHistory history = changeOfRepresentationService.generateRepresentationUpdateHistory(
+            ChangeOfRepresentationRequest.builder()
+                .by(idamService.getIdamFullName(userAuthorisation))
+                .party(ChangeOfRepresentationRequest.getIntervenerPartyByIndex(intervenerIndex))
+                // TODO
+//                .removedRepresentative(removedRepresentative)
+                .build(), STOP_REPRESENTING_CLIENT);
+
+        finremCaseData.setRepresentationUpdateHistory(
+            nullIfEmpty(history.getRepresentationUpdateHistory()).stream()
+                .map(element -> RepresentationUpdateHistoryCollection.builder()
+                    .id(element.getId())
+                    .value(element.getValue())
+                    .build())
+                .collect(Collectors.toList())
+        );
+    }
+
+    private String getClientName(FinremCaseData finremCaseData, int intervenerIndex) {
+        if (isApplicantForRepresentationChange(finremCaseData)) {
+            return finremCaseData.getFullApplicantName();
+        } else if (isRespondentForRepresentationChange(finremCaseData)) {
+            return finremCaseData.getRespondentFullName();
+        } else {
+            return null;
+        }
+    }
+
 }

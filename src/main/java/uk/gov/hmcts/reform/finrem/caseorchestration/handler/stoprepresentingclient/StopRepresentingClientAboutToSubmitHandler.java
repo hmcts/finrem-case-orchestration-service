@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -60,6 +61,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private final BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
 
+    private final IntervenerService intervenerService;
+
     record StopRepresentingRequest(long caseId, FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
                                    boolean requestedByApplicantRep, boolean requestedByRespondentRep,
                                    boolean requestedByIntervenerRep, Optional<Integer> intervenerIndex) {}
@@ -72,12 +75,14 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
                                                       UpdateRepresentationWorkflowService nocWorkflowService,
                                                       CaseRoleService caseRoleService,
                                                       ManageBarristerService manageBarristerService,
-                                                      BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater) {
+                                                      BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater,
+                                                      IntervenerService intervenerService) {
         super(finremCaseDetailsMapper);
         this.caseRoleService = caseRoleService;
         this.nocWorkflowService = nocWorkflowService;
         this.manageBarristerService = manageBarristerService;
         this.barristerChangeCaseAccessUpdater = barristerChangeCaseAccessUpdater;
+        this.intervenerService = intervenerService;
     }
 
     @Override
@@ -104,7 +109,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         Pair<Address, Boolean> serviceAddressConfig = getServiceAddressConfig(finremCaseData);
         populateServiceAddressToApplicantOrRespondent(stopRepresentingRequest, serviceAddressConfig);
         populateServiceAddressToIntervener(stopRepresentingRequest, serviceAddressConfig);
-
         handleStopRepresentingClient(stopRepresentingRequest, userAuthorisation);
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
@@ -113,8 +117,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             .build();
     }
 
-    private StopRepresentingRequest buildStopRepresentingRequest(FinremCallbackRequest callbackRequest,
-                                                                 String userAuthorisation) {
+    private StopRepresentingRequest buildStopRepresentingRequest(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseData finremCaseData =  callbackRequest.getCaseDetails().getData();
         return new StopRepresentingRequest(
             callbackRequest.getCaseDetails().getId(),
@@ -127,18 +130,26 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         );
     }
 
-    private void handleStopRepresentingClient(StopRepresentingRequest request,
-                                              String userAuthorisation) {
+    private int getIntervenerIndex(StopRepresentingRequest request) {
+        return request.intervenerIndex.orElseThrow(() -> new IllegalStateException("Intervener index is missing"));
+    }
+
+    private void handleStopRepresentingClient(StopRepresentingRequest request, String userAuthorisation) {
         if (request.requestedByApplicantRep || request.requestedByRespondentRep) {
-            // making use of NOC workflow to populate changeOrganisationRequest
-            nocWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(request.finremCaseDetails.getData(),
+            // below also update the representative history
+            nocWorkflowService.prepareNoticeOfChangeAndOrganisationPolicy(request.finremCaseDetails.getData(),
                 request.finremCaseDetailsBefore.getData(), STOP_REPRESENTING_CLIENT, userAuthorisation);
 
             updateBarristerChangeToRepresentationUpdateHistory(request, BarristerParty.APPLICANT, userAuthorisation);
             updateBarristerChangeToRepresentationUpdateHistory(request, BarristerParty.RESPONDENT, userAuthorisation);
         } else if (request.requestedByIntervenerRep) {
-            updateBarristerChangeToRepresentationUpdateHistory(request, getIntervenerBarristerByIndex(request.intervenerIndex
-                .orElseThrow(() -> new IllegalStateException("Intervener index is missing"))), userAuthorisation);
+            int intervenerIndex = getIntervenerIndex(request);
+
+            // removing access from the represented intervener. i.e. only intervener1 if the requestor is on intervener 1
+            intervenerService.updateIntervenerSolicitorStopRepresentingHistory(request.finremCaseDetails.getData(),
+                request.finremCaseDetailsBefore.getData(), intervenerIndex, userAuthorisation);
+            updateBarristerChangeToRepresentationUpdateHistory(request, getIntervenerBarristerByIndex(intervenerIndex),
+                userAuthorisation);
         }
     }
 
@@ -180,51 +191,52 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
         // Determine the relevant policies and barrister lists based on the party
         OrganisationPolicy organisationPolicy = null;
-        List<BarristerCollectionItem> barristerCollection;
 
-        if (isApplicantRepresentativeChange) {
-            organisationPolicy = caseData.getApplicantOrganisationPolicy();
-            barristerCollection = caseData.getBarristerCollectionWrapper().getApplicantBarristers();
-            caseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
-        } else if (isRespondentRepresentativeChange) {
-            organisationPolicy = caseData.getRespondentOrganisationPolicy();
-            barristerCollection = caseData.getBarristerCollectionWrapper().getRespondentBarristers();
-            caseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
+        if (isApplicantRepresentativeChange || isRespondentRepresentativeChange) {
+            List<BarristerCollectionItem> barristerCollection;
+            if (isApplicantRepresentativeChange) {
+                organisationPolicy = caseData.getApplicantOrganisationPolicy();
+                barristerCollection = caseData.getBarristerCollectionWrapper().getApplicantBarristers();
+                caseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
+            } else if (isRespondentRepresentativeChange) {
+                organisationPolicy = caseData.getRespondentOrganisationPolicy();
+                barristerCollection = caseData.getBarristerCollectionWrapper().getRespondentBarristers();
+                caseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
+            } else {
+                barristerCollection = null;
+            }
+            ofNullable(organisationPolicy)
+                .map(OrganisationPolicy::getOrganisation)
+                .map(Organisation::getOrganisationID)
+                .ifPresent(orgIdToRemove -> {
+                    // Remove barristers associated with the organization ID being removed
+                    emptyIfNull(barristerCollection).removeIf(el ->
+                        ofNullable(el.getValue())
+                            .map(Barrister::getOrganisation)
+                            .map(Organisation::getOrganisationID)
+                            .filter(orgIdToRemove::equals)
+                            .isPresent()
+                    );
+                });
         } else if (isIntervenerRepresentativeChange) {
-            int intervenerIndex = stopRepresentingRequest.intervenerIndex
-                .orElseThrow(() -> new IllegalStateException("Intervener index is missing"));
+            int intervenerIndex = getIntervenerIndex(stopRepresentingRequest);
 
             CaseRole intervenerCaseRole = getIntervenerSolicitorByIndex(intervenerIndex);
 
             var intervener = getIntervenerFromFinremCaseData(stopRepresentingRequest)
-                .orElseThrow(() -> new IllegalStateException("Intervener not found"));
+                .orElseThrow(() -> new IllegalStateException(UNREACHABLE_MESSAGE));
 
             organisationPolicy = intervener.getIntervenerOrganisation();
+            // TODO check if the requestor org having the same org id. otherwise don't remove it
+            // if
             intervener.setIntervenerOrganisation(
                 getDefaultOrganisationPolicy(intervenerCaseRole)
             );
+            // TODO
 
-            barristerCollection = caseData.getBarristerCollectionWrapper()
-                .getIntervenerBarristersByIndex(intervenerIndex);
-            // TODO a clarification is pending
-        } else {
-            barristerCollection = null;
+//            barristerCollection = caseData.getBarristerCollectionWrapper()
+//                .getIntervenerBarristersByIndex(intervenerIndex);
         }
-
-        // Extract the Organisation ID to remove (centralized logic for applicant and respondent representative change only)
-        ofNullable(organisationPolicy)
-            .map(OrganisationPolicy::getOrganisation)
-            .map(Organisation::getOrganisationID)
-            .ifPresent(orgIdToRemove -> {
-                // Remove barristers associated with the organization ID being removed
-                emptyIfNull(barristerCollection).removeIf(el ->
-                    ofNullable(el.getValue())
-                        .map(Barrister::getOrganisation)
-                        .map(Organisation::getOrganisationID)
-                        .filter(orgIdToRemove::equals)
-                        .isPresent()
-                );
-            });
     }
 
     private void populateServiceAddressToApplicantOrRespondent(StopRepresentingRequest stopRepresentingRequest,
