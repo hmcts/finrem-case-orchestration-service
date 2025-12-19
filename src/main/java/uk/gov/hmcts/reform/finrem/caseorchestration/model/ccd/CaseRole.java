@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
+import static java.lang.String.format;
+
 @RequiredArgsConstructor
 public enum CaseRole {
     APP_SOLICITOR("[APPSOLICITOR]"),
@@ -33,5 +35,33 @@ public enum CaseRole {
         return Arrays.stream(CaseRole.values())
             .filter(option -> option.getCcdCode().equalsIgnoreCase(ccdCode))
             .findFirst().orElseThrow(IllegalArgumentException::new);
+    }
+
+    /**
+     * Returns the {@link CaseRole} for an intervener solicitor at the given index.
+     *
+     * <p>The index represents the intervener number (for example, 1, 2, 3).
+     * This method constructs the corresponding case role value in the format
+     * {@code [INTVRSOLICITOR{index}]}.</p>
+     *
+     * @param index the intervener index
+     * @return the matching intervener solicitor {@link CaseRole}
+     */
+    public static CaseRole getIntervenerSolicitorByIndex(int index) {
+        return CaseRole.forValue(format("[INTVRSOLICITOR%s]", index));
+    }
+
+    /**
+     * Returns the {@link CaseRole} for an intervener barrister at the given index.
+     *
+     * <p>The index represents the intervener number (for example, 1, 2, 3).
+     * This method constructs the corresponding case role value in the format
+     * {@code [INTVRBARRISTER{index}]}.</p>
+     *
+     * @param index the intervener index
+     * @return the matching intervener barrister {@link CaseRole}
+     */
+    public static CaseRole getIntervenerBarristerByIndex(int index) {
+        return CaseRole.forValue(format("[INTVRBARRISTER%s]", index));
     }
 }

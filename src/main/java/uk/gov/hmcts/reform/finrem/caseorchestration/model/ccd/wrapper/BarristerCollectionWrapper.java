@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,4 +31,15 @@ public class BarristerCollectionWrapper {
     private List<BarristerCollectionItem> intvr3Barristers;
     @JsonProperty("intvr4BarristerCollection")
     private List<BarristerCollectionItem> intvr4Barristers;
+
+    @JsonIgnore
+    public List<BarristerCollectionItem> getIntervenerBarristersByIndex(int index) {
+        return switch (index) {
+            case 1 -> intvr1Barristers;
+            case 2 -> intvr2Barristers;
+            case 3 -> intvr3Barristers;
+            case 4 -> intvr4Barristers;
+            default -> null;
+        };
+    }
 }
