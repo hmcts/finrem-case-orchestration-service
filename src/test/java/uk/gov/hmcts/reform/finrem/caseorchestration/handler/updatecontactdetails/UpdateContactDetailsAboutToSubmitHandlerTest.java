@@ -36,6 +36,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -98,7 +99,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         verify(updateContactDetailsService).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
         verify(updateContactDetailsService, never()).handleRepresentationChange(finremCaseData, caseType);
         verify(onlineFormDocumentService, never()).generateContestedMiniForm(any(), any());
-        verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(), any(), any());
+        verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(CaseDetails.class), eq(AUTH_TOKEN), any(CaseDetails.class));
     }
 
     /*
@@ -125,7 +126,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         assertNotNull(response);
         verify(updateContactDetailsService).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
         verify(updateContactDetailsService, never()).handleRepresentationChange(finremCaseData, caseType);
-        verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(), any(), any());
+        verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(CaseDetails.class), eq(AUTH_TOKEN), any(CaseDetails.class));
 
         checkGenerateContestedMiniFormCalledForContested(caseType, request);
     }
@@ -154,7 +155,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         assertNotNull(response);
         verify(updateContactDetailsService).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
         verify(updateContactDetailsService, never()).handleRepresentationChange(finremCaseData, caseType);
-        verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(), any(), any());
+        verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(CaseDetails.class), eq(AUTH_TOKEN), any(CaseDetails.class));
 
         checkGenerateContestedMiniFormCalledForContested(caseType, request);
     }

@@ -81,7 +81,7 @@ public class AddedSolicitorService {
         }
 
         return getChangedRepresentative(finremCaseData, isApplicant,
-            Optional.of(isApplicant ? finremCaseData.getApplicantOrganisationPolicy()
+            Optional.ofNullable(isApplicant ? finremCaseData.getApplicantOrganisationPolicy()
                 : finremCaseData.getRespondentOrganisationPolicy()));
     }
 

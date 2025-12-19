@@ -10,7 +10,7 @@ import java.util.Arrays;
 @Slf4j
 @RequiredArgsConstructor
 public enum EventType {
-
+    INTERNAL_CHANGE_UPDATE_CASE("internal-change-UPDATE_CASE"),
     MANAGE_HEARINGS("FR_manageHearings"),
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
@@ -97,6 +97,7 @@ public enum EventType {
     MANAGE_HEARINGS_MIGRATION("FR_manageHearingsMigration"),
     FR_HWF_DECISION_MADE("FR_HWFDecisionMade"),
     FR_HWF_DECISION_MADE_FROM_AWAITING_PAYMENT("FR_HWFDecisionMadeFromAwaitingPayment"),
+    STOP_REPRESENTING_CLIENT("FR_stopRepresentingClient"),
     @JsonEnumDefaultValue
     NONE("");
 

@@ -23,7 +23,7 @@ public class BarristerRepresentationUpdateBuilder {
     private final IdamService idamService;
 
     public record BarristerUpdateParams(FinremCaseData caseData, String authToken, BarristerParty barristerParty,
-                                        Barrister barrister) {
+                                        Barrister barrister, String via) {
     }
 
     /**
@@ -34,7 +34,7 @@ public class BarristerRepresentationUpdateBuilder {
      */
     public RepresentationUpdate buildBarristerAdded(BarristerUpdateParams barristerUpdateParams) {
         ChangedRepresentative changedRepresentative = convertToChangedRepresentative(barristerUpdateParams.barrister);
-        return build(barristerUpdateParams, changedRepresentative, null);
+        return build(barristerUpdateParams, changedRepresentative, null, barristerUpdateParams.via);
     }
 
     /**
@@ -45,16 +45,16 @@ public class BarristerRepresentationUpdateBuilder {
      */
     public RepresentationUpdate buildBarristerRemoved(BarristerUpdateParams barristerUpdateParams) {
         ChangedRepresentative changedRepresentative = convertToChangedRepresentative(barristerUpdateParams.barrister);
-        return build(barristerUpdateParams, null, changedRepresentative);
+        return build(barristerUpdateParams, null, changedRepresentative, barristerUpdateParams.via);
     }
 
     private RepresentationUpdate build(BarristerUpdateParams barristerUpdateParams,
-                                       ChangedRepresentative added, ChangedRepresentative removed) {
+                                       ChangedRepresentative added, ChangedRepresentative removed, String via) {
         return RepresentationUpdate.builder()
             .added(added)
             .removed(removed)
             .by(idamService.getIdamFullName(barristerUpdateParams.authToken))
-            .via(MANAGE_BARRISTERS)
+            .via(via == null ? MANAGE_BARRISTERS : via)
             .date(LocalDateTime.now())
             .clientName(getClientName(barristerUpdateParams.caseData, barristerUpdateParams.barristerParty))
             .party(getParty(barristerUpdateParams.barristerParty))

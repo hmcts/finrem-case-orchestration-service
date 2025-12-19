@@ -2,15 +2,24 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -23,9 +32,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Remov
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +46,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
@@ -68,6 +80,26 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
     private final Function<FinremCaseData, List<RepresentationUpdateHistoryCollection>> getRepresentationUpdateHistoryFinrem =
         this::convertToUpdateHistoryFinrem;
+
+    private static MockedStatic<LocalDateTime> localDateTimeMock;
+
+    @BeforeClass
+    public static void setUpClass() {
+        LocalDateTime fixed = LocalDateTime.of(2024, 1, 1, 12, 0);
+
+        localDateTimeMock = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS);
+
+        localDateTimeMock.when(LocalDateTime::now)
+            .thenReturn(fixed);
+
+        localDateTimeMock.when(() -> LocalDateTime.now(ZoneId.systemDefault()))
+            .thenReturn(fixed);
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        localDateTimeMock.close();
+    }
 
     @Before
     public void setUp() {
@@ -123,7 +155,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateRepresentationAndGenerateRepresentationUpdateHistory_whenCaseDataIsValid_finrem() {
+    public void shouldUpdateRepresentationUpdateHistory_whenCaseDataIsValid_finrem() {
         // Arrange
         FinremCaseData finremCaseData = readFinremCaseData("change-of-representatives-before.json");
         FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-representatives-original-data.json");
@@ -132,7 +164,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .thenReturn(addingChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, STOP_REPRESENTING_CLIENT,
+            AUTH_TOKEN);
 
         // Verify
         // finremCaseData is updated. The following verification is performed on finremCaseData
@@ -142,12 +175,25 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .party("Applicant")
             .clientName("John Smith")
             .by("Claire Mumford")
-            .via("Notice of Change")
+            .via("Stop representing a client")
             .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
             .added(addingChangedRepresentative)
             .build();
 
         assertRepresentationUpdate(actualChange, expectedChange);
+    }
+
+    @Test
+    public void shouldPopulateChangeOrganisationRequestField_whenCaseDataIsValid_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("change-of-representatives-before.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-representatives-original-data.json");
+
+        // Act
+        noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
+
+        // Verify
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVA", null);
     }
 
     @Test
@@ -197,7 +243,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateRepresentationAndUpdateRepresentationUpdateHistory_whenChangeAlreadyPopulated_finrem() {
+    public void shouldUpdateRepresentationUpdateHistory_whenChangeAlreadyPopulated_finrem() {
         // Arrange
         FinremCaseData finremCaseData = readFinremCaseData("change-of-representatives.json");
         FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-reps-populated-original.json");
@@ -206,7 +252,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .thenReturn(addingChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, STOP_REPRESENTING_CLIENT,
+            AUTH_TOKEN);
 
         // Verify
         // finremCaseData is updated. The following verification is performed on finremCaseData
@@ -233,10 +280,22 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
             .clientName("John Smith")
             .by("Claire Mumford")
-            .via("Notice of Change")
+            .via("Stop representing a client")
             .build();
         assertRepresentationUpdate(lastElement, expectedNewElement);
         assertThat(firstElement.getDate()).isBefore(lastElement.getDate());
+    }
+
+    @Test
+    public void shouldPopulateChangeOrganisationRequestField_whenChangeAlreadyPopulated_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("change-of-representatives.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-reps-populated-original.json");
+
+        // Act
+        noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
+
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVA", null);
     }
 
     @Test
@@ -293,7 +352,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .thenReturn(addingChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, STOP_REPRESENTING_CLIENT,
+            AUTH_TOKEN);
 
         // Verify
         // finremCaseData is updated. The following verification is performed on finremCaseData
@@ -304,13 +364,26 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
             .clientName("John Smith")
             .by("Claire Mumford")
-            .via("Notice of Change")
+            .via("Stop representing a client")
             .added(addingChangedRepresentative)
             .build();
 
         // Verify expected RepresentationUpdate appended
         RepresentationUpdate firstElement = actual.getLast().getValue();
         assertRepresentationUpdate(firstElement, expectedNewElement);
+    }
+
+    @Test
+    public void inConsented_shouldPopulateChangeOrganisationRequestField_whenChangeCurrentlyUnpopulated_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("consented-change-of-reps-before.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("consented-change-of-reps-original.json");
+
+        // Act
+        noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
+
+        // Verify
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVA", null);
     }
 
     @Test
@@ -368,7 +441,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         when(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData)).thenReturn(addingChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, STOP_REPRESENTING_CLIENT,
+            AUTH_TOKEN);
 
         // Verify
         // finremCaseData is updated. The following verification is performed on finremCaseData
@@ -389,11 +463,24 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .party("Applicant")
             .clientName("John Smith")
             .by("Claire Mumford")
-            .via("Notice of Change")
+            .via("Stop representing a client")
             .added(addingChangedRepresentative)
             .build();
         assertRepresentationUpdate(lastElement, expectedNewElement);
         assertThat(firstElement.getDate()).isBefore(lastElement.getDate());
+    }
+
+    @Test
+    public void inConsented_shouldPopulateChangeOrganisationRequestField_whenChangeCurrentlyPopulated_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("consented-change-of-reps.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("consented-change-of-reps-original.json");
+
+        // Act
+        noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
+
+        // Verify
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVA", null);
     }
 
     @Test
@@ -449,11 +536,12 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-reps-removing-original.json");
         final ChangedRepresentative mockedChangedRepresentative = mock(ChangedRepresentative.class);
 
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(originalFinremCaseData, true))
+        when(removedSolicitorService.getChangedRepresentative(finremCaseData, originalFinremCaseData))
             .thenReturn(mockedChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, STOP_REPRESENTING_CLIENT,
+            AUTH_TOKEN);
 
         // Verify
         List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
@@ -463,10 +551,23 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .party("Applicant")
             .clientName("John Smith")
             .by("Claire Mumford")
-            .via("Notice of Change")
+            .via("Stop representing a client")
             .removed(mockedChangedRepresentative)
             .build();
         assertRepresentationUpdate(actualChange, expectedChange);
+    }
+
+    @Test
+    public void shouldPopulateChangeOrganisationRequestField_whenNatureIsRemoving_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("change-of-reps-removing-before.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-reps-removing-original.json");
+
+        // Act
+        noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
+
+        // Verify
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVA", "A31PTVA");
     }
 
     @Test
@@ -543,11 +644,12 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
         when(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData))
             .thenReturn(mockedAddedChangedRepresentative);
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(originalFinremCaseData, true))
+        when(removedSolicitorService.getChangedRepresentative(finremCaseData, originalFinremCaseData))
             .thenReturn(mockedRemovedChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, STOP_REPRESENTING_CLIENT,
+            AUTH_TOKEN);
 
         // Verify
         List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
@@ -557,12 +659,25 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .date(LocalDateTime.of(2020, 6, 1, 15, 0, 0))
             .clientName("John Smith")
             .by("Claire Mumford")
-            .via("Notice of Change")
+            .via("Stop representing a client")
             .added(mockedAddedChangedRepresentative)
             .removed(mockedRemovedChangedRepresentative)
             .build();
 
         assertRepresentationUpdate(actualChange, expected);
+    }
+
+    @Test
+    public void shouldPopulateChangeOrganisationRequestField_whenNatureIsReplacing_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("change-of-reps-replacing-before.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-reps-replacing-original.json");
+
+        // Act
+        noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
+
+        // Verify
+        assertChangeOrganisationField(finremCaseData, true,"A31PTVU", "A31PTVA");
     }
 
     @Test
@@ -625,7 +740,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .thenReturn(mockedAddedChangedRepresentative);
 
         // Act
-        noticeOfChangeService.updateRepresentation(finremCaseData, AUTH_TOKEN, originalFinremCaseData);
+        noticeOfChangeService.updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, STOP_REPRESENTING_CLIENT,
+            AUTH_TOKEN);
 
         List<RepresentationUpdateHistoryCollection> actual = getRepresentationUpdateHistoryFinrem.apply(finremCaseData);
         RepresentationUpdate actualChange = actual.getLast().getValue();
@@ -633,11 +749,23 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .party("respondent")
             .clientName("Jane Smith")
             .by("Claire Mumford")
-            .via("Notice of Change")
+            .via("Stop representing a client")
             .added(mockedAddedChangedRepresentative)
             .build();
 
         assertRepresentationUpdate(actualChange, expected);
+    }
+
+    @Test
+    public void shouldPopulateChangeOrganisationRequestFieldRespondent_finrem() {
+        // Arrange
+        FinremCaseData finremCaseData = readFinremCaseData("change-of-representatives-respondent-before.json");
+        FinremCaseData originalFinremCaseData = readFinremCaseData("change-of-representatives-respondent-original.json");
+
+        // Act
+        noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
+
+        assertChangeOrganisationField(finremCaseData, false,"A31PTVU", null);
     }
 
     @Test
@@ -728,5 +856,50 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .ignoringFields("date")
             .withComparatorForFields(String.CASE_INSENSITIVE_ORDER, "party")
             .isEqualTo(expectedNewElement);
+    }
+
+    private void assertChangeOrganisationField(FinremCaseData finremCaseData, boolean isApplicant,
+                                               String organisationIdToAdd, String organisationIdToRemove) {
+
+        String role = isApplicant ? CaseRole.APP_SOLICITOR.getCcdCode() : CaseRole.RESP_SOLICITOR.getCcdCode();
+
+        assertThat(finremCaseData.getChangeOrganisationRequestField())
+            .extracting(ChangeOrganisationRequest::getCaseRoleId,
+                ChangeOrganisationRequest::getApprovalStatus,
+                ChangeOrganisationRequest::getRequestTimestamp,
+                ChangeOrganisationRequest::getApprovalRejectionTimestamp
+            )
+            .contains(
+                DynamicList.builder()
+                    .value(DynamicListElement.builder()
+                        .code(role)
+                        .label(role)
+                        .build())
+                    .listItems(List.of(DynamicListElement.builder()
+                        .code(role)
+                        .label(role)
+                        .build()))
+                    .build(),
+                ChangeOrganisationApprovalStatus.APPROVED,
+                LocalDateTime.of(2024, 1, 1, 12, 0),
+                LocalDateTime.of(2024, 1, 1, 12, 0));
+
+        if (organisationIdToAdd != null) {
+            assertThat(finremCaseData.getChangeOrganisationRequestField().getOrganisationToAdd())
+                .extracting(Organisation::getOrganisationID)
+                .isEqualTo(organisationIdToAdd);
+        } else {
+            assertThat(finremCaseData.getChangeOrganisationRequestField().getOrganisationToAdd()).isNull();
+        }
+
+        assertThat(Optional.ofNullable(finremCaseData.getChangeOrganisationRequestField().getOrganisationToAdd())
+            .map(Organisation::getOrganisationID)
+            .orElse(null))
+            .isEqualTo(organisationIdToAdd);
+
+        assertThat(Optional.ofNullable(finremCaseData.getChangeOrganisationRequestField().getOrganisationToRemove())
+            .map(Organisation::getOrganisationID)
+            .orElse(null))
+            .isEqualTo(organisationIdToRemove);
     }
 }
