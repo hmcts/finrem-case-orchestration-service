@@ -14,7 +14,6 @@ public class ChangeOfRepresentationRequest {
     public static final String INTERVENER_THREE_PARTY = "Intervener 3";
     public static final String INTERVENER_FOUR_PARTY = "Intervener 4";
 
-    @Deprecated // seems it was not used
     RepresentationUpdateHistory current;
     String party;
     String clientName;
