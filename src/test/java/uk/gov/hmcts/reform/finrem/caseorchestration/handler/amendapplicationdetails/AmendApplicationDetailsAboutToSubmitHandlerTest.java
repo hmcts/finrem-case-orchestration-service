@@ -964,6 +964,9 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             .orgPolicyReference("ref-applicant")
             .build();
 
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseData.setApplicantOrganisationPolicy(applicantOrganisationPolicy);
+
         OrganisationPolicy respondentPolicy = OrganisationPolicy.builder()
             .organisation(Organisation.builder()
                 .organisationID("ORG.ID")
@@ -973,9 +976,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             .orgPolicyReference("ref-respondent")
             .build();
 
-        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
-        caseData.setApplicantOrganisationPolicy(applicantOrganisationPolicy);
         caseData.setRespondentOrganisationPolicy(respondentPolicy);
     }
 
