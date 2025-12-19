@@ -76,7 +76,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
-        List<String> errors = new ArrayList<>();
+
 
         caseFlagsService.setCaseFlagInformation(finremCaseDetails);
 
@@ -101,6 +101,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         }
 
         // Validations are needed because users can use the browser's back button to bypass the validation in mid-handler
+        List<String> errors = new ArrayList<>();
         checkForEmptyOrganisationPolicy(finremCaseData, finremCaseData.getContactDetailsWrapper(), errors);
         errors.addAll(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
 

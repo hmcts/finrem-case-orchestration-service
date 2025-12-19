@@ -953,7 +953,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
     }
 
-    // setup organisation policy for both respondent and applicant for use in other tests / concerned its repeated considerably -> consented has its own version REFACTOR
+    // consented has its own version REFACTOR?
     private static void setupOrganisationPolicy(FinremCaseData caseData) {
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
             .organisation(Organisation.builder()
