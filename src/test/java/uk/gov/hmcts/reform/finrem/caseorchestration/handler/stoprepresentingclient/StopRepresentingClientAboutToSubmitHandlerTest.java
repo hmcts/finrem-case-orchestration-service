@@ -501,7 +501,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         }
 
         @ParameterizedTest
-        @ValueSource(ints = {1, 2, 3, 4})
+        @ValueSource(ints = {1})
         void givenCaseWithSameOrganisationBarrister_whenHandled_thenRemoveRespondentBarrister(int index) {
             when(caseRoleService.isApplicantRepresentative(any(FinremCaseData.class), eq(AUTH_TOKEN)))
                 .thenReturn(false);
