@@ -67,7 +67,24 @@ class StopRepresentingClientAboutToStartHandlerTest {
 
         verify(caseRoleService).isApplicantRepresentative(givenFinremCaseData, AUTH_TOKEN);
         verify(caseRoleService).isRespondentRepresentative(givenFinremCaseData, AUTH_TOKEN);
+    }
 
+    @Test
+    void givenAsIntervenerSolicitor_whenHandled_thenPopulateCorrectLabel() {
+        FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
+        when(caseRoleService.isApplicantRepresentative(givenFinremCaseData, AUTH_TOKEN)).thenReturn(false);
+        when(caseRoleService.isRespondentRepresentative(givenFinremCaseData, AUTH_TOKEN)).thenReturn(false);
+        when(caseRoleService.isIntervenerRepresentative(givenFinremCaseData, AUTH_TOKEN)).thenReturn(true);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
+            givenFinremCaseData);
+        FinremCaseData finremCaseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
+        assertThat(finremCaseData.getStopRepresentationWrapper().getClientAddressForServiceConfidentialLabel())
+            .isEqualTo("Keep the Intervener's contact details private from the Applicant & Respondent?");
+
+        verify(caseRoleService).isApplicantRepresentative(givenFinremCaseData, AUTH_TOKEN);
+        verify(caseRoleService).isRespondentRepresentative(givenFinremCaseData, AUTH_TOKEN);
+        verify(caseRoleService).isIntervenerRepresentative(givenFinremCaseData, AUTH_TOKEN);
     }
 
     @Test

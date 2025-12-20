@@ -228,7 +228,7 @@ class UpdateRepresentationWorkflowServiceTest {
         FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
         EventType eventType = mock(EventType.class);
 
-        updateRepresentationWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseData, finremCaseDataBefore, eventType,
+        updateRepresentationWorkflowService.prepareNoticeOfChangeAndOrganisationPolicy(finremCaseData, finremCaseDataBefore, eventType,
             AUTH_TOKEN);
 
         verify(noticeOfChangeService).updateRepresentationUpdateHistory(finremCaseData, finremCaseDataBefore, eventType,
@@ -247,7 +247,7 @@ class UpdateRepresentationWorkflowServiceTest {
         FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
         EventType eventType = mock(EventType.class);
 
-        updateRepresentationWorkflowService.prepareChangeOrganisationRequestAndOrganisationPolicy(finremCaseData, finremCaseDataBefore,
+        updateRepresentationWorkflowService.prepareNoticeOfChangeAndOrganisationPolicy(finremCaseData, finremCaseDataBefore,
             eventType, AUTH_TOKEN);
 
         final Organisation emptyOrganisation = Organisation.builder().organisationID(null).organisationName(null).build();

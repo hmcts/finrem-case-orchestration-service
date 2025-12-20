@@ -86,14 +86,10 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
 
     private IntervenerWrapper getIntervenerWrapper(FinremCaseData caseData, String selectedOperationCode) {
         return switch (selectedOperationCode) {
-            case ADD_INTERVENER_ONE_CODE -> caseData.getIntervenerOne();
-            case ADD_INTERVENER_TWO_CODE -> caseData.getIntervenerTwo();
-            case ADD_INTERVENER_THREE_CODE -> caseData.getIntervenerThree();
-            case ADD_INTERVENER_FOUR_CODE -> caseData.getIntervenerFour();
-            case DEL_INTERVENER_ONE_CODE -> caseData.getIntervenerOne();
-            case DEL_INTERVENER_TWO_CODE -> caseData.getIntervenerTwo();
-            case DEL_INTERVENER_THREE_CODE -> caseData.getIntervenerThree();
-            case DEL_INTERVENER_FOUR_CODE -> caseData.getIntervenerFour();
+            case ADD_INTERVENER_ONE_CODE, DEL_INTERVENER_ONE_CODE -> caseData.getIntervenerOne();
+            case ADD_INTERVENER_TWO_CODE, DEL_INTERVENER_TWO_CODE -> caseData.getIntervenerTwo();
+            case ADD_INTERVENER_THREE_CODE, DEL_INTERVENER_THREE_CODE -> caseData.getIntervenerThree();
+            case ADD_INTERVENER_FOUR_CODE, DEL_INTERVENER_FOUR_CODE -> caseData.getIntervenerFour();
             default -> throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
         };
     }

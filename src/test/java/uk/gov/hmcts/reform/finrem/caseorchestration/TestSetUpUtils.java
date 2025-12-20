@@ -14,12 +14,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsExcep
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentType;
@@ -544,5 +548,27 @@ public class TestSetUpUtils {
     @SuppressWarnings("unchecked")
     public static <T> Supplier<T> anySupplier() {
         return any(Supplier.class);
+    }
+
+    public static Organisation organisation(String id) {
+        return Organisation.builder()
+            .organisationID(id)
+            .build();
+    }
+
+    public static OrganisationPolicy organisationPolicy(String id) {
+        return OrganisationPolicy.builder()
+            .organisation(organisation(id))
+            .build();
+    }
+
+    public static List<BarristerCollectionItem> barristers(String orgId) {
+        return new ArrayList<>(List.of(
+            BarristerCollectionItem.builder()
+                .value(Barrister.builder()
+                    .organisation(organisation(orgId))
+                    .build())
+                .build()
+        ));
     }
 }
