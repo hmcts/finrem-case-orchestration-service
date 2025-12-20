@@ -136,6 +136,49 @@ class StopRepresentingClientEventHandlerTest {
             verifyNoMoreInteractions(intervenerService);
             verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
         }
+
+        @Test
+        void givenAnyBarristerChange_whenHandled_thenUpdateBarristerChangeCaseAccess() {
+            FinremCaseData caseData = spy(FinremCaseData.class);
+            caseData.getContactDetailsWrapper().setNocParty(null);
+            FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+            FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+                .build();
+
+            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+                .invokedByIntervener(true)
+                .caseDetails(caseDetails)
+                .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
+                .userAuthorisation(AUTH_TOKEN)
+                .build();
+            BarristerChange applicantBarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
+                .thenReturn(applicantBarristerChange);
+            BarristerChange respondentBarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
+                .thenReturn(respondentBarristerChange);
+            BarristerChange intv1BarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER1))
+                .thenReturn(intv1BarristerChange);
+            BarristerChange intv2BarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER2))
+                .thenReturn(intv2BarristerChange);
+            BarristerChange intv3BarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER3))
+                .thenReturn(intv3BarristerChange);
+            BarristerChange intv4BarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
+                .thenReturn(intv4BarristerChange);
+
+            underTest.handleEvent(event);
+
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), intv1BarristerChange);
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), intv2BarristerChange);
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), intv3BarristerChange);
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), intv4BarristerChange);
+        }
     }
 
     @Nested
@@ -160,11 +203,27 @@ class StopRepresentingClientEventHandlerTest {
             BarristerChange respondentBarristerChange = mock(BarristerChange.class);
             when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
                 .thenReturn(respondentBarristerChange);
+            BarristerChange intv1BarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER1))
+                .thenReturn(intv1BarristerChange);
+            BarristerChange intv2BarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER2))
+                .thenReturn(intv2BarristerChange);
+            BarristerChange intv3BarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER3))
+                .thenReturn(intv3BarristerChange);
+            BarristerChange intv4BarristerChange = mock(BarristerChange.class);
+            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
+                .thenReturn(intv4BarristerChange);
 
             underTest.handleEvent(event);
 
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), intv1BarristerChange);
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), intv2BarristerChange);
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), intv3BarristerChange);
+            verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), intv4BarristerChange);
         }
 
         @ParameterizedTest
