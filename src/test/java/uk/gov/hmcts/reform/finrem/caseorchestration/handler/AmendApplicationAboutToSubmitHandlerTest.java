@@ -364,16 +364,30 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
     }
 
     @Test
-    void givenEmptyOrganisationPolicy_whenHandle_thenHandlerThrowError() {
+    void givenEmptyRepresentedApplicantOrganisationPolicy_whenHandle_thenHandlerThrowError() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        setupRespondentOrganisationEmpty(finremCaseData);
+        setupApplicantRepresented(finremCaseData, addressWithPostcode());
         setupApplicantOrganisationEmpty(finremCaseData);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors()).containsExactly(
-            "Organisation policy field is required for represented parties."
+            "Organisation policy field is required for represented applicant."
+        );
+    }
+
+    @Test
+    void givenEmptyRepresentedRespondentOrganisationPolicy_whenHandle_thenHandlerThrowError() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        setupRespondentRepresented(finremCaseData, addressWithPostcode());
+        setupRespondentOrganisationEmpty(finremCaseData);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).containsExactly(
+            "Organisation policy field is required for represented respondent."
         );
     }
 
@@ -445,13 +459,11 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     private static void setupRespondentOrganisationEmpty(FinremCaseData caseData) {
         setupOrganisationPolicy(caseData);
-        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
         caseData.setRespondentOrganisationPolicy(null);
     }
 
     private static void setupApplicantOrganisationEmpty(FinremCaseData caseData) {
         setupOrganisationPolicy(caseData);
-        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         caseData.setApplicantOrganisationPolicy(null);
     }
 

@@ -31,7 +31,7 @@ import java.util.List;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyOrganisationPolicy;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyRepresentedOrganisationPolicy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -102,7 +102,7 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
 
         // Validations are needed because users can use the browser's back button to bypass the validation in mid-handler
         List<String> errors = new ArrayList<>();
-        checkForEmptyOrganisationPolicy(finremCaseData, finremCaseData.getContactDetailsWrapper(), errors);
+        checkForEmptyRepresentedOrganisationPolicy(finremCaseData, errors);
         errors.addAll(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

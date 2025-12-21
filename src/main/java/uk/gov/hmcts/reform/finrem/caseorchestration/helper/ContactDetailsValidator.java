@@ -25,7 +25,8 @@ public class ContactDetailsValidator {
     static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
     static final String INVALID_EMAIL_ADDRESS_ERROR_MESSAGE = "%s is not a valid Email address.";
     static final String ORGANISATION_POLICY_ERROR = "Solicitor can only represent one party.";
-    static final String INVALID_ORGANISATION_POLICY_ERROR_MESSAGE = "Organisation policy field is required for represented parties.";
+    static final String INVALID_APPLICANT_ORGANISATION_POLICY_ERROR_MESSAGE = "Organisation policy field is required for represented applicant.";
+    static final String INVALID_RESPONDENT_ORGANISATION_POLICY_ERROR_MESSAGE = "Organisation policy field is required for represented respondent.";
     static final String INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE = "%s. Method validatePostcodesByRepresentation is only for "
         + "updating contact details on consented cases. Use validateCaseDataAddresses whenever possible.";
 
@@ -196,33 +197,30 @@ public class ContactDetailsValidator {
     }
 
     /**
-     * Checks whether organisation policy is present for both parties in the given {@link FinremCaseData}.
+     * Checks whether organisation policy is present for all represented parties in the given {@link FinremCaseData}.
      *
      * <p>
-     * This method checks whether the applicant and respondent have an organisation policy associated with them.
-     * An error is added if either organisation ID is empty. If both IDs are present,
-     * no error will be returned.
+     * This method verifies that if the applicant or respondent is represented by a solicitor,
+     * their corresponding organisation policy contains a valid organisation ID.
+     * If a party is not represented, no validation is required.
      * </p>
      *
      * @param caseData the {@link FinremCaseData} object containing organisation policies for both parties
-     * @param errors the list to which error messages will be added if validation fails
+     * @param errors   the list to which error messages will be added if validation fails
      */
-    public static void checkForEmptyOrganisationPolicy(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
+    public static void checkForEmptyRepresentedOrganisationPolicy(FinremCaseData caseData, List<String> errors) {
         OrganisationPolicy applicantOrganisationPolicy = caseData.getApplicantOrganisationPolicy();
         OrganisationPolicy respondentOrganisationPolicy = caseData.getRespondentOrganisationPolicy();
 
-        if (YesOrNo.YES.equals(wrapper.getConsentedRespondentRepresented())) {
-            if (isMissingOrganisationPolicy(respondentOrganisationPolicy)) {
-                errors.add(INVALID_ORGANISATION_POLICY_ERROR_MESSAGE);
-            }
+        if (caseData.isApplicantRepresentedByASolicitor()
+            && isMissingOrganisationPolicy(applicantOrganisationPolicy)) {
+            errors.add(INVALID_APPLICANT_ORGANISATION_POLICY_ERROR_MESSAGE);
         }
 
-        if (YesOrNo.YES.equals(wrapper.getApplicantRepresented())) {
-            if (isMissingOrganisationPolicy(applicantOrganisationPolicy)) {
-                errors.add(INVALID_ORGANISATION_POLICY_ERROR_MESSAGE);
-            }
+        if (caseData.isRespondentRepresentedByASolicitor()
+            && isMissingOrganisationPolicy(respondentOrganisationPolicy)) {
+            errors.add(INVALID_RESPONDENT_ORGANISATION_POLICY_ERROR_MESSAGE);
         }
-
     }
 
     /**

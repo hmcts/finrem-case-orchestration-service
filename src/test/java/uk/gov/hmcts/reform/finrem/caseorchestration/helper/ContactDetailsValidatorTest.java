@@ -128,39 +128,35 @@ class ContactDetailsValidatorTest {
     }
 
     @Test
-    void givenRespondentOrganisationIsEmpty_whenChecked_thenErrorIsReturned() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        OrganisationPolicy applicantPolicy = mockOrganisationPolicy(TEST_ORG_ID);
-        OrganisationPolicy respondentPolicy = mockOrganisationPolicy("");
-
-        when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
-        when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
-        when(caseData.getContactDetailsWrapper()).thenReturn(new ContactDetailsWrapper());
-
-        List<String> errors = new ArrayList<>();
-        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
-            .consentedRespondentRepresented(YesOrNo.YES).build();
-        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, wrapper, errors);
-
-        assertThat(errors).containsExactly("Organisation policy field is required for represented parties.");
-    }
-
-    @Test
-    void givenApplicantOrganisationIsEmpty_whenChecked_thenErrorIsReturned() {
+    void givenRepresentedApplicantOrganisationIsEmpty_whenChecked_thenErrorIsReturned() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         OrganisationPolicy applicantPolicy = mockOrganisationPolicy("");
         OrganisationPolicy respondentPolicy = mockOrganisationPolicy(TEST_ORG_ID);
 
         when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
         when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
-        when(caseData.getContactDetailsWrapper()).thenReturn(new ContactDetailsWrapper());
+        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
 
         List<String> errors = new ArrayList<>();
-        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.YES).build();
-        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, wrapper, errors);
+        ContactDetailsValidator.checkForEmptyRepresentedOrganisationPolicy(caseData, errors);
 
-        assertThat(errors).containsExactly("Organisation policy field is required for represented parties.");
+        assertThat(errors).containsExactly(ContactDetailsValidator.INVALID_APPLICANT_ORGANISATION_POLICY_ERROR_MESSAGE);
+    }
+
+    @Test
+    void givenRepresentedRespondentOrganisationIsEmpty_whenChecked_thenErrorIsReturned() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        OrganisationPolicy applicantPolicy = mockOrganisationPolicy(TEST_ORG_ID);
+        OrganisationPolicy respondentPolicy = mockOrganisationPolicy("");
+
+        when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
+        when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
+        when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+
+        List<String> errors = new ArrayList<>();
+        ContactDetailsValidator.checkForEmptyRepresentedOrganisationPolicy(caseData, errors);
+
+        assertThat(errors).containsExactly(ContactDetailsValidator.INVALID_RESPONDENT_ORGANISATION_POLICY_ERROR_MESSAGE);
     }
 
     @Test
@@ -171,15 +167,17 @@ class ContactDetailsValidatorTest {
 
         when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
         when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
-        when(caseData.getContactDetailsWrapper()).thenReturn(new ContactDetailsWrapper());
+        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+        when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
 
 
         List<String> errors = new ArrayList<>();
-        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
-            .consentedRespondentRepresented(YesOrNo.YES).build();
-        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, wrapper, errors);
+        ContactDetailsValidator.checkForEmptyRepresentedOrganisationPolicy(caseData, errors);
 
-        assertThat(errors).containsExactly("Organisation policy field is required for represented parties.");
+        assertThat(errors).containsExactlyInAnyOrder(
+            ContactDetailsValidator.INVALID_APPLICANT_ORGANISATION_POLICY_ERROR_MESSAGE,
+            ContactDetailsValidator.INVALID_RESPONDENT_ORGANISATION_POLICY_ERROR_MESSAGE
+        );
     }
 
     @Test
@@ -190,12 +188,11 @@ class ContactDetailsValidatorTest {
 
         when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
         when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
-        when(caseData.getContactDetailsWrapper()).thenReturn(new ContactDetailsWrapper());
+        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+        when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
 
         List<String> errors = new ArrayList<>();
-        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
-            .consentedRespondentRepresented(YesOrNo.YES).build();
-        ContactDetailsValidator.checkForEmptyOrganisationPolicy(caseData, wrapper, errors);
+        ContactDetailsValidator.checkForEmptyRepresentedOrganisationPolicy(caseData, errors);
 
         assertThat(errors).isEmpty();
     }

@@ -921,7 +921,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenEmptyOrganisationPolicy_whenHandle_thenHandlerThrowsError() {
+    void givenEmptyRepresentedApplicantOrganisationPolicy_whenHandle_thenHandlerThrowsError() {
         FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
@@ -929,14 +929,32 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         when(caseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
         when(caseDetails.getData()).thenReturn(caseData);
 
-        setupOrganisationPolicy(caseData);
-
+        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+        when(caseData.getApplicantOrganisationPolicy()).thenReturn(null);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
+        assertThat(response.getErrors()).containsExactly(
+            "Organisation policy field is required for represented applicant."
+        );
+    }
+
+    @Test
+    void givenEmptyRepresentedRespondentOrganisationPolicy_whenHandle_thenHandlerThrowsError() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        when(caseData.getDivorceStageReached()).thenReturn(mock(StageReached.class));
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+        when(caseData.getRespondentOrganisationPolicy()).thenReturn(null);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors()).containsExactly(
-            "Organisation policy field is required for represented parties."
+            "Organisation policy field is required for represented respondent."
         );
     }
   
@@ -953,7 +971,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
     }
 
-    // consented has its own version REFACTOR?
     private static void setupOrganisationPolicy(FinremCaseData caseData) {
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
             .organisation(Organisation.builder()
@@ -964,7 +981,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             .orgPolicyReference("ref-applicant")
             .build();
 
-        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         caseData.setApplicantOrganisationPolicy(applicantOrganisationPolicy);
 
         OrganisationPolicy respondentPolicy = OrganisationPolicy.builder()
@@ -976,7 +992,6 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             .orgPolicyReference("ref-respondent")
             .build();
 
-        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
         caseData.setRespondentOrganisationPolicy(respondentPolicy);
     }
 

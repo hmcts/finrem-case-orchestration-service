@@ -23,7 +23,7 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyApplicantPostcode;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyApplicantSolicitorPostcode;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyOrganisationPolicy;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyRepresentedOrganisationPolicy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyRespondentPostcode;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyRespondentSolicitorPostcode;
 
@@ -64,7 +64,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         checkForEmptyRespondentPostcode(caseData.getContactDetailsWrapper(), errors);
         checkForEmptyApplicantSolicitorPostcode(caseData, caseData.getContactDetailsWrapper(), errors);
         checkForEmptyRespondentSolicitorPostcode(caseData, caseData.getContactDetailsWrapper(), errors);
-        checkForEmptyOrganisationPolicy(caseData, caseData.getContactDetailsWrapper(), errors);
+        checkForEmptyRepresentedOrganisationPolicy(caseData, errors);
 
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);
