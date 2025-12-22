@@ -901,8 +901,8 @@ public class FinremCaseData implements HasCaseDocument {
     private String getNorthEastCourt(RegionNorthEastFrc frc, CourtListWrapper courtList) {
         if (frc != null) {
             return Map.of(
-                RegionNorthEastFrc.CLEAVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt(isConsentedApplication())),
-                RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt(isConsentedApplication())),
+                RegionNorthEastFrc.CLEAVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt()),
+                RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt()),
                 RegionNorthEastFrc.HS_YORKSHIRE, getCourtListIdOrDefault(courtList.getHumberCourt()),
                 RegionNorthEastFrc.NW_YORKSHIRE, getCourtListIdOrDefault(courtList.getNwYorkshireCourt())
             ).get(frc).getSelectedCourtId();
