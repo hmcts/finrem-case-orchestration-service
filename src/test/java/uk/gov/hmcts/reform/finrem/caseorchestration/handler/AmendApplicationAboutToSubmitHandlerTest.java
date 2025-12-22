@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -20,8 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -69,12 +68,15 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
     private ConsentOrderService consentOrderService;
     @Mock
     private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
+    @Mock
+    private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     @BeforeEach
     void setUp() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         underTest = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
-            consentOrderService, updateRepresentationWorkflowService);
+            consentOrderService, updateRepresentationWorkflowService,
+            createCaseMandatoryDataValidator);
         lenient().when(consentOrderService.getLatestConsentOrderData(isA(CallbackRequest.class)))
             .thenReturn(caseDocument(DOC_URL, FILE_NAME, BINARY_URL));
     }
@@ -364,55 +366,15 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
     }
 
     @Test
-    void givenEmptyRepresentedApplicantOrganisationPolicy_whenHandle_thenHandlerThrowError() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        setupApplicantRepresented(finremCaseData, addressWithPostcode());
-        setupApplicantOrganisationEmpty(finremCaseData);
+    void givenCaseData_whenMandatoryDataValidationFails_thenReturnsError() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(List.of("Validation failed"));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors()).containsExactly(
-            "Organisation policy field is required for represented applicant."
-        );
-    }
-
-    @Test
-    void givenEmptyRepresentedRespondentOrganisationPolicy_whenHandle_thenHandlerThrowError() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        setupRespondentRepresented(finremCaseData, addressWithPostcode());
-        setupRespondentOrganisationEmpty(finremCaseData);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors()).containsExactly(
-            "Organisation policy field is required for represented respondent."
-        );
-    }
-
-    // setup organisation policy for both respondent and applicant for use in other tests / concerned its repeated considerably
-    private static void setupOrganisationPolicy(FinremCaseData caseData) {
-        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
-            .organisation(Organisation.builder()
-                .organisationID("ORG.TEST.ID")
-                .organisationName("Applicant Org")
-                .build())
-            .orgPolicyCaseAssignedRole("APPLICANT_SOLICITOR")
-            .orgPolicyReference("ref-applicant")
-            .build();
-
-        OrganisationPolicy respondentPolicy = OrganisationPolicy.builder()
-            .organisation(Organisation.builder()
-                .organisationID("ORG.DIFFERENT.TEST.ID")
-                .organisationName("Respondent Org")
-                .build())
-            .orgPolicyCaseAssignedRole("RESPONDENT_SOLICITOR")
-            .orgPolicyReference("ref-respondent")
-            .build();
-
-        caseData.setApplicantOrganisationPolicy(applicantOrganisationPolicy);
-        caseData.setRespondentOrganisationPolicy(respondentPolicy);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).hasSize(1);
+        assertThat(response.getErrors().getFirst()).isEqualTo("Validation failed");
+        assertThat(response.getData()).isNotNull();
     }
 
     private static void setupApplicantRepresented(FinremCaseData caseData, Address applicantSolicitorAddress) {
@@ -420,12 +382,10 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         caseData.getContactDetailsWrapper().setSolicitorAddress(applicantSolicitorAddress);
         caseData.getContactDetailsWrapper().setApplicantAddress(null);
         caseData.getContactDetailsWrapper().setApplicantResideOutsideUK(null);
-        setupOrganisationPolicy(caseData);
     }
 
     private static void setupApplicantNotRepresented(FinremCaseData caseData, Address applicantAddress) {
         setupApplicantNotRepresented(caseData, applicantAddress, null);
-        setupOrganisationPolicy(caseData);
     }
 
     private static void setupApplicantNotRepresented(FinremCaseData caseData, Address applicantAddress, YesOrNo resideOutsideUK) {
@@ -433,7 +393,6 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         caseData.getContactDetailsWrapper().setSolicitorAddress(null);
         caseData.getContactDetailsWrapper().setApplicantAddress(applicantAddress);
         caseData.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
-        setupOrganisationPolicy(caseData);
     }
 
     private static void setupRespondentRepresented(FinremCaseData caseData, Address respondentSolicitorAddress) {
@@ -441,12 +400,10 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(respondentSolicitorAddress);
         caseData.getContactDetailsWrapper().setRespondentAddress(null);
         caseData.getContactDetailsWrapper().setRespondentResideOutsideUK(null);
-        setupOrganisationPolicy(caseData);
     }
 
     private static void setupRespondentNotRepresented(FinremCaseData caseData, Address respondentAddress) {
         setupRespondentNotRepresented(caseData, respondentAddress, null);
-        setupOrganisationPolicy(caseData);
     }
 
     private static void setupRespondentNotRepresented(FinremCaseData caseData, Address respondentAddress, YesOrNo resideOutsideUK) {
@@ -454,17 +411,6 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(null);
         caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
         caseData.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
-        setupOrganisationPolicy(caseData);
-    }
-
-    private static void setupRespondentOrganisationEmpty(FinremCaseData caseData) {
-        setupOrganisationPolicy(caseData);
-        caseData.setRespondentOrganisationPolicy(null);
-    }
-
-    private static void setupApplicantOrganisationEmpty(FinremCaseData caseData) {
-        setupOrganisationPolicy(caseData);
-        caseData.setApplicantOrganisationPolicy(null);
     }
 
     private static Address addressWithNullOrEmptyPostcode(String emptyOfNullPostCode) {

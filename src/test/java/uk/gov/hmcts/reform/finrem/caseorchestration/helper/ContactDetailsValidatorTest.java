@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -123,76 +122,6 @@ class ContactDetailsValidatorTest {
         when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
 
         List<String> errors = ContactDetailsValidator.validateOrganisationPolicy(caseData);
-
-        assertThat(errors).isEmpty();
-    }
-
-    @Test
-    void givenRepresentedApplicantOrganisationIsEmpty_whenChecked_thenErrorIsReturned() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        OrganisationPolicy applicantPolicy = mockOrganisationPolicy("");
-        OrganisationPolicy respondentPolicy = mockOrganisationPolicy(TEST_ORG_ID);
-
-        when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
-        when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
-        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
-
-        List<String> errors = new ArrayList<>();
-        ContactDetailsValidator.checkForEmptyRepresentedOrganisationPolicy(caseData, errors);
-
-        assertThat(errors).containsExactly(ContactDetailsValidator.INVALID_APPLICANT_ORGANISATION_POLICY_ERROR_MESSAGE);
-    }
-
-    @Test
-    void givenRepresentedRespondentOrganisationIsEmpty_whenChecked_thenErrorIsReturned() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        OrganisationPolicy applicantPolicy = mockOrganisationPolicy(TEST_ORG_ID);
-        OrganisationPolicy respondentPolicy = mockOrganisationPolicy("");
-
-        when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
-        when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
-        when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
-
-        List<String> errors = new ArrayList<>();
-        ContactDetailsValidator.checkForEmptyRepresentedOrganisationPolicy(caseData, errors);
-
-        assertThat(errors).containsExactly(ContactDetailsValidator.INVALID_RESPONDENT_ORGANISATION_POLICY_ERROR_MESSAGE);
-    }
-
-    @Test
-    void givenBothOrganisationIsEmpty_whenChecked_thenErrorIsReturned() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        OrganisationPolicy applicantPolicy = mockOrganisationPolicy("");
-        OrganisationPolicy respondentPolicy = mockOrganisationPolicy("");
-
-        when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
-        when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
-        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
-        when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
-
-
-        List<String> errors = new ArrayList<>();
-        ContactDetailsValidator.checkForEmptyRepresentedOrganisationPolicy(caseData, errors);
-
-        assertThat(errors).containsExactlyInAnyOrder(
-            ContactDetailsValidator.INVALID_APPLICANT_ORGANISATION_POLICY_ERROR_MESSAGE,
-            ContactDetailsValidator.INVALID_RESPONDENT_ORGANISATION_POLICY_ERROR_MESSAGE
-        );
-    }
-
-    @Test
-    void givenBothOrganisationPresent_whenChecked_thenNoErrorIsReturned() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        OrganisationPolicy applicantPolicy = mockOrganisationPolicy(TEST_ORG_ID);
-        OrganisationPolicy respondentPolicy = mockOrganisationPolicy(DIFFERENT_ORG_ID);
-
-        when(caseData.getApplicantOrganisationPolicy()).thenReturn(applicantPolicy);
-        when(caseData.getRespondentOrganisationPolicy()).thenReturn(respondentPolicy);
-        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
-        when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
-
-        List<String> errors = new ArrayList<>();
-        ContactDetailsValidator.checkForEmptyRepresentedOrganisationPolicy(caseData, errors);
 
         assertThat(errors).isEmpty();
     }
