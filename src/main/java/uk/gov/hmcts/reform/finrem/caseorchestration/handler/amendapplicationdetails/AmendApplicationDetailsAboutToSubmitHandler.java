@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -40,23 +41,23 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1Or
 public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
-
     private final CaseFlagsService caseFlagsService;
-
     private final FeatureToggleService featureToggleService;
-
     private final ExpressCaseService expressCaseService;
+    private final CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     public AmendApplicationDetailsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                        OnlineFormDocumentService onlineFormDocumentService,
                                                        CaseFlagsService caseFlagsService,
                                                        FeatureToggleService featureToggleService,
-                                                       ExpressCaseService expressCaseService) {
+                                                       ExpressCaseService expressCaseService,
+                                                       CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator) {
         super(finremCaseDetailsMapper);
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.caseFlagsService = caseFlagsService;
         this.featureToggleService = featureToggleService;
         this.expressCaseService = expressCaseService;
+        this.createCaseMandatoryDataValidator = createCaseMandatoryDataValidator;
     }
 
     @Override
@@ -72,34 +73,41 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
 
         validateCaseData(callbackRequest);
 
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
 
-        caseFlagsService.setCaseFlagInformation(finremCaseDetails);
+        caseFlagsService.setCaseFlagInformation(caseDetails);
 
-        clearUnusedDivorceDetailsFields(finremCaseData);
-        clearUnusedRespondentDetails(finremCaseData);
-        clearUnusedPeriodicPaymentOrderRelatedFields(finremCaseData);
-        clearUnusedPropertyAdjustmentOrderRelatedFields(finremCaseData);
-        clearFastTrackDecisionReason(finremCaseData);
-        clearOtherReasonForComplexityText(finremCaseData);
-        clearReasonForLocalCourt(finremCaseData);
-        clearAllocatedToBeHeardAtHighCourtJudgeLevelText(finremCaseData);
-        clearUnusedMiamDetailsFields(finremCaseData);
-        clearUnusedUploadAdditionalDocuments(finremCaseData);
+        clearUnusedDivorceDetailsFields(caseData);
+        clearUnusedRespondentDetails(caseData);
+        clearUnusedPeriodicPaymentOrderRelatedFields(caseData);
+        clearUnusedPropertyAdjustmentOrderRelatedFields(caseData);
+        clearFastTrackDecisionReason(caseData);
+        clearOtherReasonForComplexityText(caseData);
+        clearReasonForLocalCourt(caseData);
+        clearAllocatedToBeHeardAtHighCourtJudgeLevelText(caseData);
+        clearUnusedMiamDetailsFields(caseData);
+        clearUnusedUploadAdditionalDocuments(caseData);
 
-        generateMiniFormA(finremCaseDetails, userAuthorisation);
+        generateMiniFormA(caseDetails, userAuthorisation);
 
-        RefugeWrapperUtils.updateApplicantInRefugeTab(finremCaseDetails);
-        RefugeWrapperUtils.updateRespondentInRefugeTab(finremCaseDetails);
+        RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
+        RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
 
         if (featureToggleService.isExpressPilotEnabled()) {
-            expressCaseService.setExpressCaseEnrollmentStatus(finremCaseDetails.getData());
+            expressCaseService.setExpressCaseEnrollmentStatus(caseDetails.getData());
+        }
+
+        List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
+        if (!mandatoryDataErrors.isEmpty()) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .errors(mandatoryDataErrors)
+                .data(caseData).build();
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .errors(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData))
-            .data(finremCaseData).build();
+            .errors(ContactDetailsValidator.validateOrganisationPolicy(caseData))
+            .data(caseData).build();
     }
 
     private void generateMiniFormA(FinremCaseDetails finremCaseDetails, String userAuthorisation) {

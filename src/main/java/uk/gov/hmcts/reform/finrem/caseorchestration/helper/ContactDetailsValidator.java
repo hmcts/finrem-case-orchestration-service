@@ -348,6 +348,10 @@ public class ContactDetailsValidator {
             }
         }
     }
+    
+    private static boolean isMissingOrganisationPolicy(OrganisationPolicy organisationPolicy) {
+        return getOrganisationId(organisationPolicy).isEmpty();
+    }
 
     private static boolean isContested(FinremCaseData caseData) {
         return caseData.getCcdCaseType() == CaseType.CONTESTED;
