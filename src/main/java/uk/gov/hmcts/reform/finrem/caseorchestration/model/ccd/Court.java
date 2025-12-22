@@ -80,9 +80,8 @@ public class Court implements CourtListWrapper {
 
     @JsonIgnore
     @Override
-    public ClevelandCourt getClevelandCourt(boolean isConsented) {
-        return isConsented ? getDefaultCourtListWrapper().getClevelandCourtList()
-            : getDefaultCourtListWrapper().getCleavelandCourtList();
+    public ClevelandCourt getClevelandCourt() {
+        return getDefaultCourtListWrapper().getClevelandCourt();
     }
 
     @JsonIgnore

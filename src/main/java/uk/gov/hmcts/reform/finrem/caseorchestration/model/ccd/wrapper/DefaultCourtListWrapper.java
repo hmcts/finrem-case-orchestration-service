@@ -102,8 +102,9 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
 
     @JsonIgnore
     @Override
-    public ClevelandCourt getClevelandCourt(boolean isConsented) {
-        return isConsented ? clevelandCourtList : cleavelandCourtList;
+    public ClevelandCourt getClevelandCourt() {
+        ClevelandCourt clevelandCourtListFallback = cleavelandCourtList;
+        return clevelandCourtList != null ? clevelandCourtList : clevelandCourtListFallback;
     }
 
     @JsonIgnore
