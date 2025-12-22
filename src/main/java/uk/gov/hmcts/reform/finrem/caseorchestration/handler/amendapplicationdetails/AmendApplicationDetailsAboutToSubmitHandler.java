@@ -76,13 +76,6 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
-        if (!mandatoryDataErrors.isEmpty()) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .errors(mandatoryDataErrors)
-                .data(caseData).build();
-        }
-
         caseFlagsService.setCaseFlagInformation(caseDetails);
 
         clearUnusedDivorceDetailsFields(caseData);
@@ -103,6 +96,13 @@ public class AmendApplicationDetailsAboutToSubmitHandler extends FinremCallbackH
 
         if (featureToggleService.isExpressPilotEnabled()) {
             expressCaseService.setExpressCaseEnrollmentStatus(caseDetails.getData());
+        }
+
+        List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
+        if (!mandatoryDataErrors.isEmpty()) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .errors(mandatoryDataErrors)
+                .data(caseData).build();
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
