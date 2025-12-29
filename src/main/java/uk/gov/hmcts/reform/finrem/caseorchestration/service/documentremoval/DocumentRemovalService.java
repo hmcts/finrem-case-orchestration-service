@@ -210,7 +210,8 @@ public class DocumentRemovalService {
                         documentToDelete.getCaseDocument().getDocumentUrl())
                         || shouldRemoveDocument(fieldValue,
                         documentToDelete.getCaseDocument().getDocumentUrl())) {
-                        log.info(String.format("Deleting doc from CaseData JSON array node with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
+                        log.info(String.format("Deleting doc from CaseData JSON array node with url %s",
+                            documentToDelete.getCaseDocument().getDocumentUrl()));
                         ((ArrayNode) root).remove(i);
                     }
                 }
