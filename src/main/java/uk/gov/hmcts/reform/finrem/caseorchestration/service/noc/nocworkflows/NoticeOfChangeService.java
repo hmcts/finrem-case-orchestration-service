@@ -120,10 +120,8 @@ public class NoticeOfChangeService {
      * @param viaEventType           the event type that triggered this update
      * @param authToken              the authorisation token used to build the request
      */
-    public void updateRepresentationUpdateHistory(FinremCaseData finremCaseData,
-                                                  FinremCaseData originalFinremCaseData,
-                                                  EventType viaEventType,
-                                                  String authToken) {
+    public void updateRepresentationUpdateHistory(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
+                                                  EventType viaEventType, String authToken) {
         ChangeOfRepresentationRequest changeOfRepresentationRequest = buildChangeOfRepresentationRequest(authToken,
             finremCaseData, originalFinremCaseData);
         boolean hasChange = changeOfRepresentationRequest != null;
