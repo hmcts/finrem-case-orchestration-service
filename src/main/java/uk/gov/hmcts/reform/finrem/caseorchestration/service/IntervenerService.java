@@ -38,6 +38,7 @@ public class IntervenerService {
     private final SystemUserService systemUserService;
     private final ChangeOfRepresentationService changeOfRepresentationService;
     private final IdamService idamService;
+
     /**
      * Revokes an intervener solicitor role for the given case.
      *
