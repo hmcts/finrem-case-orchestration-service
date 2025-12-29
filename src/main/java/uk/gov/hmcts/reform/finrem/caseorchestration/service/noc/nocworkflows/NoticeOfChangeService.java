@@ -138,8 +138,7 @@ public class NoticeOfChangeService {
                         .id(element.getId())
                         .value(element.getValue())
                         .build())
-                ).collect(Collectors.toList())
-            );
+            ).collect(Collectors.toList()));
         }
     }
 
