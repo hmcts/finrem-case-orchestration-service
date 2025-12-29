@@ -61,13 +61,6 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
-        if (!mandatoryDataErrors.isEmpty()) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .errors(mandatoryDataErrors)
-                .data(caseData).build();
-        }
-
         // below validations are needed because users can use browser's back to bypass the validation in mid-handler
         List<String> errors = new ArrayList<>();
         checkForEmptyApplicantPostcode(caseData.getContactDetailsWrapper(), errors);
@@ -84,6 +77,13 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         updateLatestConsentOrder(callbackRequest);
 
         errors.addAll(ContactDetailsValidator.validateOrganisationPolicy(caseData));
+
+        List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
+        if (!mandatoryDataErrors.isEmpty()) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .errors(mandatoryDataErrors)
+                .data(caseData).build();
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
