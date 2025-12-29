@@ -56,6 +56,7 @@ import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -75,7 +76,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_URL;
 
 public class TestSetUpUtils {
@@ -269,7 +269,7 @@ public class TestSetUpUtils {
 
         return FinremCaseDetails.builder()
             .caseType(CaseType.CONSENTED)
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .state(State.APPLICATION_SUBMITTED)
             .data(caseData)
             .build();
@@ -292,7 +292,7 @@ public class TestSetUpUtils {
 
         return CaseDetails.builder()
             .caseTypeId(CaseType.CONSENTED.getCcdType())
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .data(caseData)
             .build();
     }
@@ -314,7 +314,7 @@ public class TestSetUpUtils {
 
         return CaseDetails.builder()
             .caseTypeId(CaseType.CONTESTED.getCcdType())
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .data(caseData)
             .build();
     }

@@ -28,8 +28,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
 class UploadApprovedOrderServiceTest  {
@@ -83,7 +83,7 @@ class UploadApprovedOrderServiceTest  {
                 .build())
             .hearingDirectionDetailsCollection(hearingDirectionDetailsCollections)
             .build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, finremCaseData);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CONTESTED, finremCaseData);
 
         uploadApprovedOrderService.processApprovedOrders(callbackRequest, AUTH_TOKEN);
 
@@ -137,7 +137,7 @@ class UploadApprovedOrderServiceTest  {
                 .build())
             .hearingDirectionDetailsCollection(hearingDirectionDetailsCollections)
             .build();
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, finremCaseData);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CONTESTED, finremCaseData);
 
         uploadApprovedOrderService.processApprovedOrders(callbackRequest, AUTH_TOKEN);
 
