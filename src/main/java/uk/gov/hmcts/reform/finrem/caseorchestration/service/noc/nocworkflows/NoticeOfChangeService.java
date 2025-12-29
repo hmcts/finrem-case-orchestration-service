@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -131,16 +130,14 @@ public class NoticeOfChangeService {
                 changeOfRepresentationRequest, viaEventType);
 
             // modifying finremCaseData reference object
-            finremCaseData.setRepresentationUpdateHistory(Stream.concat(
-                // existing
-                emptyIfNull(finremCaseData.getRepresentationUpdateHistory()).stream(),
-                // new
+            finremCaseData.setRepresentationUpdateHistory(
                 emptyIfNull(history.getRepresentationUpdateHistory()).stream()
                     .map(element -> RepresentationUpdateHistoryCollection.builder()
                         .id(element.getId())
                         .value(element.getValue())
                         .build())
-            ).collect(Collectors.toList()));
+                    .collect(Collectors.toList())
+            );
         }
     }
 
