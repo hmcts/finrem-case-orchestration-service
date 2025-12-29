@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -46,7 +47,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRep
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest.RESPONDENT_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -129,13 +129,16 @@ public class NoticeOfChangeService {
                 changeOfRepresentationRequest, viaEventType);
 
             // modifying finremCaseData reference object
-            finremCaseData.setRepresentationUpdateHistory(
-                nullIfEmpty(history.getRepresentationUpdateHistory()).stream()
+            finremCaseData.setRepresentationUpdateHistory(Stream.concat(
+                // existing
+                emptyIfNull(finremCaseData.getRepresentationUpdateHistory()).stream(),
+                // new
+                emptyIfNull(history.getRepresentationUpdateHistory()).stream()
                     .map(element -> RepresentationUpdateHistoryCollection.builder()
                         .id(element.getId())
                         .value(element.getValue())
                         .build())
-                    .collect(Collectors.toList())
+                ).collect(Collectors.toList())
             );
         }
     }

@@ -141,8 +141,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             updateBarristerChangeToRepresentationUpdateHistory(request, BarristerParty.RESPONDENT, userAuthorisation);
         } else if (request.requestedByIntervenerRep) {
             int intervenerIndex = getIntervenerIndex(request);
-
-            // removing access from the represented intervener. i.e. only intervener1 if the requestor is on intervener 1
             intervenerService.updateIntervenerSolicitorStopRepresentingHistory(request.finremCaseDetails.getData(),
                 request.finremCaseDetailsBefore.getData(), intervenerIndex, userAuthorisation);
             updateBarristerChangeToRepresentationUpdateHistory(request, getIntervenerBarristerByIndex(intervenerIndex),
