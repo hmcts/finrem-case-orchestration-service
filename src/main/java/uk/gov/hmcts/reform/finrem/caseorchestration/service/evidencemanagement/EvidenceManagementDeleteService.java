@@ -57,35 +57,35 @@ public class EvidenceManagementDeleteService {
         }
     }
 
-        private void deleteOnDmStore (String fileUrl, String authorizationToken){
+    private void deleteOnDmStore(String fileUrl, String authorizationToken) {
 
-            UserDetails userDetails;
-            try {
-                log.info("DMStore Delete file: {} and docId: {}", fileUrl, getDocumentIdFromFileUrl(fileUrl));
-                userDetails = idamAuthService.getUserDetails(authorizationToken);
-            } catch (FeignException e) {
-                log.info("FeignException status: {}, message: {}", e.status(), e.getMessage());
-                return;
-            }
-            HttpEntity<Object> httpEntity = deleteServiceCallHeaders(userDetails.getId());
-            ResponseEntity<String> response = restTemplate.exchange(fileUrl,
-                HttpMethod.DELETE,
-                httpEntity,
-                String.class);
-            log.debug("Document deletion response for userId {}: {}", userDetails.getId(), response);
-
+        UserDetails userDetails;
+        try {
+            log.info("DMStore Delete file: {} and docId: {}", fileUrl, getDocumentIdFromFileUrl(fileUrl));
+            userDetails = idamAuthService.getUserDetails(authorizationToken);
+        } catch (FeignException e) {
+            log.info("FeignException status: {}, message: {}", e.status(), e.getMessage());
+            return;
         }
+        HttpEntity<Object> httpEntity = deleteServiceCallHeaders(userDetails.getId());
+        ResponseEntity<String> response = restTemplate.exchange(fileUrl,
+            HttpMethod.DELETE,
+            httpEntity,
+            String.class);
+        log.debug("Document deletion response for userId {}: {}", userDetails.getId(), response);
 
-        private HttpEntity<Object> deleteServiceCallHeaders (String userId){
-
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add(SERVICE_AUTHORIZATION_HEADER, authTokenGenerator.generate());
-            httpHeaders.add(USER_ID_HEADER, userId);
-
-            return new HttpEntity<>(httpHeaders);
-        }
-
-        private UUID getDocumentIdFromFileUrl (String fileUrl){
-            return UUID.fromString(fileUrl.substring(fileUrl.length() - DOC_UUID_LENGTH));
-        }
     }
+
+    private HttpEntity<Object> deleteServiceCallHeaders(String userId) {
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(SERVICE_AUTHORIZATION_HEADER, authTokenGenerator.generate());
+        httpHeaders.add(USER_ID_HEADER, userId);
+
+        return new HttpEntity<>(httpHeaders);
+    }
+
+    private UUID getDocumentIdFromFileUrl(String fileUrl) {
+        return UUID.fromString(fileUrl.substring(fileUrl.length() - DOC_UUID_LENGTH));
+    }
+}
