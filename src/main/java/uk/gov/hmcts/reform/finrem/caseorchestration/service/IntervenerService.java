@@ -249,6 +249,22 @@ public class IntervenerService {
         }
     }
 
+    /**
+     * Updates the representation update history when an intervener solicitor
+     * stops representing a client.
+     *
+     * <p>If the intervener in the original case data has an associated organisation,
+     * a STOP_REPRESENTING_CLIENT entry is generated and appended to the existing
+     * representation update history in the current case data.</p>
+     *
+     * <p>This method modifies the provided {@link FinremCaseData} instance by
+     * adding a new history record.</p>
+     *
+     * @param finremCaseData the current case data to be updated
+     * @param originalFinremCaseData the original case data used to determine the existing intervener details
+     * @param intervenerIndex the 1-based index of the intervener
+     * @param userAuthorisation the user authorisation used to identify who triggered the update
+     */
     public void updateIntervenerSolicitorStopRepresentingHistory(FinremCaseData finremCaseData,
                                                                  FinremCaseData originalFinremCaseData,
                                                                  int intervenerIndex, String userAuthorisation) {
