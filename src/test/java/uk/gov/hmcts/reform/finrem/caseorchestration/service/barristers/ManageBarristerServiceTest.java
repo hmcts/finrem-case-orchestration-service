@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 
 @ExtendWith(MockitoExtension.class)
 class ManageBarristerServiceTest {
@@ -201,7 +201,7 @@ class ManageBarristerServiceTest {
                 .build())
             .build();
         return FinremCaseDetails.builder()
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .data(caseData)
             .build();
     }
