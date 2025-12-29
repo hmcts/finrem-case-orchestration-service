@@ -69,7 +69,7 @@ public class DocumentRemovalService {
         log.info(format("Beginning removal of %s document from Case ID %s", documentsUserWantsDeletedList.size(), caseId));
 
         //CDAM Needs to be enabled for this to work, only the user who created a document can delete it.
-        // in our case, all documents are created by ExUI and therefor have no username, so auth fails on delete with 403.
+        // in our case, all documents are created by ExUI and therefore have no username, so auth fails on delete with 403.
         documentsUserWantsDeletedList.forEach(documentToDeleteCollection ->
             deleteDocument(
                 documentToDeleteCollection.getValue(), userAuthorisation));
