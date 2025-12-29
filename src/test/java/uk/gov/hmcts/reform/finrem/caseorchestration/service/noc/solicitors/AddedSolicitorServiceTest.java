@@ -348,6 +348,12 @@ class AddedSolicitorServiceTest {
         when(caseDataService.isLitigantRepresented(finremCaseData, true)).thenReturn(false);
 
         assertNull(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData));
+
+        finremCaseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(NoticeOfChangeParty.APPLICANT).build())
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPSOLICITOR]").build())
+            .build();
+        assertNull(addedSolicitorService.getAddedSolicitorAsCaseworker(finremCaseData));
     }
 
     private DynamicList getApplicantCaseRole() {
