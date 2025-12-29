@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 
@@ -57,7 +58,7 @@ public class DocumentRemovalService {
         return buildCaseDocumentList(documentNodes);
     }
 
-    public FinremCaseData removeDocuments(FinremCaseData caseData, Long caseId,  String userAuthorisation) {
+    public FinremCaseData removeDocuments(FinremCaseData caseData, Long caseId, String userAuthorisation) {
 
         List<DocumentToKeepCollection> allExistingDocumentsList = getCaseDocumentsList(caseData);
 
@@ -98,12 +99,12 @@ public class DocumentRemovalService {
         LocalDateTime documentNodeUploadTimestamp;
         try {
             documentNodeUploadTimestamp =
-                    Objects.isNull(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP)) ? null :
-                            LocalDateTime.parse(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP).asText());
+                Objects.isNull(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP)) ? null :
+                    LocalDateTime.parse(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP).asText());
         } catch (Exception e) {
             log.error(format(
-                    "Error getting upload timestamp for document url: %s.",
-                    documentNode.get(DOCUMENT_URL).asText()));
+                "Error getting upload timestamp for document url: %s.",
+                documentNode.get(DOCUMENT_URL).asText()));
             documentNodeUploadTimestamp = null;
         }
         return documentNodeUploadTimestamp;
@@ -136,11 +137,11 @@ public class DocumentRemovalService {
         }
 
         documentsCollection.sort(Comparator.comparing(
-                DocumentToKeepCollection::getValue,
-                    Comparator.comparing(DocumentToKeep::getCaseDocument,
-                            Comparator.comparing(CaseDocument::getUploadTimestamp,
-                                Comparator.nullsLast(
-                                    Comparator.reverseOrder())))));
+            DocumentToKeepCollection::getValue,
+            Comparator.comparing(DocumentToKeep::getCaseDocument,
+                Comparator.comparing(CaseDocument::getUploadTimestamp,
+                    Comparator.nullsLast(
+                        Comparator.reverseOrder())))));
 
         return documentsCollection.stream().distinct().toList();
     }
@@ -208,7 +209,7 @@ public class DocumentRemovalService {
                     if (fieldValue.asText().equals(
                         documentToDelete.getCaseDocument().getDocumentUrl())
                         || shouldRemoveDocument(fieldValue,
-                            documentToDelete.getCaseDocument().getDocumentUrl())) {
+                        documentToDelete.getCaseDocument().getDocumentUrl())) {
                         log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
                         ((ArrayNode) root).remove(i);
                     }
@@ -220,24 +221,23 @@ public class DocumentRemovalService {
 
     private boolean shouldRemoveDocument(JsonNode fieldValue, String documentToKeepUrl) {
         return fieldValue.has(DOCUMENT_URL)
-                && fieldValue.get(DOCUMENT_URL).asText().equals(documentToKeepUrl);
+            && fieldValue.get(DOCUMENT_URL).asText().equals(documentToKeepUrl);
     }
 
-    // Consider making async again.  See deleteOldMiniFormA
     private void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken) {
-        try {
-            log.info(String.format("Deleting doc from DocStore with url %s",
-                documentToRemove.getCaseDocument().getDocumentUrl()));
+        log.info(String.format("Deleting doc from DocStore with url %s",
+            documentToRemove.getCaseDocument().getDocumentUrl()));
 
-            if (featureToggleService.isSecureDocEnabled()) {
-                genericDocumentService.deleteDocument(documentToRemove.getCaseDocument().getDocumentUrl(), authorisationToken);
-            }
-        } catch (Exception e) {
-            log.error(format(
-                    "Failed to delete document url %s",
-                    documentToRemove.getCaseDocument().getDocumentUrl()), e);
-
-            throw new DocumentDeleteException(e.getMessage(), e);
+        if (featureToggleService.isSecureDocEnabled()) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    genericDocumentService.deleteDocument(documentToRemove.getCaseDocument().getDocumentUrl(), authorisationToken);
+                } catch (Exception e) {
+                    log.error(format(
+                        "Document Removal Service failed to delete document url %s",
+                        documentToRemove.getCaseDocument().getDocumentUrl()), e);
+                }
+            });
         }
     }
 
