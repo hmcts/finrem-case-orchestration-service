@@ -219,36 +219,6 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
-    private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
-        Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
-        if (userId.isPresent()) {
-            assignCaseAccessService.grantCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
-        } else {
-            logError(caseId, errors);
-        }
-    }
-
-    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole) {
-        revokeIntervenerRole(caseId, email, orgId, caseRole, null);
-    }
-
-    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
-        Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
-        if (userId.isPresent()) {
-            assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
-        } else {
-            logError(caseId, errors);
-        }
-    }
-
-    private void logError(Long caseId, List<String> errors) {
-        String error = "Could not find intervener with provided email";
-        log.info(String.format(error + " for caseId %s", caseId));
-        if (errors != null) {
-            errors.add(error);
-        }
-    }
-
     /**
      * Updates the representation update history when an intervener solicitor
      * stops representing a client.
@@ -284,16 +254,46 @@ public class IntervenerService {
 
             // modifying finremCaseData reference object
             finremCaseData.setRepresentationUpdateHistory(Stream.concat(
-                // existing
-                emptyIfNull(finremCaseData.getRepresentationUpdateHistory()).stream(),
-                // new
-                emptyIfNull(history.getRepresentationUpdateHistory()).stream()
-                    .map(element -> RepresentationUpdateHistoryCollection.builder()
-                        .id(element.getId())
-                        .value(element.getValue())
-                        .build())
+                    // existing
+                    emptyIfNull(finremCaseData.getRepresentationUpdateHistory()).stream(),
+                    // new
+                    emptyIfNull(history.getRepresentationUpdateHistory()).stream()
+                        .map(element -> RepresentationUpdateHistoryCollection.builder()
+                            .id(element.getId())
+                            .value(element.getValue())
+                            .build())
                 ).collect(Collectors.toList())
             );
+        }
+    }
+
+    private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
+        Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
+        if (userId.isPresent()) {
+            assignCaseAccessService.grantCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
+        } else {
+            logError(caseId, errors);
+        }
+    }
+
+    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole) {
+        revokeIntervenerRole(caseId, email, orgId, caseRole, null);
+    }
+
+    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
+        Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
+        if (userId.isPresent()) {
+            assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
+        } else {
+            logError(caseId, errors);
+        }
+    }
+
+    private void logError(Long caseId, List<String> errors) {
+        String error = "Could not find intervener with provided email";
+        log.info(String.format(error + " for caseId %s", caseId));
+        if (errors != null) {
+            errors.add(error);
         }
     }
 }
