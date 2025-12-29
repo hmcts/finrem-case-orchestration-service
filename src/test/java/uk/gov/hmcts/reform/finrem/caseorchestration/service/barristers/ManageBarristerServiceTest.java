@@ -82,7 +82,7 @@ class ManageBarristerServiceTest {
 
         assertThatThrownBy(() -> manageBarristerService.getManageBarristerParty(caseDetails, CaseRole.APP_BARRISTER))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Case ID 123: Unexpected case role value APP_BARRISTER");
+            .hasMessage("Case ID 1234567890: Unexpected case role value APP_BARRISTER");
     }
 
     @ParameterizedTest
