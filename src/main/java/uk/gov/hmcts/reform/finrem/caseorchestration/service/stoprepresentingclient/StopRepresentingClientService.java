@@ -286,8 +286,8 @@ public class StopRepresentingClientService {
     }
 
     private boolean isSameOrganisation(Organisation solOrganisation, Organisation barristerOrganisation) {
-        return nullSafeOrganisationId(solOrganisation, "$EMPTY_SOL_ORG_ID$")
-            .equals(nullSafeOrganisationId(barristerOrganisation, "$EMPTY_BAR_ORG_ID$"));
+        return nullSafeOrganisationId(solOrganisation, " ")
+            .equals(nullSafeOrganisationId(barristerOrganisation, "  "));
     }
 
     private String nullSafeOrganisationId(Organisation organisation, String defaultOrdId) {
