@@ -11,7 +11,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.Representation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 
 import java.util.Arrays;
 
@@ -25,12 +28,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 @Service
 public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHandler {
 
-    private final CaseRoleService caseRoleService;
+    private final StopRepresentingClientService stopRepresentingClientService;
 
     public StopRepresentingClientAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     CaseRoleService caseRoleService) {
+                                                     StopRepresentingClientService stopRepresentingClientService) {
         super(finremCaseDetailsMapper);
-        this.caseRoleService = caseRoleService;
+        this.stopRepresentingClientService = stopRepresentingClientService;
     }
 
     @Override
@@ -45,25 +48,45 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
-        prepareStopRepresentationWrapper(callbackRequest.getCaseDetails().getData(), userAuthorisation);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        Representation representation = stopRepresentingClientService.buildRepresentation(caseData, userAuthorisation);
+        prepareStopRepresentationWrapper(callbackRequest.getCaseDetails().getData(), representation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
             .build();
     }
 
-    private void prepareStopRepresentationWrapper(FinremCaseData finremCaseData, String userAuthorisation) {
-        String label = null;
-        if (caseRoleService.isApplicantRepresentative(finremCaseData, userAuthorisation)) {
-            label = "Keep the Applicant's contact details private from the Respondent?";
-        } else if (caseRoleService.isRespondentRepresentative(finremCaseData, userAuthorisation)) {
-            label = "Keep the Respondent's contact details private from the Applicant?";
-        } else if (caseRoleService.isIntervenerRepresentative(finremCaseData, userAuthorisation)) {
-            label = "Keep the Intervener's contact details private from the Applicant & Respondent?";
+    private void prepareStopRepresentationWrapper(FinremCaseData caseData, Representation representation) {
+        StopRepresentationWrapper wrapper = caseData.getStopRepresentationWrapper();
+
+        boolean showClientAddressForService = true;
+        String label = "Client's address for service";
+        String confidentialLabel = null;
+        if (representation.isRepresentingApplicant()) {
+            label += " (Applicant)";
+            confidentialLabel = "Keep the Applicant's contact details private from the Respondent?";
+        } else if (representation.isRepresentingRespondent()) {
+            label += " (Respondent)";
+            confidentialLabel = "Keep the Respondent's contact details private from the Applicant?";
+        } else if (representation.isRepresentingAnyInterveners()) {
+            int index = representation.intervenerIndex();
+            if (representation.isRepresentingAnyIntervenerBarristers()
+                && !stopRepresentingClientService.isGoingToRemoveIntervenerSolicitorAccess(caseData, representation)) {
+                showClientAddressForService  = false;
+                label = null;
+            } else {
+                label += format(" (Intervener %s)", index);
+                confidentialLabel = format("Keep the Intervener %s's contact details private from the Applicant & Respondent?", index);
+            }
         } else {
             throw new UnsupportedOperationException(format("%s - It supports applicant/respondent representatives only",
-                finremCaseData.getCcdCaseId()));
+                caseData.getCcdCaseId()));
         }
-        finremCaseData.getStopRepresentationWrapper().setClientAddressForServiceConfidentialLabel(label);
+
+        wrapper.setClientAddressForServiceConfidentialLabel(confidentialLabel);
+        wrapper.setClientAddressForServiceLabel(label);
+        wrapper.setShowClientAddressForService(YesOrNo.forValue(showClientAddressForService));
     }
 }

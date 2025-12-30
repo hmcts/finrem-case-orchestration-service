@@ -175,4 +175,30 @@ public class CaseRoleService {
             default -> Optional.empty();
         };
     }
+
+    /**
+     * Returns the intervener index (1–4) if the user is an Intervener Solicitor
+     * for the given case.
+     *
+     * @param finremCaseData The case data containing the CCD Case ID.
+     * @param userAuthorisation The user's authorisation token.
+     * @return an {@link Optional} containing the intervener index (1–4),
+     *         or {@link Optional#empty()} if the user is not an intervener solicitor.
+     */
+    public Optional<Integer> getIntervenerSolicitorIndex(FinremCaseData finremCaseData, String userAuthorisation) {
+        CaseRole caseRole = getUserCaseRole(finremCaseData.getCcdCaseId(), userAuthorisation);
+
+        if (caseRole == null) {
+            return Optional.empty();
+        }
+
+        return switch (caseRole) {
+            case INTVR_SOLICITOR_1 -> Optional.of(1);
+            case INTVR_SOLICITOR_2 -> Optional.of(2);
+            case INTVR_SOLICITOR_3 -> Optional.of(3);
+            case INTVR_SOLICITOR_4 -> Optional.of(4);
+            default -> Optional.empty();
+        };
+    }
+
 }
