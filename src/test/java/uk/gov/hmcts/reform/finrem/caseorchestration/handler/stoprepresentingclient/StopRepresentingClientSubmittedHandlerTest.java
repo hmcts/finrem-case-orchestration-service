@@ -9,10 +9,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientInfo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.event.handler.StopRepresentingClientService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -37,13 +37,13 @@ class StopRepresentingClientSubmittedHandlerTest {
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
+    private StopRepresentingClientService stopRepresentingClientService;
     @Mock
     private CaseRoleService caseRoleService;
 
     @BeforeEach
     public void setup() {
-        underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, caseRoleService, applicationEventPublisher);
+        underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, caseRoleService, stopRepresentingClientService);
     }
 
     @Test
@@ -74,8 +74,8 @@ class StopRepresentingClientSubmittedHandlerTest {
 
         underTest.handle(request, AUTH_TOKEN);
 
-        ArgumentCaptor<StopRepresentingClientEvent> eventCaptor = ArgumentCaptor.forClass(StopRepresentingClientEvent.class);
-        verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
+        ArgumentCaptor<StopRepresentingClientInfo> eventCaptor = ArgumentCaptor.forClass(StopRepresentingClientInfo.class);
+        verify(stopRepresentingClientService).applyCaseAssignment(eventCaptor.capture());
 
         assertThat(eventCaptor.getValue().getCaseDetails().getData()).isEqualTo(caseData);
         assertThat(eventCaptor.getValue().getCaseDetailsBefore().getData()).isEqualTo(caseDataBefore);

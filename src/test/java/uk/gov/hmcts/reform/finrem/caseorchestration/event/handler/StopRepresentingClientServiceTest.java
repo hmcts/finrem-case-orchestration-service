@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
@@ -52,7 +52,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organi
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 
 @ExtendWith(MockitoExtension.class)
-class StopRepresentingClientEventHandlerTest {
+class StopRepresentingClientServiceTest {
 
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
@@ -75,11 +75,11 @@ class StopRepresentingClientEventHandlerTest {
     @Mock
     private IntervenerService intervenerService;
 
-    private StopRepresentingClientEventHandler underTest;
+    private StopRepresentingClientService underTest;
 
     @BeforeEach
     void setup() {
-        underTest = new StopRepresentingClientEventHandler(assignCaseAccessService, systemUserService, finremCaseDetailsMapper,
+        underTest = new StopRepresentingClientService(assignCaseAccessService, systemUserService, finremCaseDetailsMapper,
             manageBarristerService, barristerChangeCaseAccessUpdater, coreCaseDataService, intervenerService);
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
     }
@@ -122,14 +122,14 @@ class StopRepresentingClientEventHandlerTest {
                 Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
                 .invokedByIntervener(true)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
                 .userAuthorisation(AUTH_TOKEN)
                 .build();
 
-            underTest.handleEvent(event);
+            underTest.applyCaseAssignment(event);
 
             verify(intervenerService).revokeIntervener(Long.parseLong(CASE_ID), intervenerOne);
             verify(intervenerService, never()).revokeIntervener(Long.parseLong(CASE_ID), intervenerTwo);
@@ -145,7 +145,7 @@ class StopRepresentingClientEventHandlerTest {
             FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
                 .invokedByIntervener(true)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
@@ -170,7 +170,7 @@ class StopRepresentingClientEventHandlerTest {
             when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
                 .thenReturn(intv4BarristerChange);
 
-            underTest.handleEvent(event);
+            underTest.applyCaseAssignment(event);
 
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
@@ -192,7 +192,7 @@ class StopRepresentingClientEventHandlerTest {
             FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
                 .userAuthorisation(AUTH_TOKEN)
@@ -216,7 +216,7 @@ class StopRepresentingClientEventHandlerTest {
             when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
                 .thenReturn(intv4BarristerChange);
 
-            underTest.handleEvent(event);
+            underTest.applyCaseAssignment(event);
 
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
@@ -246,7 +246,7 @@ class StopRepresentingClientEventHandlerTest {
                     Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
                 .invokedByIntervener(false)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
@@ -265,7 +265,7 @@ class StopRepresentingClientEventHandlerTest {
                 -> getOrganisationPolicy(cd.getData(), isApplicant).equals(originalOrgPolicy)
             ))).thenReturn(mockValidCaseDetails);
 
-            underTest.handleEvent(event);
+            underTest.applyCaseAssignment(event);
 
             verify(assignCaseAccessService).applyDecision(TEST_SYSTEM_TOKEN, mockValidCaseDetails);
             verify(assignCaseAccessService, never()).applyDecision(TEST_SYSTEM_TOKEN, mockInvalidCaseDetails);
@@ -284,14 +284,14 @@ class StopRepresentingClientEventHandlerTest {
                     Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
                 .invokedByIntervener(false)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(mock(FinremCaseData.class)).build())
                 .userAuthorisation(AUTH_TOKEN)
                 .build();
 
-            underTest.handleEvent(event);
+            underTest.applyCaseAssignment(event);
 
             verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
             verifyNoInteractions(intervenerService);
@@ -309,7 +309,7 @@ class StopRepresentingClientEventHandlerTest {
             FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), caseType, caseData)
                 .build();
 
-            StopRepresentingClientEvent event = StopRepresentingClientEvent.builder()
+            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
                 .invokedByIntervener(false)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
@@ -318,7 +318,7 @@ class StopRepresentingClientEventHandlerTest {
 
             when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(mock(CaseDetails.class));
 
-            underTest.handleEvent(event);
+            underTest.applyCaseAssignment(event);
 
             ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> captor = ArgumentCaptor.forClass(Function.class);
             verify(coreCaseDataService).performPostSubmitCallback(eq(caseType), eq(Long.valueOf(CASE_ID)),

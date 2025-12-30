@@ -2,11 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.event.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
@@ -31,10 +29,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 
+@Service
 @Slf4j
-@Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class StopRepresentingClientEventHandler {
+@RequiredArgsConstructor
+public class StopRepresentingClientService {
 
     // This class is made to interact with AAC only
     // Given event.caseDetails is READ-ONLY
@@ -53,16 +51,16 @@ public class StopRepresentingClientEventHandler {
 
     private final IntervenerService intervenerService;
 
-    private static FinremCaseData getFinremCaseDataBeforeFromEvent(StopRepresentingClientEvent event) {
-        return event.getCaseDetailsBefore().getData();
+    private static FinremCaseData getFinremCaseDataBeforeFromInfo(StopRepresentingClientInfo info) {
+        return info.getCaseDetailsBefore().getData();
     }
 
-    private static FinremCaseData getFinremCaseDataFromEvent(StopRepresentingClientEvent event) {
-        return event.getCaseDetails().getData();
+    private static FinremCaseData getFinremCaseDataFromInfo(StopRepresentingClientInfo info) {
+        return info.getCaseDetails().getData();
     }
 
-    private static long getCaseId(StopRepresentingClientEvent event) {
-        return Long.parseLong(getFinremCaseDataFromEvent(event).getCcdCaseId());
+    private static long getCaseId(StopRepresentingClientInfo info) {
+        return Long.parseLong(getFinremCaseDataFromInfo(info).getCcdCaseId());
     }
 
     private static Map<String, Object> clearChangeOrganisationRequestField() {
@@ -71,25 +69,31 @@ public class StopRepresentingClientEventHandler {
         return map;
     }
 
-    @EventListener
-    // @Async
-    public void handleEvent(StopRepresentingClientEvent event) {
-        // Enable @Async to display the success page,
-        // but only if EXUI-3746 allows hiding the "Close and return to case details" button.
-        if (event.isInvokedByIntervener()) {
-            handleIntervenerRepresentativeRequest(event);
+    /**
+     * Applies case assignment based on who triggered the stop representing a client event.
+     *
+     * <p>
+     * If the event is invoked by an intervener, the intervener representative request
+     * is handled. Otherwise, the applicant or respondent representative request
+     * is processed.
+     *
+     * @param info the stop representing client POJO containing the invocation context
+     */
+    public void applyCaseAssignment(StopRepresentingClientInfo info) {
+        if (info.isInvokedByIntervener()) {
+            handleIntervenerRepresentativeRequest(info);
         } else {
-            handleApplicantOrRespondentRepresentativeRequest(event);
+            handleApplicantOrRespondentRepresentativeRequest(info);
         }
     }
 
-    private void handleApplicantOrRespondentRepresentativeRequest(StopRepresentingClientEvent event) {
-        final FinremCaseData finremCaseData = getFinremCaseDataFromEvent(event);
+    private void handleApplicantOrRespondentRepresentativeRequest(StopRepresentingClientInfo info) {
+        final FinremCaseData finremCaseData = getFinremCaseDataFromInfo(info);
         final CaseType caseType = finremCaseData.getCcdCaseType();
-        final long caseId = getCaseId(event);
+        final long caseId = getCaseId(info);
 
-        sendAllBarristerChangeToCaseAssignmentService(event);
-        boolean isNocRequestSent = sendNocRequestToCaseAssignmentService(event);
+        sendAllBarristerChangeToCaseAssignmentService(info);
+        boolean isNocRequestSent = sendNocRequestToCaseAssignmentService(info);
 
         if (isNocRequestSent) {
             // save a call if changeOrganisationRequestField is null
@@ -105,9 +109,9 @@ public class StopRepresentingClientEventHandler {
         );
     }
 
-    private void handleIntervenerRepresentativeRequest(StopRepresentingClientEvent event) {
-        final FinremCaseData finremCaseData = getFinremCaseDataFromEvent(event);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromEvent(event);
+    private void handleIntervenerRepresentativeRequest(StopRepresentingClientInfo info) {
+        final FinremCaseData finremCaseData = getFinremCaseDataFromInfo(info);
+        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromInfo(info);
 
         finremCaseDataBefore.getInterveners().forEach(originalWrapper -> {
             IntervenerType it = originalWrapper.getIntervenerType();
@@ -117,36 +121,36 @@ public class StopRepresentingClientEventHandler {
                     .findAny()
                     .ifPresent(wrapper -> {
                         if (isIntervenerOrganisationDifference(wrapper, originalWrapper)) {
-                            intervenerService.revokeIntervener(event.getCaseDetails().getId(), originalWrapper);
+                            intervenerService.revokeIntervener(info.getCaseDetails().getId(), originalWrapper);
                         }
                     });
             }
         });
 
-        sendAllBarristerChangeToCaseAssignmentService(event);
+        sendAllBarristerChangeToCaseAssignmentService(info);
     }
 
-    private void sendAllBarristerChangeToCaseAssignmentService(StopRepresentingClientEvent event) {
-        sendBarristerChangesToCaseAssignmentService(event, BarristerParty.APPLICANT);
-        sendBarristerChangesToCaseAssignmentService(event, BarristerParty.RESPONDENT);
-        sendBarristerChangesToCaseAssignmentService(event, BarristerParty.INTERVENER1);
-        sendBarristerChangesToCaseAssignmentService(event, BarristerParty.INTERVENER2);
-        sendBarristerChangesToCaseAssignmentService(event, BarristerParty.INTERVENER3);
-        sendBarristerChangesToCaseAssignmentService(event, BarristerParty.INTERVENER4);
+    private void sendAllBarristerChangeToCaseAssignmentService(StopRepresentingClientInfo info) {
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.APPLICANT);
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.RESPONDENT);
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER1);
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER2);
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER3);
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER4);
     }
 
-    private void sendBarristerChangesToCaseAssignmentService(StopRepresentingClientEvent event, BarristerParty barristerParty) {
-        final long caseId = getCaseId(event);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromEvent(event);
+    private void sendBarristerChangesToCaseAssignmentService(StopRepresentingClientInfo info, BarristerParty barristerParty) {
+        final long caseId = getCaseId(info);
+        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromInfo(info);
 
         BarristerChange barristerChange = manageBarristerService
-            .getBarristerChange(event.getCaseDetails(), finremCaseDataBefore, barristerParty);
+            .getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
         barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, barristerChange);
     }
 
-    private boolean sendNocRequestToCaseAssignmentService(StopRepresentingClientEvent event) {
-        final FinremCaseData finremCaseData = getFinremCaseDataFromEvent(event);
-        final FinremCaseData originalFinremCaseData = getFinremCaseDataBeforeFromEvent(event);
+    private boolean sendNocRequestToCaseAssignmentService(StopRepresentingClientInfo info) {
+        final FinremCaseData finremCaseData = getFinremCaseDataFromInfo(info);
+        final FinremCaseData originalFinremCaseData = getFinremCaseDataBeforeFromInfo(info);
 
         // to check if ChangeOrganisationRequest populated, otherwise skip it
         if (finremCaseData.getChangeOrganisationRequestField() == null) {
@@ -170,7 +174,7 @@ public class StopRepresentingClientEventHandler {
         // Going to apply decision
         if (isReverted) {
             assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(),
-                buildCaseDetailsFromEventCaseData(event));
+                buildCaseDetailsFromEventCaseData(info));
             return true;
         }
         throw new IllegalStateException(format("%s - ChangeOrganisationRequest populated with unknown or null NOC Party : %s",
@@ -178,8 +182,8 @@ public class StopRepresentingClientEventHandler {
             finremCaseData.getCcdCaseId()));
     }
 
-    private CaseDetails buildCaseDetailsFromEventCaseData(StopRepresentingClientEvent event) {
-        return finremCaseDetailsMapper.mapToCaseDetails(event.getCaseDetails());
+    private CaseDetails buildCaseDetailsFromEventCaseData(StopRepresentingClientInfo info) {
+        return finremCaseDetailsMapper.mapToCaseDetails(info.getCaseDetails());
     }
 
     private void clearChangeOrganisationRequestAfterThisEvent(CaseType caseType, long caseId) {

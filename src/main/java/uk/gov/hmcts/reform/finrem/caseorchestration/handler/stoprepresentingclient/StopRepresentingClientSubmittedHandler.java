@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.stoprepresentingclient;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientInfo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.event.handler.StopRepresentingClientService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 @Service
 public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandler {
 
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final StopRepresentingClientService stopRepresentingClientService;
 
     private final CaseRoleService caseRoleService;
 
@@ -34,10 +34,10 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
     public StopRepresentingClientSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                   CaseRoleService caseRoleService,
-                                                  ApplicationEventPublisher applicationEventPublisher) {
+                                                  StopRepresentingClientService stopRepresentingClientService) {
         super(finremCaseDetailsMapper);
         this.caseRoleService = caseRoleService;
-        this.applicationEventPublisher = applicationEventPublisher;
+        this.stopRepresentingClientService = stopRepresentingClientService;
     }
 
     @Override
@@ -52,12 +52,17 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        applicationEventPublisher.publishEvent(StopRepresentingClientEvent.builder()
-            .userAuthorisation(userAuthorisation)
-            .caseDetails(callbackRequest.getCaseDetails())
-            .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
-            .invokedByIntervener(caseRoleService.isIntervenerRepresentative(callbackRequest.getCaseDetails().getData(), userAuthorisation))
-            .build());
+        // Enable runAsync to display the success page,
+        // but only if EXUI-3746 allows hiding the "Close and return to case details" button.
+        // CompletableFuture.runAsync(() ->
+        stopRepresentingClientService.applyCaseAssignment(
+            StopRepresentingClientInfo.builder()
+                .userAuthorisation(userAuthorisation)
+                .caseDetails(callbackRequest.getCaseDetails())
+                .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
+                .invokedByIntervener(caseRoleService.isIntervenerRepresentative(callbackRequest.getCaseDetails().getData(), userAuthorisation))
+                .build()
+            );
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .confirmationHeader(CONFIRMATION_HEADER)
