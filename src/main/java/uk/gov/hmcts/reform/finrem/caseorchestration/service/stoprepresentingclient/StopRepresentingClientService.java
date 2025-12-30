@@ -1,10 +1,9 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.event.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;

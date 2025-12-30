@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.event;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient;
 
 import lombok.Builder;
 import lombok.Getter;

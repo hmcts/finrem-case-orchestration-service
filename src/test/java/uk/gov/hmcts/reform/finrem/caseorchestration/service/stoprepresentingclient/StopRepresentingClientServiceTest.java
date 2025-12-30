@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.event.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
