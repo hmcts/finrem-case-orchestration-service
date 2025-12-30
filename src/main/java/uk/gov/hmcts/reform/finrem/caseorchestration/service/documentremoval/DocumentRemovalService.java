@@ -72,7 +72,7 @@ public class DocumentRemovalService {
         // in our case, all documents are created by ExUI and therefore have no username, so auth fails on delete with 403.
         documentsUserWantsDeletedList.forEach(documentToDeleteCollection ->
             deleteDocument(
-                documentToDeleteCollection.getValue(), userAuthorisation));
+                documentToDeleteCollection.getValue(), userAuthorisation, caseId));
 
         JsonNode caseDataJson = objectMapper.valueToTree(caseData);
 
@@ -225,7 +225,7 @@ public class DocumentRemovalService {
             && fieldValue.get(DOCUMENT_URL).asText().equals(documentToKeepUrl);
     }
 
-    private void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken) {
+    private void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken, Long caseId) {
         log.info(String.format("Deleting doc from DocStore with url %s",
             documentToRemove.getCaseDocument().getDocumentUrl()));
 
@@ -235,8 +235,8 @@ public class DocumentRemovalService {
                     genericDocumentService.deleteDocument(documentToRemove.getCaseDocument().getDocumentUrl(), authorisationToken);
                 } catch (Exception e) {
                     log.error(format(
-                        "Document Removal Service failed to delete document url %s",
-                        documentToRemove.getCaseDocument().getDocumentUrl()), e);
+                        "Document Removal Service failed to delete document url %s for case ID %s",
+                        documentToRemove.getCaseDocument().getDocumentUrl(), caseId), e);
                 }
             });
         }

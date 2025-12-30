@@ -389,7 +389,7 @@ class DocumentRemovalServiceTest {
                 .deleteDocument("https://example1.com/123", AUTH_TOKEN));
 
         assertThat(logs.getErrors()).contains(
-            "Document Removal Service failed to delete document url https://example1.com/123");
+            "Document Removal Service failed to delete document url https://example1.com/123 for case ID 1");
 
         assertNull(result.getD11());
         assertNotNull(result.getDivorceUploadEvidence1());
