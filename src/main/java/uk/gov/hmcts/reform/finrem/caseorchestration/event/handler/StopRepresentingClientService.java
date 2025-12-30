@@ -34,9 +34,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfCha
 @RequiredArgsConstructor
 public class StopRepresentingClientService {
 
-    // This class is made to interact with AAC only
-    // Given event.caseDetails is READ-ONLY
-
     private final AssignCaseAccessService assignCaseAccessService;
 
     private final SystemUserService systemUserService;
