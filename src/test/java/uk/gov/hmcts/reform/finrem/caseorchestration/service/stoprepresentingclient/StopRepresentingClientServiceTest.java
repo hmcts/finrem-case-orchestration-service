@@ -497,6 +497,11 @@ class StopRepresentingClientServiceTest {
 
         @Test
         void givenIntvOneBarristerRepresented_whenIntvOneSolOrganisationIsTheSame_thenReturnTrue() {
+            Representation representation = mock(Representation.class);
+            when(representation.userId()).thenReturn(TEST_USER_ID);
+            when(representation.intervenerIndex()).thenReturn(1);
+            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
+
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerOne(IntervenerOne.builder()
                     .intervenerOrganisation(OrganisationPolicy.builder()
@@ -510,16 +515,17 @@ class StopRepresentingClientServiceTest {
                     ))
                     .build())
                 .build();
-            Representation representation = mock(Representation.class);
-            when(representation.userId()).thenReturn(TEST_USER_ID);
-            when(representation.intervenerIndex()).thenReturn(1);
-            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
 
             assertTrue(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
         }
 
         @Test
         void givenIntvOneBarristerRepresented_whenIntvOneSolOrganisationIsNotTheSame_thenReturnFalse() {
+            Representation representation = mock(Representation.class);
+            when(representation.userId()).thenReturn(TEST_USER_ID);
+            when(representation.intervenerIndex()).thenReturn(1);
+            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
+
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerOne(IntervenerOne.builder()
                     .intervenerOrganisation(OrganisationPolicy.builder()
@@ -533,16 +539,17 @@ class StopRepresentingClientServiceTest {
                     ))
                     .build())
                 .build();
-            Representation representation = mock(Representation.class);
-            when(representation.userId()).thenReturn(TEST_USER_ID);
-            when(representation.intervenerIndex()).thenReturn(1);
-            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
 
             assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
         }
 
         @Test
         void givenIntvOneBarristerRepresented_whenIntvOneSolOrganisationIsMissing_thenReturnFalse() {
+            Representation representation = mock(Representation.class);
+            when(representation.userId()).thenReturn(TEST_USER_ID);
+            when(representation.intervenerIndex()).thenReturn(1);
+            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
+
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerOne(IntervenerOne.builder()
                     .intervenerOrganisation(null)
@@ -554,16 +561,17 @@ class StopRepresentingClientServiceTest {
                     ))
                     .build())
                 .build();
-            Representation representation = mock(Representation.class);
-            when(representation.userId()).thenReturn(TEST_USER_ID);
-            when(representation.intervenerIndex()).thenReturn(1);
-            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
 
             assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
         }
 
         @Test
         void givenIntvFourBarristerRepresented_whenIntvFourSolOrganisationIsTheSame_thenReturnTrue() {
+            Representation representation = mock(Representation.class);
+            when(representation.userId()).thenReturn(TEST_USER_ID);
+            when(representation.intervenerIndex()).thenReturn(4);
+            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
+
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerFour(IntervenerFour.builder()
                     .intervenerOrganisation(OrganisationPolicy.builder()
@@ -577,16 +585,17 @@ class StopRepresentingClientServiceTest {
                     ))
                     .build())
                 .build();
-            Representation representation = mock(Representation.class);
-            when(representation.userId()).thenReturn(TEST_USER_ID);
-            when(representation.intervenerIndex()).thenReturn(4);
-            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
 
             assertTrue(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
         }
 
         @Test
         void givenIntvFourBarristerRepresented_whenIntvFourSolOrganisationIsNotTheSame_thenReturnFalse() {
+            Representation representation = mock(Representation.class);
+            when(representation.userId()).thenReturn(TEST_USER_ID);
+            when(representation.intervenerIndex()).thenReturn(4);
+            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
+
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerFour(IntervenerFour.builder()
                     .intervenerOrganisation(OrganisationPolicy.builder()
@@ -600,10 +609,6 @@ class StopRepresentingClientServiceTest {
                     ))
                     .build())
                 .build();
-            Representation representation = mock(Representation.class);
-            when(representation.userId()).thenReturn(TEST_USER_ID);
-            when(representation.intervenerIndex()).thenReturn(4);
-            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
 
             assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
         }
