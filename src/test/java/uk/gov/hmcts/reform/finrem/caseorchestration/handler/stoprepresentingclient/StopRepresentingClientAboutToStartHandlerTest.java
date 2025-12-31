@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.stoprepresentingclient;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
@@ -22,6 +24,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -51,6 +55,13 @@ class StopRepresentingClientAboutToStartHandlerTest {
         assertCanHandle(underTest,
             Arguments.of(ABOUT_TO_START, CONTESTED, STOP_REPRESENTING_CLIENT),
             Arguments.of(ABOUT_TO_START, CONSENTED, STOP_REPRESENTING_CLIENT));
+    }
+
+    @BeforeEach
+    void setUp() {
+        lenient()
+            .doCallRealMethod()
+            .when(stopRepresentingClientService).isSameOrganisation(any(Organisation.class), any(Organisation.class));
     }
 
     @Test
@@ -194,7 +205,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder()
             .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
                 .intvr2Barristers(List.of(BarristerCollectionItem.builder()
-                    .value(Barrister.builder().organisation(organisation(TEST_ORG_ID)).build())
+                    .value(Barrister.builder().userId(TEST_USER_ID).organisation(organisation(TEST_ORG_ID)).build())
                     .build()))
                 .build())
             .applicantOrganisationPolicy(OrganisationPolicy.builder()
@@ -218,12 +229,14 @@ class StopRepresentingClientAboutToStartHandlerTest {
             .extracting(
                 StopRepresentationWrapper::getShowClientAddressForService,
                 StopRepresentationWrapper::getClientAddressForServiceLabel,
-                StopRepresentationWrapper::getClientAddressForServiceConfidentialLabel
+                StopRepresentationWrapper::getClientAddressForServiceConfidentialLabel,
+                StopRepresentationWrapper::getExtraClientAddr1Label
             )
             .containsExactly(
                 YesOrNo.YES,
                 "Client's address for service (Intervener 2)",
-                "Keep the Intervener 2's contact details private from the Applicant & Respondent?"
+                "Keep the Intervener 2's contact details private from the Applicant & Respondent?",
+                "Client's address for service (Applicant)"
             );
 
         verify(stopRepresentingClientService).buildRepresentation(givenFinremCaseData, AUTH_TOKEN);
