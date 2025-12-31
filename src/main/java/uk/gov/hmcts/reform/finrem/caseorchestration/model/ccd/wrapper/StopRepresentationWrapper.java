@@ -39,6 +39,9 @@ public class StopRepresentationWrapper {
     // Capturing extra address (possibly applicant/respondent/intervener 1-4)
 
     @TemporaryField
+    private String extraClientAddr1Id;
+
+    @TemporaryField
     private String extraClientAddr1Label;
 
     @TemporaryField
@@ -49,6 +52,9 @@ public class StopRepresentationWrapper {
 
     @TemporaryField
     private String extraClientAddr1ConfidentialLabel;
+
+    @TemporaryField
+    private String extraClientAddr2Id;
 
     @TemporaryField
     private String extraClientAddr2Label;
@@ -63,6 +69,9 @@ public class StopRepresentationWrapper {
     private String extraClientAddr2ConfidentialLabel;
 
     @TemporaryField
+    private String extraClientAddr3Id;
+
+    @TemporaryField
     private String extraClientAddr3Label;
 
     @TemporaryField
@@ -73,6 +82,9 @@ public class StopRepresentationWrapper {
 
     @TemporaryField
     private String extraClientAddr3ConfidentialLabel;
+
+    @TemporaryField
+    private String extraClientAddr4Id;
 
     @TemporaryField
     private String extraClientAddr4Label;
