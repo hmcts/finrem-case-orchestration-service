@@ -2,29 +2,17 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingcli
 
 public record Representation(
     String userId,
-    boolean isRepresentingApplicant, boolean isRepresentingRespondent,
-    boolean isRepresentingIntervenerOneSolicitor, boolean isRepresentingIntervenerOneBarrister,
-    boolean isRepresentingIntervenerTwoSolicitor, boolean isRepresentingIntervenerTwoBarrister,
-    boolean isRepresentingIntervenerThreeSolicitor, boolean isRepresentingIntervenerThreeBarrister,
-    boolean isRepresentingIntervenerFourSolicitor, boolean isRepresentingIntervenerFourBarrister,
-    int intervenerIndex
+    boolean isRepresentingApplicant,
+    boolean isRepresentingRespondent,
+    Integer intervenerIndex,          // null if not an intervener
+    IntervenerRole intervenerRole     // null if not an intervener
 ) {
 
     public boolean isRepresentingAnyInterveners() {
-        return isRepresentingIntervenerOneSolicitor
-            || isRepresentingIntervenerTwoSolicitor
-            || isRepresentingIntervenerThreeSolicitor
-            || isRepresentingIntervenerFourSolicitor
-            || isRepresentingIntervenerOneBarrister
-            || isRepresentingIntervenerTwoBarrister
-            || isRepresentingIntervenerThreeBarrister
-            || isRepresentingIntervenerFourBarrister;
+        return intervenerIndex != null;
     }
 
     public boolean isRepresentingAnyIntervenerBarristers() {
-        return isRepresentingIntervenerOneBarrister
-            || isRepresentingIntervenerTwoBarrister
-            || isRepresentingIntervenerThreeBarrister
-            || isRepresentingIntervenerFourBarrister;
+        return intervenerRole == IntervenerRole.BARRISTER;
     }
 }

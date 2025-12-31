@@ -222,35 +222,11 @@ public class StopRepresentingClientService {
             idamService.getIdamUserId(userAuthorisation),
             caseRoleService.isApplicantRepresentative(caseData, userAuthorisation),
             caseRoleService.isRespondentRepresentative(caseData, userAuthorisation),
-            isRepresentingIntervenerSolicitor(isIntervenerRepresentative, caseData, 1, userAuthorisation),
-            isRepresentingIntervenerBarrister(isIntervenerRepresentative, caseData, 1, userAuthorisation),
-
-            isRepresentingIntervenerSolicitor(isIntervenerRepresentative, caseData, 2, userAuthorisation),
-            isRepresentingIntervenerBarrister(isIntervenerRepresentative, caseData, 2, userAuthorisation),
-
-            isRepresentingIntervenerSolicitor(isIntervenerRepresentative, caseData, 3, userAuthorisation),
-            isRepresentingIntervenerBarrister(isIntervenerRepresentative, caseData, 3, userAuthorisation),
-
-            isRepresentingIntervenerSolicitor(isIntervenerRepresentative, caseData, 4, userAuthorisation),
-            isRepresentingIntervenerBarrister(isIntervenerRepresentative, caseData, 4, userAuthorisation),
-            caseRoleService.getIntervenerIndex(caseData, userAuthorisation).orElse(-1)
+            isIntervenerRepresentative ? caseRoleService.getIntervenerIndex(caseData, userAuthorisation).orElseThrow() : null,
+            isIntervenerRepresentative ? (caseRoleService.getIntervenerSolicitorIndex(caseData, userAuthorisation).isEmpty()
+                ? IntervenerRole.SOLICITOR : IntervenerRole.BARRISTER)
+                : null
         );
-    }
-
-    private boolean isRepresentingIntervenerBarrister(
-        boolean isIntervenerRepresentative,
-        FinremCaseData caseData, int index, String userAuthorisation) {
-        return isIntervenerRepresentative
-            && caseRoleService.getIntervenerIndex(caseData, userAuthorisation).orElse(-1).equals(index)
-            && caseRoleService.getIntervenerSolicitorIndex(caseData, userAuthorisation).isEmpty();
-    }
-
-    private boolean isRepresentingIntervenerSolicitor(
-        boolean isIntervenerRepresentative,
-        FinremCaseData caseData, int index, String userAuthorisation) {
-        return isIntervenerRepresentative
-            && caseRoleService.getIntervenerIndex(caseData, userAuthorisation).orElse(-1).equals(index)
-            && caseRoleService.getIntervenerSolicitorIndex(caseData, userAuthorisation).orElse(-1).equals(index);
     }
 
     /**

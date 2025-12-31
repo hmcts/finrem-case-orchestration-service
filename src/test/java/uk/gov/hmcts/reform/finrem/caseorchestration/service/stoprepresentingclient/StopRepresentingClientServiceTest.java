@@ -65,6 +65,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.IntervenerRole.BARRISTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.IntervenerRole.SOLICITOR;
 
 @ExtendWith(MockitoExtension.class)
 class StopRepresentingClientServiceTest {
@@ -379,14 +381,8 @@ class StopRepresentingClientServiceTest {
             assertThat(representation.userId()).isEqualTo(TestConstants.TEST_USER_ID);
             assertThat(representation.isRepresentingApplicant()).isTrue();
             assertThat(representation.isRepresentingRespondent()).isFalse();
-            assertThat(representation.isRepresentingIntervenerOneSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerOneBarrister()).isFalse();
-            assertThat(representation.isRepresentingIntervenerTwoSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerTwoBarrister()).isFalse();
-            assertThat(representation.isRepresentingIntervenerThreeSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerThreeBarrister()).isFalse();
-            assertThat(representation.isRepresentingIntervenerFourSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerFourBarrister()).isFalse();
+            assertThat(representation.intervenerIndex()).isNull();
+            assertThat(representation.intervenerRole()).isNull();
             assertThat(representation.isRepresentingAnyInterveners()).isFalse();
             assertThat(representation.isRepresentingAnyIntervenerBarristers()).isFalse();
         }
@@ -409,14 +405,8 @@ class StopRepresentingClientServiceTest {
             assertThat(representation.userId()).isEqualTo(TestConstants.TEST_USER_ID);
             assertThat(representation.isRepresentingApplicant()).isFalse();
             assertThat(representation.isRepresentingRespondent()).isTrue();
-            assertThat(representation.isRepresentingIntervenerOneSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerOneBarrister()).isFalse();
-            assertThat(representation.isRepresentingIntervenerTwoSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerTwoBarrister()).isFalse();
-            assertThat(representation.isRepresentingIntervenerThreeSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerThreeBarrister()).isFalse();
-            assertThat(representation.isRepresentingIntervenerFourSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerFourBarrister()).isFalse();
+            assertThat(representation.intervenerIndex()).isNull();
+            assertThat(representation.intervenerRole()).isNull();
             assertThat(representation.isRepresentingAnyInterveners()).isFalse();
             assertThat(representation.isRepresentingAnyIntervenerBarristers()).isFalse();
         }
@@ -440,14 +430,8 @@ class StopRepresentingClientServiceTest {
             assertThat(representation.userId()).isEqualTo(TestConstants.TEST_USER_ID);
             assertThat(representation.isRepresentingApplicant()).isFalse();
             assertThat(representation.isRepresentingRespondent()).isFalse();
-            assertThat(representation.isRepresentingIntervenerOneSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerOneBarrister()).isTrue();
-            assertThat(representation.isRepresentingIntervenerTwoSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerTwoBarrister()).isFalse();
-            assertThat(representation.isRepresentingIntervenerThreeSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerThreeBarrister()).isFalse();
-            assertThat(representation.isRepresentingIntervenerFourSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerFourBarrister()).isFalse();
+            assertThat(representation.intervenerIndex()).isEqualTo(1);
+            assertThat(representation.intervenerRole()).isEqualTo(BARRISTER);
             assertThat(representation.isRepresentingAnyInterveners()).isTrue();
             assertThat(representation.isRepresentingAnyIntervenerBarristers()).isTrue();
         }
@@ -471,14 +455,8 @@ class StopRepresentingClientServiceTest {
             assertThat(representation.userId()).isEqualTo(TestConstants.TEST_USER_ID);
             assertThat(representation.isRepresentingApplicant()).isFalse();
             assertThat(representation.isRepresentingRespondent()).isFalse();
-            assertThat(representation.isRepresentingIntervenerOneSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerOneBarrister()).isFalse();
-            assertThat(representation.isRepresentingIntervenerTwoSolicitor()).isTrue();
-            assertThat(representation.isRepresentingIntervenerTwoBarrister()).isFalse();
-            assertThat(representation.isRepresentingIntervenerThreeSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerThreeBarrister()).isFalse();
-            assertThat(representation.isRepresentingIntervenerFourSolicitor()).isFalse();
-            assertThat(representation.isRepresentingIntervenerFourBarrister()).isFalse();
+            assertThat(representation.intervenerIndex()).isEqualTo(2);
+            assertThat(representation.intervenerRole()).isEqualTo(SOLICITOR);
             assertThat(representation.isRepresentingAnyInterveners()).isTrue();
             assertThat(representation.isRepresentingAnyIntervenerBarristers()).isFalse();
         }

@@ -163,7 +163,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private boolean shouldCaptureIntervenerOneServiceAddressInExtraField(FinremCaseData caseData, Representation representation) {
-        if (representation.isRepresentingIntervenerOneSolicitor()) {
+        if (Integer.valueOf(1).equals(representation.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 1),
@@ -171,7 +171,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private boolean shouldCaptureIntervenerTwoServiceAddressInExtraField(FinremCaseData caseData, Representation representation) {
-        if (representation.isRepresentingIntervenerTwoSolicitor()) {
+        if (Integer.valueOf(2).equals(representation.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 2),
@@ -179,7 +179,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private boolean shouldCaptureIntervenerThreeServiceAddressInExtraField(FinremCaseData caseData, Representation representation) {
-        if (representation.isRepresentingIntervenerThreeSolicitor()) {
+        if (Integer.valueOf(3).equals(representation.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 3),
@@ -187,7 +187,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private boolean shouldCaptureIntervenerFourServiceAddressInExtraField(FinremCaseData caseData, Representation representation) {
-        if (representation.isRepresentingIntervenerFourSolicitor()) {
+        if (Integer.valueOf(4).equals(representation.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 4),
