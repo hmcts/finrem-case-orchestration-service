@@ -28,6 +28,7 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -100,7 +101,8 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
             label = getRespondentClientAddressLabels()[0];
             confidentialLabel = getRespondentClientAddressLabels()[1];
         } else if (representation.isRepresentingAnyInterveners()) {
-            if (!stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation)) {
+            if (representation.isRepresentingAnyIntervenerBarristers()
+                && !stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation)) {
                 showClientAddressForService  = false;
             } else {
                 int index = representation.intervenerIndex();
@@ -246,11 +248,10 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     private Barrister getInterevenerBarrister(FinremCaseData caseData, Representation representation) {
         int index = representation.intervenerIndex();
         List<BarristerCollectionItem> items = caseData.getBarristerCollectionWrapper().getIntervenerBarristersByIndex(index);
-        return items.stream().map(BarristerCollectionItem::getValue)
+        return emptyIfNull(items).stream().map(BarristerCollectionItem::getValue)
             .filter(b -> representation.userId().equals(b.getUserId()))
             .findFirst()
-            .orElseThrow(() -> new IllegalStateException(format("%s - Cannot find organisation of intervener barrister",
-                caseData.getCcdCaseId())));
+            .orElse(Barrister.builder().build());
     }
 
     private void setExtraField(FinremCaseData caseData, int extraFieldIndex, String... values) {
