@@ -285,9 +285,21 @@ public class StopRepresentingClientService {
         );
     }
 
-    private boolean isSameOrganisation(Organisation solOrganisation, Organisation barristerOrganisation) {
-        return nullSafeOrganisationId(solOrganisation, " ")
-            .equals(nullSafeOrganisationId(barristerOrganisation, "  "));
+    /**
+     * Determines whether two organisations are the same by comparing their organisation IDs.
+     *
+     * <p>
+     * The comparison is null-safe. If an organisation or its ID is {@code null},
+     * a default value is used to prevent {@link NullPointerException}.
+     *
+     * @param org1 the first organisation
+     * @param org2 the second organisation
+     * @return {@code true} if both organisations have the same organisation ID;
+     *         {@code false} otherwise
+     */
+    public boolean isSameOrganisation(Organisation org1, Organisation org2) {
+        return nullSafeOrganisationId(org1, " ")
+            .equals(nullSafeOrganisationId(org2, "  "));
     }
 
     private String nullSafeOrganisationId(Organisation organisation, String defaultOrdId) {

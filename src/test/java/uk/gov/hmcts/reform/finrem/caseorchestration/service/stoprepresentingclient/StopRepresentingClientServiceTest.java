@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -22,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisation
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
@@ -40,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -589,6 +593,31 @@ class StopRepresentingClientServiceTest {
             when(representation.intervenerIndex()).thenReturn(4);
 
             assertFalse(underTest.isGoingToRemoveIntervenerSolicitorAccess(caseData, representation));
+        }
+    }
+
+    @Nested
+    class IsSameOrganisationTests {
+
+        @Test
+        void shouldReturnTrueWhenIsSameOrganisationIsCalled() {
+            assertTrue(underTest.isSameOrganisation(organisation("A"), organisation("A")));
+        }
+
+        @MethodSource
+        @ParameterizedTest
+        void shouldReturnFalseWhenIsSameOrganisationIsCalled(Organisation org1, Organisation org2) {
+            assertFalse(underTest.isSameOrganisation(org1, org2));
+        }
+
+        private static Stream<Arguments> shouldReturnFalseWhenIsSameOrganisationIsCalled() {
+            return Stream.of(
+                Arguments.of(organisation("A"), organisation("B")),
+                Arguments.of(null, organisation("B")),
+                Arguments.of(organisation(null), organisation("B")),
+                Arguments.of(organisation(null), organisation(null)),
+                Arguments.of(null, null)
+            );
         }
     }
 
