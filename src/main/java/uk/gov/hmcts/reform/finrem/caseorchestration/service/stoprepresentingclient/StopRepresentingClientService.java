@@ -224,8 +224,7 @@ public class StopRepresentingClientService {
             caseRoleService.isRespondentRepresentative(caseData, userAuthorisation),
             isIntervenerRepresentative ? caseRoleService.getIntervenerIndex(caseData, userAuthorisation).orElseThrow() : null,
             isIntervenerRepresentative ? (caseRoleService.getIntervenerSolicitorIndex(caseData, userAuthorisation).isEmpty()
-                ? IntervenerRole.SOLICITOR : IntervenerRole.BARRISTER)
-                : null
+                ? IntervenerRole.BARRISTER : IntervenerRole.SOLICITOR) : null
         );
     }
 
