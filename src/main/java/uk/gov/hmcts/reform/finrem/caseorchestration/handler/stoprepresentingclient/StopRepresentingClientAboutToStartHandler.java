@@ -9,16 +9,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.Representation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -29,6 +36,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHandler {
 
     private final StopRepresentingClientService stopRepresentingClientService;
+
+    private static String[] getApplicantClientAddressLabels() {
+        return new String[] {
+            "Client's address for service (Applicant)",
+            "Keep the Applicant's contact details private from the Respondent?"
+        };
+    }
+
+    private static String[] getRespondentClientAddressLabels() {
+        return new String[] {
+            "Client's address for service (Respondent)",
+            "Keep the Respondent's contact details private from the Applicant?"
+        };
+    }
 
     public StopRepresentingClientAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      StopRepresentingClientService stopRepresentingClientService) {
@@ -66,10 +87,10 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
         String confidentialLabel = null;
         if (representation.isRepresentingApplicant()) {
             label += " (Applicant)";
-            confidentialLabel = "Keep the Applicant's contact details private from the Respondent?";
+            confidentialLabel = getApplicantClientAddressLabels()[1];
         } else if (representation.isRepresentingRespondent()) {
             label += " (Respondent)";
-            confidentialLabel = "Keep the Respondent's contact details private from the Applicant?";
+            confidentialLabel = getRespondentClientAddressLabels()[1];
         } else if (representation.isRepresentingAnyInterveners()) {
             int index = representation.intervenerIndex();
             if (representation.isRepresentingAnyIntervenerBarristers()
@@ -88,5 +109,69 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
         wrapper.setClientAddressForServiceConfidentialLabel(confidentialLabel);
         wrapper.setClientAddressForServiceLabel(label);
         wrapper.setShowClientAddressForService(YesOrNo.forValue(showClientAddressForService));
+
+        // Extra 1
+        if (shouldCaptureApplicantServiceAddressInExtra(caseData, representation)) {
+            wrapper.setExtraClientAddr1Label(getApplicantClientAddressLabels()[0]);
+            wrapper.setExtraClientAddr1ConfidentialLabel(getApplicantClientAddressLabels()[1]);
+        }
+        if (shouldCaptureRespondentServiceAddressInExtra(caseData, representation)) {
+            wrapper.setExtraClientAddr1Label(getRespondentClientAddressLabels()[0]);
+            wrapper.setExtraClientAddr1ConfidentialLabel(getRespondentClientAddressLabels()[1]);
+        }
+    }
+
+    private boolean shouldCaptureApplicantServiceAddressInExtra(FinremCaseData caseData,
+                                                                Representation representation) {
+        if (!representation.isRepresentingAnyInterveners()) {
+            return false;
+        }
+
+        OrganisationPolicy applicantOrg = caseData.getApplicantOrganisationPolicy();
+        return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, representation), applicantOrg);
+    }
+
+    private boolean shouldCaptureRespondentServiceAddressInExtra(FinremCaseData caseData,
+                                                                 Representation representation) {
+        if (!representation.isRepresentingAnyInterveners()) {
+            return false;
+        }
+
+        OrganisationPolicy respondentOrg = caseData.getRespondentOrganisationPolicy();
+        return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, representation), respondentOrg);
+    }
+
+    private OrganisationPolicy resolveIntervenerOrganisationPolicy(FinremCaseData caseData,
+                                                                   Representation representation) {
+        if (representation.isRepresentingAnyIntervenerBarristers()) {
+            Organisation organisation = getInterevenerBarrister(caseData, representation).getOrganisation();
+            return organisation != null
+                ? OrganisationPolicy.builder().organisation(organisation).build()
+                : null;
+        }
+
+        return getIntervener(caseData, representation).getIntervenerOrganisation();
+    }
+
+    private IntervenerWrapper getIntervener(FinremCaseData caseData, Representation representation) {
+        return caseData.getInterveners().get(representation.intervenerIndex() - 1);
+    }
+
+    private boolean isSameOrganisation(OrganisationPolicy organisationPolicy1, OrganisationPolicy organisationPolicy2) {
+        return stopRepresentingClientService.isSameOrganisation(
+            ofNullable(organisationPolicy1)
+                .map(OrganisationPolicy::getOrganisation).orElse(null),
+            ofNullable(organisationPolicy2)
+                .map(OrganisationPolicy::getOrganisation).orElse(null));
+    }
+
+    private Barrister getInterevenerBarrister(FinremCaseData caseData, Representation representation) {
+        int index = representation.intervenerIndex();
+        List<BarristerCollectionItem> items = caseData.getBarristerCollectionWrapper().getIntervenerBarristersByIndex(index);
+        return items.stream().map(BarristerCollectionItem::getValue)
+            .filter(b -> representation.userId().equals(b.getUserId()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException(format("%s - Cannot find organisation of intervener barrister",
+                caseData.getCcdCaseId())));
     }
 }
