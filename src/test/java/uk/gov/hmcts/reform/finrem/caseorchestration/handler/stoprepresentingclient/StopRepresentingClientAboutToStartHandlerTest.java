@@ -146,7 +146,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
                 false, false,
                 2)
         );
-        when(stopRepresentingClientService.isGoingToRemoveIntervenerSolicitorAccess(givenFinremCaseData, representation))
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
             .thenReturn(true);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -182,7 +182,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
                 false, false,
                 2)
         );
-        when(stopRepresentingClientService.isGoingToRemoveIntervenerSolicitorAccess(givenFinremCaseData, representation))
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
             .thenReturn(false);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),

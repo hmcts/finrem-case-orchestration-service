@@ -254,20 +254,26 @@ public class StopRepresentingClientService {
     }
 
     /**
-     * Determines whether the current action will remove an intervener solicitor’s
-     * access to the case.
+     * Checks whether the representing intervener barrister belongs to the same organisation
+     * as the corresponding intervener solicitor.
      *
-     * <p>The access is considered removable when the intervener solicitor and the
-     * associated barrister belong to the same organisation for the given
-     * intervener index.</p>
+     * <p>The method:
+     * <ul>
+     *   <li>Returns {@code false} if the user is not representing any intervener barrister</li>
+     *   <li>Finds the intervener based on the index in {@link Representation}</li>
+     *   <li>Locates the barrister matching the current user ID</li>
+     *   <li>Compares the barrister organisation with the intervener solicitor organisation</li>
+     * </ul>
      *
-     * @param caseData the case data containing intervener and barrister details
-     * @param representation the representation information for the current user,
-     *                       including intervener index and user ID
-     * @return {@code true} if the intervener solicitor’s access will be removed;
+     * @param caseData the financial remedy case data containing interveners and barristers
+     * @param representation the current user representation details
+     * @return {@code true} if the intervener barrister and solicitor are from the same organisation;
      *         {@code false} otherwise
      */
-    public boolean isGoingToRemoveIntervenerSolicitorAccess(FinremCaseData caseData, Representation representation) {
+    public boolean isIntervenerBarristerFromSameOrganisationAsSolicitor(FinremCaseData caseData, Representation representation) {
+        if (!representation.isRepresentingAnyIntervenerBarristers()) {
+            return false;
+        }
         int index = representation.intervenerIndex();
         IntervenerWrapper intervener = caseData.getInterveners().get(index - 1);
         List<BarristerCollectionItem> intvBarristers = caseData.getBarristerCollectionWrapper()

@@ -485,7 +485,15 @@ class StopRepresentingClientServiceTest {
     }
 
     @Nested
-    class IsGoingToRemoveIntervenerSolicitorAccessTests {
+    class IsIntervenerBarristerFromSameOrganisationAsSolicitorTests {
+
+        @Test
+        void givenIntvSolicitorRepresented_whenCalled_thenReturnFalse() {
+            Representation representation = mock(Representation.class);
+            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(false);
+
+            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(mock(FinremCaseData.class), representation));
+        }
 
         @Test
         void givenIntvOneBarristerRepresented_whenIntvOneSolOrganisationIsTheSame_thenReturnTrue() {
@@ -505,8 +513,9 @@ class StopRepresentingClientServiceTest {
             Representation representation = mock(Representation.class);
             when(representation.userId()).thenReturn(TEST_USER_ID);
             when(representation.intervenerIndex()).thenReturn(1);
+            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
 
-            assertTrue(underTest.isGoingToRemoveIntervenerSolicitorAccess(caseData, representation));
+            assertTrue(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
         }
 
         @Test
@@ -527,8 +536,9 @@ class StopRepresentingClientServiceTest {
             Representation representation = mock(Representation.class);
             when(representation.userId()).thenReturn(TEST_USER_ID);
             when(representation.intervenerIndex()).thenReturn(1);
+            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
 
-            assertFalse(underTest.isGoingToRemoveIntervenerSolicitorAccess(caseData, representation));
+            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
         }
 
         @Test
@@ -547,8 +557,9 @@ class StopRepresentingClientServiceTest {
             Representation representation = mock(Representation.class);
             when(representation.userId()).thenReturn(TEST_USER_ID);
             when(representation.intervenerIndex()).thenReturn(1);
+            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
 
-            assertFalse(underTest.isGoingToRemoveIntervenerSolicitorAccess(caseData, representation));
+            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
         }
 
         @Test
@@ -569,8 +580,9 @@ class StopRepresentingClientServiceTest {
             Representation representation = mock(Representation.class);
             when(representation.userId()).thenReturn(TEST_USER_ID);
             when(representation.intervenerIndex()).thenReturn(4);
+            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
 
-            assertTrue(underTest.isGoingToRemoveIntervenerSolicitorAccess(caseData, representation));
+            assertTrue(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
         }
 
         @Test
@@ -591,8 +603,9 @@ class StopRepresentingClientServiceTest {
             Representation representation = mock(Representation.class);
             when(representation.userId()).thenReturn(TEST_USER_ID);
             when(representation.intervenerIndex()).thenReturn(4);
+            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
 
-            assertFalse(underTest.isGoingToRemoveIntervenerSolicitorAccess(caseData, representation));
+            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
         }
     }
 

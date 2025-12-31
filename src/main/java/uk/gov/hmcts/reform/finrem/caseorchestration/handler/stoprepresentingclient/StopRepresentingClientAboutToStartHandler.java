@@ -100,11 +100,11 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
             label = getRespondentClientAddressLabels()[0];
             confidentialLabel = getRespondentClientAddressLabels()[1];
         } else if (representation.isRepresentingAnyInterveners()) {
-            int index = representation.intervenerIndex();
-            if (representation.isRepresentingAnyIntervenerBarristers()
-                && !stopRepresentingClientService.isGoingToRemoveIntervenerSolicitorAccess(caseData, representation)) {
+            if (!stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation)) {
                 showClientAddressForService  = false;
             } else {
+                int index = representation.intervenerIndex();
+
                 label = getIntervenerClientAddressLabels(index)[0];
                 confidentialLabel = getIntervenerClientAddressLabels(index)[1];
             }
