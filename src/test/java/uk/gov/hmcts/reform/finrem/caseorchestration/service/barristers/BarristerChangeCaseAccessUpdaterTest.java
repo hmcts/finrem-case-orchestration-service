@@ -38,8 +38,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_BARRISTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerTestUtils.TEST_ORGANISATION_ID;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,7 +78,7 @@ class BarristerChangeCaseAccessUpdaterTest {
         barristerChangeCaseAccessUpdater.update(caseDetails, AUTH_TOKEN, barristerChange);
 
         barristers.forEach(barrister -> {
-            verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, barrister.getUserId(),
+            verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, barrister.getUserId(),
                 APP_BARRISTER.getCcdCode(), barrister.getOrganisation().getOrganisationID());
         });
 
@@ -102,7 +102,7 @@ class BarristerChangeCaseAccessUpdaterTest {
         barristerChangeCaseAccessUpdater.update(caseDetails, AUTH_TOKEN, barristerChange);
 
         barristers.forEach(barrister -> {
-            verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, barrister.getUserId(),
+            verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, barrister.getUserId(),
                 APP_BARRISTER.getCcdCode(), barrister.getOrganisation().getOrganisationID());
         });
 
@@ -127,7 +127,7 @@ class BarristerChangeCaseAccessUpdaterTest {
         barristerChangeCaseAccessUpdater.update(caseDetails, AUTH_TOKEN, barristerChange);
 
         barristersAdded.forEach(barrister -> {
-            verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, barrister.getUserId(),
+            verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, barrister.getUserId(),
                 APP_BARRISTER.getCcdCode(), barrister.getOrganisation().getOrganisationID());
         });
 
@@ -138,7 +138,7 @@ class BarristerChangeCaseAccessUpdaterTest {
         capturedParams.forEach(p -> verifyBarristerUpdateParams(p, caseDetails.getData(),barristersAdded));
 
         barristersRemoved.forEach(barrister -> {
-            verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, barrister.getUserId(),
+            verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, barrister.getUserId(),
                 APP_BARRISTER.getCcdCode(), barrister.getOrganisation().getOrganisationID());
         });
 
@@ -171,9 +171,9 @@ class BarristerChangeCaseAccessUpdaterTest {
 
         barristerChangeCaseAccessUpdater.update(caseDetails, AUTH_TOKEN, barristerChange);
 
-        verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, "1", APP_BARRISTER.getCcdCode(), TEST_ORGANISATION_ID);
-        verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, "2", APP_BARRISTER.getCcdCode(), TEST_ORGANISATION_ID);
-        verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID, "3", APP_BARRISTER.getCcdCode(), TEST_ORGANISATION_ID);
+        verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, "1", APP_BARRISTER.getCcdCode(), TEST_ORGANISATION_ID);
+        verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, "2", APP_BARRISTER.getCcdCode(), TEST_ORGANISATION_ID);
+        verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, "3", APP_BARRISTER.getCcdCode(), TEST_ORGANISATION_ID);
         verify(barristerRepresentationUpdateBuilder, times(barristers.size()))
             .buildBarristerRemoved(captorRemoved.capture());
         List<BarristerRepresentationUpdateBuilder.BarristerUpdateParams> capturedParams = captorRemoved.getAllValues();
@@ -245,7 +245,7 @@ class BarristerChangeCaseAccessUpdaterTest {
 
     private FinremCaseDetails createCaseDetails() {
         return FinremCaseDetails.builder()
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .data(FinremCaseData.builder()
                 .barristerParty(BarristerParty.APPLICANT)
                 .build())
