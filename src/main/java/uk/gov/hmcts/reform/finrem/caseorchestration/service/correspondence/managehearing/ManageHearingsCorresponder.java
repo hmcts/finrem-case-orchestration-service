@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.mana
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.ManageHearingsNotificationRequestMapper;
@@ -18,16 +20,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Par
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -36,6 +42,8 @@ import java.util.function.Supplier;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getNotificationPartyFromRole;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @RequiredArgsConstructor
 @Service
@@ -49,6 +57,7 @@ public class ManageHearingsCorresponder {
     private final DocumentHelper documentHelper;
     private final BulkPrintService bulkPrintService;
     private final GenericDocumentService genericDocumentService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Begin sending hearing correspondence to parties, included based on the callback request data.
@@ -75,17 +84,42 @@ public class ManageHearingsCorresponder {
             return;
         }
 
-        for (PartyOnCaseCollectionItem partyCollection : partiesOnCaseCollection) {
-            PartyOnCase party = partyCollection.getValue();
-            if (party != null) {
-                sendHearingCorrespondenceByParty(
-                    party.getRole(),
-                    finremCaseDetails,
-                    hearing,
-                    userAuthorisation
-                );
-            }
-        }
+        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
+
+        String applicantSurname = contactDetailsWrapper.getApplicantLname();
+        String respondentSurname = contactDetailsWrapper.getRespondentLname();
+
+        String selectedFRC = CourtHelper.getFRCForHearing(hearing);
+        String vacatedHearingType = hearing.getHearingType().getId();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String formattedDate = hearing.getHearingDate().format(formatter);
+        String vacatedHearingDateTime = formattedDate + " at " + hearing.getHearingTime();
+
+        NotificationRequest notificationRequest =  NotificationRequest.builder()
+            .caseReferenceNumber(String.valueOf(finremCaseDetails.getId()))
+            .hearingType(hearing.getHearingType().toString())
+            .solicitorReferenceNumber(nullToEmpty(contactDetailsWrapper.getSolicitorReference()))
+            .applicantName(applicantSurname)
+            .respondentName(respondentSurname)
+            .caseType(EmailService.CONTESTED)
+            .selectedCourt(selectedFRC)
+            .vacatedHearingType(vacatedHearingType)
+            .vacatedHearingDateTime(vacatedHearingDateTime)
+            .build();
+
+        applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
+            .notificationParties(partiesOnCaseCollection.stream()
+                .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
+                .toList())
+            .emailNotificationRequest(notificationRequest)
+            .emailTemplateId(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            //TODO: Print Docs
+            .documentsToPost(List.of())
+            .caseDetails(finremCaseDetails)
+            .build()
+        );
+
     }
 
     public void sendVacatedHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
