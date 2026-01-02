@@ -64,7 +64,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     record StopRepresentingRequest(long caseId, FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
                                    boolean requestedByApplicantRep, boolean requestedByRespondentRep,
-                                   boolean requestedByIntervenerRep, Optional<Integer> intervenerIndex) {}
+                                   boolean requestedByIntervenerRep, boolean requestedByIntervenerBarrister,
+                                   Optional<Integer> intervenerIndex) {}
 
     private static final String WARNING_MESSAGE =
         "Are you sure you wish to stop representing your client? "
@@ -116,13 +117,17 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private StopRepresentingRequest buildStopRepresentingRequest(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseData finremCaseData =  callbackRequest.getCaseDetails().getData();
+        boolean isIntervenerRepresentative = caseRoleService.isIntervenerRepresentative(finremCaseData, userAuthorisation);
+
         return new StopRepresentingRequest(
             callbackRequest.getCaseDetails().getId(),
             callbackRequest.getCaseDetails(),
             callbackRequest.getCaseDetailsBefore(),
             caseRoleService.isApplicantRepresentative(finremCaseData, userAuthorisation),
             caseRoleService.isRespondentRepresentative(finremCaseData, userAuthorisation),
-            caseRoleService.isIntervenerRepresentative(finremCaseData, userAuthorisation),
+            isIntervenerRepresentative,
+            isIntervenerRepresentative
+                && caseRoleService.getIntervenerSolicitorIndex(finremCaseData, userAuthorisation).isEmpty(),
             caseRoleService.getIntervenerIndex(finremCaseData, userAuthorisation)
         );
     }
@@ -292,7 +297,17 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private void populateServiceAddressToIntervener(StopRepresentingRequest request,
                                                     Pair<Address, Boolean> serviceAddressConfig) {
+
+
         Address serviceAddress = serviceAddressConfig.getLeft();
+        if (request.requestedByIntervenerBarrister) {
+            // could be null and skip this population
+            return;
+        } else {
+            if (serviceAddress == null) {
+                throw new IllegalStateException("serviceAddress is null");
+            }
+        }
         boolean isConfidential = Boolean.TRUE.equals(serviceAddressConfig.getRight());
 
         IntervenerWrapper intervenerWrapper = getIntervenerFromFinremCaseData(request);
