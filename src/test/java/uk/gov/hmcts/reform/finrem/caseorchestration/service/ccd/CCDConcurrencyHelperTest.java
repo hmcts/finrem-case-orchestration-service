@@ -24,10 +24,10 @@ import static java.util.Collections.emptyMap;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.JURISDICTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
 class CCDConcurrencyHelperTest {
@@ -62,10 +62,10 @@ class CCDConcurrencyHelperTest {
         @ParameterizedTest
         @EnumSource(value = CaseType.class)
         void shouldStartEvent(CaseType caseType) {
-            helper.startEvent(caseType, CASE_ID, eventId);
+            helper.startEvent(caseType, CASE_ID_IN_LONG, eventId);
 
             verify(coreCaseDataApi).startEventForCaseWorker(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID,
-                JURISDICTION, caseType.getCcdType(), Long.toString(CASE_ID), eventId);
+                JURISDICTION, caseType.getCcdType(), Long.toString(CASE_ID_IN_LONG), eventId);
         }
 
         @ParameterizedTest
@@ -77,10 +77,10 @@ class CCDConcurrencyHelperTest {
                 .caseDetails(CaseDetails.builder().data(emptyMap()).build())
                 .build();
 
-            helper.submitEvent(startEventResponse, caseType, CASE_ID, emptyMap());
+            helper.submitEvent(startEventResponse, caseType, CASE_ID_IN_LONG, emptyMap());
 
             verify(coreCaseDataApi).submitEventForCaseWorker(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID, JURISDICTION,
-                caseType.getCcdType(), Long.toString(CASE_ID), true,
+                caseType.getCcdType(), Long.toString(CASE_ID_IN_LONG), true,
                 buildCaseDataContent(eventId, eventToken, emptyMap()));
         }
 
@@ -95,10 +95,10 @@ class CCDConcurrencyHelperTest {
 
             Map<String, Object> updates = Map.of("caseName", "new case name");
 
-            helper.submitEvent(startEventResponse, caseType, CASE_ID, updates);
+            helper.submitEvent(startEventResponse, caseType, CASE_ID_IN_LONG, updates);
 
             verify(coreCaseDataApi).submitEventForCaseWorker(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID, JURISDICTION,
-                caseType.getCcdType(), Long.toString(CASE_ID), true,
+                caseType.getCcdType(), Long.toString(CASE_ID_IN_LONG), true,
                 buildCaseDataContent(eventId, eventToken, updates));
         }
     }
