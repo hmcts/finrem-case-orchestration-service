@@ -208,6 +208,7 @@ class CaseRoleServiceTest {
         assertIsRespondentRepresentative(caseData, caseRole, true);
         assertThat(caseRoleService.isIntervenerRepresentative(caseData, AUTH_TOKEN)).isEqualTo(true);
         assertThat(caseRoleService.getIntervenerIndex(caseData, AUTH_TOKEN)).isEqualTo(Optional.of(index));
+        assertThat(caseRoleService.getIntervenerSolicitorIndex(caseData, AUTH_TOKEN)).isEqualTo(Optional.of(index));
     }
 
     @ParameterizedTest
@@ -232,6 +233,7 @@ class CaseRoleServiceTest {
         assertIsRespondentRepresentative(caseData, caseRole, true);
         assertThat(caseRoleService.isIntervenerRepresentative(caseData, AUTH_TOKEN)).isEqualTo(true);
         assertThat(caseRoleService.getIntervenerIndex(caseData, AUTH_TOKEN)).isEqualTo(Optional.of(index));
+        assertThat(caseRoleService.getIntervenerSolicitorIndex(caseData, AUTH_TOKEN)).isEqualTo(Optional.empty());
     }
 
     private void assertIsRespondentRepresentative(FinremCaseData caseData, CaseRole caseRole, boolean isApplicantTest) {
