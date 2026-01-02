@@ -375,7 +375,6 @@ class StopRepresentingClientServiceTest {
             when(caseRoleService.isIntervenerRepresentative(caseData, AUTH_TOKEN)).thenReturn(isIntervenerRepresentative);
 
             when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TestConstants.TEST_USER_ID);
-            when(caseRoleService.getIntervenerIndex(caseData, AUTH_TOKEN)).thenReturn(Optional.empty());
 
             Representation representation = underTest.buildRepresentation(caseData, AUTH_TOKEN);
             assertThat(representation.userId()).isEqualTo(TestConstants.TEST_USER_ID);
@@ -399,7 +398,6 @@ class StopRepresentingClientServiceTest {
             when(caseRoleService.isIntervenerRepresentative(caseData, AUTH_TOKEN)).thenReturn(isIntervenerRepresentative);
 
             when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TestConstants.TEST_USER_ID);
-            when(caseRoleService.getIntervenerIndex(caseData, AUTH_TOKEN)).thenReturn(Optional.empty());
 
             Representation representation = underTest.buildRepresentation(caseData, AUTH_TOKEN);
             assertThat(representation.userId()).isEqualTo(TestConstants.TEST_USER_ID);
