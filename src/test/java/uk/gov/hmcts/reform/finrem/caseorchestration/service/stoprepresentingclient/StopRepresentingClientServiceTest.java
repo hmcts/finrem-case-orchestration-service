@@ -156,8 +156,8 @@ class StopRepresentingClientServiceTest {
 
             underTest.applyCaseAssignment(event);
 
-            verify(intervenerService).revokeIntervener(Long.parseLong(CASE_ID), intervenerOne);
-            verify(intervenerService, never()).revokeIntervener(Long.parseLong(CASE_ID), intervenerTwo);
+            verify(intervenerService).revokeIntervenerSolicitor(Long.parseLong(CASE_ID), intervenerOne);
+            verify(intervenerService, never()).revokeIntervenerSolicitor(Long.parseLong(CASE_ID), intervenerTwo);
             verifyNoMoreInteractions(intervenerService);
             verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
         }

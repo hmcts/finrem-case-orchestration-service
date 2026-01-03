@@ -52,7 +52,7 @@ public class IntervenerService {
      * @param intervenerWrapper the intervener details containing organisation,
      *                          solicitor email, and case role information
      */
-    public void revokeIntervener(long caseId, IntervenerWrapper intervenerWrapper) {
+    public void revokeIntervenerSolicitor(long caseId, IntervenerWrapper intervenerWrapper) {
         String orgId = Optional.ofNullable(intervenerWrapper.getIntervenerOrganisation())
             .map(OrganisationPolicy::getOrganisation)
             .map(Organisation::getOrganisationID)

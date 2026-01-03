@@ -94,6 +94,7 @@ public class StopRepresentingClientService {
         } else {
             handleApplicantOrRespondentRepresentativeRequest(info);
         }
+        sendAllBarristerChangeToCaseAssignmentService(info);
     }
 
     private void handleApplicantOrRespondentRepresentativeRequest(StopRepresentingClientInfo info) {
@@ -101,7 +102,6 @@ public class StopRepresentingClientService {
         final CaseType caseType = finremCaseData.getCcdCaseType();
         final long caseId = getCaseId(info);
 
-        sendAllBarristerChangeToCaseAssignmentService(info);
         boolean isNocRequestSent = sendNocRequestToCaseAssignmentService(info);
 
         if (isNocRequestSent) {
@@ -122,6 +122,7 @@ public class StopRepresentingClientService {
         final FinremCaseData finremCaseData = getFinremCaseDataFromInfo(info);
         final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromInfo(info);
 
+        // compare all interveners
         finremCaseDataBefore.getInterveners().forEach(originalWrapper -> {
             IntervenerType it = originalWrapper.getIntervenerType();
             if (it != null) {
@@ -130,7 +131,7 @@ public class StopRepresentingClientService {
                     .findAny()
                     .ifPresent(wrapper -> {
                         if (isIntervenerOrganisationDifference(wrapper, originalWrapper)) {
-                            intervenerService.revokeIntervener(info.getCaseDetails().getId(), originalWrapper);
+                            intervenerService.revokeIntervenerSolicitor(info.getCaseDetails().getId(), originalWrapper);
                         }
                     });
             }
