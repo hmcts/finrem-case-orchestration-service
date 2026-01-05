@@ -135,7 +135,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private StopRepresentingRequest buildStopRepresentingRequest(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
-
         return new StopRepresentingRequest(
             callbackRequest.getCaseDetails().getId(),
             callbackRequest.getCaseDetails(),
