@@ -27,4 +27,16 @@ public enum BarristerParty {
             .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
+
+    /**
+     * Returns the {@link BarristerParty} for the specified intervener index.
+     *
+     * <p>The index represents the intervener number (for example, 1–4).</p>
+     *
+     * @param index the intervener index
+     * @return the corresponding {@link BarristerParty}
+     */
+    public static BarristerParty getIntervenerBarristerByIndex(int index) {
+        return forValue("intervener" + index);
+    }
 }
