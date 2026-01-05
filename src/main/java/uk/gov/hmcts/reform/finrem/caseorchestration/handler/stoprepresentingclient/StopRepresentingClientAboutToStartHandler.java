@@ -123,27 +123,27 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     private void prepareExtraClientAddresses(FinremCaseData caseData, Representation representation) {
         int extraFieldIndex = 1;
         if (shouldCaptureApplicantServiceAddressInExtra(caseData, representation)) {
-            setExtraField(caseData, extraFieldIndex++, "applicant", getApplicantClientAddressLabels()[0],
+            setExtraField(caseData, extraFieldIndex++, ExtraAddrType.APPLICANT.getId(), getApplicantClientAddressLabels()[0],
                 getApplicantClientAddressLabels()[1]);
         } else if (shouldCaptureRespondentServiceAddressInExtra(caseData, representation)) {
-            setExtraField(caseData, extraFieldIndex++, "respondent", getRespondentClientAddressLabels()[0],
+            setExtraField(caseData, extraFieldIndex++, ExtraAddrType.RESPONDENT.getId(), getRespondentClientAddressLabels()[0],
                 getRespondentClientAddressLabels()[1]);
         }
 
         if (shouldCaptureIntervenerOneServiceAddressInExtraField(caseData, representation)) {
-            setExtraField(caseData, extraFieldIndex++, "intervener1", getIntervenerClientAddressLabels(1)[0],
+            setExtraField(caseData, extraFieldIndex++, ExtraAddrType.INTERVENER1.getId(), getIntervenerClientAddressLabels(1)[0],
                 getIntervenerClientAddressLabels(1)[1]);
         }
         if (shouldCaptureIntervenerTwoServiceAddressInExtraField(caseData, representation)) {
-            setExtraField(caseData, extraFieldIndex++, "intervener2", getIntervenerClientAddressLabels(2)[0],
+            setExtraField(caseData, extraFieldIndex++, ExtraAddrType.INTERVENER2.getId(), getIntervenerClientAddressLabels(2)[0],
                 getIntervenerClientAddressLabels(2)[1]);
         }
         if (shouldCaptureIntervenerThreeServiceAddressInExtraField(caseData, representation)) {
-            setExtraField(caseData, extraFieldIndex++, "intervener3", getIntervenerClientAddressLabels(3)[0],
+            setExtraField(caseData, extraFieldIndex++, ExtraAddrType.INTERVENER3.getId(), getIntervenerClientAddressLabels(3)[0],
                 getIntervenerClientAddressLabels(3)[1]);
         }
         if (shouldCaptureIntervenerFourServiceAddressInExtraField(caseData, representation)) {
-            setExtraField(caseData, extraFieldIndex, "intervener4", getIntervenerClientAddressLabels(4)[0],
+            setExtraField(caseData, extraFieldIndex, ExtraAddrType.INTERVENER4.getId(), getIntervenerClientAddressLabels(4)[0],
                 getIntervenerClientAddressLabels(4)[1]);
         }
     }
