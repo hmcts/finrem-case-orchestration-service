@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -11,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
@@ -42,4 +44,15 @@ public class ChangeOrganisationRequest {
     @JsonProperty("ApprovalStatus")
     private ChangeOrganisationApprovalStatus approvalStatus;
 
+    @JsonIgnore
+    public boolean isNoOrganisationsToAddOrRemove() {
+        ChangeOrganisationRequest changeRequest = this;
+        boolean addedIsEmpty = Optional.ofNullable(changeRequest.getOrganisationToAdd()).isEmpty()
+            || Optional.ofNullable(changeRequest.getOrganisationToAdd().getOrganisationID()).isEmpty();
+
+        boolean removedIsEmpty = Optional.ofNullable(changeRequest.getOrganisationToRemove()).isEmpty()
+            || Optional.ofNullable(changeRequest.getOrganisationToRemove().getOrganisationID()).isEmpty();
+
+        return addedIsEmpty && removedIsEmpty;
+    }
 }
