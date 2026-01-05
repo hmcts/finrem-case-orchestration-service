@@ -41,12 +41,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.COURT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 
 public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
@@ -181,7 +181,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         data.getContactDetailsWrapper().setApplicantAddressHiddenFromRespondent(YesOrNo.NO);
 
         FinremCaseDetails details = FinremCaseDetails.builder()
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .data(data)
             .build();
 
@@ -207,7 +207,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         data.getContactDetailsWrapper().setApplicantAddressHiddenFromRespondent(YesOrNo.YES);
 
         FinremCaseDetails details = FinremCaseDetails.builder()
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .data(data)
             .build();
 
@@ -233,7 +233,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         data.getContactDetailsWrapper().setRespondentAddressHiddenFromApplicant(YesOrNo.NO);
 
         FinremCaseDetails details = FinremCaseDetails.builder()
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .data(data)
             .build();
 
@@ -260,7 +260,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         data.setBulkPrintCoversheetWrapper(new BulkPrintCoversheetWrapper());
 
         FinremCaseDetails details = FinremCaseDetails.builder()
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .data(data)
             .build();
 
