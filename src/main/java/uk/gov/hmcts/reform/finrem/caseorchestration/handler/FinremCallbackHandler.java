@@ -2,13 +2,20 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
+import static org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnotation;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RequiredArgsConstructor
@@ -19,11 +26,8 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
-        FinremCallbackRequest callbackRequestWithFinremCaseDetails =
-            mapToFinremCallbackRequest(callbackRequest);
-
-        return handle(callbackRequestWithFinremCaseDetails, userAuthorisation);
+        return removeTemporaryFieldsAfterHandled(
+            handle(mapToFinremCallbackRequest(callbackRequest), userAuthorisation));
     }
 
     public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
@@ -35,13 +39,12 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         if (callbackRequest.getCaseDetailsBefore() != null) {
             finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
         }
-        FinremCallbackRequest callbackRequestWithFinremCaseDetails = FinremCallbackRequest.builder()
+        finremCaseDetails.getData().setCcdCaseId(finremCaseDetails.getCaseIdAsString());
+        return FinremCallbackRequest.builder()
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
             .eventType(EventType.getEventType(callbackRequest.getEventId()))
             .build();
-        finremCaseDetails.getData().setCcdCaseId(finremCaseDetails.getCaseIdAsString());
-        return callbackRequestWithFinremCaseDetails;
     }
 
     protected void validateCaseData(FinremCallbackRequest callbackRequest) {
@@ -52,4 +55,60 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         }
     }
 
+    protected boolean shouldClearTemporaryFields() {
+        return false;
+    }
+
+    /**
+     * Removes all fields marked with {@link TemporaryField} from the case data
+     * in the given callback response.
+     *
+     * <p>
+     * This method first checks whether temporary fields should be cleared. If not,
+     * it returns the original response.
+     *
+     * <p>
+     * If clearing is required, the method maps the response data into
+     * {@link FinremCaseDetails}, converts it into a CCD {@link CaseDetails} object,
+     * finds all fields annotated with {@link TemporaryField}, and removes those field
+     * names from the case data. It then maps the cleaned data back into
+     * {@link FinremCaseData} and returns a new response containing the updated data.
+     *
+     * @param response the callback response containing case data to clean
+     * @return a response with temporary fields removed, or the original response if
+     *         clearing is not needed
+     */
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> removeTemporaryFieldsAfterHandled(
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response) {
+        if (!shouldClearTemporaryFields()) {
+            return response;
+        }
+
+        FinremCaseDetails toBeSanitised = FinremCaseDetails.builder()
+            .data(response.getData()).build();
+        CaseDetails toBeSanitisedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(toBeSanitised);
+
+        if (toBeSanitisedCaseDetails.getData() != null) {
+            getClassesWithTemporaryFieldAnnotation().forEach(clazz ->
+                getFieldsListWithAnnotation(clazz, TemporaryField.class).stream()
+                    .map(Field::getName)
+                    .forEach(toBeSanitisedCaseDetails.getData()::remove));
+        }
+
+        return response.toBuilder().data(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedCaseDetails.getData())).build();
+    }
+
+    /**
+     * Returns the list of classes that contain fields annotated with {@link TemporaryField}
+     * and should have those temporary fields cleared during sanitisation.
+     *
+     * <p><strong>Developer note:</strong> If you introduce a new class that uses
+     * {@code @TemporaryField}, you must add it to this list so that its temporary
+     * fields are removed correctly.</p>
+     *
+     * @return a list of classes containing {@code @TemporaryField}-annotated fields
+     */
+    private static List<Class> getClassesWithTemporaryFieldAnnotation() {
+        return List.of(StopRepresentationWrapper.class);
+    }
 }

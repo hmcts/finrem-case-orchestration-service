@@ -24,6 +24,14 @@ class EventTypeTest {
         List<Class<?>> handlerClasses = InterfaceImplementingClasses.findClassesImplementingInterface(CallbackHandler.class,
             CallbackHandler.class.getPackageName());
 
+        // Exclude test classes
+        handlerClasses.removeIf(clazz ->
+            clazz.getProtectionDomain()
+                .getCodeSource()
+                .getLocation()
+                .getPath()
+                .contains("java/test"));
+
         for (EventType event : EventType.values()) {
             for (CaseType caseType : CaseType.values()) {
                 for (CallbackType callbackType : CallbackType.values()) {

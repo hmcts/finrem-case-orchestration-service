@@ -47,11 +47,11 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG2_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,7 +90,7 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
 
     @Test
     void givenAnyCase_whenHandle_thenShouldSetPaperApplicationYes() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CaseType.CONTESTED,
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED,
             FinremCaseData.builder().build(), mock(State.class));
 
         assertThat(handler.handle(callbackRequest, AUTH_TOKEN).getData().getPaperApplication())
@@ -275,7 +275,7 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest(FinremCaseData finremCaseData) {
-        return FinremCallbackRequestFactory.from(CASE_ID, CaseType.CONTESTED,
+        return FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED,
             finremCaseData, mock(State.class));
     }
 
