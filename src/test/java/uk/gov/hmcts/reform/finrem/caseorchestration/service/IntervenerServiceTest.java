@@ -1731,7 +1731,9 @@ class IntervenerServiceTest {
         RepresentationUpdate shouldBeRetained = mock(RepresentationUpdate.class);
 
         FinremCaseData finremCaseData = FinremCaseData.builder()
-            .intervenerOne(IntervenerOne.builder().intervenerOrganisation(OrganisationPolicy.builder()
+            .intervenerOne(IntervenerOne.builder()
+                .intervenerRepresented(YesOrNo.NO)
+                .intervenerOrganisation(OrganisationPolicy.builder()
                 .orgPolicyCaseAssignedRole("[INTVRSOLICITOR1]")
                 .build()).build())
             .representationUpdateHistory(new ArrayList<>(
@@ -1740,6 +1742,7 @@ class IntervenerServiceTest {
             .build();
         FinremCaseData originalFinremCaseData = finremCaseData.toBuilder()
             .intervenerOne(IntervenerOne.builder()
+                .intervenerRepresented(YesOrNo.YES)
                 .intervenerSolName("AAA DDD")
                 .intervenerSolEmail("aaa.ddd@gmail.com")
                 .intervenerOrganisation(OrganisationPolicy.builder()
