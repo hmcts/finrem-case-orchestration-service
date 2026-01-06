@@ -108,6 +108,25 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             Arguments.of(ABOUT_TO_SUBMIT, CONSENTED, STOP_REPRESENTING_CLIENT));
     }
 
+    @ParameterizedTest
+    @MethodSource("provideAllLoggedInScenarios")
+    void givenServiceAddressMissing_whenHandled_throwsException(boolean isApplicantRepresentative,
+                                                                Integer intervenerIndex,
+                                                                IntervenerRole intervenerRole) {
+        stubIsApplicantSolicitorAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
+        assertThatThrownBy(() -> underTest.handle(request, AUTH_TOKEN))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("serviceAddress is null");
+    }
+
     @Nested
     class LoginAsAnyRepresentativeTests {
 
@@ -182,30 +201,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         }
 
         private static Stream<Arguments> provideAllLoggedInScenarios() {
-            return Stream.of(
-                Arguments.of(true, null, null),
-                Arguments.of(false, null, null),
-                Arguments.of(false, 1, IntervenerRole.SOLICITOR),
-                Arguments.of(false, 2, IntervenerRole.SOLICITOR),
-                Arguments.of(false, 3, IntervenerRole.SOLICITOR),
-                Arguments.of(false, 4, IntervenerRole.SOLICITOR),
-                Arguments.of(false, 1, IntervenerRole.BARRISTER),
-                Arguments.of(false, 2, IntervenerRole.BARRISTER),
-                Arguments.of(false, 3, IntervenerRole.BARRISTER),
-                Arguments.of(false, 4, IntervenerRole.BARRISTER)
-            );
-        }
-
-        private void stubIsApplicantSolicitorAndIntervenerIndex(boolean isApplicantSolicitor,
-                                                                Integer intervenerIndex,
-                                                                IntervenerRole intervenerRole) {
-            boolean isRepresentingApplicant = intervenerIndex == null && isApplicantSolicitor;
-            boolean isRepresentingRespondent = intervenerIndex == null && isApplicantSolicitor;
-
-            when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
-                new Representation(TEST_USER_ID, isRepresentingApplicant, !isRepresentingRespondent, intervenerIndex,
-                    intervenerRole)
-            );
+            return StopRepresentingClientAboutToSubmitHandlerTest.provideAllLoggedInScenarios();
         }
     }
 
@@ -615,5 +611,32 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
     private void verifyBuildRepresentationCalled(FinremCaseData caseData) {
         verify(stopRepresentingClientService).buildRepresentation(caseData, AUTH_TOKEN);
+    }
+
+    private static Stream<Arguments> provideAllLoggedInScenarios() {
+        return Stream.of(
+            Arguments.of(true, null, null),
+            Arguments.of(false, null, null),
+            Arguments.of(false, 1, IntervenerRole.SOLICITOR),
+            Arguments.of(false, 2, IntervenerRole.SOLICITOR),
+            Arguments.of(false, 3, IntervenerRole.SOLICITOR),
+            Arguments.of(false, 4, IntervenerRole.SOLICITOR),
+            Arguments.of(false, 1, IntervenerRole.BARRISTER),
+            Arguments.of(false, 2, IntervenerRole.BARRISTER),
+            Arguments.of(false, 3, IntervenerRole.BARRISTER),
+            Arguments.of(false, 4, IntervenerRole.BARRISTER)
+        );
+    }
+
+    private void stubIsApplicantSolicitorAndIntervenerIndex(boolean isApplicantSolicitor,
+                                                            Integer intervenerIndex,
+                                                            IntervenerRole intervenerRole) {
+        boolean isRepresentingApplicant = intervenerIndex == null && isApplicantSolicitor;
+        boolean isRepresentingRespondent = intervenerIndex == null && isApplicantSolicitor;
+
+        when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
+            new Representation(TEST_USER_ID, isRepresentingApplicant, !isRepresentingRespondent, intervenerIndex,
+                intervenerRole)
+        );
     }
 }
