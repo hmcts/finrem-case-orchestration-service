@@ -55,7 +55,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
         // Raised EXUI-3990 to see if XUI team would fix the button issue
-        // Otherwise, remove the async call
+        // Otherwise, remove the async call below
         CompletableFuture.runAsync(() ->
             stopRepresentingClientService.applyCaseAssignment(
                 StopRepresentingClientInfo.builder()
