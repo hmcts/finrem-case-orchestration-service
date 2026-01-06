@@ -62,7 +62,6 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                     .userAuthorisation(userAuthorisation)
                     .caseDetails(callbackRequest.getCaseDetails())
                     .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
-                    .invokedByIntervener(caseRoleService.isIntervenerRepresentative(callbackRequest.getCaseDetails().getData(), userAuthorisation))
                     .build()),
             CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS)
         );

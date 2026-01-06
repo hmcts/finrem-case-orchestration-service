@@ -144,7 +144,6 @@ class StopRepresentingClientServiceTest {
                 .build();
 
             StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .invokedByIntervener(true)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
                 .userAuthorisation(AUTH_TOKEN)
@@ -167,7 +166,6 @@ class StopRepresentingClientServiceTest {
                 .build();
 
             StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .invokedByIntervener(true)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
                 .userAuthorisation(AUTH_TOKEN)
@@ -268,7 +266,6 @@ class StopRepresentingClientServiceTest {
                 .build();
 
             StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .invokedByIntervener(false)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
                 .userAuthorisation(AUTH_TOKEN)
@@ -306,7 +303,6 @@ class StopRepresentingClientServiceTest {
                 .build();
 
             StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .invokedByIntervener(false)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(mock(FinremCaseData.class)).build())
                 .userAuthorisation(AUTH_TOKEN)
@@ -331,7 +327,6 @@ class StopRepresentingClientServiceTest {
                 .build();
 
             StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .invokedByIntervener(false)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
                 .userAuthorisation(AUTH_TOKEN)
