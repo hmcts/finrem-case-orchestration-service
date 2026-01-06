@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerA
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -277,14 +278,14 @@ public class IntervenerService {
                 );
 
             finremCaseData.setRepresentationUpdateHistory(
-                Stream.concat(
+                new ArrayList<>(Stream.concat(
                     emptyIfNull(finremCaseData.getRepresentationUpdateHistory()).stream(),
                     emptyIfNull(history.getRepresentationUpdateHistory()).stream()
                         .map(e -> RepresentationUpdateHistoryCollection.builder()
                             .id(e.getId())
                             .value(e.getValue())
                             .build())
-                ).toList()
+                ).toList())
             );
         });
     }
@@ -317,14 +318,14 @@ public class IntervenerService {
                 .build(), STOP_REPRESENTING_CLIENT);
 
         finremCaseData.setRepresentationUpdateHistory(
-            Stream.concat(
+            new ArrayList<>(Stream.concat(
                 emptyIfNull(finremCaseData.getRepresentationUpdateHistory()).stream(),
                 emptyIfNull(history.getRepresentationUpdateHistory()).stream()
                     .map(e -> RepresentationUpdateHistoryCollection.builder()
                         .id(e.getId())
                         .value(e.getValue())
                         .build())
-            ).toList()
+            ).toList())
         );
     }
 
@@ -356,14 +357,14 @@ public class IntervenerService {
                 .build(), STOP_REPRESENTING_CLIENT);
 
         finremCaseData.setRepresentationUpdateHistory(
-            Stream.concat(
+            new ArrayList<>(Stream.concat(
                 emptyIfNull(finremCaseData.getRepresentationUpdateHistory()).stream(),
                 emptyIfNull(history.getRepresentationUpdateHistory()).stream()
                     .map(e -> RepresentationUpdateHistoryCollection.builder()
                         .id(e.getId())
                         .value(e.getValue())
                         .build())
-            ).toList()
+            ).toList())
         );
     }
 
