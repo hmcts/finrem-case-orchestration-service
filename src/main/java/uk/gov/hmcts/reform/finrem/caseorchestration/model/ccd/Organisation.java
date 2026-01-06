@@ -28,24 +28,22 @@ public class Organisation {
             .build();
     }
 
-    /**
-     * Determines whether two organisations are the same by comparing their organisation IDs.
-     *
-     * <p>
-     * The comparison is null-safe. If an organisation or its ID is {@code null},
-     * a default value is used to prevent {@link NullPointerException}.
-     *
-     * @param org1 the first organisation
-     * @param org2 the second organisation
-     * @return {@code true} if both organisations have the same organisation ID;
-     *         {@code false} otherwise
-     */
     public static boolean isSameOrganisation(Organisation org1, Organisation org2) {
-        return nullSafeOrganisationId(org1, " ")
-            .equals(nullSafeOrganisationId(org2, "  "));
-    }
+        if (org1 == null || org2 == null) {
+            return false;
+        }
 
-    private static String nullSafeOrganisationId(Organisation organisation, String defaultOrdId) {
-        return ofNullable(organisation).map(Organisation::getOrganisationID).orElse(defaultOrdId);
+        String orgId1 = org1.getOrganisationID();
+        String orgId2 = org2.getOrganisationID();
+
+        if (orgId1 == null || orgId2 == null) {
+            return false;
+        }
+
+        if (orgId1.isBlank() || orgId2.isBlank()) {
+            return false;
+        }
+
+        return orgId1.equals(orgId2);
     }
 }

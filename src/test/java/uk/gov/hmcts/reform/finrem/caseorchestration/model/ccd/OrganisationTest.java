@@ -26,6 +26,7 @@ class OrganisationTest {
 
     private static Stream<Arguments> shouldReturnFalse_whenOrganisationsAreDifferentOrNull() {
         return Stream.of(
+            Arguments.of(organisation("A "), organisation("A")),
             Arguments.of(organisation("A"), organisation("B")),
             Arguments.of(null, organisation("B")),
             Arguments.of(organisation(null), organisation("B")),

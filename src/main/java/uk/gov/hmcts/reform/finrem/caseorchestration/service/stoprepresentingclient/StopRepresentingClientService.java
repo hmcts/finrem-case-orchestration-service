@@ -109,15 +109,15 @@ public class StopRepresentingClientService {
         }
     }
 
-    private boolean isIntervenerOrganisationDifference(IntervenerWrapper intervenerWrapper,
-                                                       IntervenerWrapper originalIntervenerWrapper) {
-        return isSameOrganisation(
+    private boolean shouldRevokeIntervenerAccess(IntervenerWrapper intervenerWrapper,
+                                                 IntervenerWrapper originalIntervenerWrapper) {
+        return !isSameOrganisation(
             ofNullable(intervenerWrapper.getIntervenerOrganisation())
                 .map(OrganisationPolicy::getOrganisation)
-                .orElse(null),
+                .orElse(Organisation.builder().organisationID("SAME").build()),
             ofNullable(originalIntervenerWrapper.getIntervenerOrganisation())
                 .map(OrganisationPolicy::getOrganisation)
-                .orElse(null)
+                .orElse(Organisation.builder().organisationID("SAME").build())
         );
     }
 
@@ -133,7 +133,7 @@ public class StopRepresentingClientService {
                     .filter(wrapper -> it.equals(wrapper.getIntervenerType()))
                     .findAny()
                     .ifPresent(wrapper -> {
-                        if (isIntervenerOrganisationDifference(wrapper, originalWrapper)) {
+                        if (shouldRevokeIntervenerAccess(wrapper, originalWrapper)) {
                             intervenerService.revokeIntervenerSolicitor(info.getCaseDetails().getId(), originalWrapper);
                         }
                     });
