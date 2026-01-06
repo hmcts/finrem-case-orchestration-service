@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
 
 @Slf4j
 @Service
@@ -149,19 +150,24 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private void buildRepresentationUpdateHistoryAndNocDataIfAny(StopRepresentingRequest request, String userAuthorisation) {
+        FinremCaseData finremCaseData = request.finremCaseDetails.getData();
+        FinremCaseData originalFinremCaseData = request.finremCaseDetailsBefore.getData();
+
         if (isRepresentingApplicant(request) || isRepresentingRespondent(request)) {
             // below also update the representative history
-            nocWorkflowService.prepareNoticeOfChangeAndOrganisationPolicy(request.finremCaseDetails.getData(),
-                request.finremCaseDetailsBefore.getData(), STOP_REPRESENTING_CLIENT, userAuthorisation);
-
-            // TODO update history for applicant/respondent/other interveners if any
+            nocWorkflowService.prepareNoticeOfChangeAndOrganisationPolicy(finremCaseData,
+                originalFinremCaseData, STOP_REPRESENTING_CLIENT, userAuthorisation);
         } else if (isRepresentingAnyInterveners(request)) {
-            int intervenerIndex = getIntervenerIndex(request);
-            intervenerService.updateIntervenerSolicitorStopRepresentingHistory(request.finremCaseDetails.getData(),
-                request.finremCaseDetailsBefore.getData(), intervenerIndex, userAuthorisation);
-
-            // TODO update history for applicant/respondent/other interveners if any
+            // update representation update history for intervener solicitors' change (1-4)
+            intervenerService.updateApplicantSolicitorChangeToRepresentationUpdateHistory(finremCaseData,
+                originalFinremCaseData, userAuthorisation);
+            intervenerService.updateRespondentSolicitorChangeToRepresentationUpdateHistory(finremCaseData,
+                originalFinremCaseData, userAuthorisation);
         }
+
+        // update representation update history for intervener solicitors' change (1-4)
+        intervenerService.updateIntervenerSolicitorStopRepresentingHistory(finremCaseData,
+            originalFinremCaseData, userAuthorisation);
 
         updateBarristerChangeToRepresentationUpdateHistory(request, BarristerParty.APPLICANT, userAuthorisation);
         updateBarristerChangeToRepresentationUpdateHistory(request, BarristerParty.RESPONDENT, userAuthorisation);
@@ -537,17 +543,17 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private boolean doesMatchOrganisation(Organisation org1, IntervenerWrapper intervener) {
-        return stopRepresentingClientService.isSameOrganisation(org1,
+        return isSameOrganisation(org1,
             ofNullable(intervener.getIntervenerOrganisation()).map(OrganisationPolicy::getOrganisation).orElse(null));
     }
 
     private boolean doesMatchOrganisation(Organisation org1, Barrister barrister) {
-        return stopRepresentingClientService.isSameOrganisation(org1,
+        return isSameOrganisation(org1,
             ofNullable(barrister).map(Barrister::getOrganisation).orElse(null));
     }
 
     private boolean doesMatchOrganisation(Organisation org1, OrganisationPolicy orgPolicy) {
-        return stopRepresentingClientService.isSameOrganisation(org1,
+        return isSameOrganisation(org1,
             ofNullable(orgPolicy).map(OrganisationPolicy::getOrganisation).orElse(null));
     }
 

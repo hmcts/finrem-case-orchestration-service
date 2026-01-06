@@ -36,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTER
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
 
 @Service
 @Slf4j
@@ -136,8 +137,6 @@ public class StopRepresentingClientService {
                     });
             }
         });
-
-        sendAllBarristerChangeToCaseAssignmentService(info);
     }
 
     private void sendAllBarristerChangeToCaseAssignmentService(StopRepresentingClientInfo info) {
@@ -265,26 +264,5 @@ public class StopRepresentingClientService {
                 .orElse(Organisation.builder().build()),
             barrister.getOrganisation()
         );
-    }
-
-    /**
-     * Determines whether two organisations are the same by comparing their organisation IDs.
-     *
-     * <p>
-     * The comparison is null-safe. If an organisation or its ID is {@code null},
-     * a default value is used to prevent {@link NullPointerException}.
-     *
-     * @param org1 the first organisation
-     * @param org2 the second organisation
-     * @return {@code true} if both organisations have the same organisation ID;
-     *         {@code false} otherwise
-     */
-    public boolean isSameOrganisation(Organisation org1, Organisation org2) {
-        return nullSafeOrganisationId(org1, " ")
-            .equals(nullSafeOrganisationId(org2, "  "));
-    }
-
-    private String nullSafeOrganisationId(Organisation organisation, String defaultOrdId) {
-        return ofNullable(organisation).map(Organisation::getOrganisationID).orElse(defaultOrdId);
     }
 }

@@ -238,7 +238,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private boolean isSameOrganisation(OrganisationPolicy organisationPolicy1, OrganisationPolicy organisationPolicy2) {
-        return stopRepresentingClientService.isSameOrganisation(
+        return Organisation.isSameOrganisation(
             ofNullable(organisationPolicy1)
                 .map(OrganisationPolicy::getOrganisation).orElse(null),
             ofNullable(organisationPolicy2)

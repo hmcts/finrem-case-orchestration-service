@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import lombok.Builder;
 import lombok.Value;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 @Value
 @Builder(toBuilder = true)
@@ -21,6 +22,15 @@ public class ChangeOfRepresentationRequest {
     ChangedRepresentative removedRepresentative;
     String by;
     String via;
+
+    public static String getIntervenerPartyByType(IntervenerType intervenerType) {
+        return switch (intervenerType) {
+            case INTERVENER_ONE -> INTERVENER_ONE_PARTY;
+            case INTERVENER_TWO -> INTERVENER_TWO_PARTY;
+            case INTERVENER_THREE -> INTERVENER_THREE_PARTY;
+            case INTERVENER_FOUR -> INTERVENER_FOUR_PARTY;
+        };
+    }
 
     public static String getIntervenerPartyByIndex(int index) {
         return switch (index) {

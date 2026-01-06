@@ -1762,7 +1762,7 @@ class IntervenerServiceTest {
         when(changeOfRepresentationService.generateRepresentationUpdateHistory(any(ChangeOfRepresentationRequest.class),
             eq(STOP_REPRESENTING_CLIENT))).thenReturn(history);
 
-        service.updateIntervenerSolicitorStopRepresentingHistory(finremCaseData, originalFinremCaseData, 1, AUTH_TOKEN);
+        service.updateIntervenerSolicitorStopRepresentingHistory(finremCaseData, originalFinremCaseData, AUTH_TOKEN);
 
         verify(changeOfRepresentationService).generateRepresentationUpdateHistory(captor.capture(), eq(STOP_REPRESENTING_CLIENT));
         verify(idamService).getIdamFullName(AUTH_TOKEN);
