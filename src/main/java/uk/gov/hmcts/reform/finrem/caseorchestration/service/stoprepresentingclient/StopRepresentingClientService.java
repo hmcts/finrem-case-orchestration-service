@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataServ
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -112,9 +111,13 @@ public class StopRepresentingClientService {
 
     private boolean isIntervenerOrganisationDifference(IntervenerWrapper intervenerWrapper,
                                                        IntervenerWrapper originalIntervenerWrapper) {
-        return !Objects.equals(
-            intervenerWrapper.getIntervenerOrganisation(),
-            originalIntervenerWrapper.getIntervenerOrganisation()
+        return isSameOrganisation(
+            ofNullable(intervenerWrapper.getIntervenerOrganisation())
+                .map(OrganisationPolicy::getOrganisation)
+                .orElse(null),
+            ofNullable(originalIntervenerWrapper.getIntervenerOrganisation())
+                .map(OrganisationPolicy::getOrganisation)
+                .orElse(null)
         );
     }
 

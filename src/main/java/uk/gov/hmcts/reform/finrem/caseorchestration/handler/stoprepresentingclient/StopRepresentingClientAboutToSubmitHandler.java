@@ -222,7 +222,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         List<ExtraClientAddress> extraAddresses = List.of(
             new ExtraClientAddress(wrapper.getExtraClientAddr1Id(), wrapper.getExtraClientAddr1(),
                 wrapper.getExtraClientAddr1Confidential()),
-            new ExtraClientAddress( wrapper.getExtraClientAddr2Id(), wrapper.getExtraClientAddr2(),
+            new ExtraClientAddress(wrapper.getExtraClientAddr2Id(), wrapper.getExtraClientAddr2(),
                 wrapper.getExtraClientAddr2Confidential()),
             new ExtraClientAddress(wrapper.getExtraClientAddr3Id(), wrapper.getExtraClientAddr3(),
                 wrapper.getExtraClientAddr3Confidential()),
@@ -239,7 +239,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             ))
             .orElse(null);
     }
-
 
     private Pair<Address, Boolean> getServiceAddressConfigForApplicantIfAny(FinremCaseData finremCaseData) {
         return getServiceAddressConfigIfAny(finremCaseData, ExtraAddrType.APPLICANT);
