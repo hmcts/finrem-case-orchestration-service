@@ -149,6 +149,11 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             -> new IllegalStateException(format("%s - expecting intervener index exists", request.caseId)));
     }
 
+    private boolean hasApplicantOrRespondentOrganistaionPolicyChange(StopRepresentingRequest request) {
+        FinremCaseData caseData = request.finremCaseDetails.getData();
+        return caseData.getContactDetailsWrapper().getNocParty() != null;
+    }
+
     private void buildRepresentationUpdateHistoryAndNocDataIfAny(StopRepresentingRequest request, String userAuthorisation) {
         FinremCaseData finremCaseData = request.finremCaseDetails.getData();
         FinremCaseData originalFinremCaseData = request.finremCaseDetailsBefore.getData();
@@ -158,11 +163,10 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             nocWorkflowService.prepareNoticeOfChangeAndOrganisationPolicy(finremCaseData,
                 originalFinremCaseData, STOP_REPRESENTING_CLIENT, userAuthorisation);
         } else if (isRepresentingAnyInterveners(request)) {
-            // update representation update history for intervener solicitors' change (1-4)
-            intervenerService.updateApplicantSolicitorChangeToRepresentationUpdateHistory(finremCaseData,
-                originalFinremCaseData, userAuthorisation);
-            intervenerService.updateRespondentSolicitorChangeToRepresentationUpdateHistory(finremCaseData,
-                originalFinremCaseData, userAuthorisation);
+            if (hasApplicantOrRespondentOrganistaionPolicyChange(request)) {
+                nocWorkflowService.prepareNoticeOfChangeAndOrganisationPolicy(finremCaseData,
+                    originalFinremCaseData, STOP_REPRESENTING_CLIENT, userAuthorisation);
+            }
         }
 
         // update representation update history for intervener solicitors' change (1-4)
@@ -560,12 +564,14 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     private void setApplicantUnrepresentedIfOrgMatch(FinremCaseData finremCaseData, Organisation targetOrg) {
         if (doesMatchOrganisation(targetOrg, finremCaseData.getApplicantOrganisationPolicy())) {
             setApplicantUnrepresented(finremCaseData);
+            finremCaseData.getContactDetailsWrapper().setNocParty(APPLICANT);
         }
     }
 
     private void setRespondentUnrepresentedIfOrgMatch(FinremCaseData finremCaseData, Organisation targetOrg) {
         if (doesMatchOrganisation(targetOrg, finremCaseData.getRespondentOrganisationPolicy())) {
             setRespondentUnrepresented(finremCaseData);
+            finremCaseData.getContactDetailsWrapper().setNocParty(RESPONDENT);
         }
     }
 

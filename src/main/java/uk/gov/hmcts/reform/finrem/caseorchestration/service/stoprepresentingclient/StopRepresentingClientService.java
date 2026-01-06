@@ -80,21 +80,20 @@ public class StopRepresentingClientService {
     }
 
     /**
-     * Applies case assignment based on who triggered the stop representing a client event.
+     * Applies case assignment changes when a representative stops representing a client.
      *
-     * <p>
-     * If the event is invoked by an intervener, the intervener representative request
-     * is handled. Otherwise, the applicant or respondent representative request
-     * is processed.
+     * <p>This method:
+     * <ul>
+     *   <li>Handles case assignment updates for intervener representatives</li>
+     *   <li>Handles case assignment updates for applicant or respondent representatives</li>
+     *   <li>Notifies the case assignment service of any barrister representation changes</li>
+     * </ul>
      *
-     * @param info the stop representing client POJO containing the invocation context
+     * @param info the stop-representing context containing case details and user authorisation
      */
     public void applyCaseAssignment(StopRepresentingClientInfo info) {
-        if (info.isInvokedByIntervener()) {
-            handleIntervenerRepresentativeRequest(info);
-        } else {
-            handleApplicantOrRespondentRepresentativeRequest(info);
-        }
+        handleIntervenerRepresentativeRequest(info);
+        handleApplicantOrRespondentRepresentativeRequest(info);
         sendAllBarristerChangeToCaseAssignmentService(info);
     }
 
