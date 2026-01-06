@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclie
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -75,7 +76,7 @@ class StopRepresentingClientSubmittedHandlerTest {
         underTest.handle(request, AUTH_TOKEN);
 
         ArgumentCaptor<StopRepresentingClientInfo> eventCaptor = ArgumentCaptor.forClass(StopRepresentingClientInfo.class);
-        verify(stopRepresentingClientService).applyCaseAssignment(eventCaptor.capture());
+        verify(stopRepresentingClientService, timeout(500)).applyCaseAssignment(eventCaptor.capture());
 
         assertThat(eventCaptor.getValue().getCaseDetails().getData()).isEqualTo(caseData);
         assertThat(eventCaptor.getValue().getCaseDetailsBefore().getData()).isEqualTo(caseDataBefore);
