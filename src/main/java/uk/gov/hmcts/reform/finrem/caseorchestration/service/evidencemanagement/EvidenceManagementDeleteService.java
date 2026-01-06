@@ -8,7 +8,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
@@ -18,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.UUID;
+
+import static java.lang.String.format;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +35,7 @@ public class EvidenceManagementDeleteService {
     private final AuthTokenGenerator authTokenGenerator;
     private final FeatureToggleService featureToggleService;
 
-    public void delete(String fileUrl, String auth) throws HttpClientErrorException {
+    public void delete(String fileUrl, String auth) {
         if (featureToggleService.isSecureDocEnabled()) {
             deleteOnSecDoc(fileUrl, auth);
         } else {
@@ -42,13 +43,18 @@ public class EvidenceManagementDeleteService {
         }
     }
 
-    private void deleteOnSecDoc(String fileUrl, String auth) throws HttpClientErrorException {
+    private void deleteOnSecDoc(String fileUrl, String auth) {
         IdamToken idamTokens = idamAuthService.getIdamToken(auth);
         log.info("EMSDocStore Delete file: {} and docId: {}",
             fileUrl, getDocumentIdFromFileUrl(fileUrl));
-
-        caseDocumentClient.deleteDocument(idamTokens.getIdamOauth2Token(), idamTokens.getServiceAuthorization(),
-            getDocumentIdFromFileUrl(fileUrl), Boolean.TRUE);
+        try {
+            caseDocumentClient.deleteDocument(idamTokens.getIdamOauth2Token(), idamTokens.getServiceAuthorization(),
+                getDocumentIdFromFileUrl(fileUrl), Boolean.TRUE);
+        } catch (FeignException.NotFound e) {
+            log.warn(format(
+                "Document url %s not found in document store while attempting to delete document.",
+                fileUrl), e);
+        }
     }
 
     private void deleteOnDmStore(String fileUrl, String authorizationToken) {
