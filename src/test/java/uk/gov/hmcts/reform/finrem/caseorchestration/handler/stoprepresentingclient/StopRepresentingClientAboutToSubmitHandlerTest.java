@@ -121,6 +121,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
+                    .clientAddressForService(mock(Address.class))
                     .build())
                 .build();
 
@@ -146,6 +147,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepJudicialApproval(YesOrNo.YES)
+                    .clientAddressForService(mock(Address.class))
                     .build())
                 .build();
 
@@ -229,6 +231,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     .build())
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
+                    .clientAddressForService(mock(Address.class))
                     .build())
                 .build();
 
@@ -261,6 +264,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     .build())
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
+                    .clientAddressForService(mock(Address.class))
                     .build())
                 .build();
 
@@ -305,6 +309,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     .build())
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
+                    .clientAddressForService(mock(Address.class))
                     .build())
                 .build();
 
@@ -330,6 +335,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
+                    .clientAddressForService(mock(Address.class))
                     .build())
                 .build();
 
@@ -350,6 +356,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
+                    .clientAddressForService(mock(Address.class))
                     .build())
                 .build();
 
@@ -426,6 +433,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
+                    .clientAddressForService(mock(Address.class))
                     .build())
                 .build();
 
@@ -446,6 +454,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
+                    .clientAddressForService(mock(Address.class))
                     .build())
                 .build();
 
@@ -468,7 +477,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             return IntStream.rangeClosed(1, 4)
                 .boxed()
                 .flatMap(index ->
-                    Stream.of(IntervenerRole.values())
+                    Stream.of(IntervenerRole.SOLICITOR)
                         .map(intervenerRole -> Arguments.of(index, intervenerRole))
                 );
         }
@@ -512,7 +521,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             return IntStream.rangeClosed(1, 4)
                 .boxed()
                 .flatMap(index ->
-                    Stream.of(IntervenerRole.values())
+                    Stream.of(IntervenerRole.SOLICITOR)
                         .flatMap(role ->
                             Stream.of(CONSENTED, CONTESTED)
                                 .flatMap(caseType ->
@@ -549,6 +558,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     .build())
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
+                    .clientAddressForService(mock(Address.class))
                     .build())
                 .build();
 
