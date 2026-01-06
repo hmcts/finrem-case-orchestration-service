@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement;
 
+import feign.FeignException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,10 +18,14 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.UUID;
 
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -54,6 +59,9 @@ public class EvidenceManagementDeleteServiceTest {
     private EvidenceManagementDeleteService emDeleteService;
     private IdamToken idamToken;
 
+    @TestLogs
+    private final TestLogger logs = new TestLogger(EvidenceManagementDeleteService.class);
+
     @Before
     public void setUp() {
         when(featureToggleService.isSecureDocEnabled()).thenReturn(false);
@@ -63,6 +71,34 @@ public class EvidenceManagementDeleteServiceTest {
             .build();
         when(idamAuthService.getIdamToken(any())).thenReturn(idamToken);
         when(idamAuthService.getUserDetails(anyString())).thenReturn(UserDetails.builder().id("19").build());
+    }
+
+    @Test
+    public void givenUploadResponseReturned_whenUploadIsCalled_thenExpectUploadToSucceed() {
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
+        emDeleteService.delete(FILE_URL, AUTH);
+
+        verify(idamAuthService, times(1)).getIdamToken(AUTH);
+        verify(caseDocumentClient, times(1))
+            .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID),true);
+    }
+
+    @Test
+    public void shouldHandleDocumentNotFoundWhenDeletingOnSecDoc() {
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
+        doThrow(Mockito.mock(FeignException.NotFound.class))
+            .when(caseDocumentClient)
+            .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID), true);
+
+        emDeleteService.delete(FILE_URL, AUTH);
+
+        verify(idamAuthService, times(1)).getIdamToken(AUTH);
+        verify(caseDocumentClient, times(1))
+            .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID), true);
+
+        assertThat(logs.getWarns()).contains(format(
+            "Document url %s not found in document store while attempting to delete document.",
+            FILE_URL));
     }
 
     @Test
@@ -142,15 +178,5 @@ public class EvidenceManagementDeleteServiceTest {
                 Mockito.eq(HttpMethod.DELETE),
                 any(),
                 any(Class.class));
-    }
-
-    @Test
-    public void givenUploadResponseReturned_whenUploadIsCalled_thenExpectUploadToSucceed() {
-        when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
-        emDeleteService.delete(FILE_URL, AUTH);
-
-        verify(idamAuthService, times(1)).getIdamToken(AUTH);
-        verify(caseDocumentClient, times(1))
-            .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID),true);
     }
 }
