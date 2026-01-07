@@ -254,15 +254,30 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
             .orElse(Barrister.builder().build());
     }
 
+    @SuppressWarnings("java:S3011") // Property names are controlled and validated
     private void setExtraField(FinremCaseData caseData, int extraFieldIndex, String... values) {
         StopRepresentationWrapper wrapper = caseData.getStopRepresentationWrapper();
+
+        // Validate index – prevents arbitrary property access
+        if (extraFieldIndex < 1 || extraFieldIndex > 4) {
+            throw new IllegalArgumentException("Invalid extraFieldIndex: " + extraFieldIndex);
+        }
+
+        // Validate input size
+        if (values == null || values.length < 3) {
+            throw new IllegalArgumentException("Expected 3 values for extra field");
+        }
+
         try {
-            BeanUtils.setProperty(wrapper, format("extraClientAddr%sId", extraFieldIndex), values[0]);
-            BeanUtils.setProperty(wrapper, format("extraClientAddr%sLabel", extraFieldIndex), values[1]);
-            BeanUtils.setProperty(wrapper, format("extraClientAddr%sConfidentialLabel", extraFieldIndex), values[2]);
+            BeanUtils.setProperty(wrapper, "extraClientAddr" + extraFieldIndex + "Id", values[0]);
+            BeanUtils.setProperty(wrapper, "extraClientAddr" + extraFieldIndex + "Label", values[1]);
+            BeanUtils.setProperty(wrapper, "extraClientAddr" + extraFieldIndex + "ConfidentialLabel", values[2]);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(format("%s - Fail to set field for index = %s", caseData.getCcdCaseId(),
-                extraFieldIndex), e);
+            throw new IllegalStateException(
+                String.format("%s - Fail to set field for index = %s",
+                    caseData.getCcdCaseId(), extraFieldIndex),
+                e
+            );
         }
     }
 }
