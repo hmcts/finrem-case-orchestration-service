@@ -481,8 +481,15 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private NoticeOfChangeParty resolveNocParty(StopRepresentingRequest request) {
-        return isRepresentingApplicant(request) ? APPLICANT
-            : (isRepresentingRespondent(request) ? RESPONDENT : null);
+        if (isRepresentingApplicant(request)) {
+            return APPLICANT;
+        }
+
+        if (isRepresentingRespondent(request)) {
+            return RESPONDENT;
+        }
+
+        return null;
     }
 
     private IntervenerWrapper getIntervenerWrapperFromFinremCaseData(StopRepresentingRequest request) {
