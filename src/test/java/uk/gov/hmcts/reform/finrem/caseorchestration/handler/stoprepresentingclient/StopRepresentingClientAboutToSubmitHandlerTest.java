@@ -540,7 +540,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     .build())
                 .build();
 
-
             FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
             assertThat(underTest.handle(request, AUTH_TOKEN).getData())
                 .extracting(FinremCaseData::getBarristerCollectionWrapper)
