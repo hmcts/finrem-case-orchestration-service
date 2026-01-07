@@ -158,15 +158,13 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         FinremCaseData finremCaseData = request.finremCaseDetails.getData();
         FinremCaseData originalFinremCaseData = request.finremCaseDetailsBefore.getData();
 
-        if (isRepresentingApplicant(request) || isRepresentingRespondent(request)) {
+        if (isRepresentingApplicant(request)
+            || isRepresentingRespondent(request)
+            || (isRepresentingAnyInterveners(request) && hasApplicantOrRespondentOrganistaionPolicyChange(request))
+        ) {
             // below also update the representative history
             nocWorkflowService.prepareNoticeOfChangeAndOrganisationPolicy(finremCaseData,
                 originalFinremCaseData, STOP_REPRESENTING_CLIENT, userAuthorisation);
-        } else if (isRepresentingAnyInterveners(request)) {
-            if (hasApplicantOrRespondentOrganistaionPolicyChange(request)) {
-                nocWorkflowService.prepareNoticeOfChangeAndOrganisationPolicy(finremCaseData,
-                    originalFinremCaseData, STOP_REPRESENTING_CLIENT, userAuthorisation);
-            }
         }
 
         // update representation update history for intervener solicitors' change (1-4)
