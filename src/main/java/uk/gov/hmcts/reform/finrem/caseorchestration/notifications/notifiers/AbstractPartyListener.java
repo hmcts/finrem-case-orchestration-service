@@ -11,23 +11,55 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Handles party-specific notification logic; subclass for different party types.
+ */
 @RequiredArgsConstructor
 public abstract class AbstractPartyListener {
-
-    protected abstract boolean isRelevantParty(SendCorrespondenceEvent event);
-    protected abstract boolean isDigitalParty(SendCorrespondenceEvent event);
-    protected abstract PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event);
-    protected abstract CaseDocument getPartyCoversheet(SendCorrespondenceEvent event);
-    protected abstract void sendLetter(SendCorrespondenceEvent event, List<BulkPrintDocument> bpDocs, Boolean isOutsideUK);
-    protected abstract Boolean isPartyOutsideUK(SendCorrespondenceEvent event);
 
     protected final BulkPrintService bulkPrintService;
     protected final EmailService emailService;
     protected final NotificationService notificationService;
     protected final InternationalPostalService internationalPostalService;
 
+    /**
+     * Does this listener handle notifications for this party/event?
+     */
+    protected abstract boolean isRelevantParty(SendCorrespondenceEvent event);
+
+    /**
+     * Should the notification be sent digitally (by email)?
+     */
+    protected abstract boolean isDigitalParty(SendCorrespondenceEvent event);
+
+    /**
+     * Returns email/name details for the party.
+     */
+    protected abstract PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event);
+
+    /**
+     * Gets the coversheet document for the party.
+     */
+    protected abstract CaseDocument getPartyCoversheet(SendCorrespondenceEvent event);
+
+    /**
+     * Performs the actual print-and-send operation.
+     */
+    protected abstract void sendLetter(SendCorrespondenceEvent event,
+                                       List<BulkPrintDocument> bulkPrintDocs,
+                                       boolean isOutsideUK);
+
+    /**
+     * Returns true if the party resides outside the UK.
+     */
+    protected abstract boolean isPartyOutsideUK(SendCorrespondenceEvent event);
+
+    /**
+     * Struct for holding party-specific contact details.
+     */
     protected record PartySpecificDetails(
         String recipientEmailAddress,
         String recipientName
@@ -43,22 +75,32 @@ public abstract class AbstractPartyListener {
 
     private void sendNotification(SendCorrespondenceEvent event) {
         if (isDigitalParty(event)) {
-            NotificationRequest emailRequest = event.emailNotificationRequest;
-            PartySpecificDetails partySpecificDetails = setPartySpecificDetails(event);
-            emailRequest.setName(partySpecificDetails.recipientName);
-            emailRequest.setNotificationEmail(partySpecificDetails.recipientEmailAddress);
-            sendEmailNotification(event);
+            enrichAndSendEmailNotification(event);
         } else {
-            List<CaseDocument> docsToPrint = event.documentsToPost;
-            docsToPrint.add(getPartyCoversheet(event));
-            List<BulkPrintDocument> bpDocs = bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint);
-            Boolean isOutsideUK = isPartyOutsideUK(event);
-            sendLetter(event, bpDocs, isOutsideUK);
+            handlePaperNotification(event);
         }
     }
 
-    private void sendEmailNotification(SendCorrespondenceEvent event) {
-        emailService.sendConfirmationEmail(event.getEmailNotificationRequest(),
-            event.emailTemplateId);
+    /**
+     * Prepares and sends an email notification to the relevant party.
+     */
+    private void enrichAndSendEmailNotification(SendCorrespondenceEvent event) {
+        PartySpecificDetails details = setPartySpecificDetails(event);
+        NotificationRequest emailRequest = event.emailNotificationRequest;
+        emailRequest.setName(details.recipientName());
+        emailRequest.setNotificationEmail(details.recipientEmailAddress());
+        emailService.sendConfirmationEmail(emailRequest, event.emailTemplateId);
+    }
+
+    /**
+     * Collect docs, coversheet, and send letter for the relevant party.
+     */
+    private void handlePaperNotification(SendCorrespondenceEvent event) {
+        // Defensive copy to avoid mutating original event collection
+        List<CaseDocument> docsToPrint = new ArrayList<>(event.documentsToPost);
+        docsToPrint.add(getPartyCoversheet(event));
+        List<BulkPrintDocument> bpDocs = bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint);
+        boolean isOutsideUK = isPartyOutsideUK(event);
+        sendLetter(event, bpDocs, isOutsideUK);
     }
 }

@@ -97,6 +97,11 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     }
 
     @JsonIgnore
+    public String getRespSolicitorName() {
+        return data.getContactDetailsWrapper().getRespondentSolicitorName();
+    }
+
+    @JsonIgnore
     public Address getAppSolicitorAddress() {
         return isConsentedApplication()
             ? data.getContactDetailsWrapper().getSolicitorAddress()
@@ -108,6 +113,11 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
         return isConsentedApplication()
             ? data.getContactDetailsWrapper().getSolicitorEmail()
             : data.getContactDetailsWrapper().getApplicantSolicitorEmail();
+    }
+
+    @JsonIgnore
+    public String getRespSolicitorEmail() {
+        return data.getContactDetailsWrapper().getRespondentSolicitorEmail();
     }
 
     @JsonIgnore

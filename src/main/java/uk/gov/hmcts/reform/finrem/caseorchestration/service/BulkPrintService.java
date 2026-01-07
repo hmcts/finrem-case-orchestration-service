@@ -120,6 +120,31 @@ public class BulkPrintService {
         return coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
     }
 
+    public CaseDocument getRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+        // When bulk print coversheet refactor work takes place, there should be conditional logic to retrieve the existing coversheet.
+        return coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
+    }
+
+    public CaseDocument getIntervenerOneCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+        // When bulk print coversheet refactor work takes place, there should be conditional logic to retrieve the existing coversheet.
+        return coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
+    }
+
+    public CaseDocument getIntervenerTwoCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+        // When bulk print coversheet refactor work takes place, there should be conditional logic to retrieve the existing coversheet.
+        return coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO);
+    }
+
+    public CaseDocument getIntervenerThreeCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+        // When bulk print coversheet refactor work takes place, there should be conditional logic to retrieve the existing coversheet.
+        return coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE);
+    }
+
+    public CaseDocument getIntervenerFourCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+        // When bulk print coversheet refactor work takes place, there should be conditional logic to retrieve the existing coversheet.
+        return coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR);
+    }
+
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.

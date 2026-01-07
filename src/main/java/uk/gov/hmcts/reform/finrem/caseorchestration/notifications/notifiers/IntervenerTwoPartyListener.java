@@ -10,38 +10,38 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
 
 @Component
-public class ApplicantPartyListener extends AbstractPartyListener {
+public class IntervenerTwoPartyListener extends AbstractPartyListener {
 
-    public ApplicantPartyListener(BulkPrintService bulkPrintService,
-                                  EmailService emailService,
-                                  NotificationService notificationService,
-                                  InternationalPostalService internationalPostalService) {
+    public IntervenerTwoPartyListener(BulkPrintService bulkPrintService,
+                                      EmailService emailService,
+                                      NotificationService notificationService,
+                                      InternationalPostalService internationalPostalService) {
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
     }
 
     @Override
     protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.APPLICANT);
+        return event.getNotificationParties().contains(NotificationParty.INTERVENER_TWO);
     }
 
     @Override
     protected boolean isDigitalParty(SendCorrespondenceEvent event) {
-        return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(event.getCaseDetails());
+        return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(event.getCaseDetails().getData().getIntervenerTwo(), event.getCaseDetails());
     }
 
     @Override
     protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
-        String email = event.getCaseDetails().getAppSolicitorEmail();
-        String name = event.getCaseDetails().getAppSolicitorName();
+        String email = event.getCaseDetails().getData().getIntervenerTwo().getIntervenerSolEmail();
+        String name = event.getCaseDetails().getData().getIntervenerTwo().getIntervenerSolName();
         return new PartySpecificDetails(email, name);
     }
 
     @Override
     protected CaseDocument getPartyCoversheet(SendCorrespondenceEvent event) {
-        return bulkPrintService.getApplicantCoverSheet(event.getCaseDetails(), event.authToken);
+        return bulkPrintService.getIntervenerTwoCoverSheet(event.getCaseDetails(), event.authToken);
     }
 
     @Override
@@ -49,12 +49,12 @@ public class ApplicantPartyListener extends AbstractPartyListener {
                               List<BulkPrintDocument> bulkPrintDocs,
                               boolean isOutsideUK) {
         bulkPrintService.bulkPrintFinancialRemedyLetterPack(
-            event.caseDetails, APPLICANT, bulkPrintDocs, isOutsideUK, event.authToken
+            event.caseDetails, INTERVENER_TWO, bulkPrintDocs, isOutsideUK, event.authToken
         );
     }
 
     @Override
     protected boolean isPartyOutsideUK(SendCorrespondenceEvent event) {
-        return internationalPostalService.isApplicantResideOutsideOfUK(event.getCaseDetails().getData());
+        return internationalPostalService.isIntervenerResideOutsideOfUK(event.getCaseDetails().getData().getIntervenerTwo());
     }
 }
