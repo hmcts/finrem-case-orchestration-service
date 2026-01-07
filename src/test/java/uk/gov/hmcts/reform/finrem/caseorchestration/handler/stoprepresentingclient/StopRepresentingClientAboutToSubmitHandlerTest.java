@@ -146,9 +146,8 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN)
                 .getWarnings())
                 .containsExactly(
-                "Are you sure you wish to stop representing your client? "
-                    + "If you continue your access to this access will be removed"
-            );
+                    "Are you sure you wish to stop representing your client? If you continue your access to this access will be removed"
+                );
             assertThat(logs.getInfos()).hasSize(2).contains(format(
                 format("%s - %s representative stops representing a client with a client consent", CASE_ID,
                     isApplicantRepresentative ? "applicant" : "respondent")));
@@ -165,6 +164,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                    .stopRepClientConsent(YesOrNo.NO)
                     .stopRepJudicialApproval(YesOrNo.YES)
                     .clientAddressForService(mock(Address.class))
                     .build())
@@ -173,9 +173,8 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN)
                 .getWarnings())
                 .containsExactly(
-                "Are you sure you wish to stop representing your client? "
-                    + "If you continue your access to this access will be removed"
-            );
+                    "Are you sure you wish to stop representing your client? If you continue your access to this access will be removed"
+                );
             assertThat(logs.getInfos()).hasSize(2).contains(format(
                 format("%s - %s representative stops representing a client with a judicial approval", CASE_ID,
                     isApplicantRepresentative ? "applicant" : "respondent")));
@@ -220,8 +219,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN).getData())
                 .extracting(FinremCaseData::getBarristerCollectionWrapper)
                 .extracting(BarristerCollectionWrapper::getApplicantBarristers,
                     InstanceOfAssertFactories.list(BarristerCollectionItem.class))
@@ -242,8 +240,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN).getData())
                 .extracting(FinremCaseData::getBarristerCollectionWrapper)
                 .extracting(BarristerCollectionWrapper::getApplicantBarristers,
                     InstanceOfAssertFactories.list(BarristerCollectionItem.class))
@@ -263,10 +260,29 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     class LogInAsRespondentRepresentativeTests {
 
         @Test
-        void givenCaseWithSameOrganisationBarrister_whenHandled_thenRemoveRespondentBarrister() {
-            when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
-                new Representation(TEST_USER_ID, false, true, null, null)
-            );
+        void givenRespondentBarristerWithDifferentOrgId_whenHandled_thenDoesNotRemoveRespondentBarrister() {
+            stubIsRespondentSolicitor();
+
+            FinremCaseData caseData = FinremCaseData.builder()
+                .respondentOrganisationPolicy(organisationPolicy("BBB"))
+                .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
+                    .respondentBarristers(barristers("AAA"))
+                    .build())
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
+                .build();
+
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN).getData())
+                .extracting(FinremCaseData::getBarristerCollectionWrapper)
+                .extracting(BarristerCollectionWrapper::getRespondentBarristers,
+                    InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+                .hasSize(1);
+
+            verifyBuildRepresentationCalled(caseData);
+        }
+
+        @Test
+        void givenRespondentBarristerWithSameOrgId_whenHandled_thenRemoveRespondentBarrister() {
+            stubIsRespondentSolicitor();
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .respondentOrganisationPolicy(organisationPolicy("AAA"))
@@ -276,14 +292,19 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN).getData())
                 .extracting(FinremCaseData::getBarristerCollectionWrapper)
                 .extracting(BarristerCollectionWrapper::getRespondentBarristers,
                     InstanceOfAssertFactories.list(BarristerCollectionItem.class))
                 .isEmpty();
 
             verifyBuildRepresentationCalled(caseData);
+        }
+
+        private void stubIsRespondentSolicitor() {
+            when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
+                new Representation(TEST_USER_ID, false, true, null, null)
+            );
         }
     }
 
