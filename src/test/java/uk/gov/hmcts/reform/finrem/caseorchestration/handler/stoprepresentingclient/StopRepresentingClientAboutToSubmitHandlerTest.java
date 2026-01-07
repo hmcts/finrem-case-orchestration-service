@@ -269,7 +269,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .extracting(FinremCaseData::getBarristerCollectionWrapper)
                 .extracting(BarristerCollectionWrapper::getApplicantBarristers,
                     InstanceOfAssertFactories.list(BarristerCollectionItem.class))
-                .hasSize(0);
+                    .isEmpty();
 
             verifyBuildRepresentationCalled(request.getCaseDetails().getData());
         }
@@ -314,7 +314,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .extracting(FinremCaseData::getBarristerCollectionWrapper)
                 .extracting(BarristerCollectionWrapper::getRespondentBarristers,
                     InstanceOfAssertFactories.list(BarristerCollectionItem.class))
-                .hasSize(0);
+                .isEmpty();
 
             verifyBuildRepresentationCalled(request.getCaseDetails().getData());
         }
