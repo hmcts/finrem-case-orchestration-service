@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -58,6 +59,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG2_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.barristers;
@@ -114,7 +116,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     void givenServiceAddressMissing_whenHandled_throwsException(boolean isApplicantRepresentative,
                                                                 Integer intervenerIndex,
                                                                 IntervenerRole intervenerRole) {
-        stubIsApplicantSolicitorAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
+        stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
 
         FinremCaseData caseData = FinremCaseData.builder()
             .stopRepresentationWrapper(StopRepresentationWrapper.builder()
@@ -136,7 +138,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         void givenHavingClientConsent_whenHandled_thenWarningsPopulated(boolean isApplicantRepresentative,
                                                                         Integer intervenerIndex,
                                                                         IntervenerRole intervenerRole) {
-            stubIsApplicantSolicitorAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
+            stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
@@ -159,7 +161,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         void givenHavingJudicialApproval_whenHandled_thenWarningsPopulated(boolean isApplicantRepresentative,
                                                                            Integer intervenerIndex,
                                                                            IntervenerRole intervenerRole) {
-            stubIsApplicantSolicitorAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
+            stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
@@ -186,7 +188,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         void givenNoJudicialApprovalOrClientConsent_whenHandled_thenThrowIllegalStateException(boolean isApplicantRepresentative,
                                                                                                Integer intervenerIndex,
                                                                                                IntervenerRole intervenerRole) {
-            stubIsApplicantSolicitorAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
+            stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder().build())
@@ -208,7 +210,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @Test
         void givenApplicantBarristerWithDifferentOrgId_whenHandled_thenDoesNotRemoveApplicantBarrister() {
-            stubIsApplicantSolicitor();
+            stubIsRepresentingApplicant();
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .applicantOrganisationPolicy(organisationPolicy("BBB"))
@@ -229,7 +231,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @Test
         void givenApplicantBarristerWithSameOrgId_whenHandled_thenRemoveApplicantApplicantBarrister() {
-            stubIsApplicantSolicitor();
+            stubIsRepresentingApplicant();
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .applicantOrganisationPolicy(organisationPolicy("AAA"))
@@ -250,8 +252,8 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @ParameterizedTest
         @ValueSource(ints =  {1, 2, 3, 4})
-        void givenApplicantBarristerWithSameOrgId_whenHandled_thenRemoveIntervenerSolicitor(int index) {
-            stubIsApplicantSolicitor();
+        void givenApplicantSolicitorWithSameOrgId_whenHandled_thenRemoveIntervenerSolicitor(int index) {
+            stubIsRepresentingApplicant();
 
             FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG_ID, FinremCaseData.builder()
                 .applicantOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
@@ -263,7 +265,36 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             verifyBuildRepresentationCalled(caseData);
         }
 
-        private void stubIsApplicantSolicitor() {
+        @ParameterizedTest
+        @ValueSource(ints =  {1, 2, 3, 4})
+        void givenIntervenerSolicitorWithDifferenceOrgId_whenHandled_thenDoesNotRemoveIntervenerSolicitorButBarrister(int index) {
+            stubIsRepresentingApplicant();
+
+            FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG2_ID, FinremCaseData.builder()
+                .applicantOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
+                .barristerCollectionWrapper(mockIntervenerBarristerCollectionWrapper(index, TEST_ORG_ID))
+            ).build();
+
+            Function<BarristerCollectionWrapper, List<BarristerCollectionItem>> extractor =
+                switch (index) {
+                    case 1 -> BarristerCollectionWrapper::getIntvr1Barristers;
+                    case 2 -> BarristerCollectionWrapper::getIntvr2Barristers;
+                    case 3 -> BarristerCollectionWrapper::getIntvr3Barristers;
+                    case 4 -> BarristerCollectionWrapper::getIntvr4Barristers;
+                    default -> throw new IllegalArgumentException("Unsupported index: " + index);
+                };
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN).getData())
+                .extracting(FinremCaseData::getBarristerCollectionWrapper)
+                .extracting(extractor,
+                    InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+                .isEmpty();
+
+            verify(stopRepresentingClientService, never()).setIntervenerUnrepresented(caseData.getInterveners().get(index - 1));
+            verifyBuildRepresentationCalled(caseData);
+        }
+
+        private void stubIsRepresentingApplicant() {
             when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
                 new Representation(TEST_USER_ID, true, false, null, null)
             );
@@ -275,7 +306,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @Test
         void givenRespondentBarristerWithDifferentOrgId_whenHandled_thenDoesNotRemoveRespondentBarrister() {
-            stubIsRespondentSolicitor();
+            stubIsRepresentingRespondent();
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .respondentOrganisationPolicy(organisationPolicy("BBB"))
@@ -296,7 +327,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @Test
         void givenRespondentBarristerWithSameOrgId_whenHandled_thenRemoveRespondentBarrister() {
-            stubIsRespondentSolicitor();
+            stubIsRepresentingRespondent();
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .respondentOrganisationPolicy(organisationPolicy("AAA"))
@@ -317,8 +348,8 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @ParameterizedTest
         @ValueSource(ints =  {1, 2, 3, 4})
-        void givenRespondentBarristerWithSameOrgId_whenHandled_thenRemoveIntervenerSolicitor(int index) {
-            stubIsRespondentSolicitor();
+        void givenIntervenerSolicitorWithSameOrgId_whenHandled_thenRemoveIntervenerSolicitor(int index) {
+            stubIsRepresentingRespondent();
 
             FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG_ID, FinremCaseData.builder()
                 .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
@@ -330,7 +361,51 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             verifyBuildRepresentationCalled(caseData);
         }
 
-        private void stubIsRespondentSolicitor() {
+        @ParameterizedTest
+        @ValueSource(ints =  {1, 2, 3, 4})
+        void givenIntervenerSolicitorWithDifferenceOrgId_whenHandled_thenDoesNotRemoveIntervenerSolicitor(int index) {
+            stubIsRepresentingRespondent();
+
+            FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG2_ID, FinremCaseData.builder()
+                .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
+            ).build();
+
+            underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN);
+            verify(stopRepresentingClientService, never()).setIntervenerUnrepresented(caseData.getInterveners().get(index - 1));
+            verifyBuildRepresentationCalled(caseData);
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints =  {1, 2, 3, 4})
+        void givenIntervenerSolicitorWithDifferenceOrgId_whenHandled_thenDoesNotRemoveIntervenerSolicitorButBarrister(int index) {
+            stubIsRepresentingRespondent();
+
+            FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG2_ID, FinremCaseData.builder()
+                .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
+                .barristerCollectionWrapper(mockIntervenerBarristerCollectionWrapper(index, TEST_ORG_ID))
+            ).build();
+
+            Function<BarristerCollectionWrapper, List<BarristerCollectionItem>> extractor =
+                switch (index) {
+                    case 1 -> BarristerCollectionWrapper::getIntvr1Barristers;
+                    case 2 -> BarristerCollectionWrapper::getIntvr2Barristers;
+                    case 3 -> BarristerCollectionWrapper::getIntvr3Barristers;
+                    case 4 -> BarristerCollectionWrapper::getIntvr4Barristers;
+                    default -> throw new IllegalArgumentException("Unsupported index: " + index);
+                };
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN).getData())
+                .extracting(FinremCaseData::getBarristerCollectionWrapper)
+                .extracting(extractor,
+                    InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+                .isEmpty();
+
+            verify(stopRepresentingClientService, never()).setIntervenerUnrepresented(caseData.getInterveners().get(index - 1));
+            verifyBuildRepresentationCalled(caseData);
+        }
+
+        private void stubIsRepresentingRespondent() {
             when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
                 new Representation(TEST_USER_ID, false, true, null, null)
             );
@@ -343,7 +418,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         @ParameterizedTest
         @ValueSource(booleans = {true, false})
         void givenAnyCase_whenHandled_thenSetUnrepresentedAndPopulateNocParty(boolean isApplicantRepresentative) {
-            stubApplicantOrRespondentRep(isApplicantRepresentative);
+            stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
@@ -363,7 +438,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         @MethodSource
         void givenAnyCase_whenHandled_thenPopulateServiceAddress(boolean isApplicantRepresentative, CaseType caseType,
                                                                  boolean addressConfidentiality) {
-            stubApplicantOrRespondentRep(isApplicantRepresentative);
+            stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
             Address serviceAddress = mock(Address.class);
 
@@ -399,7 +474,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 );
         }
 
-        private void stubApplicantOrRespondentRep(boolean isApplicantRepresentative) {
+        private void stubIsRepresentingApplicantOrRespondent(boolean isApplicantRepresentative) {
             when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
                 new Representation(TEST_USER_ID, isApplicantRepresentative, !isApplicantRepresentative, null, null)
             );
@@ -408,24 +483,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
     @Nested
     class LogInAsIntervenerRepresentativeTests {
-
-        private static BarristerCollectionWrapper mockBarristerCollectionWrapper(int index, String orgId) {
-            return switch (index) {
-                case 1 -> BarristerCollectionWrapper.builder()
-                    .intvr1Barristers(barristers(orgId))
-                    .build();
-                case 2 -> BarristerCollectionWrapper.builder()
-                    .intvr2Barristers(barristers(orgId))
-                    .build();
-                case 3 -> BarristerCollectionWrapper.builder()
-                    .intvr3Barristers(barristers(orgId))
-                    .build();
-                case 4 -> BarristerCollectionWrapper.builder()
-                    .intvr4Barristers(barristers(orgId))
-                    .build();
-                default -> throw new IllegalArgumentException("Unsupported intervener index: " + index);
-            };
-        }
 
         private static Function<FinremCaseData, IntervenerWrapper> intervenerWrapperExtractor(int index) {
             return data -> switch (index) {
@@ -442,7 +499,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         void givenAsIntervenerSolicitor_whenAllPartiesOrgsDoNotMatch_thenDoesNotPopulateNocParty(
             int index, IntervenerRole intervenerRole) {
 
-            stubIntervenerRep(index, intervenerRole);
+            stubIsRepresentingInterevener(index, intervenerRole);
 
             FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG_ID, FinremCaseData.builder()
                 .contactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(mock(NoticeOfChangeParty.class)).build())
@@ -467,7 +524,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         void givenAsIntervenerSolicitor_whenApplicantOrRespondentOrgMatch_thenSetUnrepresentedAndNocPartyPopulated(
             int index, IntervenerRole intervenerRole, String intvOrgId, NoticeOfChangeParty noticeOfChangeParty) {
 
-            stubIntervenerRep(index, intervenerRole);
+            stubIsRepresentingInterevener(index, intervenerRole);
             FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, intvOrgId, FinremCaseData.builder()
                 .applicantOrganisationPolicy(organisationPolicy("applicantOrg"))
                 .respondentOrganisationPolicy(organisationPolicy("respondentOrg"))
@@ -491,7 +548,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         void givenAsIntervenerSolicitor_whenHandled_thenSetIntervenerUnrepresented(
             int index, IntervenerRole intervenerRole) {
 
-            stubIntervenerRep(index, intervenerRole);
+            stubIsRepresentingInterevener(index, intervenerRole);
             FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG_ID, FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
             ).build();
@@ -517,7 +574,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         @MethodSource("provideAllIntervenerSolicitorRolesWithCaseTypesAndConfidentiality")
         void givenAnyCase_whenHandled_thenPopulateServiceAddress(int index, IntervenerRole intervenerRole,
                                                                  CaseType caseType, boolean addressConfidentiality) {
-            stubIntervenerRep(index, intervenerRole);
+            stubIsRepresentingInterevener(index, intervenerRole);
 
             Address serviceAddress = mock(Address.class);
             FinremCaseData caseData = FinremCaseData.builder()
@@ -543,7 +600,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         @ParameterizedTest
         @ValueSource(ints = {1})
         void givenCaseWithSameOrganisationBarrister_whenHandled_thenRemoveRespondentBarrister(int index) {
-            stubIntervenerRep(1, IntervenerRole.SOLICITOR);
+            stubIsRepresentingInterevener(1, IntervenerRole.SOLICITOR);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerOne(IntervenerOne.builder()
@@ -582,7 +639,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             verifyBuildRepresentationCalled(caseData);
         }
 
-        private void stubIntervenerRep(int index, IntervenerRole intervenerRole) {
+        private void stubIsRepresentingInterevener(int index, IntervenerRole intervenerRole) {
             when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
                 new Representation(TEST_USER_ID, false, false, index, intervenerRole)
             );
@@ -642,11 +699,11 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         );
     }
 
-    private void stubIsApplicantSolicitorAndIntervenerIndex(boolean isApplicantSolicitor,
-                                                            Integer intervenerIndex,
-                                                            IntervenerRole intervenerRole) {
-        boolean isRepresentingApplicant = intervenerIndex == null && isApplicantSolicitor;
-        boolean isRepresentingRespondent = intervenerIndex == null && isApplicantSolicitor;
+    private void stubIsApplicantRepresentativeAndIntervenerIndex(boolean isApplicantRepresentative,
+                                                                 Integer intervenerIndex,
+                                                                 IntervenerRole intervenerRole) {
+        boolean isRepresentingApplicant = intervenerIndex == null && isApplicantRepresentative;
+        boolean isRepresentingRespondent = intervenerIndex == null && isApplicantRepresentative;
 
         when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
             new Representation(TEST_USER_ID, isRepresentingApplicant, !isRepresentingRespondent, intervenerIndex,
@@ -681,5 +738,23 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             default -> throw new IllegalArgumentException("Unsupported intervener index: " + index);
         }
         return builder;
+    }
+
+    private static BarristerCollectionWrapper mockIntervenerBarristerCollectionWrapper(int index, String orgId) {
+        return switch (index) {
+            case 1 -> BarristerCollectionWrapper.builder()
+                .intvr1Barristers(barristers(orgId))
+                .build();
+            case 2 -> BarristerCollectionWrapper.builder()
+                .intvr2Barristers(barristers(orgId))
+                .build();
+            case 3 -> BarristerCollectionWrapper.builder()
+                .intvr3Barristers(barristers(orgId))
+                .build();
+            case 4 -> BarristerCollectionWrapper.builder()
+                .intvr4Barristers(barristers(orgId))
+                .build();
+            default -> throw new IllegalArgumentException("Unsupported intervener index: " + index);
+        };
     }
 }
