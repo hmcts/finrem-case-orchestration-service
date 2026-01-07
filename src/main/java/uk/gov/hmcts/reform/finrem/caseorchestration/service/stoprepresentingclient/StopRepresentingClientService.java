@@ -220,13 +220,27 @@ public class StopRepresentingClientService {
     public Representation buildRepresentation(FinremCaseData caseData, String userAuthorisation) {
         boolean isIntervenerRepresentative = caseRoleService.isIntervenerRepresentative(caseData, userAuthorisation);
 
+        Integer intervenerIndex = null;
+        IntervenerRole intervenerRole = null;
+
+        if (isIntervenerRepresentative) {
+            intervenerIndex = caseRoleService
+                .getIntervenerIndex(caseData, userAuthorisation)
+                .orElseThrow();
+
+            intervenerRole = caseRoleService
+                .getIntervenerSolicitorIndex(caseData, userAuthorisation)
+                .isEmpty()
+                ? IntervenerRole.BARRISTER
+                : IntervenerRole.SOLICITOR;
+        }
+
         return new Representation(
             idamService.getIdamUserId(userAuthorisation),
             caseRoleService.isApplicantRepresentative(caseData, userAuthorisation),
             caseRoleService.isRespondentRepresentative(caseData, userAuthorisation),
-            isIntervenerRepresentative ? caseRoleService.getIntervenerIndex(caseData, userAuthorisation).orElseThrow() : null,
-            isIntervenerRepresentative ? (caseRoleService.getIntervenerSolicitorIndex(caseData, userAuthorisation).isEmpty()
-                ? IntervenerRole.BARRISTER : IntervenerRole.SOLICITOR) : null
+            intervenerIndex,
+            intervenerRole
         );
     }
 
