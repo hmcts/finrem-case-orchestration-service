@@ -364,10 +364,10 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             stopRepresentingByRespondentRepresentative(finremCaseData);
         } else if (isRepresentingAnyInterveners(request)) {
             if (isRepresentingAnyIntervenerBarristers(request)) {
-                stopRepresentingByIntervenerBarrister(finremCaseData, getIntervenerBarristerFromFinremCaseData(request));
+                stopRepresentingByIntervenerBarrister(finremCaseData, getIntervenerBarrister(request));
             } else {
                 // it must be intervener solicitor
-                stopRepresentingByIntervenerSolicitor(finremCaseData, getIntervenerWrapperFromFinremCaseData(request));
+                stopRepresentingByIntervenerSolicitor(finremCaseData, getIntervenerWrapper(request));
             }
         }
     }
@@ -455,7 +455,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         } else {
             throwIfServiceAddressIsNull(serviceAddress);
         }
-        IntervenerWrapper intervenerWrapper = getIntervenerWrapperFromFinremCaseData(request);
+        IntervenerWrapper intervenerWrapper = getIntervenerWrapper(request);
         populateServiceAddressToIntervener(intervenerWrapper, serviceAddressConfig);
     }
 
@@ -492,14 +492,14 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         return null;
     }
 
-    private IntervenerWrapper getIntervenerWrapperFromFinremCaseData(StopRepresentingRequest request) {
+    private IntervenerWrapper getIntervenerWrapper(StopRepresentingRequest request) {
         List<IntervenerWrapper> intervenerWrappers = request.finremCaseDetails.getData().getInterveners();
         return of(getIntervenerIndex(request))
             .map(i -> i - 1) // starts with 1
             .map(intervenerWrappers::get).orElseThrow(IllegalStateException::new);
     }
 
-    private Barrister getIntervenerBarristerFromFinremCaseData(StopRepresentingRequest request) {
+    private Barrister getIntervenerBarrister(StopRepresentingRequest request) {
         return emptyIfNull(
             request.finremCaseDetails.getData().getBarristerCollectionWrapper()
                 .getIntervenerBarristersByIndex(getIntervenerIndex(request))
