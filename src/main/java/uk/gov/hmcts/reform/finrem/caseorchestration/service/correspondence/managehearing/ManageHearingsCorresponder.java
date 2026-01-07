@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.M
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -96,6 +97,15 @@ public class ManageHearingsCorresponder {
         String formattedDate = hearing.getHearingDate().format(formatter);
         String vacatedHearingDateTime = formattedDate + " at " + hearing.getHearingTime();
 
+        List<CaseDocument> documentsToPost = new ArrayList<>(hearing.getAdditionalHearingDocs().stream()
+            .map(DocumentCollectionItem::getValue)
+            .toList());
+
+        wrapper.getHearingDocumentsCollection().stream()
+            .filter(item -> item.getValue().getHearingId().equals(wrapper.getWorkingHearingId()))
+            .map(item -> item.getValue().getHearingDocument())
+            .forEach(documentsToPost::add);
+
         NotificationRequest notificationRequest =  NotificationRequest.builder()
             .caseReferenceNumber(String.valueOf(finremCaseDetails.getId()))
             .hearingType(hearing.getHearingType().toString())
@@ -114,9 +124,9 @@ public class ManageHearingsCorresponder {
                 .toList())
             .emailNotificationRequest(notificationRequest)
             .emailTemplateId(FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
-            //TODO: Print Docs
-            .documentsToPost(List.of())
+            .documentsToPost(documentsToPost)
             .caseDetails(finremCaseDetails)
+            .authToken(userAuthorisation)
             .build()
         );
 

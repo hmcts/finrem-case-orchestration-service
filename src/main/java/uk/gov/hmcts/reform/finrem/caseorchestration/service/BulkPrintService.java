@@ -115,6 +115,11 @@ public class BulkPrintService {
             authorisationToken);
     }
 
+    public CaseDocument getApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+        // When bulk print coversheet refactor work takes place, there should be conditional logic to retrieve the existing coversheet.
+        return coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
+    }
+
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
@@ -247,6 +252,15 @@ public class BulkPrintService {
                 throw new IllegalArgumentException("All documents must be in PDF format. Invalid file: " + document.getFileName());
             }
         });
+    }
+
+    public List<BulkPrintDocument> convertCaseDocumentsToBulkPrintDocuments(List<CaseDocument> caseDocuments) {
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        for (CaseDocument caseDocument : caseDocuments) {
+            BulkPrintDocument bulkPrintDocument = documentHelper.mapToBulkPrintDocument(caseDocument);
+            bulkPrintDocuments.add(bulkPrintDocument);
+        }
+        return bulkPrintDocuments;
     }
 
     private BulkPrintDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
