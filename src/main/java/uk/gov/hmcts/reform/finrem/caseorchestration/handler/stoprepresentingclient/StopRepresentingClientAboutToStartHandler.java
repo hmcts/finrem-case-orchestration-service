@@ -254,7 +254,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
             .orElse(Barrister.builder().build());
     }
 
-    @SuppressWarnings("java:S3011") // Property names are controlled and validated
+    @SuppressWarnings("java:S4512")// Property names are fixed and index is whitelisted (not user-controlled)
     private void setExtraField(FinremCaseData caseData, int extraFieldIndex, String... values) {
         StopRepresentationWrapper wrapper = caseData.getStopRepresentationWrapper();
 
