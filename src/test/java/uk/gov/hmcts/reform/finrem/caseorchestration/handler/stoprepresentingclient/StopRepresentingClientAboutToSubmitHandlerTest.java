@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -44,9 +43,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclie
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -67,7 +64,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.barristers;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisationPolicy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
@@ -146,14 +142,12 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             stubIsApplicantSolicitorAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
 
             FinremCaseData caseData = FinremCaseData.builder()
-                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                    .stopRepClientConsent(YesOrNo.YES)
-                    .clientAddressForService(mock(Address.class))
-                    .build())
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getWarnings()).containsExactly(
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN)
+                .getWarnings())
+                .containsExactly(
                 "Are you sure you wish to stop representing your client? "
                     + "If you continue your access to this access will be removed"
             );
@@ -178,8 +172,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     .build())
                 .build();
 
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getWarnings()).containsExactly(
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN)
+                .getWarnings())
+                .containsExactly(
                 "Are you sure you wish to stop representing your client? "
                     + "If you continue your access to this access will be removed"
             );
@@ -201,8 +196,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder().build())
                 .build();
 
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
-            assertThatThrownBy(() -> underTest.handle(request, AUTH_TOKEN))
+            assertThatThrownBy(() -> underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN))
                 .hasMessage("Unreachable");
 
             verifyBuildRepresentationCalled(caseData);
@@ -217,24 +211,15 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     class LogInAsApplicantRepresentativeTests {
 
         @Test
-        void givenCaseWithOtherOrganisationApplicantBarrister_whenHandled_thenDoesNotRemoveBarrister() {
+        void givenApplicantBarristerWithDifferentOrgId_whenHandled_thenDoesNotRemoveBarrister() {
             stubIsApplicantSolicitor();
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .applicantOrganisationPolicy(organisationPolicy("BBB"))
                 .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
-                    .applicantBarristers(new ArrayList<>(List.of(
-                        BarristerCollectionItem.builder()
-                            .value(Barrister.builder()
-                                .organisation(organisation("AAA"))
-                                .build())
-                            .build()
-                    )))
+                    .applicantBarristers(barristers("AAA"))
                     .build())
-                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                    .stopRepClientConsent(YesOrNo.YES)
-                    .clientAddressForService(mock(Address.class))
-                    .build())
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
             FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
@@ -248,7 +233,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         }
 
         @Test
-        void givenCaseWithSameOrganisationBarrister_whenHandled_thenRemoveApplicantBarrister() {
+        void givenApplicantBarristerWithSameOrgId_whenHandled_thenRemoveApplicantBarrister() {
             stubIsApplicantSolicitor();
 
             FinremCaseData caseData = FinremCaseData.builder()
@@ -256,10 +241,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
                     .applicantBarristers(barristers("AAA"))
                     .build())
-                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                    .stopRepClientConsent(YesOrNo.YES)
-                    .clientAddressForService(mock(Address.class))
-                    .build())
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
             FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
@@ -293,10 +275,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
                     .respondentBarristers(barristers("AAA"))
                     .build())
-                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                    .stopRepClientConsent(YesOrNo.YES)
-                    .clientAddressForService(mock(Address.class))
-                    .build())
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
             FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
@@ -319,14 +298,10 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             stubApplicantOrRespondentRep(isApplicantRepresentative);
 
             FinremCaseData caseData = FinremCaseData.builder()
-                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                    .stopRepClientConsent(YesOrNo.YES)
-                    .clientAddressForService(mock(Address.class))
-                    .build())
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN).getData())
                 .extracting(FinremCaseData::getContactDetailsWrapper)
                 .extracting(ContactDetailsWrapper::getNocParty)
                 .is(expectedParty(isApplicantRepresentative));
@@ -447,10 +422,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .contactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(mock(NoticeOfChangeParty.class)).build())
                 .applicantOrganisationPolicy(organisationPolicy("applicantOrg"))
                 .respondentOrganisationPolicy(organisationPolicy("respondentOrg"))
-                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                    .stopRepClientConsent(YesOrNo.YES)
-                    .clientAddressForService(mock(Address.class))
-                    .build())
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
             ).build();
 
             FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
@@ -473,10 +445,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, intvOrgId, FinremCaseData.builder()
                 .applicantOrganisationPolicy(organisationPolicy("applicantOrg"))
                 .respondentOrganisationPolicy(organisationPolicy("respondentOrg"))
-                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                    .stopRepClientConsent(YesOrNo.YES)
-                    .clientAddressForService(mock(Address.class))
-                    .build())
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
             ).build();
 
             assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN).getData())
@@ -498,10 +467,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
             stubIntervenerRep(index, intervenerRole);
             FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG_ID, FinremCaseData.builder()
-                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                    .stopRepClientConsent(YesOrNo.YES)
-                    .clientAddressForService(mock(Address.class))
-                    .build())
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
             ).build();
 
             underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN);
@@ -572,10 +538,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     .intvr3Barristers(barristers("CCC"))
                     .intvr4Barristers(barristers("DDD"))
                     .build())
-                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                    .stopRepClientConsent(YesOrNo.YES)
-                    .clientAddressForService(mock(Address.class))
-                    .build())
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
             FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
@@ -660,17 +623,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             "expected APPLICANT if applicant solicitor, otherwise RESPONDENT");
     }
 
-    private static Condition<OrganisationPolicy> expectedIntervenerOrganisationPolicy(int index) {
-        return new Condition<>(orgPolicy -> {
-            if (orgPolicy == null) {
-                return false;
-            }
-
-            return CaseRole.getIntervenerSolicitorByIndex(index).getCcdCode().equals(orgPolicy.getOrgPolicyCaseAssignedRole());
-        },
-            "expected APPLICANT if applicant solicitor, otherwise RESPONDENT");
-    }
-
     private void verifyBuildRepresentationCalled(FinremCaseData caseData) {
         verify(stopRepresentingClientService).buildRepresentation(caseData, AUTH_TOKEN);
     }
@@ -700,5 +652,12 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             new Representation(TEST_USER_ID, isRepresentingApplicant, !isRepresentingRespondent, intervenerIndex,
                 intervenerRole)
         );
+    }
+
+    private static StopRepresentationWrapper clientConsentedStopRepresentationWrapper(Address serviceAddress) {
+        return StopRepresentationWrapper.builder()
+            .stopRepClientConsent(YesOrNo.YES)
+            .clientAddressForService(serviceAddress)
+            .build();
     }
 }
