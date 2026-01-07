@@ -269,9 +269,9 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
         }
 
         try {
-            BeanUtils.setProperty(wrapper, "extraClientAddr" + extraFieldIndex + "Id", values[0]);
-            BeanUtils.setProperty(wrapper, "extraClientAddr" + extraFieldIndex + "Label", values[1]);
-            BeanUtils.setProperty(wrapper, "extraClientAddr" + extraFieldIndex + "ConfidentialLabel", values[2]);
+            BeanUtils.setProperty(wrapper, format("extraClientAddr%sId", extraFieldIndex), values[0]);
+            BeanUtils.setProperty(wrapper, format("extraClientAddr%sLabel", extraFieldIndex), values[1]);
+            BeanUtils.setProperty(wrapper, format("extraClientAddr%sConfidentialLabel", extraFieldIndex), values[2]);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(
                 String.format("%s - Fail to set field for index = %s",
