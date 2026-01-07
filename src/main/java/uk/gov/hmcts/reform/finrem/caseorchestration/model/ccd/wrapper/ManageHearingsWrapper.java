@@ -1,14 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
@@ -124,5 +127,18 @@ public class ManageHearingsWrapper {
                 .orElse(null);
         }
         return workingVacatedHearingId;
+    }
+
+    @JsonIgnore
+    public List<CaseDocument> getAssociatedWorkingHearingDocuments() {
+        UUID hearingId = getWorkingHearingId();
+        if (hearingId == null || hearingDocumentsCollection == null) {
+            return Collections.emptyList();
+        }
+        return hearingDocumentsCollection.stream()
+            .map(ManageHearingDocumentsCollectionItem::getValue)
+            .filter(doc -> hearingId.equals(doc.getHearingId()))
+            .map(ManageHearingDocument::getHearingDocument)
+            .toList();
     }
 }

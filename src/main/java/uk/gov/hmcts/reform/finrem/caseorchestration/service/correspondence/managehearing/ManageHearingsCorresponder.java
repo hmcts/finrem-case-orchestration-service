@@ -101,10 +101,8 @@ public class ManageHearingsCorresponder {
             .map(DocumentCollectionItem::getValue)
             .toList());
 
-        wrapper.getHearingDocumentsCollection().stream()
-            .filter(item -> item.getValue().getHearingId().equals(wrapper.getWorkingHearingId()))
-            .map(item -> item.getValue().getHearingDocument())
-            .forEach(documentsToPost::add);
+        List<CaseDocument> associatedHearingDocuments = wrapper.getAssociatedWorkingHearingDocuments();
+        documentsToPost.addAll(associatedHearingDocuments);
 
         NotificationRequest notificationRequest =  NotificationRequest.builder()
             .caseReferenceNumber(String.valueOf(finremCaseDetails.getId()))
