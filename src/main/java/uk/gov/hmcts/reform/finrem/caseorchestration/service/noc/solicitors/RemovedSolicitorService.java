@@ -24,6 +24,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
@@ -77,30 +79,56 @@ public class RemovedSolicitorService {
     }
 
     /**
-     * Returns the solicitor to be removed for the caseworker, based on whether the
-     * applicant or respondent is selected.
+     * Determines the representative who has been removed during a change of representation.
      *
      * <p>
-     * If the selected litigant is currently represented, this method builds and returns a
-     * {@link ChangedRepresentative} containing the solicitor’s name, email, and the
-     * organisation being removed. If the litigant is not represented, it returns {@code null}.
+     * This method compares the updated {@code finremCaseData} with the original
+     * {@code originalFinremCaseData} to identify whether the Applicant or Respondent
+     * has changed representative. It checks which party the change applies to and then
+     * retrieves the corresponding original organisation policy.
+     * </p>
      *
-     * @param finremCaseData  the current case data
-     * @param isApplicant     true if the removal applies to the applicant; false if it applies to the respondent
-     * @return the solicitor details to remove, or null if the litigant is not represented
+     * <p>
+     * If the relevant party was previously represented, the method builds and returns a
+     * {@link ChangedRepresentative} object containing the removed solicitor's name,
+     * email, and organisation. If no change applies or the party was not represented,
+     * the method returns {@code null}.
+     * </p>
+     *
+     * @param finremCaseData          the updated case data after the change
+     * @param originalFinremCaseData  the case data before the change
+     * @return a {@code ChangedRepresentative} describing the removed representative,
+     *         or {@code null} if no representative was removed
      */
-    public ChangedRepresentative getRemovedSolicitorAsCaseworker(FinremCaseData finremCaseData, boolean isApplicant) {
-        final OrganisationPolicy organisationPolicy = isApplicant ? finremCaseData.getApplicantOrganisationPolicy()
-            : finremCaseData.getRespondentOrganisationPolicy();
+    public ChangedRepresentative getChangedRepresentative(FinremCaseData finremCaseData,
+                                                          FinremCaseData originalFinremCaseData) {
+        OrganisationPolicy organisationPolicy = null;
 
-        if (caseDataService.isLitigantRepresented(finremCaseData, isApplicant)) {
-            return ChangedRepresentative.builder()
-                .name(getSolicitorName(finremCaseData, isApplicant))
-                .email(getSolicitorEmail(finremCaseData, isApplicant))
-                .organisation(getRemovedOrganisation(finremCaseData, organisationPolicy, isApplicant))
-                .build();
+        Boolean isApplicant = null;
+        if (isApplicantForRepresentationChange(finremCaseData)) {
+            organisationPolicy = originalFinremCaseData.getApplicantOrganisationPolicy();
+            isApplicant = true;
+        } else if (isRespondentForRepresentationChange(finremCaseData)) {
+            organisationPolicy = originalFinremCaseData.getRespondentOrganisationPolicy();
+            isApplicant = false;
         }
 
+        if (isApplicant == null) {
+            return null;
+        }
+        if (organisationPolicy == null) {
+            log.info("{} - No applicant or respondent organisation policy provided", finremCaseData.getCcdCaseId());
+            return null;
+        }
+
+        boolean wasLitigantRepresented = caseDataService.isLitigantRepresented(originalFinremCaseData, isApplicant);
+        if (wasLitigantRepresented) {
+            return ChangedRepresentative.builder()
+                .name(getSolicitorName(originalFinremCaseData, isApplicant))
+                .email(getSolicitorEmail(originalFinremCaseData, isApplicant))
+                .organisation(organisationPolicy.getOrganisation())
+                .build();
+        }
         return null;
     }
 
@@ -109,14 +137,6 @@ public class RemovedSolicitorService {
             ? checkApplicantSolicitorIsDigitalService : checkRespondentSolicitorIsDigitalService;
 
         return checkSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
-    }
-
-    private boolean isSolicitorDigital(FinremCaseData finremCaseData, boolean isApplicant) {
-        if (isApplicant) {
-            return checkApplicantSolicitorIsDigitalService.isSolicitorDigital(finremCaseData);
-        } else {
-            return checkRespondentSolicitorIsDigitalService.isSolicitorDigital(finremCaseData);
-        }
     }
 
     private ChangedRepresentative getNonDigitalRemovedRepresentative(CaseDetails caseDetails, boolean isApplicant) {
@@ -145,9 +165,11 @@ public class RemovedSolicitorService {
     }
 
     private String getSolicitorName(FinremCaseData finremCaseData, boolean isApplicant) {
-        return isApplicant
-            ? nullToEmpty(finremCaseData.getAppSolicitorName())
-            : nullToEmpty(finremCaseData.getContactDetailsWrapper().getRespondentSolicitorName());
+        if (isApplicant) {
+            return nullToEmpty(finremCaseData.getAppSolicitorName());
+        } else {
+            return nullToEmpty(finremCaseData.getContactDetailsWrapper().getRespondentSolicitorName());
+        }
     }
 
     private String getSolicitorEmail(CaseDetails caseDetails, boolean isApplicant) {
@@ -157,9 +179,11 @@ public class RemovedSolicitorService {
     }
 
     private String getSolicitorEmail(FinremCaseData finremCaseData, boolean isApplicant) {
-        return isApplicant
-            ? finremCaseData.getAppSolicitorEmail()
-            : nullToEmpty(finremCaseData.getContactDetailsWrapper().getRespondentSolicitorEmail());
+        if (isApplicant) {
+            return finremCaseData.getAppSolicitorEmail();
+        } else {
+            return nullToEmpty(finremCaseData.getContactDetailsWrapper().getRespondentSolicitorEmail());
+        }
     }
 
     private String getApplicantSolicitorName(CaseDetails caseDetails) {
@@ -182,16 +206,6 @@ public class RemovedSolicitorService {
                 OrganisationPolicy.class);
 
         if (!isSolicitorDigital(caseDetails, isApplicant)) {
-            return null;
-        }
-
-        return Optional.ofNullable(organisationPolicy).map(OrganisationPolicy::getOrganisation).orElse(null);
-    }
-
-    private Organisation getRemovedOrganisation(FinremCaseData finremCaseData,
-                                                OrganisationPolicy organisationPolicy,
-                                                boolean isApplicant) {
-        if (!isSolicitorDigital(finremCaseData, isApplicant)) {
             return null;
         }
 
