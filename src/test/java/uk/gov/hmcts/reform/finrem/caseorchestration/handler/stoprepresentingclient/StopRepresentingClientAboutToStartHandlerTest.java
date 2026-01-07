@@ -14,6 +14,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.Representation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
@@ -29,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisationPolicy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -130,7 +135,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
     }
 
     @Test
-    void givenAsIntervenerTwoBarristerAndToRemoveIntervenerSolicitorAccess_whenHandled_thenPopulateCorrectLabel() {
+    void givenIntervenerBarristerWithCorrespondingIntvSol_whenHandled_thenPopulateCorrectLabel() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
         Representation representation = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
@@ -161,7 +166,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
     }
 
     @Test
-    void givenAsIntervenerTwoBarristerAndNotToRemoveIntervenerSolicitorAccess_whenHandled_thenPopulateCorrectLabel() {
+    void givenIntervenerBarristerWithoutCorrespondingIntvSol_whenHandled_thenPopulateCorrectLabel() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
         Representation representation = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
@@ -184,6 +189,140 @@ class StopRepresentingClientAboutToStartHandlerTest {
                 YesOrNo.NO,
                 null,
                 null
+            );
+
+        verify(stopRepresentingClientService).buildRepresentation(givenFinremCaseData, AUTH_TOKEN);
+    }
+
+    @Test
+    void givenIntervenerBarristerWithoutCorrespondingIntvSolButRespondentSol_whenHandled_thenPopulateCorrectLabel() {
+        FinremCaseData givenFinremCaseData = FinremCaseData.builder()
+            .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
+                .intvr2Barristers(List.of(BarristerCollectionItem.builder()
+                    .value(Barrister.builder().userId(TEST_USER_ID).organisation(organisation(TEST_ORG_ID)).build())
+                    .build()))
+                .build())
+            .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+            .build();
+        Representation representation = null;
+        when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
+            representation = new Representation(TEST_USER_ID, false, false, 2, BARRISTER)
+        );
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
+            .thenReturn(false);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
+            givenFinremCaseData);
+        FinremCaseData finremCaseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
+
+        assertThat(finremCaseData.getStopRepresentationWrapper())
+            .extracting(
+                StopRepresentationWrapper::getShowClientAddressForService,
+                StopRepresentationWrapper::getClientAddressForServiceLabel,
+                StopRepresentationWrapper::getClientAddressForServiceConfidentialLabel,
+                StopRepresentationWrapper::getExtraClientAddr1Label
+            )
+            .containsExactly(
+                YesOrNo.NO,
+                null,
+                null,
+                "Client's address for service (Respondent)"
+            );
+
+        verify(stopRepresentingClientService).buildRepresentation(givenFinremCaseData, AUTH_TOKEN);
+    }
+
+    @Test
+    void givenIntervenerBarristerWithSameOrgRespondentSolAndIntv1Sol_whenHandled_thenPopulateCorrectLabel() {
+        FinremCaseData givenFinremCaseData = FinremCaseData.builder()
+            .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
+                .intvr1Barristers(List.of(BarristerCollectionItem.builder()
+                    .value(Barrister.builder().userId(TEST_USER_ID).organisation(organisation(TEST_ORG_ID)).build())
+                    .build()))
+                .build())
+            .intervenerTwo(IntervenerTwo.builder()
+                .intervenerOrganisation(organisationPolicy(TEST_ORG_ID))
+                .build())
+            .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+            .build();
+        Representation representation = null;
+        when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
+            representation = new Representation(TEST_USER_ID, false, false, 1, BARRISTER)
+        );
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
+            .thenReturn(false);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
+            givenFinremCaseData);
+        FinremCaseData finremCaseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
+
+        assertThat(finremCaseData.getStopRepresentationWrapper())
+            .extracting(
+                StopRepresentationWrapper::getShowClientAddressForService,
+                StopRepresentationWrapper::getClientAddressForServiceLabel,
+                StopRepresentationWrapper::getClientAddressForServiceConfidentialLabel,
+                StopRepresentationWrapper::getExtraClientAddr1Label,
+                StopRepresentationWrapper::getExtraClientAddr2Label
+            )
+            .containsExactly(
+                YesOrNo.NO,
+                null,
+                null,
+                "Client's address for service (Respondent)",
+                "Client's address for service (Intervener 2)"
+            );
+
+        verify(stopRepresentingClientService).buildRepresentation(givenFinremCaseData, AUTH_TOKEN);
+    }
+
+    @Test
+    void givenIntervenerBarristerWithSameOrgIntervenerSolicitors_whenHandled_thenPopulateCorrectLabel() {
+        FinremCaseData givenFinremCaseData = FinremCaseData.builder()
+            .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
+                .intvr2Barristers(List.of(BarristerCollectionItem.builder()
+                    .value(Barrister.builder().userId(TEST_USER_ID).organisation(organisation(TEST_ORG_ID)).build())
+                    .build()))
+                .build())
+            .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+            .intervenerOne(IntervenerOne.builder()
+                .intervenerOrganisation(organisationPolicy(TEST_ORG_ID))
+                .build())
+            .intervenerThree(IntervenerThree.builder()
+                .intervenerOrganisation(organisationPolicy(TEST_ORG_ID))
+                .build())
+            .intervenerFour(IntervenerFour.builder()
+                .intervenerOrganisation(organisationPolicy(TEST_ORG_ID))
+                .build())
+            .build();
+        Representation representation = null;
+        when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
+            representation = new Representation(TEST_USER_ID, false, false, 2, BARRISTER)
+        );
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
+            .thenReturn(false);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
+            givenFinremCaseData);
+        FinremCaseData finremCaseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
+
+        assertThat(finremCaseData.getStopRepresentationWrapper())
+            .extracting(
+                StopRepresentationWrapper::getShowClientAddressForService,
+                StopRepresentationWrapper::getClientAddressForServiceLabel,
+                StopRepresentationWrapper::getClientAddressForServiceConfidentialLabel,
+                StopRepresentationWrapper::getExtraClientAddr1Label,
+                StopRepresentationWrapper::getExtraClientAddr2Label,
+                StopRepresentationWrapper::getExtraClientAddr3Label,
+                StopRepresentationWrapper::getExtraClientAddr4Label
+            )
+            .containsExactly(
+                YesOrNo.NO,
+                null,
+                null,
+                "Client's address for service (Respondent)",
+                "Client's address for service (Intervener 1)",
+                "Client's address for service (Intervener 3)",
+                "Client's address for service (Intervener 4)"
             );
 
         verify(stopRepresentingClientService).buildRepresentation(givenFinremCaseData, AUTH_TOKEN);
@@ -226,6 +365,48 @@ class StopRepresentingClientAboutToStartHandlerTest {
                 "Client's address for service (Intervener 2)",
                 "Keep the Intervener 2's contact details private from the Applicant & Respondent?",
                 "Client's address for service (Applicant)"
+            );
+
+        verify(stopRepresentingClientService).buildRepresentation(givenFinremCaseData, AUTH_TOKEN);
+    }
+
+    @Test
+    void givenIntervenerTwoBarristerAndRespondentHavingSameOrgId_whenHandled_thenPopulateCorrectLabels() {
+        FinremCaseData givenFinremCaseData = FinremCaseData.builder()
+            .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
+                .intvr2Barristers(List.of(BarristerCollectionItem.builder()
+                    .value(Barrister.builder().userId(TEST_USER_ID).organisation(organisation(TEST_ORG_ID)).build())
+                    .build()))
+                .build())
+            .respondentOrganisationPolicy(OrganisationPolicy.builder()
+                .organisation(organisation(TEST_ORG_ID))
+                .build())
+            .build();
+        Representation representation = null;
+        when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
+            representation = new Representation(TEST_USER_ID, false, false, 2, BARRISTER)
+        );
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
+            .thenReturn(true);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
+            givenFinremCaseData);
+        FinremCaseData finremCaseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
+        assertThat(finremCaseData.getStopRepresentationWrapper().getClientAddressForServiceConfidentialLabel())
+            .isEqualTo("Keep the Intervener 2's contact details private from the Applicant & Respondent?");
+
+        assertThat(finremCaseData.getStopRepresentationWrapper())
+            .extracting(
+                StopRepresentationWrapper::getShowClientAddressForService,
+                StopRepresentationWrapper::getClientAddressForServiceLabel,
+                StopRepresentationWrapper::getClientAddressForServiceConfidentialLabel,
+                StopRepresentationWrapper::getExtraClientAddr1Label
+            )
+            .containsExactly(
+                YesOrNo.YES,
+                "Client's address for service (Intervener 2)",
+                "Keep the Intervener 2's contact details private from the Applicant & Respondent?",
+                "Client's address for service (Respondent)"
             );
 
         verify(stopRepresentingClientService).buildRepresentation(givenFinremCaseData, AUTH_TOKEN);
