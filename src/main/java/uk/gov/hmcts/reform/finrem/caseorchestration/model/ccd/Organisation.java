@@ -8,8 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static java.util.Optional.ofNullable;
-
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
