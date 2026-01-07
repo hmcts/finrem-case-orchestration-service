@@ -9,10 +9,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -280,5 +282,35 @@ public class StopRepresentingClientService {
                 .orElse(Organisation.builder().build()),
             barrister.getOrganisation()
         );
+    }
+
+    public void setApplicantUnrepresented(FinremCaseData finremCaseData) {
+        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        finremCaseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
+    }
+
+    public void setRespondentUnrepresented(FinremCaseData finremCaseData) {
+        if (finremCaseData.isConsentedApplication()) {
+            finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+        } else {
+            finremCaseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+        }
+        finremCaseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
+    }
+
+    public void setIntervenerUnrepresented(IntervenerWrapper intervenerWrapper) {
+        intervenerWrapper.setIntervenerRepresented(YesOrNo.NO);
+        intervenerWrapper.setIntervenerOrganisation(getDefaultOrganisationPolicy(
+            intervenerWrapper.getIntervenerSolicitorCaseRole()
+        ));
+    }
+
+    private OrganisationPolicy getDefaultOrganisationPolicy(CaseRole role) {
+        return OrganisationPolicy
+            .builder()
+            .organisation(Organisation.builder().organisationID(null).organisationName(null).build())
+            .orgPolicyReference(null)
+            .orgPolicyCaseAssignedRole(role.getCcdCode())
+            .build();
     }
 }

@@ -355,8 +355,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     private void processRequest(StopRepresentingRequest request) {
         FinremCaseData finremCaseData = request.finremCaseDetails.getData();
 
-        // Set the party who is being unrepresented. null if intervener
-        finremCaseData.getContactDetailsWrapper().setNocParty(resolveNocParty(request));
+        // reset noc party
+        finremCaseData.getContactDetailsWrapper().setNocParty(null);
 
         if (isRepresentingApplicant(request)) {
             stopRepresentingByApplicantRepresentative(finremCaseData);
@@ -460,24 +460,17 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private void setApplicantUnrepresented(FinremCaseData finremCaseData) {
-        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        finremCaseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
+        stopRepresentingClientService.setApplicantUnrepresented(finremCaseData);
+        finremCaseData.getContactDetailsWrapper().setNocParty(APPLICANT);
     }
 
     private void setRespondentUnrepresented(FinremCaseData finremCaseData) {
-        if (finremCaseData.isConsentedApplication()) {
-            finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
-        } else {
-            finremCaseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
-        }
-        finremCaseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
+        stopRepresentingClientService.setRespondentUnrepresented(finremCaseData);
+        finremCaseData.getContactDetailsWrapper().setNocParty(RESPONDENT);
     }
 
     private void setIntervenerUnrepresented(IntervenerWrapper intervenerWrapper) {
-        intervenerWrapper.setIntervenerRepresented(YesOrNo.NO);
-        intervenerWrapper.setIntervenerOrganisation(getDefaultOrganisationPolicy(
-            intervenerWrapper.getIntervenerSolicitorCaseRole()
-        ));
+        stopRepresentingClientService.setIntervenerUnrepresented(intervenerWrapper);
     }
 
     private NoticeOfChangeParty resolveNocParty(StopRepresentingRequest request) {
@@ -568,14 +561,12 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     private void setApplicantUnrepresentedIfOrgMatch(FinremCaseData finremCaseData, Organisation targetOrg) {
         if (doesMatchOrganisation(targetOrg, finremCaseData.getApplicantOrganisationPolicy())) {
             setApplicantUnrepresented(finremCaseData);
-            finremCaseData.getContactDetailsWrapper().setNocParty(APPLICANT);
         }
     }
 
     private void setRespondentUnrepresentedIfOrgMatch(FinremCaseData finremCaseData, Organisation targetOrg) {
         if (doesMatchOrganisation(targetOrg, finremCaseData.getRespondentOrganisationPolicy())) {
             setRespondentUnrepresented(finremCaseData);
-            finremCaseData.getContactDetailsWrapper().setNocParty(RESPONDENT);
         }
     }
 

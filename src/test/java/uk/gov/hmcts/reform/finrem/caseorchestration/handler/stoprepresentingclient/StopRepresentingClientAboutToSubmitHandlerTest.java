@@ -10,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
@@ -43,7 +45,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -53,10 +58,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.barristers;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
@@ -153,7 +161,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 format("%s - %s representative stops representing a client with a client consent", CASE_ID,
                     isApplicantRepresentative ? "applicant" : "respondent")));
 
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
+            verifyBuildRepresentationCalled(caseData);
         }
 
         @ParameterizedTest
@@ -179,7 +187,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 format("%s - %s representative stops representing a client with a judicial approval", CASE_ID,
                     isApplicantRepresentative ? "applicant" : "respondent")));
 
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
+            verifyBuildRepresentationCalled(caseData);
         }
 
         @ParameterizedTest
@@ -197,7 +205,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             assertThatThrownBy(() -> underTest.handle(request, AUTH_TOKEN))
                 .hasMessage("Unreachable");
 
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
+            verifyBuildRepresentationCalled(caseData);
         }
 
         private static Stream<Arguments> provideAllLoggedInScenarios() {
@@ -236,7 +244,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     InstanceOfAssertFactories.list(BarristerCollectionItem.class))
                 .hasSize(1);
 
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
+            verifyBuildRepresentationCalled(caseData);
         }
 
         @Test
@@ -261,7 +269,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     InstanceOfAssertFactories.list(BarristerCollectionItem.class))
                     .isEmpty();
 
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
+            verifyBuildRepresentationCalled(caseData);
         }
 
         private void stubIsApplicantSolicitor() {
@@ -298,7 +306,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     InstanceOfAssertFactories.list(BarristerCollectionItem.class))
                 .isEmpty();
 
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
+            verifyBuildRepresentationCalled(caseData);
         }
     }
 
@@ -307,7 +315,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @ParameterizedTest
         @ValueSource(booleans = {true, false})
-        void givenAnyCase_whenHandled_thenPopulateNocParty(boolean isApplicantRepresentative) {
+        void givenAnyCase_whenHandled_thenSetUnrepresentedAndPopulateNocParty(boolean isApplicantRepresentative) {
             stubApplicantOrRespondentRep(isApplicantRepresentative);
 
             FinremCaseData caseData = FinremCaseData.builder()
@@ -323,34 +331,14 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .extracting(ContactDetailsWrapper::getNocParty)
                 .is(expectedParty(isApplicantRepresentative));
 
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
-        }
-
-        @ParameterizedTest
-        @ValueSource(booleans = {true, false})
-        void givenAnyCase_whenHandled_thenClearOrganisationPolicy(boolean isApplicantRepresentative) {
-            stubApplicantOrRespondentRep(isApplicantRepresentative);
-
-            FinremCaseData caseData = FinremCaseData.builder()
-                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
-                    .stopRepClientConsent(YesOrNo.YES)
-                    .clientAddressForService(mock(Address.class))
-                    .build())
-                .build();
-
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getData())
-                .extracting(isApplicantRepresentative ? FinremCaseData::getApplicantOrganisationPolicy
-                    : FinremCaseData::getRespondentOrganisationPolicy)
-                .is(expectedOrganisationPolicy(isApplicantRepresentative));
-
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
+            verify(stopRepresentingClientService, times(isApplicantRepresentative ? 1 : 0)).setApplicantUnrepresented(caseData);
+            verify(stopRepresentingClientService, times(isApplicantRepresentative ? 0 : 1)).setRespondentUnrepresented(caseData);
+            verifyBuildRepresentationCalled(caseData);
         }
 
         @ParameterizedTest
         @MethodSource
-        void givenAnyCase_whenHandled_thenPopulateServiceAddress(boolean isApplicantRepresentative,
-                                                                 CaseType caseType,
+        void givenAnyCase_whenHandled_thenPopulateServiceAddress(boolean isApplicantRepresentative, CaseType caseType,
                                                                  boolean addressConfidentiality) {
             stubApplicantOrRespondentRep(isApplicantRepresentative);
 
@@ -364,20 +352,15 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     .build())
                 .build();
 
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, caseData), AUTH_TOKEN).getData())
                 .extracting(FinremCaseData::getContactDetailsWrapper)
                 .extracting(
                     isApplicantRepresentative ? ContactDetailsWrapper::getApplicantAddress : ContactDetailsWrapper::getRespondentAddress,
                     isApplicantRepresentative ? ContactDetailsWrapper::getApplicantAddressHiddenFromRespondent
-                        : ContactDetailsWrapper::getRespondentAddressHiddenFromApplicant,
-                    isApplicantRepresentative ? ContactDetailsWrapper::getApplicantRepresented : (CONTESTED.equals(caseType)
-                        ? ContactDetailsWrapper::getContestedRespondentRepresented
-                        : ContactDetailsWrapper::getConsentedRespondentRepresented))
-                .contains(serviceAddress, YesOrNo.forValue(addressConfidentiality), YesOrNo.NO);
+                        : ContactDetailsWrapper::getRespondentAddressHiddenFromApplicant)
+                .contains(serviceAddress, YesOrNo.forValue(addressConfidentiality));
 
-
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
+            verifyBuildRepresentationCalled(caseData);
         }
 
         static Stream<Arguments> givenAnyCase_whenHandled_thenPopulateServiceAddress() {
@@ -403,17 +386,72 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     @Nested
     class LogInAsIntervenerRepresentativeTests {
 
+        private static BarristerCollectionWrapper mockBarristerCollectionWrapper(int index, String orgId) {
+            return switch (index) {
+                case 1 -> BarristerCollectionWrapper.builder()
+                    .intvr1Barristers(barristers(orgId))
+                    .build();
+                case 2 -> BarristerCollectionWrapper.builder()
+                    .intvr2Barristers(barristers(orgId))
+                    .build();
+                case 3 -> BarristerCollectionWrapper.builder()
+                    .intvr3Barristers(barristers(orgId))
+                    .build();
+                case 4 -> BarristerCollectionWrapper.builder()
+                    .intvr4Barristers(barristers(orgId))
+                    .build();
+                default -> throw new IllegalArgumentException("Unsupported intervener index: " + index);
+            };
+        }
+
+        private static FinremCaseData.FinremCaseDataBuilder appendIntervenerOrganisationPolicy(
+            int index, String orgId,
+            FinremCaseData.FinremCaseDataBuilder builder) {
+
+            switch (index) {
+                case 1 ->
+                    builder.intervenerOne(IntervenerOne.builder()
+                        .intervenerOrganisation(organisationPolicy(orgId)).build());
+                case 2 ->
+                    builder.intervenerTwo(IntervenerTwo.builder()
+                        .intervenerOrganisation(organisationPolicy(orgId)).build());
+                case 3 ->
+                    builder.intervenerThree(IntervenerThree.builder()
+                        .intervenerOrganisation(organisationPolicy(orgId)).build());
+                case 4 ->
+                    builder.intervenerFour(IntervenerFour.builder()
+                        .intervenerOrganisation(organisationPolicy(orgId)).build());
+                default -> throw new IllegalArgumentException("Unsupported intervener index: " + index);
+            }
+            return builder;
+        }
+
+        private static Function<FinremCaseData, IntervenerWrapper> intervenerWrapperExtractor(int index) {
+            return data -> switch (index) {
+                case 1 -> data.getIntervenerOne();
+                case 2 -> data.getIntervenerTwo();
+                case 3 -> data.getIntervenerThree();
+                case 4 -> data.getIntervenerFour();
+                default -> throw new IllegalArgumentException("Unsupported index: " + index);
+            };
+        }
+
         @ParameterizedTest
-        @MethodSource("provideAllIntervenerRoles")
-        void givenAnyCase_whenHandled_thenDoesNotPopulateNocParty(int index, IntervenerRole intervenerRole) {
+        @MethodSource("provideAllIntervenerSolicitorRoles")
+        void givenAsIntervenerSolicitor_whenAllPartiesOrgsDoNotMatch_thenDoesNotPopulateNocParty(
+            int index, IntervenerRole intervenerRole) {
+
             stubIntervenerRep(index, intervenerRole);
 
-            FinremCaseData caseData = FinremCaseData.builder()
+            FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG_ID, FinremCaseData.builder()
+                .contactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(mock(NoticeOfChangeParty.class)).build())
+                .applicantOrganisationPolicy(organisationPolicy("applicantOrg"))
+                .respondentOrganisationPolicy(organisationPolicy("respondentOrg"))
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
                     .clientAddressForService(mock(Address.class))
                     .build())
-                .build();
+            ).build();
 
             FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
             assertThat(underTest.handle(request, AUTH_TOKEN).getData())
@@ -421,53 +459,75 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .extracting(ContactDetailsWrapper::getNocParty)
                 .isNull();
 
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
+            verify(stopRepresentingClientService, never()).setApplicantUnrepresented(caseData);
+            verify(stopRepresentingClientService, never()).setRespondentUnrepresented(caseData);
+            verifyBuildRepresentationCalled(caseData);
         }
 
         @ParameterizedTest
-        @MethodSource("provideAllIntervenerRoles")
-        void givenAnyCase_whenHandled_thenClearOrganisationPolicy(int index, IntervenerRole intervenerRole) {
-            stubIntervenerRep(index, intervenerRole);
+        @MethodSource("provideAllIntervenerSolicitorRolesWithApplicantOrRespondentOrg")
+        void givenAsIntervenerSolicitor_whenApplicantOrRespondentOrgMatch_thenSetUnrepresentedAndNocPartyPopulated(
+            int index, IntervenerRole intervenerRole, String intvOrgId, NoticeOfChangeParty noticeOfChangeParty) {
 
-            FinremCaseData caseData = FinremCaseData.builder()
+            stubIntervenerRep(index, intervenerRole);
+            FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, intvOrgId, FinremCaseData.builder()
+                .applicantOrganisationPolicy(organisationPolicy("applicantOrg"))
+                .respondentOrganisationPolicy(organisationPolicy("respondentOrg"))
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
                     .clientAddressForService(mock(Address.class))
                     .build())
-                .build();
+            ).build();
 
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getData())
-                .extracting(data -> switch (index) {
-                    case 1 -> data.getIntervenerOne();
-                    case 2 -> data.getIntervenerTwo();
-                    case 3 -> data.getIntervenerThree();
-                    case 4 -> data.getIntervenerFour();
-                    default -> throw new IllegalArgumentException("Unsupported index: " + index);
-                })
-                .extracting(IntervenerWrapper::getIntervenerOrganisation)
-                .is(expectedIntervenerOrganisationPolicy(index));
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN).getData())
+                .extracting(FinremCaseData::getContactDetailsWrapper)
+                .extracting(ContactDetailsWrapper::getNocParty)
+                .isEqualTo(noticeOfChangeParty);
 
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
-        }
-
-        static Stream<Arguments> provideAllIntervenerRoles() {
-            return IntStream.rangeClosed(1, 4)
-                .boxed()
-                .flatMap(index ->
-                    Stream.of(IntervenerRole.SOLICITOR)
-                        .map(intervenerRole -> Arguments.of(index, intervenerRole))
-                );
+            verify(stopRepresentingClientService, times(APPLICANT.equals(noticeOfChangeParty) ? 1 : 0))
+                .setApplicantUnrepresented(caseData);
+            verify(stopRepresentingClientService, times(RESPONDENT.equals(noticeOfChangeParty) ? 1 : 0))
+                .setRespondentUnrepresented(caseData);
+            verifyBuildRepresentationCalled(caseData);
         }
 
         @ParameterizedTest
-        @MethodSource
+        @MethodSource("provideAllIntervenerSolicitorRoles")
+        void givenAsIntervenerSolicitor_whenHandled_thenSetIntervenerUnrepresented(
+            int index, IntervenerRole intervenerRole) {
+
+            stubIntervenerRep(index, intervenerRole);
+            FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG_ID, FinremCaseData.builder()
+                .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                    .stopRepClientConsent(YesOrNo.YES)
+                    .clientAddressForService(mock(Address.class))
+                    .build())
+            ).build();
+
+            underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN);
+
+            ArgumentCaptor<IntervenerWrapper> captor = ArgumentCaptor.forClass(IntervenerWrapper.class);
+            verify(stopRepresentingClientService).setIntervenerUnrepresented(captor.capture());
+            assertThat(captor.getValue().getIntervenerType())
+                .isEqualTo(
+                    switch (index) {
+                        case 1 -> IntervenerType.INTERVENER_ONE;
+                        case 2 -> IntervenerType.INTERVENER_TWO;
+                        case 3 -> IntervenerType.INTERVENER_THREE;
+                        case 4 -> IntervenerType.INTERVENER_FOUR;
+                        default -> throw new IllegalArgumentException("Unexpected index: " + index);
+                    }
+                );
+            verifyBuildRepresentationCalled(caseData);
+        }
+
+        @ParameterizedTest
+        @MethodSource("provideAllIntervenerSolicitorRolesWithCaseTypesAndConfidentiality")
         void givenAnyCase_whenHandled_thenPopulateServiceAddress(int index, IntervenerRole intervenerRole,
                                                                  CaseType caseType, boolean addressConfidentiality) {
             stubIntervenerRep(index, intervenerRole);
 
             Address serviceAddress = mock(Address.class);
-
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
@@ -478,36 +538,14 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
             FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, caseData);
             assertThat(underTest.handle(request, AUTH_TOKEN).getData())
-                .extracting(data -> switch (index) {
-                    case 1 -> data.getIntervenerOne();
-                    case 2 -> data.getIntervenerTwo();
-                    case 3 -> data.getIntervenerThree();
-                    case 4 -> data.getIntervenerFour();
-                    default -> throw new IllegalArgumentException("Unsupported index: " + index);
-                })
+                .extracting(intervenerWrapperExtractor(index))
                 .extracting(
                     IntervenerWrapper::getIntervenerAddress,
-                    IntervenerWrapper::getIntervenerAddressConfidential,
-                    IntervenerWrapper::getIntervenerRepresented
+                    IntervenerWrapper::getIntervenerAddressConfidential
                 )
-                .contains(serviceAddress, YesOrNo.forValue(addressConfidentiality), YesOrNo.NO);
+                .contains(serviceAddress, YesOrNo.forValue(addressConfidentiality));
 
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
-        }
-
-        static Stream<Arguments> givenAnyCase_whenHandled_thenPopulateServiceAddress() {
-            return IntStream.rangeClosed(1, 4)
-                .boxed()
-                .flatMap(index ->
-                    Stream.of(IntervenerRole.SOLICITOR)
-                        .flatMap(role ->
-                            Stream.of(CONSENTED, CONTESTED)
-                                .flatMap(caseType ->
-                                    Stream.of(true, false)
-                                        .map(flag -> Arguments.of(index, role, caseType, flag))
-                                )
-                        )
-                );
+            verifyBuildRepresentationCalled(caseData);
         }
 
         @ParameterizedTest
@@ -552,13 +590,56 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 }, InstanceOfAssertFactories.list(BarristerCollectionItem.class))
                 .isEmpty();
 
-            verifyBuildRepresentationCalled(request.getCaseDetails().getData());
+            verifyBuildRepresentationCalled(caseData);
         }
 
         private void stubIntervenerRep(int index, IntervenerRole intervenerRole) {
             when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
                 new Representation(TEST_USER_ID, false, false, index, intervenerRole)
             );
+        }
+
+        static Stream<Arguments> provideAllIntervenerBarristerRoles() {
+            return IntStream.rangeClosed(1, 4)
+                .boxed()
+                .flatMap(index ->
+                    Stream.of(IntervenerRole.BARRISTER)
+                        .map(intervenerRole -> Arguments.of(index, intervenerRole))
+                );
+        }
+
+        static Stream<Arguments> provideAllIntervenerSolicitorRoles() {
+            return IntStream.rangeClosed(1, 4)
+                .boxed()
+                .flatMap(index ->
+                    Stream.of(IntervenerRole.SOLICITOR)
+                        .map(intervenerRole -> Arguments.of(index, intervenerRole))
+                );
+        }
+
+        static Stream<Arguments> provideAllIntervenerSolicitorRolesWithApplicantOrRespondentOrg() {
+            return provideAllIntervenerSolicitorRoles()
+                .flatMap(args ->
+                    Map.of("applicantOrg", APPLICANT,
+                            "respondentOrg", RESPONDENT)
+                        .entrySet().stream()
+                        .map(e -> Arguments.of(args.get()[0], args.get()[1],
+                            e.getKey(), e.getValue()
+                        ))
+                );
+        }
+
+        static Stream<Arguments> provideAllIntervenerSolicitorRolesWithCaseTypesAndConfidentiality() {
+            return provideAllIntervenerSolicitorRoles()
+                .flatMap(args ->
+                    Arrays.stream(CaseType.values())
+                        .flatMap(caseType ->
+                            Stream.of(true, false)
+                                .map(addressConfidentiality -> Arguments.of(args.get()[0], args.get()[1],
+                                    caseType, addressConfidentiality
+                                ))
+                        )
+                );
         }
     }
 
