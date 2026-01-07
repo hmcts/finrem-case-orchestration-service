@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
@@ -60,6 +59,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.barristers;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisationPolicy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
@@ -213,14 +213,12 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             stubIsApplicantSolicitor();
 
             FinremCaseData caseData = FinremCaseData.builder()
-                .applicantOrganisationPolicy(OrganisationPolicy.builder()
-                    .organisation(Organisation.builder().organisationID("BBB").build())
-                    .build())
+                .applicantOrganisationPolicy(organisationPolicy("BBB"))
                 .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
                     .applicantBarristers(new ArrayList<>(List.of(
                         BarristerCollectionItem.builder()
                             .value(Barrister.builder()
-                                .organisation(Organisation.builder().organisationID("AAA").build())
+                                .organisation(organisation("AAA"))
                                 .build())
                             .build()
                     )))
@@ -246,17 +244,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             stubIsApplicantSolicitor();
 
             FinremCaseData caseData = FinremCaseData.builder()
-                .applicantOrganisationPolicy(OrganisationPolicy.builder()
-                    .organisation(Organisation.builder().organisationID("AAA").build())
-                    .build())
+                .applicantOrganisationPolicy(organisationPolicy("AAA"))
                 .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
-                    .applicantBarristers(new ArrayList<>(List.of(
-                        BarristerCollectionItem.builder()
-                            .value(Barrister.builder()
-                                .organisation(Organisation.builder().organisationID("AAA").build())
-                                .build())
-                            .build()
-                    )))
+                    .applicantBarristers(barristers("AAA"))
                     .build())
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
@@ -291,17 +281,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             );
 
             FinremCaseData caseData = FinremCaseData.builder()
-                .respondentOrganisationPolicy(OrganisationPolicy.builder()
-                    .organisation(Organisation.builder().organisationID("AAA").build())
-                    .build())
+                .respondentOrganisationPolicy(organisationPolicy("AAA"))
                 .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
-                    .respondentBarristers(new ArrayList<>(List.of(
-                        BarristerCollectionItem.builder()
-                            .value(Barrister.builder()
-                                .organisation(Organisation.builder().organisationID("AAA").build())
-                                .build())
-                            .build()
-                    )))
+                    .respondentBarristers(barristers("AAA"))
                     .build())
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.YES)
