@@ -18,11 +18,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -609,17 +607,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     private static Condition<NoticeOfChangeParty> expectedParty(boolean isApplicantSolicitor) {
         return new Condition<>(party ->
             isApplicantSolicitor ? APPLICANT.equals(party) : RESPONDENT.equals(party),
-            "expected APPLICANT if applicant solicitor, otherwise RESPONDENT");
-    }
-
-    private static Condition<OrganisationPolicy> expectedOrganisationPolicy(boolean isApplicantSolicitor) {
-        return new Condition<>(orgPolicy -> {
-            if (orgPolicy == null) {
-                return false;
-            }
-            return isApplicantSolicitor ? CaseRole.APP_SOLICITOR.getCcdCode().equals(orgPolicy.getOrgPolicyCaseAssignedRole())
-                : CaseRole.RESP_SOLICITOR.getCcdCode().equals(orgPolicy.getOrgPolicyCaseAssignedRole());
-        },
             "expected APPLICANT if applicant solicitor, otherwise RESPONDENT");
     }
 
