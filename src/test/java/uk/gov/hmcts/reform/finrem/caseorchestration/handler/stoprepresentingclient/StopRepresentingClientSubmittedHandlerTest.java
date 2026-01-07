@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 
@@ -36,12 +35,10 @@ class StopRepresentingClientSubmittedHandlerTest {
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
     private StopRepresentingClientService stopRepresentingClientService;
-    @Mock
-    private CaseRoleService caseRoleService;
 
     @BeforeEach
     public void setup() {
-        underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, caseRoleService, stopRepresentingClientService);
+        underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, stopRepresentingClientService);
     }
 
     @Test

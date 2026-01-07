@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 
@@ -30,15 +29,11 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
     private final StopRepresentingClientService stopRepresentingClientService;
 
-    private final CaseRoleService caseRoleService;
-
     private static final String CONFIRMATION_HEADER = "# Notice of change request submitted";
 
     public StopRepresentingClientSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                  CaseRoleService caseRoleService,
                                                   StopRepresentingClientService stopRepresentingClientService) {
         super(finremCaseDetailsMapper);
-        this.caseRoleService = caseRoleService;
         this.stopRepresentingClientService = stopRepresentingClientService;
     }
 
