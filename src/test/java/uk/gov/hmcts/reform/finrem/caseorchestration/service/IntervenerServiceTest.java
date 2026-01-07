@@ -1,7 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -47,9 +51,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
@@ -1780,6 +1789,93 @@ class IntervenerServiceTest {
                 .email("aaa.ddd@gmail.com")
                 .organisation(organisation("AAA"))
                 .build());
+    }
+
+    @Nested
+    class RevokeIntervenerSolicitorTests {
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", " "})
+        @NullSource
+        void givenMissingIntervenerSolEmail_whenCalled_thenDoNothing(String email) {
+            IntervenerOne intervenerOne = IntervenerOne.builder().intervenerSolEmail(email)
+                .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(TEST_ORG_ID)).build())
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            verifyNoInteractions(assignCaseAccessService);
+            verifyNoInteractions(organisationService);
+            verifyNoInteractions(systemUserService);
+        }
+
+        @Test
+        void givenMissingOrganisationPolicy_whenCalled_thenDoNothing() {
+            IntervenerOne intervenerOne = IntervenerOne.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                .intervenerOrganisation(null)
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            verifyNoInteractions(assignCaseAccessService);
+            verifyNoInteractions(organisationService);
+            verifyNoInteractions(systemUserService);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", " "})
+        @NullSource
+        void givenMissingOrgId_whenCalled_thenDoNothing(String orgId) {
+            IntervenerOne intervenerOne = IntervenerOne.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(orgId)).build())
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            verifyNoInteractions(assignCaseAccessService);
+            verifyNoInteractions(organisationService);
+            verifyNoInteractions(systemUserService);
+        }
+
+        @Test
+        void givenMissingOrganisation_whenCalled_thenDoNothing() {
+            IntervenerOne intervenerOne = IntervenerOne.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                .intervenerOrganisation(OrganisationPolicy.builder().organisation(null).build())
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            verifyNoInteractions(assignCaseAccessService);
+            verifyNoInteractions(organisationService);
+            verifyNoInteractions(systemUserService);
+        }
+
+        @Test
+        void givenUserNotFound_whenCalled_thenDoThing() {
+            when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+            when(organisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN))
+                .thenReturn(Optional.empty());
+            IntervenerTwo intervenerTwo = IntervenerTwo.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(TEST_ORG_ID)).build())
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
+            verify(systemUserService).getSysUserToken();
+            verify(organisationService).findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN);
+            verifyNoInteractions(assignCaseAccessService);
+        }
+
+        @Test
+        void givenValidIntervenerWrapper_whenCalled_thenRevokeIntervener() {
+            when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+            when(organisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN))
+                .thenReturn(Optional.of(TEST_USER_ID));
+            IntervenerTwo intervenerTwo = IntervenerTwo.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(TEST_ORG_ID)).build())
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
+            verify(systemUserService).getSysUserToken();
+            verify(organisationService).findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN);
+            verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID,
+                INTVR_SOLICITOR_2.getCcdCode(), TEST_ORG_ID);
+        }
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
