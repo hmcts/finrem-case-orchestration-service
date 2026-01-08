@@ -230,6 +230,38 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             verifyBuildRepresentationCalled(caseData);
         }
 
+        @Test
+        void givenLoginAsIntervenerBarrister_whenHandled_thenExtraServiceAddressesToIntervener2AndRespondent() {
+            stubIsRepresentingIntervener(3, IntervenerRole.BARRISTER);
+
+            Address intervener3Addr = mock(Address.class);
+            Address respondentAddr = mock(Address.class);
+            Address intervener2Addr = mock(Address.class);
+
+            FinremCaseData caseData = FinremCaseData.builder()
+                .intervenerThree(IntervenerThree.builder().intervenerAddress(intervener3Addr).build())
+                .barristerCollectionWrapper(intervenerBarristerCollectionWrapper(3, TEST_ORG_ID, TEST_USER_ID))
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(null).toBuilder()
+                    .extraClientAddr1(respondentAddr)
+                    .extraClientAddr1Confidential(YesOrNo.forValue(false))
+                    .extraClientAddr1Id(ExtraAddrType.RESPONDENT.getId())
+
+                    .extraClientAddr2(intervener2Addr)
+                    .extraClientAddr2Confidential(YesOrNo.forValue(true))
+                    .extraClientAddr2Id(ExtraAddrType.INTERVENER2.getId())
+                    .build())
+                .build();
+
+            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
+
+            assertThat(caseData.getIntervenerThree())
+                .extracting(IntervenerThree::getIntervenerAddress)
+                .isEqualTo(intervener3Addr);
+            verifyIntervenerAddress(caseData, 2, intervener2Addr, true);
+            verifyRespondentAddress(caseData, respondentAddr, false);
+            verifyBuildRepresentationCalled(caseData);
+        }
+
         private static void verifyApplicantAddress(FinremCaseData caseData, Address applicantAddress,
                                                    boolean confidentiality) {
             assertThat(caseData.getContactDetailsWrapper())
@@ -903,5 +935,4 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             new Representation(TEST_USER_ID, false, false, index, intervenerRole)
         );
     }
-
 }
