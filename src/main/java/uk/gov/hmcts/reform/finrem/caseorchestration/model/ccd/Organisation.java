@@ -26,6 +26,23 @@ public class Organisation {
             .build();
     }
 
+    /**
+     * Checks whether two {@link Organisation} objects represent the same organisation.
+     *
+     * <p>
+     * Two organisations are considered the same if:
+     * <ul>
+     *   <li>Both organisation objects are not {@code null}</li>
+     *   <li>Both organisation IDs are not {@code null}</li>
+     *   <li>Both organisation IDs are not blank</li>
+     *   <li>The organisation IDs are equal</li>
+     * </ul>
+     *
+     * @param org1 the first organisation to compare
+     * @param org2 the second organisation to compare
+     * @return {@code true} if both organisations have the same non-blank organisation ID;
+     *         {@code false} otherwise
+     */
     public static boolean isSameOrganisation(Organisation org1, Organisation org2) {
         if (org1 == null || org2 == null) {
             return false;
