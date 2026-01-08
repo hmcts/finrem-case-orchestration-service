@@ -284,11 +284,31 @@ public class StopRepresentingClientService {
         );
     }
 
+    /**
+     * Marks the applicant as unrepresented.
+     *
+     * <p>
+     * This sets the applicant represented flag to {@link YesOrNo#NO} and assigns
+     * the default organisation policy for the applicant solicitor role.
+     *
+     * @param finremCaseData the case data to update
+     */
     public void setApplicantUnrepresented(FinremCaseData finremCaseData) {
         finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
         finremCaseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
     }
 
+    /**
+     * Marks the respondent as unrepresented.
+     *
+     * <p>
+     * For consented applications, the consented respondent represented flag is updated.
+     * For contested applications, the contested respondent represented flag is updated.
+     * In both cases, the default organisation policy for the respondent solicitor role
+     * is assigned.
+     *
+     * @param finremCaseData the case data to update
+     */
     public void setRespondentUnrepresented(FinremCaseData finremCaseData) {
         if (finremCaseData.isConsentedApplication()) {
             finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
@@ -298,6 +318,15 @@ public class StopRepresentingClientService {
         finremCaseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
     }
 
+    /**
+     * Marks an intervener as unrepresented.
+     *
+     * <p>
+     * This sets the intervener represented flag to {@link YesOrNo#NO} and assigns
+     * the default organisation policy based on the intervener solicitor case role.
+     *
+     * @param intervenerWrapper the intervener wrapper to update
+     */
     public void setIntervenerUnrepresented(IntervenerWrapper intervenerWrapper) {
         intervenerWrapper.setIntervenerRepresented(YesOrNo.NO);
         intervenerWrapper.setIntervenerOrganisation(getDefaultOrganisationPolicy(
@@ -306,8 +335,7 @@ public class StopRepresentingClientService {
     }
 
     private OrganisationPolicy getDefaultOrganisationPolicy(CaseRole role) {
-        return OrganisationPolicy
-            .builder()
+        return OrganisationPolicy.builder()
             .organisation(Organisation.builder().organisationID(null).organisationName(null).build())
             .orgPolicyReference(null)
             .orgPolicyCaseAssignedRole(role.getCcdCode())

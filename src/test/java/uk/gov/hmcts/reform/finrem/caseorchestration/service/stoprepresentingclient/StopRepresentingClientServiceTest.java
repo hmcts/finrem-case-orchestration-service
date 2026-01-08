@@ -17,12 +17,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
@@ -103,6 +106,73 @@ class StopRepresentingClientServiceTest {
             manageBarristerService, barristerChangeCaseAccessUpdater, coreCaseDataService, intervenerService,
             caseRoleService, idamService);
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+    }
+
+    @Test
+    void shouldSetIntervenerAsUnrepresentedAndPopulateDefaultOrganisationPolicy() {
+        IntervenerOne intervenerWrapper = IntervenerOne.builder().build();
+
+        underTest.setIntervenerUnrepresented(intervenerWrapper);
+
+        assertThat(intervenerWrapper.getIntervenerRepresented())
+            .isEqualTo(YesOrNo.NO);
+        assertThat(intervenerWrapper.getIntervenerOrganisation())
+            .isEqualTo(
+                OrganisationPolicy.builder()
+                    .organisation(Organisation.builder().organisationID(null).organisationName(null).build())
+                    .orgPolicyReference(null)
+                    .orgPolicyCaseAssignedRole(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                    .build()
+            );
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldSetRespondentAsUnrepresentedAndPopulateDefaultOrganisationPolicy(
+        boolean isConsentedApplication) {
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseType(isConsentedApplication ? CaseType.CONSENTED : CaseType.CONTESTED)
+            .build();
+
+        underTest.setRespondentUnrepresented(caseData);
+
+        if (isConsentedApplication) {
+            assertThat(caseData.getContactDetailsWrapper().getConsentedRespondentRepresented())
+                .isEqualTo(YesOrNo.NO);
+        } else {
+            assertThat(caseData.getContactDetailsWrapper().getContestedRespondentRepresented())
+                .isEqualTo(YesOrNo.NO);
+        }
+
+        assertThat(caseData.getRespondentOrganisationPolicy())
+            .isEqualTo(
+                OrganisationPolicy.builder()
+                    .organisation(Organisation.builder().organisationID(null).organisationName(null).build())
+                    .orgPolicyReference(null)
+                    .orgPolicyCaseAssignedRole(CaseRole.RESP_SOLICITOR.getCcdCode())
+                    .build()
+            );
+    }
+
+    @Test
+    void shouldSetApplicantAsUnrepresentedAndPopulateDefaultOrganisationPolicy() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .build();
+
+        underTest.setApplicantUnrepresented(caseData);
+
+        assertThat(caseData.getContactDetailsWrapper().getApplicantRepresented())
+            .isEqualTo(YesOrNo.NO);
+
+        assertThat(caseData.getApplicantOrganisationPolicy())
+            .isEqualTo(
+                OrganisationPolicy.builder()
+                    .organisation(Organisation.builder().organisationID(null).organisationName(null).build())
+                    .orgPolicyReference(null)
+                    .orgPolicyCaseAssignedRole(CaseRole.APP_SOLICITOR.getCcdCode())
+                    .build()
+            );
     }
 
     @Nested
