@@ -50,6 +50,7 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
@@ -119,19 +120,150 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             Arguments.of(ABOUT_TO_SUBMIT, CONSENTED, STOP_REPRESENTING_CLIENT));
     }
 
-    @ParameterizedTest
-    @MethodSource("provideAllLoggedInScenarios")
-    void givenServiceAddressMissing_whenHandled_throwsException(boolean isApplicantRepresentative, Integer intervenerIndex,
-                                                                IntervenerRole intervenerRole) {
-        stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
+    @Nested
+    class ServiceAddressTests {
 
-        FinremCaseData caseData = FinremCaseData.builder()
-            .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(null))
-            .build();
+        @ParameterizedTest
+        @MethodSource("provideAllLoggedInScenarios")
+        void givenServiceAddressMissing_whenHandled_throwsException(boolean isApplicantRepresentative, Integer intervenerIndex,
+                                                                    IntervenerRole intervenerRole) {
+            boolean skipTest = IntervenerRole.BARRISTER.equals(intervenerRole);
+            if (skipTest) {
+                return;
+            }
+            stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
 
-        assertThatThrownBy(() -> underTest.handle(request(caseData), AUTH_TOKEN))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("serviceAddress is null");
+            FinremCaseData caseData = FinremCaseData.builder()
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(null))
+                .build();
+
+            assertThatThrownBy(() -> underTest.handle(request(caseData), AUTH_TOKEN))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("serviceAddress is null");
+        }
+
+        @ParameterizedTest
+        @MethodSource("provideAllLoggedInScenarios")
+        void givenIntervenerBarristerWithServiceAddressMissing_whenHandled_thenDoNotThrowException(
+            boolean isApplicantRepresentative, Integer intervenerIndex, IntervenerRole intervenerRole) {
+
+            boolean skipTest = !IntervenerRole.BARRISTER.equals(intervenerRole);
+            if (skipTest) {
+                return;
+            }
+            stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
+
+            FinremCaseData caseData = FinremCaseData.builder()
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(null))
+                .barristerCollectionWrapper(intervenerBarristerCollectionWrapper(intervenerIndex, TEST_ORG_ID, TEST_USER_ID))
+                .build();
+
+            assertDoesNotThrow(() -> {
+                underTest.handle(request(caseData), AUTH_TOKEN);
+            });
+        }
+
+        @Test
+        void whenHandled_thenExtraServiceAddressesToIntervenersAndApplicant() {
+            stubIsRepresentingIntervener(2, IntervenerRole.SOLICITOR);
+
+            Address serviceAddress = mock(Address.class);
+            Address intervener1Addr = mock(Address.class);
+            Address intervener3Addr = mock(Address.class);
+            Address intervener4Addr = mock(Address.class);
+            Address applicantAddr = mock(Address.class);
+
+            FinremCaseData caseData = FinremCaseData.builder()
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(serviceAddress).toBuilder()
+                    .extraClientAddr1(intervener1Addr)
+                    .extraClientAddr1Confidential(YesOrNo.forValue(true))
+                    .extraClientAddr1Id(ExtraAddrType.INTERVENER1.getId())
+
+                    .extraClientAddr2(intervener3Addr)
+                    .extraClientAddr2Confidential(YesOrNo.forValue(false))
+                    .extraClientAddr2Id(ExtraAddrType.INTERVENER3.getId())
+
+                    .extraClientAddr3(intervener4Addr)
+                    .extraClientAddr3Confidential(YesOrNo.forValue(false))
+                    .extraClientAddr3Id(ExtraAddrType.INTERVENER4.getId())
+
+                    .extraClientAddr4(applicantAddr)
+                    .extraClientAddr4Confidential(YesOrNo.forValue(true))
+                    .extraClientAddr4Id(ExtraAddrType.APPLICANT.getId())
+
+                    .build())
+                .build();
+
+            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
+
+            verifyIntervenerAddress(caseData, 1, intervener1Addr, true);
+            verifyIntervenerAddress(caseData, 3, intervener3Addr, false);
+            verifyIntervenerAddress(caseData, 4, intervener4Addr, false);
+            verifyApplicantAddress(caseData, applicantAddr, true);
+            verifyBuildRepresentationCalled(caseData);
+        }
+
+        @Test
+        void whenHandled_thenExtraServiceAddressesToIntervener2AndRespondent() {
+            stubIsRepresentingIntervener(3, IntervenerRole.SOLICITOR);
+
+            Address serviceAddress = mock(Address.class);
+            Address respondentAddr = mock(Address.class);
+            Address intervener2Addr = mock(Address.class);
+
+            FinremCaseData caseData = FinremCaseData.builder()
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(serviceAddress).toBuilder()
+                    .extraClientAddr1(respondentAddr)
+                    .extraClientAddr1Confidential(YesOrNo.forValue(true))
+                    .extraClientAddr1Id(ExtraAddrType.RESPONDENT.getId())
+
+                    .extraClientAddr2(intervener2Addr)
+                    .extraClientAddr2Confidential(YesOrNo.forValue(false))
+                    .extraClientAddr2Id(ExtraAddrType.INTERVENER2.getId())
+                    .build())
+                .build();
+
+            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
+
+            verifyIntervenerAddress(caseData, 2, intervener2Addr, false);
+            verifyRespondentAddress(caseData, respondentAddr, true);
+            verifyBuildRepresentationCalled(caseData);
+        }
+
+        private static void verifyApplicantAddress(FinremCaseData caseData, Address applicantAddress,
+                                                   boolean confidentiality) {
+            assertThat(caseData.getContactDetailsWrapper())
+                .extracting(
+                    ContactDetailsWrapper::getApplicantAddress,
+                    ContactDetailsWrapper::getApplicantAddressHiddenFromRespondent
+                )
+                .contains(applicantAddress, YesOrNo.forValue(confidentiality));
+        }
+
+        private static void verifyRespondentAddress(FinremCaseData caseData, Address respondentAddress,
+                                                    boolean confidentiality) {
+            assertThat(caseData.getContactDetailsWrapper())
+                .extracting(
+                    ContactDetailsWrapper::getRespondentAddress,
+                    ContactDetailsWrapper::getRespondentAddressHiddenFromApplicant
+                )
+                .contains(respondentAddress, YesOrNo.forValue(confidentiality));
+        }
+
+        private static void verifyIntervenerAddress(FinremCaseData caseData, int intervenerIndex,
+                                                    Address intervenerAddress, boolean confidentiality) {
+            assertThat(caseData)
+                .extracting(intervenerWrapperExtractor(intervenerIndex))
+                .extracting(
+                    IntervenerWrapper::getIntervenerAddress,
+                    IntervenerWrapper::getIntervenerAddressConfidential
+                )
+                .contains(intervenerAddress, YesOrNo.forValue(confidentiality));
+        }
+
+        private static Stream<Arguments> provideAllLoggedInScenarios() {
+            return StopRepresentingClientAboutToSubmitHandlerTest.provideAllLoggedInScenarios();
+        }
     }
 
     @Nested
@@ -143,18 +275,29 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                                                                         IntervenerRole intervenerRole) {
             stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
 
-            FinremCaseData caseData = FinremCaseData.builder()
-                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
-                .build();
+            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = FinremCaseData.builder()
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)));
+            if (intervenerIndex != null && IntervenerRole.BARRISTER.equals(intervenerRole)) {
+                caseDataBuilder.barristerCollectionWrapper(
+                    intervenerBarristerCollectionWrapper(intervenerIndex, TEST_ORG_ID, TEST_USER_ID));
+            }
+
+            FinremCaseData caseData = caseDataBuilder.build();
 
             assertThat(underTest.handle(request(caseData), AUTH_TOKEN)
                 .getWarnings())
                 .containsExactly(
                     "Are you sure you wish to stop representing your client? If you continue your access to this access will be removed"
                 );
-            assertThat(logs.getInfos()).hasSize(2).contains(format(
-                format("%s - %s representative stops representing a client with a client consent", CASE_ID,
-                    isApplicantRepresentative ? "applicant" : "respondent")));
+            if (intervenerIndex != null) {
+                assertThat(logs.getInfos()).hasSize(2).contains(format(
+                    format("%s - intervener %s representative stops representing a client with a client consent", CASE_ID,
+                        intervenerIndex)));
+            } else {
+                assertThat(logs.getInfos()).hasSize(2).contains(format(
+                    format("%s - %s representative stops representing a client with a client consent", CASE_ID,
+                        isApplicantRepresentative ? "applicant" : "respondent")));
+            }
 
             verifyBuildRepresentationCalled(caseData);
         }
@@ -165,22 +308,32 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                                                                            IntervenerRole intervenerRole) {
             stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
 
-            FinremCaseData caseData = FinremCaseData.builder()
+            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = FinremCaseData.builder()
                 .stopRepresentationWrapper(StopRepresentationWrapper.builder()
                     .stopRepClientConsent(YesOrNo.NO)
                     .stopRepJudicialApproval(YesOrNo.YES)
                     .clientAddressForService(mock(Address.class))
-                    .build())
-                .build();
+                    .build());
+            if (intervenerIndex != null && IntervenerRole.BARRISTER.equals(intervenerRole)) {
+                caseDataBuilder.barristerCollectionWrapper(
+                    intervenerBarristerCollectionWrapper(intervenerIndex, TEST_ORG_ID, TEST_USER_ID));
+            }
+            FinremCaseData caseData = caseDataBuilder.build();
 
             assertThat(underTest.handle(request(caseData), AUTH_TOKEN)
                 .getWarnings())
                 .containsExactly(
                     "Are you sure you wish to stop representing your client? If you continue your access to this access will be removed"
                 );
-            assertThat(logs.getInfos()).hasSize(2).contains(format(
-                format("%s - %s representative stops representing a client with a judicial approval", CASE_ID,
-                    isApplicantRepresentative ? "applicant" : "respondent")));
+            if (intervenerIndex == null) {
+                assertThat(logs.getInfos()).hasSize(2).contains(format(
+                    format("%s - %s representative stops representing a client with a judicial approval", CASE_ID,
+                        isApplicantRepresentative ? "applicant" : "respondent")));
+            } else {
+                assertThat(logs.getInfos()).hasSize(2).contains(format(
+                    format("%s - intervener %s representative stops representing a client with a judicial approval", CASE_ID,
+                        intervenerIndex)));
+            }
 
             verifyBuildRepresentationCalled(caseData);
         }
@@ -575,12 +728,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             verifyBuildRepresentationCalled(caseData);
         }
 
-        private void stubIsRepresentingIntervener(int index, IntervenerRole intervenerRole) {
-            when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
-                new Representation(TEST_USER_ID, false, false, index, intervenerRole)
-            );
-        }
-
         static Stream<Arguments> provideAllIntervenerSolicitorRolesWithApplicantOrRespondentOrg() {
             return IntStream.rangeClosed(1, 4)
                 .boxed()
@@ -628,10 +775,10 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                                                                  Integer intervenerIndex,
                                                                  IntervenerRole intervenerRole) {
         boolean isRepresentingApplicant = intervenerIndex == null && isApplicantRepresentative;
-        boolean isRepresentingRespondent = intervenerIndex == null && isApplicantRepresentative;
+        boolean isRepresentingRespondent = intervenerIndex == null && !isApplicantRepresentative;
 
         when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
-            new Representation(TEST_USER_ID, isRepresentingApplicant, !isRepresentingRespondent, intervenerIndex, intervenerRole)
+            new Representation(TEST_USER_ID, isRepresentingApplicant, isRepresentingRespondent, intervenerIndex, intervenerRole)
         );
     }
 
@@ -656,11 +803,15 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     }
 
     private static BarristerCollectionWrapper intervenerBarristerCollectionWrapper(int index, String orgId) {
+        return intervenerBarristerCollectionWrapper(index, orgId, null);
+    }
+
+    private static BarristerCollectionWrapper intervenerBarristerCollectionWrapper(int index, String orgId, String userId) {
         return switch (index) {
-            case 1 -> BarristerCollectionWrapper.builder().intvr1Barristers(barristers(orgId)).build();
-            case 2 -> BarristerCollectionWrapper.builder().intvr2Barristers(barristers(orgId)).build();
-            case 3 -> BarristerCollectionWrapper.builder().intvr3Barristers(barristers(orgId)).build();
-            case 4 -> BarristerCollectionWrapper.builder().intvr4Barristers(barristers(orgId)).build();
+            case 1 -> BarristerCollectionWrapper.builder().intvr1Barristers(barristers(orgId, userId)).build();
+            case 2 -> BarristerCollectionWrapper.builder().intvr2Barristers(barristers(orgId, userId)).build();
+            case 3 -> BarristerCollectionWrapper.builder().intvr3Barristers(barristers(orgId, userId)).build();
+            case 4 -> BarristerCollectionWrapper.builder().intvr4Barristers(barristers(orgId, userId)).build();
             default -> throw new IllegalArgumentException("Unsupported intervener index: " + index);
         };
     }
@@ -746,4 +897,11 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 InstanceOfAssertFactories.list(BarristerCollectionItem.class))
             .isEqualTo(barristers(orgId));
     }
+
+    private void stubIsRepresentingIntervener(int index, IntervenerRole intervenerRole) {
+        when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
+            new Representation(TEST_USER_ID, false, false, index, intervenerRole)
+        );
+    }
+
 }

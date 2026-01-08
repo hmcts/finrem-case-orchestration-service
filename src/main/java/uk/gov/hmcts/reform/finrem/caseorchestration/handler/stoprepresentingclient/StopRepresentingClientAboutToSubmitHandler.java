@@ -254,7 +254,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private Pair<Address, Boolean> getServiceAddressConfigForIntervener3IfAny(FinremCaseData finremCaseData) {
-        return getServiceAddressConfigIfAny(finremCaseData, ExtraAddrType.INTERVENER2);
+        return getServiceAddressConfigIfAny(finremCaseData, ExtraAddrType.INTERVENER3);
     }
 
     private Pair<Address, Boolean> getServiceAddressConfigForIntervener4IfAny(FinremCaseData finremCaseData) {
@@ -397,7 +397,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         boolean isConfidential = Boolean.TRUE.equals(serviceAddressConfig.getRight());
 
         ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
-
         contactDetailsWrapper.setApplicantAddress(serviceAddress);
         contactDetailsWrapper.setApplicantAddressHiddenFromRespondent(YesOrNo.forValue(isConfidential));
     }
@@ -410,7 +409,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         boolean isConfidential = Boolean.TRUE.equals(serviceAddressConfig.getRight());
 
         ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
-
         contactDetailsWrapper.setRespondentAddress(serviceAddress);
         contactDetailsWrapper.setRespondentAddressHiddenFromApplicant(YesOrNo.forValue(isConfidential));
     }
