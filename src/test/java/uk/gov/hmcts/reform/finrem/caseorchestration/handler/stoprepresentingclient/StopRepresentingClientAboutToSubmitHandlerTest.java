@@ -103,9 +103,8 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     private static final String RESPONDENT_ORG_ID = "RESPONDENT_ORG_ID";
     private static final String INTERVENER1_ORG_ID = "INTERVENER1_ORG_ID";
     private static final String INTERVENER2_ORG_ID = "INTERVENER2_ORG_ID";
-    private static final String INTERVENER3_ORG_ID = "INTERVENER3_ORG_ID";
     private static final String INTERVENER4_ORG_ID = "INTERVENER4_ORG_ID";
-
+    private static final String MATCHING_ORG_ID = "MATCHING_ORG_ID";
 
     @BeforeEach
     void setup() {
@@ -213,9 +212,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @ParameterizedTest
         @ValueSource(booleans = {true, false})
-        void givenCaseWithAppOrResBarrister_whenHandled_thenRemoveTheBarrister(
-            boolean isApplicantRepresentative) {
-
+        void whenHandled_thenRemoveMatchingBarristers(boolean isApplicantRepresentative) {
             stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
             IntervenerOne intervenerOne = intervenerOne(INTERVENER1_ORG_ID);
@@ -250,33 +247,31 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .describedAs("Intervener two unchanged")
                 .extracting(FinremCaseData::getIntervenerTwo)
                 .isEqualTo(intervenerTwo);
-            assertThat(caseData)
-                .extracting(FinremCaseData::getBarristerCollectionWrapper)
-                .satisfies(wrapper -> {
-                    assertThat(wrapper.getApplicantBarristers())
-                        .matches(res ->
-                            isApplicantRepresentative ? res.isEmpty() : res.equals(barristers(APPLICANT_ORG_ID)));
-                    assertThat(wrapper.getRespondentBarristers())
-                        .matches(res ->
-                            !isApplicantRepresentative ? res.isEmpty() : res.equals(barristers(RESPONDENT_ORG_ID)));
-                    assertThat(wrapper.getIntvr1Barristers()).isEqualTo(barristers(INTERVENER1_ORG_ID)); // kept
-                    assertThat(wrapper.getIntvr2Barristers()).isEqualTo(barristers(INTERVENER2_ORG_ID)); // kept
-                    assertThat(wrapper.getIntvr4Barristers()).isEqualTo(barristers(INTERVENER4_ORG_ID)); // kept
-                });
-
+            if (isApplicantRepresentative) {
+                verifyApplicantBarristerRemoved(caseData);
+                verifyRespondentBarristerNotRemoved(caseData);
+            } else {
+                verifyApplicantBarristerNotRemoved(caseData);
+                verifyRespondentBarristerRemoved(caseData);
+            }
+            verifyIntervenerBarristerNotRemoved(caseData, 1, INTERVENER1_ORG_ID);
+            verifyIntervenerBarristerNotRemoved(caseData, 2, INTERVENER2_ORG_ID);
+            verifyIntervenerBarristerNotRemoved(caseData, 4, INTERVENER4_ORG_ID);
             verifyBuildRepresentationCalled(caseData);
         }
 
         @ParameterizedTest
         @ValueSource(booleans = {true, false})
-        void givenAnyCase_whenHandled_thenSetUnrepresentedAndPopulateNocParty(boolean isApplicantRepresentative) {
+        void whenHandled_thenSetUnrepresentedPartyAndNocParty(boolean isApplicantRepresentative) {
             stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
-            assertThat(underTest.handle(request(caseData), AUTH_TOKEN).getData())
+            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
+
+            assertThat(caseData)
                 .extracting(FinremCaseData::getContactDetailsWrapper)
                 .extracting(ContactDetailsWrapper::getNocParty)
                 .isEqualTo(isApplicantRepresentative ? APPLICANT : RESPONDENT);
@@ -288,8 +283,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @ParameterizedTest
         @MethodSource
-        void givenAnyCase_whenHandled_thenPopulateServiceAddress(boolean isApplicantRepresentative, CaseType caseType,
-                                                                 boolean addressConfidentiality) {
+        void whenHandled_thenPopulateServiceAddress(
+            boolean isApplicantRepresentative, CaseType caseType, boolean addressConfidentiality) {
+
             stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
             Address serviceAddress = mock(Address.class);
@@ -299,7 +295,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     .build())
                 .build();
 
-            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, caseData), AUTH_TOKEN).getData())
+            caseData = underTest.handle(request(caseData, caseType), AUTH_TOKEN).getData();
+
+            assertThat(caseData)
                 .extracting(FinremCaseData::getContactDetailsWrapper)
                 .extracting(
                     isApplicantRepresentative ? ContactDetailsWrapper::getApplicantAddress : ContactDetailsWrapper::getRespondentAddress,
@@ -310,7 +308,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             verifyBuildRepresentationCalled(caseData);
         }
 
-        static Stream<Arguments> givenAnyCase_whenHandled_thenPopulateServiceAddress() {
+        static Stream<Arguments> whenHandled_thenPopulateServiceAddress() {
             return Stream.of(true, false)
                 .flatMap(firstFlag ->
                     Stream.of(CONSENTED, CONTESTED)
@@ -325,58 +323,60 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @ParameterizedTest
         @MethodSource("provideIntervenerIndexAndIsApplicantRepresentative")
-        void givenIntervenerSolicitorWithSameOrgId_whenHandled_thenRemoveIntervenerSolicitor(
+        void whenHandled_thenSetIntervenerUnrepresented(
             int index, boolean isApplicantRepresentative) {
+
             stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
-            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(index, TEST_ORG_ID, FinremCaseData.builder()
-                .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(index, MATCHING_ORG_ID, FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
             );
             if (isApplicantRepresentative) {
-                caseDataBuilder.applicantOrganisationPolicy(organisationPolicy(TEST_ORG_ID));
+                caseDataBuilder.applicantOrganisationPolicy(organisationPolicy(MATCHING_ORG_ID));
             } else {
-                caseDataBuilder.respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID));
+                caseDataBuilder.respondentOrganisationPolicy(organisationPolicy(MATCHING_ORG_ID));
             }
             FinremCaseData caseData = caseDataBuilder.build();
 
             underTest.handle(request(caseData), AUTH_TOKEN);
+
             verify(stopRepresentingClientService).setIntervenerUnrepresented(same(caseData.getInterveners().get(index - 1)));
             verifyBuildRepresentationCalled(caseData);
         }
 
         @ParameterizedTest
         @ValueSource(booleans = {true, false})
-        void givenMultipleIntervenerSolicitorAndBarristersWithSameOrgId_whenHandled_thenRemoveBoth(
+        void givenMultipleIntervenersWithMatchingOrganisation_whenHandled_thenUnrepresentIntervenersAndRemoveBarristers(
             boolean isApplicantRepresentative) {
+
             stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
-            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(1, TEST_ORG_ID, FinremCaseData.builder()
-                .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(1, MATCHING_ORG_ID, FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .barristerCollectionWrapper(
                     BarristerCollectionWrapper.builder()
-                        .intvr1Barristers(barristers(TEST_ORG_ID))
-                        .intvr2Barristers(barristers(TEST_ORG_ID))
-                        .intvr3Barristers(barristers(TEST_ORG2_ID))
+                        .intvr1Barristers(barristers(INTERVENER1_ORG_ID))
+                        .intvr2Barristers(barristers(MATCHING_ORG_ID))
+                        .intvr4Barristers(barristers(MATCHING_ORG_ID))
                         .build()
                 )
             );
-            appendIntervenerOrganisationPolicy(2, TEST_ORG_ID, caseDataBuilder);
+            appendIntervenerOrganisationPolicy(2, MATCHING_ORG_ID, caseDataBuilder);
             if (isApplicantRepresentative) {
-                caseDataBuilder.applicantOrganisationPolicy(organisationPolicy(TEST_ORG_ID));
+                caseDataBuilder.applicantOrganisationPolicy(organisationPolicy(MATCHING_ORG_ID));
             } else {
-                caseDataBuilder.respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID));
+                caseDataBuilder.respondentOrganisationPolicy(organisationPolicy(MATCHING_ORG_ID));
             }
             FinremCaseData caseData = caseDataBuilder.build();
 
-            assertThat(underTest.handle(request(caseData), AUTH_TOKEN).getData())
+            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
+
+            assertThat(caseData)
                 .extracting(FinremCaseData::getBarristerCollectionWrapper)
                 .satisfies(wrapper -> {
-                    assertThat(intervenerBarristerCollectionWrapperExtractor(1).apply(wrapper)).isEmpty();
-                    assertThat(intervenerBarristerCollectionWrapperExtractor(2).apply(wrapper)).isEmpty();
-                    assertThat(intervenerBarristerCollectionWrapperExtractor(3).apply(wrapper))
-                        .isEqualTo(barristers(TEST_ORG2_ID));
+                    assertThat(wrapper.getIntvr1Barristers()).isEqualTo(barristers(INTERVENER1_ORG_ID));
+                    assertThat(wrapper.getIntvr2Barristers()).isEmpty();
+                    assertThat(wrapper.getIntvr4Barristers()).isEmpty();
                 });
             verify(stopRepresentingClientService).setIntervenerUnrepresented(same(caseData.getInterveners().get(0)));
             verify(stopRepresentingClientService).setIntervenerUnrepresented(same(caseData.getInterveners().get(1)));
@@ -387,51 +387,50 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @ParameterizedTest
         @MethodSource("provideIntervenerIndexAndIsApplicantRepresentative")
-        void givenIntervenerSolicitorWithDifferenceOrgId_whenHandled_thenDoesNotRemoveIntervenerSolicitor(
+        void givenIntervenerWithDifferentOrganisation_whenHandled_thenIntervenerIsNotUnrepresented(
             int index, boolean isApplicantRepresentative) {
+
             stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
-            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(index, TEST_ORG2_ID, FinremCaseData.builder()
-                .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
-                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
+            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(index, TEST_ORG_ID,
+                FinremCaseData.builder()
+                    .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
             );
             if (isApplicantRepresentative) {
-                caseDataBuilder.applicantOrganisationPolicy(organisationPolicy(TEST_ORG_ID));
+                caseDataBuilder.applicantOrganisationPolicy(organisationPolicy(APPLICANT_ORG_ID));
             } else {
-                caseDataBuilder.respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID));
+                caseDataBuilder.respondentOrganisationPolicy(organisationPolicy(RESPONDENT_ORG_ID));
             }
             FinremCaseData caseData = caseDataBuilder.build();
 
             underTest.handle(request(caseData), AUTH_TOKEN);
-            verify(stopRepresentingClientService, never()).setIntervenerUnrepresented(caseData.getInterveners().get(index - 1));
+
+            verify(stopRepresentingClientService, never()).setIntervenerUnrepresented(any());
             verifyBuildRepresentationCalled(caseData);
         }
 
         @ParameterizedTest
         @MethodSource("provideIntervenerIndexAndIsApplicantRepresentative")
-        void givenIntervenerSolicitorWithDifferenceOrgId_whenHandled_thenDoesNotRemoveIntervenerSolicitorButBarrister(
+        void givenIntervenerWithDifferentOrganisation_whenHandled_thenKeepIntervenerAndRemoveBarrister(
             int index, boolean isApplicantRepresentative) {
+
             stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
             FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(index, TEST_ORG2_ID, FinremCaseData.builder()
-                .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
-                .barristerCollectionWrapper(intervenerBarristerCollectionWrapper(index, TEST_ORG_ID))
+                .barristerCollectionWrapper(intervenerBarristerCollectionWrapper(index, MATCHING_ORG_ID))
             );
             if (isApplicantRepresentative) {
-                caseDataBuilder.applicantOrganisationPolicy(organisationPolicy(TEST_ORG_ID));
+                caseDataBuilder.applicantOrganisationPolicy(organisationPolicy(MATCHING_ORG_ID));
             } else {
-                caseDataBuilder.respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID));
+                caseDataBuilder.respondentOrganisationPolicy(organisationPolicy(MATCHING_ORG_ID));
             }
             FinremCaseData caseData = caseDataBuilder.build();
 
-            assertThat(underTest.handle(request(caseData), AUTH_TOKEN).getData())
-                .extracting(FinremCaseData::getBarristerCollectionWrapper)
-                .extracting(intervenerBarristerCollectionWrapperExtractor(index),
-                    InstanceOfAssertFactories.list(BarristerCollectionItem.class))
-                .isEmpty();
+            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
 
-            verify(stopRepresentingClientService, never()).setIntervenerUnrepresented(caseData.getInterveners().get(index - 1));
+            verifyIntervenerBarristerRemoved(caseData, index);
+            verify(stopRepresentingClientService, never()).setIntervenerUnrepresented(any());
             verifyBuildRepresentationCalled(caseData);
         }
 
@@ -454,49 +453,63 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     }
 
     @Nested
-    class LogInAsIntervenerRepresentativeTests {
+    class LogInAsIntervenerSolicitorTests {
 
         @ParameterizedTest
-        @MethodSource("provideAllIntervenerSolicitorRoles")
-        void givenAsIntervenerSolicitor_whenAllPartiesOrgsDoNotMatch_thenDoesNotPopulateNocParty(
-            int index, IntervenerRole intervenerRole) {
+        @ValueSource(ints = {1, 2, 3, 4})
+        void givenNoOrganisationsMatch_whenHandled_thenApplicantAndRespondentRemainRepresentedAndNocPartyIsNotPopulated(
+            int index) {
 
-            stubIsRepresentingIntervener(index, intervenerRole);
+            stubIsRepresentingIntervener(index, IntervenerRole.SOLICITOR);
 
             FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG_ID, FinremCaseData.builder()
                 .contactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(mock(NoticeOfChangeParty.class)).build())
-                .applicantOrganisationPolicy(organisationPolicy("applicantOrg"))
-                .respondentOrganisationPolicy(organisationPolicy("respondentOrg"))
+                .applicantOrganisationPolicy(organisationPolicy(APPLICANT_ORG_ID))
+                .respondentOrganisationPolicy(organisationPolicy(RESPONDENT_ORG_ID))
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
             ).build();
 
-            FinremCallbackRequest request = request(caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
+
+            assertThat(caseData)
                 .extracting(FinremCaseData::getContactDetailsWrapper)
                 .extracting(ContactDetailsWrapper::getNocParty)
-                .isNull();
+                .isNull(); // should be reset to null
 
-            verify(stopRepresentingClientService, never()).setApplicantUnrepresented(caseData);
-            verify(stopRepresentingClientService, never()).setRespondentUnrepresented(caseData);
+            verify(stopRepresentingClientService, never()).setApplicantUnrepresented(any());
+            verify(stopRepresentingClientService, never()).setRespondentUnrepresented(any());
             verifyBuildRepresentationCalled(caseData);
         }
 
         @ParameterizedTest
         @MethodSource("provideAllIntervenerSolicitorRolesWithApplicantOrRespondentOrg")
-        void givenAsIntervenerSolicitor_whenApplicantOrRespondentOrgMatch_thenSetUnrepresentedAndNocPartyPopulated(
-            int index, IntervenerRole intervenerRole, String intvOrgId, NoticeOfChangeParty noticeOfChangeParty) {
+        void givenOrganisationsMatch_whenHandled_thenApplicantOrRespondentRepresentativesIsUnrepresentedAndNocPartyIsPopulated(
+            int index, String intvOrgId, NoticeOfChangeParty noticeOfChangeParty) {
 
-            stubIsRepresentingIntervener(index, intervenerRole);
+            stubIsRepresentingIntervener(index, IntervenerRole.SOLICITOR);
             FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, intvOrgId, FinremCaseData.builder()
-                .applicantOrganisationPolicy(organisationPolicy("applicantOrg"))
-                .respondentOrganisationPolicy(organisationPolicy("respondentOrg"))
+                .applicantOrganisationPolicy(organisationPolicy(APPLICANT_ORG_ID))
+                .respondentOrganisationPolicy(organisationPolicy(RESPONDENT_ORG_ID))
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
+                .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
+                    .applicantBarristers(barristers(APPLICANT_ORG_ID))
+                    .respondentBarristers(barristers(RESPONDENT_ORG_ID))
+                    .build())
             ).build();
 
-            assertThat(underTest.handle(request(caseData), AUTH_TOKEN).getData())
+            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
+
+            assertThat(caseData)
                 .extracting(FinremCaseData::getContactDetailsWrapper)
                 .extracting(ContactDetailsWrapper::getNocParty)
                 .isEqualTo(noticeOfChangeParty);
+            if (APPLICANT.equals(noticeOfChangeParty)) {
+                verifyApplicantBarristerRemoved(caseData);
+                verifyRespondentBarristerNotRemoved(caseData);
+            } else {
+                verifyRespondentBarristerRemoved(caseData);
+                verifyApplicantBarristerNotRemoved(caseData);
+            }
 
             verify(stopRepresentingClientService, times(APPLICANT.equals(noticeOfChangeParty) ? 1 : 0))
                 .setApplicantUnrepresented(caseData);
@@ -506,17 +519,20 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         }
 
         @ParameterizedTest
-        @MethodSource("provideAllIntervenerSolicitorRoles")
-        void givenAsIntervenerSolicitor_whenHandled_thenSetIntervenerUnrepresented(
-            int index, IntervenerRole intervenerRole) {
-
-            stubIsRepresentingIntervener(index, intervenerRole);
-            FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, TEST_ORG_ID, FinremCaseData.builder()
+        @ValueSource(ints = {1, 2, 3, 4})
+        void givenOrganisationsMatch_whenHandled_thenOtherIntervenerIsUnrepresented(int index) {
+            stubIsRepresentingIntervener(index, IntervenerRole.SOLICITOR);
+            FinremCaseData caseData = appendIntervenerOrganisationPolicy(index, MATCHING_ORG_ID, FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
+                .contactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(mock(NoticeOfChangeParty.class)).build())
             ).build();
 
-            underTest.handle(request(caseData), AUTH_TOKEN);
+            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
 
+            assertThat(caseData)
+                .extracting(FinremCaseData::getContactDetailsWrapper)
+                .extracting(ContactDetailsWrapper::getNocParty)
+                .isNull();
             ArgumentCaptor<IntervenerWrapper> captor = ArgumentCaptor.forClass(IntervenerWrapper.class);
             verify(stopRepresentingClientService).setIntervenerUnrepresented(captor.capture());
             assertThat(captor.getValue().getIntervenerType())
@@ -534,9 +550,10 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @ParameterizedTest
         @MethodSource("provideAllIntervenerSolicitorRolesWithCaseTypesAndConfidentiality")
-        void givenAnyCase_whenHandled_thenPopulateServiceAddress(int index, IntervenerRole intervenerRole,
-                                                                 CaseType caseType, boolean addressConfidentiality) {
-            stubIsRepresentingIntervener(index, intervenerRole);
+        void whenHandled_thenServiceAddressSetToIntervener(
+            int index, CaseType caseType, boolean addressConfidentiality) {
+
+            stubIsRepresentingIntervener(index, IntervenerRole.SOLICITOR);
 
             Address serviceAddress = mock(Address.class);
             FinremCaseData caseData = FinremCaseData.builder()
@@ -545,8 +562,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     .build())
                 .build();
 
-            FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getData())
+            caseData = underTest.handle(request(caseData, caseType), AUTH_TOKEN).getData();
+
+            assertThat(caseData)
                 .extracting(intervenerWrapperExtractor(index))
                 .extracting(
                     IntervenerWrapper::getIntervenerAddress,
@@ -557,79 +575,31 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             verifyBuildRepresentationCalled(caseData);
         }
 
-        @ParameterizedTest
-        @ValueSource(ints = {1})
-        void givenCaseWithSameOrganisationBarrister_whenHandled_thenRemoveRespondentBarrister(int index) {
-            stubIsRepresentingIntervener(1, IntervenerRole.SOLICITOR);
-
-            FinremCaseData caseData = FinremCaseData.builder()
-                .intervenerOne(IntervenerOne.builder()
-                    .intervenerOrganisation(organisationPolicy("AAA"))
-                    .build())
-                .intervenerTwo(IntervenerTwo.builder()
-                    .intervenerOrganisation(organisationPolicy("BBB"))
-                    .build())
-                .intervenerThree(IntervenerThree.builder()
-                    .intervenerOrganisation(organisationPolicy("CCC"))
-                    .build())
-                .intervenerFour(IntervenerFour.builder()
-                    .intervenerOrganisation(organisationPolicy("DDD"))
-                    .build())
-                .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
-                    .intvr1Barristers(barristers("AAA"))
-                    .intvr2Barristers(barristers("BBB"))
-                    .intvr3Barristers(barristers("CCC"))
-                    .intvr4Barristers(barristers("DDD"))
-                    .build())
-                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
-                .build();
-
-            FinremCallbackRequest request = request(caseData);
-            assertThat(underTest.handle(request, AUTH_TOKEN).getData())
-                .extracting(FinremCaseData::getBarristerCollectionWrapper)
-                .extracting(intervenerBarristerCollectionWrapperExtractor(index),
-                    InstanceOfAssertFactories.list(BarristerCollectionItem.class))
-                .isEmpty();
-
-            verifyBuildRepresentationCalled(caseData);
-        }
-
         private void stubIsRepresentingIntervener(int index, IntervenerRole intervenerRole) {
             when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
                 new Representation(TEST_USER_ID, false, false, index, intervenerRole)
             );
         }
 
-        static Stream<Arguments> provideAllIntervenerSolicitorRoles() {
+        static Stream<Arguments> provideAllIntervenerSolicitorRolesWithApplicantOrRespondentOrg() {
             return IntStream.rangeClosed(1, 4)
                 .boxed()
                 .flatMap(index ->
-                    Stream.of(IntervenerRole.SOLICITOR)
-                        .map(intervenerRole -> Arguments.of(index, intervenerRole))
-                );
-        }
-
-        static Stream<Arguments> provideAllIntervenerSolicitorRolesWithApplicantOrRespondentOrg() {
-            return provideAllIntervenerSolicitorRoles()
-                .flatMap(args ->
-                    Map.of("applicantOrg", APPLICANT,
-                            "respondentOrg", RESPONDENT)
+                    Map.of(APPLICANT_ORG_ID, APPLICANT,
+                            RESPONDENT_ORG_ID, RESPONDENT)
                         .entrySet().stream()
-                        .map(e -> Arguments.of(args.get()[0], args.get()[1],
-                            e.getKey(), e.getValue()
-                        ))
+                        .map(e -> Arguments.of(index, e.getKey(), e.getValue()))
                 );
         }
 
         static Stream<Arguments> provideAllIntervenerSolicitorRolesWithCaseTypesAndConfidentiality() {
-            return provideAllIntervenerSolicitorRoles()
-                .flatMap(args ->
+            return  IntStream.rangeClosed(1, 4)
+                .boxed()
+                .flatMap(index ->
                     Arrays.stream(CaseType.values())
                         .flatMap(caseType ->
                             Stream.of(true, false)
-                                .map(addressConfidentiality -> Arguments.of(args.get()[0], args.get()[1],
-                                    caseType, addressConfidentiality
-                                ))
+                                .map(addressConfidentiality -> Arguments.of(index, caseType, addressConfidentiality))
                         )
                 );
         }
@@ -723,5 +693,57 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
     private static FinremCallbackRequest request(FinremCaseData caseData) {
         return FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
+    }
+
+    private static FinremCallbackRequest request(FinremCaseData caseData, CaseType caseType) {
+        return FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, caseData);
+    }
+
+    private static void verifyApplicantBarristerRemoved(FinremCaseData caseData) {
+        assertThat(caseData)
+            .extracting(FinremCaseData::getBarristerCollectionWrapper)
+            .extracting(BarristerCollectionWrapper::getApplicantBarristers,
+                InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+            .isEmpty();
+    }
+
+    private static void verifyApplicantBarristerNotRemoved(FinremCaseData caseData) {
+        assertThat(caseData)
+            .extracting(FinremCaseData::getBarristerCollectionWrapper)
+            .extracting(BarristerCollectionWrapper::getApplicantBarristers,
+                InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+            .isEqualTo(barristers(APPLICANT_ORG_ID));
+    }
+
+    private static void verifyRespondentBarristerRemoved(FinremCaseData caseData) {
+        assertThat(caseData)
+            .extracting(FinremCaseData::getBarristerCollectionWrapper)
+            .extracting(BarristerCollectionWrapper::getRespondentBarristers,
+                InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+            .isEmpty();
+    }
+
+    private static void verifyRespondentBarristerNotRemoved(FinremCaseData caseData) {
+        assertThat(caseData)
+            .extracting(FinremCaseData::getBarristerCollectionWrapper)
+            .extracting(BarristerCollectionWrapper::getRespondentBarristers,
+                InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+            .isEqualTo(barristers(RESPONDENT_ORG_ID));
+    }
+
+    private static void verifyIntervenerBarristerRemoved(FinremCaseData caseData, int index) {
+        assertThat(caseData)
+            .extracting(FinremCaseData::getBarristerCollectionWrapper)
+            .extracting(intervenerBarristerCollectionWrapperExtractor(index),
+                InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+            .isEmpty();
+    }
+
+    private static void verifyIntervenerBarristerNotRemoved(FinremCaseData caseData, int index, String orgId) {
+        assertThat(caseData)
+            .extracting(FinremCaseData::getBarristerCollectionWrapper)
+            .extracting(intervenerBarristerCollectionWrapperExtractor(index),
+                InstanceOfAssertFactories.list(BarristerCollectionItem.class))
+            .isEqualTo(barristers(orgId));
     }
 }
