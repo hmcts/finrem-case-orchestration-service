@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -532,15 +531,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private boolean isHavingJudicialApproval(FinremCaseData finremCaseData) {
         return YesOrNo.isYes(finremCaseData.getStopRepresentationWrapper().getStopRepJudicialApproval());
-    }
-
-    private OrganisationPolicy getDefaultOrganisationPolicy(CaseRole role) {
-        return OrganisationPolicy
-            .builder()
-            .organisation(Organisation.builder().organisationID(null).organisationName(null).build())
-            .orgPolicyReference(null)
-            .orgPolicyCaseAssignedRole(role.getCcdCode())
-            .build();
     }
 
     private boolean doesMatchOrganisation(Organisation org1, IntervenerWrapper intervener) {
