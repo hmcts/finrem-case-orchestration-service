@@ -451,7 +451,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(index, TEST_ORG2_ID, FinremCaseData.builder()
                 .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
-                .barristerCollectionWrapper(mockIntervenerBarristerCollectionWrapper(index, TEST_ORG_ID))
+                .barristerCollectionWrapper(intervenerBarristerCollectionWrapper(index, TEST_ORG_ID))
             );
             if (isApplicantRepresentative) {
                 caseDataBuilder.applicantOrganisationPolicy(organisationPolicy(TEST_ORG_ID));
@@ -731,7 +731,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         return builder;
     }
 
-    private static BarristerCollectionWrapper mockIntervenerBarristerCollectionWrapper(int index, String orgId) {
+    private static BarristerCollectionWrapper intervenerBarristerCollectionWrapper(int index, String orgId) {
         return switch (index) {
             case 1 -> BarristerCollectionWrapper.builder().intvr1Barristers(barristers(orgId)).build();
             case 2 -> BarristerCollectionWrapper.builder().intvr2Barristers(barristers(orgId)).build();
