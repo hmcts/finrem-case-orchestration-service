@@ -129,7 +129,6 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
             setExtraField(caseData, extraFieldIndex++, ExtraAddrType.RESPONDENT.getId(), getRespondentClientAddressLabels()[0],
                 getRespondentClientAddressLabels()[1]);
         }
-
         if (shouldCaptureIntervenerOneServiceAddressInExtraField(caseData, representation)) {
             setExtraField(caseData, extraFieldIndex++, ExtraAddrType.INTERVENER1.getId(), getIntervenerClientAddressLabels(1)[0],
                 getIntervenerClientAddressLabels(1)[1]);
