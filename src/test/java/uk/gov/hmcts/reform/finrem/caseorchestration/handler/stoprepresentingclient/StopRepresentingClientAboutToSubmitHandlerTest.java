@@ -52,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -261,7 +262,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             ).build();
 
             underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN);
-            verify(stopRepresentingClientService).setIntervenerUnrepresented(caseData.getInterveners().get(index - 1));
+            verify(stopRepresentingClientService).setIntervenerUnrepresented(same(caseData.getInterveners().get(index - 1)));
             verifyBuildRepresentationCalled(caseData);
         }
 
@@ -328,7 +329,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             ).build();
 
             underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN);
-            verify(stopRepresentingClientService).setIntervenerUnrepresented(caseData.getInterveners().get(index - 1));
+            verify(stopRepresentingClientService).setIntervenerUnrepresented(same(caseData.getInterveners().get(index - 1)));
             verifyBuildRepresentationCalled(caseData);
         }
 
@@ -416,7 +417,47 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             FinremCaseData caseData = caseDataBuilder.build();
 
             underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN);
-            verify(stopRepresentingClientService).setIntervenerUnrepresented(caseData.getInterveners().get(index - 1));
+            verify(stopRepresentingClientService).setIntervenerUnrepresented(same(caseData.getInterveners().get(index - 1)));
+            verifyBuildRepresentationCalled(caseData);
+        }
+
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        void givenMultipleIntervenerSolicitorAndBarristersWithSameOrgId_whenHandled_thenRemoveBoth(
+            boolean isApplicantRepresentative) {
+            stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
+
+            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(1, TEST_ORG_ID, FinremCaseData.builder()
+                .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
+                .barristerCollectionWrapper(
+                    BarristerCollectionWrapper.builder()
+                        .intvr1Barristers(barristers(TEST_ORG_ID))
+                        .intvr2Barristers(barristers(TEST_ORG_ID))
+                        .intvr3Barristers(barristers(TEST_ORG2_ID))
+                        .build()
+                )
+            );
+            appendIntervenerOrganisationPolicy(2, TEST_ORG_ID, caseDataBuilder);
+            if (isApplicantRepresentative) {
+                caseDataBuilder.applicantOrganisationPolicy(organisationPolicy(TEST_ORG_ID));
+            } else {
+                caseDataBuilder.respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID));
+            }
+            FinremCaseData caseData = caseDataBuilder.build();
+
+            assertThat(underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN).getData())
+                .extracting(FinremCaseData::getBarristerCollectionWrapper)
+                .satisfies(wrapper -> {
+                    assertThat(intervenerBarristerCollectionWrapperExtractor(1).apply(wrapper)).isEmpty();
+                    assertThat(intervenerBarristerCollectionWrapperExtractor(2).apply(wrapper)).isEmpty();
+                    assertThat(intervenerBarristerCollectionWrapperExtractor(3).apply(wrapper))
+                        .isEqualTo(barristers(TEST_ORG2_ID));
+                });
+            verify(stopRepresentingClientService).setIntervenerUnrepresented(same(caseData.getInterveners().get(0)));
+            verify(stopRepresentingClientService).setIntervenerUnrepresented(same(caseData.getInterveners().get(1)));
+            verify(stopRepresentingClientService, never()).setIntervenerUnrepresented(same(caseData.getInterveners().get(2)));
+            verify(stopRepresentingClientService, never()).setIntervenerUnrepresented(same(caseData.getInterveners().get(3)));
             verifyBuildRepresentationCalled(caseData);
         }
 
@@ -489,16 +530,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
     @Nested
     class LogInAsIntervenerRepresentativeTests {
-
-        private static Function<FinremCaseData, IntervenerWrapper> intervenerWrapperExtractor(int index) {
-            return data -> switch (index) {
-                case 1 -> data.getIntervenerOne();
-                case 2 -> data.getIntervenerTwo();
-                case 3 -> data.getIntervenerThree();
-                case 4 -> data.getIntervenerFour();
-                default -> throw new IllegalArgumentException("Unsupported index: " + index);
-            };
-        }
 
         @ParameterizedTest
         @MethodSource("provideAllIntervenerSolicitorRoles")
@@ -750,4 +781,15 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             default -> throw new IllegalArgumentException("Unsupported index: " + index);
         };
     }
+
+    private static Function<FinremCaseData, IntervenerWrapper> intervenerWrapperExtractor(int index) {
+        return data -> switch (index) {
+            case 1 -> data.getIntervenerOne();
+            case 2 -> data.getIntervenerTwo();
+            case 3 -> data.getIntervenerThree();
+            case 4 -> data.getIntervenerFour();
+            default -> throw new IllegalArgumentException("Unsupported index: " + index);
+        };
+    }
+
 }
