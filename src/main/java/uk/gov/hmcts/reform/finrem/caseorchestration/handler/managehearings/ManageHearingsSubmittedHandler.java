@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -23,7 +22,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
     private final ManageHearingsCorresponder manageHearingsCorresponder;
 
     public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                          ManageHearingsCorresponder manageHearingsCorresponder, ApplicationEventPublisher applicationEventPublisher) {
+                                          ManageHearingsCorresponder manageHearingsCorresponder) {
         super(finremCaseDetailsMapper);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
     }

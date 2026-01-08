@@ -3,24 +3,26 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -29,7 +31,6 @@ import java.util.UUID;
 public class HearingCorrespondenceHelper {
 
     private final PaperNotificationService paperNotificationService;
-    private final ExpressCaseService expressCaseService;
 
     /**
      * Retrieves the {@link Hearing} from the wrapper param using the UUID param.
@@ -103,32 +104,6 @@ public class HearingCorrespondenceHelper {
     }
 
     /**
-     * Determines if notifications should not be sent for a hearing.
-     * Should return true if the hearing's notice prompt is set to NO or is NULL.
-     * @param hearing The hearing to check.
-     * @return true if notification is required, false otherwise.
-     */
-    public boolean shouldNotSendNotification(HearingLike hearing) {
-        return !hearing.shouldSendNotifications();
-    }
-
-    /**
-     * Wraps {@link PaperNotificationService} logic for readability.
-     * @return true if the applicant solicitor should receive an email notification.
-     */
-    public boolean shouldEmailToApplicantSolicitor(FinremCaseDetails finremCaseDetails) {
-        return !paperNotificationService.shouldPrintForApplicantDisregardApplicationType(finremCaseDetails);
-    }
-
-    /**
-     * Wraps {@link PaperNotificationService} logic for readability.
-     * @return true if the respondent solicitor should receive an email notification.
-     */
-    public boolean shouldEmailToRespondentSolicitor(FinremCaseDetails finremCaseDetails) {
-        return !paperNotificationService.shouldPrintForRespondent(finremCaseDetails);
-    }
-
-    /**
      * Wraps {@link PaperNotificationService} logic for readability.
      * @return true if the applicant should receive hearing documents by post.
      */
@@ -145,35 +120,13 @@ public class HearingCorrespondenceHelper {
     }
 
     /**
-     * Determines if a hearing should only send a notice. And should NOT send additional hearing documents.
-     * To return true:
-     * - the HearingType must appear in the noticeOnlyHearingTypes set.
-     * - FDR hearings are an exception, they're notice only when the case is NOT an express case.
-     * @param finremCaseDetails case details
-     * @param hearing the hearing to check
-     * @return true if the hearing should only send a notice, false otherwise
+     * Get the vacate hearing notice document, or return null if not found.
+     *
+     * @param finremCaseDetails the case details containing the hearing documents
+     * @return a {@link CaseDocument}
      */
-    public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, HearingLike hearing) {
-        Set<HearingType> noticeOnlyHearingTypes = Set.of(
-            HearingType.MPS,
-            HearingType.FH,
-            HearingType.DIR,
-            HearingType.MENTION,
-            HearingType.PERMISSION_TO_APPEAL,
-            HearingType.APPEAL_HEARING,
-            HearingType.APPLICATION_HEARING,
-            HearingType.RETRIAL_HEARING,
-            HearingType.PTR
-        );
-
-        return Optional.ofNullable(hearing)
-            .map(HearingLike::getHearingType)
-            .map(hearingType ->
-                noticeOnlyHearingTypes.contains(hearingType)
-                    || (HearingType.FDR.equals(hearingType)
-                    && !expressCaseService.isExpressCase(finremCaseDetails.getData()))
-            )
-            .orElse(false);
+    public CaseDocument getVacateHearingNotice(FinremCaseDetails finremCaseDetails) {
+        return getByWorkingVacatedHearingAndDocumentType(finremCaseDetails, CaseDocumentType.VACATE_HEARING_NOTICE);
     }
 
     /**
@@ -207,5 +160,40 @@ public class HearingCorrespondenceHelper {
      */
     private boolean isVacateHearingAction(ManageHearingsAction actionSelection) {
         return ManageHearingsAction.VACATE_HEARING.equals(actionSelection);
+    }
+
+    /**
+     * Gets the most recent Vacated hearing document with the passed CaseDocumentType argument.
+     * If no notice is found, returns an empty list.
+     *
+     * @param finremCaseDetails the case details containing the hearing documents.
+     * @param documentType      a {@link CaseDocumentType} identifying the type of hearing document.
+     * @return a {@link CaseDocument}
+     */
+    private CaseDocument getByWorkingVacatedHearingAndDocumentType(FinremCaseDetails finremCaseDetails,
+                                                                   CaseDocumentType documentType) {
+        ManageHearingsWrapper wrapper = finremCaseDetails.getData().getManageHearingsWrapper();
+        UUID hearingId = wrapper.getWorkingVacatedHearingId();
+        return getCaseDocumentByTypeAndHearingUuid(documentType, wrapper, hearingId);
+    }
+
+    /**
+     * Retrieves a case document filtered on the UUID of the hearing and document type.
+     *
+     * @param wrapper the ManageHearings wrapper holding the docs
+     * @param documentType      a {@link CaseDocumentType} identifying the type of hearing document.
+     * @return a {@link CaseDocument}
+     */
+    private CaseDocument getCaseDocumentByTypeAndHearingUuid(CaseDocumentType documentType, ManageHearingsWrapper wrapper, UUID hearingId) {
+        return wrapper.getHearingDocumentsCollection().stream()
+            .map(ManageHearingDocumentsCollectionItem::getValue)
+            .filter(Objects::nonNull)
+            .filter(doc -> Objects.equals(hearingId, doc.getHearingId()))
+            .filter(doc -> Objects.equals(documentType, doc.getHearingCaseDocumentType()))
+            .map(ManageHearingDocument::getHearingDocument)
+            .filter(Objects::nonNull)
+            .max(Comparator.comparing(CaseDocument::getUploadTimestamp,
+                Comparator.nullsLast(Comparator.naturalOrder())))
+            .orElse(null);
     }
 }
