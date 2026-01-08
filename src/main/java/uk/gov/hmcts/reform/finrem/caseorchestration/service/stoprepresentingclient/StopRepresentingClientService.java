@@ -62,16 +62,16 @@ public class StopRepresentingClientService {
 
     private final IdamService idamService;
 
-    private static FinremCaseData getFinremCaseDataBeforeFromInfo(StopRepresentingClientInfo info) {
+    private static FinremCaseData getFinremCaseDataBefore(StopRepresentingClientInfo info) {
         return info.getCaseDetailsBefore().getData();
     }
 
-    private static FinremCaseData getFinremCaseDataFromInfo(StopRepresentingClientInfo info) {
+    private static FinremCaseData getFinremCaseData(StopRepresentingClientInfo info) {
         return info.getCaseDetails().getData();
     }
 
     private static long getCaseId(StopRepresentingClientInfo info) {
-        return Long.parseLong(getFinremCaseDataFromInfo(info).getCcdCaseId());
+        return Long.parseLong(getFinremCaseData(info).getCcdCaseId());
     }
 
     private static Map<String, Object> clearChangeOrganisationRequestField() {
@@ -99,7 +99,7 @@ public class StopRepresentingClientService {
     }
 
     private void handleApplicantOrRespondentRepresentativeRequest(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseDataFromInfo(info);
+        final FinremCaseData finremCaseData = getFinremCaseData(info);
         final CaseType caseType = finremCaseData.getCcdCaseType();
         final long caseId = getCaseId(info);
 
@@ -124,8 +124,8 @@ public class StopRepresentingClientService {
     }
 
     private void handleIntervenerRepresentativeRequest(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseDataFromInfo(info);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromInfo(info);
+        final FinremCaseData finremCaseData = getFinremCaseData(info);
+        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
 
         // compare all interveners
         finremCaseDataBefore.getInterveners().forEach(originalWrapper -> {
@@ -154,7 +154,7 @@ public class StopRepresentingClientService {
 
     private void sendBarristerChangesToCaseAssignmentService(StopRepresentingClientInfo info, BarristerParty barristerParty) {
         final long caseId = getCaseId(info);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromInfo(info);
+        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
 
         BarristerChange barristerChange = manageBarristerService
             .getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
@@ -162,8 +162,8 @@ public class StopRepresentingClientService {
     }
 
     private boolean sendNocRequestToCaseAssignmentService(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseDataFromInfo(info);
-        final FinremCaseData originalFinremCaseData = getFinremCaseDataBeforeFromInfo(info);
+        final FinremCaseData finremCaseData = getFinremCaseData(info);
+        final FinremCaseData originalFinremCaseData = getFinremCaseDataBefore(info);
 
         // to check if ChangeOrganisationRequest populated, otherwise skip it
         if (finremCaseData.getChangeOrganisationRequestField() == null) {
