@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -468,18 +467,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private void setIntervenerUnrepresented(IntervenerWrapper intervenerWrapper) {
         stopRepresentingClientService.setIntervenerUnrepresented(intervenerWrapper);
-    }
-
-    private NoticeOfChangeParty resolveNocParty(StopRepresentingRequest request) {
-        if (isRepresentingApplicant(request)) {
-            return APPLICANT;
-        }
-
-        if (isRepresentingRespondent(request)) {
-            return RESPONDENT;
-        }
-
-        return null;
     }
 
     private IntervenerWrapper getIntervenerWrapper(StopRepresentingRequest request) {
