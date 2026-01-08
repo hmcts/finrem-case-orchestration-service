@@ -332,7 +332,7 @@ class StopRepresentingClientServiceTest {
             }
 
             FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(
-                    Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+                Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
             StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
@@ -369,7 +369,7 @@ class StopRepresentingClientServiceTest {
 
             // Setting original org policy
             FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(
-                    Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+                Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
             StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
