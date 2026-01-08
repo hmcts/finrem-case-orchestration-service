@@ -211,9 +211,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private Pair<Address, Boolean> getServiceAddressConfigIfAny(FinremCaseData finremCaseData, ExtraAddrType expectedType) {
         StopRepresentationWrapper wrapper = finremCaseData.getStopRepresentationWrapper();
-        if (wrapper == null) {
-            return null;
-        }
 
         List<ExtraClientAddress> extraAddresses = List.of(
             new ExtraClientAddress(wrapper.getExtraClientAddr1Id(), wrapper.getExtraClientAddr1(),
