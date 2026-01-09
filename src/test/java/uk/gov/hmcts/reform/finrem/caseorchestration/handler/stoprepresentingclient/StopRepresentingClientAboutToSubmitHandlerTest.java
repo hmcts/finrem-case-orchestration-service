@@ -878,6 +878,12 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         );
     }
 
+    private void stubIsRepresentingIntervener(int index, IntervenerRole intervenerRole) {
+        when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
+            new Representation(TEST_USER_ID, false, false, index, intervenerRole)
+        );
+    }
+
     private static StopRepresentationWrapper clientConsentedStopRepresentationWrapper(Address serviceAddress) {
         return StopRepresentationWrapper.builder()
             .stopRepClientConsent(YesOrNo.YES)
@@ -992,11 +998,5 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             .extracting(intervenerBarristerCollectionWrapperExtractor(index),
                 InstanceOfAssertFactories.list(BarristerCollectionItem.class))
             .isEqualTo(barristers(orgId));
-    }
-
-    private void stubIsRepresentingIntervener(int index, IntervenerRole intervenerRole) {
-        when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
-            new Representation(TEST_USER_ID, false, false, index, intervenerRole)
-        );
     }
 }
