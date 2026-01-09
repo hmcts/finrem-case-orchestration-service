@@ -286,7 +286,7 @@ public class AssignCaseAccessService {
             serviceAuthTokenGenerator.generate(),
             revokeAccessRequest);
 
-        log.info("CCD response after Revoke Creator Role Access Request: {}", response);
+        log.info("{} - CCD response after Revoke Creator Role Access Request: {}", caseId, response);
         return response;
     }
 

@@ -107,7 +107,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -165,7 +165,7 @@ class DuplicateFilenameDocumentCheckerTest {
         List<String> warnings = underTest.getWarnings(DocumentCheckContext.builder()
             .caseDocument(null)
             .bytes(new byte[0])
-            .beforeCaseDetails(FinremCaseDetailsBuilderFactory.from(CASE_ID, caseType, FinremCaseData.builder()
+            .beforeCaseDetails(FinremCaseDetailsBuilderFactory.from(CASE_ID_IN_LONG, caseType, FinremCaseData.builder()
                 .uploadGeneralDocuments(List.of(UploadGeneralDocumentCollection.builder()
                     .value(UploadGeneralDocument.builder().build())
                     .build()))
@@ -175,7 +175,7 @@ class DuplicateFilenameDocumentCheckerTest {
                 .generalOrderWrapper(GeneralOrderWrapper.builder()
                     .generalOrderLatestDocument(CaseDocument.builder().documentFilename("generalOrderLatestDocument").build())
                     .build())).build())
-            .caseDetails(FinremCaseDetailsBuilderFactory.from(CASE_ID, caseType,
+            .caseDetails(FinremCaseDetailsBuilderFactory.from(CASE_ID_IN_LONG, caseType,
                     FinremCaseData.builder().uploadDocuments(List.of(UploadDocumentCollection.builder().value(UploadDocument.builder()
                         .documentLink(DUPLICATED_CASE_DOCUMENT)
                         .build()).build()))
