@@ -175,6 +175,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(serviceAddress).toBuilder()
+
                     .extraClientAddr1(intervener1Addr)
                     .extraClientAddr1Confidential(YesOrNo.forValue(true))
                     .extraClientAddr1Id(ExtraAddrType.INTERVENER1.getId())
@@ -313,7 +314,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 caseDataBuilder.barristerCollectionWrapper(
                     intervenerBarristerCollectionWrapper(intervenerIndex, TEST_ORG_ID, TEST_USER_ID));
             }
-
             FinremCaseData caseData = caseDataBuilder.build();
 
             assertThat(underTest.handle(request(caseData), AUTH_TOKEN)
@@ -419,7 +419,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             } else {
                 caseDataBuilder.respondentOrganisationPolicy(organisationPolicy(RESPONDENT_ORG_ID));
             }
-
             FinremCaseData caseData = caseDataBuilder.build();
 
             caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
