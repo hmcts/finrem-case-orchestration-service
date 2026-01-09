@@ -116,8 +116,18 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     }
 
     @JsonIgnore
+    public String getApplicantSolicitorRef() {
+       return data.getContactDetailsWrapper().getSolicitorReference();
+    }
+
+    @JsonIgnore
     public String getRespSolicitorEmail() {
         return data.getContactDetailsWrapper().getRespondentSolicitorEmail();
+    }
+
+    @JsonIgnore
+    public String getRespSolicitorRef() {
+        return data.getContactDetailsWrapper().getRespondentSolicitorReference();
     }
 
     @JsonIgnore

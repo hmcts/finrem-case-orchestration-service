@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
 
+import static com.google.common.base.Strings.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
 
 @Component
@@ -34,9 +36,11 @@ public class IntervenerTwoPartyListener extends AbstractPartyListener {
 
     @Override
     protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
-        String email = event.getCaseDetails().getData().getIntervenerTwo().getIntervenerSolEmail();
-        String name = event.getCaseDetails().getData().getIntervenerTwo().getIntervenerSolName();
-        return new PartySpecificDetails(email, name);
+        IntervenerWrapper intervenerTwo = event.getCaseDetails().getData().getIntervenerTwo();
+        String email = intervenerTwo.getIntervenerSolEmail();
+        String name = intervenerTwo.getIntervenerSolName();
+        String ref = nullToEmpty(intervenerTwo.getIntervenerSolicitorReference());
+        return new PartySpecificDetails(email, name, ref);
     }
 
     @Override

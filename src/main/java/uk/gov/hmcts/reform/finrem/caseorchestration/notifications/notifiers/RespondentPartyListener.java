@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
 
+import static com.google.common.base.Strings.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @Component
@@ -34,9 +36,11 @@ public class RespondentPartyListener extends AbstractPartyListener {
 
     @Override
     protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
-        String email = event.getCaseDetails().getRespSolicitorEmail();
-        String name = event.getCaseDetails().getRespSolicitorName();
-        return new PartySpecificDetails(email, name);
+        FinremCaseDetails caseDetails = event.getCaseDetails();
+        String email = caseDetails.getRespSolicitorEmail();
+        String name = caseDetails.getRespSolicitorName();
+        String ref = nullToEmpty(caseDetails.getRespSolicitorRef());
+        return new PartySpecificDetails(email, name, ref);
     }
 
     @Override

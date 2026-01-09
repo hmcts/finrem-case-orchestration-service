@@ -61,8 +61,9 @@ public abstract class AbstractPartyListener {
      * Struct for holding party-specific contact details.
      */
     protected record PartySpecificDetails(
-        String recipientEmailAddress,
-        String recipientName
+        String recipientSolEmailAddress,
+        String recipientSolName,
+        String recipientSolReference
     ) {}
 
     @Async
@@ -87,8 +88,9 @@ public abstract class AbstractPartyListener {
     private void enrichAndSendEmailNotification(SendCorrespondenceEvent event) {
         PartySpecificDetails details = setPartySpecificDetails(event);
         NotificationRequest emailRequest = event.emailNotificationRequest;
-        emailRequest.setName(details.recipientName());
-        emailRequest.setNotificationEmail(details.recipientEmailAddress());
+        emailRequest.setName(details.recipientSolName);
+        emailRequest.setNotificationEmail(details.recipientSolEmailAddress);
+        emailRequest.setSolicitorReferenceNumber(details.recipientSolReference);
         emailService.sendConfirmationEmail(emailRequest, event.emailTemplateId);
     }
 

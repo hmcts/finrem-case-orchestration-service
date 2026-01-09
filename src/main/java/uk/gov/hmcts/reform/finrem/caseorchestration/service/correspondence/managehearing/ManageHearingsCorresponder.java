@@ -26,11 +26,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getNotificationPartyFromRole;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @RequiredArgsConstructor
 @Service
@@ -86,7 +86,8 @@ public class ManageHearingsCorresponder {
         VacateOrAdjournedHearing vacateOrAdjournedHearing = hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(
             wrapper, wrapper.getWorkingVacatedHearingId());
 
-        if (!vacateOrAdjournedHearing.shouldSendNotifications()) {
+        // Always send vacate hearing notice when relisted, as user cannot select to send or not in this scenario
+        if (!isVacatedAndRelistedHearing && !vacateOrAdjournedHearing.shouldSendNotifications()) {
             return;
         }
 
@@ -105,14 +106,15 @@ public class ManageHearingsCorresponder {
      */
     private NotificationRequest buildNotificationRequest(FinremCaseData caseData, ManageHearingsAction action, HearingLike hearing) {
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
 
         String vacatedHearingType = "";
         String vacatedHearingDateTime = "";
 
         if (action.equals(ManageHearingsAction.VACATE_HEARING)) {
-            vacatedHearingType = String.valueOf(hearing.getHearingType());
+            vacatedHearingType = hearing.getHearingType().getId();
             vacatedHearingDateTime = "%s at %s".formatted(
-                hearing.getHearingDate(),
+                hearing.getHearingDate().format(dateFormatter),
                 hearing.getHearingTime()
             );
         }
@@ -120,14 +122,12 @@ public class ManageHearingsCorresponder {
         String respondentSurname = contactDetailsWrapper.getRespondentLname();
         String selectedFRC = CourtHelper.getFRCForHearing(hearing);
 
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
         String formattedHearingDate = hearing.getHearingDate().format(dateFormatter);
 
         return NotificationRequest.builder()
             .caseReferenceNumber(String.valueOf(caseData.getCcdCaseId()))
-            .hearingType(String.valueOf(hearing.getHearingType()))
+            .hearingType(hearing.getHearingType().getId())
             .hearingDate(formattedHearingDate)
-            .solicitorReferenceNumber(nullToEmpty(contactDetailsWrapper.getSolicitorReference()))
             .applicantName(applicantSurname)
             .respondentName(respondentSurname)
             .caseType(EmailService.CONTESTED)
@@ -159,10 +159,8 @@ public class ManageHearingsCorresponder {
                               List<CaseDocument> documentsToPost,
                               EmailTemplateNames templateName ) {
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = hearing.getPartiesOnCase();
-        if (partiesOnCase.isEmpty()) {
-            return;
-        }
+        List<PartyOnCaseCollectionItem> partiesOnCase =
+            Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
             .notificationParties(partiesOnCase.stream()
