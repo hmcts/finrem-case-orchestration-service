@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.Hearin
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
@@ -21,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,25 +39,8 @@ class HearingCorrespondenceHelperTest {
     @Mock
     PaperNotificationService paperNotificationService;
 
-    @Mock
-    ExpressCaseService expressCaseService;
-
     @InjectMocks
     private HearingCorrespondenceHelper helper;
-
-    @Test
-    void shouldReturnCorrectValuesWhenShouldSendNotificationUsed() {
-        Hearing hearing = Hearing.builder().build();
-
-        // hearingNoticePrompt not initialised
-        assertTrue(helper.shouldNotSendNotification(hearing));
-
-        hearing.setHearingNoticePrompt(YesOrNo.NO);
-        assertTrue(helper.shouldNotSendNotification(hearing));
-
-        hearing.setHearingNoticePrompt(YesOrNo.YES);
-        assertFalse(helper.shouldNotSendNotification(hearing));
-    }
 
     @Test
     void shouldReturnHearingInContextWhenIdMatches() {
@@ -140,34 +120,6 @@ class HearingCorrespondenceHelperTest {
     }
 
     /**
-     * shouldEmailToApplicantSolicitor is just a wrapper around the paperNotificationService.shouldPrintForApplicant.
-     */
-    @Test
-    void shouldReturnCorrectValueForShouldEmailToApplicantSolicitor() {
-        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
-
-        when(paperNotificationService.shouldPrintForApplicantDisregardApplicationType(finremCaseDetails)).thenReturn(false);
-        assertTrue(helper.shouldEmailToApplicantSolicitor(finremCaseDetails));
-
-        when(paperNotificationService.shouldPrintForApplicantDisregardApplicationType(finremCaseDetails)).thenReturn(true);
-        assertFalse(helper.shouldEmailToApplicantSolicitor(finremCaseDetails));
-    }
-
-    /**
-     * shouldEmailToRespondentSolicitor is just a wrapper around the paperNotificationService.shouldPrintForRespondent.
-     */
-    @Test
-    void shouldReturnCorrectValueForShouldEmailToRespondentSolicitor() {
-        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
-
-        when(paperNotificationService.shouldPrintForRespondent(finremCaseDetails)).thenReturn(false);
-        assertTrue(helper.shouldEmailToRespondentSolicitor(finremCaseDetails));
-
-        when(paperNotificationService.shouldPrintForRespondent(finremCaseDetails)).thenReturn(true);
-        assertFalse(helper.shouldEmailToRespondentSolicitor(finremCaseDetails));
-    }
-
-    /**
      * shouldPostToApplicant is just a wrapper around the paperNotificationService.shouldPrintForApplicant.
      */
     @Test
@@ -193,101 +145,6 @@ class HearingCorrespondenceHelperTest {
 
         when(paperNotificationService.shouldPrintForRespondent(finremCaseDetails)).thenReturn(false);
         assertFalse(helper.shouldPostToRespondent(finremCaseDetails));
-    }
-
-    /**
-     * Tests true path for shouldSendHearingNoticeOnly::
-     * - Action is ADD_HEARING
-     * - Hearing type comes from a stream of arguments that should all be valid.
-     * When a case needs documents posted, shouldPostHearingNoticeOnly decides if only the notice needs posting.
-     */
-    @ParameterizedTest
-    @MethodSource("provideNoticeOnlyCases")
-    void shouldPostHearingNoticeOnlyReturnsTrue(Hearing hearing) {
-        // Arrange case
-        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADD_HEARING);
-        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
-        // Act
-        boolean result = helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing);
-        // Assert
-        assertTrue(result);
-    }
-
-    /**
-     * Used by shouldSendHearingNoticeOnlyReturnsTrue.
-     *
-     * @return Stream of Arguments all of which should cause shouldSendHearingNoticeOnly to return True
-     */
-    static Stream<Arguments> provideNoticeOnlyCases() {
-        return Stream.of(
-            arguments(
-                Hearing.builder().hearingType(HearingType.MPS).build()
-            ),
-            arguments(
-                Hearing.builder().hearingType(HearingType.FH).build()
-            ),
-            arguments(
-                Hearing.builder().hearingType(HearingType.DIR).build()
-            ),
-            arguments(
-                Hearing.builder().hearingType(HearingType.MENTION).build()
-            ),
-            arguments(
-                Hearing.builder().hearingType(HearingType.PERMISSION_TO_APPEAL).build()
-            ),
-            arguments(
-                Hearing.builder().hearingType(HearingType.APPEAL_HEARING).build()
-            ),
-            arguments(
-                Hearing.builder().hearingType(HearingType.RETRIAL_HEARING).build()
-            ),
-            arguments(
-                Hearing.builder().hearingType(HearingType.PTR).build()
-            ),
-            arguments(
-                Hearing.builder().hearingType(HearingType.APPLICATION_HEARING).build()
-            ),
-            // Test should mock that this FDR is not an express case to pass.
-            arguments(
-                Hearing.builder().hearingType(HearingType.FDR).build()
-            )
-        );
-    }
-
-    /**
-     * Tests false path for shouldSendHearingNoticeOnly::
-     * - Action is ADD_HEARING
-     * - Hearing type comes from a stream of arguments that should all be invalid.
-     * When a case needs documents posted, shouldPostHearingNoticeOnly decides if only the notice needs posting.
-     */
-    @ParameterizedTest
-    @MethodSource("provideInvalidNoticeOnlyCases")
-    void shouldPostHearingNoticeOnlyReturnsFalse(Hearing hearing) {
-        // Arrange case
-        FinremCaseDetails finremCaseDetails = finremCaseDetails();
-        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
-        // Act
-        boolean result = helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing);
-        // Assert
-        assertFalse(result);
-    }
-
-    /**
-     * Used by shouldSendHearingNoticeOnlyReturnsTrue.
-     *
-     * @return Stream of Arguments all of which should cause shouldSendHearingNoticeOnly to return True
-     */
-    static Stream<Arguments> provideInvalidNoticeOnlyCases() {
-        return Stream.of(
-            // Case: FDA Hearing type is wrong.
-            arguments(
-                Hearing.builder().hearingType(HearingType.FDA).build()
-            ),
-            // but FDR Hearing type is wrong (for a standard, non-express, case like this).
-            arguments(
-                Hearing.builder().hearingType(HearingType.FDR).build()
-            )
-        );
     }
 
     @Test
@@ -329,15 +186,6 @@ class HearingCorrespondenceHelperTest {
             .data(FinremCaseData.builder()
                 .manageHearingsWrapper(ManageHearingsWrapper.builder()
                     .manageHearingsActionSelection(action)
-                    .build())
-                .build())
-            .build();
-    }
-
-    private static FinremCaseDetails finremCaseDetails() {
-        return FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
-                .manageHearingsWrapper(ManageHearingsWrapper.builder()
                     .build())
                 .build())
             .build();

@@ -361,8 +361,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             .build();
 
         when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
-        when(manageHearingsDocumentService.getHearingNotice(any(FinremCaseDetails.class)))
-            .thenReturn(caseDocument(DOC_URL, HEARING_DOCUMENT_NAME, HEARING_DOCUMENT_BIN_URL));
 
         // When a hearing is required, the general application directions document should not be generated
         Optional<CaseDocument> expectedDocument = Optional.empty();
