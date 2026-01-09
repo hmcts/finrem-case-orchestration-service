@@ -12,13 +12,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
@@ -35,10 +38,14 @@ class StopRepresentingClientSubmittedHandlerTest {
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
     private StopRepresentingClientService stopRepresentingClientService;
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     @BeforeEach
     public void setup() {
-        underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, stopRepresentingClientService);
+        underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, stopRepresentingClientService,
+            featureToggleService);
+        lenient().when(featureToggleService.isExui3990WorkaroundEnabled()).thenReturn(true);
     }
 
     @Test
@@ -60,6 +67,25 @@ class StopRepresentingClientSubmittedHandlerTest {
     void givenAnyCase_whenHandled_thenPublishStopRepresentingClientEvent() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
+            caseDataBefore, caseData);
+
+        underTest.handle(request, AUTH_TOKEN);
+
+        ArgumentCaptor<StopRepresentingClientInfo> eventCaptor = ArgumentCaptor.forClass(StopRepresentingClientInfo.class);
+        verify(stopRepresentingClientService).applyCaseAssignment(eventCaptor.capture());
+
+        assertThat(eventCaptor.getValue().getCaseDetails().getData()).isEqualTo(caseData);
+        assertThat(eventCaptor.getValue().getCaseDetailsBefore().getData()).isEqualTo(caseDataBefore);
+        assertThat(eventCaptor.getValue().getUserAuthorisation()).isEqualTo(AUTH_TOKEN);
+    }
+
+    @Test
+    void givenFeatureToggleOff_whenHandled_thenPublishStopRepresentingClientEvent() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+        when(featureToggleService.isExui3990WorkaroundEnabled()).thenReturn(false);
 
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
             caseDataBefore, caseData);

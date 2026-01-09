@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 
@@ -29,12 +30,16 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
     private final StopRepresentingClientService stopRepresentingClientService;
 
+    private final FeatureToggleService featureToggleService;
+
     private static final String CONFIRMATION_HEADER = "# Notice of change request submitted";
 
     public StopRepresentingClientSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                  StopRepresentingClientService stopRepresentingClientService) {
+                                                  StopRepresentingClientService stopRepresentingClientService,
+                                                  FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
         this.stopRepresentingClientService = stopRepresentingClientService;
+        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -49,17 +54,26 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        // Raised EXUI-3990 to see if XUI team would fix the button issue
-        // Otherwise, remove the async call below
-        CompletableFuture.runAsync(() ->
+        if (featureToggleService.isExui3990WorkaroundEnabled()) {
             stopRepresentingClientService.applyCaseAssignment(
                 StopRepresentingClientInfo.builder()
                     .userAuthorisation(userAuthorisation)
                     .caseDetails(callbackRequest.getCaseDetails())
                     .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
-                    .build()),
-            CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS)
-        );
+                    .build());
+        } else {
+            // Raised EXUI-3990 to see if XUI team would fix the button issue
+            // Otherwise, remove the async call below
+            CompletableFuture.runAsync(() ->
+                stopRepresentingClientService.applyCaseAssignment(
+                    StopRepresentingClientInfo.builder()
+                        .userAuthorisation(userAuthorisation)
+                        .caseDetails(callbackRequest.getCaseDetails())
+                        .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
+                        .build()),
+                CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS)
+            );
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .confirmationHeader(CONFIRMATION_HEADER)
