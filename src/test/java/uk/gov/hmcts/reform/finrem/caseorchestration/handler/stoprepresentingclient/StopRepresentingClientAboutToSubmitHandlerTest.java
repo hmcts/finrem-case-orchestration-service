@@ -638,7 +638,33 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     }
 
     @Nested
-    class LogInAsIntervenerSolicitorTests {
+    class LogInAsIntervenerRepresentativeTests {
+        @ParameterizedTest
+        @ValueSource(ints = {1, 2, 3, 4})
+        void givenNoOrganisationsMatch_whenHandledBarristerRequest_thenApplicantAndRespondentRemainRepresentedAndNocPartyIsNotPopulated(
+            int index) {
+
+            stubIsRepresentingIntervener(index, IntervenerRole.BARRISTER);
+
+            FinremCaseData caseData = FinremCaseData.builder()
+                .contactDetailsWrapper(ContactDetailsWrapper.builder().nocParty(mock(NoticeOfChangeParty.class)).build())
+                .applicantOrganisationPolicy(organisationPolicy(APPLICANT_ORG_ID))
+                .respondentOrganisationPolicy(organisationPolicy(RESPONDENT_ORG_ID))
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
+                .barristerCollectionWrapper(intervenerBarristerCollectionWrapper(index, TEST_ORG_ID, TEST_USER_ID))
+                .build();
+
+            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
+
+            assertThat(caseData)
+                .extracting(FinremCaseData::getContactDetailsWrapper)
+                .extracting(ContactDetailsWrapper::getNocParty)
+                .isNull(); // should be reset to null
+
+            verify(stopRepresentingClientService, never()).setApplicantUnrepresented(any());
+            verify(stopRepresentingClientService, never()).setRespondentUnrepresented(any());
+            verifyBuildRepresentationCalled(caseData);
+        }
 
         @ParameterizedTest
         @ValueSource(ints = {1, 2, 3, 4})
@@ -663,6 +689,46 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
             verify(stopRepresentingClientService, never()).setApplicantUnrepresented(any());
             verify(stopRepresentingClientService, never()).setRespondentUnrepresented(any());
+            verifyBuildRepresentationCalled(caseData);
+        }
+
+        @ParameterizedTest
+        @MethodSource("provideAllIntervenerSolicitorRolesWithApplicantOrRespondentOrg")
+        void givenOrganisationsMatch_whenHandledBarristerRequest_thenApplicantOrRespondentRepresentativesIsUnrepresentedAndNocPartyIsPopulated(
+            int index, String intvOrgId, NoticeOfChangeParty noticeOfChangeParty) {
+
+            BarristerCollectionWrapper barristerCollectionWrapper = intervenerBarristerCollectionWrapper(index, intvOrgId, TEST_USER_ID)
+                .toBuilder()
+                .respondentBarristers(barristers(RESPONDENT_ORG_ID))
+                .applicantBarristers(barristers(APPLICANT_ORG_ID))
+                .build();
+
+            stubIsRepresentingIntervener(index, IntervenerRole.BARRISTER);
+            FinremCaseData caseData = FinremCaseData.builder()
+                .applicantOrganisationPolicy(organisationPolicy(APPLICANT_ORG_ID))
+                .respondentOrganisationPolicy(organisationPolicy(RESPONDENT_ORG_ID))
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
+                .barristerCollectionWrapper(barristerCollectionWrapper)
+                .build();
+
+            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
+
+            assertThat(caseData)
+                .extracting(FinremCaseData::getContactDetailsWrapper)
+                .extracting(ContactDetailsWrapper::getNocParty)
+                .isEqualTo(noticeOfChangeParty);
+            if (APPLICANT.equals(noticeOfChangeParty)) {
+                verifyApplicantBarristerRemoved(caseData);
+                verifyRespondentBarristerNotRemoved(caseData);
+            } else {
+                verifyRespondentBarristerRemoved(caseData);
+                verifyApplicantBarristerNotRemoved(caseData);
+            }
+
+            verify(stopRepresentingClientService, times(APPLICANT.equals(noticeOfChangeParty) ? 1 : 0))
+                .setApplicantUnrepresented(caseData);
+            verify(stopRepresentingClientService, times(RESPONDENT.equals(noticeOfChangeParty) ? 1 : 0))
+                .setRespondentUnrepresented(caseData);
             verifyBuildRepresentationCalled(caseData);
         }
 
