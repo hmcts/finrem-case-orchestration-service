@@ -848,10 +848,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         }
     }
 
-    private void verifyBuildRepresentationCalled(FinremCaseData caseData) {
-        verify(stopRepresentingClientService).buildRepresentation(caseData, AUTH_TOKEN);
-    }
-
     private static Stream<Arguments> provideAllLoggedInScenarios() {
         return Stream.of(
             Arguments.of(true, null, null),
@@ -998,5 +994,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             .extracting(intervenerBarristerCollectionWrapperExtractor(index),
                 InstanceOfAssertFactories.list(BarristerCollectionItem.class))
             .isEqualTo(barristers(orgId));
+    }
+
+    private void verifyBuildRepresentationCalled(FinremCaseData caseData) {
+        verify(stopRepresentingClientService).buildRepresentation(caseData, AUTH_TOKEN);
     }
 }
