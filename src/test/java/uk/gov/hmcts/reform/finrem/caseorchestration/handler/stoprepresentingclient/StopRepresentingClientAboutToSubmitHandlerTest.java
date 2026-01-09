@@ -697,18 +697,16 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         void givenOrganisationsMatch_whenHandledBarristerRequest_thenApplicantOrRespondentRepresentativesIsUnrepresentedAndNocPartyIsPopulated(
             int index, String intvOrgId, NoticeOfChangeParty noticeOfChangeParty) {
 
-            BarristerCollectionWrapper barristerCollectionWrapper = intervenerBarristerCollectionWrapper(index, intvOrgId, TEST_USER_ID)
-                .toBuilder()
-                .respondentBarristers(barristers(RESPONDENT_ORG_ID))
-                .applicantBarristers(barristers(APPLICANT_ORG_ID))
-                .build();
-
             stubIsRepresentingIntervener(index, IntervenerRole.BARRISTER);
             FinremCaseData caseData = FinremCaseData.builder()
                 .applicantOrganisationPolicy(organisationPolicy(APPLICANT_ORG_ID))
                 .respondentOrganisationPolicy(organisationPolicy(RESPONDENT_ORG_ID))
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
-                .barristerCollectionWrapper(barristerCollectionWrapper)
+                .barristerCollectionWrapper(intervenerBarristerCollectionWrapper(index, intvOrgId, TEST_USER_ID)
+                    .toBuilder()
+                    .respondentBarristers(barristers(RESPONDENT_ORG_ID))
+                    .applicantBarristers(barristers(APPLICANT_ORG_ID))
+                    .build())
                 .build();
 
             caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
