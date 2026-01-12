@@ -33,7 +33,7 @@ public interface CourtListWrapper {
 
     LancashireCourt getLancashireCourt();
 
-    ClevelandCourt getClevelandCourt(boolean isConsented);
+    ClevelandCourt getClevelandCourt();
 
     NwYorkshireCourt getNwYorkshireCourt();
 
