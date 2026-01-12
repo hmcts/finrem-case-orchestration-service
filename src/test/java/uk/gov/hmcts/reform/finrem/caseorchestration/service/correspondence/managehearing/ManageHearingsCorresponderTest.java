@@ -295,7 +295,7 @@ class ManageHearingsCorresponderTest {
 
         when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(manageHearingsWrapper, hearingId)).thenReturn(hearing);
 
-        when(hearingCorrespondenceHelper.getVacateHearingNotice(callbackRequest.getCaseDetails())).thenReturn(
+        when(hearingCorrespondenceHelper.getVacateHearingNotice(callbackRequest.getCaseDetails().getData())).thenReturn(
             CaseDocument
             .builder()
             .documentFilename("VacateHearingNotice.pdf")

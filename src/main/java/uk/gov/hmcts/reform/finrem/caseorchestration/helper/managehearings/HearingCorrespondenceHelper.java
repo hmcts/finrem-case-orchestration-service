@@ -110,6 +110,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Wraps {@link PaperNotificationService} logic for readability.
+     *
      * @return true if the applicant should receive hearing documents by post.
      */
     public boolean shouldPostToApplicant(FinremCaseDetails finremCaseDetails) {
@@ -118,6 +119,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Wraps {@link PaperNotificationService} logic for readability.
+     *
      * @return true if the respondent should receive hearing documents by post.
      */
     public boolean shouldPostToRespondent(FinremCaseDetails finremCaseDetails) {
@@ -127,39 +129,42 @@ public class HearingCorrespondenceHelper {
     /**
      * Get the vacate hearing notice document, or return null if not found.
      *
-     * @param finremCaseDetails the case details containing the hearing documents
+     * @param caseData case details containing the hearing documents
      * @return a {@link CaseDocument}
      */
-    public CaseDocument getVacateHearingNotice(FinremCaseDetails finremCaseDetails) {
-        return getByWorkingVacatedHearingAndDocumentType(finremCaseDetails, CaseDocumentType.VACATE_HEARING_NOTICE);
+    public CaseDocument getVacateHearingNotice(FinremCaseData caseData) {
+        return getByWorkingVacatedHearingAndDocumentType(caseData, CaseDocumentType.VACATE_HEARING_NOTICE);
     }
 
     /**
      * Retrieves the action selection, e.g. ADD_HEARING, from the Manage Hearings Wrapper in the case details.
-     * @param finremCaseDetails the case details containing the Manage Hearings Wrapper
+     *
+     * @param caseData the case details containing the Manage Hearings Wrapper
      * @return the ManageHearingsAction or null if not present
      */
-    public ManageHearingsAction getManageHearingsAction(FinremCaseDetails finremCaseDetails) {
-        return Optional.ofNullable(finremCaseDetails)
-            .map(FinremCaseDetails::getData)
+    public ManageHearingsAction getManageHearingsAction(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData)
             .map(FinremCaseData::getManageHearingsWrapper)
             .map(ManageHearingsWrapper::getManageHearingsActionSelection)
             .orElse(null);
     }
 
-    /*
+    /**
      * Returns true is a hearing was vacated and relisted
-     * @param finremCaseDetails queried to see if the vacate action was chosen and if the hearing was relisted.
+     *
+     * @param caseData queried to see if the vacate action was chosen and if the hearing was relisted.
+     * @return if the hearing was vacated and relisted
      */
-    public boolean isVacatedAndRelistedHearing(FinremCaseDetails finremCaseDetails) {
-        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
+    public boolean isVacatedAndRelistedHearing(FinremCaseData caseData) {
+        ManageHearingsAction actionSelection = getManageHearingsAction(caseData);
         boolean hearingRelisted = YesOrNo.YES.equals(
-            finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
+            caseData.getManageHearingsWrapper().getWasRelistSelected());
         return isVacateHearingAction(actionSelection) && hearingRelisted;
     }
 
     /**
      * Determines if the action selection is to vacate a hearing.
+     *
      * @param actionSelection the action selection to check
      * @return true if the action selection is VACATE_HEARING, false otherwise
      */
@@ -171,13 +176,13 @@ public class HearingCorrespondenceHelper {
      * Gets the most recent Vacated hearing document with the passed CaseDocumentType argument.
      * If no notice is found, returns an empty list.
      *
-     * @param finremCaseDetails the case details containing the hearing documents.
-     * @param documentType      a {@link CaseDocumentType} identifying the type of hearing document.
+     * @param caseData     the case details containing the hearing documents.
+     * @param documentType a {@link CaseDocumentType} identifying the type of hearing document.
      * @return a {@link CaseDocument}
      */
-    private CaseDocument getByWorkingVacatedHearingAndDocumentType(FinremCaseDetails finremCaseDetails,
+    private CaseDocument getByWorkingVacatedHearingAndDocumentType(FinremCaseData caseData,
                                                                    CaseDocumentType documentType) {
-        ManageHearingsWrapper wrapper = finremCaseDetails.getData().getManageHearingsWrapper();
+        ManageHearingsWrapper wrapper = caseData.getManageHearingsWrapper();
         UUID hearingId = wrapper.getWorkingVacatedHearingId();
         return getCaseDocumentByTypeAndHearingUuid(documentType, wrapper, hearingId);
     }
@@ -185,8 +190,8 @@ public class HearingCorrespondenceHelper {
     /**
      * Retrieves a case document filtered on the UUID of the hearing and document type.
      *
-     * @param wrapper the ManageHearings wrapper holding the docs
-     * @param documentType      a {@link CaseDocumentType} identifying the type of hearing document.
+     * @param wrapper      the ManageHearings wrapper holding the docs
+     * @param documentType a {@link CaseDocumentType} identifying the type of hearing document.
      * @return a {@link CaseDocument}
      */
     private CaseDocument getCaseDocumentByTypeAndHearingUuid(CaseDocumentType documentType, ManageHearingsWrapper wrapper, UUID hearingId) {

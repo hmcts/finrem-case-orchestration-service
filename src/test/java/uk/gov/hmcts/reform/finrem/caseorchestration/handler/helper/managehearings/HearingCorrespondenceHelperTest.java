@@ -211,7 +211,7 @@ class HearingCorrespondenceHelperTest {
     void when_isVacatedAndRelistedHearing_returns_true() {
         FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.VACATE_HEARING);
         finremCaseDetails.getData().getManageHearingsWrapper().setWasRelistSelected(YesOrNo.YES);
-        assertTrue(helper.isVacatedAndRelistedHearing(finremCaseDetails));
+        assertTrue(helper.isVacatedAndRelistedHearing(finremCaseDetails.getData()));
     }
 
     @ParameterizedTest
@@ -219,7 +219,7 @@ class HearingCorrespondenceHelperTest {
     void when_isVacatedAndRelistedHearing_returns_false(ManageHearingsAction action, YesOrNo yesOrNo) {
         FinremCaseDetails finremCaseDetails = finremCaseDetails(action);
         finremCaseDetails.getData().getManageHearingsWrapper().setWasRelistSelected(yesOrNo);
-        assertFalse(helper.isVacatedAndRelistedHearing(finremCaseDetails));
+        assertFalse(helper.isVacatedAndRelistedHearing(finremCaseDetails.getData()));
     }
 
     /**
@@ -356,7 +356,7 @@ class HearingCorrespondenceHelperTest {
                 .build())
             .build();
 
-        CaseDocument result = helper.getVacateHearingNotice(finremCaseDetails);
+        CaseDocument result = helper.getVacateHearingNotice(finremCaseDetails.getData());
 
         assertEquals(expectedDocument, result);
     }
@@ -383,7 +383,7 @@ class HearingCorrespondenceHelperTest {
                 .build())
             .build();
 
-        CaseDocument result = helper.getVacateHearingNotice(finremCaseDetails);
+        CaseDocument result = helper.getVacateHearingNotice(finremCaseDetails.getData());
 
         assertNull(result);
     }

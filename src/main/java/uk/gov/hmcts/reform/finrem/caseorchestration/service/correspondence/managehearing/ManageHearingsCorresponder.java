@@ -86,7 +86,7 @@ public class ManageHearingsCorresponder {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         ManageHearingsWrapper wrapper = finremCaseData.getManageHearingsWrapper();
 
-        boolean isVacatedAndRelistedHearing = hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseDetails);
+        boolean isVacatedAndRelistedHearing = hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseData);
 
         if (isVacatedAndRelistedHearing) {
             sendHearingCorrespondence(callbackRequest, userAuthorisation);
@@ -100,7 +100,7 @@ public class ManageHearingsCorresponder {
             return;
         }
 
-        List<CaseDocument> documentsToPost = List.of(hearingCorrespondenceHelper.getVacateHearingNotice(finremCaseDetails));
+        List<CaseDocument> documentsToPost = List.of(hearingCorrespondenceHelper.getVacateHearingNotice(finremCaseData));
 
         publishEvent(
             finremCaseDetails,
