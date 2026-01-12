@@ -147,7 +147,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             -> new IllegalStateException(format("%s - expecting intervener index exists", request.caseId)));
     }
 
-    private boolean hasApplicantOrRespondentOrganistaionPolicyChange(StopRepresentingRequest request) {
+    private boolean hasApplicantOrRespondentOrganisationPolicyChange(StopRepresentingRequest request) {
         FinremCaseData caseData = request.finremCaseDetails.getData();
         return caseData.getContactDetailsWrapper().getNocParty() != null;
     }
@@ -158,7 +158,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
         if (isRepresentingApplicant(request)
             || isRepresentingRespondent(request)
-            || (isRepresentingAnyInterveners(request) && hasApplicantOrRespondentOrganistaionPolicyChange(request))
+            || (isRepresentingAnyInterveners(request) && hasApplicantOrRespondentOrganisationPolicyChange(request))
         ) {
             // below also update the representative history
             nocWorkflowService.prepareNoticeOfChangeAndOrganisationPolicy(finremCaseData,
