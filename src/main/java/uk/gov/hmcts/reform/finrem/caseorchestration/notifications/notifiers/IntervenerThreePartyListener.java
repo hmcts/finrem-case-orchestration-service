@@ -32,12 +32,12 @@ public class IntervenerThreePartyListener extends AbstractPartyListener {
     @Override
     protected boolean isDigitalParty(SendCorrespondenceEvent event) {
         return notificationService
-            .isIntervenerSolicitorDigitalAndEmailPopulated(event.getCaseDetails().getData().getIntervenerThree(), event.getCaseDetails());
+            .isIntervenerSolicitorDigitalAndEmailPopulated(event.getCaseData().getIntervenerThree(), event.getCaseDetails());
     }
 
     @Override
     protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
-        IntervenerWrapper intervenerThree = event.getCaseDetails().getData().getIntervenerThree();
+        IntervenerWrapper intervenerThree = event.getCaseData().getIntervenerThree();
         String email = intervenerThree.getIntervenerSolEmail();
         String name = intervenerThree.getIntervenerSolName();
         String ref = nullToEmpty(intervenerThree.getIntervenerSolicitorReference());
@@ -60,6 +60,6 @@ public class IntervenerThreePartyListener extends AbstractPartyListener {
 
     @Override
     protected boolean isPartyOutsideUK(SendCorrespondenceEvent event) {
-        return internationalPostalService.isIntervenerResideOutsideOfUK(event.getCaseDetails().getData().getIntervenerThree());
+        return internationalPostalService.isIntervenerResideOutsideOfUK(event.getCaseData().getIntervenerThree());
     }
 }

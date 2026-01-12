@@ -49,6 +49,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -56,6 +58,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.APPEAL_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.FDA;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsCorresponderTest {
@@ -92,6 +95,83 @@ class ManageHearingsCorresponderTest {
 
         //Assert
         verifyNoInteractions(eventPublisher);
+    }
+
+    @Test
+    void givenHearingWithNullType_whenSendHearingCorrespondence_thenThrowsIllegalStateException() {
+        //Arrange
+        FinremCallbackRequest callbackRequest =
+                FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
+        Hearing hearing = Hearing.builder()
+            .hearingNoticePrompt(YesOrNo.YES)
+            .hearingType(null)
+            .build();
+
+        ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
+        manageHearingsWrapper.setWorkingHearingId(hearingId);
+
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(manageHearingsWrapper, hearingId)).thenReturn(hearing);
+
+        //Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+            corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN));
+
+        assertTrue(exception.getMessage().contains("Hearing type must not be null"));
+    }
+
+    @Test
+    void givenHearingWithNullDate_whenSendHearingCorrespondence_thenThrowsIllegalStateException() {
+        //Arrange
+        FinremCallbackRequest callbackRequest =
+                FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
+        Hearing hearing = Hearing.builder()
+            .hearingNoticePrompt(YesOrNo.YES)
+            .hearingType(FDA)
+            .hearingDate(null)
+            .build();
+
+        ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
+        manageHearingsWrapper.setWorkingHearingId(hearingId);
+
+        when(hearingCorrespondenceHelper.getActiveHearingInContext(manageHearingsWrapper, hearingId)).thenReturn(hearing);
+
+        //Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+            corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN));
+
+        assertTrue(exception.getMessage().contains("Hearing date must not be null"));
+    }
+
+    @Test
+    void givenHearingWithNullTime_whenSendVacateOrAdjournCorrespondence_thenThrowsIllegalStateException() {
+        //Arrange
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
+        VacateOrAdjournedHearing hearing = VacateOrAdjournedHearing.builder()
+            .hearingNoticePrompt(YesOrNo.YES)
+            .hearingType(FDA)
+            .wasVacOrAdjNoticeSent(YesOrNo.YES)
+            .hearingDate(LocalDate.now())
+            .hearingTime(null)
+            .build();
+
+        ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
+        manageHearingsWrapper.setWorkingVacatedHearingId(hearingId);
+
+        FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
+
+        when(hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseData)).thenReturn(false);
+        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(manageHearingsWrapper, hearingId)).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getVacateHearingNotice(finremCaseData)).thenReturn(
+            CaseDocument.builder()
+                .documentFilename("test Vacate.pdf")
+                .build());
+
+        //Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+            corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN));
+
+        assertTrue(exception.getMessage().contains("Hearing time must not be null"));
     }
 
     @Test
@@ -181,8 +261,8 @@ class ManageHearingsCorresponderTest {
             .usingRecursiveComparison()
             .isEqualTo(expectedEvent.getEmailNotificationRequest());
 
-        assertThat(actualEvent.getEmailTemplateId())
-            .isEqualTo(expectedEvent.getEmailTemplateId());
+        assertThat(actualEvent.getEmailTemplate())
+            .isEqualTo(expectedEvent.getEmailTemplate());
 
         assertThat(actualEvent.getNotificationParties())
             .containsExactlyInAnyOrderElementsOf(expectedEvent.getNotificationParties());
@@ -316,8 +396,8 @@ class ManageHearingsCorresponderTest {
             .usingRecursiveComparison()
             .isEqualTo(expectedEvent.getEmailNotificationRequest());
 
-        assertThat(actualEvent.getEmailTemplateId())
-            .isEqualTo(expectedEvent.getEmailTemplateId());
+        assertThat(actualEvent.getEmailTemplate())
+            .isEqualTo(expectedEvent.getEmailTemplate());
 
         assertThat(actualEvent.getNotificationParties())
             .containsExactlyInAnyOrderElementsOf(expectedEvent.getNotificationParties());
@@ -343,7 +423,7 @@ class ManageHearingsCorresponderTest {
                 NotificationParty.INTERVENER_TWO,
                 NotificationParty.INTERVENER_THREE,
                 NotificationParty.INTERVENER_FOUR))
-            .emailTemplateId(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .emailNotificationRequest(NotificationRequest
                 .builder()
                 .caseReferenceNumber(CASE_ID)
@@ -378,7 +458,7 @@ class ManageHearingsCorresponderTest {
                 NotificationParty.INTERVENER_TWO,
                 NotificationParty.INTERVENER_THREE,
                 NotificationParty.INTERVENER_FOUR))
-            .emailTemplateId(EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR)
+            .emailTemplate(EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR)
             .emailNotificationRequest(NotificationRequest
                 .builder()
                 .caseReferenceNumber(CASE_ID)

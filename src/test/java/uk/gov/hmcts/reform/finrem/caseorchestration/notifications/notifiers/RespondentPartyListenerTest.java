@@ -70,7 +70,7 @@ class RespondentPartyListenerTest {
             .caseDetails(caseDetails)
             .emailNotificationRequest(NotificationRequest.builder().build())
             .notificationParties(List.of(NotificationParty.RESPONDENT))
-            .emailTemplateId(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .documentsToPost(List.of(CaseDocument.builder().documentFilename(TEST_DOC_NAME).build()))
             .authToken(AUTH_TOKEN)
             .build();
@@ -159,7 +159,7 @@ class RespondentPartyListenerTest {
         assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(RESPONDENT_REF);
 
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplateId()));
+        verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplate()));
     }
 
     /**

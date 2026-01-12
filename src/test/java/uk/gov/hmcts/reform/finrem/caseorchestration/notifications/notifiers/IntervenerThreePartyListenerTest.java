@@ -69,7 +69,7 @@ class IntervenerThreePartyListenerTest {
             .caseDetails(caseDetails)
             .emailNotificationRequest(NotificationRequest.builder().build())
             .notificationParties(List.of(NotificationParty.INTERVENER_THREE))
-            .emailTemplateId(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
             .documentsToPost(List.of(CaseDocument.builder().documentFilename(TEST_DOC_NAME).build()))
             .authToken(AUTH_TOKEN)
             .build();
@@ -159,7 +159,7 @@ class IntervenerThreePartyListenerTest {
         assertThat(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).isEqualTo(INTERVENER_THREE_REF);
 
         verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerThree(), caseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplateId()));
+        verify(emailService).sendConfirmationEmail(any(), eq(event.getEmailTemplate()));
     }
 
     /**

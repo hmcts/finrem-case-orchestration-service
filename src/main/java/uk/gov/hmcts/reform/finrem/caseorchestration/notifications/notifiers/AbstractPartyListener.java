@@ -91,7 +91,7 @@ public abstract class AbstractPartyListener {
         emailRequest.setName(details.recipientSolName);
         emailRequest.setNotificationEmail(details.recipientSolEmailAddress);
         emailRequest.setSolicitorReferenceNumber(details.recipientSolReference);
-        emailService.sendConfirmationEmail(emailRequest, event.emailTemplateId);
+        emailService.sendConfirmationEmail(emailRequest, event.emailTemplate);
     }
 
     /**

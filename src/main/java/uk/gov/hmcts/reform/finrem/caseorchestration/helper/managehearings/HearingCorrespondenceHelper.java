@@ -163,6 +163,27 @@ public class HearingCorrespondenceHelper {
     }
 
     /**
+     * Determines if the Mini Form A document is required based on the hearing type and case type,
+     * and retrieves it if applicable.
+     *
+     * For FDA hearings, the Mini Form A is always required. For FDR hearings, it is conditionally
+     * required if the case is an express case.
+     *
+     * @param caseData the case data containing relevant details about the case
+     * @param hearing the hearing information used to determine if the Mini Form A is required
+     * @return an {@link Optional} containing the Mini Form A document if it is required,
+     *         or an empty {@link Optional} if not
+     */
+    public Optional<CaseDocument> getMiniFormAIfRequired(FinremCaseData caseData, Hearing hearing) {
+        if (FDA.equals(hearing.getHearingType())
+            || (FDR.equals(hearing.getHearingType()) && expressCaseService.isExpressCase(caseData))) {
+            return Optional.ofNullable(caseData.getMiniFormA());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Determines if the action selection is to vacate a hearing.
      *
      * @param actionSelection the action selection to check
@@ -205,14 +226,5 @@ public class HearingCorrespondenceHelper {
             .max(Comparator.comparing(CaseDocument::getUploadTimestamp,
                 Comparator.nullsLast(Comparator.naturalOrder())))
             .orElse(null);
-    }
-
-    public Optional<CaseDocument> getMiniFormAIfRequired(FinremCaseData caseData, Hearing hearing) {
-        if (FDA.equals(hearing.getHearingType())
-            || (FDR.equals(hearing.getHearingType()) && expressCaseService.isExpressCase(caseData))) {
-            return Optional.ofNullable(caseData.getMiniFormA());
-        } else {
-            return Optional.empty();
-        }
     }
 }

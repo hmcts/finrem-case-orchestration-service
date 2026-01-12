@@ -59,6 +59,6 @@ public class RespondentPartyListener extends AbstractPartyListener {
 
     @Override
     protected boolean isPartyOutsideUK(SendCorrespondenceEvent event) {
-        return internationalPostalService.isRespondentResideOutsideOfUK(event.getCaseDetails().getData());
+        return internationalPostalService.isRespondentResideOutsideOfUK(event.getCaseData());
     }
 }

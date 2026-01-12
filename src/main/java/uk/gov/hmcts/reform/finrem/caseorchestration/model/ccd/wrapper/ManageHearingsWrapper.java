@@ -129,6 +129,16 @@ public class ManageHearingsWrapper {
         return workingVacatedHearingId;
     }
 
+    /**
+     * Retrieves a list of working hearing-related documents associated with the current hearing ID.
+     *
+     * The method filters the hearingDocumentsCollection to include only those documents that are
+     * linked to the current working hearing ID. If either the working hearing ID or the
+     * hearingDocumentsCollection is null, an empty list is returned.
+     *
+     * @return a list of {@link CaseDocument} objects corresponding to the working hearing ID,
+     *         or an empty list if no matching documents are found or if the input data is null.
+     */
     @JsonIgnore
     public List<CaseDocument> getAssociatedWorkingHearingDocuments() {
         UUID hearingId = getWorkingHearingId();

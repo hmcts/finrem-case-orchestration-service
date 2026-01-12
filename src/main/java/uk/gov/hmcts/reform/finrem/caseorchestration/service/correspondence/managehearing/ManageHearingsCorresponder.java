@@ -96,7 +96,7 @@ public class ManageHearingsCorresponder {
             wrapper, wrapper.getWorkingVacatedHearingId());
 
         // Always send vacate hearing notice when relisted, as user cannot select to send or not in this scenario
-        if (!isVacatedAndRelistedHearing && !vacateOrAdjournedHearing.shouldSendNotifications()) {
+        if (shouldNotSendVacateOrAdjournNotification(isVacatedAndRelistedHearing, vacateOrAdjournedHearing)) {
             return;
         }
 
@@ -126,22 +126,38 @@ public class ManageHearingsCorresponder {
         String vacatedHearingType = "";
         String vacatedHearingDateTime = "";
 
-        if (action.equals(ManageHearingsAction.VACATE_HEARING)) {
-            vacatedHearingType = hearing.getHearingType().getId();
+        if (ManageHearingsAction.VACATE_HEARING.equals(action)) {
+
+            vacatedHearingType = Optional.ofNullable(hearing.getHearingType())
+                .orElseThrow(() -> new IllegalStateException("Hearing type must not be null")).getId();
+
+            String formattedDate = Optional.ofNullable(hearing.getHearingDate())
+                .orElseThrow(() -> new IllegalStateException("Hearing date must not be null"))
+                .format(dateFormatter);
+
+            String hearingTime = Optional.ofNullable(hearing.getHearingTime())
+                .orElseThrow(() -> new IllegalStateException("Hearing time must not be null"));
+
             vacatedHearingDateTime = "%s at %s".formatted(
-                hearing.getHearingDate().format(dateFormatter),
-                hearing.getHearingTime()
+                formattedDate,
+                hearingTime
             );
         }
+
+        String hearingType = Optional.ofNullable(hearing.getHearingType())
+            .orElseThrow(() -> new IllegalStateException("Hearing type must not be null")).getId();
+
         String applicantSurname = contactDetailsWrapper.getApplicantLname();
         String respondentSurname = contactDetailsWrapper.getRespondentLname();
         String selectedFRC = CourtHelper.getFRCForHearing(hearing);
 
-        String formattedHearingDate = hearing.getHearingDate().format(dateFormatter);
+        String formattedHearingDate = Optional.ofNullable(hearing.getHearingDate())
+            .orElseThrow(() -> new IllegalStateException("Hearing date must not be null"))
+            .format(dateFormatter);
 
         return NotificationRequest.builder()
-            .caseReferenceNumber(String.valueOf(caseData.getCcdCaseId()))
-            .hearingType(hearing.getHearingType().getId())
+            .caseReferenceNumber(caseData.getCcdCaseId())
+            .hearingType(hearingType)
             .hearingDate(formattedHearingDate)
             .applicantName(applicantSurname)
             .respondentName(respondentSurname)
@@ -153,7 +169,9 @@ public class ManageHearingsCorresponder {
     }
 
     private List<CaseDocument> getAdditionalHearingDocs(HearingLike hearing) {
-        return new ArrayList<>(hearing.getAdditionalHearingDocs().stream()
+        return new ArrayList<>(Optional.ofNullable(hearing.getAdditionalHearingDocs())
+            .orElseGet(List::of)
+            .stream()
             .map(DocumentCollectionItem::getValue)
             .toList());
     }
@@ -182,11 +200,16 @@ public class ManageHearingsCorresponder {
                 .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
                 .toList())
             .emailNotificationRequest(buildNotificationRequest(caseDetails.getData(), action, hearing))
-            .emailTemplateId(templateName)
+            .emailTemplate(templateName)
             .documentsToPost(documentsToPost)
             .caseDetails(caseDetails)
             .authToken(userAuthorisation)
             .build()
         );
+    }
+
+    private boolean shouldNotSendVacateOrAdjournNotification(boolean isVacatedAndRelistedHearing,
+                                                          VacateOrAdjournedHearing vacateOrAdjournedHearing) {
+        return !isVacatedAndRelistedHearing && !vacateOrAdjournedHearing.shouldSendNotifications();
     }
 }
