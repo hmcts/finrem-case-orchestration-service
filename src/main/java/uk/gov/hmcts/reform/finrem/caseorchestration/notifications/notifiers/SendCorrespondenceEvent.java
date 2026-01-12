@@ -16,7 +16,6 @@ public class SendCorrespondenceEvent {
     NotificationRequest emailNotificationRequest;
     EmailTemplateNames emailTemplateId;
     List<CaseDocument> documentsToPost;
-    //TODO: consider if we need full case details to determine if party is digital (used by notificationService).
     FinremCaseDetails caseDetails;
     String authToken;
 }
