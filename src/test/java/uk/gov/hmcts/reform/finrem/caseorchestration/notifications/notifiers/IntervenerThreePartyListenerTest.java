@@ -113,18 +113,6 @@ class IntervenerThreePartyListenerTest {
     }
 
     /**
-     * Tests sendLetter delegates to bulkPrintService.
-     */
-    @Test
-    void shouldSendLetter() {
-        List<BulkPrintDocument> docs = List.of(BulkPrintDocument.builder().build());
-        intervenerThreePartyListener.sendLetter(event, docs, true);
-        verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
-            caseDetails, INTERVENER_THREE, docs, true, AUTH_TOKEN
-        );
-    }
-
-    /**
      * Tests isPartyOutsideUK delegates to internationalPostalService.
      */
     @Test

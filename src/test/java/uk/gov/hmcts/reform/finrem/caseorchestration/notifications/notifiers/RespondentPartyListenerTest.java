@@ -114,18 +114,6 @@ class RespondentPartyListenerTest {
     }
 
     /**
-     * Tests sendLetter delegates to bulkPrintService.
-     */
-    @Test
-    void shouldSendLetter() {
-        List<BulkPrintDocument> docs = List.of(BulkPrintDocument.builder().build());
-        respondentPartyListener.sendLetter(event, docs, true);
-        verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
-            caseDetails, RESPONDENT, docs, true, AUTH_TOKEN
-        );
-    }
-
-    /**
      * Tests isPartyOutsideUK delegates to internationalPostalService.
      */
     @Test

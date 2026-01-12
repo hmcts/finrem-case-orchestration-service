@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -17,6 +18,7 @@ import java.util.List;
 /**
  * Handles party-specific notification logic; subclass for different party types.
  */
+@Slf4j
 @RequiredArgsConstructor
 public abstract class AbstractPartyListener {
 
@@ -24,6 +26,8 @@ public abstract class AbstractPartyListener {
     protected final EmailService emailService;
     protected final NotificationService notificationService;
     protected final InternationalPostalService internationalPostalService;
+
+    protected String notificationParty;
 
     /**
      * Should this listener handle notifications for this party/event.
@@ -46,13 +50,6 @@ public abstract class AbstractPartyListener {
     protected abstract CaseDocument getPartyCoversheet(SendCorrespondenceEvent event);
 
     /**
-     * Performs the actual print-and-send operation.
-     */
-    protected abstract void sendLetter(SendCorrespondenceEvent event,
-                                       List<BulkPrintDocument> bulkPrintDocs,
-                                       boolean isOutsideUK);
-
-    /**
      * Returns true if the party resides outside the UK.
      */
     protected abstract boolean isPartyOutsideUK(SendCorrespondenceEvent event);
@@ -64,12 +61,14 @@ public abstract class AbstractPartyListener {
         String recipientSolEmailAddress,
         String recipientSolName,
         String recipientSolReference
-    ) {}
+    ) {
+    }
 
     @Async
     @EventListener
     public void handleNotification(SendCorrespondenceEvent event) {
         if (isRelevantParty(event)) {
+            log.info("Notification event received for party {} on case case {}", notificationParty, event.getCaseId());
             sendNotification(event);
         }
     }
@@ -78,7 +77,7 @@ public abstract class AbstractPartyListener {
         if (isDigitalParty(event)) {
             enrichAndSendEmailNotification(event);
         } else {
-            handlePaperNotification(event);
+            sendPaperNotification(event);
         }
     }
 
@@ -86,6 +85,7 @@ public abstract class AbstractPartyListener {
      * Prepares and sends an email notification to the relevant party.
      */
     private void enrichAndSendEmailNotification(SendCorrespondenceEvent event) {
+        log.info("Preparing email notification for party {} on case case {}", notificationParty, event.getCaseId());
         PartySpecificDetails details = setPartySpecificDetails(event);
         NotificationRequest emailRequest = event.emailNotificationRequest;
         emailRequest.setName(details.recipientSolName);
@@ -97,12 +97,15 @@ public abstract class AbstractPartyListener {
     /**
      * Collect docs, coversheet, and send letter for the relevant party.
      */
-    private void handlePaperNotification(SendCorrespondenceEvent event) {
+    private void sendPaperNotification(SendCorrespondenceEvent event) {
+        log.info("Preparing paper notification for party {} on case case {}", notificationParty, event.getCaseId());
         // Defensive copy to avoid mutating original event collection
         List<CaseDocument> docsToPrint = new ArrayList<>(event.documentsToPost);
         docsToPrint.add(getPartyCoversheet(event));
         List<BulkPrintDocument> bpDocs = bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint);
         boolean isOutsideUK = isPartyOutsideUK(event);
-        sendLetter(event, bpDocs, isOutsideUK);
+        bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+            event.caseDetails, notificationParty, bpDocs, isOutsideUK, event.authToken
+        );
     }
 }

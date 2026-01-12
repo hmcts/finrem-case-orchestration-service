@@ -23,4 +23,8 @@ public class SendCorrespondenceEvent {
     public FinremCaseData getCaseData() {
         return caseDetails.getData();
     }
+
+    public String getCaseId() {
+        return getCaseData().getCcdCaseId();
+    }
 }
