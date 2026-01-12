@@ -157,7 +157,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
         if (representation.isRepresentingAnyInterveners() && !representation.isRepresentingAnyIntervenerBarristers()) {
             return getIntervener(caseData, representation).getIntervenerOrganisation();
         }
-        return OrganisationPolicy.builder().organisation(getInterevenerBarrister(caseData, representation).getOrganisation())
+        return OrganisationPolicy.builder().organisation(getIntervenerBarrister(caseData, representation).getOrganisation())
             .build();
     }
 
@@ -214,7 +214,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     private OrganisationPolicy resolveIntervenerOrganisationPolicy(FinremCaseData caseData,
                                                                    Representation representation) {
         if (representation.isRepresentingAnyIntervenerBarristers()) {
-            Organisation organisation = getInterevenerBarrister(caseData, representation).getOrganisation();
+            Organisation organisation = getIntervenerBarrister(caseData, representation).getOrganisation();
             return organisation != null
                 ? OrganisationPolicy.builder().organisation(organisation).build()
                 : null;
@@ -244,7 +244,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
                 .map(OrganisationPolicy::getOrganisation).orElse(null));
     }
 
-    private Barrister getInterevenerBarrister(FinremCaseData caseData, Representation representation) {
+    private Barrister getIntervenerBarrister(FinremCaseData caseData, Representation representation) {
         int index = representation.intervenerIndex();
         List<BarristerCollectionItem> items = caseData.getBarristerCollectionWrapper().getIntervenerBarristersByIndex(index);
         return emptyIfNull(items).stream().map(BarristerCollectionItem::getValue)
