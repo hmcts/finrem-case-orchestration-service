@@ -207,7 +207,7 @@ public class StopRepresentingClientService {
     }
 
     /**
-     * Builds a {@link Representation} object indicating which parties
+     * Builds a {@link RepresentativeInContext} object indicating which parties
      * the current user represents in the given case.
      *
      * <p>This includes applicant, respondent, and intervener roles
@@ -216,10 +216,10 @@ public class StopRepresentingClientService {
      *
      * @param caseData the case data containing the CCD case details
      * @param userAuthorisation the user's authorisation token
-     * @return a {@link Representation} describing the user's representation
+     * @return a {@link RepresentativeInContext} describing the user's representation
      *         across all parties in the case
      */
-    public Representation buildRepresentation(FinremCaseData caseData, String userAuthorisation) {
+    public RepresentativeInContext buildRepresentation(FinremCaseData caseData, String userAuthorisation) {
         boolean isIntervenerRepresentative = caseRoleService.isIntervenerRepresentative(caseData, userAuthorisation);
 
         Integer intervenerIndex = null;
@@ -237,7 +237,7 @@ public class StopRepresentingClientService {
                 : IntervenerRole.SOLICITOR;
         }
 
-        return new Representation(
+        return new RepresentativeInContext(
             idamService.getIdamUserId(userAuthorisation),
             caseRoleService.isApplicantRepresentative(caseData, userAuthorisation),
             caseRoleService.isRespondentRepresentative(caseData, userAuthorisation),
@@ -253,27 +253,27 @@ public class StopRepresentingClientService {
      * <p>The method:
      * <ul>
      *   <li>Returns {@code false} if the user is not representing any intervener barrister</li>
-     *   <li>Finds the intervener based on the index in {@link Representation}</li>
+     *   <li>Finds the intervener based on the index in {@link RepresentativeInContext}</li>
      *   <li>Locates the barrister matching the current user ID</li>
      *   <li>Compares the barrister organisation with the intervener solicitor organisation</li>
      * </ul>
      *
      * @param caseData the financial remedy case data containing interveners and barristers
-     * @param representation the current user representation details
+     * @param representativeInContext the current user representation details
      * @return {@code true} if the intervener barrister and solicitor are from the same organisation;
      *         {@code false} otherwise
      */
-    public boolean isIntervenerBarristerFromSameOrganisationAsSolicitor(FinremCaseData caseData, Representation representation) {
-        if (!representation.isRepresentingAnyIntervenerBarristers()) {
+    public boolean isIntervenerBarristerFromSameOrganisationAsSolicitor(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+        if (!representativeInContext.isIntervenerBarrister()) {
             return false;
         }
-        int index = representation.intervenerIndex();
+        int index = representativeInContext.intervenerIndex();
         IntervenerWrapper intervener = caseData.getInterveners().get(index - 1);
         List<BarristerCollectionItem> intvBarristers = caseData.getBarristerCollectionWrapper()
             .getIntervenerBarristersByIndex(index);
 
         Barrister barrister = emptyIfNull(intvBarristers).stream().map(BarristerCollectionItem::getValue)
-            .filter(b -> b.getUserId().equals(representation.userId()))
+            .filter(b -> b.getUserId().equals(representativeInContext.userId()))
             .findFirst().orElseThrow();
 
         return isSameOrganisation(

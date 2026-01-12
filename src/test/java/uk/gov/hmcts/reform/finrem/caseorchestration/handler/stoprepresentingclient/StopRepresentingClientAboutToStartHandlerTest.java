@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.Representation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.RepresentativeInContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 
 import java.util.List;
@@ -62,7 +62,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
     void givenAsApplicantSolicitor_whenHandled_thenPopulateCorrectLabel() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            new Representation(TEST_USER_ID, true, false,null, null)
+            new RepresentativeInContext(TEST_USER_ID, true, false,null, null)
         );
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -87,7 +87,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
     void givenAsRespondentSolicitor_whenHandled_thenPopulateCorrectLabel() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            new Representation(TEST_USER_ID, false, true, null, null)
+            new RepresentativeInContext(TEST_USER_ID, false, true, null, null)
         );
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -113,7 +113,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
     void givenAsIntervenerSolicitor_whenHandled_thenPopulateCorrectLabel() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            new Representation(TEST_USER_ID, false, false, 1, SOLICITOR)
+            new RepresentativeInContext(TEST_USER_ID, false, false, 1, SOLICITOR)
         );
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -137,11 +137,11 @@ class StopRepresentingClientAboutToStartHandlerTest {
     @Test
     void givenIntervenerBarristerWithCorrespondingIntvSol_whenHandled_thenPopulateCorrectLabel() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
-        Representation representation = null;
+        RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representation = new Representation(TEST_USER_ID, false, false, 2, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
-        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(true);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -168,11 +168,11 @@ class StopRepresentingClientAboutToStartHandlerTest {
     @Test
     void givenIntervenerBarristerWithoutCorrespondingIntvSol_whenHandled_thenPopulateCorrectLabel() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
-        Representation representation = null;
+        RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representation = new Representation(TEST_USER_ID, false, false, 2, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
-        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(false);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -204,11 +204,11 @@ class StopRepresentingClientAboutToStartHandlerTest {
                 .build())
             .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
             .build();
-        Representation representation = null;
+        RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representation = new Representation(TEST_USER_ID, false, false, 2, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
-        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(false);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -245,11 +245,11 @@ class StopRepresentingClientAboutToStartHandlerTest {
                 .build())
             .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
             .build();
-        Representation representation = null;
+        RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representation = new Representation(TEST_USER_ID, false, false, 1, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 1, BARRISTER)
         );
-        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(false);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -294,11 +294,11 @@ class StopRepresentingClientAboutToStartHandlerTest {
                 .intervenerOrganisation(organisationPolicy(TEST_ORG_ID))
                 .build())
             .build();
-        Representation representation = null;
+        RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representation = new Representation(TEST_USER_ID, false, false, 2, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
-        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(false);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -340,11 +340,11 @@ class StopRepresentingClientAboutToStartHandlerTest {
                 .organisation(organisation(TEST_ORG_ID))
                 .build())
             .build();
-        Representation representation = null;
+        RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representation = new Representation(TEST_USER_ID, false, false, 2, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
-        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(true);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -382,11 +382,11 @@ class StopRepresentingClientAboutToStartHandlerTest {
                 .organisation(organisation(TEST_ORG_ID))
                 .build())
             .build();
-        Representation representation = null;
+        RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representation = new Representation(TEST_USER_ID, false, false, 2, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
-        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representation))
+        when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(true);
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -416,7 +416,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
     void givenAsCaseworker_whenHandled_thenExceptionIsThrown() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            new Representation(TEST_USER_ID, false, false, null, null)
+            new RepresentativeInContext(TEST_USER_ID, false, false, null, null)
         );
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),

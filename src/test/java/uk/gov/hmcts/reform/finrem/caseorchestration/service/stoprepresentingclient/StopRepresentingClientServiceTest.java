@@ -437,14 +437,14 @@ class StopRepresentingClientServiceTest {
 
             when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TestConstants.TEST_USER_ID);
 
-            Representation representation = underTest.buildRepresentation(caseData, AUTH_TOKEN);
-            assertThat(representation.userId()).isEqualTo(TestConstants.TEST_USER_ID);
-            assertThat(representation.isRepresentingApplicant()).isTrue();
-            assertThat(representation.isRepresentingRespondent()).isFalse();
-            assertThat(representation.intervenerIndex()).isNull();
-            assertThat(representation.intervenerRole()).isNull();
-            assertThat(representation.isRepresentingAnyInterveners()).isFalse();
-            assertThat(representation.isRepresentingAnyIntervenerBarristers()).isFalse();
+            RepresentativeInContext representativeInContext = underTest.buildRepresentation(caseData, AUTH_TOKEN);
+            assertThat(representativeInContext.userId()).isEqualTo(TestConstants.TEST_USER_ID);
+            assertThat(representativeInContext.isApplicationRepresentative()).isTrue();
+            assertThat(representativeInContext.isRespondentRepresentative()).isFalse();
+            assertThat(representativeInContext.intervenerIndex()).isNull();
+            assertThat(representativeInContext.intervenerRole()).isNull();
+            assertThat(representativeInContext.isIntervenerRepresentative()).isFalse();
+            assertThat(representativeInContext.isIntervenerBarrister()).isFalse();
         }
 
         @Test
@@ -460,14 +460,14 @@ class StopRepresentingClientServiceTest {
 
             when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TestConstants.TEST_USER_ID);
 
-            Representation representation = underTest.buildRepresentation(caseData, AUTH_TOKEN);
-            assertThat(representation.userId()).isEqualTo(TestConstants.TEST_USER_ID);
-            assertThat(representation.isRepresentingApplicant()).isFalse();
-            assertThat(representation.isRepresentingRespondent()).isTrue();
-            assertThat(representation.intervenerIndex()).isNull();
-            assertThat(representation.intervenerRole()).isNull();
-            assertThat(representation.isRepresentingAnyInterveners()).isFalse();
-            assertThat(representation.isRepresentingAnyIntervenerBarristers()).isFalse();
+            RepresentativeInContext representativeInContext = underTest.buildRepresentation(caseData, AUTH_TOKEN);
+            assertThat(representativeInContext.userId()).isEqualTo(TestConstants.TEST_USER_ID);
+            assertThat(representativeInContext.isApplicationRepresentative()).isFalse();
+            assertThat(representativeInContext.isRespondentRepresentative()).isTrue();
+            assertThat(representativeInContext.intervenerIndex()).isNull();
+            assertThat(representativeInContext.intervenerRole()).isNull();
+            assertThat(representativeInContext.isIntervenerRepresentative()).isFalse();
+            assertThat(representativeInContext.isIntervenerBarrister()).isFalse();
         }
 
         @Test
@@ -485,14 +485,14 @@ class StopRepresentingClientServiceTest {
             when(caseRoleService.getIntervenerIndex(caseData, AUTH_TOKEN)).thenReturn(Optional.of(1));
             when(caseRoleService.getIntervenerSolicitorIndex(caseData, AUTH_TOKEN)).thenReturn(Optional.empty());
 
-            Representation representation = underTest.buildRepresentation(caseData, AUTH_TOKEN);
-            assertThat(representation.userId()).isEqualTo(TestConstants.TEST_USER_ID);
-            assertThat(representation.isRepresentingApplicant()).isFalse();
-            assertThat(representation.isRepresentingRespondent()).isFalse();
-            assertThat(representation.intervenerIndex()).isEqualTo(1);
-            assertThat(representation.intervenerRole()).isEqualTo(BARRISTER);
-            assertThat(representation.isRepresentingAnyInterveners()).isTrue();
-            assertThat(representation.isRepresentingAnyIntervenerBarristers()).isTrue();
+            RepresentativeInContext representativeInContext = underTest.buildRepresentation(caseData, AUTH_TOKEN);
+            assertThat(representativeInContext.userId()).isEqualTo(TestConstants.TEST_USER_ID);
+            assertThat(representativeInContext.isApplicationRepresentative()).isFalse();
+            assertThat(representativeInContext.isRespondentRepresentative()).isFalse();
+            assertThat(representativeInContext.intervenerIndex()).isEqualTo(1);
+            assertThat(representativeInContext.intervenerRole()).isEqualTo(BARRISTER);
+            assertThat(representativeInContext.isIntervenerRepresentative()).isTrue();
+            assertThat(representativeInContext.isIntervenerBarrister()).isTrue();
         }
 
         @Test
@@ -510,14 +510,14 @@ class StopRepresentingClientServiceTest {
             when(caseRoleService.getIntervenerIndex(caseData, AUTH_TOKEN)).thenReturn(Optional.of(2));
             when(caseRoleService.getIntervenerSolicitorIndex(caseData, AUTH_TOKEN)).thenReturn(Optional.of(2));
 
-            Representation representation = underTest.buildRepresentation(caseData, AUTH_TOKEN);
-            assertThat(representation.userId()).isEqualTo(TestConstants.TEST_USER_ID);
-            assertThat(representation.isRepresentingApplicant()).isFalse();
-            assertThat(representation.isRepresentingRespondent()).isFalse();
-            assertThat(representation.intervenerIndex()).isEqualTo(2);
-            assertThat(representation.intervenerRole()).isEqualTo(SOLICITOR);
-            assertThat(representation.isRepresentingAnyInterveners()).isTrue();
-            assertThat(representation.isRepresentingAnyIntervenerBarristers()).isFalse();
+            RepresentativeInContext representativeInContext = underTest.buildRepresentation(caseData, AUTH_TOKEN);
+            assertThat(representativeInContext.userId()).isEqualTo(TestConstants.TEST_USER_ID);
+            assertThat(representativeInContext.isApplicationRepresentative()).isFalse();
+            assertThat(representativeInContext.isRespondentRepresentative()).isFalse();
+            assertThat(representativeInContext.intervenerIndex()).isEqualTo(2);
+            assertThat(representativeInContext.intervenerRole()).isEqualTo(SOLICITOR);
+            assertThat(representativeInContext.isIntervenerRepresentative()).isTrue();
+            assertThat(representativeInContext.isIntervenerBarrister()).isFalse();
         }
     }
 
@@ -526,18 +526,18 @@ class StopRepresentingClientServiceTest {
 
         @Test
         void givenIntvSolicitorRepresented_whenCalled_thenReturnFalse() {
-            Representation representation = mock(Representation.class);
-            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(false);
+            RepresentativeInContext representativeInContext = mock(RepresentativeInContext.class);
+            when(representativeInContext.isIntervenerBarrister()).thenReturn(false);
 
-            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(mock(FinremCaseData.class), representation));
+            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(mock(FinremCaseData.class), representativeInContext));
         }
 
         @Test
         void givenIntvOneBarristerRepresented_whenIntvOneSolOrganisationIsTheSame_thenReturnTrue() {
-            Representation representation = mock(Representation.class);
-            when(representation.userId()).thenReturn(TEST_USER_ID);
-            when(representation.intervenerIndex()).thenReturn(1);
-            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
+            RepresentativeInContext representativeInContext = mock(RepresentativeInContext.class);
+            when(representativeInContext.userId()).thenReturn(TEST_USER_ID);
+            when(representativeInContext.intervenerIndex()).thenReturn(1);
+            when(representativeInContext.isIntervenerBarrister()).thenReturn(true);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerOne(IntervenerOne.builder()
@@ -553,15 +553,15 @@ class StopRepresentingClientServiceTest {
                     .build())
                 .build();
 
-            assertTrue(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
+            assertTrue(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representativeInContext));
         }
 
         @Test
         void givenIntvOneBarristerRepresented_whenIntvOneSolOrganisationIsNotTheSame_thenReturnFalse() {
-            Representation representation = mock(Representation.class);
-            when(representation.userId()).thenReturn(TEST_USER_ID);
-            when(representation.intervenerIndex()).thenReturn(1);
-            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
+            RepresentativeInContext representativeInContext = mock(RepresentativeInContext.class);
+            when(representativeInContext.userId()).thenReturn(TEST_USER_ID);
+            when(representativeInContext.intervenerIndex()).thenReturn(1);
+            when(representativeInContext.isIntervenerBarrister()).thenReturn(true);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerOne(IntervenerOne.builder()
@@ -577,15 +577,15 @@ class StopRepresentingClientServiceTest {
                     .build())
                 .build();
 
-            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
+            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representativeInContext));
         }
 
         @Test
         void givenIntvOneBarristerRepresented_whenIntvOneSolOrganisationIsMissing_thenReturnFalse() {
-            Representation representation = mock(Representation.class);
-            when(representation.userId()).thenReturn(TEST_USER_ID);
-            when(representation.intervenerIndex()).thenReturn(1);
-            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
+            RepresentativeInContext representativeInContext = mock(RepresentativeInContext.class);
+            when(representativeInContext.userId()).thenReturn(TEST_USER_ID);
+            when(representativeInContext.intervenerIndex()).thenReturn(1);
+            when(representativeInContext.isIntervenerBarrister()).thenReturn(true);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerOne(IntervenerOne.builder()
@@ -599,15 +599,15 @@ class StopRepresentingClientServiceTest {
                     .build())
                 .build();
 
-            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
+            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representativeInContext));
         }
 
         @Test
         void givenIntvFourBarristerRepresented_whenIntvFourSolOrganisationIsTheSame_thenReturnTrue() {
-            Representation representation = mock(Representation.class);
-            when(representation.userId()).thenReturn(TEST_USER_ID);
-            when(representation.intervenerIndex()).thenReturn(4);
-            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
+            RepresentativeInContext representativeInContext = mock(RepresentativeInContext.class);
+            when(representativeInContext.userId()).thenReturn(TEST_USER_ID);
+            when(representativeInContext.intervenerIndex()).thenReturn(4);
+            when(representativeInContext.isIntervenerBarrister()).thenReturn(true);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerFour(IntervenerFour.builder()
@@ -623,15 +623,15 @@ class StopRepresentingClientServiceTest {
                     .build())
                 .build();
 
-            assertTrue(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
+            assertTrue(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representativeInContext));
         }
 
         @Test
         void givenIntvFourBarristerRepresented_whenIntvFourSolOrganisationIsNotTheSame_thenReturnFalse() {
-            Representation representation = mock(Representation.class);
-            when(representation.userId()).thenReturn(TEST_USER_ID);
-            when(representation.intervenerIndex()).thenReturn(4);
-            when(representation.isRepresentingAnyIntervenerBarristers()).thenReturn(true);
+            RepresentativeInContext representativeInContext = mock(RepresentativeInContext.class);
+            when(representativeInContext.userId()).thenReturn(TEST_USER_ID);
+            when(representativeInContext.intervenerIndex()).thenReturn(4);
+            when(representativeInContext.isIntervenerBarrister()).thenReturn(true);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerFour(IntervenerFour.builder()
@@ -647,7 +647,7 @@ class StopRepresentingClientServiceTest {
                     .build())
                 .build();
 
-            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation));
+            assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representativeInContext));
         }
     }
 

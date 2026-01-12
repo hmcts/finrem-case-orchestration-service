@@ -27,7 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.Representation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.RepresentativeInContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 
 import java.util.Arrays;
@@ -62,30 +62,30 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     private final StopRepresentingClientService stopRepresentingClientService;
 
     record StopRepresentingRequest(long caseId, FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
-                                   Representation representation) {}
+                                   RepresentativeInContext representativeInContext) {}
 
     private static final String WARNING_MESSAGE =
         "Are you sure you wish to stop representing your client? "
             + "If you continue your access to this access will be removed";
 
     private static boolean isRepresentingApplicant(StopRepresentingRequest request) {
-        return request.representation.isRepresentingApplicant();
+        return request.representativeInContext.isApplicationRepresentative();
     }
 
     private static boolean isRepresentingRespondent(StopRepresentingRequest request) {
-        return request.representation.isRepresentingRespondent();
+        return request.representativeInContext.isRespondentRepresentative();
     }
 
     private static boolean isRepresentingAnyInterveners(StopRepresentingRequest request) {
-        return request.representation.isRepresentingAnyInterveners();
+        return request.representativeInContext.isIntervenerRepresentative();
     }
 
     private static boolean isRepresentingAnyIntervenerBarristers(StopRepresentingRequest request) {
-        return request.representation.isRepresentingAnyIntervenerBarristers();
+        return request.representativeInContext.isIntervenerBarrister();
     }
 
     private static String getUserId(StopRepresentingRequest request) {
-        return request.representation.userId();
+        return request.representativeInContext.userId();
     }
 
     public StopRepresentingClientAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -143,7 +143,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private int getIntervenerIndex(StopRepresentingRequest request) {
-        return of(request.representation.intervenerIndex()).orElseThrow(()
+        return of(request.representativeInContext.intervenerIndex()).orElseThrow(()
             -> new IllegalStateException(format("%s - expecting intervener index exists", request.caseId)));
     }
 

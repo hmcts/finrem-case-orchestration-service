@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.Representation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.RepresentativeInContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 
 import java.lang.reflect.InvocationTargetException;
@@ -81,31 +81,31 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        Representation representation = stopRepresentingClientService.buildRepresentation(caseData, userAuthorisation);
-        prepareStopRepresentationWrapper(caseData, representation);
-        prepareExtraClientAddresses(caseData, representation);
+        RepresentativeInContext representativeInContext = stopRepresentingClientService.buildRepresentation(caseData, userAuthorisation);
+        prepareStopRepresentationWrapper(caseData, representativeInContext);
+        prepareExtraClientAddresses(caseData, representativeInContext);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private void prepareStopRepresentationWrapper(FinremCaseData caseData, Representation representation) {
+    private void prepareStopRepresentationWrapper(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
         StopRepresentationWrapper wrapper = caseData.getStopRepresentationWrapper();
 
         boolean showClientAddressForService = true;
         String label = null;
         String confidentialLabel = null;
-        if (representation.isRepresentingApplicant()) {
+        if (representativeInContext.isApplicationRepresentative()) {
             label = getApplicantClientAddressLabels()[0];
             confidentialLabel = getApplicantClientAddressLabels()[1];
-        } else if (representation.isRepresentingRespondent()) {
+        } else if (representativeInContext.isRespondentRepresentative()) {
             label = getRespondentClientAddressLabels()[0];
             confidentialLabel = getRespondentClientAddressLabels()[1];
-        } else if (representation.isRepresentingAnyInterveners()) {
-            if (representation.isRepresentingAnyIntervenerBarristers()
-                && !stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representation)) {
+        } else if (representativeInContext.isIntervenerRepresentative()) {
+            if (representativeInContext.isIntervenerBarrister()
+                && !stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representativeInContext)) {
                 showClientAddressForService  = false;
             } else {
-                int index = representation.intervenerIndex();
+                int index = representativeInContext.intervenerIndex();
 
                 label = getIntervenerClientAddressLabels(index)[0];
                 confidentialLabel = getIntervenerClientAddressLabels(index)[1];
@@ -120,107 +120,107 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
         wrapper.setShowClientAddressForService(YesOrNo.forValue(showClientAddressForService));
     }
 
-    private void prepareExtraClientAddresses(FinremCaseData caseData, Representation representation) {
+    private void prepareExtraClientAddresses(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
         int extraFieldIndex = 1;
-        if (shouldCaptureApplicantServiceAddressInExtra(caseData, representation)) {
+        if (shouldCaptureApplicantServiceAddressInExtra(caseData, representativeInContext)) {
             setExtraField(caseData, extraFieldIndex++, ExtraAddrType.APPLICANT.getId(), getApplicantClientAddressLabels()[0],
                 getApplicantClientAddressLabels()[1]);
-        } else if (shouldCaptureRespondentServiceAddressInExtra(caseData, representation)) {
+        } else if (shouldCaptureRespondentServiceAddressInExtra(caseData, representativeInContext)) {
             setExtraField(caseData, extraFieldIndex++, ExtraAddrType.RESPONDENT.getId(), getRespondentClientAddressLabels()[0],
                 getRespondentClientAddressLabels()[1]);
         }
-        if (shouldCaptureIntervenerOneServiceAddressInExtraField(caseData, representation)) {
+        if (shouldCaptureIntervenerOneServiceAddressInExtraField(caseData, representativeInContext)) {
             setExtraField(caseData, extraFieldIndex++, ExtraAddrType.INTERVENER1.getId(), getIntervenerClientAddressLabels(1)[0],
                 getIntervenerClientAddressLabels(1)[1]);
         }
-        if (shouldCaptureIntervenerTwoServiceAddressInExtraField(caseData, representation)) {
+        if (shouldCaptureIntervenerTwoServiceAddressInExtraField(caseData, representativeInContext)) {
             setExtraField(caseData, extraFieldIndex++, ExtraAddrType.INTERVENER2.getId(), getIntervenerClientAddressLabels(2)[0],
                 getIntervenerClientAddressLabels(2)[1]);
         }
-        if (shouldCaptureIntervenerThreeServiceAddressInExtraField(caseData, representation)) {
+        if (shouldCaptureIntervenerThreeServiceAddressInExtraField(caseData, representativeInContext)) {
             setExtraField(caseData, extraFieldIndex++, ExtraAddrType.INTERVENER3.getId(), getIntervenerClientAddressLabels(3)[0],
                 getIntervenerClientAddressLabels(3)[1]);
         }
-        if (shouldCaptureIntervenerFourServiceAddressInExtraField(caseData, representation)) {
+        if (shouldCaptureIntervenerFourServiceAddressInExtraField(caseData, representativeInContext)) {
             setExtraField(caseData, extraFieldIndex, ExtraAddrType.INTERVENER4.getId(), getIntervenerClientAddressLabels(4)[0],
                 getIntervenerClientAddressLabels(4)[1]);
         }
     }
 
-    private OrganisationPolicy getCurrentUserOrganisationPolicy(FinremCaseData caseData, Representation representation) {
-        if (representation.isRepresentingApplicant()) {
+    private OrganisationPolicy getCurrentUserOrganisationPolicy(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+        if (representativeInContext.isApplicationRepresentative()) {
             return caseData.getApplicantOrganisationPolicy();
         }
-        if (representation.isRepresentingRespondent()) {
+        if (representativeInContext.isRespondentRepresentative()) {
             return caseData.getRespondentOrganisationPolicy();
         }
-        if (representation.isRepresentingAnyInterveners() && !representation.isRepresentingAnyIntervenerBarristers()) {
-            return getIntervener(caseData, representation).getIntervenerOrganisation();
+        if (representativeInContext.isIntervenerRepresentative() && !representativeInContext.isIntervenerBarrister()) {
+            return getIntervener(caseData, representativeInContext).getIntervenerOrganisation();
         }
-        return OrganisationPolicy.builder().organisation(getIntervenerBarrister(caseData, representation).getOrganisation())
+        return OrganisationPolicy.builder().organisation(getIntervenerBarrister(caseData, representativeInContext).getOrganisation())
             .build();
     }
 
-    private boolean shouldCaptureIntervenerOneServiceAddressInExtraField(FinremCaseData caseData, Representation representation) {
-        if (Integer.valueOf(1).equals(representation.intervenerIndex())) {
+    private boolean shouldCaptureIntervenerOneServiceAddressInExtraField(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+        if (Integer.valueOf(1).equals(representativeInContext.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 1),
-            getCurrentUserOrganisationPolicy(caseData, representation));
+            getCurrentUserOrganisationPolicy(caseData, representativeInContext));
     }
 
-    private boolean shouldCaptureIntervenerTwoServiceAddressInExtraField(FinremCaseData caseData, Representation representation) {
-        if (Integer.valueOf(2).equals(representation.intervenerIndex())) {
+    private boolean shouldCaptureIntervenerTwoServiceAddressInExtraField(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+        if (Integer.valueOf(2).equals(representativeInContext.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 2),
-            getCurrentUserOrganisationPolicy(caseData, representation));
+            getCurrentUserOrganisationPolicy(caseData, representativeInContext));
     }
 
-    private boolean shouldCaptureIntervenerThreeServiceAddressInExtraField(FinremCaseData caseData, Representation representation) {
-        if (Integer.valueOf(3).equals(representation.intervenerIndex())) {
+    private boolean shouldCaptureIntervenerThreeServiceAddressInExtraField(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+        if (Integer.valueOf(3).equals(representativeInContext.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 3),
-            getCurrentUserOrganisationPolicy(caseData, representation));
+            getCurrentUserOrganisationPolicy(caseData, representativeInContext));
     }
 
-    private boolean shouldCaptureIntervenerFourServiceAddressInExtraField(FinremCaseData caseData, Representation representation) {
-        if (Integer.valueOf(4).equals(representation.intervenerIndex())) {
+    private boolean shouldCaptureIntervenerFourServiceAddressInExtraField(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+        if (Integer.valueOf(4).equals(representativeInContext.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 4),
-            getCurrentUserOrganisationPolicy(caseData, representation));
+            getCurrentUserOrganisationPolicy(caseData, representativeInContext));
     }
 
-    private boolean shouldCaptureApplicantServiceAddressInExtra(FinremCaseData caseData, Representation representation) {
-        if (!representation.isRepresentingAnyInterveners()) {
+    private boolean shouldCaptureApplicantServiceAddressInExtra(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+        if (!representativeInContext.isIntervenerRepresentative()) {
             return false;
         }
 
         OrganisationPolicy applicantOrg = caseData.getApplicantOrganisationPolicy();
-        return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, representation), applicantOrg);
+        return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, representativeInContext), applicantOrg);
     }
 
-    private boolean shouldCaptureRespondentServiceAddressInExtra(FinremCaseData caseData, Representation representation) {
-        if (!representation.isRepresentingAnyInterveners()) {
+    private boolean shouldCaptureRespondentServiceAddressInExtra(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+        if (!representativeInContext.isIntervenerRepresentative()) {
             return false;
         }
 
         OrganisationPolicy respondentOrg = caseData.getRespondentOrganisationPolicy();
-        return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, representation), respondentOrg);
+        return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, representativeInContext), respondentOrg);
     }
 
     private OrganisationPolicy resolveIntervenerOrganisationPolicy(FinremCaseData caseData,
-                                                                   Representation representation) {
-        if (representation.isRepresentingAnyIntervenerBarristers()) {
-            Organisation organisation = getIntervenerBarrister(caseData, representation).getOrganisation();
+                                                                   RepresentativeInContext representativeInContext) {
+        if (representativeInContext.isIntervenerBarrister()) {
+            Organisation organisation = getIntervenerBarrister(caseData, representativeInContext).getOrganisation();
             return organisation != null
                 ? OrganisationPolicy.builder().organisation(organisation).build()
                 : null;
         }
 
-        return getIntervener(caseData, representation).getIntervenerOrganisation();
+        return getIntervener(caseData, representativeInContext).getIntervenerOrganisation();
     }
 
     private OrganisationPolicy resolveIntervenerOrganisationPolicy(FinremCaseData caseData,
@@ -228,8 +228,8 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
         return getIntervener(caseData, intervenerIndex).getIntervenerOrganisation();
     }
 
-    private IntervenerWrapper getIntervener(FinremCaseData caseData, Representation representation) {
-        return caseData.getInterveners().get(representation.intervenerIndex() - 1);
+    private IntervenerWrapper getIntervener(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+        return caseData.getInterveners().get(representativeInContext.intervenerIndex() - 1);
     }
 
     private IntervenerWrapper getIntervener(FinremCaseData caseData, int index) {
@@ -244,11 +244,11 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
                 .map(OrganisationPolicy::getOrganisation).orElse(null));
     }
 
-    private Barrister getIntervenerBarrister(FinremCaseData caseData, Representation representation) {
-        int index = representation.intervenerIndex();
+    private Barrister getIntervenerBarrister(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+        int index = representativeInContext.intervenerIndex();
         List<BarristerCollectionItem> items = caseData.getBarristerCollectionWrapper().getIntervenerBarristersByIndex(index);
         return emptyIfNull(items).stream().map(BarristerCollectionItem::getValue)
-            .filter(b -> representation.userId().equals(b.getUserId()))
+            .filter(b -> representativeInContext.userId().equals(b.getUserId()))
             .findFirst()
             .orElse(Barrister.builder().build());
     }

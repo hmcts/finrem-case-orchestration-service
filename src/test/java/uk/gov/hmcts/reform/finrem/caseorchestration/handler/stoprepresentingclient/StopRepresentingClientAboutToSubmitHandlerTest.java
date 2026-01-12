@@ -35,7 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.Barrister
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.IntervenerRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.Representation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.RepresentativeInContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
@@ -631,7 +631,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         private void stubIsRepresentingApplicantOrRespondent(boolean isApplicantRepresentative) {
             when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
-                new Representation(TEST_USER_ID, isApplicantRepresentative, !isApplicantRepresentative, null, null)
+                new RepresentativeInContext(TEST_USER_ID, isApplicantRepresentative, !isApplicantRepresentative, null, null)
             );
         }
     }
@@ -869,13 +869,13 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         boolean isRepresentingRespondent = intervenerIndex == null && !isApplicantRepresentative;
 
         when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
-            new Representation(TEST_USER_ID, isRepresentingApplicant, isRepresentingRespondent, intervenerIndex, intervenerRole)
+            new RepresentativeInContext(TEST_USER_ID, isRepresentingApplicant, isRepresentingRespondent, intervenerIndex, intervenerRole)
         );
     }
 
     private void stubIsRepresentingIntervener(int index, IntervenerRole intervenerRole) {
         when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
-            new Representation(TEST_USER_ID, false, false, index, intervenerRole)
+            new RepresentativeInContext(TEST_USER_ID, false, false, index, intervenerRole)
         );
     }
 

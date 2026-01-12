@@ -1,18 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient;
 
-public record Representation(
+public record RepresentativeInContext(
     String userId,
-    boolean isRepresentingApplicant,
-    boolean isRepresentingRespondent,
+    boolean isApplicationRepresentative,
+    boolean isRespondentRepresentative,
     Integer intervenerIndex,          // null if not an intervener
     IntervenerRole intervenerRole     // null if not an intervener
 ) {
 
-    public boolean isRepresentingAnyInterveners() {
+    public boolean isIntervenerRepresentative() {
         return intervenerIndex != null;
     }
 
-    public boolean isRepresentingAnyIntervenerBarristers() {
+    public boolean isIntervenerBarrister() {
         return intervenerRole == IntervenerRole.BARRISTER;
     }
 }
