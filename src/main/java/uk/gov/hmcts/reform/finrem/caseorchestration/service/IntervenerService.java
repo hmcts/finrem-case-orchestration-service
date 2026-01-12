@@ -4,10 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
@@ -16,6 +22,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerC
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +36,36 @@ public class IntervenerService {
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
     private final SystemUserService systemUserService;
+    private final ChangeOfRepresentationService changeOfRepresentationService;
+    private final IdamService idamService;
+
+    /**
+     * Revokes an intervener solicitor role for the given case.
+     *
+     * <p>
+     * The role is revoked only if both the intervener organisation ID and
+     * solicitor email address are present and not blank.
+     * If either value is missing or empty, the method returns without
+     * performing any action.
+     *
+     * @param caseId            the CCD case ID
+     * @param intervenerWrapper the intervener details containing organisation,
+     *                          solicitor email, and case role information
+     */
+    public void revokeIntervener(long caseId, IntervenerWrapper intervenerWrapper) {
+        String orgId = Optional.ofNullable(intervenerWrapper.getIntervenerOrganisation())
+            .map(OrganisationPolicy::getOrganisation)
+            .map(Organisation::getOrganisationID)
+            .orElse(null);
+
+        String email = intervenerWrapper.getIntervenerSolEmail();
+
+        if (!StringUtils.hasText(orgId) || !StringUtils.hasText(email)) {
+            return;
+        }
+
+        revokeIntervenerRole(caseId, email, orgId, intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode());
+    }
 
     public IntervenerChangeDetails removeIntervenerDetails(IntervenerWrapper intervenerWrapper,
                                                            List<String> errors,
@@ -178,6 +219,54 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
+    /**
+     * Updates the representation update history when an intervener solicitor
+     * stops representing a client.
+     *
+     * <p>If the intervener in the original case data has an associated organisation,
+     * a STOP_REPRESENTING_CLIENT entry is generated and appended to the existing
+     * representation update history in the current case data.</p>
+     *
+     * <p>This method modifies the provided {@link FinremCaseData} instance by
+     * adding a new history record.</p>
+     *
+     * @param finremCaseData the current case data to be updated
+     * @param originalFinremCaseData the original case data used to determine the existing intervener details
+     * @param intervenerIndex the 1-based index of the intervener
+     * @param userAuthorisation the user authorisation used to identify who triggered the update
+     */
+    public void updateIntervenerSolicitorStopRepresentingHistory(FinremCaseData finremCaseData,
+                                                                 FinremCaseData originalFinremCaseData,
+                                                                 int intervenerIndex, String userAuthorisation) {
+        IntervenerWrapper originalIntervener = originalFinremCaseData.getInterveners().get(intervenerIndex - 1);
+        if (originalIntervener.getIntervenerOrganisation() != null) {
+            // modifying finremCaseData reference object
+            RepresentationUpdateHistory history = changeOfRepresentationService.generateRepresentationUpdateHistory(
+                ChangeOfRepresentationRequest.builder()
+                    .by(idamService.getIdamFullName(userAuthorisation))
+                    .party(ChangeOfRepresentationRequest.getIntervenerPartyByIndex(intervenerIndex))
+                    .removedRepresentative(ChangedRepresentative.builder()
+                        .name(originalIntervener.getIntervenerSolName())
+                        .email(originalIntervener.getIntervenerSolEmail())
+                        .organisation(originalIntervener.getIntervenerOrganisation().getOrganisation())
+                        .build())
+                    .build(), STOP_REPRESENTING_CLIENT);
+
+            // modifying finremCaseData reference object
+            finremCaseData.setRepresentationUpdateHistory(Stream.concat(
+                    // existing
+                    emptyIfNull(finremCaseData.getRepresentationUpdateHistory()).stream(),
+                    // new
+                    emptyIfNull(history.getRepresentationUpdateHistory()).stream()
+                        .map(element -> RepresentationUpdateHistoryCollection.builder()
+                            .id(element.getId())
+                            .value(element.getValue())
+                            .build())
+                ).collect(Collectors.toList())
+            );
+        }
+    }
+
     private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
         Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         if (userId.isPresent()) {
@@ -185,6 +274,10 @@ public class IntervenerService {
         } else {
             logError(caseId, errors);
         }
+    }
+
+    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole) {
+        revokeIntervenerRole(caseId, email, orgId, caseRole, null);
     }
 
     private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
@@ -199,6 +292,8 @@ public class IntervenerService {
     private void logError(Long caseId, List<String> errors) {
         String error = "Could not find intervener with provided email";
         log.info(String.format(error + " for caseId %s", caseId));
-        errors.add(error);
+        if (errors != null) {
+            errors.add(error);
+        }
     }
 }
