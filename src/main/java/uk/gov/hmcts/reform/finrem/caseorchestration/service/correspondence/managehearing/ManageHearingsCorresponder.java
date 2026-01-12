@@ -63,7 +63,14 @@ public class ManageHearingsCorresponder {
             .ifPresent(documentsToPost::add);
         documentsToPost.addAll(wrapper.getAssociatedWorkingHearingDocuments());
 
-        publishEvent(finremCaseDetails, hearing, ManageHearingsAction.ADD_HEARING, userAuthorisation, documentsToPost, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
+        publishEvent(
+            finremCaseDetails,
+            hearing,
+            ManageHearingsAction.ADD_HEARING,
+            userAuthorisation,
+            documentsToPost,
+            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
+        );
     }
 
     /**
@@ -95,7 +102,13 @@ public class ManageHearingsCorresponder {
 
         List<CaseDocument> documentsToPost = List.of(hearingCorrespondenceHelper.getVacateHearingNotice(finremCaseDetails));
 
-        publishEvent(finremCaseDetails, vacateOrAdjournedHearing, ManageHearingsAction.VACATE_HEARING, userAuthorisation, documentsToPost, FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR);
+        publishEvent(
+            finremCaseDetails,
+            vacateOrAdjournedHearing,
+            ManageHearingsAction.VACATE_HEARING,
+            userAuthorisation, documentsToPost,
+            FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR
+        );
     }
 
     /**
@@ -159,7 +172,7 @@ public class ManageHearingsCorresponder {
                               ManageHearingsAction action,
                               String userAuthorisation,
                               List<CaseDocument> documentsToPost,
-                              EmailTemplateNames templateName ) {
+                              EmailTemplateNames templateName) {
 
         List<PartyOnCaseCollectionItem> partiesOnCase =
             Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);

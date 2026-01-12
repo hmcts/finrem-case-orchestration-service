@@ -117,7 +117,7 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
 
     @JsonIgnore
     public String getApplicantSolicitorRef() {
-       return data.getContactDetailsWrapper().getSolicitorReference();
+        return data.getContactDetailsWrapper().getSolicitorReference();
     }
 
     @JsonIgnore

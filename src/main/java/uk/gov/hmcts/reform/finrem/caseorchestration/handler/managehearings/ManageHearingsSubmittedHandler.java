@@ -44,7 +44,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         ManageHearingsAction actionSelection = manageHearingsWrapper.getManageHearingsActionSelection();
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
-             manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
+            manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }
 
         if (ManageHearingsAction.VACATE_HEARING.equals(actionSelection)) {

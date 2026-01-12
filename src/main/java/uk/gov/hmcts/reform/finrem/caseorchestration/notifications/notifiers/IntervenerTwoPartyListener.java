@@ -31,7 +31,8 @@ public class IntervenerTwoPartyListener extends AbstractPartyListener {
 
     @Override
     protected boolean isDigitalParty(SendCorrespondenceEvent event) {
-        return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(event.getCaseDetails().getData().getIntervenerTwo(), event.getCaseDetails());
+        return notificationService
+            .isIntervenerSolicitorDigitalAndEmailPopulated(event.getCaseDetails().getData().getIntervenerTwo(), event.getCaseDetails());
     }
 
     @Override

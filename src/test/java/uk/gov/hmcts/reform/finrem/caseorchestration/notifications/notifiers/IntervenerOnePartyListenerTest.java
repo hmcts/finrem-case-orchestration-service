@@ -146,7 +146,8 @@ class IntervenerOnePartyListenerTest {
 
     @Test
     void shouldSendDigitalNotificationWhenPartyIsDigitalViaHandleNotification() {
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(), caseDetails)).thenReturn(true);
+        when(notificationService
+            .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(), caseDetails)).thenReturn(true);
 
         // Set up event with intervenerOne as notification party
         intervenerOnePartyListener.handleNotification(event);
@@ -165,7 +166,8 @@ class IntervenerOnePartyListenerTest {
      */
     @Test
     void shouldSendPaperNotificationWhenPartyIsNotDigitalViaHandleNotification() {
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(), caseDetails)).thenReturn(false);
+        when(notificationService
+            .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(), caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getIntervenerOneCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(anyList()))

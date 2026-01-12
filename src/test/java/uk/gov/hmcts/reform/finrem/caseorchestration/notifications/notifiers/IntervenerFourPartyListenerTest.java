@@ -128,7 +128,8 @@ class IntervenerFourPartyListenerTest {
      */
     @Test
     void shouldReturnTrueWhenPartyOutsideUK() {
-        when(internationalPostalService.isIntervenerResideOutsideOfUK(caseDetails.getData().getIntervenerFour())).thenReturn(true);
+        when(internationalPostalService
+            .isIntervenerResideOutsideOfUK(caseDetails.getData().getIntervenerFour())).thenReturn(true);
         boolean result = intervenerFourPartyListener.isPartyOutsideUK(event);
         assertThat(result).isTrue();
         verify(internationalPostalService).isIntervenerResideOutsideOfUK(caseDetails.getData().getIntervenerFour());
@@ -139,14 +140,16 @@ class IntervenerFourPartyListenerTest {
      */
     @Test
     void shouldReturnFalseWhenPartyNotOutsideUK() {
-        when(internationalPostalService.isIntervenerResideOutsideOfUK(caseDetails.getData().getIntervenerFour())).thenReturn(false);
+        when(internationalPostalService
+            .isIntervenerResideOutsideOfUK(caseDetails.getData().getIntervenerFour())).thenReturn(false);
         boolean result = intervenerFourPartyListener.isPartyOutsideUK(event);
         assertThat(result).isFalse();
     }
 
     @Test
     void shouldSendDigitalNotificationWhenPartyIsDigitalViaHandleNotification() {
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerFour(), caseDetails)).thenReturn(true);
+        when(notificationService
+            .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerFour(), caseDetails)).thenReturn(true);
 
         // Set up event with intervenerFour as notification party
         intervenerFourPartyListener.handleNotification(event);
@@ -165,7 +168,8 @@ class IntervenerFourPartyListenerTest {
      */
     @Test
     void shouldSendPaperNotificationWhenPartyIsNotDigitalViaHandleNotification() {
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerFour(), caseDetails)).thenReturn(false);
+        when(notificationService
+            .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerFour(), caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getIntervenerFourCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(anyList()))

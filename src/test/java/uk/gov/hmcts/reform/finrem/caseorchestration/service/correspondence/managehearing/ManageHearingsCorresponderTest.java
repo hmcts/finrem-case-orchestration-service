@@ -77,9 +77,9 @@ class ManageHearingsCorresponderTest {
     @Test
     void givenHearingSelectedNoNotification_whenSendHearingCorrespondence_thenNoNotificationSent() {
         //Arrange
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
-        Hearing hearing = Hearing.
-            builder().hearingNoticePrompt(YesOrNo.NO)
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
+        Hearing hearing = Hearing.builder().hearingNoticePrompt(YesOrNo.NO)
             .build();
 
         ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
@@ -201,15 +201,19 @@ class ManageHearingsCorresponderTest {
     @Test
     void givenVacatedOrAdjournedHearingSelectedNoNotification_whenSendVacatedOrAdjournedHearingCorrespondence_thenNoNotificationSent() {
         //Arrange
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
-        VacateOrAdjournedHearing vacatedOrAdjournedHearing = VacateOrAdjournedHearing.
-            builder().hearingNoticePrompt(YesOrNo.NO)
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
+        VacateOrAdjournedHearing vacatedOrAdjournedHearing = VacateOrAdjournedHearing
+            .builder().hearingNoticePrompt(YesOrNo.NO)
             .build();
 
-        ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
+        ManageHearingsWrapper manageHearingsWrapper =
+            callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
         manageHearingsWrapper.setWorkingVacatedHearingId(hearingId);
 
-        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(manageHearingsWrapper, hearingId)).thenReturn(vacatedOrAdjournedHearing);
+        when(hearingCorrespondenceHelper
+            .getVacateOrAdjournedHearingInContext(manageHearingsWrapper, hearingId))
+            .thenReturn(vacatedOrAdjournedHearing);
 
         //Act
         corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);

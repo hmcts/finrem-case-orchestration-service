@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum NotificationParty {
-    //TODO: Test if this works for unrecognized roles
     APPLICANT("[APPSOLICITOR]"),
     RESPONDENT("[RESPSOLICITOR]"),
     INTERVENER_ONE("[INTVRSOLICITOR1]"),

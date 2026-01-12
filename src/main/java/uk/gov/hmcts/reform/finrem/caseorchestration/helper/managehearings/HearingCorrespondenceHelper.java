@@ -203,8 +203,8 @@ public class HearingCorrespondenceHelper {
     }
 
     public Optional<CaseDocument> getMiniFormAIfRequired(FinremCaseData caseData, Hearing hearing) {
-        if (FDA.equals(hearing.getHearingType()) ||
-            (FDR.equals(hearing.getHearingType()) && expressCaseService.isExpressCase(caseData))) {
+        if (FDA.equals(hearing.getHearingType())
+            || (FDR.equals(hearing.getHearingType()) && expressCaseService.isExpressCase(caseData))) {
             return Optional.ofNullable(caseData.getMiniFormA());
         } else {
             return Optional.empty();

@@ -111,7 +111,7 @@ class HearingCorrespondenceHelperTest {
     }
 
     @Test
-    void shouldReturnMiniFormAWhenFDAA() {
+    void shouldReturnMiniFormAWhenFda() {
         FinremCaseData caseData = FinremCaseData.builder()
             .miniFormA(mock(CaseDocument.class))
             .build();
@@ -127,7 +127,7 @@ class HearingCorrespondenceHelperTest {
     }
 
     @Test
-    void shouldReturnMiniFormAWhenExpressFDR() {
+    void shouldReturnMiniFormAWhenExpressFdr() {
         FinremCaseData caseData = FinremCaseData.builder()
             .miniFormA(mock(CaseDocument.class))
             .build();

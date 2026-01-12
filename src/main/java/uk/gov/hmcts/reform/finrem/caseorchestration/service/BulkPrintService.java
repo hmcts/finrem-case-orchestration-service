@@ -127,22 +127,26 @@ public class BulkPrintService {
 
     public CaseDocument getIntervenerOneCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         // When bulk print coversheet refactor work takes place, there should be conditional logic to retrieve the existing coversheet.
-        return coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
+        return coverSheetService
+            .generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
     }
 
     public CaseDocument getIntervenerTwoCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         // When bulk print coversheet refactor work takes place, there should be conditional logic to retrieve the existing coversheet.
-        return coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO);
+        return coverSheetService
+            .generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO);
     }
 
     public CaseDocument getIntervenerThreeCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         // When bulk print coversheet refactor work takes place, there should be conditional logic to retrieve the existing coversheet.
-        return coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE);
+        return coverSheetService
+            .generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE);
     }
 
     public CaseDocument getIntervenerFourCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         // When bulk print coversheet refactor work takes place, there should be conditional logic to retrieve the existing coversheet.
-        return coverSheetService.generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR);
+        return coverSheetService
+            .generateIntervenerCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR);
     }
 
     /**

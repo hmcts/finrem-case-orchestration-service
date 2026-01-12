@@ -26,12 +26,12 @@ public abstract class AbstractPartyListener {
     protected final InternationalPostalService internationalPostalService;
 
     /**
-     * Does this listener handle notifications for this party/event?
+     * Should this listener handle notifications for this party/event.
      */
     protected abstract boolean isRelevantParty(SendCorrespondenceEvent event);
 
     /**
-     * Should the notification be sent digitally (by email)?
+     * Should the notification be sent digitally (by email).
      */
     protected abstract boolean isDigitalParty(SendCorrespondenceEvent event);
 
