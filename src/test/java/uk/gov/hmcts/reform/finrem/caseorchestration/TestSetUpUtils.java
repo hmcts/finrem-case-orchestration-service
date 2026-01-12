@@ -14,12 +14,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsExcep
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentType;
@@ -52,6 +56,7 @@ import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -71,7 +76,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.FILE_URL;
 
 public class TestSetUpUtils {
@@ -265,7 +269,7 @@ public class TestSetUpUtils {
 
         return FinremCaseDetails.builder()
             .caseType(CaseType.CONSENTED)
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .state(State.APPLICATION_SUBMITTED)
             .data(caseData)
             .build();
@@ -288,7 +292,7 @@ public class TestSetUpUtils {
 
         return CaseDetails.builder()
             .caseTypeId(CaseType.CONSENTED.getCcdType())
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .data(caseData)
             .build();
     }
@@ -310,7 +314,7 @@ public class TestSetUpUtils {
 
         return CaseDetails.builder()
             .caseTypeId(CaseType.CONTESTED.getCcdType())
-            .id(CASE_ID)
+            .id(CASE_ID_IN_LONG)
             .data(caseData)
             .build();
     }
@@ -544,5 +548,27 @@ public class TestSetUpUtils {
     @SuppressWarnings("unchecked")
     public static <T> Supplier<T> anySupplier() {
         return any(Supplier.class);
+    }
+
+    public static Organisation organisation(String id) {
+        return Organisation.builder()
+            .organisationID(id)
+            .build();
+    }
+
+    public static OrganisationPolicy organisationPolicy(String id) {
+        return OrganisationPolicy.builder()
+            .organisation(organisation(id))
+            .build();
+    }
+
+    public static List<BarristerCollectionItem> barristers(String orgId) {
+        return new ArrayList<>(List.of(
+            BarristerCollectionItem.builder()
+                .value(Barrister.builder()
+                    .organisation(organisation(orgId))
+                    .build())
+                .build()
+        ));
     }
 }

@@ -8,6 +8,7 @@ import org.apache.tika.utils.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -17,8 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.util.Map;
-import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
@@ -31,6 +32,34 @@ public class UpdateRepresentationWorkflowService {
     private final NoticeOfChangeService noticeOfChangeService;
     private final AssignCaseAccessService assignCaseAccessService;
     private final SystemUserService systemUserService;
+
+    /**
+     * Prepares the change of organisation request and updates the related organisation policies.
+     *
+     * <p>
+     * This method updates the party representation history by comparing the current {@code finremCaseData}
+     * with {@code originalFinremCaseData}, using the provided {@code viaEventType} to indicate the event
+     * that triggered the update. It then populates the {@code ChangeOrganisationRequest} field on the case data.
+     * If there are no organisations to add or remove, it sets the default organisation policy and creates
+     * a default change-of-organisation request structure.
+     *
+     * <p>All modifications are applied directly to the provided {@code finremCaseData} object.</p>
+     *
+     * @param finremCaseData          the case data to be updated with the latest representation details
+     * @param originalFinremCaseData  the original case data used to detect representation changes
+     * @param viaEventType            the event type that triggered this update
+     * @param userAuthorisation       the authorisation token of the user performing the action
+     */
+    public void prepareNoticeOfChangeAndOrganisationPolicy(FinremCaseData finremCaseData,  FinremCaseData originalFinremCaseData,
+                                                           EventType viaEventType, String userAuthorisation) {
+        noticeOfChangeService.updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, viaEventType, userAuthorisation);
+        noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
+
+        if (safeChangeOrganisationRequest(finremCaseData).isNoOrganisationsToAddOrRemove()) {
+            persistDefaultOrganisationPolicy(finremCaseData);
+            setDefaultChangeOrganisationRequest(finremCaseData);
+        }
+    }
 
     public AboutToStartOrSubmitCallbackResponse handleNoticeOfChangeWorkflow(CaseDetails caseDetails,
                                                                              String authorisationToken,
@@ -62,7 +91,7 @@ public class UpdateRepresentationWorkflowService {
     private boolean isNoOrganisationsToAddOrRemove(CaseDetails caseDetails) {
         ChangeOrganisationRequest changeRequest = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
-        return isOrganisationsEmpty(changeRequest);
+        return changeRequest.isNoOrganisationsToAddOrRemove();
     }
 
     private void setDefaultChangeOrganisationRequest(CaseDetails caseDetails) {
@@ -79,14 +108,17 @@ public class UpdateRepresentationWorkflowService {
         caseDetails.getData().put(CHANGE_ORGANISATION_REQUEST, defaultRequest);
     }
 
-    private boolean isOrganisationsEmpty(ChangeOrganisationRequest changeRequest) {
-        boolean addedIsEmpty = Optional.ofNullable(changeRequest.getOrganisationToAdd()).isEmpty()
-            || Optional.ofNullable(changeRequest.getOrganisationToAdd().getOrganisationID()).isEmpty();
-
-        boolean removedIsEmpty = Optional.ofNullable(changeRequest.getOrganisationToRemove()).isEmpty()
-            || Optional.ofNullable(changeRequest.getOrganisationToRemove().getOrganisationID()).isEmpty();
-
-        return addedIsEmpty && removedIsEmpty;
+    private void setDefaultChangeOrganisationRequest(FinremCaseData finremCaseData) {
+        ChangeOrganisationRequest defaultRequest = ChangeOrganisationRequest.builder()
+            .requestTimestamp(null)
+            .organisationToAdd(null)
+            .organisationToRemove(null)
+            .approvalRejectionTimestamp(null)
+            .approvalStatus(null)
+            .caseRoleId(null)
+            .reason(null)
+            .build();
+        finremCaseData.setChangeOrganisationRequestField(defaultRequest);
     }
 
     public void persistDefaultOrganisationPolicy(CaseDetails caseDetails) {
@@ -135,5 +167,10 @@ public class UpdateRepresentationWorkflowService {
             .orgPolicyReference(null)
             .orgPolicyCaseAssignedRole(role.getCcdCode())
             .build();
+    }
+
+    private ChangeOrganisationRequest safeChangeOrganisationRequest(FinremCaseData data) {
+        return ofNullable(data.getChangeOrganisationRequestField())
+            .orElseGet(() -> ChangeOrganisationRequest.builder().build());
     }
 }

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.utils.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -81,7 +82,7 @@ public class AddedSolicitorService {
         }
 
         return getChangedRepresentative(finremCaseData, isApplicant,
-            Optional.of(isApplicant ? finremCaseData.getApplicantOrganisationPolicy()
+            Optional.ofNullable(isApplicant ? finremCaseData.getApplicantOrganisationPolicy()
                 : finremCaseData.getRespondentOrganisationPolicy()));
     }
 
@@ -98,7 +99,8 @@ public class AddedSolicitorService {
 
         return organisationPolicy
             .map(OrganisationPolicy::getOrganisation)
-            .map(organisation -> getAddedSolicitor(finremCaseData, isApplicant, organisation))
+            .map(organisation -> StringUtils.isEmpty(organisation.getOrganisationID()) ? null
+                : getAddedSolicitor(finremCaseData, isApplicant, organisation))
             .orElse(null);
     }
 
