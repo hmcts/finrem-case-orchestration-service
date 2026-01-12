@@ -59,6 +59,8 @@ public class ManageHearingsCorresponder {
         }
 
         List<CaseDocument> documentsToPost = getAdditionalHearingDocs(hearing);
+        hearingCorrespondenceHelper.getMiniFormAIfRequired(finremCaseData, hearing)
+            .ifPresent(documentsToPost::add);
         documentsToPost.addAll(wrapper.getAssociatedWorkingHearingDocuments());
 
         publishEvent(finremCaseDetails, hearing, ManageHearingsAction.ADD_HEARING, userAuthorisation, documentsToPost, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);

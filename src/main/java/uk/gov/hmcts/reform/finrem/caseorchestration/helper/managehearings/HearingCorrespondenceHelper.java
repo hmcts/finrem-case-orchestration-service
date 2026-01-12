@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -25,12 +26,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.FDA;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType.FDR;
+
 @RequiredArgsConstructor
 @Slf4j
 @Component
 public class HearingCorrespondenceHelper {
 
     private final PaperNotificationService paperNotificationService;
+    private final ExpressCaseService expressCaseService;
 
     /**
      * Retrieves the {@link Hearing} from the wrapper param using the UUID param.
@@ -195,5 +200,14 @@ public class HearingCorrespondenceHelper {
             .max(Comparator.comparing(CaseDocument::getUploadTimestamp,
                 Comparator.nullsLast(Comparator.naturalOrder())))
             .orElse(null);
+    }
+
+    public Optional<CaseDocument> getMiniFormAIfRequired(FinremCaseData caseData, Hearing hearing) {
+        if (FDA.equals(hearing.getHearingType()) ||
+            (FDR.equals(hearing.getHearingType()) && expressCaseService.isExpressCase(caseData))) {
+            return Optional.ofNullable(caseData.getMiniFormA());
+        } else {
+            return Optional.empty();
+        }
     }
 }
