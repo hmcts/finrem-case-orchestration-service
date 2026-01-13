@@ -12,8 +12,8 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public enum VacateOrAdjournAction {
 
-    ADJOURN_ACTION("Adjourn_Action", "Hearing Vacated"),
-    VACATE_ACTION("Vacate_Action", "Hearing Adjourned");
+    ADJOURN_HEARING("Adjourn_Hearing", "Adjourned"),
+    VACATE_HEARING("Vacate_Hearing", "Vacated");
 
     private final String value;
     @Getter
@@ -30,5 +30,4 @@ public enum VacateOrAdjournAction {
             .findFirst()
             .orElseThrow(IllegalArgumentException::new);
     }
-
 }

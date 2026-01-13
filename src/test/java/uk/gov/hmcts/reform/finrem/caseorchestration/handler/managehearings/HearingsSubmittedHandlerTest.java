@@ -71,7 +71,7 @@ class HearingsSubmittedHandlerTest {
     void shouldHandleSubmittedCallbackForVacateHearing() {
         // Arrange
         UUID hearingID = UUID.randomUUID();
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, hearingID, ManageHearingsAction.VACATE_HEARING);
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, hearingID, ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
