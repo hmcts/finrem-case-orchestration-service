@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -7,6 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Handles party-specific notification logic; subclass for different party types.
@@ -58,10 +61,15 @@ public abstract class AbstractPartyListener {
      * Struct for holding party-specific contact details.
      */
     protected record PartySpecificDetails(
-        String recipientSolEmailAddress,
-        String recipientSolName,
-        String recipientSolReference
+        @NotNull String recipientSolEmailAddress,
+        @NotNull String recipientSolName,
+        @NotNull String recipientSolReference
     ) {
+        public PartySpecificDetails {
+            if (recipientSolEmailAddress == null || recipientSolName == null || recipientSolReference == null) {
+                throw new IllegalArgumentException("PartySpecificDetails fields must not be null");
+            }
+        }
     }
 
     @Async
@@ -82,28 +90,56 @@ public abstract class AbstractPartyListener {
     }
 
     /**
-     * Prepares and sends an email notification to the relevant party.
+     * Enriches the email notification data with party-specific details and sends a confirmation email.
+     *
+     * @param event the event containing the notification details, including the email template and notification request.
+     *              If the email template or notification request is missing, an {@link IllegalStateException} is thrown.
      */
     private void enrichAndSendEmailNotification(SendCorrespondenceEvent event) {
+
         log.info("Preparing email notification for party {} on case case {}", notificationParty, event.getCaseId());
         PartySpecificDetails details = setPartySpecificDetails(event);
-        NotificationRequest emailRequest = event.emailNotificationRequest;
+
+        NotificationRequest emailRequest = Optional.ofNullable(event.getEmailNotificationRequest())
+            .orElseThrow(() -> new IllegalArgumentException("Notification Request is required for digital notifications"));
+
+        EmailTemplateNames emailTemplate = Optional.ofNullable(event.getEmailTemplate()).orElseThrow(() ->
+            new IllegalArgumentException("Email template is required for digital notifications"));
+
         emailRequest.setName(details.recipientSolName);
         emailRequest.setNotificationEmail(details.recipientSolEmailAddress);
         emailRequest.setSolicitorReferenceNumber(details.recipientSolReference);
-        emailService.sendConfirmationEmail(emailRequest, event.emailTemplate);
+
+        // Email service handles email specific exceptions - consider building in retiring to email service.
+        emailService.sendConfirmationEmail(emailRequest, emailTemplate);
     }
 
     /**
-     * Collect docs, coversheet, and send letter for the relevant party.
+     * Sends a paper notification for the specified event by preparing the necessary documents
+     * for bulk printing and invoking the bulk print service. This includes adding a coversheet
+     * specific to the party and determining if the party resides outside the UK to handle
+     * international notifications accordingly.
+     *
+     * @param event the event containing details necessary for sending the paper notification,
+     *              such as the case details, documents to post, and authorization token.
+     *              If no documents are provided, an {@link IllegalArgumentException} will be thrown.
      */
     private void sendPaperNotification(SendCorrespondenceEvent event) {
+
         log.info("Preparing paper notification for party {} on case case {}", notificationParty, event.getCaseId());
-        // Defensive copy to avoid mutating original event collection
-        List<CaseDocument> docsToPrint = new ArrayList<>(event.documentsToPost);
+
+        // Defensive copy to avoid mutating an original event collection
+        List<CaseDocument> docsToPrint = Optional.ofNullable(event.documentsToPost)
+            .filter(docs -> !docs.isEmpty())
+            .map(ArrayList::new)
+            .orElseThrow(() -> new IllegalArgumentException("No documents to post provided for paper notification"));
+
         docsToPrint.add(getPartyCoversheet(event));
         List<BulkPrintDocument> bpDocs = bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint);
         boolean isOutsideUK = isPartyOutsideUK(event);
+
+        // Bulk print service requires implementation of exception handling -
+        // consider building in retries and Server Error Handling as part of DFR-3308.
         bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             event.caseDetails, notificationParty, bpDocs, isOutsideUK, event.authToken
         );
