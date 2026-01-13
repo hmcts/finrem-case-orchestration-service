@@ -113,7 +113,7 @@ public class HearingCourtWrapper implements CourtListWrapper {
 
     @JsonIgnore
     @Override
-    public ClevelandCourt getClevelandCourt(boolean isConsented) {
+    public ClevelandCourt getClevelandCourt() {
         return hearingClevelandCourtList;
     }
 
