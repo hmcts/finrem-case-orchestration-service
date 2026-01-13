@@ -150,7 +150,7 @@ public class HearingCorrespondenceHelper {
     }
 
     /**
-     * Returns true is a hearing was vacated and relisted
+     * Returns true is a hearing was vacated and relisted.
      *
      * @param caseData queried to see if the vacate action was chosen and if the hearing was relisted.
      * @return if the hearing was vacated and relisted
@@ -165,7 +165,6 @@ public class HearingCorrespondenceHelper {
     /**
      * Determines if the Mini Form A document is required based on the hearing type and case type,
      * and retrieves it if applicable.
-     *
      * For FDA hearings, the Mini Form A is always required. For FDR hearings, it is conditionally
      * required if the case is an express case.
      *

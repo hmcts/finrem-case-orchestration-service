@@ -112,7 +112,7 @@ class ApplicantPartyListenerTest {
         caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorEmail(null);
 
         IllegalArgumentException exception =  assertThrows(IllegalArgumentException.class,
-            () ->applicantPartyListener.setPartySpecificDetails(event));
+            () -> applicantPartyListener.setPartySpecificDetails(event));
 
         assertTrue(exception.getMessage().contains("PartySpecificDetails fields must not be null"));
     }
@@ -126,7 +126,7 @@ class ApplicantPartyListenerTest {
         caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorName(null);
 
         IllegalArgumentException exception =  assertThrows(IllegalArgumentException.class,
-            () ->applicantPartyListener.setPartySpecificDetails(event));
+            () -> applicantPartyListener.setPartySpecificDetails(event));
 
         assertTrue(exception.getMessage().contains("PartySpecificDetails fields must not be null"));
     }
@@ -262,7 +262,7 @@ class ApplicantPartyListenerTest {
             .build();
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () ->applicantPartyListener.handleNotification(newEvent));
+            () -> applicantPartyListener.handleNotification(newEvent));
 
         assertThat(exception.getMessage()).isEqualTo("No documents to post provided for paper notification");
 
