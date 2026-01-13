@@ -112,6 +112,8 @@ public abstract class AbstractPartyListener {
 
         // Email service handles email specific exceptions - consider building in retiring to email service.
         emailService.sendConfirmationEmail(emailRequest, emailTemplate);
+
+        log.info("Completed email notification for party {} on case case {}", notificationParty, event.getCaseId());
     }
 
     /**
@@ -143,5 +145,7 @@ public abstract class AbstractPartyListener {
         bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             event.caseDetails, notificationParty, bpDocs, isOutsideUK, event.authToken
         );
+
+        log.info("Completed paper notification for party {} on case case {}", notificationParty, event.getCaseId());
     }
 }
