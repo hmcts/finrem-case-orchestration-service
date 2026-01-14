@@ -288,8 +288,8 @@ public class StopRepresentingClientService {
      * Marks the applicant as unrepresented.
      *
      * <p>
-     * This sets the applicant represented flag to {@link YesOrNo#NO} and assigns
-     * the default organisation policy for the applicant solicitor role.
+     * This sets the applicant represented flag to {@link YesOrNo#NO} and
+     * clears the organisation policy currently assigned to the applicant solicitor role.
      *
      * @param finremCaseData the case data to update
      */
@@ -304,8 +304,7 @@ public class StopRepresentingClientService {
      * <p>
      * For consented applications, the consented respondent represented flag is updated.
      * For contested applications, the contested respondent represented flag is updated.
-     * In both cases, the default organisation policy for the respondent solicitor role
-     * is assigned.
+     * In both cases, it clears the organisation policy currently assigned to the respondent solicitor role.
      *
      * @param finremCaseData the case data to update
      */
@@ -322,8 +321,8 @@ public class StopRepresentingClientService {
      * Marks an intervener as unrepresented.
      *
      * <p>
-     * This sets the intervener represented flag to {@link YesOrNo#NO} and assigns
-     * the default organisation policy based on the intervener solicitor case role.
+     * This sets the intervener represented flag to {@link YesOrNo#NO} and
+     * clears the organisation policy currently assigned to the intervener solicitor role.
      *
      * @param intervenerWrapper the intervener wrapper to update
      */
