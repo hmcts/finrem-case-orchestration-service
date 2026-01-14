@@ -524,7 +524,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
             underTest.handle(request(caseData), AUTH_TOKEN);
 
-            verify(stopRepresentingClientService).setIntervenerUnrepresented(same(caseData.getInterveners().get(index - 1)));
+            verify(stopRepresentingClientService).setIntervenerUnrepresented(same(caseData.getIntervenerById(index)));
             verifyBuildRepresentationCalled(caseData);
         }
 

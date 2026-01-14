@@ -268,7 +268,7 @@ public class StopRepresentingClientService {
             return false;
         }
         int index = representativeInContext.intervenerIndex();
-        IntervenerWrapper intervener = caseData.getInterveners().get(index - 1);
+        IntervenerWrapper intervener = caseData.getIntervenerById(index);
         List<BarristerCollectionItem> intvBarristers = caseData.getBarristerCollectionWrapper()
             .getIntervenerBarristersByIndex(index);
 

@@ -225,15 +225,11 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
 
     private OrganisationPolicy resolveIntervenerOrganisationPolicy(FinremCaseData caseData,
                                                                    int intervenerIndex) {
-        return getIntervener(caseData, intervenerIndex).getIntervenerOrganisation();
+        return caseData.getIntervenerById(intervenerIndex).getIntervenerOrganisation();
     }
 
     private IntervenerWrapper getIntervener(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
-        return caseData.getInterveners().get(representativeInContext.intervenerIndex() - 1);
-    }
-
-    private IntervenerWrapper getIntervener(FinremCaseData caseData, int index) {
-        return caseData.getInterveners().get(index - 1);
+        return caseData.getIntervenerById(representativeInContext.intervenerIndex());
     }
 
     private boolean isSameOrganisation(OrganisationPolicy organisationPolicy1, OrganisationPolicy organisationPolicy2) {
