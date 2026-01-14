@@ -467,10 +467,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private IntervenerWrapper getIntervenerWrapper(StopRepresentingRequest request) {
-        List<IntervenerWrapper> intervenerWrappers = request.finremCaseDetails.getData().getInterveners();
-        return of(getIntervenerIndex(request))
-            .map(i -> i - 1) // starts with 1
-            .map(intervenerWrappers::get).orElseThrow(IllegalStateException::new);
+        return request.finremCaseDetails.getData().getIntervenerById(getIntervenerIndex(request));
     }
 
     private Barrister getIntervenerBarrister(StopRepresentingRequest request) {
