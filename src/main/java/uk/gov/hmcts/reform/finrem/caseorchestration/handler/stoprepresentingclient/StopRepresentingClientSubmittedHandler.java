@@ -62,8 +62,6 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                     .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
                     .build());
         } else {
-            // Raised EXUI-3990 to see if XUI team would fix the button issue
-            // Otherwise, remove the async call below
             CompletableFuture.runAsync(() ->
                 stopRepresentingClientService.applyCaseAssignment(
                     StopRepresentingClientInfo.builder()
@@ -71,6 +69,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                         .caseDetails(callbackRequest.getCaseDetails())
                         .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
                         .build()),
+                // Add a delay to prevent a fast response so the confirmation body is not shown
                 CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS)
             );
         }
