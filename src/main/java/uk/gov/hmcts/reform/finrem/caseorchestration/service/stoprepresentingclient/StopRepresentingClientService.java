@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingcli
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -17,6 +18,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -38,6 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getNotificationPartyFromRole;
 
 @Service
 @Slf4j
@@ -61,6 +66,8 @@ public class StopRepresentingClientService {
     private final CaseRoleService caseRoleService;
 
     private final IdamService idamService;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private static FinremCaseData getFinremCaseDataBefore(StopRepresentingClientInfo info) {
         return info.getCaseDetailsBefore().getData();
@@ -96,6 +103,10 @@ public class StopRepresentingClientService {
         handleIntervenerRepresentativeRequest(info);
         handleApplicantOrRespondentRepresentativeRequest(info);
         sendAllBarristerChangeToCaseAssignmentService(info);
+    }
+
+    public void notifyParties(StopRepresentingClientInfo info) {
+        notifyApplicantRepresentative(info);
     }
 
     /**
@@ -344,5 +355,23 @@ public class StopRepresentingClientService {
             .orgPolicyReference(null)
             .orgPolicyCaseAssignedRole(role.getCcdCode())
             .build();
+    }
+
+    private void notifyApplicantRepresentative(StopRepresentingClientInfo info, String userAuthorisation) {
+        RepresentativeInContext context = buildRepresentation(info.getCaseDetails().getData(), userAuthorisation);
+        if (context.isApplicationRepresentative()) {
+
+            applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
+                .notificationParties(List.of(
+                    getNotificationPartyFromRole(CaseRole.APP_SOLICITOR.getCcdCode()),
+                    getNotificationPartyFromRole(CaseRole.APP_BARRISTER.getCcdCode())
+                ))
+                .emailNotificationRequest(NotificationRequest.builder().build())
+                .emailTemplate(EmailTemplateNames.FR_CONTESTED_SOLICITOR_STOP_REPRESENTING_APPLICANT)
+                .caseDetails(info.getCaseDetails())
+                .authToken(userAuthorisation)
+                .build()
+            );
+        }
     }
 }
