@@ -111,6 +111,11 @@ public class StopRepresentingClientService {
         }
     }
 
+    /**
+     * Determines whether intervener access should be revoked by comparing
+     * the current intervener organisation with the original organisation
+     * stored in case data.
+     */
     private boolean shouldRevokeIntervenerAccess(IntervenerWrapper intervenerWrapper,
                                                  IntervenerWrapper originalIntervenerWrapper) {
         return !isSameOrganisation(
