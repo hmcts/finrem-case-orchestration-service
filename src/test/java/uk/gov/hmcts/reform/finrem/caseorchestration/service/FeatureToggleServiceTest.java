@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class FeatureToggleServiceTest {
@@ -24,8 +23,63 @@ public class FeatureToggleServiceTest {
         private FeatureToggleService featureToggleService;
 
         @Test
-        void isExui3990WorkaroundEnabled() {
-            assertTrue(featureToggleService.isExui3990WorkaroundEnabled());
+        void isAssignCaseAccessEnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isAssignCaseAccessEnabled()).isTrue();
+        }
+
+        @Test
+        void isCaseFileViewEnabledReturnsFalse() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isCaseFileViewEnabled()).isFalse();
+        }
+
+        @Test
+        void isExpressPilotEnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isExpressPilotEnabled()).isFalse();
+        }
+
+        @Test
+        void isExui3990WorkaroundEnabledReturnsTrue() {
+            // not in any application.properties
+            assertThat(featureToggleService.isExui3990WorkaroundEnabled()).isTrue();
+        }
+
+        @Test
+        void isIntervenerEnabledReturnsFalse() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isIntervenerEnabled()).isFalse();
+        }
+
+        @Test
+        void isPBAUsingCaseTypeEnabledReturnsFalse() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isPBAUsingCaseTypeEnabled()).isFalse();
+        }
+
+        @Test
+        void isSecureDocEnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isSecureDocEnabled()).isTrue();
+        }
+
+        @Test
+        void isSendLetterDuplicateCheckEnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isSendLetterDuplicateCheckEnabled()).isTrue();
+        }
+
+        @Test
+        void isSendToFRCEnabledReturnsFalse() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isSendToFRCEnabled()).isFalse();
+        }
+
+        @Test
+        void isVacateHearingEnabledReturnsFalse() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isVacateHearingEnabled()).isFalse();
         }
     }
 
