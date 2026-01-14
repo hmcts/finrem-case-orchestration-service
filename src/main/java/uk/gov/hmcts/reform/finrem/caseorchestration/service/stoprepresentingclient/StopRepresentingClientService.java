@@ -98,119 +98,6 @@ public class StopRepresentingClientService {
         sendAllBarristerChangeToCaseAssignmentService(info);
     }
 
-    private void handleApplicantOrRespondentRepresentativeRequest(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseData(info);
-        final CaseType caseType = finremCaseData.getCcdCaseType();
-        final long caseId = getCaseId(info);
-
-        boolean isNocRequestSent = sendNocRequestToCaseAssignmentService(info);
-
-        if (isNocRequestSent) {
-            // save a call if changeOrganisationRequestField is null
-            clearChangeOrganisationRequestAfterThisEvent(caseType, caseId);
-        }
-    }
-
-    /**
-     * Determines whether intervener access should be revoked by comparing
-     * the current intervener organisation with the original organisation
-     * stored in case data.
-     */
-    private boolean shouldRevokeIntervenerAccess(IntervenerWrapper intervenerWrapper,
-                                                 IntervenerWrapper originalIntervenerWrapper) {
-        return !isSameOrganisation(
-            ofNullable(intervenerWrapper.getIntervenerOrganisation())
-                .map(OrganisationPolicy::getOrganisation)
-                .orElse(Organisation.builder().organisationID("SAME").build()),
-            ofNullable(originalIntervenerWrapper.getIntervenerOrganisation())
-                .map(OrganisationPolicy::getOrganisation)
-                .orElse(Organisation.builder().organisationID("SAME").build())
-        );
-    }
-
-    private void handleIntervenerRepresentativeRequest(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseData(info);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
-
-        // compare all interveners
-        finremCaseDataBefore.getInterveners().forEach(originalWrapper -> {
-            IntervenerType it = originalWrapper.getIntervenerType();
-            if (it != null) {
-                finremCaseData.getInterveners().stream()
-                    .filter(wrapper -> it.equals(wrapper.getIntervenerType()))
-                    .findAny()
-                    .ifPresent(wrapper -> {
-                        if (shouldRevokeIntervenerAccess(wrapper, originalWrapper)) {
-                            intervenerService.revokeIntervenerSolicitor(info.getCaseDetails().getId(), originalWrapper);
-                        }
-                    });
-            }
-        });
-    }
-
-    private void sendAllBarristerChangeToCaseAssignmentService(StopRepresentingClientInfo info) {
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.APPLICANT);
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.RESPONDENT);
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER1);
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER2);
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER3);
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER4);
-    }
-
-    private void sendBarristerChangesToCaseAssignmentService(StopRepresentingClientInfo info, BarristerParty barristerParty) {
-        final long caseId = getCaseId(info);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
-
-        BarristerChange barristerChange = manageBarristerService
-            .getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
-        barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, barristerChange);
-    }
-
-    private boolean sendNocRequestToCaseAssignmentService(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseData(info);
-        final FinremCaseData originalFinremCaseData = getFinremCaseDataBefore(info);
-
-        // to check if ChangeOrganisationRequest populated, otherwise skip it
-        if (finremCaseData.getChangeOrganisationRequestField() == null) {
-            log.info("{} - Not sending request to case assignment service due to changeOrganisationRequestField is null",
-                finremCaseData.getCcdCaseId());
-            return false;
-        }
-
-        // aac handles org policy modification based on the Change Organisation Request,
-        // so we need to revert the org policies to their value before the event started
-        // Refer to NoticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess
-        boolean isReverted = false;
-        if (isApplicantForRepresentationChange(finremCaseData)) {
-            finremCaseData.setApplicantOrganisationPolicy(originalFinremCaseData.getApplicantOrganisationPolicy());
-            isReverted = true;
-        } else if (isRespondentForRepresentationChange(finremCaseData)) {
-            finremCaseData.setRespondentOrganisationPolicy(originalFinremCaseData.getRespondentOrganisationPolicy());
-            isReverted = true;
-        }
-
-        // Going to apply decision
-        if (isReverted) {
-            assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(),
-                buildCaseDetailsFromEventCaseData(info));
-            return true;
-        }
-        throw new IllegalStateException(format("%s - ChangeOrganisationRequest populated with unknown or null NOC Party : %s",
-            finremCaseData.getContactDetailsWrapper().getNocParty(),
-            finremCaseData.getCcdCaseId()));
-    }
-
-    private CaseDetails buildCaseDetailsFromEventCaseData(StopRepresentingClientInfo info) {
-        return finremCaseDetailsMapper.mapToCaseDetails(info.getCaseDetails());
-    }
-
-    private void clearChangeOrganisationRequestAfterThisEvent(CaseType caseType, long caseId) {
-        // to reset the targeted field by case id and case type only
-        // coreCaseDataService loads the case data again in the internal event call.
-        coreCaseDataService.performPostSubmitCallback(caseType, caseId,
-            INTERNAL_CHANGE_UPDATE_CASE.getCcdType(), caseDetails -> clearChangeOrganisationRequestField());
-    }
-
     /**
      * Builds a {@link RepresentativeInContext} object indicating which parties
      * the current user represents in the given case.
@@ -336,6 +223,119 @@ public class StopRepresentingClientService {
         intervenerWrapper.setIntervenerOrganisation(getDefaultOrganisationPolicy(
             intervenerWrapper.getIntervenerSolicitorCaseRole()
         ));
+    }
+
+    private void handleApplicantOrRespondentRepresentativeRequest(StopRepresentingClientInfo info) {
+        final FinremCaseData finremCaseData = getFinremCaseData(info);
+        final CaseType caseType = finremCaseData.getCcdCaseType();
+        final long caseId = getCaseId(info);
+
+        boolean isNocRequestSent = sendNocRequestToCaseAssignmentService(info);
+
+        if (isNocRequestSent) {
+            // save a call if changeOrganisationRequestField is null
+            clearChangeOrganisationRequestAfterThisEvent(caseType, caseId);
+        }
+    }
+
+    /**
+     * Determines whether intervener access should be revoked by comparing
+     * the current intervener organisation with the original organisation
+     * stored in case data.
+     */
+    private boolean shouldRevokeIntervenerAccess(IntervenerWrapper intervenerWrapper,
+                                                 IntervenerWrapper originalIntervenerWrapper) {
+        return !isSameOrganisation(
+            ofNullable(intervenerWrapper.getIntervenerOrganisation())
+                .map(OrganisationPolicy::getOrganisation)
+                .orElse(Organisation.builder().organisationID("SAME").build()),
+            ofNullable(originalIntervenerWrapper.getIntervenerOrganisation())
+                .map(OrganisationPolicy::getOrganisation)
+                .orElse(Organisation.builder().organisationID("SAME").build())
+        );
+    }
+
+    private void handleIntervenerRepresentativeRequest(StopRepresentingClientInfo info) {
+        final FinremCaseData finremCaseData = getFinremCaseData(info);
+        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
+
+        // compare all interveners
+        finremCaseDataBefore.getInterveners().forEach(originalWrapper -> {
+            IntervenerType it = originalWrapper.getIntervenerType();
+            if (it != null) {
+                finremCaseData.getInterveners().stream()
+                    .filter(wrapper -> it.equals(wrapper.getIntervenerType()))
+                    .findAny()
+                    .ifPresent(wrapper -> {
+                        if (shouldRevokeIntervenerAccess(wrapper, originalWrapper)) {
+                            intervenerService.revokeIntervenerSolicitor(info.getCaseDetails().getId(), originalWrapper);
+                        }
+                    });
+            }
+        });
+    }
+
+    private void sendAllBarristerChangeToCaseAssignmentService(StopRepresentingClientInfo info) {
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.APPLICANT);
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.RESPONDENT);
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER1);
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER2);
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER3);
+        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER4);
+    }
+
+    private void sendBarristerChangesToCaseAssignmentService(StopRepresentingClientInfo info, BarristerParty barristerParty) {
+        final long caseId = getCaseId(info);
+        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
+
+        BarristerChange barristerChange = manageBarristerService
+            .getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
+        barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, barristerChange);
+    }
+
+    private boolean sendNocRequestToCaseAssignmentService(StopRepresentingClientInfo info) {
+        final FinremCaseData finremCaseData = getFinremCaseData(info);
+        final FinremCaseData originalFinremCaseData = getFinremCaseDataBefore(info);
+
+        // to check if ChangeOrganisationRequest populated, otherwise skip it
+        if (finremCaseData.getChangeOrganisationRequestField() == null) {
+            log.info("{} - Not sending request to case assignment service due to changeOrganisationRequestField is null",
+                finremCaseData.getCcdCaseId());
+            return false;
+        }
+
+        // aac handles org policy modification based on the Change Organisation Request,
+        // so we need to revert the org policies to their value before the event started
+        // Refer to NoticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess
+        boolean isReverted = false;
+        if (isApplicantForRepresentationChange(finremCaseData)) {
+            finremCaseData.setApplicantOrganisationPolicy(originalFinremCaseData.getApplicantOrganisationPolicy());
+            isReverted = true;
+        } else if (isRespondentForRepresentationChange(finremCaseData)) {
+            finremCaseData.setRespondentOrganisationPolicy(originalFinremCaseData.getRespondentOrganisationPolicy());
+            isReverted = true;
+        }
+
+        // Going to apply decision
+        if (isReverted) {
+            assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(),
+                buildCaseDetailsFromEventCaseData(info));
+            return true;
+        }
+        throw new IllegalStateException(format("%s - ChangeOrganisationRequest populated with unknown or null NOC Party : %s",
+            finremCaseData.getContactDetailsWrapper().getNocParty(),
+            finremCaseData.getCcdCaseId()));
+    }
+
+    private CaseDetails buildCaseDetailsFromEventCaseData(StopRepresentingClientInfo info) {
+        return finremCaseDetailsMapper.mapToCaseDetails(info.getCaseDetails());
+    }
+
+    private void clearChangeOrganisationRequestAfterThisEvent(CaseType caseType, long caseId) {
+        // to reset the targeted field by case id and case type only
+        // coreCaseDataService loads the case data again in the internal event call.
+        coreCaseDataService.performPostSubmitCallback(caseType, caseId,
+            INTERNAL_CHANGE_UPDATE_CASE.getCcdType(), caseDetails -> clearChangeOrganisationRequestField());
     }
 
     private OrganisationPolicy getDefaultOrganisationPolicy(CaseRole role) {
