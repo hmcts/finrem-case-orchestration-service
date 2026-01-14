@@ -101,16 +101,17 @@ public abstract class AbstractPartyListener {
         PartySpecificDetails details = setPartySpecificDetails(event);
 
         NotificationRequest emailRequest = Optional.ofNullable(event.getEmailNotificationRequest())
-            .orElseThrow(() -> new IllegalArgumentException("Notification Request is required for digital notifications"));
+            .orElseThrow(() ->
+                new IllegalArgumentException("Notification Request is required for digital notifications, case ID: " + event.getCaseId()));
 
         emailRequest.setName(details.recipientSolName);
         emailRequest.setNotificationEmail(details.recipientSolEmailAddress);
         emailRequest.setSolicitorReferenceNumber(details.recipientSolReference);
 
         EmailTemplateNames emailTemplate = Optional.ofNullable(event.getEmailTemplate()).orElseThrow(() ->
-            new IllegalArgumentException("Email template is required for digital notifications"));
+            new IllegalArgumentException("Email template is required for digital notifications, case ID: " + event.getCaseId()));
 
-        // Email service handles email specific exceptions - consider building in retiring to email service.
+        // Email service handles email specific exceptions - consider building in retries to email service.
         emailService.sendConfirmationEmail(emailRequest, emailTemplate);
 
         log.info("Completed email notification for party {} on case case {}", notificationParty, event.getCaseId());
@@ -134,7 +135,8 @@ public abstract class AbstractPartyListener {
         List<CaseDocument> docsToPrint = Optional.ofNullable(event.documentsToPost)
             .filter(docs -> !docs.isEmpty())
             .map(ArrayList::new)
-            .orElseThrow(() -> new IllegalArgumentException("No documents to post provided for paper notification"));
+            .orElseThrow(() ->
+                new IllegalArgumentException("No documents to post provided for paper notification, case ID: " + event.getCaseId()));
 
         docsToPrint.add(getPartyCoversheet(event));
         List<BulkPrintDocument> bpDocs = bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint);
