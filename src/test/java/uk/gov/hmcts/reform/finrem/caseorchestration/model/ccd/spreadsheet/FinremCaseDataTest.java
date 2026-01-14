@@ -267,7 +267,7 @@ class FinremCaseDataTest {
     @Test
     void testGetIntervenerById() {
         IntervenerOne intervenerOne = mock(IntervenerOne.class);
-        IntervenerTwo intervenerTwo= mock(IntervenerTwo.class);
+        IntervenerTwo intervenerTwo = mock(IntervenerTwo.class);
         IntervenerThree intervenerThree = mock(IntervenerThree.class);
         IntervenerFour intervenerFour = mock(IntervenerFour.class);
 
