@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -60,37 +61,38 @@ class ApplicantPartyListenerTest {
     void setUp() {
 
         caseDetails = FinremCaseDetails.builder()
-                .data(FinremCaseData.builder()
-                        .ccdCaseId(CASE_ID)
-                        .contactDetailsWrapper(
-                                ContactDetailsWrapper
-                                        .builder()
-                                        .applicantSolicitorName(APPLICANT_NAME)
-                                        .applicantSolicitorEmail(APPLICANT_EMAIL)
-                                        .solicitorReference(APPLICANT_REF)
-                                        .build()
-                        ).build()).build();
+            .caseType(CaseType.CONTESTED)
+            .data(FinremCaseData.builder()
+                .ccdCaseId(CASE_ID)
+                .contactDetailsWrapper(
+                    ContactDetailsWrapper
+                        .builder()
+                        .applicantSolicitorName(APPLICANT_NAME)
+                        .applicantSolicitorEmail(APPLICANT_EMAIL)
+                        .solicitorReference(APPLICANT_REF)
+                        .build()
+                ).build()).build();
 
         event = SendCorrespondenceEvent.builder()
-                .caseDetails(caseDetails)
-                .emailNotificationRequest(NotificationRequest.builder().build())
-                .notificationParties(List.of(NotificationParty.APPLICANT))
-                .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
-                .documentsToPost(List.of(CaseDocument.builder().documentFilename(TEST_DOC_NAME).build()))
-                .authToken(AUTH_TOKEN)
-                .build();
+            .caseDetails(caseDetails)
+            .emailNotificationRequest(NotificationRequest.builder().build())
+            .notificationParties(List.of(NotificationParty.APPLICANT))
+            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .documentsToPost(List.of(CaseDocument.builder().documentFilename(TEST_DOC_NAME).build()))
+            .authToken(AUTH_TOKEN)
+            .build();
 
         applicantPartyListener = new ApplicantPartyListener(
-                bulkPrintService, emailService, notificationService, internationalPostalService
+            bulkPrintService, emailService, notificationService, internationalPostalService
         );
     }
 
     @Test
     void shouldNotNotifyWhenNotRelevantParty() {
         SendCorrespondenceEvent otherEvent = SendCorrespondenceEvent.builder()
-                .caseDetails(caseDetails)
-                .notificationParties(List.of(NotificationParty.RESPONDENT))
-                .build();
+            .caseDetails(caseDetails)
+            .notificationParties(List.of(NotificationParty.RESPONDENT))
+            .build();
         applicantPartyListener.handleNotification(otherEvent);
         verifyNoInteractions(emailService, bulkPrintService, notificationService, internationalPostalService);
     }
@@ -115,7 +117,7 @@ class ApplicantPartyListenerTest {
         caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorEmail(null);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> applicantPartyListener.setPartySpecificDetails(event));
+            () -> applicantPartyListener.setPartySpecificDetails(event));
 
         assertTrue(exception.getMessage().contains("PartySpecificDetails fields must not be null"));
     }
@@ -129,7 +131,7 @@ class ApplicantPartyListenerTest {
         caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorName(null);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> applicantPartyListener.setPartySpecificDetails(event));
+            () -> applicantPartyListener.setPartySpecificDetails(event));
 
         assertTrue(exception.getMessage().contains("PartySpecificDetails fields must not be null"));
     }
@@ -187,18 +189,18 @@ class ApplicantPartyListenerTest {
     void shouldThrowIllegalArgumentWhenNotificationRequestIsNullOnSendDigitalNotification() {
 
         SendCorrespondenceEvent newEvent = SendCorrespondenceEvent.builder()
-                .caseDetails(caseDetails)
-                .emailNotificationRequest(null)
-                .notificationParties(List.of(NotificationParty.APPLICANT))
-                .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
-                .documentsToPost(List.of())
-                .authToken(AUTH_TOKEN)
-                .build();
+            .caseDetails(caseDetails)
+            .emailNotificationRequest(null)
+            .notificationParties(List.of(NotificationParty.APPLICANT))
+            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .documentsToPost(List.of())
+            .authToken(AUTH_TOKEN)
+            .build();
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> applicantPartyListener.handleNotification(newEvent));
+            () -> applicantPartyListener.handleNotification(newEvent));
 
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verifyNoInteractions(emailService);
@@ -210,18 +212,18 @@ class ApplicantPartyListenerTest {
     void shouldThrowIllegalArgumentWhenEmailTemplateIsNullOnSendDigitalNotification() {
 
         SendCorrespondenceEvent newEvent = SendCorrespondenceEvent.builder()
-                .caseDetails(caseDetails)
-                .emailNotificationRequest(NotificationRequest.builder().build())
-                .notificationParties(List.of(NotificationParty.APPLICANT))
-                .emailTemplate(null)
-                .documentsToPost(List.of())
-                .authToken(AUTH_TOKEN)
-                .build();
+            .caseDetails(caseDetails)
+            .emailNotificationRequest(NotificationRequest.builder().build())
+            .notificationParties(List.of(NotificationParty.APPLICANT))
+            .emailTemplate(null)
+            .documentsToPost(List.of())
+            .authToken(AUTH_TOKEN)
+            .build();
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> applicantPartyListener.handleNotification(newEvent));
+            () -> applicantPartyListener.handleNotification(newEvent));
 
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verifyNoInteractions(emailService);
@@ -237,15 +239,15 @@ class ApplicantPartyListenerTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
-        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(anyList()))
-                .thenReturn(List.of(BulkPrintDocument.builder().build()));
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(anyList(), AUTH_TOKEN, caseDetails.getCaseType()))
+            .thenReturn(List.of(BulkPrintDocument.builder().build()));
 
         applicantPartyListener.handleNotification(event);
 
         verify(bulkPrintService).getApplicantCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(anyList());
+        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(anyList(), AUTH_TOKEN, caseDetails.getCaseType());
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
-                eq(caseDetails), eq(APPLICANT), anyList(), eq(false), eq(AUTH_TOKEN)
+            eq(caseDetails), eq(APPLICANT), anyList(), eq(false), eq(AUTH_TOKEN)
         );
     }
 
@@ -256,16 +258,16 @@ class ApplicantPartyListenerTest {
     void shouldThrowIllegalArgWhenSendPaperNotificationWithNoDocs() {
 
         SendCorrespondenceEvent newEvent = SendCorrespondenceEvent.builder()
-                .caseDetails(caseDetails)
-                .emailNotificationRequest(NotificationRequest.builder().build())
-                .notificationParties(List.of(NotificationParty.APPLICANT))
-                .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
-                .documentsToPost(List.of())
-                .authToken(AUTH_TOKEN)
-                .build();
+            .caseDetails(caseDetails)
+            .emailNotificationRequest(NotificationRequest.builder().build())
+            .notificationParties(List.of(NotificationParty.APPLICANT))
+            .emailTemplate(EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR)
+            .documentsToPost(List.of())
+            .authToken(AUTH_TOKEN)
+            .build();
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> applicantPartyListener.handleNotification(newEvent));
+            () -> applicantPartyListener.handleNotification(newEvent));
 
         assertThat(exception.getMessage()).isEqualTo("No documents to post provided for paper notification, case ID: " + CASE_ID);
 

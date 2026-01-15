@@ -76,7 +76,7 @@ public abstract class AbstractPartyListener {
     @EventListener
     public void handleNotification(SendCorrespondenceEvent event) {
         if (isRelevantParty(event)) {
-            log.info("Notification event received for party {} on case case {}", notificationParty, event.getCaseId());
+            log.info("Notification event received for party {} on case {}", notificationParty, event.getCaseId());
             sendNotification(event);
         }
     }
@@ -97,7 +97,7 @@ public abstract class AbstractPartyListener {
      */
     private void enrichAndSendEmailNotification(SendCorrespondenceEvent event) {
 
-        log.info("Preparing email notification for party {} on case case {}", notificationParty, event.getCaseId());
+        log.info("Preparing email notification for party {} on case {}", notificationParty, event.getCaseId());
         PartySpecificDetails details = setPartySpecificDetails(event);
 
         NotificationRequest emailRequest = Optional.ofNullable(event.getEmailNotificationRequest())
@@ -129,7 +129,7 @@ public abstract class AbstractPartyListener {
      */
     private void sendPaperNotification(SendCorrespondenceEvent event) {
 
-        log.info("Preparing paper notification for party {} on case case {}", notificationParty, event.getCaseId());
+        log.info("Preparing paper notification for party {} on case {}", notificationParty, event.getCaseId());
 
         // Defensive copy to avoid mutating an original event collection
         List<CaseDocument> docsToPrint = Optional.ofNullable(event.documentsToPost)
@@ -139,7 +139,7 @@ public abstract class AbstractPartyListener {
                 new IllegalArgumentException("No documents to post provided for paper notification, case ID: " + event.getCaseId()));
 
         docsToPrint.add(getPartyCoversheet(event));
-        List<BulkPrintDocument> bpDocs = bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint);
+        List<BulkPrintDocument> bpDocs = bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint, event.authToken, event.getCaseDetails().getCaseType());
         boolean isOutsideUK = isPartyOutsideUK(event);
 
         // Bulk print service requires implementation of exception handling -

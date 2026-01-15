@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
@@ -56,6 +57,7 @@ class IntervenerFourPartyListenerTest {
     void setUp() {
 
         caseDetails = FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder().intervenerFour(IntervenerFour
                     .builder()
                     .intervenerSolEmail(INTERVENER_FOUR_EMAIL)
@@ -160,13 +162,13 @@ class IntervenerFourPartyListenerTest {
             .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerFour(), caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getIntervenerFourCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
-        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(anyList()))
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(anyList(), AUTH_TOKEN, caseDetails.getCaseType()))
             .thenReturn(List.of(BulkPrintDocument.builder().build()));
 
         intervenerFourPartyListener.handleNotification(event);
 
         verify(bulkPrintService).getIntervenerFourCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(anyList());
+        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(anyList(), AUTH_TOKEN, caseDetails.getCaseType());
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
             eq(caseDetails), eq(INTERVENER_FOUR), anyList(), eq(false), eq(AUTH_TOKEN)
         );

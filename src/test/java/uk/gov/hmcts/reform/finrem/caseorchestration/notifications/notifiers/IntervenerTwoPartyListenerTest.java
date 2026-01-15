@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
@@ -57,6 +58,7 @@ class IntervenerTwoPartyListenerTest {
     void setUp() {
 
         caseDetails = FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder().intervenerTwo(IntervenerTwo
                     .builder()
                     .intervenerSolEmail(INTERVENER_TWO_EMAIL)
@@ -161,13 +163,13 @@ class IntervenerTwoPartyListenerTest {
             .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerTwo(), caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getIntervenerTwoCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
-        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(anyList()))
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(anyList(), AUTH_TOKEN, caseDetails.getCaseType()))
             .thenReturn(List.of(BulkPrintDocument.builder().build()));
 
         intervenerTwoPartyListener.handleNotification(event);
 
         verify(bulkPrintService).getIntervenerTwoCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(anyList());
+        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(anyList(), AUTH_TOKEN, caseDetails.getCaseType());
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
             eq(caseDetails), eq(INTERVENER_TWO), anyList(), eq(false), eq(AUTH_TOKEN)
         );
