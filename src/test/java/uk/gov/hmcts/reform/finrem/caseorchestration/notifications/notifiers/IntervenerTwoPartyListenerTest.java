@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
@@ -22,7 +23,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -50,13 +50,19 @@ class IntervenerTwoPartyListenerTest {
     private static final String INTERVENER_TWO_REF = "REF123";
     private static final String COVER_SHEET_FILE = "cover.pdf";
     private static final String TEST_DOC_NAME = "test-document.pdf";
+    private CaseDocument testDocument;
     private FinremCaseDetails caseDetails;
     private SendCorrespondenceEvent event;
 
     @BeforeEach
     void setUp() {
 
+        testDocument = CaseDocument.builder()
+            .documentFilename(TEST_DOC_NAME)
+            .build();
+
         caseDetails = FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder().intervenerTwo(IntervenerTwo
                     .builder()
                     .intervenerSolEmail(INTERVENER_TWO_EMAIL)
@@ -157,19 +163,29 @@ class IntervenerTwoPartyListenerTest {
      */
     @Test
     void shouldSendPaperNotificationWhenPartyIsNotDigitalViaHandleNotification() {
+        BulkPrintDocument bulkPrintDocument1 = BulkPrintDocument
+            .builder()
+            .fileName(TEST_DOC_NAME)
+            .build();
+
+        BulkPrintDocument bulkPrintCoverSheet = BulkPrintDocument
+            .builder()
+            .fileName(COVER_SHEET_FILE)
+            .build();
+
         when(notificationService
             .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerTwo(), caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getIntervenerTwoCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
-        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(anyList()))
-            .thenReturn(List.of(BulkPrintDocument.builder().build()));
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType()))
+            .thenReturn(List.of(bulkPrintDocument1, bulkPrintCoverSheet));
 
         intervenerTwoPartyListener.handleNotification(event);
 
         verify(bulkPrintService).getIntervenerTwoCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(anyList());
+        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType());
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
-            eq(caseDetails), eq(INTERVENER_TWO), anyList(), eq(false), eq(AUTH_TOKEN)
+            caseDetails, INTERVENER_TWO, List.of(bulkPrintDocument1, bulkPrintCoverSheet), false, AUTH_TOKEN
         );
     }
 }

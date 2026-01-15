@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -102,9 +103,9 @@ public class BulkPrintService {
     /**
      * Prints the applicant's documents with a coversheet.
      *
-     * @param caseDetails          The case details.
-     * @param authorisationToken   The authorisation token.
-     * @param caseDocuments        The list of case documents to print.
+     * @param caseDetails        The case details.
+     * @param authorisationToken The authorisation token.
+     * @param caseDocuments      The list of case documents to print.
      * @return The UUID of the printed documents.
      */
     public UUID printApplicantDocuments(FinremCaseDetails caseDetails, String authorisationToken,
@@ -283,10 +284,29 @@ public class BulkPrintService {
         });
     }
 
-    public List<BulkPrintDocument> convertCaseDocumentsToBulkPrintDocuments(List<CaseDocument> caseDocuments) {
+    /**
+     * Converts a list of case documents to a list of bulk print documents.
+     * Each case document is processed and mapped into a corresponding bulk print document
+     *
+     * <p>
+     *     Call to genericDocumentService.convertDocumentIfNotPdfAlready converts non-PDF docs to PDF before mapping;
+     *     however, the current conversion stores an orphaned document in DM Store.
+     *     As part of DFR-3308, the conversion logic that returns a PDF byte array should be passed straight into the
+     *     List of a document byte array in the bulk print call.
+     * </p>.
+     *
+     * @param caseDocuments       the list of case documents to be converted
+     * @param authorisationToken  the token used for authorisation during document conversion
+     * @param caseType            the type of the case related to the documents
+     * @return a list of bulk print documents generated from the given case documents
+     */
+    public List<BulkPrintDocument> convertCaseDocumentsToBulkPrintDocuments(List<CaseDocument> caseDocuments,
+                                                                            String authorisationToken,
+                                                                            CaseType caseType) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         for (CaseDocument caseDocument : caseDocuments) {
-            BulkPrintDocument bulkPrintDocument = documentHelper.mapToBulkPrintDocument(caseDocument);
+            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseType);
+            BulkPrintDocument bulkPrintDocument = documentHelper.mapToBulkPrintDocument(pdfDocument);
             bulkPrintDocuments.add(bulkPrintDocument);
         }
         return bulkPrintDocuments;
@@ -337,6 +357,7 @@ public class BulkPrintService {
      * This method will be removed in future versions.
      *
      * <p>Use @link generateRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) instead </p>
+     *
      * @return BulkPrintDocument to be return
      * @deprecated deprecated since 15-Feb-2023
      */
