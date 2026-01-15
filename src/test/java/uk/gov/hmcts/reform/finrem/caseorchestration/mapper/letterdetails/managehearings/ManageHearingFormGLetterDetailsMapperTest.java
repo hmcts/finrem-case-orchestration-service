@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
@@ -20,6 +22,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
@@ -53,8 +57,12 @@ class ManageHearingFormGLetterDetailsMapperTest {
             new ObjectMapper(), courtDetailsConfiguration);
     }
 
-    @Test
-    void shouldBuildDocumentTemplateDetails() {
+    @ParameterizedTest
+    @CsvSource(value = {
+        "MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS, YES",
+        "SCHEDULE_1_CHILDREN_ACT_1989, NO",
+    })
+    void shouldBuildDocumentTemplateDetails(Schedule1OrMatrimonialAndCpList schedule1OrMatrimonial, YesOrNo civilPartnership) {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
