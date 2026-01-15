@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -11,15 +12,12 @@ public enum NotificationParty {
     INTERVENER_THREE("[INTVRSOLICITOR3]"),
     INTERVENER_FOUR("[INTVRSOLICITOR4]");
 
+    @Getter
     private final String role;
-
-    public String getRoles() {
-        return role;
-    }
 
     public static NotificationParty getNotificationPartyFromRole(String role) {
         for (NotificationParty party : NotificationParty.values()) {
-            if (party.getRoles().equals(role)) {
+            if (party.getRole().equals(role)) {
                 return party;
             }
         }
