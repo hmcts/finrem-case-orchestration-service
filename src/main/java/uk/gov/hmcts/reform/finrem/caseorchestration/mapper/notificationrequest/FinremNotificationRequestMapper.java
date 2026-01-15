@@ -55,12 +55,12 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData()));
     }
 
-    public NotificationRequest getNotificationRequestForApplicantBarrister(FinremCaseDetails caseDetails, Barrister barrister) {
-        return buildNotificationRequest(caseDetails, getApplicantBarristerCaseData(caseDetails.getData(), barrister));
-    }
-
     public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails, boolean isNotDigital) {
         return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData(), isNotDigital));
+    }
+
+    public NotificationRequest getNotificationRequestForApplicantBarrister(FinremCaseDetails caseDetails, Barrister barrister) {
+        return buildNotificationRequest(caseDetails, getApplicantBarristerCaseData(caseDetails.getData(), barrister));
     }
 
     public NotificationRequest getNotificationRequestForIntervenerSolicitor(FinremCaseDetails caseDetails,

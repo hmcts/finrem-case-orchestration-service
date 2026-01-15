@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingcli
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.SetUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -315,7 +316,7 @@ public class StopRepresentingClientService {
         BarristerChange barristerChange = manageBarristerService
             .getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
         barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, barristerChange);
-        barristerChange.getRemoved().forEach(b -> {
+        SetUtils.emptyIfNull(barristerChange.getRemoved()).forEach(b -> {
             if (BarristerParty.APPLICANT.equals(barristerParty)) {
                 notifyApplicantBarrister(info, b);
             } else {

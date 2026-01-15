@@ -9,10 +9,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
@@ -100,12 +102,21 @@ class StopRepresentingClientServiceTest {
     @Mock
     private StopRepresentingClientService underTest;
 
+    @Mock
+    private FinremNotificationRequestMapper finremNotificationRequestMapper;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @BeforeEach
     void setup() {
         underTest = new StopRepresentingClientService(assignCaseAccessService, systemUserService, finremCaseDetailsMapper,
             manageBarristerService, barristerChangeCaseAccessUpdater, coreCaseDataService, intervenerService,
-            caseRoleService, idamService);
+            caseRoleService, idamService, finremNotificationRequestMapper, applicationEventPublisher);
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+        lenient().when(manageBarristerService
+                .getBarristerChange(any(FinremCaseDetails.class), any(FinremCaseData.class), any(BarristerParty.class)))
+            .thenReturn(BarristerChange.builder().build());
     }
 
     @Test
@@ -403,6 +414,9 @@ class StopRepresentingClientServiceTest {
                 .build();
 
             when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(mock(CaseDetails.class));
+            when(manageBarristerService
+                .getBarristerChange(any(FinremCaseDetails.class), any(FinremCaseData.class), any(BarristerParty.class)))
+                .thenReturn(BarristerChange.builder().build());
 
             underTest.applyCaseAssignment(event);
 
