@@ -72,6 +72,10 @@ public abstract class AbstractPartyListener {
         }
     }
 
+    protected boolean shouldSendPaperNotification() {
+        return true;
+    }
+
     @Async
     @EventListener
     public void handleNotification(SendCorrespondenceEvent event) {
@@ -84,7 +88,7 @@ public abstract class AbstractPartyListener {
     private void sendNotification(SendCorrespondenceEvent event) {
         if (isDigitalParty(event)) {
             enrichAndSendEmailNotification(event);
-        } else {
+        } else if (shouldSendPaperNotification()) {
             sendPaperNotification(event);
         }
     }

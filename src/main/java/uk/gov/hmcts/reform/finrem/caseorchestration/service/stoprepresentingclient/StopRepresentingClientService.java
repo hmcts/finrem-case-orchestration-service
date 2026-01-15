@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -42,7 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getNotificationPartyFromRole;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getNotificationParty;
 
 @Service
 @Slf4j
@@ -68,6 +68,8 @@ public class StopRepresentingClientService {
     private final CaseRoleService caseRoleService;
 
     private final IdamService idamService;
+
+    private final FinremNotificationRequestMapper finremNotificationRequestMapper;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -390,11 +392,11 @@ public class StopRepresentingClientService {
         if (context.isApplicationRepresentative()) {
             applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
                 .notificationParties(List.of(
-                    // TODO getNotificationPartyFromRole(CaseRole.APP_BARRISTER) directly
-                    getNotificationPartyFromRole(CaseRole.APP_BARRISTER.getCcdCode()) // ApplicantSolicitorListener is listening it
+                    getNotificationParty(CaseRole.APP_BARRISTER, false)
+                        .orElseThrow()
                 ))
-                .emailNotificationRequest(NotificationRequest.builder()
-                    .build()) // TODO
+                .emailNotificationRequest(finremNotificationRequestMapper
+                    .getNotificationRequestForApplicantBarrister(info.getCaseDetails(), barrister))
                 .emailTemplate(getNotifyAppilcantSolicitorTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
                 .authToken(userAuthorisation)
@@ -410,11 +412,11 @@ public class StopRepresentingClientService {
         if (context.isApplicationRepresentative()) {
             applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
                 .notificationParties(List.of(
-                    // TODO getNotificationPartyFromRole(CaseRole.APP_SOLICITOR) directly
-                    getNotificationPartyFromRole(CaseRole.APP_SOLICITOR.getCcdCode()) // ApplicantBarristerListener is listening it
+                    getNotificationParty(CaseRole.APP_SOLICITOR, false)
+                        .orElseThrow()
                 ))
-                .emailNotificationRequest(NotificationRequest.builder()
-                    .build()) // TODO
+                .emailNotificationRequest(finremNotificationRequestMapper
+                    .getNotificationRequestForApplicantSolicitor(info.getCaseDetails()))
                 .emailTemplate(getNotifyAppilcantSolicitorTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
                 .authToken(userAuthorisation)
