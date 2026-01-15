@@ -1654,7 +1654,7 @@ public class NotificationService {
     }
 
     /**
-     * Do not expect any return.1
+     * Do not expect any return.
      *
      * <p>Please use @{@link #sendNoticeOfChangeEmail(FinremCaseDetails)}</p>
      *
