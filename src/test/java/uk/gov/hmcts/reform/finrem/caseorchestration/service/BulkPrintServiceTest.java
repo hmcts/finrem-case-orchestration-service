@@ -94,7 +94,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(
             new CaseDocument(), finremCaseDetails(), RESPONDENT, AUTH_TOKEN);
 
-         assertThat(bulkPrintLetterId).isEqualTo(letterId);
+        assertThat(bulkPrintLetterId).isEqualTo(letterId);
 
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
 
@@ -107,7 +107,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
         UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(caseDocument(), caseDetails, APPLICANT, AUTH_TOKEN);
 
-         assertThat(bulkPrintLetterId).isEqualTo(letterId);
+        assertThat(bulkPrintLetterId).isEqualTo(letterId);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
         UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(caseDocument(), caseDetails, APPLICANT, AUTH_TOKEN);
 
-         assertThat(bulkPrintLetterId).isEqualTo(letterId);
+        assertThat(bulkPrintLetterId).isEqualTo(letterId);
     }
 
     @Test
@@ -167,7 +167,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         BulkPrintRequest bulkPrintRequest = bulkPrintRequestArgumentCaptor.getValue();
         verifyBulkPrintRequest(bulkPrintRequest, bulkPrintDocuments, caseDetails.getId(), APPLICANT);
 
-        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp()).isEqualTo(caseDocument); 
+        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp()).isEqualTo(caseDocument);
     }
 
     @Test
@@ -365,7 +365,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument2, AUTH_TOKEN, CaseType.CONSENTED))
             .thenReturn(caseDocument2);
 
-        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(caseDocuments, AUTH_TOKEN, CaseType.CONSENTED);
+        List<BulkPrintDocument> bulkPrintDocuments =
+            bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(caseDocuments, AUTH_TOKEN, CaseType.CONSENTED);
 
         assertThat(bulkPrintDocuments).hasSize(2);
         assertThat(bulkPrintDocuments.getFirst().getFileName()).isEqualTo("test-file-1.pdf");
