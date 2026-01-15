@@ -55,7 +55,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
         if (featureToggleService.isExui3990WorkaroundEnabled()) {
-            stopRepresentingClientService.applyCaseAssignment(
+            stopRepresentingClientService.revokePartiesAccessAndNotifyParties(
                 StopRepresentingClientInfo.builder()
                     .userAuthorisation(userAuthorisation)
                     .caseDetails(callbackRequest.getCaseDetails())
@@ -63,7 +63,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                     .build());
         } else {
             CompletableFuture.runAsync(() ->
-                stopRepresentingClientService.applyCaseAssignment(
+                stopRepresentingClientService.revokePartiesAccessAndNotifyParties(
                     StopRepresentingClientInfo.builder()
                         .userAuthorisation(userAuthorisation)
                         .caseDetails(callbackRequest.getCaseDetails())

@@ -74,7 +74,7 @@ class StopRepresentingClientSubmittedHandlerTest {
         underTest.handle(request, AUTH_TOKEN);
 
         ArgumentCaptor<StopRepresentingClientInfo> eventCaptor = ArgumentCaptor.forClass(StopRepresentingClientInfo.class);
-        verify(stopRepresentingClientService).applyCaseAssignment(eventCaptor.capture());
+        verify(stopRepresentingClientService).revokePartiesAccessAndNotifyParties(eventCaptor.capture());
 
         assertThat(eventCaptor.getValue().getCaseDetails().getData()).isEqualTo(caseData);
         assertThat(eventCaptor.getValue().getCaseDetailsBefore().getData()).isEqualTo(caseDataBefore);
@@ -93,7 +93,7 @@ class StopRepresentingClientSubmittedHandlerTest {
         underTest.handle(request, AUTH_TOKEN);
 
         ArgumentCaptor<StopRepresentingClientInfo> eventCaptor = ArgumentCaptor.forClass(StopRepresentingClientInfo.class);
-        verify(stopRepresentingClientService, timeout(500)).applyCaseAssignment(eventCaptor.capture());
+        verify(stopRepresentingClientService, timeout(500)).revokePartiesAccessAndNotifyParties(eventCaptor.capture());
 
         assertThat(eventCaptor.getValue().getCaseDetails().getData()).isEqualTo(caseData);
         assertThat(eventCaptor.getValue().getCaseDetailsBefore().getData()).isEqualTo(caseDataBefore);

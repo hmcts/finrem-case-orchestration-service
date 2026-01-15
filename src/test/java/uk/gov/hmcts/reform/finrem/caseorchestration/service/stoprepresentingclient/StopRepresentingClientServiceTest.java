@@ -230,7 +230,7 @@ class StopRepresentingClientServiceTest {
                 .userAuthorisation(AUTH_TOKEN)
                 .build();
 
-            underTest.applyCaseAssignment(event);
+            underTest.revokePartiesAccessAndNotifyParties(event);
 
             verify(intervenerService).revokeIntervenerSolicitor(Long.parseLong(CASE_ID), intervenerOne);
             verify(intervenerService, never()).revokeIntervenerSolicitor(Long.parseLong(CASE_ID), intervenerTwo);
@@ -270,7 +270,7 @@ class StopRepresentingClientServiceTest {
             when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
                 .thenReturn(intv4BarristerChange);
 
-            underTest.applyCaseAssignment(event);
+            underTest.revokePartiesAccessAndNotifyParties(event);
 
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
@@ -316,7 +316,7 @@ class StopRepresentingClientServiceTest {
             when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
                 .thenReturn(intv4BarristerChange);
 
-            underTest.applyCaseAssignment(event);
+            underTest.revokePartiesAccessAndNotifyParties(event);
 
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
@@ -346,7 +346,7 @@ class StopRepresentingClientServiceTest {
                 Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
+            StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
                 .userAuthorisation(AUTH_TOKEN)
@@ -364,7 +364,7 @@ class StopRepresentingClientServiceTest {
                 -> getOrganisationPolicy(cd.getData(), isApplicant).equals(originalOrgPolicy)
             ))).thenReturn(mockValidCaseDetails);
 
-            underTest.applyCaseAssignment(event);
+            underTest.revokePartiesAccessAndNotifyParties(info);
 
             verify(assignCaseAccessService).applyDecision(TEST_SYSTEM_TOKEN, mockValidCaseDetails);
             verify(assignCaseAccessService, never()).applyDecision(TEST_SYSTEM_TOKEN, mockInvalidCaseDetails);
@@ -389,7 +389,7 @@ class StopRepresentingClientServiceTest {
                 .userAuthorisation(AUTH_TOKEN)
                 .build();
 
-            underTest.applyCaseAssignment(event);
+            underTest.revokePartiesAccessAndNotifyParties(event);
 
             verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
             verifyNoInteractions(intervenerService);
@@ -418,7 +418,7 @@ class StopRepresentingClientServiceTest {
                 .getBarristerChange(any(FinremCaseDetails.class), any(FinremCaseData.class), any(BarristerParty.class)))
                 .thenReturn(BarristerChange.builder().build());
 
-            underTest.applyCaseAssignment(event);
+            underTest.revokePartiesAccessAndNotifyParties(event);
 
             ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> captor = ArgumentCaptor.forClass(Function.class);
             verify(coreCaseDataService).performPostSubmitCallback(eq(caseType), eq(Long.valueOf(CASE_ID)),

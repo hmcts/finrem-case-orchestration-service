@@ -92,25 +92,26 @@ public class StopRepresentingClientService {
         return map;
     }
 
-    private static EmailTemplateNames getNotifyAppilcantSolicitorTemplateName(FinremCaseData finremCaseData) {
+    private static EmailTemplateNames getNotifyApplicantSolicitorTemplateName(FinremCaseData finremCaseData) {
         return finremCaseData.isContestedApplication()
             ? EmailTemplateNames.FR_CONTESTED_SOLICITOR_STOP_REPRESENTING_APPLICANT
             : EmailTemplateNames.FR_CONSENTED_SOLICITOR_STOP_REPRESENTING_APPLICANT;
     }
 
     /**
-     * Applies case assignment changes when a representative stops representing a client.
+     * Revoke the case assess and send notifications to affected parties.
      *
      * <p>This method:
      * <ul>
-     *   <li>Handles case assignment updates for intervener representatives</li>
-     *   <li>Handles case assignment updates for applicant or respondent representatives</li>
-     *   <li>Notifies the case assignment service of any barrister representation changes</li>
+     *   <li>Handles requests for intervener representatives</li>
+     *   <li>Handles requests for applicant or respondent representatives</li>
+     *   <li>Handles requests for any barrister representation changes</li>
+     *   <li>Sends notification to parties like applicant, respondent and the parties being revoked</li>
      * </ul>
      *
      * @param info the stop-representing context containing case details and user authorisation
      */
-    public void applyCaseAssignment(StopRepresentingClientInfo info) {
+    public void revokePartiesAccessAndNotifyParties(StopRepresentingClientInfo info) {
         handleIntervenerRepresentativeRequest(info);
         handleApplicantOrRespondentRepresentativeRequest(info);
         sendAllBarristerChangeToCaseAssignmentService(info);
@@ -398,7 +399,7 @@ public class StopRepresentingClientService {
                 ))
                 .emailNotificationRequest(finremNotificationRequestMapper
                     .getNotificationRequestForApplicantBarrister(info.getCaseDetails(), barrister))
-                .emailTemplate(getNotifyAppilcantSolicitorTemplateName(finremCaseData))
+                .emailTemplate(getNotifyApplicantSolicitorTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
                 .caseDetailsBefore(info.getCaseDetailsBefore())
                 .authToken(userAuthorisation)
@@ -419,7 +420,7 @@ public class StopRepresentingClientService {
                 ))
                 .emailNotificationRequest(finremNotificationRequestMapper
                     .getNotificationRequestForApplicantSolicitor(info.getCaseDetails()))
-                .emailTemplate(getNotifyAppilcantSolicitorTemplateName(finremCaseData))
+                .emailTemplate(getNotifyApplicantSolicitorTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
                 .caseDetailsBefore(info.getCaseDetailsBefore())
                 .authToken(userAuthorisation)
