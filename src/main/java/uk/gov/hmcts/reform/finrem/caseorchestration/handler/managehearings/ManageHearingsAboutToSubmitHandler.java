@@ -70,6 +70,8 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
 
         manageHearingActionService.updateTabData(finremCaseData);
 
+        finremCaseData.setPinInPost("123pip");
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
     }

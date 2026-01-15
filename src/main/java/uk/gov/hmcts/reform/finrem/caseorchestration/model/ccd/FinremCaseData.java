@@ -77,6 +77,7 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private CaseType ccdCaseType;
 
+    private String pinInPost;
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;
