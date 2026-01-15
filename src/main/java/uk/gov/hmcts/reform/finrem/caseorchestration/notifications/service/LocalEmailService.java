@@ -36,7 +36,7 @@ public class LocalEmailService extends EmailService {
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
-                templateVars, notificationRequest.getEmailReplyToId());
+            templateVars, notificationRequest.getEmailReplyToId());
         log.info("Creating a preview email for Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
         previewEmail(emailToSend, "send Confirmation email for " + template.name());
     }
@@ -51,10 +51,10 @@ public class LocalEmailService extends EmailService {
         String referenceId = emailToSend.getReferenceId();
         try {
             log.info("Attempting to create a preview for {} with template {}. Reference ID: {}",
-                    emailDescription, templateId, referenceId);
+                emailDescription, templateId, referenceId);
             TemplatePreview templatePreview = emailClient.generateTemplatePreview(
-                    templateId,
-                    emailToSend.getTemplateFields()
+                templateId,
+                emailToSend.getTemplateFields()
             );
             log.info("Preview successful. Rendered template:\n{}", templatePreview);
         } catch (NotificationClientException e) {
