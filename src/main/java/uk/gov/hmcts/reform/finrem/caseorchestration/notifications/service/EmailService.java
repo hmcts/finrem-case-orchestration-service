@@ -174,7 +174,10 @@ public class EmailService {
             addRefusedDraftOrderOrPsaTemplateVars(notificationRequest, templateVars);
         }
 
-        templateVars.putAll(emailTemplateVars.get(templateName));
+        Map<String, String> fromApplicationContextProperties = emailTemplateVars.get(templateName);
+        if (fromApplicationContextProperties != null) {
+            templateVars.putAll(fromApplicationContextProperties);
+        }
         return templateVars;
     }
 
