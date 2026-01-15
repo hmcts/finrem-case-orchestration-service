@@ -139,7 +139,8 @@ public abstract class AbstractPartyListener {
                 new IllegalArgumentException("No documents to post provided for paper notification, case ID: " + event.getCaseId()));
 
         docsToPrint.add(getPartyCoversheet(event));
-        List<BulkPrintDocument> bpDocs = bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint, event.authToken, event.getCaseDetails().getCaseType());
+        List<BulkPrintDocument> bpDocs =
+                bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint, event.authToken, event.getCaseDetails().getCaseType());
         boolean isOutsideUK = isPartyOutsideUK(event);
 
         // Bulk print service requires implementation of exception handling -
