@@ -92,10 +92,10 @@ public class StopRepresentingClientService {
         return map;
     }
 
-    private static EmailTemplateNames getNotifyApplicantSolicitorTemplateName(FinremCaseData finremCaseData) {
+    private static EmailTemplateNames getNotifyApplicantRepresentativeTemplateName(FinremCaseData finremCaseData) {
         return finremCaseData.isContestedApplication()
-            ? EmailTemplateNames.FR_CONTESTED_SOLICITOR_STOP_REPRESENTING_APPLICANT
-            : EmailTemplateNames.FR_CONSENTED_SOLICITOR_STOP_REPRESENTING_APPLICANT;
+            ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
+            : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
     }
 
     /**
@@ -320,7 +320,7 @@ public class StopRepresentingClientService {
         SetUtils.emptyIfNull(barristerChange.getRemoved()).forEach(b -> {
             if (BarristerParty.APPLICANT.equals(barristerParty)) {
                 notifyApplicantBarrister(info, b);
-            } else {
+            } else if (BarristerParty.RESPONDENT.equals(barristerParty)) {
                 notifyRespondentBarrister(info, b);
             }
         });
@@ -398,8 +398,8 @@ public class StopRepresentingClientService {
                         .orElseThrow()
                 ))
                 .emailNotificationRequest(finremNotificationRequestMapper
-                    .getNotificationRequestForApplicantBarrister(info.getCaseDetails(), barrister))
-                .emailTemplate(getNotifyApplicantSolicitorTemplateName(finremCaseData))
+                    .getNotificationRequestForApplicantBarrister(info.getCaseDetailsBefore(), barrister))
+                .emailTemplate(getNotifyApplicantRepresentativeTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
                 .caseDetailsBefore(info.getCaseDetailsBefore())
                 .authToken(userAuthorisation)
@@ -419,8 +419,8 @@ public class StopRepresentingClientService {
                         .orElseThrow()
                 ))
                 .emailNotificationRequest(finremNotificationRequestMapper
-                    .getNotificationRequestForApplicantSolicitor(info.getCaseDetails()))
-                .emailTemplate(getNotifyApplicantSolicitorTemplateName(finremCaseData))
+                    .getNotificationRequestForApplicantSolicitor(info.getCaseDetailsBefore()))
+                .emailTemplate(getNotifyApplicantRepresentativeTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
                 .caseDetailsBefore(info.getCaseDetailsBefore())
                 .authToken(userAuthorisation)
