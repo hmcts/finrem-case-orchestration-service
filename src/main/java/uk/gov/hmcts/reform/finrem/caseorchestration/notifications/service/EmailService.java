@@ -63,6 +63,7 @@ public class EmailService {
     private static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
     private static final String HEARING_DATE = "hearingDate";
     private static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
+    private static final String DEFAULT_LINK_TO_SMART_SURVEY = "http://www.smartsurvey.co.uk/s/KCECE/";
 
     /**
      * Orchestrates sending an email based on the provided notification request and template.
@@ -91,6 +92,9 @@ public class EmailService {
         templateVars.put("applicantName", notificationRequest.getApplicantName());
         templateVars.put("respondentName", notificationRequest.getRespondentName());
         templateVars.put("hearingType", notificationRequest.getHearingType());
+
+        // linkToSmartSurvey
+        templateVars.put("linkToSmartSurvey", DEFAULT_LINK_TO_SMART_SURVEY);
 
         //contested emails notifications require the court information, consented does not
         if ((CONTESTED.equals(notificationRequest.getCaseType())
