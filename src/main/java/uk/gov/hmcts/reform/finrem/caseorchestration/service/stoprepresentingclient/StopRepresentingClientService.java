@@ -49,6 +49,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifie
 @RequiredArgsConstructor
 public class StopRepresentingClientService {
 
+    private static final Revocation NO_NOC_INVOLVED = new Revocation(false, false);
+
     private final AssignCaseAccessService assignCaseAccessService;
 
     private final SystemUserService systemUserService;
@@ -87,6 +89,12 @@ public class StopRepresentingClientService {
         return map;
     }
 
+    private static EmailTemplateNames getNotifyAppilcantSolicitorTemplateName(FinremCaseData finremCaseData) {
+        return finremCaseData.isContestedApplication()
+            ? EmailTemplateNames.FR_CONTESTED_SOLICITOR_STOP_REPRESENTING_APPLICANT
+            : EmailTemplateNames.FR_CONSENTED_SOLICITOR_STOP_REPRESENTING_APPLICANT;
+    }
+
     /**
      * Applies case assignment changes when a representative stops representing a client.
      *
@@ -103,10 +111,6 @@ public class StopRepresentingClientService {
         handleIntervenerRepresentativeRequest(info);
         handleApplicantOrRespondentRepresentativeRequest(info);
         sendAllBarristerChangeToCaseAssignmentService(info);
-    }
-
-    public void notifyParties(StopRepresentingClientInfo info) {
-        notifyApplicantRepresentative(info);
     }
 
     /**
@@ -241,11 +245,18 @@ public class StopRepresentingClientService {
         final CaseType caseType = finremCaseData.getCcdCaseType();
         final long caseId = getCaseId(info);
 
-        boolean isNocRequestSent = sendNocRequestToCaseAssignmentService(info);
+        Revocation revocation = revokeApplicantSolicitorOrRespondentSolicitor(info);
 
-        if (isNocRequestSent) {
+        if (revocation.isRevoked()) {
             // save a call if changeOrganisationRequestField is null
             clearChangeOrganisationRequestAfterThisEvent(caseType, caseId);
+
+            if (revocation.applicantSolicitorRevoked) {
+                notifyApplicantSolicitor(info);
+            }
+            if (revocation.respondentSolicitorRevoked) {
+                notifyRespondentSolicitor(info);
+            }
         }
     }
 
@@ -302,9 +313,23 @@ public class StopRepresentingClientService {
         BarristerChange barristerChange = manageBarristerService
             .getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
         barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, barristerChange);
+        barristerChange.getRemoved().forEach(b -> {
+            if (BarristerParty.APPLICANT.equals(barristerParty)) {
+                notifyApplicantBarrister(info, b);
+            } else {
+                notifyRespondentBarrister(info, b);
+            }
+        });
     }
 
-    private boolean sendNocRequestToCaseAssignmentService(StopRepresentingClientInfo info) {
+    private record Revocation(boolean applicantSolicitorRevoked, boolean respondentSolicitorRevoked) {
+
+        boolean isRevoked() {
+            return applicantSolicitorRevoked || respondentSolicitorRevoked;
+        }
+    }
+
+    private Revocation revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
         final FinremCaseData finremCaseData = getFinremCaseData(info);
         final FinremCaseData originalFinremCaseData = getFinremCaseDataBefore(info);
 
@@ -312,26 +337,27 @@ public class StopRepresentingClientService {
         if (finremCaseData.getChangeOrganisationRequestField() == null) {
             log.info("{} - Not sending request to case assignment service due to changeOrganisationRequestField is null",
                 finremCaseData.getCcdCaseId());
-            return false;
+            return NO_NOC_INVOLVED;
         }
 
         // aac handles org policy modification based on the Change Organisation Request,
         // so we need to revert the org policies to their value before the event started
         // Refer to NoticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess
-        boolean isReverted = false;
-        if (isApplicantForRepresentationChange(finremCaseData)) {
+        boolean shouldPerformNoc = false;
+        boolean isApplicantForRepresentationChange = isApplicantForRepresentationChange(finremCaseData);
+        if (isApplicantForRepresentationChange) {
             finremCaseData.setApplicantOrganisationPolicy(originalFinremCaseData.getApplicantOrganisationPolicy());
-            isReverted = true;
+            shouldPerformNoc = true;
         } else if (isRespondentForRepresentationChange(finremCaseData)) {
             finremCaseData.setRespondentOrganisationPolicy(originalFinremCaseData.getRespondentOrganisationPolicy());
-            isReverted = true;
+            shouldPerformNoc = true;
         }
 
         // Going to apply decision
-        if (isReverted) {
+        if (shouldPerformNoc) {
             assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(),
                 buildCaseDetailsFromEventCaseData(info));
-            return true;
+            return new Revocation(isApplicantForRepresentationChange, !isApplicantForRepresentationChange);
         }
         throw new IllegalStateException(format("%s - ChangeOrganisationRequest populated with unknown or null NOC Party : %s",
             finremCaseData.getContactDetailsWrapper().getNocParty(),
@@ -357,21 +383,53 @@ public class StopRepresentingClientService {
             .build();
     }
 
-    private void notifyApplicantRepresentative(StopRepresentingClientInfo info, String userAuthorisation) {
-        RepresentativeInContext context = buildRepresentation(info.getCaseDetails().getData(), userAuthorisation);
+    private void notifyApplicantBarrister(StopRepresentingClientInfo info, Barrister barrister) {
+        String userAuthorisation = info.getUserAuthorisation();
+        FinremCaseData finremCaseData = getFinremCaseData(info);
+        RepresentativeInContext context = buildRepresentation(finremCaseData, userAuthorisation);
         if (context.isApplicationRepresentative()) {
-
             applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
                 .notificationParties(List.of(
-                    getNotificationPartyFromRole(CaseRole.APP_SOLICITOR.getCcdCode()),
-                    getNotificationPartyFromRole(CaseRole.APP_BARRISTER.getCcdCode())
+                    // TODO getNotificationPartyFromRole(CaseRole.APP_BARRISTER) directly
+                    getNotificationPartyFromRole(CaseRole.APP_SOLICITOR.getCcdCode()) // ApplicantSolicitorListener is listening it
                 ))
-                .emailNotificationRequest(NotificationRequest.builder().build())
-                .emailTemplate(EmailTemplateNames.FR_CONTESTED_SOLICITOR_STOP_REPRESENTING_APPLICANT)
+                .emailNotificationRequest(NotificationRequest.builder()
+                    .notificationEmail(barrister.getEmail())
+                    .build()) // TODO
+                .emailTemplate(getNotifyAppilcantSolicitorTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
                 .authToken(userAuthorisation)
                 .build()
             );
         }
+    }
+
+    private void notifyApplicantSolicitor(StopRepresentingClientInfo info) {
+        String userAuthorisation = info.getUserAuthorisation();
+        FinremCaseData finremCaseData = getFinremCaseData(info);
+        RepresentativeInContext context = buildRepresentation(finremCaseData, userAuthorisation);
+        if (context.isApplicationRepresentative()) {
+            applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
+                .notificationParties(List.of(
+                    // TODO getNotificationPartyFromRole(CaseRole.APP_SOLICITOR) directly
+                    getNotificationPartyFromRole(CaseRole.APP_SOLICITOR.getCcdCode()) // ApplicantBarristerListener is listening it
+                ))
+                .emailNotificationRequest(NotificationRequest.builder()
+                    .notificationEmail(finremCaseData.getAppSolicitorEmail())
+                    .build()) // TODO
+                .emailTemplate(getNotifyAppilcantSolicitorTemplateName(finremCaseData))
+                .caseDetails(info.getCaseDetails())
+                .authToken(userAuthorisation)
+                .build()
+            );
+        }
+    }
+
+    private void notifyRespondentBarrister(StopRepresentingClientInfo info, Barrister barrister) {
+        // TODO Covered in DFR-4454
+    }
+
+    private void notifyRespondentSolicitor(StopRepresentingClientInfo info) {
+        // TODO Covered in DFR-4454
     }
 }
