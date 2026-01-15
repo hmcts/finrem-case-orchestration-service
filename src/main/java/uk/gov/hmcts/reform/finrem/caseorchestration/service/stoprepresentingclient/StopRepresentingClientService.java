@@ -391,10 +391,9 @@ public class StopRepresentingClientService {
             applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
                 .notificationParties(List.of(
                     // TODO getNotificationPartyFromRole(CaseRole.APP_BARRISTER) directly
-                    getNotificationPartyFromRole(CaseRole.APP_SOLICITOR.getCcdCode()) // ApplicantSolicitorListener is listening it
+                    getNotificationPartyFromRole(CaseRole.APP_BARRISTER.getCcdCode()) // ApplicantSolicitorListener is listening it
                 ))
                 .emailNotificationRequest(NotificationRequest.builder()
-                    .notificationEmail(barrister.getEmail())
                     .build()) // TODO
                 .emailTemplate(getNotifyAppilcantSolicitorTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
@@ -415,7 +414,6 @@ public class StopRepresentingClientService {
                     getNotificationPartyFromRole(CaseRole.APP_SOLICITOR.getCcdCode()) // ApplicantBarristerListener is listening it
                 ))
                 .emailNotificationRequest(NotificationRequest.builder()
-                    .notificationEmail(finremCaseData.getAppSolicitorEmail())
                     .build()) // TODO
                 .emailTemplate(getNotifyAppilcantSolicitorTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
