@@ -18,10 +18,15 @@ public class SendCorrespondenceEvent {
     EmailTemplateNames emailTemplate;
     List<CaseDocument> documentsToPost;
     FinremCaseDetails caseDetails;
+    FinremCaseDetails caseDetailsBefore;
     String authToken;
 
     public FinremCaseData getCaseData() {
         return caseDetails.getData();
+    }
+
+    public FinremCaseData getCaseDataBefore() {
+        return caseDetailsBefore.getData();
     }
 
     public String getCaseId() {

@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.F
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -111,6 +112,8 @@ public class NotificationService {
     private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     private final EvidenceManagementDownloadService evidenceManagementDownloadService;
     private final CourtDetailsConfiguration courtDetailsConfiguration;
+    private final PrdOrganisationService organisationService;
+    private final SystemUserService systemUserService;
 
     /**
      * No Return.
@@ -1552,9 +1555,41 @@ public class NotificationService {
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
     }
 
+    /**
+     * Determines whether the applicant's solicitor is currently digital by checking that the
+     * applicant solicitor details are populated in the case data and verifying the solicitor's
+     * current digital status via the assign case access service.
+     *
+     * <p>This reflects the solicitor's current state rather than relying on historical data
+     * or a lookup by email.</p>
+     *
+     * @param caseDetails the case details containing applicant solicitor information
+     * @return {@code true} if the applicant solicitor is populated and is currently digital;
+     *         {@code false} otherwise
+     */
     public boolean isApplicantSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isApplicantSolicitorPopulated()
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    /**
+     * Determines whether the applicant's solicitor was digital at the time of evaluation by checking
+     * that the applicant solicitor details were populated in the case data and that a corresponding
+     * digital user existed in the organisation service for the applicant solicitor email.
+     *
+     * <p>This method relies on an email-based lookup in the organisation service and represents a
+     * point-in-time (historical) check, rather than the solicitor's current digital status.</p>
+     *
+     * @param caseDetails the case details containing applicant solicitor information
+     * @return {@code true} if the applicant solicitor details were populated and a digital user
+     *         was found for the applicant solicitor email; {@code false} otherwise
+     */
+    public boolean wasApplicantSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        FinremCaseData finremCaseData = caseDetails.getData();
+        String email = finremCaseData.getAppSolicitorEmail();
+
+        return finremCaseData.isApplicantSolicitorPopulated()
+            && organisationService.findUserByEmail(email, systemUserService.getSysUserToken()).isPresent();
     }
 
     public boolean isApplicantSolicitorDigital(FinremCaseDetails caseDetails) {
@@ -1619,7 +1654,7 @@ public class NotificationService {
     }
 
     /**
-     * Do not expect any return.
+     * Do not expect any return.1
      *
      * <p>Please use @{@link #sendNoticeOfChangeEmail(FinremCaseDetails)}</p>
      *

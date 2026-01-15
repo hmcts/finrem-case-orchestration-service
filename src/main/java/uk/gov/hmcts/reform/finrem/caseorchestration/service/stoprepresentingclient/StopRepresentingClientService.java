@@ -392,13 +392,14 @@ public class StopRepresentingClientService {
         if (context.isApplicationRepresentative()) {
             applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
                 .notificationParties(List.of(
-                    getNotificationParty(CaseRole.APP_BARRISTER, false)
+                    getNotificationParty(CaseRole.APP_BARRISTER, false, true)
                         .orElseThrow()
                 ))
                 .emailNotificationRequest(finremNotificationRequestMapper
                     .getNotificationRequestForApplicantBarrister(info.getCaseDetails(), barrister))
                 .emailTemplate(getNotifyAppilcantSolicitorTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
+                .caseDetailsBefore(info.getCaseDetailsBefore())
                 .authToken(userAuthorisation)
                 .build()
             );
@@ -412,13 +413,14 @@ public class StopRepresentingClientService {
         if (context.isApplicationRepresentative()) {
             applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
                 .notificationParties(List.of(
-                    getNotificationParty(CaseRole.APP_SOLICITOR, false)
+                    getNotificationParty(CaseRole.APP_SOLICITOR, false, true)
                         .orElseThrow()
                 ))
                 .emailNotificationRequest(finremNotificationRequestMapper
                     .getNotificationRequestForApplicantSolicitor(info.getCaseDetails()))
                 .emailTemplate(getNotifyAppilcantSolicitorTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
+                .caseDetailsBefore(info.getCaseDetailsBefore())
                 .authToken(userAuthorisation)
                 .build()
             );

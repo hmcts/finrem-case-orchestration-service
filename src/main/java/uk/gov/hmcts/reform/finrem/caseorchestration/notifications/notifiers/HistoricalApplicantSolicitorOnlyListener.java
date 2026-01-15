@@ -10,23 +10,27 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import static com.google.common.base.Strings.nullToEmpty;
 
 @Component
-public class DigitalApplicantSolicitorOnlyListener extends DigitalOnlyListener {
+public class HistoricalApplicantSolicitorOnlyListener extends DigitalOnlyListener {
 
-    public DigitalApplicantSolicitorOnlyListener(BulkPrintService bulkPrintService,
-                                                 EmailService emailService,
-                                                 NotificationService notificationService,
-                                                 InternationalPostalService internationalPostalService) {
+    public HistoricalApplicantSolicitorOnlyListener(BulkPrintService bulkPrintService,
+                                                    EmailService emailService,
+                                                    NotificationService notificationService,
+                                                    InternationalPostalService internationalPostalService) {
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
     }
 
     @Override
     protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.APPLICANT_SOLICITOR_ONLY);
+        return event.getNotificationParties().contains(NotificationParty.HISTORICAL_APPLICANT_SOLICITOR_ONLY);
     }
 
     @Override
     protected boolean isDigitalParty(SendCorrespondenceEvent event) {
-        return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(event.getCaseDetails());
+        if (event.getCaseDetailsBefore() != null) {
+            return notificationService.wasApplicantSolicitorDigitalAndEmailPopulated(event.getCaseDetailsBefore());
+        } else {
+            return false;
+        }
     }
 
     @Override

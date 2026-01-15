@@ -5,25 +5,23 @@ import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Getter
 public enum NotificationParty {
-    APPLICANT("[APPSOLICITOR]", true),
-    RESPONDENT("[RESPSOLICITOR]", true),
-    INTERVENER_ONE("[INTVRSOLICITOR1]", true),
-    INTERVENER_TWO("[INTVRSOLICITOR2]", true),
-    INTERVENER_THREE("[INTVRSOLICITOR3]", true),
-    INTERVENER_FOUR("[INTVRSOLICITOR4]", true),
-    APPLICANT_SOLICITOR_ONLY(CaseRole.APP_SOLICITOR.getCcdCode(), false),
-    APPLICANT_BARRISTER_ONLY(CaseRole.APP_BARRISTER.getCcdCode(), false);
+    APPLICANT("[APPSOLICITOR]", true, false),
+    RESPONDENT("[RESPSOLICITOR]", true, false),
+    INTERVENER_ONE("[INTVRSOLICITOR1]", true, false),
+    INTERVENER_TWO("[INTVRSOLICITOR2]", true, false),
+    INTERVENER_THREE("[INTVRSOLICITOR3]", true, false),
+    INTERVENER_FOUR("[INTVRSOLICITOR4]", true, false),
+    HISTORICAL_APPLICANT_SOLICITOR_ONLY(CaseRole.APP_SOLICITOR.getCcdCode(), false, true),
+    HISTORICAL_APPLICANT_BARRISTER_ONLY(CaseRole.APP_BARRISTER.getCcdCode(), false, true);
 
     private final String role;
     private final boolean notifyRepresented;
+    private final boolean historical;
 
     public static NotificationParty getNotificationPartyFromRole(String role) {
         for (NotificationParty party : NotificationParty.values()) {
@@ -35,18 +33,13 @@ public enum NotificationParty {
     }
 
     public static Optional<NotificationParty> getNotificationParty(
-        CaseRole caseRole, boolean notifyRepresented) {
+        CaseRole caseRole, boolean notifyRepresented, boolean historical) {
 
-        return Optional.ofNullable(caseRole)
-            .map(CaseRole::getCcdCode)
-            .map(LOOKUP::get)
-            .map(map -> map.get(notifyRepresented));
+        return Arrays.stream(NotificationParty.values())
+            .filter(party -> party.getRole().equals(caseRole.getCcdCode()))
+            .filter(party -> party.isNotifyRepresented() == notifyRepresented)
+            .filter(party -> party.isHistorical() == historical)
+            .findFirst();
     }
 
-    private static final Map<String, Map<Boolean, NotificationParty>> LOOKUP =
-        Arrays.stream(NotificationParty.values())
-            .collect(Collectors.groupingBy(
-                NotificationParty::getRole,
-                Collectors.toMap(NotificationParty::isNotifyRepresented, Function.identity())
-            ));
 }
