@@ -113,7 +113,7 @@ public class EmailServiceTest {
 
     @Before
     public void setUp() {
-        notificationRequest = new NotificationRequest();
+        notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setNotificationEmail(TEST_SOLICITOR_EMAIL);
         notificationRequest.setCaseReferenceNumber(TEST_CASE_FAMILY_MAN_ID);
         notificationRequest.setSolicitorReferenceNumber(TEST_SOLICITOR_REFERENCE);

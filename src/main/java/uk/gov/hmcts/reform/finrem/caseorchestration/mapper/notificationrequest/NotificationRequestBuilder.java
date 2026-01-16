@@ -168,7 +168,7 @@ public class NotificationRequestBuilder {
      * @return a NotificationRequest
      */
     public NotificationRequest build() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();;
         notificationRequest.setCaseReferenceNumber(caseReferenceNumber);
         notificationRequest.setSolicitorReferenceNumber(solicitorReferenceNumber);
         notificationRequest.setDivorceCaseNumber(divorceCaseNumber);

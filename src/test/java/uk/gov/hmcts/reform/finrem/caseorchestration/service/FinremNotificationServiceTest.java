@@ -145,7 +145,7 @@ class FinremNotificationServiceTest {
     void setUp() {
         dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
 
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         lenient().when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class),
             any())).thenReturn(notificationRequest);
         lenient().when(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(any(FinremCaseDetails.class), any()))
@@ -723,7 +723,7 @@ class FinremNotificationServiceTest {
 
     @Test
     void givenContestedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         notificationRequest.setNotificationEmail("test@test.com");
         when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
@@ -737,7 +737,7 @@ class FinremNotificationServiceTest {
 
     @Test
     void givenConsentedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         notificationRequest.setNotificationEmail("test@test.com");
         when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
@@ -751,7 +751,7 @@ class FinremNotificationServiceTest {
 
     @Test
     void givenContestedCase_whenSendNoCCaseworkerEmail_thenSendContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
@@ -765,7 +765,7 @@ class FinremNotificationServiceTest {
 
     @Test
     void givenConsentedCase_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
@@ -779,7 +779,7 @@ class FinremNotificationServiceTest {
 
     @Test
     void givenContestedCaseAndNonDigitalSol_whenSendNocEmail_thenNotSendContestedEmailCaseworker() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(false);

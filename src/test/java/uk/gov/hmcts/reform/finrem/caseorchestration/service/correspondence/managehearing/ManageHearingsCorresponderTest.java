@@ -153,7 +153,7 @@ class ManageHearingsCorresponderTest {
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         when(notificationRequestMapper.buildHearingNotificationForApplicantSolicitor(callbackRequest.getCaseDetails(),
             hearing)).thenReturn(notificationRequest);
 
@@ -185,7 +185,7 @@ class ManageHearingsCorresponderTest {
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         when(notificationRequestMapper.buildHearingNotificationForRespondentSolicitor(callbackRequest.getCaseDetails(),
             hearing)).thenReturn(notificationRequest);
 
@@ -224,7 +224,7 @@ class ManageHearingsCorresponderTest {
         addIntervenersToCaseData(finremCaseData, makeRepresented);
 
         Hearing hearing = mock(Hearing.class);
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
 
         // Arrange
         for (int i = 0; i < 4; i++) {

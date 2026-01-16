@@ -143,7 +143,7 @@ class DraftOrderReviewOverdueSendNotificationTaskTest {
             AMEND_CASE_CRON.getCcdType())).thenReturn(createStartEventResponse(overdueCase));
 
         when(notificationRequestMapper.buildCaseworkerDraftOrderReviewOverdue(any(FinremCaseDetails.class),
-            any(DraftOrdersReview.class))).thenReturn(new NotificationRequest());
+            any(DraftOrdersReview.class))).thenReturn(NotificationRequest.builder().build());
 
         underTest.run();
 
