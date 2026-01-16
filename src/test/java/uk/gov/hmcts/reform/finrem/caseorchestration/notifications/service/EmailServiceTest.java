@@ -20,12 +20,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationT
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.InvalidEmailAddressException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.SendEmailException;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -36,7 +38,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.NotificationConstants.PHONE_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.APPLICANT_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.BARRISTER_REFERENCE_NUMBER;
@@ -795,6 +799,34 @@ public class EmailServiceTest {
 
         Map<String, Object> actualTemplateFields = templateFieldsArgumentCaptor.getValue();
         expectedTemplateFields.forEach((k, v) -> assertEquals(v, actualTemplateFields.get(k)));
+    }
+
+    @Test
+    public void shouldPopulateLinkToSmartSurveyFromApplicationProperties() throws NotificationClientException {
+        emailService.sendConfirmationEmail(NotificationRequest.builder().build(), FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR);
+
+        verify(mockClient).sendEmail(
+            eq(emailTemplates.get(FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR.name())),
+            any(),
+            templateFieldsArgumentCaptor.capture(),
+            any(), any());
+        assertThat(templateFieldsArgumentCaptor.getValue())
+            .containsEntry("linkToSmartSurvey", "http://smartSurveyLink.from.application.properties");
+    }
+
+    @Test
+    public void shouldPopulateLinkToSmartSurveyByDefault() throws NotificationClientException {
+        EmailTemplateNames emailTemplateNames = mock(EmailTemplateNames.class);
+        when(emailTemplateNames.name()).thenReturn("EMAIL_TEMPLATE_NAME");
+        emailService.sendConfirmationEmail(NotificationRequest.builder().build(), emailTemplateNames);
+
+        verify(mockClient).sendEmail(
+            eq(emailTemplates.get("EMAIL_TEMPLATE_NAME")),
+            any(),
+            templateFieldsArgumentCaptor.capture(),
+            any(), any());
+        assertThat(templateFieldsArgumentCaptor.getValue())
+            .containsEntry("linkToSmartSurvey", "http://www.smartsurvey.co.uk/s/KCECE/");
     }
 
     @Test
