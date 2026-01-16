@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import static com.google.common.base.Strings.nullToEmpty;
+import static java.util.Optional.ofNullable;
 
 @Component
 public class HistoricalApplicantSolicitorOnlyListener extends DigitalOnlyListener {
@@ -38,7 +38,7 @@ public class HistoricalApplicantSolicitorOnlyListener extends DigitalOnlyListene
         FinremCaseDetails caseDetails = event.getCaseDetails();
         String email = caseDetails.getAppSolicitorEmail();
         String name = caseDetails.getAppSolicitorName();
-        String ref = nullToEmpty(caseDetails.getApplicantSolicitorRef());
+        String ref = ofNullable(caseDetails.getApplicantSolicitorRef()).orElse("");
         return new PartySpecificDetails(email, name, ref);
     }
 }
