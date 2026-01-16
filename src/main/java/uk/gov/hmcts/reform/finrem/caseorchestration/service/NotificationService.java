@@ -112,8 +112,6 @@ public class NotificationService {
     private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     private final EvidenceManagementDownloadService evidenceManagementDownloadService;
     private final CourtDetailsConfiguration courtDetailsConfiguration;
-    private final PrdOrganisationService organisationService;
-    private final SystemUserService systemUserService;
 
     /**
      * No Return.
@@ -1586,10 +1584,7 @@ public class NotificationService {
      */
     public boolean wasApplicantSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
         FinremCaseData finremCaseData = caseDetails.getData();
-        String email = finremCaseData.getAppSolicitorEmail();
-
-        return finremCaseData.isApplicantSolicitorPopulated()
-            && organisationService.findUserByEmail(email, systemUserService.getSysUserToken()).isPresent();
+        return finremCaseData.isApplicantSolicitorPopulated() && finremCaseData.isApplicantRepresentedByASolicitor();
     }
 
     public boolean isApplicantSolicitorDigital(FinremCaseDetails caseDetails) {
