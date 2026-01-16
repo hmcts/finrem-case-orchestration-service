@@ -398,7 +398,7 @@ class IntervenerServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        IntervenerChangeDetails intervenerChangeDetails = service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
+        service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
         IntervenerOne intervenerOneWrapper = finremCaseData.getIntervenerOne();
 
@@ -1777,6 +1777,64 @@ class IntervenerServiceTest {
                 .email("aaa.ddd@gmail.com")
                 .organisation(organisation("AAA"))
                 .build());
+    }
+
+    @Test
+    void givenCase_whenRemoveIntervenerWithoutStoredUserIdAndUserNotFound_thenLogError() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
+            Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
+        ).build();
+        IntervenerOne oneWrapper = IntervenerOne
+            .builder()
+            .intervenerName("One name")
+            .intervenerEmail("test@test.com")
+            .intervenerSolEmail(INTERVENER_TEST_EMAIL)
+            .solUserId(null)
+            .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
+            .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
+            .intervenerOrganisation(organisationPolicy)
+            .intervenerRepresented(YesOrNo.YES)
+            .build();
+        finremCaseData.setIntervenerOne(oneWrapper);
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN))
+            .thenReturn(Optional.empty());
+        List<String> errors = new ArrayList<>();
+        service.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
+
+        verify(systemUserService).getSysUserToken();
+        verify(organisationService).findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN);
+        verify(assignCaseAccessService, never()).removeCaseRoleToUser(any(), any(), any(), any());
+        assertThat(errors).contains("Could not find intervener with provided email");
+        assertNull(finremCaseData.getIntervenerOne().getIntervenerName());
+    }
+
+    @Test
+    void givenValidOrgIdAndEmail_whenRevokeIntervener_thenCaseRoleIsRevoked() {
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()
+            .organisation(Organisation.builder()
+                .organisationID(SOME_ORG_ID)
+                .organisationName(SOME_ORG_ID)
+                .build())
+            .build();
+
+        IntervenerOne intervenerWrapper = IntervenerOne.builder()
+            .intervenerOrganisation(organisationPolicy)
+            .intervenerSolEmail(INTERVENER_TEST_EMAIL)
+            .solUserId(INTERVENER_USER_ID)
+            .intervenerRepresented(YesOrNo.YES)
+            .build();
+        service.revokeIntervener(CASE_ID_IN_LONG, intervenerWrapper);
+        verify(assignCaseAccessService).removeCaseRoleToUser(
+            CASE_ID_IN_LONG,
+            INTERVENER_USER_ID,
+            INTVR_SOLICITOR_1.getCcdCode(),
+            SOME_ORG_ID
+        );
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
