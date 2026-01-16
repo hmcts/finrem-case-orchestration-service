@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.RespondentLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.DraftOrdersNotificationRequestMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
@@ -75,7 +74,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
     LetterAddresseeGeneratorMapper.class, ApplicantLetterAddresseeGenerator.class,
     RespondentLetterAddresseeGenerator.class, IntervenerOneLetterAddresseeGenerator.class, IntervenerTwoLetterAddresseeGenerator.class,
     IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class,
-    InternationalPostalService.class, ManageHearingsNotificationRequestMapper.class})
+    InternationalPostalService.class})
 public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
     @Autowired

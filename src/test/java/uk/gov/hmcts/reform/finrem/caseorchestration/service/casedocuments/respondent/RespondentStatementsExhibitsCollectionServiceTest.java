@@ -39,7 +39,6 @@ public class RespondentStatementsExhibitsCollectionServiceTest extends BaseManag
 
     @Override
     public void assertExpectedCollectionType() {
-        // TODO Check with Ruban
         assertThat(getDocumentCollection(),
             hasSize(2));
         assertThat(caseData.getUploadCaseDocumentWrapper()

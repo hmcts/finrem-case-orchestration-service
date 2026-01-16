@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
@@ -21,8 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequ
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -81,7 +81,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(
             new CaseDocument(), caseDetails(), APPLICANT, AUTH_TOKEN);
 
-        assertThat(bulkPrintLetterId, is(letterId));
+        assertThat(bulkPrintLetterId).isEqualTo(letterId);
 
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
 
@@ -94,7 +94,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(
             new CaseDocument(), finremCaseDetails(), RESPONDENT, AUTH_TOKEN);
 
-        assertThat(bulkPrintLetterId, is(letterId));
+        assertThat(bulkPrintLetterId).isEqualTo(letterId);
 
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
 
@@ -107,7 +107,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
         UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(caseDocument(), caseDetails, APPLICANT, AUTH_TOKEN);
 
-        assertThat(bulkPrintLetterId, is(letterId));
+        assertThat(bulkPrintLetterId).isEqualTo(letterId);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
         UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(caseDocument(), caseDetails, APPLICANT, AUTH_TOKEN);
 
-        assertThat(bulkPrintLetterId, is(letterId));
+        assertThat(bulkPrintLetterId).isEqualTo(letterId);
     }
 
     @Test
@@ -136,7 +136,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         UUID uuid = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(uuid).isEqualTo(letterId);
 
         verify(coverSheetService).generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
@@ -144,7 +144,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         BulkPrintRequest bulkPrintRequest = bulkPrintRequestArgumentCaptor.getValue();
         verifyBulkPrintRequest(bulkPrintRequest, bulkPrintDocuments, caseDetails.getId(), APPLICANT);
 
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP), is(true));
+        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP)).isTrue();
     }
 
     @Test
@@ -159,7 +159,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         UUID uuid = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(uuid).isEqualTo(letterId);
 
         verify(coverSheetService).generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
@@ -167,7 +167,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         BulkPrintRequest bulkPrintRequest = bulkPrintRequestArgumentCaptor.getValue();
         verifyBulkPrintRequest(bulkPrintRequest, bulkPrintDocuments, caseDetails.getId(), APPLICANT);
 
-        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp(), is(caseDocument));
+        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp()).isEqualTo(caseDocument);
     }
 
     @Test
@@ -182,7 +182,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(uuid).isEqualTo(letterId);
 
         verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
@@ -190,7 +190,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         BulkPrintRequest bulkPrintRequest = bulkPrintRequestArgumentCaptor.getValue();
         verifyBulkPrintRequest(bulkPrintRequest, bulkPrintDocuments, caseDetails.getId(), RESPONDENT);
 
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES), is(true));
+        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES)).isTrue();
     }
 
     @Test
@@ -205,7 +205,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(uuid).isEqualTo(letterId);
 
         verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
@@ -213,14 +213,14 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         BulkPrintRequest bulkPrintRequest = bulkPrintRequestArgumentCaptor.getValue();
         verifyBulkPrintRequest(bulkPrintRequest, bulkPrintDocuments, caseDetails.getId(), RESPONDENT);
 
-        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes(), is(caseDocument));
+        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes()).isEqualTo(caseDocument);
     }
 
     @Test
     public void shouldConvertCaseDocumentToBulkPrintDocument() {
         BulkPrintDocument bulkPrintDoc = documentHelper.getBulkPrintDocumentFromCaseDocument(caseDocument());
-        assertThat(bulkPrintDoc.getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(bulkPrintDoc.getFileName(), is(FILE_NAME));
+        assertThat(bulkPrintDoc.getBinaryFileUrl()).isEqualTo(BINARY_URL);
+        assertThat(bulkPrintDoc.getFileName()).isEqualTo(FILE_NAME);
     }
 
     @Test
@@ -229,7 +229,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
             = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
 
-        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(false));
+        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails)).isFalse();
     }
 
     @Test
@@ -245,9 +245,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         UUID uuid = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL), is(true));
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP), is(false));
+        assertThat(uuid).isEqualTo(letterId);
+        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL)).isTrue();
+        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP)).isFalse();
     }
 
     @Test
@@ -263,8 +263,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         UUID uuid = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
-        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential(), is(caseDocument));
+        assertThat(uuid).isEqualTo(letterId);
+        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential()).isEqualTo(caseDocument);
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp());
     }
 
@@ -281,8 +281,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
-        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential(), is(caseDocument));
+        assertThat(uuid).isEqualTo(letterId);
+        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential()).isEqualTo(caseDocument);
         assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
     }
 
@@ -299,9 +299,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL), is(true));
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES), is(false));
+        assertThat(uuid).isEqualTo(letterId);
+        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL)).isTrue();
+        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES)).isFalse();
     }
 
     @Test
@@ -319,7 +319,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         UUID uuid = bulkPrintService.printIntervenerDocuments(intervenerOne, caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
-        assertThat(uuid, is(letterId));
+        assertThat(uuid).isEqualTo(letterId);
 
         verify(coverSheetService).generateIntervenerCoverSheet(caseDetails, AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
@@ -346,6 +346,38 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         });
     }
 
+    @Test
+    public void shouldConvertCaseDocumentsToBulkPrintDocumentsSuccessfully() {
+        CaseDocument caseDocument1 = CaseDocument.builder()
+            .documentFilename("test-file-1.pdf")
+            .documentBinaryUrl("http://test.url/1")
+            .build();
+
+        CaseDocument caseDocument2 = CaseDocument.builder()
+            .documentFilename("test-file-2.pdf")
+            .documentBinaryUrl("http://test.url/2")
+            .build();
+
+        List<CaseDocument> caseDocuments = List.of(caseDocument1, caseDocument2);
+
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument1, AUTH_TOKEN, CaseType.CONSENTED))
+            .thenReturn(caseDocument1);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument2, AUTH_TOKEN, CaseType.CONSENTED))
+            .thenReturn(caseDocument2);
+
+        List<BulkPrintDocument> bulkPrintDocuments =
+            bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(caseDocuments, AUTH_TOKEN, CaseType.CONSENTED);
+
+        assertThat(bulkPrintDocuments).hasSize(2);
+        assertThat(bulkPrintDocuments.getFirst().getFileName()).isEqualTo("test-file-1.pdf");
+        assertThat(bulkPrintDocuments.getFirst().getBinaryFileUrl()).isEqualTo("http://test.url/1");
+        assertThat(bulkPrintDocuments.getLast().getFileName()).isEqualTo("test-file-2.pdf");
+        assertThat(bulkPrintDocuments.getLast().getBinaryFileUrl()).isEqualTo("http://test.url/2");
+
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument1, AUTH_TOKEN, CaseType.CONSENTED);
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument2, AUTH_TOKEN, CaseType.CONSENTED);
+    }
+
     private CaseDetails caseDetails() {
         return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
     }
@@ -355,21 +387,21 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     private void verifyBulkPrintRequest(BulkPrintRequest actual, String expectedRecipientParty) {
-        assertThat(actual.getBulkPrintDocuments().size(), is(1));
-        assertThat(actual.getLetterType(), is(FINANCIAL_REMEDY_GENERAL_LETTER));
-        assertThat(actual.getCaseId(), is(String.valueOf(1234567890)));
-        assertThat(actual.getAuthorisationToken(), is(AUTH_TOKEN));
-        assertThat(actual.getRecipientParty(), is(expectedRecipientParty));
-        assertThat(actual.getRequestId(), is("1234567890:" + expectedRecipientParty + ":12"));
+        assertThat(actual.getBulkPrintDocuments()).hasSize(1);
+        assertThat(actual.getLetterType()).isEqualTo(FINANCIAL_REMEDY_GENERAL_LETTER);
+        assertThat(actual.getCaseId()).isEqualTo(String.valueOf(1234567890));
+        assertThat(actual.getAuthorisationToken()).isEqualTo(AUTH_TOKEN);
+        assertThat(actual.getRecipientParty()).isEqualTo(expectedRecipientParty);
+        assertThat(actual.getRequestId()).isEqualTo("1234567890:" + expectedRecipientParty + ":12");
     }
 
     private void verifyBulkPrintRequest(BulkPrintRequest actual, List<BulkPrintDocument> expectedBulkPrintDocuments,
                                         long caseId, String expectedRecipientParty) {
-        assertThat(actual.getBulkPrintDocuments().containsAll(expectedBulkPrintDocuments), is(true));
-        assertThat(actual.getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
-        assertThat(actual.getCaseId(), is(String.valueOf(caseId)));
-        assertThat(actual.getAuthorisationToken(), is(AUTH_TOKEN));
-        assertThat(actual.getRecipientParty(), is(expectedRecipientParty));
-        assertThat(actual.getRequestId(), is(caseId + ":" + expectedRecipientParty + ":12"));
+        assertThat(actual.getBulkPrintDocuments()).containsAll(expectedBulkPrintDocuments);
+        assertThat(actual.getLetterType()).isEqualTo(FINANCIAL_REMEDY_PACK_LETTER_TYPE);
+        assertThat(actual.getCaseId()).isEqualTo(String.valueOf(caseId));
+        assertThat(actual.getAuthorisationToken()).isEqualTo(AUTH_TOKEN);
+        assertThat(actual.getRecipientParty()).isEqualTo(expectedRecipientParty);
+        assertThat(actual.getRequestId()).isEqualTo(caseId + ":" + expectedRecipientParty + ":12");
     }
 }

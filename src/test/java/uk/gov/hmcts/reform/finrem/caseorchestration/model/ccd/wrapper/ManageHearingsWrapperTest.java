@@ -4,8 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
@@ -138,5 +141,84 @@ class ManageHearingsWrapperTest {
 
         // Assert
         assertThat(expectedUuid).isEqualTo(testUuid);
+    }
+
+    @Test
+    void getAssociatedWorkingHearingDocuments_shouldReturnAssociatedDocuments_WhenHearingIdMatches() {
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument doc1 = CaseDocument.builder().documentUrl("url1").documentFilename("file1").build();
+        CaseDocument doc2 = CaseDocument.builder().documentUrl("url2").documentFilename("file2").build();
+
+        ManageHearingDocumentsCollectionItem item1 = ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument.builder().hearingId(hearingId).hearingDocument(doc1).build())
+                .build();
+        ManageHearingDocumentsCollectionItem item2 = ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument.builder().hearingId(hearingId).hearingDocument(doc2).build())
+                .build();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+                .workingHearingId(hearingId)
+                .hearingDocumentsCollection(List.of(item1, item2))
+                .build();
+
+        List<CaseDocument> result = wrapper.getAssociatedWorkingHearingDocuments();
+
+        assertNotNull(result);
+        assertThat(result).containsExactlyInAnyOrder(doc1, doc2);
+    }
+
+    @Test
+    void getAssociatedWorkingHearingDocuments_shouldReturnEmptyList_WhenNoMatchFoundForAssociatedDocuments() {
+        UUID hearingId = UUID.randomUUID();
+        UUID nonMatchingId = UUID.randomUUID();
+        CaseDocument doc1 = CaseDocument.builder().documentUrl("url1").documentFilename("file1").build();
+
+        ManageHearingDocumentsCollectionItem item1 = ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument.builder().hearingId(nonMatchingId).hearingDocument(doc1).build())
+                .build();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+                .workingHearingId(hearingId)
+                .hearingDocumentsCollection(List.of(item1))
+                .build();
+
+        List<CaseDocument> result = wrapper.getAssociatedWorkingHearingDocuments();
+
+        assertNotNull(result);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getAssociatedWorkingHearingDocuments_shouldReturnEmptyList_WhenHearingDocumentsCollectionIsNull() {
+        UUID hearingId = UUID.randomUUID();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+                .workingHearingId(hearingId)
+                .hearingDocumentsCollection(null)
+                .build();
+
+        List<CaseDocument> result = wrapper.getAssociatedWorkingHearingDocuments();
+
+        assertNotNull(result);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getAssociatedWorkingHearingDocuments_shouldReturnEmptyList_WhenWorkingHearingIdIsNull() {
+        CaseDocument doc1 = CaseDocument.builder().documentUrl("url1").documentFilename("file1").build();
+
+        ManageHearingDocumentsCollectionItem item1 = ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument.builder().hearingId(UUID.randomUUID()).hearingDocument(doc1).build())
+                .build();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+                .workingHearingId(null)
+                .hearingDocumentsCollection(List.of(item1))
+                .build();
+
+        List<CaseDocument> result = wrapper.getAssociatedWorkingHearingDocuments();
+
+        assertNotNull(result);
+        assertThat(result).isEmpty();
     }
 }
