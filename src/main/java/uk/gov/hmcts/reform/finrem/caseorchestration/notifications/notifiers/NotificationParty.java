@@ -24,12 +24,12 @@ public enum NotificationParty {
     private final boolean historical;
 
     public static NotificationParty getNotificationPartyFromRole(String role) {
-        for (NotificationParty party : NotificationParty.values()) {
-            if (party.getRole().equals(role)) {
-                return party;
-            }
-        }
-        return null;
+        return Arrays.stream(NotificationParty.values())
+            .filter(party -> party.getRole().equals(role))
+            .filter(NotificationParty::isNotifyRepresented)
+            .filter(party -> !party.isHistorical())
+            .findFirst()
+            .orElse(null);
     }
 
     public static Optional<NotificationParty> getNotificationParty(
