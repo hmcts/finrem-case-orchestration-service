@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.AccessCodeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -92,6 +93,10 @@ public class ManageScannedDocsContestedAboutToSubmitHandler extends FinremCallba
         manageScannedDocumentCollection.forEach(sd -> processedScannedDocumentIds.remove(sd.getId()));
         removeProcessedScannedDocumentsFromCase(caseData, processedScannedDocumentIds);
         caseData.setManageScannedDocumentCollection(null);
+        // test purposes for spike DFR-4413, need to be removed
+        AccessCodeGenerator.setAccessCode(caseData);
+        log.info("Valid access code for applicant {}", AccessCodeGenerator.getValidAccessCode(caseData.getApplicantAccessCodes()));
+        log.info("Valid access code for respondent {}", AccessCodeGenerator.getValidAccessCode(caseData.getRespondentAccessCodes()));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
     }

@@ -299,6 +299,8 @@ public class FinremCaseData implements HasCaseDocument {
     private DynamicMultiSelectList solicitorRoleList;
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
+    private List<AccessCodeCollection> applicantAccessCodes;
+    private List<AccessCodeCollection> respondentAccessCodes;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ManageCaseDocumentsWrapper manageCaseDocumentsWrapper;
