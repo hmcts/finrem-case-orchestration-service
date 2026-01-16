@@ -286,7 +286,7 @@ public class IntervenerService {
                                       IntervenerWrapper intervenerWrapper) {
         String solUserID = intervenerWrapper.getSolUserId();
         if (StringUtils.hasText(solUserID)) {
-            assignCaseAccessService.removeCaseRoleToUser(caseId, solUserID , caseRole, orgId);
+            assignCaseAccessService.removeCaseRoleToUser(caseId, solUserID, caseRole, orgId);
         } else {
             Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
             if (userId.isPresent()) {
