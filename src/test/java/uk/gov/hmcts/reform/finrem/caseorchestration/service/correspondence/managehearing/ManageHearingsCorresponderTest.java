@@ -101,7 +101,7 @@ class ManageHearingsCorresponderTest {
     void givenHearingWithNullType_whenSendHearingCorrespondence_thenThrowsIllegalStateException() {
         //Arrange
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
+                FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
         Hearing hearing = Hearing.builder()
             .hearingNoticePrompt(YesOrNo.YES)
             .hearingType(null)
@@ -123,7 +123,7 @@ class ManageHearingsCorresponderTest {
     void givenHearingWithNullDate_whenSendHearingCorrespondence_thenThrowsIllegalStateException() {
         //Arrange
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
+                FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, new FinremCaseData());
         Hearing hearing = Hearing.builder()
             .hearingNoticePrompt(YesOrNo.YES)
             .hearingType(FDA)
@@ -377,9 +377,9 @@ class ManageHearingsCorresponderTest {
 
         when(hearingCorrespondenceHelper.getVacateHearingNotice(callbackRequest.getCaseDetails().getData())).thenReturn(
             CaseDocument
-                .builder()
-                .documentFilename("VacateHearingNotice.pdf")
-                .build()
+            .builder()
+            .documentFilename("VacateHearingNotice.pdf")
+            .build()
         );
 
         //Act
@@ -429,7 +429,7 @@ class ManageHearingsCorresponderTest {
                 .caseReferenceNumber(CASE_ID)
                 .hearingType(APPEAL_HEARING.getId())
                 .hearingDate("01 January 2026")
-                .caseType(EmailService.CONTESTED)
+                    .caseType(EmailService.CONTESTED)
                 .applicantName("Frodo")
                 .respondentName("Gollum")
                 .selectedCourt("cfc")
@@ -443,7 +443,7 @@ class ManageHearingsCorresponderTest {
                 CaseDocument.builder()
                     .documentFilename("HearingNotice.pdf")
                     .build())
-            )
+                )
             .authToken(AUTH_TOKEN)
             .build();
     }
