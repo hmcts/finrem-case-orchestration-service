@@ -59,6 +59,10 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData(), isNotDigital));
     }
 
+    public NotificationRequest getNotificationRequestForApplicantBarrister(FinremCaseDetails caseDetails, Barrister barrister) {
+        return buildNotificationRequest(caseDetails, getApplicantBarristerCaseData(caseDetails.getData(), barrister));
+    }
+
     public NotificationRequest getNotificationRequestForIntervenerSolicitor(FinremCaseDetails caseDetails,
                                                                             SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         return buildNotificationRequest(caseDetails, caseDataKeysWrapper);
@@ -68,6 +72,14 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         return isRespondentSolicitorChangedOnLatestRepresentationUpdate(caseDetails)
             ? getNotificationRequestForRespondentSolicitor(caseDetails)
             : getNotificationRequestForApplicantSolicitor(caseDetails);
+    }
+
+    private SolicitorCaseDataKeysWrapper getApplicantBarristerCaseData(FinremCaseData caseData, Barrister barrister) {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(barrister.getEmail())
+            .solicitorNameKey(nullToEmpty(barrister.getName()))
+            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
+            .build();
     }
 
     private SolicitorCaseDataKeysWrapper getApplicantSolicitorCaseData(FinremCaseData caseData) {
@@ -117,7 +129,7 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
 
     private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         FinremCaseData caseData = caseDetails.getData();
         notificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
         notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseDataKeysWrapper.getSolicitorReferenceKey(), EMPTY_STRING));

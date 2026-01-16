@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum Features {
 
+    EXUI3990_WORKAROUND_ENABLED("exui3990_workaround_enabled"),
     ASSIGN_CASE_ACCESS("assign_case_access"),
     SEND_TO_FRC("send_to_frc"),
     PAYMENT_REQUEST_USING_CASE_TYPE("pba_case_type"),

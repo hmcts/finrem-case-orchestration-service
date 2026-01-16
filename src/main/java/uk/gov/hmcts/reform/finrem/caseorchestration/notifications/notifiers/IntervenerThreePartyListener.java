@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import static com.google.common.base.Strings.nullToEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 
 @Component
 public class IntervenerThreePartyListener extends AbstractPartyListener {
@@ -19,7 +20,11 @@ public class IntervenerThreePartyListener extends AbstractPartyListener {
                                         NotificationService notificationService,
                                         InternationalPostalService internationalPostalService) {
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
-        this.notificationParty = IntervenerConstant.INTERVENER_THREE;
+    }
+
+    @Override
+    protected String getNotificationParty() {
+        return IntervenerConstant.INTERVENER_THREE;
     }
 
     @Override

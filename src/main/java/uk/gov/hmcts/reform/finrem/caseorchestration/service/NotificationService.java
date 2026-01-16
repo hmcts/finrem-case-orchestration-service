@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.F
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -1547,11 +1548,25 @@ public class NotificationService {
         return caseDetails.getData().isApplicantSolicitorPopulated();
     }
 
+    public boolean isApplicantSolicitorEmailPopulatedAndPresented(FinremCaseDetails caseDetails) {
+        FinremCaseData finremCaseData = caseDetails.getData();
+        return finremCaseData.isApplicantSolicitorPopulated() && finremCaseData.isApplicantRepresentedByASolicitor();
+    }
+
     public boolean isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
     }
 
+    /**
+     * Determines whether the applicant's solicitor is currently digital by checking that the
+     * applicant solicitor details are populated in the case data and verifying the solicitor's
+     * current digital status via the assign case access service.
+     *
+     * @param caseDetails the case details containing applicant solicitor information
+     * @return {@code true} if the applicant solicitor is populated and is currently digital;
+     *         {@code false} otherwise
+     */
     public boolean isApplicantSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isApplicantSolicitorPopulated()
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());

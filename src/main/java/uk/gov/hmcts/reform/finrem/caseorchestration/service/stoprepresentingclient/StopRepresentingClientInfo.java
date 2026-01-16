@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 @Getter
 @Builder
 public class StopRepresentingClientInfo {
-    boolean invokedByIntervener;
+    boolean invokedByIntervenerBarrister;
     String userAuthorisation;
     FinremCaseDetails caseDetails;
     FinremCaseDetails caseDetailsBefore;
