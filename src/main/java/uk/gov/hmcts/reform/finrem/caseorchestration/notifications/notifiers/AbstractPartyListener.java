@@ -30,8 +30,6 @@ public abstract class AbstractPartyListener {
     protected final NotificationService notificationService;
     protected final InternationalPostalService internationalPostalService;
 
-    protected String notificationParty;
-
     protected abstract String getNotificationParty();
 
     /**
@@ -78,7 +76,7 @@ public abstract class AbstractPartyListener {
     @EventListener
     public void handleNotification(SendCorrespondenceEvent event) {
         if (isRelevantParty(event)) {
-            log.info("Notification event received for party {} on case {}", notificationParty, event.getCaseId());
+            log.info("Notification event received for party {} on case {}", getNotificationParty(), event.getCaseId());
             sendNotification(event);
         }
     }
@@ -106,7 +104,7 @@ public abstract class AbstractPartyListener {
      */
     private void enrichAndSendEmailNotification(SendCorrespondenceEvent event) {
 
-        log.info("Preparing email notification for party {} on case {}", notificationParty, event.getCaseId());
+        log.info("Preparing email notification for party {} on case {}", getNotificationParty(), event.getCaseId());
         PartySpecificDetails details = setPartySpecificDetails(event);
 
         NotificationRequest emailRequest = Optional.ofNullable(event.getEmailNotificationRequest())
@@ -123,7 +121,7 @@ public abstract class AbstractPartyListener {
         // Email service handles email specific exceptions - consider building in retries to email service.
         emailService.sendConfirmationEmail(emailRequest, emailTemplate);
 
-        log.info("Completed email notification for party {} on case case {}", notificationParty, event.getCaseId());
+        log.info("Completed email notification for party {} on case {}", getNotificationParty(), event.getCaseId());
     }
 
     /**
@@ -138,7 +136,7 @@ public abstract class AbstractPartyListener {
      */
     private void sendPaperNotification(SendCorrespondenceEvent event) {
 
-        log.info("Preparing paper notification for party {} on case {}", notificationParty, event.getCaseId());
+        log.info("Preparing paper notification for party {} on case {}", getNotificationParty(), event.getCaseId());
 
         // Defensive copy to avoid mutating an original event collection
         List<CaseDocument> docsToPrint = Optional.ofNullable(event.documentsToPost)
@@ -149,7 +147,7 @@ public abstract class AbstractPartyListener {
 
         docsToPrint.add(getPartyCoversheet(event));
         List<BulkPrintDocument> bpDocs =
-                bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint, event.authToken, event.getCaseDetails().getCaseType());
+            bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint, event.authToken, event.getCaseDetails().getCaseType());
         boolean isOutsideUK = isPartyOutsideUK(event);
 
         // Bulk print service requires implementation of exception handling -
@@ -158,10 +156,10 @@ public abstract class AbstractPartyListener {
             event.caseDetails, getBulkPrintRecipient(), bpDocs, isOutsideUK, event.authToken
         );
 
-        log.info("Completed paper notification for party {} on case case {}", notificationParty, event.getCaseId());
+        log.info("Completed paper notification for party {} on case {}", getNotificationParty(), event.getCaseId());
     }
 
     protected String getBulkPrintRecipient() {
-        return notificationParty;
+        return getNotificationParty();
     }
 }
