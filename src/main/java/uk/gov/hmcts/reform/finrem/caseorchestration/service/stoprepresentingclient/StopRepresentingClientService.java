@@ -404,7 +404,7 @@ public class StopRepresentingClientService {
                     .toBuilder()
                     .dateOfIssue(getDateOfIssue())
                     .build())
-                .emailTemplate(getNotifyApplicantRepresentativ/****eTemplateName(finremCaseData))
+                .emailTemplate(getNotifyApplicantRepresentativeTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
                 .caseDetailsBefore(info.getCaseDetailsBefore())
                 .authToken(userAuthorisation)
