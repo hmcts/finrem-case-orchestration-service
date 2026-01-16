@@ -26,7 +26,7 @@ public abstract class DigitalOnlyListener extends AbstractPartyListener {
     }
 
     @Override
-    protected final boolean shouldSendPaperNotification() {
+    protected final boolean shouldSendPaperNotification(SendCorrespondenceEvent event) {
         return false;
     }
 }

@@ -25,7 +25,7 @@ public class HistoricalApplicantSolicitorOnlyListener extends DigitalOnlyListene
     }
 
     @Override
-    protected boolean isDigitalParty(SendCorrespondenceEvent event) {
+    protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
         if (event.getCaseDetailsBefore() != null) {
             return notificationService.isApplicantSolicitorEmailPopulatedAndPresented(event.getCaseDetailsBefore());
         } else {
