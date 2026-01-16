@@ -131,7 +131,7 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
 
     private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         FinremCaseData caseData = caseDetails.getData();
         notificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
         notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseDataKeysWrapper.getSolicitorReferenceKey(), EMPTY_STRING));
