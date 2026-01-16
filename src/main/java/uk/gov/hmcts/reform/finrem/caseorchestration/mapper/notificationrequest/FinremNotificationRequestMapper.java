@@ -17,10 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -161,7 +159,6 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             ? listForHearingWrapper.getHearingType().getId()
             : "");
         notificationRequest.setIsNotDigital(caseDataKeysWrapper.getSolicitorIsNotDigitalKey());
-        notificationRequest.setDateOfIssue(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 
         return notificationRequest;
     }

@@ -31,6 +31,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.Barrister
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -398,7 +400,10 @@ public class StopRepresentingClientService {
                         .orElseThrow()
                 ))
                 .emailNotificationRequest(finremNotificationRequestMapper
-                    .getNotificationRequestForApplicantBarrister(info.getCaseDetailsBefore(), barrister))
+                    .getNotificationRequestForApplicantBarrister(info.getCaseDetailsBefore(), barrister)
+                    .toBuilder()
+                    .dateOfIssue(getDateOfIssue())
+                    .build())
                 .emailTemplate(getNotifyApplicantRepresentativeTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
                 .caseDetailsBefore(info.getCaseDetailsBefore())
@@ -419,7 +424,10 @@ public class StopRepresentingClientService {
                         .orElseThrow()
                 ))
                 .emailNotificationRequest(finremNotificationRequestMapper
-                    .getNotificationRequestForApplicantSolicitor(info.getCaseDetailsBefore()))
+                    .getNotificationRequestForApplicantSolicitor(info.getCaseDetailsBefore())
+                    .toBuilder()
+                    .dateOfIssue(getDateOfIssue())
+                    .build())
                 .emailTemplate(getNotifyApplicantRepresentativeTemplateName(finremCaseData))
                 .caseDetails(info.getCaseDetails())
                 .caseDetailsBefore(info.getCaseDetailsBefore())
@@ -427,6 +435,10 @@ public class StopRepresentingClientService {
                 .build()
             );
         }
+    }
+
+    private String getDateOfIssue() {
+        return new SimpleDateFormat("yyyy-MM-dd").format(new Date());
     }
 
     private void notifyRespondentBarrister(StopRepresentingClientInfo info, Barrister barrister) {
