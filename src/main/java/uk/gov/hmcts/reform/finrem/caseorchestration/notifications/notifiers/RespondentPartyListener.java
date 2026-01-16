@@ -28,7 +28,7 @@ public class RespondentPartyListener extends AbstractPartyListener {
     }
 
     @Override
-    protected boolean isDigitalParty(SendCorrespondenceEvent event) {
+    protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
         return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(event.getCaseDetails());
     }
 

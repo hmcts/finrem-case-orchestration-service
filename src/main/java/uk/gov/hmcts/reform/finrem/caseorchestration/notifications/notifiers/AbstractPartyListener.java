@@ -38,9 +38,9 @@ public abstract class AbstractPartyListener {
     protected abstract boolean isRelevantParty(SendCorrespondenceEvent event);
 
     /**
-     * Should the notification be sent digitally (by email).
+     * Should the email notification be sent.
      */
-    protected abstract boolean isDigitalParty(SendCorrespondenceEvent event);
+    protected abstract boolean shouldSendEmailNotification(SendCorrespondenceEvent event);
 
     /**
      * Returns email/name details for the party.
@@ -82,11 +82,18 @@ public abstract class AbstractPartyListener {
     }
 
     private void sendNotification(SendCorrespondenceEvent event) {
-        if (isDigitalParty(event)) {
+        if (shouldSendEmailNotification(event)) {
             enrichAndSendEmailNotification(event);
-        } else {
+        } else if (shouldSendPaperNotification(event)) {
             sendPaperNotification(event);
         }
+    }
+
+    /**
+     * Should the paper notification be sent.
+     */
+    protected boolean shouldSendPaperNotification(SendCorrespondenceEvent event) {
+        return true;
     }
 
     /**
