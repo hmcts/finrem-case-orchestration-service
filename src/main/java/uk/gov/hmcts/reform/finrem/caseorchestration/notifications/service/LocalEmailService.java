@@ -13,6 +13,18 @@ import uk.gov.service.notify.TemplatePreview;
 
 import java.util.Map;
 
+/**
+ * Local implementation of {@link EmailService} used when the {@code local} Spring profile is active.
+ *
+ * <p>
+ * This service is intended for local development only and typically avoids sending real emails,
+ * instead logging or handling them in a non-production manner.
+ * </p>
+ *
+ * @see <a href="https://tools.hmcts.net/confluence/x/O7kcbw">
+ *      HMCTS Confluence – Local Email Service guidance
+ *      </a>
+ */
 @Profile("local")
 @Service
 @Slf4j
