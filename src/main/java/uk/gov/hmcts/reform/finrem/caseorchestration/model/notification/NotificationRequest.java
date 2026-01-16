@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -70,4 +70,5 @@ public class NotificationRequest {
     private String emailReplyToId;
     private String vacatedHearingDateTime;
     private String vacatedHearingType;
+    private String dateOfIssue;
 }
