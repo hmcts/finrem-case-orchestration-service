@@ -284,8 +284,8 @@ public class IntervenerService {
 
     private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors,
                                       IntervenerWrapper intervenerWrapper) {
-        if (StringUtils.hasText(intervenerWrapper.getSolUserId())) {
-            String solUserID = intervenerWrapper.getSolUserId();
+        String solUserID = intervenerWrapper.getSolUserId();
+        if (StringUtils.hasText(solUserID)) {
             assignCaseAccessService.removeCaseRoleToUser(caseId, solUserID , caseRole, orgId);
         } else {
             Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
