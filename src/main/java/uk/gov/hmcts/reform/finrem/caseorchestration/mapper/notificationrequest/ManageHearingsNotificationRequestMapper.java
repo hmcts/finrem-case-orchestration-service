@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.ADD_HEARING;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.VACATE_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction.ADJOURN_OR_VACATE_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
@@ -158,6 +158,6 @@ public class ManageHearingsNotificationRequestMapper {
         ManageHearingsAction actionSelection = hearingCorrespondenceHelper.getManageHearingsAction(finremCaseDetails);
         boolean hearingIsRelisted =
             YES.equals(finremCaseDetails.getData().getManageHearingsWrapper().getWasRelistSelected());
-        return (VACATE_HEARING.equals(actionSelection) && hearingIsRelisted) || ADD_HEARING.equals(actionSelection);
+        return (ADJOURN_OR_VACATE_HEARING.equals(actionSelection) && hearingIsRelisted) || ADD_HEARING.equals(actionSelection);
     }
 }

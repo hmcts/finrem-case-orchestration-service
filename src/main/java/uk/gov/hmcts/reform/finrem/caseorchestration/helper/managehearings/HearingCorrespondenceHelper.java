@@ -206,6 +206,6 @@ public class HearingCorrespondenceHelper {
      * @return true if the action selection is VACATE_HEARING, false otherwise
      */
     private boolean isVacateHearingAction(ManageHearingsAction actionSelection) {
-        return ManageHearingsAction.VACATE_HEARING.equals(actionSelection);
+        return ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(actionSelection);
     }
 }

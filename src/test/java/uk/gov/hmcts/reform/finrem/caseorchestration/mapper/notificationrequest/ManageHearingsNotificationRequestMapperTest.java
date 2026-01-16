@@ -116,7 +116,7 @@ class ManageHearingsNotificationRequestMapperTest {
 
             // When
             when(hearingCorrespondenceHelper.getManageHearingsAction(any()))
-                .thenReturn(ManageHearingsAction.VACATE_HEARING);
+                .thenReturn(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
             contactDetails.setApplicantSolicitorEmail("applicantsolicitor@example.com");
             contactDetails.setApplicantSolicitorName("The applicant solicitor name");
             mocked.when(() -> CourtHelper.getFRCForHearing(vacatedHearing)).thenReturn("MockedCourt");
@@ -138,7 +138,7 @@ class ManageHearingsNotificationRequestMapperTest {
             contactDetails.setApplicantSolicitorName(APPLICANT_SOLICITOR_NAME);
 
             when(hearingCorrespondenceHelper.getManageHearingsAction(any()))
-                .thenReturn(ManageHearingsAction.VACATE_HEARING);
+                .thenReturn(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
             when(hearingCorrespondenceHelper.getActiveHearingInContext(any(), any()))
                 .thenReturn(hearing);
 

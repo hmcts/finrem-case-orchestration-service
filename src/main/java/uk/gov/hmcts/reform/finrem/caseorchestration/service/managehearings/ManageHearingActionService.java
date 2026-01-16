@@ -130,7 +130,7 @@ public class ManageHearingActionService {
      *
      * @param finremCaseDetails case details containing hearing and case data
      */
-    public void performVacateHearing(FinremCaseDetails finremCaseDetails, String authToken) {
+    public void performAdjournOrVacateHearing(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
 
@@ -147,8 +147,8 @@ public class ManageHearingActionService {
             .orElseThrow(() -> new IllegalStateException("Hearings collection is empty"));
         hearings.remove(hearingToVacate);
 
-        VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.fromHearingToVacatedHearing(hearingToVacate,
-            vacateHearingInput, hearingsWrapper.getShouldSendVacateOrAdjNotice());
+        VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.fromHearingToVacatedOrAdjourned(hearingToVacate,
+            vacateHearingInput, hearingsWrapper.getShouldSendVacateOrAdjNotice(), vacateHearingInput.getVacateOrAdjournAction());
 
         VacatedOrAdjournedHearingsCollectionItem vacatedItem = VacatedOrAdjournedHearingsCollectionItem.builder()
             .id(hearingToVacate.getId())
@@ -162,8 +162,8 @@ public class ManageHearingActionService {
 
         Map<String, DocumentRecord> documentMap = new HashMap<>();
 
+        //TODO: Vacate / Adjourn notice logic to go here
         generateVacateHearingNotice(finremCaseDetails, authToken, documentMap);
-
         generateVacateNoticeCoverSheetIfHearingNotRelisted(hearingsWrapper, finremCaseDetails, authToken);
 
         addDocumentsToCollection(documentMap, hearingsWrapper);
