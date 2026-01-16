@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Wor
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.FormGLetterDetails;
@@ -66,6 +67,7 @@ class ManageHearingFormGLetterDetailsMapperTest {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
+            .civilPartnership(civilPartnership)
             .contactDetailsWrapper(ContactDetailsWrapper
                 .builder()
                 .applicantFmName("John")
@@ -74,6 +76,10 @@ class ManageHearingFormGLetterDetailsMapperTest {
                 .respondentLname("Smith")
                 .solicitorReference(TestConstants.TEST_SOLICITOR_REFERENCE)
                 .respondentSolicitorReference(TestConstants.TEST_RESP_SOLICITOR_REFERENCE)
+                .build())
+            .scheduleOneWrapper(ScheduleOneWrapper
+                .builder()
+                .typeOfApplication(schedule1OrMatrimonial)
                 .build())
             .manageHearingsWrapper(
                 ManageHearingsWrapper.builder()
@@ -144,6 +150,8 @@ class ManageHearingFormGLetterDetailsMapperTest {
         assertThat(formGLetterDetails.getHearingDate()).isEqualTo("2025-08-01");
         assertThat(formGLetterDetails.getHearingTime()).isEqualTo("10:00 AM");
         assertThat(formGLetterDetails.getCourtDetails()).isEqualTo(courtTemplateFields);
+        assertThat(formGLetterDetails.getCivilPartnership()).isEqualTo(civilPartnership.getYesOrNo());
+        assertThat(formGLetterDetails.getTypeOfApplication()).isEqualTo(schedule1OrMatrimonial.getValue());
     }
 
     @Test
