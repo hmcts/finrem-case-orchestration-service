@@ -267,7 +267,8 @@ public class IntervenerService {
         }
     }
 
-    private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors, IntervenerWrapper intervenerWrapper) {
+    private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors,
+                                   IntervenerWrapper intervenerWrapper) {
         Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         if (userId.isPresent()) {
             intervenerWrapper.setSolUserId(userId.get());
@@ -281,7 +282,8 @@ public class IntervenerService {
         revokeIntervenerRole(caseId, email, orgId, caseRole, null, intervenerWrapper);
     }
 
-    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors, IntervenerWrapper intervenerWrapper) {
+    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors,
+                                      IntervenerWrapper intervenerWrapper) {
         if (StringUtils.hasText(intervenerWrapper.getSolUserId())) {
             assignCaseAccessService.removeCaseRoleToUser(caseId, intervenerWrapper.getSolUserId(), caseRole, orgId);
         } else {
