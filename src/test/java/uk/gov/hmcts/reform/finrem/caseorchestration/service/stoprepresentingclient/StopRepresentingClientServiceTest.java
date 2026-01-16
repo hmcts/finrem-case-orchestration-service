@@ -477,7 +477,7 @@ class StopRepresentingClientServiceTest {
                         SendCorrespondenceEvent::getAuthToken
                     )
                     .contains(
-                        List.of(NotificationParty.HISTORICAL_APPLICANT_SOLICITOR_ONLY),
+                        List.of(NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY),
                         CaseType.CONTESTED.equals(caseType) ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
                             : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
                         caseDetails,
@@ -544,7 +544,7 @@ class StopRepresentingClientServiceTest {
                         SendCorrespondenceEvent::getAuthToken
                     )
                     .contains(
-                        List.of(NotificationParty.HISTORICAL_APPLICANT_BARRISTER_ONLY),
+                        List.of(NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY),
                         CaseType.CONTESTED.equals(caseType) ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
                             : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
                         caseDetails,

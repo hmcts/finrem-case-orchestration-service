@@ -6,12 +6,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-public abstract class DigitalOnlyListener extends AbstractPartyListener {
+public abstract class EmailNotificationOnlyListener extends AbstractPartyListener {
 
-    public DigitalOnlyListener(BulkPrintService bulkPrintService,
-                               EmailService emailService,
-                               NotificationService notificationService,
-                               InternationalPostalService internationalPostalService) {
+    public EmailNotificationOnlyListener(BulkPrintService bulkPrintService,
+                                         EmailService emailService,
+                                         NotificationService notificationService,
+                                         InternationalPostalService internationalPostalService) {
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
     }
 

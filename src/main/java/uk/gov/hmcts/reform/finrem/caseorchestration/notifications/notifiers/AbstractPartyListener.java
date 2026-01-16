@@ -32,6 +32,8 @@ public abstract class AbstractPartyListener {
 
     protected String notificationParty;
 
+    protected abstract String getNotificationParty();
+
     /**
      * Should this listener handle notifications for this party/event.
      */
@@ -153,9 +155,13 @@ public abstract class AbstractPartyListener {
         // Bulk print service requires implementation of exception handling -
         // consider building in retries and Server Error Handling as part of DFR-3308.
         bulkPrintService.bulkPrintFinancialRemedyLetterPack(
-            event.caseDetails, notificationParty, bpDocs, isOutsideUK, event.authToken
+            event.caseDetails, getBulkPrintRecipient(), bpDocs, isOutsideUK, event.authToken
         );
 
         log.info("Completed paper notification for party {} on case case {}", notificationParty, event.getCaseId());
+    }
+
+    protected String getBulkPrintRecipient() {
+        return notificationParty;
     }
 }
