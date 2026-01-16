@@ -25,6 +25,9 @@ public class StopRepresentationWrapper {
     private YesOrNo stopRepJudicialApproval;
 
     @TemporaryField
+    private String clientAddressForServiceLabel;
+
+    @TemporaryField
     private Address clientAddressForService;
 
     @TemporaryField
@@ -32,4 +35,69 @@ public class StopRepresentationWrapper {
 
     @TemporaryField
     private String clientAddressForServiceConfidentialLabel;
+
+    // Capturing extra address (possibly applicant/respondent/intervener 1-4)
+
+    @TemporaryField
+    private String extraClientAddr1Id;
+
+    @TemporaryField
+    private String extraClientAddr1Label;
+
+    @TemporaryField
+    private Address extraClientAddr1;
+
+    @TemporaryField
+    private YesOrNo extraClientAddr1Confidential;
+
+    @TemporaryField
+    private String extraClientAddr1ConfidentialLabel;
+
+    @TemporaryField
+    private String extraClientAddr2Id;
+
+    @TemporaryField
+    private String extraClientAddr2Label;
+
+    @TemporaryField
+    private Address extraClientAddr2;
+
+    @TemporaryField
+    private YesOrNo extraClientAddr2Confidential;
+
+    @TemporaryField
+    private String extraClientAddr2ConfidentialLabel;
+
+    @TemporaryField
+    private String extraClientAddr3Id;
+
+    @TemporaryField
+    private String extraClientAddr3Label;
+
+    @TemporaryField
+    private Address extraClientAddr3;
+
+    @TemporaryField
+    private YesOrNo extraClientAddr3Confidential;
+
+    @TemporaryField
+    private String extraClientAddr3ConfidentialLabel;
+
+    @TemporaryField
+    private String extraClientAddr4Id;
+
+    @TemporaryField
+    private String extraClientAddr4Label;
+
+    @TemporaryField
+    private Address extraClientAddr4;
+
+    @TemporaryField
+    private YesOrNo extraClientAddr4Confidential;
+
+    @TemporaryField
+    private String extraClientAddr4ConfidentialLabel;
+
+    @TemporaryField
+    private YesOrNo showClientAddressForService;
 }

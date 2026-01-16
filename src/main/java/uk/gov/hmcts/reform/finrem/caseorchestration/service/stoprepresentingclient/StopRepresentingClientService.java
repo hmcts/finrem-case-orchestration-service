@@ -6,12 +6,20 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
@@ -19,14 +27,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBar
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
 
 @Service
 @Slf4j
@@ -47,16 +58,20 @@ public class StopRepresentingClientService {
 
     private final IntervenerService intervenerService;
 
-    private static FinremCaseData getFinremCaseDataBeforeFromInfo(StopRepresentingClientInfo info) {
+    private final CaseRoleService caseRoleService;
+
+    private final IdamService idamService;
+
+    private static FinremCaseData getFinremCaseDataBefore(StopRepresentingClientInfo info) {
         return info.getCaseDetailsBefore().getData();
     }
 
-    private static FinremCaseData getFinremCaseDataFromInfo(StopRepresentingClientInfo info) {
+    private static FinremCaseData getFinremCaseData(StopRepresentingClientInfo info) {
         return info.getCaseDetails().getData();
     }
 
     private static long getCaseId(StopRepresentingClientInfo info) {
-        return Long.parseLong(getFinremCaseDataFromInfo(info).getCcdCaseId());
+        return Long.parseLong(getFinremCaseData(info).getCcdCaseId());
     }
 
     private static Map<String, Object> clearChangeOrganisationRequestField() {
@@ -66,29 +81,155 @@ public class StopRepresentingClientService {
     }
 
     /**
-     * Applies case assignment based on who triggered the stop representing a client event.
+     * Applies case assignment changes when a representative stops representing a client.
      *
-     * <p>
-     * If the event is invoked by an intervener, the intervener representative request
-     * is handled. Otherwise, the applicant or respondent representative request
-     * is processed.
+     * <p>This method:
+     * <ul>
+     *   <li>Handles case assignment updates for intervener representatives</li>
+     *   <li>Handles case assignment updates for applicant or respondent representatives</li>
+     *   <li>Notifies the case assignment service of any barrister representation changes</li>
+     * </ul>
      *
-     * @param info the stop representing client POJO containing the invocation context
+     * @param info the stop-representing context containing case details and user authorisation
      */
     public void applyCaseAssignment(StopRepresentingClientInfo info) {
-        if (info.isInvokedByIntervener()) {
-            handleIntervenerRepresentativeRequest(info);
-        } else {
-            handleApplicantOrRespondentRepresentativeRequest(info);
+        handleIntervenerRepresentativeRequest(info);
+        handleApplicantOrRespondentRepresentativeRequest(info);
+        sendAllBarristerChangeToCaseAssignmentService(info);
+    }
+
+    /**
+     * Builds a {@link RepresentativeInContext} object indicating which parties
+     * the current user represents in the given case.
+     *
+     * <p>This includes applicant, respondent, and intervener roles
+     * (interveners 1–4), distinguishing between solicitor and barrister
+     * representation.</p>
+     *
+     * @param caseData the case data containing the CCD case details
+     * @param userAuthorisation the user's authorisation token
+     * @return a {@link RepresentativeInContext} describing the user's representation
+     *         across all parties in the case
+     */
+    public RepresentativeInContext buildRepresentation(FinremCaseData caseData, String userAuthorisation) {
+        boolean isIntervenerRepresentative = caseRoleService.isIntervenerRepresentative(caseData, userAuthorisation);
+
+        Integer intervenerIndex = null;
+        IntervenerRole intervenerRole = null;
+
+        if (isIntervenerRepresentative) {
+            intervenerIndex = caseRoleService
+                .getIntervenerIndex(caseData, userAuthorisation)
+                .orElseThrow();
+
+            intervenerRole = caseRoleService
+                .getIntervenerSolicitorIndex(caseData, userAuthorisation)
+                .isEmpty()
+                ? IntervenerRole.BARRISTER
+                : IntervenerRole.SOLICITOR;
         }
+
+        return new RepresentativeInContext(
+            idamService.getIdamUserId(userAuthorisation),
+            caseRoleService.isApplicantRepresentative(caseData, userAuthorisation),
+            caseRoleService.isRespondentRepresentative(caseData, userAuthorisation),
+            intervenerIndex,
+            intervenerRole
+        );
+    }
+
+    /**
+     * Checks whether the representing intervener barrister belongs to the same organisation
+     * as the corresponding intervener solicitor.
+     *
+     * <p>The method:
+     * <ul>
+     *   <li>Returns {@code false} if the user is not representing any intervener barrister</li>
+     *   <li>Finds the intervener based on the index in {@link RepresentativeInContext}</li>
+     *   <li>Locates the barrister matching the current user ID</li>
+     *   <li>Compares the barrister organisation with the intervener solicitor organisation</li>
+     * </ul>
+     *
+     * @param caseData the financial remedy case data containing interveners and barristers
+     * @param representativeInContext the current user representation details
+     * @return {@code true} if the intervener barrister and solicitor are from the same organisation;
+     *         {@code false} otherwise
+     */
+    public boolean isIntervenerBarristerFromSameOrganisationAsSolicitor(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+        if (!representativeInContext.isIntervenerBarrister()) {
+            return false;
+        }
+        int index = representativeInContext.intervenerIndex();
+        IntervenerWrapper intervener = caseData.getIntervenerById(index);
+        List<BarristerCollectionItem> intvBarristers = caseData.getBarristerCollectionWrapper()
+            .getIntervenerBarristersByIndex(index);
+
+        Barrister barrister = emptyIfNull(intvBarristers).stream().map(BarristerCollectionItem::getValue)
+            .filter(b -> b.getUserId().equals(representativeInContext.userId()))
+            .findFirst().orElseThrow();
+
+        return isSameOrganisation(
+            ofNullable(intervener.getIntervenerOrganisation())
+                .map(OrganisationPolicy::getOrganisation)
+                .orElse(Organisation.builder().build()),
+            barrister.getOrganisation()
+        );
+    }
+
+    /**
+     * Marks the applicant as unrepresented.
+     *
+     * <p>
+     * This sets the applicant represented flag to {@link YesOrNo#NO} and
+     * clears the organisation policy currently assigned to the applicant solicitor role.
+     *
+     * @param finremCaseData the case data to update
+     */
+    public void setApplicantUnrepresented(FinremCaseData finremCaseData) {
+        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        finremCaseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
+    }
+
+    /**
+     * Marks the respondent as unrepresented.
+     *
+     * <p>
+     * For consented applications, the consented respondent represented flag is updated.
+     * For contested applications, the contested respondent represented flag is updated.
+     * In both cases, it clears the organisation policy currently assigned to the respondent solicitor role.
+     *
+     * @param finremCaseData the case data to update
+     */
+    public void setRespondentUnrepresented(FinremCaseData finremCaseData) {
+        if (finremCaseData.isConsentedApplication()) {
+            finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+        } else {
+            finremCaseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+        }
+        finremCaseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
+    }
+
+    /**
+     * Marks an intervener as unrepresented.
+     *
+     * <p>
+     * This sets the intervener represented flag to {@link YesOrNo#NO} and
+     * clears the organisation policy currently assigned to the intervener solicitor role.
+     *
+     * @param intervenerWrapper the intervener wrapper to update
+     */
+    public void setIntervenerUnrepresented(IntervenerWrapper intervenerWrapper) {
+        intervenerWrapper.setIntervenerRepresented(YesOrNo.NO);
+        intervenerWrapper.setIntervenerOrganisation(getDefaultOrganisationPolicy(
+            intervenerWrapper.getIntervenerSolicitorCaseRole()
+        ));
     }
 
     private void handleApplicantOrRespondentRepresentativeRequest(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseDataFromInfo(info);
+        final FinremCaseData finremCaseData = getFinremCaseData(info);
         final CaseType caseType = finremCaseData.getCcdCaseType();
         final long caseId = getCaseId(info);
 
-        sendAllBarristerChangeToCaseAssignmentService(info);
         boolean isNocRequestSent = sendNocRequestToCaseAssignmentService(info);
 
         if (isNocRequestSent) {
@@ -97,18 +238,28 @@ public class StopRepresentingClientService {
         }
     }
 
-    private boolean isIntervenerOrganisationDifference(IntervenerWrapper intervenerWrapper,
-                                                       IntervenerWrapper originalIntervenerWrapper) {
-        return !Objects.equals(
-            intervenerWrapper.getIntervenerOrganisation(),
-            originalIntervenerWrapper.getIntervenerOrganisation()
+    /**
+     * Determines whether intervener access should be revoked by comparing
+     * the current intervener organisation with the original organisation
+     * stored in case data.
+     */
+    private boolean shouldRevokeIntervenerAccess(IntervenerWrapper intervenerWrapper,
+                                                 IntervenerWrapper originalIntervenerWrapper) {
+        return !isSameOrganisation(
+            ofNullable(intervenerWrapper.getIntervenerOrganisation())
+                .map(OrganisationPolicy::getOrganisation)
+                .orElse(Organisation.builder().organisationID("SAME").build()),
+            ofNullable(originalIntervenerWrapper.getIntervenerOrganisation())
+                .map(OrganisationPolicy::getOrganisation)
+                .orElse(Organisation.builder().organisationID("SAME").build())
         );
     }
 
     private void handleIntervenerRepresentativeRequest(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseDataFromInfo(info);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromInfo(info);
+        final FinremCaseData finremCaseData = getFinremCaseData(info);
+        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
 
+        // compare all interveners
         finremCaseDataBefore.getInterveners().forEach(originalWrapper -> {
             IntervenerType it = originalWrapper.getIntervenerType();
             if (it != null) {
@@ -116,14 +267,12 @@ public class StopRepresentingClientService {
                     .filter(wrapper -> it.equals(wrapper.getIntervenerType()))
                     .findAny()
                     .ifPresent(wrapper -> {
-                        if (isIntervenerOrganisationDifference(wrapper, originalWrapper)) {
-                            intervenerService.revokeIntervener(info.getCaseDetails().getId(), originalWrapper);
+                        if (shouldRevokeIntervenerAccess(wrapper, originalWrapper)) {
+                            intervenerService.revokeIntervenerSolicitor(info.getCaseDetails().getId(), originalWrapper);
                         }
                     });
             }
         });
-
-        sendAllBarristerChangeToCaseAssignmentService(info);
     }
 
     private void sendAllBarristerChangeToCaseAssignmentService(StopRepresentingClientInfo info) {
@@ -137,7 +286,7 @@ public class StopRepresentingClientService {
 
     private void sendBarristerChangesToCaseAssignmentService(StopRepresentingClientInfo info, BarristerParty barristerParty) {
         final long caseId = getCaseId(info);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBeforeFromInfo(info);
+        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
 
         BarristerChange barristerChange = manageBarristerService
             .getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
@@ -145,8 +294,8 @@ public class StopRepresentingClientService {
     }
 
     private boolean sendNocRequestToCaseAssignmentService(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseDataFromInfo(info);
-        final FinremCaseData originalFinremCaseData = getFinremCaseDataBeforeFromInfo(info);
+        final FinremCaseData finremCaseData = getFinremCaseData(info);
+        final FinremCaseData originalFinremCaseData = getFinremCaseDataBefore(info);
 
         // to check if ChangeOrganisationRequest populated, otherwise skip it
         if (finremCaseData.getChangeOrganisationRequestField() == null) {
@@ -187,5 +336,13 @@ public class StopRepresentingClientService {
         // coreCaseDataService loads the case data again in the internal event call.
         coreCaseDataService.performPostSubmitCallback(caseType, caseId,
             INTERNAL_CHANGE_UPDATE_CASE.getCcdType(), caseDetails -> clearChangeOrganisationRequestField());
+    }
+
+    private OrganisationPolicy getDefaultOrganisationPolicy(CaseRole role) {
+        return OrganisationPolicy.builder()
+            .organisation(Organisation.builder().organisationID(null).organisationName(null).build())
+            .orgPolicyReference(null)
+            .orgPolicyCaseAssignedRole(role.getCcdCode())
+            .build();
     }
 }

@@ -563,10 +563,15 @@ public class TestSetUpUtils {
     }
 
     public static List<BarristerCollectionItem> barristers(String orgId) {
+        return barristers(orgId, null);
+    }
+
+    public static List<BarristerCollectionItem> barristers(String orgId, String userId) {
         return new ArrayList<>(List.of(
             BarristerCollectionItem.builder()
                 .value(Barrister.builder()
                     .organisation(organisation(orgId))
+                    .userId(userId)
                     .build())
                 .build()
         ));
