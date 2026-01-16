@@ -1548,6 +1548,11 @@ public class NotificationService {
         return caseDetails.getData().isApplicantSolicitorPopulated();
     }
 
+    public boolean isApplicantSolicitorEmailPopulatedAndPresented(FinremCaseDetails caseDetails) {
+        FinremCaseData finremCaseData = caseDetails.getData();
+        return finremCaseData.isApplicantSolicitorPopulated() && finremCaseData.isApplicantRepresentedByASolicitor();
+    }
+
     public boolean isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
@@ -1558,9 +1563,6 @@ public class NotificationService {
      * applicant solicitor details are populated in the case data and verifying the solicitor's
      * current digital status via the assign case access service.
      *
-     * <p>This reflects the solicitor's current state rather than relying on historical data
-     * or a lookup by email.</p>
-     *
      * @param caseDetails the case details containing applicant solicitor information
      * @return {@code true} if the applicant solicitor is populated and is currently digital;
      *         {@code false} otherwise
@@ -1568,23 +1570,6 @@ public class NotificationService {
     public boolean isApplicantSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isApplicantSolicitorPopulated()
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
-    }
-
-    /**
-     * Determines whether the applicant's solicitor was digital at the time of evaluation by checking
-     * that the applicant solicitor details were populated in the case data and that a corresponding
-     * digital user existed in the organisation service for the applicant solicitor email.
-     *
-     * <p>This method relies on an email-based lookup in the organisation service and represents a
-     * point-in-time (historical) check, rather than the solicitor's current digital status.</p>
-     *
-     * @param caseDetails the case details containing applicant solicitor information
-     * @return {@code true} if the applicant solicitor details were populated and a digital user
-     *         was found for the applicant solicitor email; {@code false} otherwise
-     */
-    public boolean wasApplicantSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
-        FinremCaseData finremCaseData = caseDetails.getData();
-        return finremCaseData.isApplicantSolicitorPopulated() && finremCaseData.isApplicantRepresentedByASolicitor();
     }
 
     public boolean isApplicantSolicitorDigital(FinremCaseDetails caseDetails) {
