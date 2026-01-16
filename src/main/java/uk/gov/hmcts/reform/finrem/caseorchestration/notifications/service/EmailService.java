@@ -92,6 +92,7 @@ public class EmailService {
         templateVars.put("applicantName", notificationRequest.getApplicantName());
         templateVars.put("respondentName", notificationRequest.getRespondentName());
         templateVars.put("hearingType", notificationRequest.getHearingType());
+        templateVars.put("dateOfIssue", notificationRequest.getDateOfIssue());
 
         // linkToSmartSurvey
         templateVars.put("linkToSmartSurvey", DEFAULT_LINK_TO_SMART_SURVEY);
