@@ -70,7 +70,6 @@ public class EmailService {
 
         populateDefaultTemplateVarsByDefault(templateVars);
         populateCourtNameAndCourtEmailTemplateVars(templateVars, notificationRequest, templateName);
-        populateTemplateVarsForConsented(templateVars, notificationRequest, templateName);
         populateTemplateVarsFromNotificationRequest(templateVars, notificationRequest);
         populateTemplateVarsDependsOnEmailTemplate(templateVars, notificationRequest, templateName);
         populateTemplateVarsFromApplicationProperties(templateVars, templateName);
@@ -87,6 +86,10 @@ public class EmailService {
         templateVars.put("applicantName", notificationRequest.getApplicantName());
         templateVars.put("respondentName", notificationRequest.getRespondentName());
         templateVars.put("hearingType", notificationRequest.getHearingType());
+        if (CONSENTED.equals(notificationRequest.getCaseType())) {
+            templateVars.put("caseOrderType", notificationRequest.getCaseOrderType());
+            templateVars.put("camelCaseOrderType", notificationRequest.getCamelCaseOrderType());
+        }
     }
 
     protected void populateDefaultTemplateVarsByDefault(Map<String, Object> templateVars) {
@@ -113,17 +116,6 @@ public class EmailService {
         }
     }
 
-    protected void populateTemplateVarsForConsented(Map<String, Object> templateVars, NotificationRequest notificationRequest,
-                                                    String templateName) {
-        if (CONSENTED.equals(notificationRequest.getCaseType()) && !EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC.name().equals(templateName)) {
-            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
-        }
-        if (CONSENTED.equals(notificationRequest.getCaseType())) {
-            templateVars.put("caseOrderType", notificationRequest.getCaseOrderType());
-            templateVars.put("camelCaseOrderType", notificationRequest.getCamelCaseOrderType());
-        }
-    }
-
     protected void populateTemplateVarsDependsOnEmailTemplate(Map<String, Object> templateVars, NotificationRequest notificationRequest,
                                                               String templateName) {
         if (EmailTemplateNames.FR_ASSIGNED_TO_JUDGE.name().equals(templateName)) {
@@ -137,6 +129,9 @@ public class EmailService {
             || EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE.name().equals(templateName)) {
             templateVars.put("generalEmailBody", notificationRequest.getGeneralEmailBody());
+        }
+        if (CONSENTED.equals(notificationRequest.getCaseType()) && !EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC.name().equals(templateName)) {
+            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
         }
         if (EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)) {
