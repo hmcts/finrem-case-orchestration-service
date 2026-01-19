@@ -69,8 +69,7 @@ public class EmailService {
         Map<String, Object> templateVars = new HashMap<>();
 
         populateDefaultTemplateVarsByDefault(templateVars);
-        populateTemplateVarsForContested(templateVars, notificationRequest, templateName);
-        populateTemplateVarsForConsented(templateVars, notificationRequest, templateName);
+        populateCourtNameAndCourtEmailTemplateVars(templateVars, notificationRequest, templateName);
         populateTemplateVarsFromNotificationRequest(templateVars, notificationRequest);
         populateTemplateVarsDependsOnEmailTemplate(templateVars, notificationRequest, templateName);
         populateTemplateVarsFromApplicationProperties(templateVars, templateName);
@@ -78,37 +77,43 @@ public class EmailService {
         return templateVars;
     }
 
-    protected void populateDefaultTemplateVarsByDefault(Map<String, Object> templateVars) {
-        templateVars.put("linkToSmartSurvey", DEFAULT_LINK_TO_SMART_SURVEY);
-    }
-
-    protected void populateTemplateVarsForContested(Map<String, Object> templateVars, NotificationRequest notificationRequest,
-                                                    String templateName) {
-        //contested emails notifications require the court information, consented does not
-        if ((CONTESTED.equals(notificationRequest.getCaseType())
-            || EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING.name().equals(templateName)) && !isEmpty(notificationRequest.getSelectedCourt())) {
-            Map<String, String> courtDetails = contestedContactEmails.get(notificationRequest.getSelectedCourt());
-
-            templateVars.put("courtName", courtDetails.get("name"));
-            templateVars.put("courtEmail", courtDetails.get("email"));
-        }
-    }
-
-    protected void populateTemplateVarsForConsented(Map<String, Object> templateVars, NotificationRequest notificationRequest,
-                                                    String templateName) {
-        if (CONSENTED.equals(notificationRequest.getCaseType()) && !EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC.name().equals(templateName)) {
-            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
-        }
+    protected void populateTemplateVarsFromNotificationRequest(Map<String, Object> templateVars, NotificationRequest notificationRequest) {
+        templateVars.put("caseReferenceNumber", notificationRequest.getCaseReferenceNumber());
+        templateVars.put("solicitorReferenceNumber", notificationRequest.getSolicitorReferenceNumber());
+        templateVars.put("divorceCaseNumber", notificationRequest.getDivorceCaseNumber());
+        templateVars.put("notificationEmail", notificationRequest.getNotificationEmail());
+        templateVars.put("name", notificationRequest.getName());
+        templateVars.put("applicantName", notificationRequest.getApplicantName());
+        templateVars.put("respondentName", notificationRequest.getRespondentName());
+        templateVars.put("hearingType", notificationRequest.getHearingType());
         if (CONSENTED.equals(notificationRequest.getCaseType())) {
             templateVars.put("caseOrderType", notificationRequest.getCaseOrderType());
             templateVars.put("camelCaseOrderType", notificationRequest.getCamelCaseOrderType());
         }
     }
 
-    protected void populateTemplateVarsFromApplicationProperties(Map<String, Object> templateVars, String templateName) {
-        Map<String, String> fromApplicationContextProperties = emailTemplateVars.get(templateName);
-        if (fromApplicationContextProperties != null) {
-            templateVars.putAll(fromApplicationContextProperties);
+    protected void populateDefaultTemplateVarsByDefault(Map<String, Object> templateVars) {
+        templateVars.put("linkToSmartSurvey", DEFAULT_LINK_TO_SMART_SURVEY);
+    }
+
+    protected void populateCourtNameAndCourtEmailTemplateVars(Map<String, Object> templateVars, NotificationRequest notificationRequest,
+                                                              String templateName) {
+        //contested emails notifications require the court information, consented does not
+        if ((CONTESTED.equals(notificationRequest.getCaseType()) || EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING
+            .name().equals(templateName))
+            && !isEmpty(notificationRequest.getSelectedCourt())) {
+            Map<String, String> courtDetails = contestedContactEmails.get(notificationRequest.getSelectedCourt());
+
+            templateVars.put("courtName", courtDetails.get("name"));
+            templateVars.put("courtEmail", courtDetails.get("email"));
+        }
+
+        // Override court name/email address values if present in the request
+        if (StringUtils.isNotBlank(notificationRequest.getContactCourtName())) {
+            templateVars.put("courtName", notificationRequest.getContactCourtName());
+        }
+        if (StringUtils.isNotBlank(notificationRequest.getContactCourtEmail())) {
+            templateVars.put("courtEmail", notificationRequest.getContactCourtEmail());
         }
     }
 
@@ -130,6 +135,9 @@ public class EmailService {
             || EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)) {
             templateVars.put("link_to_file", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
         }
+        if (CONSENTED.equals(notificationRequest.getCaseType()) && !EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC.name().equals(templateName)) {
+            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
+        }
         if (EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION.name().equals(templateName)) {
             templateVars.put("generalApplicationRejectionReason", notificationRequest.getGeneralApplicationRejectionReason());
         }
@@ -144,13 +152,6 @@ public class EmailService {
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
         }
-        if (EmailTemplateNames.FR_INTERVENER_SOLICITOR_ADDED_EMAIL.name().equals(templateName)
-            || EmailTemplateNames.FR_INTERVENER_SOLICITOR_REMOVED_EMAIL.name().equals(templateName)) {
-            templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
-            templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
-            templateVars.put("intervenerSolicitorFirm", notificationRequest.getIntervenerSolicitorFirm());
-            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
-        }
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN.name().equals(templateName)) {
             templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
@@ -160,6 +161,13 @@ public class EmailService {
             templateVars.put("vacatedHearingType", notificationRequest.getVacatedHearingType());
             templateVars.put("vacatedHearingDateTime", notificationRequest.getVacatedHearingDateTime());
         }
+        if (EmailTemplateNames.FR_INTERVENER_SOLICITOR_ADDED_EMAIL.name().equals(templateName)
+            || EmailTemplateNames.FR_INTERVENER_SOLICITOR_REMOVED_EMAIL.name().equals(templateName)) {
+            templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
+            templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
+            templateVars.put("intervenerSolicitorFirm", notificationRequest.getIntervenerSolicitorFirm());
+            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
+        }
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE.name().equals(templateName)) {
             addDraftOrderReviewOverdueTemplateVars(notificationRequest, templateVars);
         }
@@ -168,23 +176,10 @@ public class EmailService {
         }
     }
 
-    protected void populateTemplateVarsFromNotificationRequest(Map<String, Object> templateVars, NotificationRequest notificationRequest) {
-        templateVars.put("caseReferenceNumber", notificationRequest.getCaseReferenceNumber());
-        templateVars.put("solicitorReferenceNumber", notificationRequest.getSolicitorReferenceNumber());
-        templateVars.put("divorceCaseNumber", notificationRequest.getDivorceCaseNumber());
-        templateVars.put("notificationEmail", notificationRequest.getNotificationEmail());
-        templateVars.put("name", notificationRequest.getName());
-        templateVars.put("applicantName", notificationRequest.getApplicantName());
-        templateVars.put("respondentName", notificationRequest.getRespondentName());
-        templateVars.put("hearingType", notificationRequest.getHearingType());
-        templateVars.put("dateOfIssue", notificationRequest.getDateOfIssue());
-
-        // Override court name/email address values if present in the request
-        if (StringUtils.isNotBlank(notificationRequest.getContactCourtName())) {
-            templateVars.put("courtName", notificationRequest.getContactCourtName());
-        }
-        if (StringUtils.isNotBlank(notificationRequest.getContactCourtEmail())) {
-            templateVars.put("courtEmail", notificationRequest.getContactCourtEmail());
+    protected void populateTemplateVarsFromApplicationProperties(Map<String, Object> templateVars, String templateName) {
+        Map<String, String> fromApplicationContextProperties = emailTemplateVars.get(templateName);
+        if (fromApplicationContextProperties != null) {
+            templateVars.putAll(fromApplicationContextProperties);
         }
     }
 
