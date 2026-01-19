@@ -30,11 +30,7 @@ public class PreviousApplicantBarristerListener extends EmailNotificationOnlyLis
 
     @Override
     protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
-        if (event.getCaseDetailsBefore() != null) {
-            return notificationService.isApplicantSolicitorEmailPopulatedAndPresented(event.getCaseDetailsBefore());
-        } else {
-            return false;
-        }
+        return event.getCaseDetailsBefore() != null;
     }
 
     @Override
