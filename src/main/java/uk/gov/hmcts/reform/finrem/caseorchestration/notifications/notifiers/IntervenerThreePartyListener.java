@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 
 @Component
 public class IntervenerThreePartyListener extends AbstractPartyListener {
