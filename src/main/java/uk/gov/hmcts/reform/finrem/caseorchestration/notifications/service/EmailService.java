@@ -99,8 +99,9 @@ public class EmailService {
     protected void populateCourtNameAndCourtEmailTemplateVars(Map<String, Object> templateVars, NotificationRequest notificationRequest,
                                                               String templateName) {
         //contested emails notifications require the court information, consented does not
-        if ((CONTESTED.equals(notificationRequest.getCaseType())
-            || EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING.name().equals(templateName)) && !isEmpty(notificationRequest.getSelectedCourt())) {
+        if ((CONTESTED.equals(notificationRequest.getCaseType()) || EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING
+            .name().equals(templateName))
+            && !isEmpty(notificationRequest.getSelectedCourt())) {
             Map<String, String> courtDetails = contestedContactEmails.get(notificationRequest.getSelectedCourt());
 
             templateVars.put("courtName", courtDetails.get("name"));
