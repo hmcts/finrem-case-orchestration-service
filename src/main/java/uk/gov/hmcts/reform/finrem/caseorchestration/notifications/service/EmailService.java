@@ -44,22 +44,6 @@ public class EmailService {
 
     public static final String CONTESTED = "contested";
     public static final String CONSENTED = "consented";
-    private static final String FR_ASSIGNED_TO_JUDGE = "FR_ASSIGNED_TO_JUDGE";
-    private static final String CONTESTED_GENERAL_EMAIL = "FR_CONTESTED_GENERAL_EMAIL";
-    private static final String CONTESTED_GENERAL_EMAIL_ATTACHMENT = "FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT";
-    private static final String CONSENT_GENERAL_EMAIL = "FR_CONSENT_GENERAL_EMAIL";
-    private static final String CONSENT_GENERAL_EMAIL_ATTACHMENT = "FR_CONSENT_GENERAL_EMAIL_ATTACHMENT";
-    private static final String TRANSFER_TO_LOCAL_COURT = "FR_TRANSFER_TO_LOCAL_COURT";
-    private static final String GENERAL_APPLICATION_REFER_TO_JUDGE = "FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE";
-    public static final String FR_CONSENT_ORDER_AVAILABLE_CTSC = "FR_CONSENT_ORDER_AVAILABLE_CTSC";
-    public static final String GENERAL_APPLICATION_REJECTED = "FR_REJECT_GENERAL_APPLICATION";
-    public static final String BARRISTER_ACCESS_ADDED = "FR_BARRISTER_ACCESS_ADDED";
-    public static final String BARRISTER_ACCESS_REMOVED = "FR_BARRISTER_ACCESS_REMOVED";
-    public static final String CONSENTED_LIST_FOR_HEARING = "FR_CONSENTED_LIST_FOR_HEARING";
-    public static final String INTERVENER_ADDED_EMAIL = "FR_INTERVENER_ADDED_EMAIL";
-    public static final String INTERVENER_SOLICITOR_ADDED_EMAIL = "FR_INTERVENER_SOLICITOR_ADDED_EMAIL";
-    public static final String INTERVENER_REMOVED_EMAIL = "FR_INTERVENER_REMOVED_EMAIL";
-    public static final String INTERVENER_SOLICITOR_REMOVED_EMAIL = "FR_INTERVENER_SOLICITOR_REMOVED_EMAIL";
     private static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
     private static final String HEARING_DATE = "hearingDate";
     private static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
@@ -84,6 +68,107 @@ public class EmailService {
     protected Map<String, Object> buildTemplateVars(NotificationRequest notificationRequest, String templateName) {
         Map<String, Object> templateVars = new HashMap<>();
 
+        populateDefaultTemplateVarsByDefault(templateVars);
+        populateTemplateVarsForContested(templateVars, notificationRequest, templateName);
+        populateTemplateVarsForConsented(templateVars, notificationRequest, templateName);
+        populateTemplateVarsFromNotificationRequest(templateVars, notificationRequest);
+        populateTemplateVarsDependsOnEmailTemplate(templateVars, notificationRequest, templateName);
+        populateTemplateVarsFromApplicationProperties(templateVars, templateName);
+
+        return templateVars;
+    }
+
+    protected void populateDefaultTemplateVarsByDefault(Map<String, Object> templateVars) {
+        templateVars.put("linkToSmartSurvey", DEFAULT_LINK_TO_SMART_SURVEY);
+    }
+
+    protected void populateTemplateVarsForContested(Map<String, Object> templateVars, NotificationRequest notificationRequest,
+                                                    String templateName) {
+        //contested emails notifications require the court information, consented does not
+        if ((CONTESTED.equals(notificationRequest.getCaseType())
+            || EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING.name().equals(templateName)) && !isEmpty(notificationRequest.getSelectedCourt())) {
+            Map<String, String> courtDetails = contestedContactEmails.get(notificationRequest.getSelectedCourt());
+
+            templateVars.put("courtName", courtDetails.get("name"));
+            templateVars.put("courtEmail", courtDetails.get("email"));
+        }
+    }
+
+    protected void populateTemplateVarsForConsented(Map<String, Object> templateVars, NotificationRequest notificationRequest,
+                                                    String templateName) {
+        if (CONSENTED.equals(notificationRequest.getCaseType()) && !EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC.name().equals(templateName)) {
+            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
+        }
+        if (CONSENTED.equals(notificationRequest.getCaseType())) {
+            templateVars.put("caseOrderType", notificationRequest.getCaseOrderType());
+            templateVars.put("camelCaseOrderType", notificationRequest.getCamelCaseOrderType());
+        }
+    }
+
+    protected void populateTemplateVarsFromApplicationProperties(Map<String, Object> templateVars, String templateName) {
+        Map<String, String> fromApplicationContextProperties = emailTemplateVars.get(templateName);
+        if (fromApplicationContextProperties != null) {
+            templateVars.putAll(fromApplicationContextProperties);
+        }
+    }
+
+    protected void populateTemplateVarsDependsOnEmailTemplate(Map<String, Object> templateVars, NotificationRequest notificationRequest,
+                                                              String templateName) {
+        if (EmailTemplateNames.FR_ASSIGNED_TO_JUDGE.name().equals(templateName)) {
+            templateVars.put("isNotDigital", notificationRequest.getIsNotDigital());
+        }
+        //general emails and transfer to local court emails are the only templates that require the generalEmailBody
+        if (EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL.name().equals(templateName)
+            || EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL.name().equals(templateName)
+            || EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)
+            || EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)
+            || EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT.name().equals(templateName)
+            || EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE.name().equals(templateName)) {
+            templateVars.put("generalEmailBody", notificationRequest.getGeneralEmailBody());
+        }
+        if (EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)
+            || EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)) {
+            templateVars.put("link_to_file", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
+        }
+        if (EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION.name().equals(templateName)) {
+            templateVars.put("generalApplicationRejectionReason", notificationRequest.getGeneralApplicationRejectionReason());
+        }
+        if (EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED.name().equals(templateName)
+            || EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED.name().equals(templateName)) {
+            templateVars.put("BarristerReferenceNumber", notificationRequest.getBarristerReferenceNumber());
+            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
+        }
+        if (EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL.name().equals(templateName)
+            || EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL.name().equals(templateName)) {
+            templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
+            templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
+            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
+        }
+        if (EmailTemplateNames.FR_INTERVENER_SOLICITOR_ADDED_EMAIL.name().equals(templateName)
+            || EmailTemplateNames.FR_INTERVENER_SOLICITOR_REMOVED_EMAIL.name().equals(templateName)) {
+            templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
+            templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
+            templateVars.put("intervenerSolicitorFirm", notificationRequest.getIntervenerSolicitorFirm());
+            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
+        }
+        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name().equals(templateName)
+            || EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN.name().equals(templateName)) {
+            templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
+            templateVars.put(MANAGE_CASE_BASE_URL, manageCaseBaseUrl);
+        }
+        if (EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR.name().equals(templateName)) {
+            templateVars.put("vacatedHearingType", notificationRequest.getVacatedHearingType());
+            templateVars.put("vacatedHearingDateTime", notificationRequest.getVacatedHearingDateTime());
+        }
+        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE.name().equals(templateName)) {
+            addDraftOrderReviewOverdueTemplateVars(notificationRequest, templateVars);
+        }
+        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED.name().equals(templateName)) {
+            addRefusedDraftOrderOrPsaTemplateVars(notificationRequest, templateVars);
+        }
+    }
+
+    protected void populateTemplateVarsFromNotificationRequest(Map<String, Object> templateVars, NotificationRequest notificationRequest) {
         templateVars.put("caseReferenceNumber", notificationRequest.getCaseReferenceNumber());
         templateVars.put("solicitorReferenceNumber", notificationRequest.getSolicitorReferenceNumber());
         templateVars.put("divorceCaseNumber", notificationRequest.getDivorceCaseNumber());
@@ -93,100 +178,12 @@ public class EmailService {
         templateVars.put("respondentName", notificationRequest.getRespondentName());
         templateVars.put("hearingType", notificationRequest.getHearingType());
 
-        // linkToSmartSurvey
-        templateVars.put("linkToSmartSurvey", DEFAULT_LINK_TO_SMART_SURVEY);
-
-        //contested emails notifications require the court information, consented does not
-        if ((CONTESTED.equals(notificationRequest.getCaseType())
-            || CONSENTED_LIST_FOR_HEARING.equals(templateName)) && !isEmpty(notificationRequest.getSelectedCourt())) {
-            Map<String, String> courtDetails = contestedContactEmails.get(notificationRequest.getSelectedCourt());
-
-            templateVars.put("courtName", courtDetails.get("name"));
-            templateVars.put("courtEmail", courtDetails.get("email"));
-        }
-
         // Override court name/email address values if present in the request
         if (StringUtils.isNotBlank(notificationRequest.getContactCourtName())) {
             templateVars.put("courtName", notificationRequest.getContactCourtName());
         }
         if (StringUtils.isNotBlank(notificationRequest.getContactCourtEmail())) {
             templateVars.put("courtEmail", notificationRequest.getContactCourtEmail());
-        }
-
-        if (FR_ASSIGNED_TO_JUDGE.equals(templateName)) {
-            templateVars.put("isNotDigital", notificationRequest.getIsNotDigital());
-        }
-
-        //general emails and transfer to local court emails are the only templates that require the generalEmailBody
-        if (CONSENT_GENERAL_EMAIL.equals(templateName)
-            || CONTESTED_GENERAL_EMAIL.equals(templateName)
-            || CONSENT_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
-            || CONTESTED_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
-            || TRANSFER_TO_LOCAL_COURT.equals(templateName)
-            || GENERAL_APPLICATION_REFER_TO_JUDGE.equals(templateName)) {
-            templateVars.put("generalEmailBody", notificationRequest.getGeneralEmailBody());
-        }
-        if (CONSENT_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
-            || CONTESTED_GENERAL_EMAIL_ATTACHMENT.equals(templateName)) {
-            templateVars.put("link_to_file", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
-        }
-
-        if (CONSENTED.equals(notificationRequest.getCaseType()) && !FR_CONSENT_ORDER_AVAILABLE_CTSC.equals(templateName)) {
-            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
-        }
-
-        if (CONSENTED.equals(notificationRequest.getCaseType())) {
-            templateVars.put("caseOrderType", notificationRequest.getCaseOrderType());
-            templateVars.put("camelCaseOrderType", notificationRequest.getCamelCaseOrderType());
-        }
-
-        if (GENERAL_APPLICATION_REJECTED.equals(templateName)) {
-            templateVars.put("generalApplicationRejectionReason", notificationRequest.getGeneralApplicationRejectionReason());
-        }
-
-        if (BARRISTER_ACCESS_ADDED.equals(templateName) || BARRISTER_ACCESS_REMOVED.equals(templateName)) {
-            templateVars.put("BarristerReferenceNumber", notificationRequest.getBarristerReferenceNumber());
-            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
-        }
-        if (INTERVENER_ADDED_EMAIL.equals(templateName) || INTERVENER_REMOVED_EMAIL.equals(templateName)) {
-            templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
-            templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
-            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
-        }
-        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name().equals(templateName)
-            || EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN.name().equals(templateName)) {
-            templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
-            templateVars.put(MANAGE_CASE_BASE_URL, manageCaseBaseUrl);
-        }
-
-        if (EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR.name().equals(templateName)) {
-            templateVars.put("vacatedHearingType", notificationRequest.getVacatedHearingType());
-            templateVars.put("vacatedHearingDateTime", notificationRequest.getVacatedHearingDateTime());
-        }
-
-        setIntervenerSolicitorDetails(notificationRequest, templateName, templateVars);
-
-        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE.name().equals(templateName)) {
-            addDraftOrderReviewOverdueTemplateVars(notificationRequest, templateVars);
-        }
-
-        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED.name().equals(templateName)) {
-            addRefusedDraftOrderOrPsaTemplateVars(notificationRequest, templateVars);
-        }
-
-        Map<String, String> fromApplicationContextProperties = emailTemplateVars.get(templateName);
-        if (fromApplicationContextProperties != null) {
-            templateVars.putAll(fromApplicationContextProperties);
-        }
-        return templateVars;
-    }
-
-    private void setIntervenerSolicitorDetails(NotificationRequest notificationRequest, String templateName, Map<String, Object> templateVars) {
-        if (INTERVENER_SOLICITOR_ADDED_EMAIL.equals(templateName) || INTERVENER_SOLICITOR_REMOVED_EMAIL.equals(templateName)) {
-            templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
-            templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
-            templateVars.put("intervenerSolicitorFirm", notificationRequest.getIntervenerSolicitorFirm());
-            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
         }
     }
 
