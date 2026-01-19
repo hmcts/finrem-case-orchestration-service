@@ -130,12 +130,12 @@ public class EmailService {
             || EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE.name().equals(templateName)) {
             templateVars.put("generalEmailBody", notificationRequest.getGeneralEmailBody());
         }
-        if (CONSENTED.equals(notificationRequest.getCaseType()) && !EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC.name().equals(templateName)) {
-            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
-        }
         if (EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)) {
             templateVars.put("link_to_file", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
+        }
+        if (CONSENTED.equals(notificationRequest.getCaseType()) && !EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC.name().equals(templateName)) {
+            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
         }
         if (EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION.name().equals(templateName)) {
             templateVars.put("generalApplicationRejectionReason", notificationRequest.getGeneralApplicationRejectionReason());
