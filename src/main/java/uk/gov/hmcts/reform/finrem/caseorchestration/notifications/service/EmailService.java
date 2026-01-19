@@ -69,7 +69,7 @@ public class EmailService {
         Map<String, Object> templateVars = new HashMap<>();
 
         populateDefaultTemplateVarsByDefault(templateVars);
-        populateTemplateVarsForContested(templateVars, notificationRequest, templateName);
+        populateCourtNameAndCourtEmailTemplateVars(templateVars, notificationRequest, templateName);
         populateTemplateVarsForConsented(templateVars, notificationRequest, templateName);
         populateTemplateVarsFromNotificationRequest(templateVars, notificationRequest);
         populateTemplateVarsDependsOnEmailTemplate(templateVars, notificationRequest, templateName);
@@ -87,22 +87,14 @@ public class EmailService {
         templateVars.put("applicantName", notificationRequest.getApplicantName());
         templateVars.put("respondentName", notificationRequest.getRespondentName());
         templateVars.put("hearingType", notificationRequest.getHearingType());
-
-        // Override court name/email address values if present in the request
-        if (StringUtils.isNotBlank(notificationRequest.getContactCourtName())) {
-            templateVars.put("courtName", notificationRequest.getContactCourtName());
-        }
-        if (StringUtils.isNotBlank(notificationRequest.getContactCourtEmail())) {
-            templateVars.put("courtEmail", notificationRequest.getContactCourtEmail());
-        }
     }
 
     protected void populateDefaultTemplateVarsByDefault(Map<String, Object> templateVars) {
         templateVars.put("linkToSmartSurvey", DEFAULT_LINK_TO_SMART_SURVEY);
     }
 
-    protected void populateTemplateVarsForContested(Map<String, Object> templateVars, NotificationRequest notificationRequest,
-                                                    String templateName) {
+    protected void populateCourtNameAndCourtEmailTemplateVars(Map<String, Object> templateVars, NotificationRequest notificationRequest,
+                                                              String templateName) {
         //contested emails notifications require the court information, consented does not
         if ((CONTESTED.equals(notificationRequest.getCaseType())
             || EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING.name().equals(templateName)) && !isEmpty(notificationRequest.getSelectedCourt())) {
@@ -110,6 +102,14 @@ public class EmailService {
 
             templateVars.put("courtName", courtDetails.get("name"));
             templateVars.put("courtEmail", courtDetails.get("email"));
+        }
+
+        // Override court name/email address values if present in the request
+        if (StringUtils.isNotBlank(notificationRequest.getContactCourtName())) {
+            templateVars.put("courtName", notificationRequest.getContactCourtName());
+        }
+        if (StringUtils.isNotBlank(notificationRequest.getContactCourtEmail())) {
+            templateVars.put("courtEmail", notificationRequest.getContactCourtEmail());
         }
     }
 
