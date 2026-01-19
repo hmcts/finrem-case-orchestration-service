@@ -105,13 +105,6 @@ public class EmailService {
         }
     }
 
-    protected void populateTemplateVarsFromApplicationProperties(Map<String, Object> templateVars, String templateName) {
-        Map<String, String> fromApplicationContextProperties = emailTemplateVars.get(templateName);
-        if (fromApplicationContextProperties != null) {
-            templateVars.putAll(fromApplicationContextProperties);
-        }
-    }
-
     protected void populateTemplateVarsDependsOnEmailTemplate(Map<String, Object> templateVars, NotificationRequest notificationRequest,
                                                               String templateName) {
         if (EmailTemplateNames.FR_ASSIGNED_TO_JUDGE.name().equals(templateName)) {
@@ -165,6 +158,13 @@ public class EmailService {
         }
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED.name().equals(templateName)) {
             addRefusedDraftOrderOrPsaTemplateVars(notificationRequest, templateVars);
+        }
+    }
+
+    protected void populateTemplateVarsFromApplicationProperties(Map<String, Object> templateVars, String templateName) {
+        Map<String, String> fromApplicationContextProperties = emailTemplateVars.get(templateName);
+        if (fromApplicationContextProperties != null) {
+            templateVars.putAll(fromApplicationContextProperties);
         }
     }
 
