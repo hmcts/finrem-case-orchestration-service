@@ -260,9 +260,6 @@ public class StopRepresentingClientService {
             if (revocation.applicantSolicitorRevoked) {
                 notifyApplicantSolicitor(info);
             }
-            if (revocation.respondentSolicitorRevoked) {
-                notifyRespondentSolicitor(info);
-            }
         }
     }
 
@@ -322,8 +319,6 @@ public class StopRepresentingClientService {
         SetUtils.emptyIfNull(barristerChange.getRemoved()).forEach(b -> {
             if (BarristerParty.APPLICANT.equals(barristerParty)) {
                 notifyApplicantBarrister(info, b);
-            } else if (BarristerParty.RESPONDENT.equals(barristerParty)) {
-                notifyRespondentBarrister(info, b);
             }
         });
     }
@@ -439,13 +434,5 @@ public class StopRepresentingClientService {
 
     private String getDateOfIssue() {
         return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-    }
-
-    private void notifyRespondentBarrister(StopRepresentingClientInfo info, Barrister barrister) {
-        // TODO Covered in DFR-4454
-    }
-
-    private void notifyRespondentSolicitor(StopRepresentingClientInfo info) {
-        // TODO Covered in DFR-4454
     }
 }
