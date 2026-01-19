@@ -156,13 +156,6 @@ public class EmailService {
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
         }
-        if (EmailTemplateNames.FR_INTERVENER_SOLICITOR_ADDED_EMAIL.name().equals(templateName)
-            || EmailTemplateNames.FR_INTERVENER_SOLICITOR_REMOVED_EMAIL.name().equals(templateName)) {
-            templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
-            templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
-            templateVars.put("intervenerSolicitorFirm", notificationRequest.getIntervenerSolicitorFirm());
-            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
-        }
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN.name().equals(templateName)) {
             templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
@@ -171,6 +164,13 @@ public class EmailService {
         if (EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR.name().equals(templateName)) {
             templateVars.put("vacatedHearingType", notificationRequest.getVacatedHearingType());
             templateVars.put("vacatedHearingDateTime", notificationRequest.getVacatedHearingDateTime());
+        }
+        if (EmailTemplateNames.FR_INTERVENER_SOLICITOR_ADDED_EMAIL.name().equals(templateName)
+            || EmailTemplateNames.FR_INTERVENER_SOLICITOR_REMOVED_EMAIL.name().equals(templateName)) {
+            templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
+            templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
+            templateVars.put("intervenerSolicitorFirm", notificationRequest.getIntervenerSolicitorFirm());
+            templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
         }
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE.name().equals(templateName)) {
             addDraftOrderReviewOverdueTemplateVars(notificationRequest, templateVars);
