@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 public abstract class EmailNotificationOnlyListener extends AbstractPartyListener {
 
-    public EmailNotificationOnlyListener(BulkPrintService bulkPrintService,
+    protected EmailNotificationOnlyListener(BulkPrintService bulkPrintService,
                                          EmailService emailService,
                                          NotificationService notificationService,
                                          InternationalPostalService internationalPostalService) {
