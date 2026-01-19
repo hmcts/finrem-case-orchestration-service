@@ -9,6 +9,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -33,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -44,6 +47,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.Barrister
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -460,8 +464,19 @@ class StopRepresentingClientServiceTest {
 
             lenient().when(underTest.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
                 new RepresentativeInContext(TEST_USER_ID, isApplicant, !isApplicant, null, null));
+            NotificationRequest nr = NotificationRequest.builder().build();
+            lenient()
+                .when(finremNotificationRequestMapper
+                    .getNotificationRequestForApplicantSolicitor(caseDetailsBefore))
+                .thenReturn(nr);
 
-            underTest.revokePartiesAccessAndNotifyParties(event);
+
+            LocalDate fixedDate = LocalDate.of(2024, 11, 4);
+            try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
+                mockedLocalDate.when(LocalDate::now).thenReturn(fixedDate);
+
+                underTest.revokePartiesAccessAndNotifyParties(event);
+            }
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
             verify(applicationEventPublisher, times(isApplicant ? 1 : 0)).publishEvent(captor.capture());
@@ -474,7 +489,8 @@ class StopRepresentingClientServiceTest {
                         SendCorrespondenceEvent::getEmailTemplate,
                         SendCorrespondenceEvent::getCaseDetails,
                         SendCorrespondenceEvent::getCaseDetailsBefore,
-                        SendCorrespondenceEvent::getAuthToken
+                        SendCorrespondenceEvent::getAuthToken,
+                        SendCorrespondenceEvent::getEmailNotificationRequest
                     )
                     .contains(
                         List.of(NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY),
@@ -482,7 +498,8 @@ class StopRepresentingClientServiceTest {
                             : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
                         caseDetails,
                         caseDetailsBefore,
-                        AUTH_TOKEN);
+                        AUTH_TOKEN,
+                        nr.toBuilder().dateOfIssue("2024-11-04").build());
             }
         }
 
@@ -528,7 +545,18 @@ class StopRepresentingClientServiceTest {
             lenient().when(underTest.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
                 new RepresentativeInContext(TEST_USER_ID, isApplicant, !isApplicant, null, null));
 
-            underTest.revokePartiesAccessAndNotifyParties(event);
+            NotificationRequest nr = NotificationRequest.builder().build();
+            lenient()
+                .when(finremNotificationRequestMapper
+                .getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister))
+                .thenReturn(nr);
+
+            LocalDate fixedDate = LocalDate.of(2024, 11, 4);
+            try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
+                mockedLocalDate.when(LocalDate::now).thenReturn(fixedDate);
+
+                underTest.revokePartiesAccessAndNotifyParties(event);
+            }
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
             verify(applicationEventPublisher, times(isApplicant ? 1 : 0)).publishEvent(captor.capture());
@@ -541,7 +569,8 @@ class StopRepresentingClientServiceTest {
                         SendCorrespondenceEvent::getEmailTemplate,
                         SendCorrespondenceEvent::getCaseDetails,
                         SendCorrespondenceEvent::getCaseDetailsBefore,
-                        SendCorrespondenceEvent::getAuthToken
+                        SendCorrespondenceEvent::getAuthToken,
+                        SendCorrespondenceEvent::getEmailNotificationRequest
                     )
                     .contains(
                         List.of(NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY),
@@ -549,7 +578,8 @@ class StopRepresentingClientServiceTest {
                             : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
                         caseDetails,
                         caseDetailsBefore,
-                        AUTH_TOKEN);
+                        AUTH_TOKEN,
+                        nr.toBuilder().dateOfIssue("2024-11-04").build());
             }
         }
     }

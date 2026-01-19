@@ -31,8 +31,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.Barrister
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -438,7 +438,7 @@ public class StopRepresentingClientService {
     }
 
     private String getDateOfIssue() {
-        return new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
     private void notifyRespondentBarrister(StopRepresentingClientInfo info, Barrister barrister) {
