@@ -29,7 +29,7 @@ public class DraftOrdersNotificationRequestMapper {
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
 
     public NotificationRequest buildJudgeNotificationRequest(FinremCaseDetails caseDetails, LocalDate hearingDate, String judge) {
-        NotificationRequest judgeNotificationRequest = new NotificationRequest();
+        NotificationRequest judgeNotificationRequest = NotificationRequest.builder().build();
         judgeNotificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
         judgeNotificationRequest.setHearingDate(dateFormatter.format(hearingDate));
         judgeNotificationRequest.setNotificationEmail(judge);
