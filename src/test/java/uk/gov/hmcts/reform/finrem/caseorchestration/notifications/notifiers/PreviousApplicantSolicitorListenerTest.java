@@ -124,4 +124,16 @@ class PreviousApplicantSolicitorListenerTest {
         verifyNoInteractions(emailService);
         verifyNoLetterSent();
     }
+
+    @Test
+    void shouldNotSendEmailNotificationIfCaseDetailsBeforeIsAbsent() {
+        FinremCaseDetails caseDetailsBefore = null;
+
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, mock(EmailTemplateNames.class));
+
+        underTest.handleNotification(event);
+
+        verifyNoInteractions(emailService);
+        verifyNoLetterSent();
+    }
 }
