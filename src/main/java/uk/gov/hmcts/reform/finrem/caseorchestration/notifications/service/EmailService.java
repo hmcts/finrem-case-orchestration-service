@@ -78,6 +78,25 @@ public class EmailService {
         return templateVars;
     }
 
+    protected void populateTemplateVarsFromNotificationRequest(Map<String, Object> templateVars, NotificationRequest notificationRequest) {
+        templateVars.put("caseReferenceNumber", notificationRequest.getCaseReferenceNumber());
+        templateVars.put("solicitorReferenceNumber", notificationRequest.getSolicitorReferenceNumber());
+        templateVars.put("divorceCaseNumber", notificationRequest.getDivorceCaseNumber());
+        templateVars.put("notificationEmail", notificationRequest.getNotificationEmail());
+        templateVars.put("name", notificationRequest.getName());
+        templateVars.put("applicantName", notificationRequest.getApplicantName());
+        templateVars.put("respondentName", notificationRequest.getRespondentName());
+        templateVars.put("hearingType", notificationRequest.getHearingType());
+
+        // Override court name/email address values if present in the request
+        if (StringUtils.isNotBlank(notificationRequest.getContactCourtName())) {
+            templateVars.put("courtName", notificationRequest.getContactCourtName());
+        }
+        if (StringUtils.isNotBlank(notificationRequest.getContactCourtEmail())) {
+            templateVars.put("courtEmail", notificationRequest.getContactCourtEmail());
+        }
+    }
+
     protected void populateDefaultTemplateVarsByDefault(Map<String, Object> templateVars) {
         templateVars.put("linkToSmartSurvey", DEFAULT_LINK_TO_SMART_SURVEY);
     }
@@ -165,25 +184,6 @@ public class EmailService {
         Map<String, String> fromApplicationContextProperties = emailTemplateVars.get(templateName);
         if (fromApplicationContextProperties != null) {
             templateVars.putAll(fromApplicationContextProperties);
-        }
-    }
-
-    protected void populateTemplateVarsFromNotificationRequest(Map<String, Object> templateVars, NotificationRequest notificationRequest) {
-        templateVars.put("caseReferenceNumber", notificationRequest.getCaseReferenceNumber());
-        templateVars.put("solicitorReferenceNumber", notificationRequest.getSolicitorReferenceNumber());
-        templateVars.put("divorceCaseNumber", notificationRequest.getDivorceCaseNumber());
-        templateVars.put("notificationEmail", notificationRequest.getNotificationEmail());
-        templateVars.put("name", notificationRequest.getName());
-        templateVars.put("applicantName", notificationRequest.getApplicantName());
-        templateVars.put("respondentName", notificationRequest.getRespondentName());
-        templateVars.put("hearingType", notificationRequest.getHearingType());
-
-        // Override court name/email address values if present in the request
-        if (StringUtils.isNotBlank(notificationRequest.getContactCourtName())) {
-            templateVars.put("courtName", notificationRequest.getContactCourtName());
-        }
-        if (StringUtils.isNotBlank(notificationRequest.getContactCourtEmail())) {
-            templateVars.put("courtEmail", notificationRequest.getContactCourtEmail());
         }
     }
 
