@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -64,7 +64,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -82,6 +81,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresent
 
 @ExtendWith(MockitoExtension.class)
 class StopRepresentingClientServiceTest {
+
+    private static final LocalDate FIXED_DATE_NOW = LocalDate.of(2024, 11, 4);
+
+    private static final String EXPECTED_NOW_DATE_IN_STRING = "2024-11-04";
 
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
@@ -442,13 +445,10 @@ class StopRepresentingClientServiceTest {
         }
 
         @ParameterizedTest
-        @CsvSource({
-            "CONSENTED, true", "CONTESTED, true",
-            "CONSENTED, false", "CONTESTED, false"
-        })
-        void shouldNotifyApplicant(CaseType caseType, boolean isApplicant) {
+        @EnumSource(value = CaseType.class, names = {"CONSENTED", "CONTESTED"})
+        void shouldNotifyApplicantSolicitor(CaseType caseType) {
             FinremCaseData caseData = spy(FinremCaseData.class);
-            caseData.getContactDetailsWrapper().setNocParty(isApplicant ? NoticeOfChangeParty.APPLICANT : NoticeOfChangeParty.RESPONDENT);
+            caseData.getContactDetailsWrapper().setNocParty(NoticeOfChangeParty.APPLICANT);
             caseData.setChangeOrganisationRequestField(mock(ChangeOrganisationRequest.class));
 
             FinremCaseData caseDataBefore = mock(FinremCaseData.class);
@@ -462,53 +462,46 @@ class StopRepresentingClientServiceTest {
                 .userAuthorisation(AUTH_TOKEN)
                 .build();
 
-            lenient().when(underTest.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
-                new RepresentativeInContext(TEST_USER_ID, isApplicant, !isApplicant, null, null));
-            NotificationRequest nr = NotificationRequest.builder().build();
-            lenient()
-                .when(finremNotificationRequestMapper
+            when(underTest.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
+                new RepresentativeInContext(TEST_USER_ID, true, false, null, null));
+            NotificationRequest notificationRequest = NotificationRequest.builder().build();
+            when(finremNotificationRequestMapper
                     .getNotificationRequestForApplicantSolicitor(caseDetailsBefore))
-                .thenReturn(nr);
+                .thenReturn(notificationRequest);
 
-
-            LocalDate fixedDate = LocalDate.of(2024, 11, 4);
             try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
-                mockedLocalDate.when(LocalDate::now).thenReturn(fixedDate);
+                mockedLocalDate.when(LocalDate::now).thenReturn(FIXED_DATE_NOW);
 
                 underTest.revokePartiesAccessAndNotifyParties(event);
             }
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-            verify(applicationEventPublisher, times(isApplicant ? 1 : 0)).publishEvent(captor.capture());
-            verify(finremNotificationRequestMapper, times(isApplicant ? 1 : 0))
+            verify(applicationEventPublisher).publishEvent(captor.capture());
+            verify(finremNotificationRequestMapper)
                 .getNotificationRequestForApplicantSolicitor(caseDetailsBefore);
-            if (isApplicant) {
-                assertThat(captor.getValue())
-                    .extracting(
-                        SendCorrespondenceEvent::getNotificationParties,
-                        SendCorrespondenceEvent::getEmailTemplate,
-                        SendCorrespondenceEvent::getCaseDetails,
-                        SendCorrespondenceEvent::getCaseDetailsBefore,
-                        SendCorrespondenceEvent::getAuthToken,
-                        SendCorrespondenceEvent::getEmailNotificationRequest
-                    )
-                    .contains(
-                        List.of(NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY),
-                        CaseType.CONTESTED.equals(caseType) ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-                            : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
-                        caseDetails,
-                        caseDetailsBefore,
-                        AUTH_TOKEN,
-                        nr.toBuilder().dateOfIssue("2024-11-04").build());
-            }
+
+            assertThat(captor.getValue())
+                .extracting(
+                    SendCorrespondenceEvent::getNotificationParties,
+                    SendCorrespondenceEvent::getEmailTemplate,
+                    SendCorrespondenceEvent::getCaseDetails,
+                    SendCorrespondenceEvent::getCaseDetailsBefore,
+                    SendCorrespondenceEvent::getAuthToken,
+                    SendCorrespondenceEvent::getEmailNotificationRequest
+                )
+                .contains(
+                    List.of(NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY),
+                    CaseType.CONTESTED.equals(caseType) ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
+                        : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
+                    caseDetails,
+                    caseDetailsBefore,
+                    AUTH_TOKEN,
+                    notificationRequest.toBuilder().dateOfIssue(EXPECTED_NOW_DATE_IN_STRING).build());
         }
 
         @ParameterizedTest
-        @CsvSource({
-            "CONSENTED, true", "CONTESTED, true",
-            "CONSENTED, false", "CONTESTED, false"
-        })
-        void shouldNotifyBarrister(CaseType caseType, boolean isApplicant) {
+        @EnumSource(value = CaseType.class, names = {"CONSENTED", "CONTESTED"})
+        void shouldNotifyApplicantBarrister(CaseType caseType) {
             FinremCaseData caseData = spy(FinremCaseData.class);
             caseData.getContactDetailsWrapper().setNocParty(mock(NoticeOfChangeParty.class));
             FinremCaseData caseDataBefore = mock(FinremCaseData.class);
@@ -543,7 +536,7 @@ class StopRepresentingClientServiceTest {
                 .thenReturn(intv4BarristerChange);
 
             lenient().when(underTest.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
-                new RepresentativeInContext(TEST_USER_ID, isApplicant, !isApplicant, null, null));
+                new RepresentativeInContext(TEST_USER_ID, true, false, null, null));
 
             NotificationRequest nr = NotificationRequest.builder().build();
             lenient()
@@ -551,36 +544,34 @@ class StopRepresentingClientServiceTest {
                 .getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister))
                 .thenReturn(nr);
 
-            LocalDate fixedDate = LocalDate.of(2024, 11, 4);
             try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
-                mockedLocalDate.when(LocalDate::now).thenReturn(fixedDate);
+                mockedLocalDate.when(LocalDate::now).thenReturn(FIXED_DATE_NOW);
 
                 underTest.revokePartiesAccessAndNotifyParties(event);
             }
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-            verify(applicationEventPublisher, times(isApplicant ? 1 : 0)).publishEvent(captor.capture());
-            verify(finremNotificationRequestMapper, times(isApplicant ? 1 : 0))
+            verify(applicationEventPublisher).publishEvent(captor.capture());
+            verify(finremNotificationRequestMapper)
                 .getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister);
-            if (isApplicant) {
-                assertThat(captor.getValue())
-                    .extracting(
-                        SendCorrespondenceEvent::getNotificationParties,
-                        SendCorrespondenceEvent::getEmailTemplate,
-                        SendCorrespondenceEvent::getCaseDetails,
-                        SendCorrespondenceEvent::getCaseDetailsBefore,
-                        SendCorrespondenceEvent::getAuthToken,
-                        SendCorrespondenceEvent::getEmailNotificationRequest
-                    )
-                    .contains(
-                        List.of(NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY),
-                        CaseType.CONTESTED.equals(caseType) ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-                            : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
-                        caseDetails,
-                        caseDetailsBefore,
-                        AUTH_TOKEN,
-                        nr.toBuilder().dateOfIssue("2024-11-04").build());
-            }
+
+            assertThat(captor.getValue())
+                .extracting(
+                    SendCorrespondenceEvent::getNotificationParties,
+                    SendCorrespondenceEvent::getEmailTemplate,
+                    SendCorrespondenceEvent::getCaseDetails,
+                    SendCorrespondenceEvent::getCaseDetailsBefore,
+                    SendCorrespondenceEvent::getAuthToken,
+                    SendCorrespondenceEvent::getEmailNotificationRequest
+                )
+                .contains(
+                    List.of(NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY),
+                    CaseType.CONTESTED.equals(caseType) ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
+                        : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
+                    caseDetails,
+                    caseDetailsBefore,
+                    AUTH_TOKEN,
+                    nr.toBuilder().dateOfIssue(EXPECTED_NOW_DATE_IN_STRING).build());
         }
     }
 
