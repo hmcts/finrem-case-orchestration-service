@@ -31,7 +31,7 @@ class NotificationPartyTest {
     }
 
     @Test
-    void shouldReturnPreviousApplicantSolicitorOnly() {
+    void shouldReturnPreviousNotificationParties() {
         assertEquals(Optional.of(PREVIOUS_APPLICANT_SOLICITOR_ONLY), getNotificationParty(CaseRole.APP_SOLICITOR, false, true));
         assertEquals(Optional.of(PREVIOUS_APPLICANT_BARRISTER_ONLY), getNotificationParty(CaseRole.APP_BARRISTER, false, true));
     }
