@@ -143,7 +143,7 @@ class ManageHearingsDocumentServiceTest {
         // Assert
         assertEquals(expectedDocument, actualDocument);
         verify(hearingNoticeLetterDetailsMapper).getDocumentTemplateDetailsAsMap(finremCaseDetails);
-        verify(documentConfiguration).getManageHearingNoticeTemplate( Region.SOUTHWEST);
+        verify(documentConfiguration).getManageHearingNoticeTemplate(Region.SOUTHWEST);
         verify(documentConfiguration).getManageHearingNoticeFileName();
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
             AUTH_TOKEN, documentDataMap, HEARING_NOTICE_TEMPLATE, "hearingNoticeFileName", CONTESTED);

@@ -383,7 +383,10 @@ public class ManageHearingActionService {
             .toList());
     }
 
-    private void generateHearingNotice(FinremCaseDetails finremCaseDetails, Region courtRegion, String authToken, Map<String, DocumentRecord> documentMap) {
+    private void generateHearingNotice(FinremCaseDetails finremCaseDetails,
+                                       Region courtRegion,
+                                       String authToken,
+                                       Map<String, DocumentRecord> documentMap) {
         documentMap.put(
             HEARING_NOTICE_DOCUMENT,
             new DocumentRecord(

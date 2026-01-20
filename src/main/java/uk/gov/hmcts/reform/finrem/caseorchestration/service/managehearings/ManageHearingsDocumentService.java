@@ -95,9 +95,9 @@ public class ManageHearingsDocumentService {
 
         String template = documentConfiguration.getVacateOrAdjournNoticeTemplate(courtRegion);
 
-        String fileName =  VacateOrAdjournAction.VACATE_HEARING.equals(vacateOrAdjournAction) ?
-            documentConfiguration.getVacateHearingNoticeFileName() :
-            documentConfiguration.getAdjournHearingNoticeFileName();
+        String fileName =  VacateOrAdjournAction.VACATE_HEARING.equals(vacateOrAdjournAction)
+            ? documentConfiguration.getVacateHearingNoticeFileName()
+            : documentConfiguration.getAdjournHearingNoticeFileName();
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
             authorisationToken,
