@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
@@ -82,13 +83,14 @@ public class ManageHearingActionService {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
         HearingType hearingType = getHearingType(hearingWrapper.getWorkingHearing().getHearingTypeDynamicList());
+        Region courtRegion = hearingWrapper.getWorkingHearing().getHearingCourtSelection().getRegion();
 
         UUID hearingId = UUID.randomUUID();
         addHearingToCollection(hearingWrapper, hearingId);
 
         Map<String, DocumentRecord> documentMap = new HashMap<>();
 
-        generateHearingNotice(finremCaseDetails, authToken, documentMap);
+        generateHearingNotice(finremCaseDetails, courtRegion, authToken, documentMap);
 
         // FDR Hearings that are not express cases do not generate Form C or Form G, they
         // will have been generated at the time of the FDA hearing.
@@ -165,7 +167,9 @@ public class ManageHearingActionService {
 
         Map<String, DocumentRecord> documentMap = new HashMap<>();
 
-        generateVacateOrAdjournNotice(finremCaseDetails, authToken, documentMap, action);
+        Region courtregion = vacatedItem.getValue().getHearingCourtSelection().getRegion();
+
+        generateVacateOrAdjournNotice(finremCaseDetails, courtregion, authToken, documentMap, action);
         generateVacateNoticeCoverSheetIfHearingNotRelisted(hearingsWrapper, finremCaseDetails, authToken);
 
         addDocumentsToCollection(documentMap, hearingsWrapper);
@@ -379,24 +383,25 @@ public class ManageHearingActionService {
             .toList());
     }
 
-    private void generateHearingNotice(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
+    private void generateHearingNotice(FinremCaseDetails finremCaseDetails, Region courtRegion, String authToken, Map<String, DocumentRecord> documentMap) {
         documentMap.put(
             HEARING_NOTICE_DOCUMENT,
             new DocumentRecord(
-                manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, authToken),
+                manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, courtRegion, authToken),
                 CaseDocumentType.HEARING_NOTICE
             )
         );
     }
 
     private void generateVacateOrAdjournNotice(FinremCaseDetails finremCaseDetails,
+                                               Region courtRegion,
                                                String authToken,
                                                Map<String, DocumentRecord> documentMap,
                                                VacateOrAdjournAction action) {
         documentMap.put(
             VACATE_HEARING_NOTICE_DOCUMENT,
             new DocumentRecord(
-                manageHearingsDocumentService.generateVacateOrAdjournNotice(finremCaseDetails, authToken, action),
+                manageHearingsDocumentService.generateVacateOrAdjournNotice(finremCaseDetails, courtRegion, authToken, action),
                 CaseDocumentType.VACATE_HEARING_NOTICE
             )
         );

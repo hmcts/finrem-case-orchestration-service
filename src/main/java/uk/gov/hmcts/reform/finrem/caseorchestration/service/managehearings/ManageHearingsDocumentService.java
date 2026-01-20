@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
@@ -63,6 +64,7 @@ public class ManageHearingsDocumentService {
      * @return the generated hearing notice as a {@link CaseDocument}
      */
     public CaseDocument generateHearingNotice(FinremCaseDetails finremCaseDetails,
+                                              Region courtRegion,
                                               String authorisationToken) {
 
         Map<String, Object> documentDataMap = hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
@@ -70,7 +72,7 @@ public class ManageHearingsDocumentService {
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
             authorisationToken,
             documentDataMap,
-            documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails),
+            documentConfiguration.getManageHearingNoticeTemplate(courtRegion),
             documentConfiguration.getManageHearingNoticeFileName(),
             finremCaseDetails.getCaseType()
         );
@@ -85,12 +87,13 @@ public class ManageHearingsDocumentService {
      * @return the generated vacate hearing notice as a {@link CaseDocument}
      */
     public CaseDocument generateVacateOrAdjournNotice(FinremCaseDetails finremCaseDetails,
+                                                      Region courtRegion,
                                                       String authorisationToken,
                                                       VacateOrAdjournAction vacateOrAdjournAction) {
 
         Map<String, Object> documentDataMap = vacateOrAdjournNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
-        String template = documentConfiguration.getVacateOrAdjournNoticeTemplate(finremCaseDetails);
+        String template = documentConfiguration.getVacateOrAdjournNoticeTemplate(courtRegion);
 
         String fileName =  VacateOrAdjournAction.VACATE_HEARING.equals(vacateOrAdjournAction) ?
             documentConfiguration.getVacateHearingNoticeFileName() :

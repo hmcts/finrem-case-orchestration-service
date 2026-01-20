@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
@@ -126,7 +127,7 @@ class ManageHearingsDocumentServiceTest {
         // Arrange
         when(hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails))
             .thenReturn(documentDataMap);
-        when(documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails))
+        when(documentConfiguration.getManageHearingNoticeTemplate(Region.SOUTHWEST))
             .thenReturn(HEARING_NOTICE_TEMPLATE);
         when(documentConfiguration.getManageHearingNoticeFileName())
             .thenReturn(HEARING_NOTICE_FILE_NAME);
@@ -137,12 +138,12 @@ class ManageHearingsDocumentServiceTest {
 
         // Act
         CaseDocument actualDocument =
-            manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
+            manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, Region.SOUTHWEST,  AUTH_TOKEN);
 
         // Assert
         assertEquals(expectedDocument, actualDocument);
         verify(hearingNoticeLetterDetailsMapper).getDocumentTemplateDetailsAsMap(finremCaseDetails);
-        verify(documentConfiguration).getManageHearingNoticeTemplate(finremCaseDetails);
+        verify(documentConfiguration).getManageHearingNoticeTemplate( Region.SOUTHWEST);
         verify(documentConfiguration).getManageHearingNoticeFileName();
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
             AUTH_TOKEN, documentDataMap, HEARING_NOTICE_TEMPLATE, "hearingNoticeFileName", CONTESTED);
@@ -157,7 +158,7 @@ class ManageHearingsDocumentServiceTest {
         // Arrange
         when(vacateOrAdjournNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails))
             .thenReturn(documentDataMap);
-        when(documentConfiguration.getVacateOrAdjournNoticeTemplate(finremCaseDetails))
+        when(documentConfiguration.getVacateOrAdjournNoticeTemplate(Region.SOUTHWEST))
             .thenReturn(VACATE_OR_ADJOURN_NOTICE_TEMPLATE);
 
         if (VacateOrAdjournAction.ADJOURN_HEARING.equals(action)) {
@@ -174,12 +175,12 @@ class ManageHearingsDocumentServiceTest {
 
         // Act
         CaseDocument actualDocument =
-            manageHearingsDocumentService.generateVacateOrAdjournNotice(finremCaseDetails, AUTH_TOKEN, action);
+            manageHearingsDocumentService.generateVacateOrAdjournNotice(finremCaseDetails, Region.SOUTHWEST,  AUTH_TOKEN, action);
 
         // Assert
         assertEquals(expectedDocument, actualDocument);
         verify(vacateOrAdjournNoticeLetterDetailsMapper).getDocumentTemplateDetailsAsMap(finremCaseDetails);
-        verify(documentConfiguration).getVacateOrAdjournNoticeTemplate(finremCaseDetails);
+        verify(documentConfiguration).getVacateOrAdjournNoticeTemplate(Region.SOUTHWEST);
 
         if (VacateOrAdjournAction.ADJOURN_HEARING.equals(action)) {
             verify(documentConfiguration).getAdjournHearingNoticeFileName();

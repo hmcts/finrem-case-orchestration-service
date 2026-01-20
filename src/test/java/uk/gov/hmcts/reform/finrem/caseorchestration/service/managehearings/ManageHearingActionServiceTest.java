@@ -14,12 +14,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.Hearin
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
@@ -35,6 +39,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -105,7 +110,7 @@ class ManageHearingActionServiceTest {
     @Test
     void performAddHearing_shouldAddHearingAndGenerateHearingNotice() {
         CaseDocument hearingNotice = createCaseDocument(HEARING_NOTICE_FILENAME, HEARING_NOTICE_URL);
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN))
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, Region.LONDON, AUTH_TOKEN))
             .thenReturn(hearingNotice);
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
@@ -148,7 +153,7 @@ class ManageHearingActionServiceTest {
             AUTH_TOKEN)).thenReturn(pfdNcdrDocuments);
         when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(outOfCourtResolution);
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails,
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, Region.LONDON,
             AUTH_TOKEN)).thenReturn(createCaseDocument(HEARING_NOTICE_FILENAME, HEARING_NOTICE_URL));
         when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(true);
         when(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)).thenReturn(true);
@@ -199,7 +204,7 @@ class ManageHearingActionServiceTest {
             AUTH_TOKEN)).thenReturn(formG);
         when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(outOfCourtResolution);
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails,
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, Region.LONDON,
             AUTH_TOKEN)).thenReturn(createCaseDocument(HEARING_NOTICE_FILENAME, HEARING_NOTICE_URL));
 
         when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN))
@@ -249,7 +254,7 @@ class ManageHearingActionServiceTest {
             AUTH_TOKEN)).thenReturn(pfdNcdrDocuments);
         when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(outOfCourtResolution);
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails,
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, Region.LONDON,
             AUTH_TOKEN)).thenReturn(createCaseDocument("HearingNotice.pdf",
             "http://example.com/hearing-notice"));
         when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
@@ -295,7 +300,7 @@ class ManageHearingActionServiceTest {
             AUTH_TOKEN)).thenReturn(pfdNcdrDocuments);
         when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(outOfCourtResolution);
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails,
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, Region.LONDON,
             AUTH_TOKEN)).thenReturn(createCaseDocument("HearingNotice.pdf",
             "http://example.com/hearing-notice"));
         when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(false);
@@ -327,6 +332,7 @@ class ManageHearingActionServiceTest {
             .chooseHearings(DynamicList.builder()
                 .value(DynamicListElement.builder().code(hearingToVacateId.toString()).build())
                 .build())
+            .vacateOrAdjournAction(VacateOrAdjournAction.VACATE_HEARING)
             .vacateReason(COURTROOM_UNAVAILABLE)
             .build());
 
@@ -369,9 +375,9 @@ class ManageHearingActionServiceTest {
 
         assertThat(hearingWrapper.getWasRelistSelected()).isEqualTo(hearingWasRelisted);
 
-        verify(manageHearingsDocumentService).generateVacateOrAdjournNotice(finremCaseDetails, AUTH_TOKEN, VacateOrAdjournAction.VACATE_HEARING);
+        verify(manageHearingsDocumentService).generateVacateOrAdjournNotice(finremCaseDetails, Region.LONDON, AUTH_TOKEN, VacateOrAdjournAction.VACATE_HEARING);
 
-        assertThat(hearingWrapper.getHearingDocumentsCollection().size()).isEqualTo(1);
+        assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(1);
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingCaseDocumentType().getId())
             .isEqualTo(CaseDocumentType.VACATE_HEARING_NOTICE.getId());
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingId())
@@ -781,6 +787,13 @@ class ManageHearingActionServiceTest {
 
     private WorkingHearing createWorkingHearing(LocalDate date) {
         return WorkingHearing.builder()
+            .hearingCourtSelection(Court.builder()
+                .region(Region.LONDON)
+                .londonList(RegionLondonFrc.LONDON)
+                .courtListWrapper(DefaultCourtListWrapper.builder()
+                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                    .build())
+                .build())
             .hearingTypeDynamicList(DynamicList.builder()
                 .value(DynamicListElement.builder()
                     .code(HearingType.DIR.name())
@@ -811,6 +824,12 @@ class ManageHearingActionServiceTest {
             .hearingDate(date)
             .hearingTime(time)
             .hearingTimeEstimate(estimate)
+            .hearingCourtSelection(Court.builder()
+                .region(Region.LONDON)
+                .londonList(RegionLondonFrc.LONDON)
+                .courtListWrapper(DefaultCourtListWrapper.builder()
+                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                    .build()).build())
             .partiesOnCase(List.of(PartyOnCaseCollectionItem
                 .builder()
                 .value(PartyOnCase
