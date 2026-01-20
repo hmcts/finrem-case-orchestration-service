@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.VacateHearingNoticeLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.VacateOrAdjournNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -48,7 +49,7 @@ public class ManageHearingsDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final HearingNoticeLetterDetailsMapper hearingNoticeLetterDetailsMapper;
-    private final VacateHearingNoticeLetterDetailsMapper vacateHearingNoticeLetterDetailsMapper;
+    private final VacateOrAdjournNoticeLetterDetailsMapper vacateOrAdjournNoticeLetterDetailsMapper;
     private final ManageHearingFormCLetterDetailsMapper manageHearingFormCLetterDetailsMapper;
     private final ManageHearingFormGLetterDetailsMapper formGLetterDetailsMapper;
     private final ExpressCaseService expressCaseService;
@@ -83,16 +84,23 @@ public class ManageHearingsDocumentService {
      * @param authorisationToken the authorisation token for document generation
      * @return the generated vacate hearing notice as a {@link CaseDocument}
      */
-    public CaseDocument generateVacateHearingNotice(FinremCaseDetails finremCaseDetails,
-                                              String authorisationToken) {
+    public CaseDocument generateVacateOrAdjournNotice(FinremCaseDetails finremCaseDetails,
+                                                      String authorisationToken,
+                                                      VacateOrAdjournAction vacateOrAdjournAction) {
 
-        Map<String, Object> documentDataMap = vacateHearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
+        Map<String, Object> documentDataMap = vacateOrAdjournNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
+
+        String template = documentConfiguration.getVacateOrAdjournNoticeTemplate(finremCaseDetails);
+
+        String fileName =  VacateOrAdjournAction.VACATE_HEARING.equals(vacateOrAdjournAction) ?
+            documentConfiguration.getVacateHearingNoticeFileName() :
+            documentConfiguration.getAdjournHearingNoticeFileName();
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
             authorisationToken,
             documentDataMap,
-            documentConfiguration.getVacateHearingNoticeTemplate(finremCaseDetails),
-            documentConfiguration.getVacateHearingNoticeFileName(),
+            template,
+            fileName,
             finremCaseDetails.getCaseType()
         );
     }

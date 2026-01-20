@@ -369,7 +369,7 @@ class ManageHearingActionServiceTest {
 
         assertThat(hearingWrapper.getWasRelistSelected()).isEqualTo(hearingWasRelisted);
 
-        verify(manageHearingsDocumentService).generateVacateHearingNotice(finremCaseDetails, AUTH_TOKEN);
+        verify(manageHearingsDocumentService).generateVacateOrAdjournNotice(finremCaseDetails, AUTH_TOKEN, VacateOrAdjournAction.VACATE_HEARING);
 
         assertThat(hearingWrapper.getHearingDocumentsCollection().size()).isEqualTo(1);
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingCaseDocumentType().getId())

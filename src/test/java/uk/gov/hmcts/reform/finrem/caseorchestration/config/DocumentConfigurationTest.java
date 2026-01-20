@@ -58,14 +58,14 @@ class DocumentConfigurationTest {
 
     @Test
     void returnsStandardTemplate_whenHighCourtNotSelected() {
-        assertThat(documentConfiguration.getVacateHearingNoticeTemplate(finremCaseDetails))
+        assertThat(documentConfiguration.getVacateOrAdjournNoticeTemplate(finremCaseDetails))
             .isEqualTo("FL-FRM-HNO-ENG-00024.docx");
     }
 
     @Test
     void returnsHighCourtTemplate_whenHighCourtSelected() {
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setHighCourtFrcList(RegionHighCourtFrc.HIGHCOURT);
-        assertThat(documentConfiguration.getVacateHearingNoticeTemplate(finremCaseDetails))
+        assertThat(documentConfiguration.getVacateOrAdjournNoticeTemplate(finremCaseDetails))
             .isEqualTo("FL-FRM-HNO-ENG-00025.docx");
     }
 }

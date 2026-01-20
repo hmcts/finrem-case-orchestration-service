@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.VacateHearingNoticeLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.VacateOrAdjournNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
@@ -63,7 +64,7 @@ class ManageHearingsDocumentServiceTest {
     @Mock
     private HearingNoticeLetterDetailsMapper hearingNoticeLetterDetailsMapper;
     @Mock
-    private VacateHearingNoticeLetterDetailsMapper vacateHearingNoticeLetterDetailsMapper;
+    private VacateOrAdjournNoticeLetterDetailsMapper vacateOrAdjournNoticeLetterDetailsMapper;
     @Mock
     private ManageHearingFormCLetterDetailsMapper manageHearingFormCLetterDetailsMapper;
     @Mock
@@ -74,9 +75,14 @@ class ManageHearingsDocumentServiceTest {
     private StaticHearingDocumentService staticHearingDocumentService;
 
     private static final String HEARING_NOTICE_TEMPLATE = "hearingNoticeTemplate";
+    private static final String VACATE_OR_ADJOURN_NOTICE_TEMPLATE = "vacateOrAdjournNoticeTemplate";
     private static final String HEARING_NOTICE_FILE_NAME = "hearingNoticeFileName";
     private static final String HEARING_NOTICE_FILE_URL = "hearingNoticeURL";
-    private static final String VACATE_HEARING_NOTICE_FILE_URL = "vacateHearingNoticeURL";
+    private static final String VACATE_NOTICE_FILE_NAME = "vacateHearingNoticeFileName";
+    private static final String ADJOURNED_NOTICE_FILE_NAME = "adjournedHearingNoticeFileName";
+
+    private static final String VACATE_NOTICE_FILE_URL = "vacateHearingNoticeURL";
+    private static final String ADJOURNED_NOTICE_FILE_URL = "adjournedHearingNoticeURL";
 
     private static final String FORM_A_URL = "formAURL";
 
@@ -143,31 +149,61 @@ class ManageHearingsDocumentServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("hearingNoticeTestSetup")
-    void shouldGenerateVacateHearingNotice(Map<String, Object> documentDataMap, CaseDocument expectedDocument) {
+    @MethodSource("vacateAndAdjournNoticeProvider")
+    void shouldGenerateVacateOrAdjournNotice(Map<String, Object> documentDataMap,
+                                             CaseDocument expectedDocument,
+                                             VacateOrAdjournAction action,
+                                             String expectedFileName) {
         // Arrange
-        when(vacateHearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails))
+        when(vacateOrAdjournNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails))
             .thenReturn(documentDataMap);
-        when(documentConfiguration.getVacateHearingNoticeTemplate(finremCaseDetails))
-            .thenReturn(HEARING_NOTICE_TEMPLATE);
-        when(documentConfiguration.getVacateHearingNoticeFileName())
-            .thenReturn(HEARING_NOTICE_FILE_NAME);
+        when(documentConfiguration.getVacateOrAdjournNoticeTemplate(finremCaseDetails))
+            .thenReturn(VACATE_OR_ADJOURN_NOTICE_TEMPLATE);
+
+        if (VacateOrAdjournAction.ADJOURN_HEARING.equals(action)) {
+            when(documentConfiguration.getAdjournHearingNoticeFileName())
+                .thenReturn(ADJOURNED_NOTICE_FILE_NAME);
+        } else if (VacateOrAdjournAction.VACATE_HEARING.equals(action)) {
+            when(documentConfiguration.getVacateHearingNoticeFileName())
+                .thenReturn(VACATE_NOTICE_FILE_NAME);
+        }
 
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(
-            AUTH_TOKEN, documentDataMap, HEARING_NOTICE_TEMPLATE, HEARING_NOTICE_FILE_NAME, CONTESTED))
+            AUTH_TOKEN, documentDataMap, VACATE_OR_ADJOURN_NOTICE_TEMPLATE, expectedFileName, CONTESTED))
             .thenReturn(expectedDocument);
 
         // Act
         CaseDocument actualDocument =
-            manageHearingsDocumentService.generateVacateHearingNotice(finremCaseDetails, AUTH_TOKEN);
+            manageHearingsDocumentService.generateVacateOrAdjournNotice(finremCaseDetails, AUTH_TOKEN, action);
 
         // Assert
         assertEquals(expectedDocument, actualDocument);
-        verify(vacateHearingNoticeLetterDetailsMapper).getDocumentTemplateDetailsAsMap(finremCaseDetails);
-        verify(documentConfiguration).getVacateHearingNoticeTemplate(finremCaseDetails);
-        verify(documentConfiguration).getVacateHearingNoticeFileName();
+        verify(vacateOrAdjournNoticeLetterDetailsMapper).getDocumentTemplateDetailsAsMap(finremCaseDetails);
+        verify(documentConfiguration).getVacateOrAdjournNoticeTemplate(finremCaseDetails);
+
+        if (VacateOrAdjournAction.ADJOURN_HEARING.equals(action)) {
+            verify(documentConfiguration).getAdjournHearingNoticeFileName();
+        } else if (VacateOrAdjournAction.VACATE_HEARING.equals(action)) {
+            verify(documentConfiguration).getVacateHearingNoticeFileName();
+        }
+
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
-            AUTH_TOKEN, documentDataMap, HEARING_NOTICE_TEMPLATE, "hearingNoticeFileName", CONTESTED);
+            AUTH_TOKEN, documentDataMap, VACATE_OR_ADJOURN_NOTICE_TEMPLATE, expectedFileName, CONTESTED);
+    }
+
+    private static Stream<Arguments> vacateAndAdjournNoticeProvider() {
+        return Stream.of(
+            Arguments.of(
+                Map.of("key", "value"),
+                CaseDocument.builder().documentFilename(VACATE_NOTICE_FILE_NAME).build(),
+                VacateOrAdjournAction.VACATE_HEARING,
+                VACATE_NOTICE_FILE_NAME),
+            Arguments.of(
+                Map.of("key", "value"),
+                CaseDocument.builder().documentFilename(ADJOURNED_NOTICE_FILE_NAME).build(),
+                VacateOrAdjournAction.ADJOURN_HEARING,
+                ADJOURNED_NOTICE_FILE_NAME)
+        );
     }
 
     /*
@@ -628,7 +664,7 @@ class ManageHearingsDocumentServiceTest {
 
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
-            .doesNotContain(FORM_C_EXPRESS_URL, FORM_C_FAST_TRACK_URL, VACATE_HEARING_NOTICE_FILE_URL);
+            .doesNotContain(FORM_C_EXPRESS_URL, FORM_C_FAST_TRACK_URL, VACATE_NOTICE_FILE_URL);
     }
 
     /**
@@ -663,7 +699,7 @@ class ManageHearingsDocumentServiceTest {
 
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
-            .doesNotContain(FORM_C_EXPRESS_URL, FORM_C_URL, FORM_G_URL, VACATE_HEARING_NOTICE_FILE_URL);
+            .doesNotContain(FORM_C_EXPRESS_URL, FORM_C_URL, FORM_G_URL, VACATE_NOTICE_FILE_URL);
     }
 
     /**
@@ -697,7 +733,7 @@ class ManageHearingsDocumentServiceTest {
 
         assertThat(result)
             .extracting(CaseDocument::getDocumentUrl)
-            .doesNotContain(FORM_C_URL, FORM_C_FAST_TRACK_URL, VACATE_HEARING_NOTICE_FILE_URL);
+            .doesNotContain(FORM_C_URL, FORM_C_FAST_TRACK_URL, VACATE_NOTICE_FILE_URL);
     }
 
     /**

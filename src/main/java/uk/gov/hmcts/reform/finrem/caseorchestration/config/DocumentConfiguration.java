@@ -93,10 +93,11 @@ public class DocumentConfiguration {
     private String manageHearingHighCourtNoticeTemplate;
     private String manageHearingNoticeFileName;
     @Getter(AccessLevel.NONE)
-    private String vacateHearingNoticeTemplate;
+    private String vacateOrAdjournNoticeTemplate;
     @Getter(AccessLevel.NONE)
-    private String vacateHearingHighCourtNoticeTemplate;
+    private String vacateOrAdjournHighCourtNoticeTemplate;
     private String vacateHearingNoticeFileName;
+    private String adjournHearingNoticeFileName;
     @Getter(AccessLevel.NONE)
     private String manageHearingFormCTemplate;
     @Getter(AccessLevel.NONE)
@@ -242,10 +243,16 @@ public class DocumentConfiguration {
             : manageHearingNoticeTemplate;
     }
 
-    public String getVacateHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
-        return isHighCourtSelected(finremCaseDetails) ? vacateHearingHighCourtNoticeTemplate
-            : vacateHearingNoticeTemplate;
+    public String getVacateOrAdjournNoticeTemplate(FinremCaseDetails finremCaseDetails) {
+        // TODO: High court check needs updating for Manage Hearings
+        return isHighCourtSelected(finremCaseDetails) ? vacateOrAdjournHighCourtNoticeTemplate
+            : vacateOrAdjournNoticeTemplate;
     }
+
+//    public String getAdjournHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
+//        return isHighCourtSelected(finremCaseDetails) ? adjournHearingHighCourtNoticeTemplate
+//            : adjournHearingNoticeTemplate;
+//    }
 
     private boolean isHighCourtSelected(CaseDetails caseDetails) {
         if (caseDetails != null && caseDetails.getData() != null
