@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.Notificat
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Builder
@@ -21,10 +22,14 @@ public class SendCorrespondenceEvent {
     String authToken;
 
     public FinremCaseData getCaseData() {
-        return caseDetails.getData();
+        return Optional.ofNullable(caseDetails)
+            .map(FinremCaseDetails::getData)
+            .orElse(null);
     }
 
     public String getCaseId() {
-        return getCaseData().getCcdCaseId();
+        return Optional.ofNullable(getCaseData())
+            .map(FinremCaseData::getCcdCaseId)
+            .orElse(null);
     }
 }
