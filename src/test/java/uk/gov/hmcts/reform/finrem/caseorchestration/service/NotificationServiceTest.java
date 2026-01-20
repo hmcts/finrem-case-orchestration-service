@@ -1676,7 +1676,7 @@ class NotificationServiceTest {
         "false, true, false",
         "false, false, false"
     })
-    void testIsApplicantSolicitorEmailPopulatedAndPresented(boolean populated, boolean represented, boolean expected) {
+    void returnsTrueOnlyWhenSolicitorIsPopulatedAndApplicantIsRepresented(boolean populated, boolean represented, boolean expected) {
         FinremCaseData finremCaseData = mock(FinremCaseData.class);
         when(finremCaseData.isApplicantSolicitorPopulated()).thenReturn(populated);
         lenient().when(finremCaseData.isApplicantRepresentedByASolicitor()).thenReturn(represented);
