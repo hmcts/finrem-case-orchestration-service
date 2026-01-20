@@ -194,7 +194,7 @@ class NotificationServiceTest {
 
     @BeforeEach
     void setUp() {
-        notificationRequest = new NotificationRequest();
+        notificationRequest = NotificationRequest.builder().build();
         dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
         lenient().when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(CaseDetails.class))).thenReturn(notificationRequest);
         lenient().when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(CaseDetails.class))).thenReturn(notificationRequest);
@@ -856,7 +856,7 @@ class NotificationServiceTest {
 
     @Test
     void givenContestedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
-        NotificationRequest myNotificationRequest = new NotificationRequest();
+        NotificationRequest myNotificationRequest = NotificationRequest.builder().build();
         myNotificationRequest.setNotificationEmail("test@test.com");
         myNotificationRequest.setName(TEST_SOLICITOR_NAME);
 
@@ -873,7 +873,7 @@ class NotificationServiceTest {
 
     @Test
     void givenConsentedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
-        NotificationRequest myNotificationRequest = new NotificationRequest();
+        NotificationRequest myNotificationRequest = NotificationRequest.builder().build();
         myNotificationRequest.setName(TEST_SOLICITOR_NAME);
         myNotificationRequest.setNotificationEmail("test@test.com");
 
@@ -890,7 +890,7 @@ class NotificationServiceTest {
 
     @Test
     void givenConsentedCaseWhenSendNoticeOfChangeEmail_whenMissingEmailAddress_thenNotSendingNoticeOfChangeContestedEmail() {
-        notificationRequest = new NotificationRequest();
+        notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
 
         CaseDetails caseDetails = getConsentedCallbackRequest().getCaseDetails();
@@ -906,7 +906,7 @@ class NotificationServiceTest {
 
     @Test
     void givenContestedCaseAndNonDigitalSol_whenSendNocEmail_thenNotSendContestedEmail() {
-        notificationRequest = new NotificationRequest();
+        notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
 
@@ -918,7 +918,7 @@ class NotificationServiceTest {
 
     @Test
     void givenContestedCase_whenSendNoCCaseworkerEmail_thenSendContestedEmail() {
-        notificationRequest = new NotificationRequest();
+        notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
@@ -933,7 +933,7 @@ class NotificationServiceTest {
 
     @Test
     void givenConsentedCase_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
-        notificationRequest = new NotificationRequest();
+        notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
@@ -949,7 +949,7 @@ class NotificationServiceTest {
 
     @Test
     void givenConsentedCaseAndRequestedByDigitalRespondentSolicitor_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
-        notificationRequest = new NotificationRequest();
+        notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_RESP_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         lenient().when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
@@ -966,7 +966,7 @@ class NotificationServiceTest {
 
     @Test
     void givenConsentedCaseAndRequestedByNonDigitalRespondentSolicitor_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
-        notificationRequest = new NotificationRequest();
+        notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_RESP_SOLICITOR_NAME);
         lenient().when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         lenient().when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
@@ -983,7 +983,7 @@ class NotificationServiceTest {
 
     @Test
     void givenContestedCaseAndNonDigitalSol_whenSendNocEmail_thenNotSendContestedEmailCaseworker() {
-        notificationRequest = new NotificationRequest();
+        notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
@@ -1566,7 +1566,7 @@ class NotificationServiceTest {
     @Test
     void shouldSendReadyForReviewEmailToJudge() {
         // Arrange
-        NotificationRequest judgeNotificationRequest = new NotificationRequest();
+        NotificationRequest judgeNotificationRequest = NotificationRequest.builder().build();
         judgeNotificationRequest.setCaseReferenceNumber("123456789");
 
         // Act
