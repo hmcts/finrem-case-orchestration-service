@@ -1548,6 +1548,17 @@ public class NotificationService {
         return caseDetails.getData().isApplicantSolicitorPopulated();
     }
 
+    /**
+     * Determines whether the applicant solicitor email should be presented.
+     *
+     * <p>
+     * The email is considered presentable when the applicant solicitor details
+     * are populated and the applicant is represented by a solicitor.
+     *
+     * @param caseDetails the Finrem case details containing case data
+     * @return {@code true} if the applicant solicitor is populated and the applicant
+     *         is represented by a solicitor; otherwise {@code false}
+     */
     public boolean isApplicantSolicitorEmailPopulatedAndPresented(FinremCaseDetails caseDetails) {
         FinremCaseData finremCaseData = caseDetails.getData();
         return finremCaseData.isApplicantSolicitorPopulated() && finremCaseData.isApplicantRepresentedByASolicitor();
