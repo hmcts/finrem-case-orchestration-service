@@ -115,6 +115,10 @@ class AbstractPartyListenerTest {
             return true;
         }
 
+    }
+
+    class SendEmailNotificationWithPartySpecificDetailsListener extends SendEmailNotificationListener {
+
         @Override
         protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
             return new PartySpecificDetails(RECIPIENT_EMAIL, RECIPIENT_NAME, RECIPIENT_REFERENCE);
@@ -168,6 +172,8 @@ class AbstractPartyListenerTest {
 
     private SendEmailNotificationListener sendEmailNotificationListener;
 
+    private SendEmailNotificationWithPartySpecificDetailsListener sendEmailNotificationWithPartySpecificDetailsListener;
+
     private SendPaperNotificationListener sendPaperNotificationListener;
 
     private SendPaperNotificationListener sendPaperNotificationOutsideUkListener;
@@ -178,6 +184,7 @@ class AbstractPartyListenerTest {
     void setUp() {
         irrelevantPartyListener = new IrrelevantPartyListener();
         sendEmailNotificationListener = new SendEmailNotificationListener();
+        sendEmailNotificationWithPartySpecificDetailsListener = new SendEmailNotificationWithPartySpecificDetailsListener();
         invalidSendEmailNotificationListeners = new InvalidSendEmailNotificationListener[] {
             new InvalidSendEmailNotificationListener(0), new InvalidSendEmailNotificationListener(1),
             new InvalidSendEmailNotificationListener(2)
@@ -241,7 +248,11 @@ class AbstractPartyListenerTest {
     @Test
     void givenNotificationRequestProvided_whenSendEmailNotificationListenerCalled_thenSendEmailAndNoLetterSent() {
         EmailTemplateNames template = mock(EmailTemplateNames.class);
-        NotificationRequest nr = spy(NotificationRequest.builder().build());
+        NotificationRequest nr = spy(NotificationRequest.builder()
+            .notificationEmail("ashley@email.com")
+            .name("NR NAME")
+            .solicitorReferenceNumber("NR solicitorReferenceNumber")
+            .build());
 
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
             .emailTemplate(template)
@@ -249,6 +260,29 @@ class AbstractPartyListenerTest {
             .build();
 
         sendEmailNotificationListener.handleNotification(event);
+
+        ArgumentCaptor<NotificationRequest> captor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(captor.capture(), eq(template));
+        verifyNoLetterSent();
+        assertThat(captor.getValue())
+            .extracting(
+                NotificationRequest::getName,
+                NotificationRequest::getNotificationEmail,
+                NotificationRequest::getSolicitorReferenceNumber)
+            .contains("NR NAME", "ashley@email.com", "NR solicitorReferenceNumber");
+    }
+
+    @Test
+    void givenNotificationRequestProvided_whenSendEmailNotificationWithPartySpecificDetailsListenerCalled_thenSendEmailAndNoLetterSent() {
+        EmailTemplateNames template = mock(EmailTemplateNames.class);
+        NotificationRequest nr = spy(NotificationRequest.builder().build());
+
+        SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
+            .emailTemplate(template)
+            .emailNotificationRequest(nr)
+            .build();
+
+        sendEmailNotificationWithPartySpecificDetailsListener.handleNotification(event);
 
         ArgumentCaptor<NotificationRequest> captor = ArgumentCaptor.forClass(NotificationRequest.class);
         verify(emailService).sendConfirmationEmail(captor.capture(), eq(template));
