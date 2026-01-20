@@ -45,7 +45,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getNotificationParty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY;
 
 @Service
 @Slf4j
@@ -390,10 +391,7 @@ public class StopRepresentingClientService {
         RepresentativeInContext context = buildRepresentation(finremCaseData, userAuthorisation);
         if (context.isApplicationRepresentative()) {
             applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
-                .notificationParties(List.of(
-                    getNotificationParty(CaseRole.APP_BARRISTER, false, true)
-                        .orElseThrow()
-                ))
+                .notificationParties(List.of(PREVIOUS_APPLICANT_BARRISTER_ONLY))
                 .emailNotificationRequest(finremNotificationRequestMapper
                     .getNotificationRequestForApplicantBarrister(info.getCaseDetailsBefore(), barrister)
                     .toBuilder()
@@ -414,10 +412,7 @@ public class StopRepresentingClientService {
         RepresentativeInContext context = buildRepresentation(finremCaseData, userAuthorisation);
         if (context.isApplicationRepresentative()) {
             applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
-                .notificationParties(List.of(
-                    getNotificationParty(CaseRole.APP_SOLICITOR, false, true)
-                        .orElseThrow()
-                ))
+                .notificationParties(List.of(PREVIOUS_APPLICANT_SOLICITOR_ONLY))
                 .emailNotificationRequest(finremNotificationRequestMapper
                     .getNotificationRequestForApplicantSolicitor(info.getCaseDetailsBefore())
                     .toBuilder()
