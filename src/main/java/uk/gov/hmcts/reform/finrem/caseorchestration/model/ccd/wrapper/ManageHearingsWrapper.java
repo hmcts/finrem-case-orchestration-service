@@ -1,14 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
@@ -124,5 +127,27 @@ public class ManageHearingsWrapper {
                 .orElse(null);
         }
         return workingVacatedHearingId;
+    }
+
+    /**
+     * Retrieves a list of working hearing-related documents associated with the current hearing ID.
+     * The method filters the hearingDocumentsCollection to include only those documents that are
+     * linked to the current working hearing ID. If either the working hearing ID or the
+     * hearingDocumentsCollection is null, an empty list is returned.
+     *
+     * @return a list of {@link CaseDocument} objects corresponding to the working hearing ID,
+     *         or an empty list if no matching documents are found or if the input data is null.
+     */
+    @JsonIgnore
+    public List<CaseDocument> getAssociatedWorkingHearingDocuments() {
+        UUID hearingId = getWorkingHearingId();
+        if (hearingId == null || hearingDocumentsCollection == null) {
+            return Collections.emptyList();
+        }
+        return hearingDocumentsCollection.stream()
+            .map(ManageHearingDocumentsCollectionItem::getValue)
+            .filter(doc -> hearingId.equals(doc.getHearingId()))
+            .map(ManageHearingDocument::getHearingDocument)
+            .toList();
     }
 }
