@@ -1605,6 +1605,11 @@ public class NotificationService {
         return caseDetails.getData().isRespondentSolicitorPopulated();
     }
 
+    public boolean isRespondentSolicitorEmailPopulatedAndPresented(FinremCaseDetails caseDetails) {
+        FinremCaseData finremCaseData = caseDetails.getData();
+        return finremCaseData.isRespondentSolicitorPopulated() && finremCaseData.isRespondentRepresentedByASolicitor();
+    }
+
     public boolean isIntervenerSolicitorEmailPopulated(IntervenerWrapper intervenerWrapper) {
         return intervenerWrapper.isIntervenerSolicitorPopulated();
     }

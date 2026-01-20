@@ -17,7 +17,9 @@ public enum NotificationParty {
     INTERVENER_THREE("[INTVRSOLICITOR3]", true, false),
     INTERVENER_FOUR("[INTVRSOLICITOR4]", true, false),
     PREVIOUS_APPLICANT_SOLICITOR_ONLY(CaseRole.APP_SOLICITOR.getCcdCode(), false, true),
-    PREVIOUS_APPLICANT_BARRISTER_ONLY(CaseRole.APP_BARRISTER.getCcdCode(), false, true);
+    PREVIOUS_APPLICANT_BARRISTER_ONLY(CaseRole.APP_BARRISTER.getCcdCode(), false, true),
+    PREVIOUS_RESPONDENT_SOLICITOR_ONLY(CaseRole.RESP_SOLICITOR.getCcdCode(), false, true),
+    PREVIOUS_RESPONDENT_BARRISTER_ONLY(CaseRole.RESP_BARRISTER.getCcdCode(), false, true);
 
     private final String role;
     private final boolean notifyRepresented;
