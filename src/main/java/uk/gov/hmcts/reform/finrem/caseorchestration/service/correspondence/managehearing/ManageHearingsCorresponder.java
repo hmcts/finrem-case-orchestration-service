@@ -105,7 +105,7 @@ public class ManageHearingsCorresponder {
         publishEvent(
             finremCaseDetails,
             vacateOrAdjournedHearing,
-            ManageHearingsAction.VACATE_HEARING,
+            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
             userAuthorisation, documentsToPost,
             FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR
         );
@@ -126,7 +126,7 @@ public class ManageHearingsCorresponder {
         String vacatedHearingType = "";
         String vacatedHearingDateTime = "";
 
-        if (ManageHearingsAction.VACATE_HEARING.equals(action)) {
+        if (ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(action)) {
 
             vacatedHearingType = Optional.ofNullable(hearing.getHearingType())
                 .orElseThrow(() -> new IllegalStateException("Hearing type must not be null")).getId();
