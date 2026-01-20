@@ -122,6 +122,12 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
             );
             caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(newManageCaseDocumentCollection);
         }
+        else if (action == ManageCaseDocumentsAction.AMEND) {
+            // Replace the entire collection with the amended documents
+            caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(
+                nullIfEmpty(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
+            );
+        }
     }
 
     private FinremCaseData getFinremCaseData(FinremCallbackRequest callbackRequest) {

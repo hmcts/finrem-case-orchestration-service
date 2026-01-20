@@ -12,8 +12,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction.ADD_NEW;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction.AMEND;
 
 @Slf4j
 @Service
@@ -43,6 +46,26 @@ public class NewManageCaseDocumentsContestedMidHandler extends FinremCallbackHan
                     .uploadCaseDocument(UploadCaseDocument.builder().build())
                     .build())
             );
+        } else if (AMEND.equals(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentsActionSelection())) {
+            // Get all manageable documents and create clean copies with only CCD-allowed fields
+            List<UploadCaseDocumentCollection> amendableDocuments = caseData.getUploadCaseDocumentWrapper()
+                .getAllManageableCollections()
+                .stream()
+                .map(doc -> UploadCaseDocumentCollection.builder()
+                    .id(UUID.randomUUID().toString())
+                    .uploadCaseDocument(UploadCaseDocument.builder()
+                        .caseDocuments(doc.getUploadCaseDocument().getCaseDocuments())
+                        .caseDocumentType(doc.getUploadCaseDocument().getCaseDocumentType())
+                        .caseDocumentParty(doc.getUploadCaseDocument().getCaseDocumentParty())
+                        .caseDocumentOther(doc.getUploadCaseDocument().getCaseDocumentOther())
+                        .caseDocumentConfidentiality(doc.getUploadCaseDocument().getCaseDocumentConfidentiality())
+                        .hearingDetails(doc.getUploadCaseDocument().getHearingDetails())
+                        .caseDocumentFdr(doc.getUploadCaseDocument().getCaseDocumentFdr())
+                        .build())
+                    .build())
+                .collect(Collectors.toList());
+
+            caseData.getManageCaseDocumentsWrapper().setInputManageCaseDocumentCollection(amendableDocuments);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
