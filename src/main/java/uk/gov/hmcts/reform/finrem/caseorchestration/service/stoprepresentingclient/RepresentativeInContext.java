@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingcli
 
 public record RepresentativeInContext(
     String userId,
-    boolean isApplicationRepresentative,
+    boolean isApplicantRepresentative,
     boolean isRespondentRepresentative,
     Integer intervenerIndex,          // null if not an intervener
     IntervenerRole intervenerRole     // null if not an intervener

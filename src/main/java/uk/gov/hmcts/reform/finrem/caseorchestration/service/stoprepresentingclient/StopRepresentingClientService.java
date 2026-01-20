@@ -389,7 +389,7 @@ public class StopRepresentingClientService {
         String userAuthorisation = info.getUserAuthorisation();
         FinremCaseData finremCaseData = getFinremCaseData(info);
         RepresentativeInContext context = buildRepresentation(finremCaseData, userAuthorisation);
-        if (context.isApplicationRepresentative()) {
+        if (context.isApplicantRepresentative()) {
             applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
                 .notificationParties(List.of(PREVIOUS_APPLICANT_BARRISTER_ONLY))
                 .emailNotificationRequest(finremNotificationRequestMapper
@@ -410,7 +410,7 @@ public class StopRepresentingClientService {
         String userAuthorisation = info.getUserAuthorisation();
         FinremCaseData finremCaseData = getFinremCaseData(info);
         RepresentativeInContext context = buildRepresentation(finremCaseData, userAuthorisation);
-        if (context.isApplicationRepresentative()) {
+        if (context.isApplicantRepresentative()) {
             applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
                 .notificationParties(List.of(PREVIOUS_APPLICANT_SOLICITOR_ONLY))
                 .emailNotificationRequest(finremNotificationRequestMapper

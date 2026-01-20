@@ -602,7 +602,7 @@ class StopRepresentingClientServiceTest {
 
             RepresentativeInContext representativeInContext = underTest.buildRepresentation(caseData, AUTH_TOKEN);
             assertThat(representativeInContext.userId()).isEqualTo(TestConstants.TEST_USER_ID);
-            assertThat(representativeInContext.isApplicationRepresentative()).isTrue();
+            assertThat(representativeInContext.isApplicantRepresentative()).isTrue();
             assertThat(representativeInContext.isRespondentRepresentative()).isFalse();
             assertThat(representativeInContext.intervenerIndex()).isNull();
             assertThat(representativeInContext.intervenerRole()).isNull();
@@ -625,7 +625,7 @@ class StopRepresentingClientServiceTest {
 
             RepresentativeInContext representativeInContext = underTest.buildRepresentation(caseData, AUTH_TOKEN);
             assertThat(representativeInContext.userId()).isEqualTo(TestConstants.TEST_USER_ID);
-            assertThat(representativeInContext.isApplicationRepresentative()).isFalse();
+            assertThat(representativeInContext.isApplicantRepresentative()).isFalse();
             assertThat(representativeInContext.isRespondentRepresentative()).isTrue();
             assertThat(representativeInContext.intervenerIndex()).isNull();
             assertThat(representativeInContext.intervenerRole()).isNull();
@@ -650,7 +650,7 @@ class StopRepresentingClientServiceTest {
 
             RepresentativeInContext representativeInContext = underTest.buildRepresentation(caseData, AUTH_TOKEN);
             assertThat(representativeInContext.userId()).isEqualTo(TestConstants.TEST_USER_ID);
-            assertThat(representativeInContext.isApplicationRepresentative()).isFalse();
+            assertThat(representativeInContext.isApplicantRepresentative()).isFalse();
             assertThat(representativeInContext.isRespondentRepresentative()).isFalse();
             assertThat(representativeInContext.intervenerIndex()).isEqualTo(1);
             assertThat(representativeInContext.intervenerRole()).isEqualTo(BARRISTER);
@@ -675,7 +675,7 @@ class StopRepresentingClientServiceTest {
 
             RepresentativeInContext representativeInContext = underTest.buildRepresentation(caseData, AUTH_TOKEN);
             assertThat(representativeInContext.userId()).isEqualTo(TestConstants.TEST_USER_ID);
-            assertThat(representativeInContext.isApplicationRepresentative()).isFalse();
+            assertThat(representativeInContext.isApplicantRepresentative()).isFalse();
             assertThat(representativeInContext.isRespondentRepresentative()).isFalse();
             assertThat(representativeInContext.intervenerIndex()).isEqualTo(2);
             assertThat(representativeInContext.intervenerRole()).isEqualTo(SOLICITOR);

@@ -69,7 +69,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
             + "If you continue your access to this access will be removed";
 
     private static boolean isRepresentingApplicant(StopRepresentingRequest request) {
-        return request.representativeInContext.isApplicationRepresentative();
+        return request.representativeInContext.isApplicantRepresentative();
     }
 
     private static boolean isRepresentingRespondent(StopRepresentingRequest request) {
