@@ -65,6 +65,11 @@ class AbstractPartyListenerTest {
         }
 
         @Override
+        protected String getNotificationParty() {
+            return getClass().getSimpleName();
+        }
+
+        @Override
         protected boolean isRelevantParty(SendCorrespondenceEvent event) {
             return true;
         }
@@ -141,7 +146,6 @@ class AbstractPartyListenerTest {
 
         SendPaperNotificationListener(boolean outsideUK) {
             this.outsideUK = outsideUK;
-            this.notificationParty = SendPaperNotificationListener.class.getName();
         }
 
         @Override
@@ -302,7 +306,7 @@ class AbstractPartyListenerTest {
         }
         // assert
         verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType);
-        verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(caseDetails, SendPaperNotificationListener.class.getName(),
+        verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(caseDetails, SendPaperNotificationListener.class.getSimpleName(),
             bpDocs, isOutsideUK, AUTH_TOKEN);
     }
 
