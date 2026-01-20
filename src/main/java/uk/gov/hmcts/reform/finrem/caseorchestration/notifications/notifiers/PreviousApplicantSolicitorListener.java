@@ -6,8 +6,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import static java.util.Optional.ofNullable;
-
 @Component
 public class PreviousApplicantSolicitorListener extends EmailNotificationOnlyListener {
 
@@ -35,13 +33,5 @@ public class PreviousApplicantSolicitorListener extends EmailNotificationOnlyLis
         } else {
             return false;
         }
-    }
-
-    @Override
-    protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
-        String email = event.getEmailNotificationRequest().getNotificationEmail();
-        String name = event.getEmailNotificationRequest().getName();
-        String ref = ofNullable(event.getEmailNotificationRequest().getSolicitorReferenceNumber()).orElse("");
-        return new PartySpecificDetails(email, name, ref);
     }
 }

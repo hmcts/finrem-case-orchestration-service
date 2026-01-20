@@ -29,4 +29,9 @@ public abstract class EmailNotificationOnlyListener extends AbstractPartyListene
     protected final boolean shouldSendPaperNotification(SendCorrespondenceEvent event) {
         return false;
     }
+
+    @Override
+    protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
+        return null;
+    }
 }

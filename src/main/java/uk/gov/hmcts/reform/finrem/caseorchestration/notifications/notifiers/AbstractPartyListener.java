@@ -111,9 +111,11 @@ public abstract class AbstractPartyListener {
             .orElseThrow(() ->
                 new IllegalArgumentException("Notification Request is required for digital notifications, case ID: " + event.getCaseId()));
 
-        emailRequest.setName(details.recipientSolName);
-        emailRequest.setNotificationEmail(details.recipientSolEmailAddress);
-        emailRequest.setSolicitorReferenceNumber(details.recipientSolReference);
+        if (details != null) {
+            emailRequest.setName(details.recipientSolName);
+            emailRequest.setNotificationEmail(details.recipientSolEmailAddress);
+            emailRequest.setSolicitorReferenceNumber(details.recipientSolReference);
+        }
 
         EmailTemplateNames emailTemplate = Optional.ofNullable(event.getEmailTemplate()).orElseThrow(() ->
             new IllegalArgumentException("Email template is required for digital notifications, case ID: " + event.getCaseId()));
