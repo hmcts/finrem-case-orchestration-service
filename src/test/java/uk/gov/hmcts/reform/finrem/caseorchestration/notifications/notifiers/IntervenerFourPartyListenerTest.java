@@ -41,7 +41,6 @@ class IntervenerFourPartyListenerTest {
     @Mock
     private InternationalPostalService internationalPostalService;
 
-    @InjectMocks
     private IntervenerFourPartyListener intervenerFourPartyListener;
 
     private static final String INTERVENER_FOUR_EMAIL = "intervenerFour@solicitor.com";
