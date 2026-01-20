@@ -2,40 +2,35 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.mana
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
+import java.util.Optional;
 
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getNotificationPartyFromRole;
 
 @RequiredArgsConstructor
 @Service
@@ -43,21 +38,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 public class ManageHearingsCorresponder {
 
     private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
-    private final ManageHearingsNotificationRequestMapper notificationRequestMapper;
-    private final NotificationService notificationService;
-    private final ManageHearingsDocumentService manageHearingsDocumentService;
-    private final DocumentHelper documentHelper;
-    private final BulkPrintService bulkPrintService;
-    private final GenericDocumentService genericDocumentService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
-     * Begin sending hearing correspondence to parties, included based on the callback request data.
-     * No notifications, notices or documents sent if the User has specified that.
-     * No notifications, notices or documents sent if the party list is empty.
-     * Loops through each selected party in the hearing and sends using {@link #sendHearingCorrespondenceByParty}.
+     * Collect associated new hearing information and send hearing notification to the solicitor through
+     *  a correspondence event publisher.
      *
-     * @param callbackRequest   the callback request containing case and hearing data
-     * @param userAuthorisation the user authorisation token
+     * @param callbackRequest the callback request containing case details and data
+     * @param userAuthorisation the authorization token of the user initiating this action
      */
     public void sendHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
 
@@ -66,35 +54,39 @@ public class ManageHearingsCorresponder {
         ManageHearingsWrapper wrapper = finremCaseData.getManageHearingsWrapper();
         Hearing hearing = hearingCorrespondenceHelper.getActiveHearingInContext(wrapper, wrapper.getWorkingHearingId());
 
-        if (hearingCorrespondenceHelper.shouldNotSendNotification(hearing)) {
+        if (!hearing.shouldSendNotifications()) {
             return;
         }
 
-        List<PartyOnCaseCollectionItem> partiesOnCaseCollection = hearing.getPartiesOnCase();
-        if (partiesOnCaseCollection == null || partiesOnCaseCollection.isEmpty()) {
-            return;
-        }
+        List<CaseDocument> documentsToPost = getAdditionalHearingDocs(hearing);
+        hearingCorrespondenceHelper.getMiniFormAIfRequired(finremCaseData, hearing)
+            .ifPresent(documentsToPost::add);
+        documentsToPost.addAll(wrapper.getAssociatedWorkingHearingDocuments());
 
-        for (PartyOnCaseCollectionItem partyCollection : partiesOnCaseCollection) {
-            PartyOnCase party = partyCollection.getValue();
-            if (party != null) {
-                sendHearingCorrespondenceByParty(
-                    party.getRole(),
-                    finremCaseDetails,
-                    hearing,
-                    userAuthorisation
-                );
-            }
-        }
+        publishEvent(
+            finremCaseDetails,
+            hearing,
+            ManageHearingsAction.ADD_HEARING,
+            userAuthorisation,
+            documentsToPost,
+            FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
+        );
     }
 
+    /**
+     * Collect associated vacated hearing information and send hearing notification to the solicitor through
+     *  a correspondence event publisher.
+     *
+     * @param callbackRequest the callback request containing case details and data
+     * @param userAuthorisation the authorization token of the user initiating this action
+     */
     public void sendVacatedHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         ManageHearingsWrapper wrapper = finremCaseData.getManageHearingsWrapper();
 
-        boolean isVacatedAndRelistedHearing = hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseDetails);
+        boolean isVacatedAndRelistedHearing = hearingCorrespondenceHelper.isVacatedAndRelistedHearing(finremCaseData);
 
         if (isVacatedAndRelistedHearing) {
             sendHearingCorrespondence(callbackRequest, userAuthorisation);
@@ -103,400 +95,121 @@ public class ManageHearingsCorresponder {
         VacateOrAdjournedHearing vacateOrAdjournedHearing = hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(
             wrapper, wrapper.getWorkingVacatedHearingId());
 
-        if (shouldNotSendNotificationForVacatedOrAdjournedHearing(isVacatedAndRelistedHearing, vacateOrAdjournedHearing)) {
+        // Always send vacate hearing notice when relisted, as user cannot select to send or not in this scenario
+        if (shouldNotSendVacateOrAdjournNotification(isVacatedAndRelistedHearing, vacateOrAdjournedHearing)) {
             return;
         }
 
-        List<PartyOnCaseCollectionItem> partiesOnCaseCollection = vacateOrAdjournedHearing.getPartiesOnCase();
-        if (partiesOnCaseCollection == null || partiesOnCaseCollection.isEmpty()) {
-            return;
-        }
+        List<CaseDocument> documentsToPost = List.of(hearingCorrespondenceHelper.getVacateHearingNotice(finremCaseData));
 
-        for (PartyOnCaseCollectionItem partyCollection : vacateOrAdjournedHearing.getPartiesOnCase()) {
-            PartyOnCase party = partyCollection.getValue();
-            if (party != null) {
-                sendHearingCorrespondenceByParty(
-                    party.getRole(),
-                    finremCaseDetails,
-                    vacateOrAdjournedHearing,
-                    userAuthorisation
-                );
-            }
-        }
-    }
-
-    /**
-     * Sends a hearing notification to the party specified in parameters.
-     *
-     * <p>Uses the {@link CaseRole} of the specified party to decide what to send.</p>
-     *
-     * @param role              the role of the party on the case, representing their case role
-     * @param finremCaseDetails the case details with detail needed in generating the notification
-     * @param hearing           the hearing associated with the notification
-     * @param userAuthorisation the user authorisation token
-     */
-    private void sendHearingCorrespondenceByParty(String role,
-                                                  FinremCaseDetails finremCaseDetails,
-                                                  HearingLike hearing,
-                                                  String userAuthorisation) {
-        CaseRole caseRole = CaseRole.forValue(role);
-        switch (caseRole) {
-            case CaseRole.APP_SOLICITOR ->
-                processCorrespondenceForApplicant(finremCaseDetails, hearing, userAuthorisation);
-            case CaseRole.RESP_SOLICITOR ->
-                processCorrespondenceForRespondent(finremCaseDetails, hearing, userAuthorisation);
-            case CaseRole.INTVR_SOLICITOR_1 ->
-                processCorrespondenceForIntervenerOne(finremCaseDetails, hearing, userAuthorisation, caseRole);
-            case CaseRole.INTVR_SOLICITOR_2 ->
-                processCorrespondenceForIntervenerTwo(finremCaseDetails, hearing, userAuthorisation, caseRole);
-            case CaseRole.INTVR_SOLICITOR_3 ->
-                processCorrespondenceForIntervenerThree(finremCaseDetails, hearing, userAuthorisation, caseRole);
-            case CaseRole.INTVR_SOLICITOR_4 ->
-                processCorrespondenceForIntervenerFour(finremCaseDetails, hearing, userAuthorisation, caseRole);
-            default -> throw new IllegalStateException(
-                String.format(
-                    "Unexpected value: %s for case reference %s",
-                    caseRole,
-                    finremCaseDetails.getId()
-                )
-            );
-        }
-    }
-
-    /**
-     * Processes correspondence for the applicant's solicitor.
-     * Calls ProcessCorrespondenceForParty with the appropriate parameters.
-     * Lambdas are passed to ProcessCorrespondenceForParty, so the information is lazy-loaded if needed.
-     *
-     * @param finremCaseDetails the case details containing relevant information about the hearing and case participants
-     * @param hearing           the hearing for which the notification is being sent
-     * @param userAuthorisation the user authorisation token for sending notifications
-     */
-    private void processCorrespondenceForApplicant(FinremCaseDetails finremCaseDetails, HearingLike hearing, String userAuthorisation) {
-        processCorrespondenceForParty(
+        publishEvent(
             finremCaseDetails,
-            hearing,
-            CaseRole.APP_SOLICITOR,
-            userAuthorisation,
-            () -> hearingCorrespondenceHelper.shouldEmailToApplicantSolicitor(finremCaseDetails),
-            () -> hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails),
-            () -> notificationRequestMapper.buildHearingNotificationForApplicantSolicitor(finremCaseDetails, hearing)
+            vacateOrAdjournedHearing,
+            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+            userAuthorisation, documentsToPost,
+            FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR
         );
     }
 
     /**
-     * Processes correspondence for the respondent's solicitor.
-     * Calls ProcessCorrespondenceForParty with the appropriate parameters.
-     * Lambdas are passed to ProcessCorrespondenceForParty, so the information is lazy-loaded if needed.
+     * Builds a NotificationRequest object using the provided case data and hearings information.
      *
-     * @param finremCaseDetails the case details containing relevant information about the hearing and case participants
-     * @param hearing           the hearing for which the notification is being sent
-     * @param userAuthorisation the user authorisation token for sending notifications
+     * @param caseData the case data containing details like contact information and case ID
+     * @param action the action being performed on the hearing (e.g., add or vacate)
+     * @param hearing the hearing information from which to extract details for the notification
+     * @return a fully constructed NotificationRequest object with data extracted from the inputs
      */
-    private void processCorrespondenceForRespondent(FinremCaseDetails finremCaseDetails, HearingLike hearing, String userAuthorisation) {
-        processCorrespondenceForParty(
-            finremCaseDetails,
-            hearing,
-            CaseRole.RESP_SOLICITOR,
-            userAuthorisation,
-            () -> hearingCorrespondenceHelper.shouldEmailToRespondentSolicitor(finremCaseDetails),
-            () -> hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails),
-            () -> notificationRequestMapper.buildHearingNotificationForRespondentSolicitor(finremCaseDetails, hearing)
-        );
-    }
+    private NotificationRequest buildNotificationRequest(FinremCaseData caseData, ManageHearingsAction action, HearingLike hearing) {
+        ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
 
-    /**
-     * Used by processCorrespondenceForIntervener.  Forwards Intervener One data to processCorrespondenceForIntervener.
-     */
-    private void processCorrespondenceForIntervenerOne(FinremCaseDetails finremCaseDetails, HearingLike hearing,
-                                                       String auth, CaseRole role) {
-        IntervenerWrapper intervenerOne = finremCaseDetails.getData().getIntervenerOneWrapperIfPopulated();
+        String vacatedHearingType = "";
+        String vacatedHearingDateTime = "";
 
-        if (isIntervenerDataIncomplete(intervenerOne)) {
-            log.warn("Intervener One has no addresses for case ID: {}. Hearing correspondence not processed.", finremCaseDetails.getId());
-            return;
-        }
+        if (ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(action)) {
 
-        processCorrespondenceForIntervener(finremCaseDetails, hearing, auth, role, intervenerOne);
-    }
+            vacatedHearingType = Optional.ofNullable(hearing.getHearingType())
+                .orElseThrow(() -> new IllegalStateException("Hearing type must not be null")).getId();
 
-    /**
-     * Used by processCorrespondenceForIntervener. Forwards Intervener Two data to processCorrespondenceForIntervener.
-     */
-    private void processCorrespondenceForIntervenerTwo(FinremCaseDetails finremCaseDetails, HearingLike hearing,
-                                                       String auth, CaseRole role) {
-        IntervenerWrapper intervenerTwo = finremCaseDetails.getData().getIntervenerTwoWrapperIfPopulated();
+            String formattedDate = Optional.ofNullable(hearing.getHearingDate())
+                .orElseThrow(() -> new IllegalStateException("Hearing date must not be null"))
+                .format(dateFormatter);
 
-        if (isIntervenerDataIncomplete(intervenerTwo)) {
-            log.warn("Intervener Two has no addresses for case ID: {}. Hearing correspondence not processed.", finremCaseDetails.getId());
-            return;
-        }
+            String hearingTime = Optional.ofNullable(hearing.getHearingTime())
+                .orElseThrow(() -> new IllegalStateException("Hearing time must not be null"));
 
-        processCorrespondenceForIntervener(finremCaseDetails, hearing, auth, role, intervenerTwo);
-    }
-
-    /**
-     * Used by processCorrespondenceForIntervener. Forwards Intervener Three data to processCorrespondenceForIntervener.
-     */
-    private void processCorrespondenceForIntervenerThree(FinremCaseDetails finremCaseDetails, HearingLike hearing,
-                                                         String auth, CaseRole role) {
-        IntervenerWrapper intervenerThree = finremCaseDetails.getData().getIntervenerThreeWrapperIfPopulated();
-
-        if (isIntervenerDataIncomplete(intervenerThree)) {
-            log.warn("Intervener Three has no addresses for case ID: {}. Hearing correspondence not processed.", finremCaseDetails.getId());
-            return;
-        }
-
-        processCorrespondenceForIntervener(finremCaseDetails, hearing, auth, role, intervenerThree);
-    }
-
-    /**
-     * Used by processCorrespondenceForIntervener. Forwards Intervener Four data to processCorrespondenceForIntervener.
-     */
-    private void processCorrespondenceForIntervenerFour(FinremCaseDetails finremCaseDetails, HearingLike hearing,
-                                                        String auth, CaseRole role) {
-        IntervenerWrapper intervenerFour = finremCaseDetails.getData().getIntervenerFourWrapperIfPopulated();
-
-        if (isIntervenerDataIncomplete(intervenerFour)) {
-            log.warn("Intervener Four has no addresses for case ID: {}. Hearing correspondence not processed.", finremCaseDetails.getId());
-            return;
-        }
-
-        processCorrespondenceForIntervener(finremCaseDetails, hearing, auth, role, intervenerFour);
-    }
-
-    /**
-     * Returns true if we can't post to, or email the intervener.
-     *
-     * @param intervener the intervener wrapper containing the data for the intervener
-     * @return true if the intervener data is insufficient, false is an email address or postal address is available.
-     */
-    private boolean isIntervenerDataIncomplete(IntervenerWrapper intervener) {
-        return intervener == null
-            || !intervener.isIntervenerSolicitorPopulated()
-            && intervener.getIntervenerAddress() == null;
-    }
-
-    /**
-     * Used by the methods processCorrespondenceForIntervenerOne to processCorrespondenceForIntervenerFour
-     * encapsulates the common logic for sending hearing correspondence for each intervener.
-     */
-    private void processCorrespondenceForIntervener(FinremCaseDetails finremCaseDetails,
-                                                    HearingLike hearing,
-                                                    String userAuthorisation,
-                                                    CaseRole caseRole,
-                                                    IntervenerWrapper intervener) {
-
-        BooleanSupplier shouldEmailSupplier = () -> YesOrNo.YES.equals(intervener.getIntervenerRepresented());
-        BooleanSupplier shouldPostSupplier = () -> !shouldEmailSupplier.getAsBoolean();
-
-        processCorrespondenceForParty(
-            finremCaseDetails,
-            hearing,
-            caseRole,
-            userAuthorisation,
-            shouldEmailSupplier,
-            shouldPostSupplier,
-            () -> notificationRequestMapper.buildHearingNotificationForIntervenerSolicitor(
-                finremCaseDetails,
-                hearing,
-                intervener)
-        );
-    }
-
-    /**
-     * Common logic to send hearing correspondence to parties.
-     * Party-specific logic is determined by the calling method.
-     * Determines whether to send email notifications post documents.
-     *
-     * @param finremCaseDetails the case details containing relevant information about the hearing and case participants
-     * @param hearing           the hearing for which the notification is being sent
-     */
-    private void processCorrespondenceForParty(
-        FinremCaseDetails finremCaseDetails,
-        HearingLike hearing,
-        CaseRole caseRole,
-        String userAuthorisation,
-        BooleanSupplier shouldEmailPartySolicitor,
-        BooleanSupplier shouldPostToParty,
-        Supplier<NotificationRequest> notificationRequestSupplier) {
-
-        EmailTemplateNames emailTemplateName;
-
-        if (hearing instanceof VacateOrAdjournedHearing) {
-            emailTemplateName = FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
-        } else {
-            emailTemplateName = FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
-        }
-
-        if (shouldEmailPartySolicitor.getAsBoolean()) {
-            notificationService.sendHearingNotificationToSolicitor(
-                notificationRequestSupplier.get(),
-                caseRole.toString(),
-                emailTemplateName
+            vacatedHearingDateTime = "%s at %s".formatted(
+                formattedDate,
+                hearingTime
             );
         }
 
-        if (shouldPostToParty.getAsBoolean()) {
-            if (hearing instanceof VacateOrAdjournedHearing) {
-                postVacateNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
-            } else if (hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing)) {
-                postHearingNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
-            } else {
-                postAllAvailableHearingDocuments(finremCaseDetails, caseRole, userAuthorisation);
-            }
-        }
+        String hearingType = Optional.ofNullable(hearing.getHearingType())
+            .orElseThrow(() -> new IllegalStateException("Hearing type must not be null")).getId();
+
+        String applicantSurname = contactDetailsWrapper.getApplicantLname();
+        String respondentSurname = contactDetailsWrapper.getRespondentLname();
+        String selectedFRC = CourtHelper.getFRCForHearing(hearing);
+
+        String formattedHearingDate = Optional.ofNullable(hearing.getHearingDate())
+            .orElseThrow(() -> new IllegalStateException("Hearing date must not be null"))
+            .format(dateFormatter);
+
+        return NotificationRequest.builder()
+            .caseReferenceNumber(caseData.getCcdCaseId())
+            .hearingType(hearingType)
+            .hearingDate(formattedHearingDate)
+            .applicantName(applicantSurname)
+            .respondentName(respondentSurname)
+            .caseType(EmailService.CONTESTED)
+            .selectedCourt(selectedFRC)
+            .vacatedHearingDateTime(vacatedHearingDateTime)
+            .vacatedHearingType(vacatedHearingType)
+            .build();
+    }
+
+    private List<CaseDocument> getAdditionalHearingDocs(HearingLike hearing) {
+        return new ArrayList<>(Optional.ofNullable(hearing.getAdditionalHearingDocs())
+            .orElseGet(List::of)
+            .stream()
+            .map(DocumentCollectionItem::getValue)
+            .toList());
     }
 
     /**
-     * Gets the hearing notice then sends it to the Bulk Print service.
+     * Publishes a correspondence event for managing hearing notifications.
      *
-     * @param finremCaseDetails the case details.
-     * @param caseRole          the case role of the party to whom the notice is being sent.
-     * @param userAuthorisation the user authorisation token.
+     * @param caseDetails the details of the financial remedy case
+     * @param hearing the hearing-related information to be included in the event
+     * @param userAuthorisation the authorization token of the user triggering the event
+     * @param documentsToPost the list of documents to be sent as part of the correspondence
+     * @param templateName the email template name to use for notifications
      */
-    private void postHearingNoticeOnly(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
+    private void publishEvent(FinremCaseDetails caseDetails,
+                              HearingLike hearing,
+                              ManageHearingsAction action,
+                              String userAuthorisation,
+                              List<CaseDocument> documentsToPost,
+                              EmailTemplateNames templateName) {
 
-        CaseDocument hearingNotice = manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
+        List<PartyOnCaseCollectionItem> partiesOnCase =
+            Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
 
-        if (hearingNotice == null) {
-            log.warn("Hearing notice is null. No document sent to {} for case ID: {}", caseRole,
-                finremCaseDetails.getCaseIdAsString());
-            return;
-        }
-
-        List<CaseDocument> hearingDocuments = new ArrayList<>(List.of(hearingNotice));
-        hearingDocuments.addAll(manageHearingsDocumentService
-            .getAdditionalHearingDocsFromWorkingHearing(finremCaseDetails.getData().getManageHearingsWrapper()));
-
-        convertDocumentsAndSendToBulkPrint(hearingDocuments, finremCaseDetails, userAuthorisation, caseRole);
-    }
-
-    /**
-     * Gets the vacate hearing notice then sends it to the Bulk Print service.
-     *
-     * @param finremCaseDetails the case details.
-     * @param caseRole          the case role of the party to whom the notice is being sent.
-     * @param userAuthorisation the user authorisation token.
-     */
-    private void postVacateNoticeOnly(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
-        CaseDocument vacateHearingNotice = manageHearingsDocumentService.getVacateHearingNotice(finremCaseDetails);
-
-        if (vacateHearingNotice == null) {
-            log.warn("Vacate hearing notice is null. No document sent to {} for case ID: {}", caseRole,
-                finremCaseDetails.getCaseIdAsString());
-            return;
-        }
-
-        convertDocumentsAndSendToBulkPrint(
-            new ArrayList<>(List.of(vacateHearingNotice)), finremCaseDetails, userAuthorisation, caseRole);
-    }
-
-    /**
-     * Gets all the documents available for a hearing.
-     * A mini form A is generated once so ony needs posting once, so don't send when vacating any hearing.
-     *
-     * @param finremCaseDetails the case details.
-     * @param caseRole          the case role of the party to whom the documents are being sent.
-     * @param userAuthorisation the user authorisation token.
-     */
-    private void postAllAvailableHearingDocuments(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
-        // Add system generated hearing documents to bundle
-        List<CaseDocument> hearingDocuments = new ArrayList<>(
-            manageHearingsDocumentService.getHearingDocumentsToPost(finremCaseDetails)
+        applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
+            .notificationParties(partiesOnCase.stream()
+                .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
+                .toList())
+            .emailNotificationRequest(buildNotificationRequest(caseDetails.getData(), action, hearing))
+            .emailTemplate(templateName)
+            .documentsToPost(documentsToPost)
+            .caseDetails(caseDetails)
+            .authToken(userAuthorisation)
+            .build()
         );
-
-        // Add any additional documents to bundle
-        hearingDocuments.addAll(manageHearingsDocumentService.getAdditionalHearingDocsFromWorkingHearing(
-            finremCaseDetails.getData().getManageHearingsWrapper()));
-
-        if (isEmpty(hearingDocuments)) {
-            log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());
-            return;
-        }
-
-        convertDocumentsAndSendToBulkPrint(hearingDocuments, finremCaseDetails, userAuthorisation, caseRole);
     }
 
-    private void convertDocumentsAndSendToBulkPrint(List<CaseDocument> hearingDocuments,
-                                                    FinremCaseDetails finremCaseDetails,
-                                                    String userAuthorisation,
-                                                    CaseRole caseRole) {
-        List<CaseDocument> convertedHearingDocuments = convertDocumentsToPdf(
-            hearingDocuments, userAuthorisation, finremCaseDetails.getCaseType());
-
-        List<BulkPrintDocument> bulkPrintDocuments =
-            documentHelper.getCaseDocumentsAsBulkPrintDocuments(convertedHearingDocuments);
-
-        printDocuments(
-            finremCaseDetails,
-            userAuthorisation,
-            bulkPrintDocuments,
-            caseRole
-        );
-
-        log.info("Request sent to Bulk Print to post notice to the {} party. Request sent for case ID: {}",
-            caseRole, finremCaseDetails.getId());
-    }
-
-    /**
-     * Prints documents for the specified case role.
-     * Uses the {@link BulkPrintService} to send the documents for printing.
-     *
-     * @param finremCaseDetails  the case details containing relevant information about the hearing and case participants
-     * @param userAuthorisation  the user authorisation token for sending notifications
-     * @param bulkPrintDocuments the list of documents to be printed
-     * @param caseRole           the case role for which the documents are being printed
-     */
-    private void printDocuments(FinremCaseDetails finremCaseDetails, String userAuthorisation,
-                                List<BulkPrintDocument> bulkPrintDocuments, CaseRole caseRole) {
-        switch (caseRole) {
-            case CaseRole.APP_SOLICITOR ->
-                bulkPrintService.printApplicantDocuments(finremCaseDetails, userAuthorisation, bulkPrintDocuments);
-            case CaseRole.RESP_SOLICITOR ->
-                bulkPrintService.printRespondentDocuments(finremCaseDetails, userAuthorisation, bulkPrintDocuments);
-            case CaseRole.INTVR_SOLICITOR_1 -> {
-                IntervenerWrapper intervenerOne =
-                    finremCaseDetails.getData().getIntervenerOneWrapperIfPopulated();
-                bulkPrintService.printIntervenerDocuments(intervenerOne, finremCaseDetails, userAuthorisation, bulkPrintDocuments);
-            }
-            case CaseRole.INTVR_SOLICITOR_2 -> {
-                IntervenerWrapper intervenerTwo =
-                    finremCaseDetails.getData().getIntervenerTwoWrapperIfPopulated();
-                bulkPrintService.printIntervenerDocuments(intervenerTwo, finremCaseDetails, userAuthorisation, bulkPrintDocuments);
-            }
-            case CaseRole.INTVR_SOLICITOR_3 -> {
-                IntervenerWrapper intervenerThree =
-                    finremCaseDetails.getData().getIntervenerThreeWrapperIfPopulated();
-                bulkPrintService.printIntervenerDocuments(intervenerThree, finremCaseDetails, userAuthorisation, bulkPrintDocuments);
-            }
-            case CaseRole.INTVR_SOLICITOR_4 -> {
-                IntervenerWrapper intervenerFour =
-                    finremCaseDetails.getData().getIntervenerFourWrapperIfPopulated();
-                bulkPrintService.printIntervenerDocuments(intervenerFour, finremCaseDetails, userAuthorisation, bulkPrintDocuments);
-            }
-            default -> throw new IllegalStateException(
-                String.format(
-                    "Unexpected value: %s for case reference %s",
-                    caseRole,
-                    finremCaseDetails.getId()
-                )
-            );
-        }
-    }
-
-    private List<CaseDocument> convertDocumentsToPdf(List<CaseDocument> documents, String userAuthorisation, CaseType caseType) {
-        return documents.stream()
-            .map(document -> genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseType))
-            .toList();
-    }
-
-    /*
-     * Only consider shouldNotSendNotification for the vacateOrAdjournedHearing when we are not relisting.
-     * If we are relisting, whether we send notifications is captured on the new hearing.
-     */
-    private boolean shouldNotSendNotificationForVacatedOrAdjournedHearing(boolean isVacatedAndRelistedHearing,
-                                                                          VacateOrAdjournedHearing vacateOrAdjournedHearing) {
-        return (!isVacatedAndRelistedHearing && hearingCorrespondenceHelper.shouldNotSendNotification(vacateOrAdjournedHearing));
+    private boolean shouldNotSendVacateOrAdjournNotification(boolean isVacatedAndRelistedHearing,
+                                                          VacateOrAdjournedHearing vacateOrAdjournedHearing) {
+        return !isVacatedAndRelistedHearing && !vacateOrAdjournedHearing.shouldSendNotifications();
     }
 }
