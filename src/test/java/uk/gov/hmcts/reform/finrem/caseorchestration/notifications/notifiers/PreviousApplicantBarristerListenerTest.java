@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
 
-import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -106,7 +105,7 @@ class PreviousApplicantBarristerListenerTest {
                 NotificationRequest::getName,
                 NotificationRequest::getNotificationEmail,
                 NotificationRequest::getSolicitorReferenceNumber)
-            .contains(TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL, ofNullable(solicitorReferenceNumber).orElse(""));
+            .contains(TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL, solicitorReferenceNumber);
         verifyNoLetterSent();
     }
 
