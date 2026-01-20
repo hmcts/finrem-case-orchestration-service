@@ -311,19 +311,24 @@ public class ContactDetailsValidator {
         return livesInUK && addressMissingRequiredPostcode;
     }
 
-    private static void checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
+    // PT todo - move to different visibility area of the class
+    // PT todo - docs and test
+    public static boolean checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                                List<String> errors) {
         if (isContested(caseData)) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && !isValidEmailAddress(wrapper.getApplicantSolicitorEmail())) {
                 errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getApplicantSolicitorEmail()));
+                return false;
             }
         } else if (isConsented(caseData)) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && !isValidEmailAddress(wrapper.getSolicitorEmail())) {
                 errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getSolicitorEmail()));
+                return false;
             }
         }
+        return true;
     }
 
     private static void checkForApplicantEmail(ContactDetailsWrapper wrapper, List<String> errors) {

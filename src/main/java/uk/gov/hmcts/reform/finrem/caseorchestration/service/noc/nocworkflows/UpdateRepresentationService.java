@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Added
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.RemovedSolicitorService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -59,6 +61,9 @@ public class UpdateRepresentationService {
     private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     private static final String NOC_EVENT = "nocRequest";
     private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
+    private static final String NOT_ACTIVE_USER_ERROR = "Email is not linked to an active User within a HMCTS organisation";
+    private static final String VALIDATE_EMAIL_ACTIVE_FOR_ORG_ERROR = "Email could not be linked to your organisation. Please check and try again";
+
 
     private final AuditEventService auditEventService;
     private final IdamAuthService idamClient;
@@ -98,6 +103,28 @@ public class UpdateRepresentationService {
 
         return updateRepresentationUpdateHistory(caseDetails, addedSolicitor,
             removedSolicitor, changeRequest);
+    }
+
+    // PT todo, docs and test
+    // emails sanitised from exceptions in findUserByEmail.
+    public List<String> validateEmailActiveForOrganisation(String emailAddress, String caseReference, String userAuthorisation) {
+        List<String> errors  = new ArrayList<>();
+        try {
+            Optional<String> userId = organisationService.findUserByEmail(emailAddress, userAuthorisation);
+            if (userId.isEmpty()) {
+                log.info("{} case reference: {}", NOT_ACTIVE_USER_ERROR, caseReference);
+                errors.add(NOT_ACTIVE_USER_ERROR);
+            }
+            return errors;
+        } catch (Exception e) {
+            log.error(
+                "validateEmailActiveForOrganisation failed for Case reference {}. Exception message {}",
+                caseReference,
+                e.getMessage()
+            );
+            errors.add(VALIDATE_EMAIL_ACTIVE_FOR_ORG_ERROR + " Case reference: " + caseReference);
+            return errors;
+        }
     }
 
     private UserDetails getInvokerDetails(String authToken, CaseDetails caseDetails) {

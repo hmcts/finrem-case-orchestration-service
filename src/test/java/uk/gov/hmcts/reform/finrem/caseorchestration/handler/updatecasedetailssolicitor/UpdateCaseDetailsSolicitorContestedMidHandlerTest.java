@@ -25,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CASE_DETAILS_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -36,7 +37,10 @@ class UpdateCaseDetailsSolicitorContestedMidHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest, MID_EVENT, CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR);
+        assertCanHandle(underTest,
+            Arguments.of(MID_EVENT, CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR),
+            Arguments.of(MID_EVENT, CONSENTED, UPDATE_CASE_DETAILS_SOLICITOR)
+        );
     }
 
     static Stream<Arguments> errorScenarios() {
@@ -59,6 +63,7 @@ class UpdateCaseDetailsSolicitorContestedMidHandlerTest {
         );
     }
 
+    // PT todo - fix
     @ParameterizedTest
     @MethodSource("errorScenarios")
     void testHandle(List<String> addressErrors,
