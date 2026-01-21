@@ -468,6 +468,7 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         assertThat(uploadCaseDocumentTwo.getCaseDocumentConfidentiality()).isEqualTo(YesOrNo.YES);
         assertThat(uploadCaseDocumentTwo.getCaseDocumentFdr()).isEqualTo(YesOrNo.NO);
     }
+
     @Test
     void givenAmendAction_whenHandle_thenInputManageCaseDocumentCollectionReplacesManageCaseDocumentCollection() {
 
