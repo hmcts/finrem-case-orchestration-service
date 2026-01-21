@@ -489,9 +489,6 @@ class StopRepresentingClientServiceTest {
             Barrister applicantBarrister = mock(Barrister.class);
             mockApplicantBarristersChangeOnly(info, caseDataBefore, applicantBarrister);
 
-            lenient().when(underTest.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
-                new RepresentativeInContext(TEST_USER_ID, true, false, null, null));
-
             NotificationRequest notificationRequest = NotificationRequest.builder().build();
             when(finremNotificationRequestMapper
                 .getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister))
@@ -557,7 +554,7 @@ class StopRepresentingClientServiceTest {
             verifyNoMoreInteractions(applicationEventPublisher,finremNotificationRequestMapper);
         }
 
-        private EmailTemplateNames applicantExpectedTemplateNames(CaseType caseType) {
+        private static EmailTemplateNames applicantExpectedTemplateNames(CaseType caseType) {
             return CaseType.CONTESTED.equals(caseType)
                 ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
                 : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
