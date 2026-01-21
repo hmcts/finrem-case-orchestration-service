@@ -424,6 +424,7 @@ public class StopRepresentingClientService {
             .build()
         );
     }
+
     private void notifyApplicantBarrister(StopRepresentingClientInfo info, Barrister barrister) {
         FinremCaseData caseData = getFinremCaseData(info);
 
