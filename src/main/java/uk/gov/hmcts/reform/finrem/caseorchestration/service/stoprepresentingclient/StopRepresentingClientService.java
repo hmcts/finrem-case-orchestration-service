@@ -388,43 +388,39 @@ public class StopRepresentingClientService {
     private void notifyApplicantBarrister(StopRepresentingClientInfo info, Barrister barrister) {
         String userAuthorisation = info.getUserAuthorisation();
         FinremCaseData finremCaseData = getFinremCaseData(info);
-        RepresentativeInContext context = buildRepresentation(finremCaseData, userAuthorisation);
-        if (context.isApplicantRepresentative()) {
-            applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
-                .notificationParties(List.of(PREVIOUS_APPLICANT_BARRISTER_ONLY))
-                .emailNotificationRequest(finremNotificationRequestMapper
-                    .getNotificationRequestForApplicantBarrister(info.getCaseDetailsBefore(), barrister)
-                    .toBuilder()
-                    .dateOfIssue(getDateOfIssue())
-                    .build())
-                .emailTemplate(getNotifyApplicantRepresentativeTemplateName(finremCaseData))
-                .caseDetails(info.getCaseDetails())
-                .caseDetailsBefore(info.getCaseDetailsBefore())
-                .authToken(userAuthorisation)
-                .build()
-            );
-        }
+
+        applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
+            .notificationParties(List.of(PREVIOUS_APPLICANT_BARRISTER_ONLY))
+            .emailNotificationRequest(finremNotificationRequestMapper
+                .getNotificationRequestForApplicantBarrister(info.getCaseDetailsBefore(), barrister)
+                .toBuilder()
+                .dateOfIssue(getDateOfIssue())
+                .build())
+            .emailTemplate(getNotifyApplicantRepresentativeTemplateName(finremCaseData))
+            .caseDetails(info.getCaseDetails())
+            .caseDetailsBefore(info.getCaseDetailsBefore())
+            .authToken(userAuthorisation)
+            .build()
+        );
     }
 
     private void notifyApplicantSolicitor(StopRepresentingClientInfo info) {
         String userAuthorisation = info.getUserAuthorisation();
         FinremCaseData finremCaseData = getFinremCaseData(info);
-        RepresentativeInContext context = buildRepresentation(finremCaseData, userAuthorisation);
-        if (context.isApplicantRepresentative()) {
-            applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
-                .notificationParties(List.of(PREVIOUS_APPLICANT_SOLICITOR_ONLY))
-                .emailNotificationRequest(finremNotificationRequestMapper
-                    .getNotificationRequestForApplicantSolicitor(info.getCaseDetailsBefore())
-                    .toBuilder()
-                    .dateOfIssue(getDateOfIssue())
-                    .build())
-                .emailTemplate(getNotifyApplicantRepresentativeTemplateName(finremCaseData))
-                .caseDetails(info.getCaseDetails())
-                .caseDetailsBefore(info.getCaseDetailsBefore())
-                .authToken(userAuthorisation)
-                .build()
-            );
-        }
+
+        applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
+            .notificationParties(List.of(PREVIOUS_APPLICANT_SOLICITOR_ONLY))
+            .emailNotificationRequest(finremNotificationRequestMapper
+                .getNotificationRequestForApplicantSolicitor(info.getCaseDetailsBefore())
+                .toBuilder()
+                .dateOfIssue(getDateOfIssue())
+                .build())
+            .emailTemplate(getNotifyApplicantRepresentativeTemplateName(finremCaseData))
+            .caseDetails(info.getCaseDetails())
+            .caseDetailsBefore(info.getCaseDetailsBefore())
+            .authToken(userAuthorisation)
+            .build()
+        );
     }
 
     private String getDateOfIssue() {

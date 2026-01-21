@@ -378,6 +378,12 @@ class StopRepresentingClientServiceTest {
                 -> getOrganisationPolicy(cd.getData(), isApplicant).equals(originalOrgPolicy)
             ))).thenReturn(mockValidCaseDetails);
 
+            lenient().when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
+                .thenReturn(NotificationRequest.builder().build());
+            lenient().when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class)))
+                .thenReturn(NotificationRequest.builder().build());
+
+            // Act
             underTest.revokePartiesAccessAndNotifyParties(info);
 
             verify(assignCaseAccessService).applyDecision(TEST_SYSTEM_TOKEN, mockValidCaseDetails);
@@ -429,6 +435,11 @@ class StopRepresentingClientServiceTest {
 
             when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(mock(CaseDetails.class));
 
+            lenient().when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
+                .thenReturn(NotificationRequest.builder().build());
+            lenient().when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class)))
+                .thenReturn(NotificationRequest.builder().build());
+
             underTest.revokePartiesAccessAndNotifyParties(event);
 
             ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> captor = ArgumentCaptor.forClass(Function.class);
@@ -463,8 +474,6 @@ class StopRepresentingClientServiceTest {
                 .userAuthorisation(AUTH_TOKEN)
                 .build();
 
-            when(underTest.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
-                new RepresentativeInContext(TEST_USER_ID, true, false, null, null));
             NotificationRequest notificationRequest = NotificationRequest.builder().build();
             when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetailsBefore))
                 .thenReturn(notificationRequest);
@@ -611,9 +620,6 @@ class StopRepresentingClientServiceTest {
             BarristerChange intv4BarristerChange = mock(BarristerChange.class);
             when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
                 .thenReturn(intv4BarristerChange);
-
-            when(underTest.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
-                new RepresentativeInContext(TEST_USER_ID, true, false, null, null));
 
             NotificationRequest notificationRequest = NotificationRequest.builder().build();
             when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetailsBefore))
