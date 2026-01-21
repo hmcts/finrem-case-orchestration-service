@@ -851,7 +851,7 @@ class StopRepresentingClientServiceTest {
     }
 
     private static StopRepresentingClientInfo stopRepresentingClientInfo(FinremCaseDetails caseDetails,
-                                                                  FinremCaseDetails caseDetailsBefore) {
+                                                                         FinremCaseDetails caseDetailsBefore) {
         return StopRepresentingClientInfo.builder()
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetailsBefore)
