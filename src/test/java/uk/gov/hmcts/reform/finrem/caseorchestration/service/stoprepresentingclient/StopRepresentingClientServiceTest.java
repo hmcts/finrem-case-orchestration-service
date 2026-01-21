@@ -239,13 +239,10 @@ class StopRepresentingClientServiceTest {
                 Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .caseDetails(caseDetails)
-                .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
-                .userAuthorisation(AUTH_TOKEN)
-                .build();
+            StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails,
+                FinremCaseDetails.builder().data(caseDataBefore).build());
 
-            underTest.revokePartiesAccessAndNotifyParties(event);
+            underTest.revokePartiesAccessAndNotifyParties(info);
 
             verify(intervenerService).revokeIntervenerSolicitor(Long.parseLong(CASE_ID), intervenerOne);
             verify(intervenerService, never()).revokeIntervenerSolicitor(Long.parseLong(CASE_ID), intervenerTwo);
@@ -261,31 +258,29 @@ class StopRepresentingClientServiceTest {
             FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .caseDetails(caseDetails)
-                .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
-                .userAuthorisation(AUTH_TOKEN)
-                .build();
+            StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails,
+                FinremCaseDetails.builder().data(caseDataBefore).build());
+
             BarristerChange applicantBarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
                 .thenReturn(applicantBarristerChange);
             BarristerChange respondentBarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
                 .thenReturn(respondentBarristerChange);
             BarristerChange intv1BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER1))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER1))
                 .thenReturn(intv1BarristerChange);
             BarristerChange intv2BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER2))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER2))
                 .thenReturn(intv2BarristerChange);
             BarristerChange intv3BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER3))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER3))
                 .thenReturn(intv3BarristerChange);
             BarristerChange intv4BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
                 .thenReturn(intv4BarristerChange);
 
-            underTest.revokePartiesAccessAndNotifyParties(event);
+            underTest.revokePartiesAccessAndNotifyParties(info);
 
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
@@ -307,31 +302,29 @@ class StopRepresentingClientServiceTest {
             FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .caseDetails(caseDetails)
-                .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
-                .userAuthorisation(AUTH_TOKEN)
-                .build();
+            StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails,
+                FinremCaseDetails.builder().data(caseDataBefore).build());
+
             BarristerChange applicantBarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
                 .thenReturn(applicantBarristerChange);
             BarristerChange respondentBarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
                 .thenReturn(respondentBarristerChange);
             BarristerChange intv1BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER1))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER1))
                 .thenReturn(intv1BarristerChange);
             BarristerChange intv2BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER2))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER2))
                 .thenReturn(intv2BarristerChange);
             BarristerChange intv3BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER3))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER3))
                 .thenReturn(intv3BarristerChange);
             BarristerChange intv4BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
+            when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
                 .thenReturn(intv4BarristerChange);
 
-            underTest.revokePartiesAccessAndNotifyParties(event);
+            underTest.revokePartiesAccessAndNotifyParties(info);
 
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
             verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
@@ -361,11 +354,8 @@ class StopRepresentingClientServiceTest {
                 Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            final StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
-                .caseDetails(caseDetails)
-                .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
-                .userAuthorisation(AUTH_TOKEN)
-                .build();
+            final StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails,
+                FinremCaseDetails.builder().data(caseDataBefore).build());
 
             // Setting up invalid case details
             CaseDetails mockInvalidCaseDetails = mock(CaseDetails.class);
@@ -404,13 +394,10 @@ class StopRepresentingClientServiceTest {
                 Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .caseDetails(caseDetails)
-                .caseDetailsBefore(FinremCaseDetails.builder().data(mock(FinremCaseData.class)).build())
-                .userAuthorisation(AUTH_TOKEN)
-                .build();
+            StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails,
+                FinremCaseDetails.builder().data(mock(FinremCaseData.class)).build());
 
-            underTest.revokePartiesAccessAndNotifyParties(event);
+            underTest.revokePartiesAccessAndNotifyParties(info);
 
             verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
             verifyNoInteractions(intervenerService);
@@ -428,11 +415,8 @@ class StopRepresentingClientServiceTest {
             FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), caseType, caseData)
                 .build();
 
-            final StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .caseDetails(caseDetails)
-                .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
-                .userAuthorisation(AUTH_TOKEN)
-                .build();
+            final StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails,
+                FinremCaseDetails.builder().data(caseDataBefore).build());
 
             when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(mock(CaseDetails.class));
 
@@ -441,7 +425,7 @@ class StopRepresentingClientServiceTest {
             lenient().when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class)))
                 .thenReturn(NotificationRequest.builder().build());
 
-            underTest.revokePartiesAccessAndNotifyParties(event);
+            underTest.revokePartiesAccessAndNotifyParties(info);
 
             ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> captor = ArgumentCaptor.forClass(Function.class);
             verify(coreCaseDataService).performPostSubmitCallback(eq(caseType), eq(Long.valueOf(CASE_ID)),
@@ -469,11 +453,7 @@ class StopRepresentingClientServiceTest {
                 .build();
             FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().data(caseDataBefore).build();
 
-            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .caseDetails(caseDetails)
-                .caseDetailsBefore(caseDetailsBefore)
-                .userAuthorisation(AUTH_TOKEN)
-                .build();
+            StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails, caseDetailsBefore);
 
             NotificationRequest notificationRequest = NotificationRequest.builder().build();
             when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetailsBefore))
@@ -482,7 +462,7 @@ class StopRepresentingClientServiceTest {
             try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
                 mockedLocalDate.when(LocalDate::now).thenReturn(FIXED_DATE_NOW);
 
-                underTest.revokePartiesAccessAndNotifyParties(event);
+                underTest.revokePartiesAccessAndNotifyParties(info);
             }
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
@@ -505,13 +485,9 @@ class StopRepresentingClientServiceTest {
                 .build();
             FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().data(caseDataBefore).build();
 
-            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .caseDetails(caseDetails)
-                .caseDetailsBefore(caseDetailsBefore)
-                .userAuthorisation(AUTH_TOKEN)
-                .build();
+            StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails, caseDetailsBefore);
             Barrister applicantBarrister = mock(Barrister.class);
-            mockApplicantBarristersChangeOnly(event, caseDataBefore, applicantBarrister);
+            mockApplicantBarristersChangeOnly(info, caseDataBefore, applicantBarrister);
 
             lenient().when(underTest.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
                 new RepresentativeInContext(TEST_USER_ID, true, false, null, null));
@@ -524,7 +500,7 @@ class StopRepresentingClientServiceTest {
             try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
                 mockedLocalDate.when(LocalDate::now).thenReturn(FIXED_DATE_NOW);
 
-                underTest.revokePartiesAccessAndNotifyParties(event);
+                underTest.revokePartiesAccessAndNotifyParties(info);
             }
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
@@ -550,13 +526,9 @@ class StopRepresentingClientServiceTest {
                 .build();
             FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().data(caseDataBefore).build();
 
-            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
-                .caseDetails(caseDetails)
-                .caseDetailsBefore(caseDetailsBefore)
-                .userAuthorisation(AUTH_TOKEN)
-                .build();
+            StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails, caseDetailsBefore);
             Barrister applicantBarrister = mock(Barrister.class);
-            mockApplicantBarristersChangeOnly(event, caseDataBefore, applicantBarrister);
+            mockApplicantBarristersChangeOnly(info, caseDataBefore, applicantBarrister);
 
             NotificationRequest notificationRequest = NotificationRequest.builder().build();
             when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetailsBefore))
@@ -567,7 +539,7 @@ class StopRepresentingClientServiceTest {
             try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
                 mockedLocalDate.when(LocalDate::now).thenReturn(FIXED_DATE_NOW);
 
-                underTest.revokePartiesAccessAndNotifyParties(event);
+                underTest.revokePartiesAccessAndNotifyParties(info);
             }
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
@@ -844,26 +816,26 @@ class StopRepresentingClientServiceTest {
         }
     }
 
-    void mockApplicantBarristersChangeOnly(StopRepresentingClientInfo event, FinremCaseData caseDataBefore,
+    void mockApplicantBarristersChangeOnly(StopRepresentingClientInfo info, FinremCaseData caseDataBefore,
                                            Barrister... applicantBarristers) {
         BarristerChange applicantBarristerChange = mock(BarristerChange.class);
-        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
+        when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
             .thenReturn(applicantBarristerChange);
         when(applicantBarristerChange.getRemoved()).thenReturn(Set.of(applicantBarristers));
         BarristerChange respondentBarristerChange = mock(BarristerChange.class);
-        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
+        when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
             .thenReturn(respondentBarristerChange);
         BarristerChange intv1BarristerChange = mock(BarristerChange.class);
-        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER1))
+        when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER1))
             .thenReturn(intv1BarristerChange);
         BarristerChange intv2BarristerChange = mock(BarristerChange.class);
-        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER2))
+        when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER2))
             .thenReturn(intv2BarristerChange);
         BarristerChange intv3BarristerChange = mock(BarristerChange.class);
-        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER3))
+        when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER3))
             .thenReturn(intv3BarristerChange);
         BarristerChange intv4BarristerChange = mock(BarristerChange.class);
-        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
+        when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
             .thenReturn(intv4BarristerChange);
     }
 
@@ -880,5 +852,14 @@ class StopRepresentingClientServiceTest {
 
     private static NotificationRequest notificationRequestWithCurrentDateOfIssuePopulated(NotificationRequest notificationRequest) {
         return notificationRequest.toBuilder().dateOfIssue(EXPECTED_NOW_DATE_IN_STRING).build();
+    }
+
+    private StopRepresentingClientInfo stopRepresentingClientInfo(FinremCaseDetails caseDetails,
+                                                                  FinremCaseDetails caseDetailsBefore) {
+        return StopRepresentingClientInfo.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore)
+            .userAuthorisation(AUTH_TOKEN)
+            .build();
     }
 }
