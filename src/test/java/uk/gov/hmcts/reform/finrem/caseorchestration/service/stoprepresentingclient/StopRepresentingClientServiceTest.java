@@ -361,7 +361,7 @@ class StopRepresentingClientServiceTest {
                 Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
-            StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
+            final StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
                 .userAuthorisation(AUTH_TOKEN)
@@ -428,7 +428,7 @@ class StopRepresentingClientServiceTest {
             FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), caseType, caseData)
                 .build();
 
-            StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
+            final StopRepresentingClientInfo event = StopRepresentingClientInfo.builder()
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(FinremCaseDetails.builder().data(caseDataBefore).build())
                 .userAuthorisation(AUTH_TOKEN)
@@ -848,7 +848,6 @@ class StopRepresentingClientServiceTest {
             assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representativeInContext));
         }
     }
-
 
     void mockApplicantBarristersChangeOnly(StopRepresentingClientInfo event, FinremCaseData caseDataBefore,
                                            Barrister... applicantBarristers) {
