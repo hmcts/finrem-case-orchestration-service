@@ -77,7 +77,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_US
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.IntervenerRole.BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.IntervenerRole.SOLICITOR;
 
@@ -559,10 +561,52 @@ class StopRepresentingClientServiceTest {
             verifyNoMoreInteractions(applicationEventPublisher,finremNotificationRequestMapper);
         }
 
+        @ParameterizedTest
+        @EnumSource(value = CaseType.class, names = {"CONSENTED", "CONTESTED"})
+        void shouldNotifyRespondentSolicitor(CaseType caseType) {
+            FinremCaseData caseData = spy(FinremCaseData.class);
+            caseData.getContactDetailsWrapper().setNocParty(NoticeOfChangeParty.RESPONDENT);
+            caseData.setChangeOrganisationRequestField(mock(ChangeOrganisationRequest.class));
+
+            FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+            FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), caseType, caseData)
+                .build();
+            FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().data(caseDataBefore).build();
+
+            StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails, caseDetailsBefore);
+
+            NotificationRequest notificationRequest = NotificationRequest.builder().build();
+            when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetailsBefore))
+                .thenReturn(notificationRequest);
+
+            // Act
+            try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
+                mockedLocalDate.when(LocalDate::now).thenReturn(FIXED_DATE_NOW);
+
+                underTest.revokePartiesAccessAndNotifyParties(info);
+            }
+
+            // verify
+            ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
+            verify(applicationEventPublisher).publishEvent(captor.capture());
+            verify(finremNotificationRequestMapper).getNotificationRequestForRespondentSolicitor(caseDetailsBefore);
+
+            verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
+                NotificationParty.PREVIOUS_RESPONDENT_SOLICITOR_ONLY,
+                respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
+            verifyNoMoreInteractions(applicationEventPublisher, finremNotificationRequestMapper);
+        }
+
         private static EmailTemplateNames applicantExpectedTemplateNames(CaseType caseType) {
             return CaseType.CONTESTED.equals(caseType)
                 ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
                 : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
+        }
+
+        private static EmailTemplateNames respondentExpectedTemplateNames(CaseType caseType) {
+            return CaseType.CONTESTED.equals(caseType)
+                ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT
+                : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
         }
 
         private void verifySendCorrespondenceEvent(SendCorrespondenceEvent event, NotificationParty party, EmailTemplateNames template,
