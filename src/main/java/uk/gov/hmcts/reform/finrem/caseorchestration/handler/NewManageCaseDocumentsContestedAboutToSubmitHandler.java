@@ -102,9 +102,21 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
     }
 
     private void replaceManagedDocumentsInCollectionType(FinremCaseData caseData) {
-        emptyIfNull(documentHandlers).forEach(documentHandler ->
-            documentHandler.replaceManagedDocumentsInCollectionType(caseData, getManagedCollections(caseData),
-                false));
+        final ManageCaseDocumentsAction action = caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentsActionSelection();
+
+        if (ManageCaseDocumentsAction.AMEND.equals(action)) {
+            List<UploadCaseDocumentCollection> inputDocuments =
+                emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection());
+
+            emptyIfNull(documentHandlers).forEach(documentHandler ->
+                documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, true));
+        } else if (ManageCaseDocumentsAction.ADD_NEW.equals(action)) {
+            List<UploadCaseDocumentCollection> managedCollections =
+                emptyIfNull(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection());
+
+            emptyIfNull(documentHandlers).forEach(documentHandler ->
+                documentHandler.replaceManagedDocumentsInCollectionType(caseData, managedCollections, false));
+        }
     }
 
     private List<UploadCaseDocumentCollection> getManagedCollections(FinremCaseData caseData) {
@@ -121,11 +133,9 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
                 nullIfEmpty(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
             );
             caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(newManageCaseDocumentCollection);
-        }
-        else if (action == ManageCaseDocumentsAction.AMEND) {
-            // Replace the entire collection with the amended documents
+        } else if (action == ManageCaseDocumentsAction.AMEND) {
             caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(
-                nullIfEmpty(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
+                caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection()
             );
         }
     }
@@ -200,10 +210,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
         if (featureToggleService.isSecureDocEnabled()) {
             List<UploadCaseDocumentCollection> allCollectionsBefore =
                 caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
-            List<UploadCaseDocumentCollection> allCollections =
-                caseData.getUploadCaseDocumentWrapper().getAllManageableCollections();
-            allCollectionsBefore.removeAll(allCollections);
-
+            allCollectionsBefore.removeAll(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
             allCollectionsBefore.stream().map(this::getDocumentUrl)
                 .forEach(docUrl -> evidenceManagementDeleteService.delete(docUrl, userAuthorisation));
         }
