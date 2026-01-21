@@ -469,7 +469,7 @@ public class StopRepresentingClientService {
             List.of(PREVIOUS_RESPONDENT_BARRISTER_ONLY),
             getNotifyRespondentRepresentativeTemplateName(caseData),
             () -> finremNotificationRequestMapper
-                .getNotificationRequestForApplicantBarrister(info.getCaseDetailsBefore(), barrister)
+                .getNotificationRequestForRespondentBarrister(info.getCaseDetailsBefore(), barrister)
         );
     }
 

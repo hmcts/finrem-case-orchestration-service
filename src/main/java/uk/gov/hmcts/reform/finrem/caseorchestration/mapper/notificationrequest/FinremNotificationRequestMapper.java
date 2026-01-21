@@ -51,6 +51,10 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData(), isNotDigital));
     }
 
+    public NotificationRequest getNotificationRequestForRespondentBarrister(FinremCaseDetails caseDetails, Barrister barrister) {
+        return buildNotificationRequest(caseDetails, getRespondentBarristerCaseData(caseDetails.getData(), barrister));
+    }
+
     public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData()));
     }
@@ -72,6 +76,14 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         return isRespondentSolicitorChangedOnLatestRepresentationUpdate(caseDetails)
             ? getNotificationRequestForRespondentSolicitor(caseDetails)
             : getNotificationRequestForApplicantSolicitor(caseDetails);
+    }
+
+    private SolicitorCaseDataKeysWrapper getRespondentBarristerCaseData(FinremCaseData caseData, Barrister barrister) {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(barrister.getEmail())
+            .solicitorNameKey(nullToEmpty(barrister.getName()))
+            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()))
+            .build();
     }
 
     private SolicitorCaseDataKeysWrapper getApplicantBarristerCaseData(FinremCaseData caseData, Barrister barrister) {
