@@ -23,21 +23,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -466,94 +462,5 @@ class ManageHearingsDocumentServiceTest {
 
         assertEquals(CaseDocumentType.FORM_C, result.getLeft());
         assertEquals("a standard form C template", result.getRight());
-    }
-
-    /**
-     * Builds a collection of ManageHearingDocumentsCollectionItem for all hearing documents.
-     * Useful to check which documents are posted for a hearing.
-     *
-     * @param hearingId the UUID of the hearing associated with the documents
-     * @return a list of ManageHearingDocumentsCollectionItem containing all hearing documents
-     */
-    private List<ManageHearingDocumentsCollectionItem> buildCollectionForAllHearingDocuments(UUID hearingId) {
-        return List.of(
-            doc(CaseDocumentType.HEARING_NOTICE, HEARING_NOTICE_FILE_URL, hearingId),
-            doc(CaseDocumentType.OUT_OF_COURT_RESOLUTION, OUT_OF_COURT_RESOLUTION_URL, hearingId),
-            doc(CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER, PFD_NCDR_COMPLIANCE_LETTER_URL, hearingId),
-            doc(CaseDocumentType.PFD_NCDR_COVER_LETTER, PFD_NCDR_COVER_LETTER_URL, hearingId),
-            doc(CaseDocumentType.FORM_C, FORM_C_URL, hearingId),
-            doc(CaseDocumentType.FORM_G, FORM_G_URL, hearingId),
-            doc(CaseDocumentType.FORM_C_FAST_TRACK, FORM_C_FAST_TRACK_URL, hearingId),
-            doc(CaseDocumentType.FORM_C_EXPRESS, FORM_C_EXPRESS_URL, hearingId)
-        );
-    }
-
-    /**
-     * Helper method to create a ManageHearingDocumentsCollectionItem with a specific CaseDocumentType and URL.
-     *
-     * @param type      the CaseDocumentType for the document
-     * @param url       the URL of the document
-     * @param hearingId the UUID of the hearing associated with the document
-     * @return a ManageHearingDocumentsCollectionItem containing the specified document
-     */
-    private ManageHearingDocumentsCollectionItem doc(CaseDocumentType type, String url, UUID hearingId) {
-        return ManageHearingDocumentsCollectionItem.builder()
-            .value(ManageHearingDocument.builder()
-                .hearingId(hearingId)
-                .hearingCaseDocumentType(type)
-                .hearingDocument(CaseDocument.builder()
-                    .documentUrl(url)
-                    .build())
-                .build())
-            .build();
-    }
-
-    private List<ManageHearingsCollectionItem> getListOfOneHearing(UUID hearingId, HearingType hearingType) {
-        return List.of(ManageHearingsCollectionItem.builder()
-            .id(hearingId)
-            .value(Hearing.builder()
-                .hearingType(hearingType)
-                .build())
-            .build());
-    }
-
-    /**
-     * Builds a FinremCaseData object with a ManageHearingsWrapper containing hearing documents.
-     * And sets other attributes using the arguments provided. MiniFormA is set to a test value.
-     *
-     * @param hearingId              used so that tests can check that the correct hearing documents are returned
-     * @param hearingDocuments       the list of hearing documents to be included in the case data
-     * @param isFastTrackApplication indicates if the application is fast track (use for FDA hearings).
-     * @param hearingType            the type of hearing
-     * @return FinremCaseData with the specified hearing documents and attributes
-     */
-    private FinremCaseData buildCaseDataWithHearingDocuments(
-        UUID hearingId,
-        List<ManageHearingDocumentsCollectionItem> hearingDocuments,
-        YesOrNo isFastTrackApplication,
-        HearingType hearingType
-    ) {
-        CaseDocument miniFormA = CaseDocument.builder()
-            .documentUrl(FORM_A_URL)
-            .build();
-        return FinremCaseData.builder()
-            .fastTrackDecision(isFastTrackApplication)
-            .miniFormA(miniFormA)
-            .manageHearingsWrapper(
-                ManageHearingsWrapper.builder()
-                    .workingHearingId(hearingId)
-                    .hearings(getListOfOneHearing(hearingId, hearingType))
-                    .hearingDocumentsCollection(hearingDocuments)
-                    .build())
-            .build();
-    }
-
-    private ManageHearingDocument buildManageHearingDocument(CaseDocumentType documentType, UUID hearingId, String documentUrl) {
-        return ManageHearingDocument.builder()
-            .hearingId(hearingId)
-            .hearingDocument(CaseDocument.builder().documentUrl(documentUrl)
-                .uploadTimestamp(LocalDateTime.now()).build())
-            .hearingCaseDocumentType(documentType)
-            .build();
     }
 }

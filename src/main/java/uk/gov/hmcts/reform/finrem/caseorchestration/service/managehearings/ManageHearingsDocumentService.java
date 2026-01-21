@@ -67,12 +67,14 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Generates a notice document to say that a hearing is being vacated.
-     * Includes the given hearing and case details.
+     * Generates a vacate or adjourn hearing notice document based on the provided case details, region,
+     * and specified action (vacate or adjourn).
      *
-     * @param finremCaseDetails  the case details containing case data
-     * @param authorisationToken the authorisation token for document generation
-     * @return the generated vacate hearing notice as a {@link CaseDocument}
+     * @param finremCaseDetails the details of the financial remedy case for which the notice is being generated
+     * @param courtRegion the region of the court associated with the case
+     * @param authorisationToken the security token used for authorizing the document generation process
+     * @param vacateOrAdjournAction the action type indicating whether the notice is for vacating or adjourning the hearing
+     * @return the generated case document containing the vacated or adjourned hearing notice
      */
     public CaseDocument generateVacateOrAdjournNotice(FinremCaseDetails finremCaseDetails,
                                                       Region courtRegion,
