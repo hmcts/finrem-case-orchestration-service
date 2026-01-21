@@ -816,8 +816,8 @@ class StopRepresentingClientServiceTest {
         }
     }
 
-    void mockApplicantBarristersChangeOnly(StopRepresentingClientInfo info, FinremCaseData caseDataBefore,
-                                           Barrister... applicantBarristers) {
+    private void mockApplicantBarristersChangeOnly(StopRepresentingClientInfo info, FinremCaseData caseDataBefore,
+                                                   Barrister... applicantBarristers) {
         BarristerChange applicantBarristerChange = mock(BarristerChange.class);
         when(manageBarristerService.getBarristerChange(info.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
             .thenReturn(applicantBarristerChange);
@@ -854,7 +854,7 @@ class StopRepresentingClientServiceTest {
         return notificationRequest.toBuilder().dateOfIssue(EXPECTED_NOW_DATE_IN_STRING).build();
     }
 
-    private StopRepresentingClientInfo stopRepresentingClientInfo(FinremCaseDetails caseDetails,
+    private static StopRepresentingClientInfo stopRepresentingClientInfo(FinremCaseDetails caseDetails,
                                                                   FinremCaseDetails caseDetailsBefore) {
         return StopRepresentingClientInfo.builder()
             .caseDetails(caseDetails)
