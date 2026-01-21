@@ -44,24 +44,60 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
     }
 
     public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails) {
-        return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData()));
+        return buildStandardNotificationRequest(caseDetails, respondentSolicitorProvider(caseDetails.getData()));
     }
 
     public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails, boolean isNotDigital) {
-        return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData(), isNotDigital));
+        return buildStandardNotificationRequest(caseDetails, respondentSolicitorProvider(caseDetails.getData(), isNotDigital));
     }
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails) {
-        return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData()));
+        return buildStandardNotificationRequest(caseDetails, applicantSolicitorProvider(caseDetails.getData()));
     }
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails, boolean isNotDigital) {
-        return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData(), isNotDigital));
+        return buildStandardNotificationRequest(caseDetails, applicantSolicitorProvider(caseDetails.getData(), isNotDigital));
     }
 
+    /**
+     * Builds a {@link NotificationRequest} for an intervener solicitor.
+     *
+     * <p>
+     * The intervener is identified using the supplied {@code intervenerId}, which is
+     * used to retrieve the corresponding intervener from the case data. The solicitor
+     * contact details and reference information for that intervener are then mapped
+     * into the appropriate notification fields before constructing the request.
+     * </p>
+     *
+     * @param caseDetails the Finrem case details containing intervener data
+     * @param intervenerId the identifier of the intervener whose solicitor should be notified
+     * @return the constructed {@link NotificationRequest} for the intervener solicitor
+     */
     public NotificationRequest getNotificationRequestForIntervenerSolicitor(FinremCaseDetails caseDetails,
-                                                                            SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
-        return buildNotificationRequest(caseDetails, caseDataKeysWrapper);
+                                                                            int intervenerId) {
+        return buildStandardNotificationRequest(caseDetails,
+            intervenerSolicitorProvider(caseDetails.getData().getIntervenerById(intervenerId)));
+    }
+
+    /**
+     * @deprecated Use {@link #getNotificationRequestForIntervenerSolicitor(FinremCaseDetails, int)}
+     * instead.
+     *
+     * <p>
+     * This method accepts a {@link SolicitorCaseDataKeysWrapper} directly, which bypasses the
+     * standard mapping logic from {@link IntervenerDetails}. The newer method centralises
+     * the construction of solicitor-related fields and should be preferred to ensure
+     * consistency and future maintainability.
+     * </p>
+     *
+     * @param caseDetails the Finrem case details
+     * @param provider the solicitor case data keys wrapper
+     * @return the constructed {@link NotificationRequest}
+     */
+    @Deprecated
+    public NotificationRequest getNotificationRequestForIntervenerSolicitor(FinremCaseDetails caseDetails,
+                                                                            SolicitorCaseDataKeysWrapper provider) {
+        return buildStandardNotificationRequest(caseDetails, provider);
     }
 
     public NotificationRequest getNotificationRequestForNoticeOfChange(FinremCaseDetails caseDetails) {
@@ -70,7 +106,7 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             : getNotificationRequestForApplicantSolicitor(caseDetails);
     }
 
-    private SolicitorCaseDataKeysWrapper getApplicantSolicitorCaseData(FinremCaseData caseData) {
+    private SolicitorCaseDataKeysWrapper applicantSolicitorProvider(FinremCaseData caseData) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getAppSolicitorEmail())
             .solicitorNameKey(nullToEmpty(caseData.getAppSolicitorName()))
@@ -78,7 +114,15 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .build();
     }
 
-    private SolicitorCaseDataKeysWrapper getApplicantSolicitorCaseData(FinremCaseData caseData, boolean isNotDigital) {
+    private SolicitorCaseDataKeysWrapper intervenerSolicitorProvider(IntervenerDetails intervenerDetails) {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(intervenerDetails.getIntervenerSolEmail())
+            .solicitorNameKey(nullToEmpty(Objects.toString(intervenerDetails.getIntervenerSolName(), intervenerDetails.getIntervenerSolicitorFirm())))
+            .solicitorReferenceKey(nullToEmpty(intervenerDetails.getIntervenerSolicitorReference()))
+            .build();
+    }
+
+    private SolicitorCaseDataKeysWrapper applicantSolicitorProvider(FinremCaseData caseData, boolean isNotDigital) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getAppSolicitorEmail())
             .solicitorNameKey(nullToEmpty(caseData.getAppSolicitorName()))
@@ -87,7 +131,7 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .build();
     }
 
-    private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData) {
+    private SolicitorCaseDataKeysWrapper respondentSolicitorProvider(FinremCaseData caseData) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
             .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
@@ -95,7 +139,7 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .build();
     }
 
-    private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData, boolean isNotDigital) {
+    private SolicitorCaseDataKeysWrapper respondentSolicitorProvider(FinremCaseData caseData, boolean isNotDigital) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
             .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
@@ -115,15 +159,14 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         return Collections.max(representationUpdates, Comparator.comparing(c -> c.getValue().getDate())).getValue();
     }
 
-    private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails,
-                                                         SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+    private NotificationRequest buildStandardNotificationRequest(FinremCaseDetails caseDetails,
+                                                                 SolicitorCaseDataKeysWrapper provider) {
+        final FinremCaseData caseData = caseDetails.getData();
+
+        // TODO Consider using James' NotificationRequestBuilder
         NotificationRequest notificationRequest = NotificationRequest.builder().build();
-        FinremCaseData caseData = caseDetails.getData();
         notificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
-        notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseDataKeysWrapper.getSolicitorReferenceKey(), EMPTY_STRING));
         notificationRequest.setDivorceCaseNumber(Objects.toString(caseData.getDivorceCaseNumber(), EMPTY_STRING));
-        notificationRequest.setName(caseDataKeysWrapper.getSolicitorNameKey());
-        notificationRequest.setNotificationEmail(caseDataKeysWrapper.getSolicitorEmailKey());
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
         notificationRequest.setGeneralApplicationRejectionReason(
@@ -146,7 +189,13 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         notificationRequest.setHearingType(listForHearingWrapper.getHearingType() != null
             ? listForHearingWrapper.getHearingType().getId()
             : "");
-        notificationRequest.setIsNotDigital(caseDataKeysWrapper.getSolicitorIsNotDigitalKey());
+
+        if (provider != null) {
+            notificationRequest.setName(provider.getSolicitorNameKey());
+            notificationRequest.setNotificationEmail(provider.getSolicitorEmailKey());
+            notificationRequest.setSolicitorReferenceNumber(Objects.toString(provider.getSolicitorReferenceKey(), EMPTY_STRING));
+            notificationRequest.setIsNotDigital(provider.getSolicitorIsNotDigitalKey());
+        }
 
         return notificationRequest;
     }
@@ -207,7 +256,7 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
      */
     public NotificationRequest getNotificationRequestForGeneralEmail(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
-        SolicitorCaseDataKeysWrapper solicitorCaseData = getApplicantSolicitorCaseData(caseData);
+        SolicitorCaseDataKeysWrapper solicitorCaseData = applicantSolicitorProvider(caseData);
 
         return notificationRequestBuilder()
             .withCaseDefaults(caseDetails)
@@ -218,7 +267,7 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
     }
 
     private void setCaseOrderType(NotificationRequest notificationRequest, FinremCaseData caseData) {
-        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
+        if (consentedApplicationHelper.isVariationOrder(caseData)) {
             notificationRequest.setCaseOrderType("variation");
             notificationRequest.setCamelCaseOrderType("Variation");
         } else {
