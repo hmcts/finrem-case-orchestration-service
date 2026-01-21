@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -488,23 +489,13 @@ class StopRepresentingClientServiceTest {
             verify(applicationEventPublisher).publishEvent(captor.capture());
             verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(caseDetailsBefore);
 
-            assertThat(captor.getValue())
-                .extracting(
-                    SendCorrespondenceEvent::getNotificationParties,
-                    SendCorrespondenceEvent::getEmailTemplate,
-                    SendCorrespondenceEvent::getCaseDetails,
-                    SendCorrespondenceEvent::getCaseDetailsBefore,
-                    SendCorrespondenceEvent::getAuthToken,
-                    SendCorrespondenceEvent::getEmailNotificationRequest
-                )
-                .contains(
-                    List.of(NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY),
-                    CaseType.CONTESTED.equals(caseType) ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-                        : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
-                    caseDetails,
-                    caseDetailsBefore,
-                    AUTH_TOKEN,
-                    notificationRequestWithCurrentDateOfIssuePopulated(notificationRequest));
+            var expectedTemplate = CaseType.CONTESTED.equals(caseType)
+                ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
+                : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
+
+            verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
+                NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY,
+                expectedTemplate, caseDetails, caseDetailsBefore, notificationRequest);
             verifyNoMoreInteractions(applicationEventPublisher, finremNotificationRequestMapper);
         }
 
@@ -524,25 +515,7 @@ class StopRepresentingClientServiceTest {
                 .userAuthorisation(AUTH_TOKEN)
                 .build();
             Barrister applicantBarrister = mock(Barrister.class);
-            BarristerChange applicantBarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
-                .thenReturn(applicantBarristerChange);
-            when(applicantBarristerChange.getRemoved()).thenReturn(Set.of(applicantBarrister));
-            BarristerChange respondentBarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
-                .thenReturn(respondentBarristerChange);
-            BarristerChange intv1BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER1))
-                .thenReturn(intv1BarristerChange);
-            BarristerChange intv2BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER2))
-                .thenReturn(intv2BarristerChange);
-            BarristerChange intv3BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER3))
-                .thenReturn(intv3BarristerChange);
-            BarristerChange intv4BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
-                .thenReturn(intv4BarristerChange);
+            mockApplicantBarristersChangeOnly(event, caseDataBefore, applicantBarrister);
 
             lenient().when(underTest.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
                 new RepresentativeInContext(TEST_USER_ID, true, false, null, null));
@@ -563,23 +536,12 @@ class StopRepresentingClientServiceTest {
             verify(finremNotificationRequestMapper)
                 .getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister);
 
-            assertThat(captor.getValue())
-                .extracting(
-                    SendCorrespondenceEvent::getNotificationParties,
-                    SendCorrespondenceEvent::getEmailTemplate,
-                    SendCorrespondenceEvent::getCaseDetails,
-                    SendCorrespondenceEvent::getCaseDetailsBefore,
-                    SendCorrespondenceEvent::getAuthToken,
-                    SendCorrespondenceEvent::getEmailNotificationRequest
-                )
-                .contains(
-                    List.of(NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY),
-                    CaseType.CONTESTED.equals(caseType) ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-                        : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
-                    caseDetails,
-                    caseDetailsBefore,
-                    AUTH_TOKEN,
-                    notificationRequestWithCurrentDateOfIssuePopulated(notificationRequest));
+            var expectedTemplate = CaseType.CONTESTED.equals(caseType)
+                ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
+                : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
+            verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
+                NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY,
+                expectedTemplate, caseDetails, caseDetailsBefore, notificationRequest);
             verifyNoMoreInteractions(applicationEventPublisher,finremNotificationRequestMapper);
         }
 
@@ -601,25 +563,7 @@ class StopRepresentingClientServiceTest {
                 .userAuthorisation(AUTH_TOKEN)
                 .build();
             Barrister applicantBarrister = mock(Barrister.class);
-            BarristerChange applicantBarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
-                .thenReturn(applicantBarristerChange);
-            when(applicantBarristerChange.getRemoved()).thenReturn(Set.of(applicantBarrister));
-            BarristerChange respondentBarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
-                .thenReturn(respondentBarristerChange);
-            BarristerChange intv1BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER1))
-                .thenReturn(intv1BarristerChange);
-            BarristerChange intv2BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER2))
-                .thenReturn(intv2BarristerChange);
-            BarristerChange intv3BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER3))
-                .thenReturn(intv3BarristerChange);
-            BarristerChange intv4BarristerChange = mock(BarristerChange.class);
-            when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
-                .thenReturn(intv4BarristerChange);
+            mockApplicantBarristersChangeOnly(event, caseDataBefore, applicantBarrister);
 
             NotificationRequest notificationRequest = NotificationRequest.builder().build();
             when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetailsBefore))
@@ -638,41 +582,40 @@ class StopRepresentingClientServiceTest {
             verify(finremNotificationRequestMapper)
                 .getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister);
 
-            assertThat(captor.getAllValues().getFirst())
-                .extracting(
-                    SendCorrespondenceEvent::getNotificationParties,
-                    SendCorrespondenceEvent::getEmailTemplate,
-                    SendCorrespondenceEvent::getCaseDetails,
-                    SendCorrespondenceEvent::getCaseDetailsBefore,
-                    SendCorrespondenceEvent::getAuthToken,
-                    SendCorrespondenceEvent::getEmailNotificationRequest
-                )
-                .contains(
-                    List.of(NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY),
-                    CaseType.CONTESTED.equals(caseType) ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-                        : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
-                    caseDetails,
-                    caseDetailsBefore,
-                    AUTH_TOKEN,
-                    notificationRequestWithCurrentDateOfIssuePopulated(notificationRequest));
-            assertThat(captor.getAllValues().getLast())
-                .extracting(
-                    SendCorrespondenceEvent::getNotificationParties,
-                    SendCorrespondenceEvent::getEmailTemplate,
-                    SendCorrespondenceEvent::getCaseDetails,
-                    SendCorrespondenceEvent::getCaseDetailsBefore,
-                    SendCorrespondenceEvent::getAuthToken,
-                    SendCorrespondenceEvent::getEmailNotificationRequest
-                )
-                .contains(
-                    List.of(NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY),
-                    CaseType.CONTESTED.equals(caseType) ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-                        : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
-                    caseDetails,
-                    caseDetailsBefore,
-                    AUTH_TOKEN,
-                    notificationRequestWithCurrentDateOfIssuePopulated(notificationRequest));
+            var expectedTemplate = CaseType.CONTESTED.equals(caseType)
+                ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
+                : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
+
+            verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
+                NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY,
+                expectedTemplate, caseDetails, caseDetailsBefore, notificationRequest);
+
+            verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
+                NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY,
+                expectedTemplate, caseDetails, caseDetailsBefore, notificationRequest);
             verifyNoMoreInteractions(applicationEventPublisher,finremNotificationRequestMapper);
+        }
+
+        private void verifySendCorrespondenceEvent(SendCorrespondenceEvent event, NotificationParty party, EmailTemplateNames template,
+                                                   FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore,
+                                                   NotificationRequest notificationRequest) {
+            assertThat(event)
+                .extracting(
+                    SendCorrespondenceEvent::getNotificationParties,
+                    SendCorrespondenceEvent::getEmailTemplate,
+                    SendCorrespondenceEvent::getCaseDetails,
+                    SendCorrespondenceEvent::getCaseDetailsBefore,
+                    SendCorrespondenceEvent::getAuthToken,
+                    SendCorrespondenceEvent::getEmailNotificationRequest
+                )
+                .contains(
+                    List.of(party),
+                    template,
+                    caseDetails,
+                    caseDetailsBefore,
+                    AUTH_TOKEN,
+                    notificationRequestWithCurrentDateOfIssuePopulated(notificationRequest)
+                );
         }
     }
 
@@ -904,6 +847,30 @@ class StopRepresentingClientServiceTest {
 
             assertFalse(underTest.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representativeInContext));
         }
+    }
+
+
+    void mockApplicantBarristersChangeOnly(StopRepresentingClientInfo event, FinremCaseData caseDataBefore,
+                                           Barrister... applicantBarristers) {
+        BarristerChange applicantBarristerChange = mock(BarristerChange.class);
+        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.APPLICANT))
+            .thenReturn(applicantBarristerChange);
+        when(applicantBarristerChange.getRemoved()).thenReturn(Set.of(applicantBarristers));
+        BarristerChange respondentBarristerChange = mock(BarristerChange.class);
+        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.RESPONDENT))
+            .thenReturn(respondentBarristerChange);
+        BarristerChange intv1BarristerChange = mock(BarristerChange.class);
+        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER1))
+            .thenReturn(intv1BarristerChange);
+        BarristerChange intv2BarristerChange = mock(BarristerChange.class);
+        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER2))
+            .thenReturn(intv2BarristerChange);
+        BarristerChange intv3BarristerChange = mock(BarristerChange.class);
+        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER3))
+            .thenReturn(intv3BarristerChange);
+        BarristerChange intv4BarristerChange = mock(BarristerChange.class);
+        when(manageBarristerService.getBarristerChange(event.getCaseDetails(), caseDataBefore, BarristerParty.INTERVENER4))
+            .thenReturn(intv4BarristerChange);
     }
 
     private static BarristerCollectionItem buildBarristerCollectionItem(String userId, String orgId) {
