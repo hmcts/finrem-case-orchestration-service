@@ -369,10 +369,10 @@ class StopRepresentingClientServiceTest {
                 -> getOrganisationPolicy(cd.getData(), isApplicant).equals(originalOrgPolicy)
             ))).thenReturn(mockValidCaseDetails);
 
-            lenient().when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
-                .thenReturn(NotificationRequest.builder().build());
-            lenient().when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class)))
-                .thenReturn(NotificationRequest.builder().build());
+            if (isApplicant) {
+                when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
+                    .thenReturn(NotificationRequest.builder().build());
+            }
 
             // Act
             underTest.revokePartiesAccessAndNotifyParties(info);
@@ -419,11 +419,10 @@ class StopRepresentingClientServiceTest {
                 FinremCaseDetails.builder().data(caseDataBefore).build());
 
             when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(mock(CaseDetails.class));
-
-            lenient().when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
-                .thenReturn(NotificationRequest.builder().build());
-            lenient().when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class)))
-                .thenReturn(NotificationRequest.builder().build());
+            if (isApplicant) {
+                when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
+                    .thenReturn(NotificationRequest.builder().build());
+            }
 
             underTest.revokePartiesAccessAndNotifyParties(info);
 
