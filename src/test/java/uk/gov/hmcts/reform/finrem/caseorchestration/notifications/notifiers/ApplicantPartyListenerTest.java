@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -45,7 +44,6 @@ class ApplicantPartyListenerTest {
     @Mock
     private InternationalPostalService internationalPostalService;
 
-    @InjectMocks
     private ApplicantPartyListener applicantPartyListener;
 
     private static final String APPLICANT_EMAIL = "applicant@solicitor.com";
