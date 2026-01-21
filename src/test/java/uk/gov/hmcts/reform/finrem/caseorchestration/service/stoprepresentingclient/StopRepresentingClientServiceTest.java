@@ -489,13 +489,9 @@ class StopRepresentingClientServiceTest {
             verify(applicationEventPublisher).publishEvent(captor.capture());
             verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(caseDetailsBefore);
 
-            var expectedTemplate = CaseType.CONTESTED.equals(caseType)
-                ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-                : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
-
             verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
                 NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY,
-                expectedTemplate, caseDetails, caseDetailsBefore, notificationRequest);
+                applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
             verifyNoMoreInteractions(applicationEventPublisher, finremNotificationRequestMapper);
         }
 
@@ -536,12 +532,9 @@ class StopRepresentingClientServiceTest {
             verify(finremNotificationRequestMapper)
                 .getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister);
 
-            var expectedTemplate = CaseType.CONTESTED.equals(caseType)
-                ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-                : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
             verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
                 NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY,
-                expectedTemplate, caseDetails, caseDetailsBefore, notificationRequest);
+                applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
             verifyNoMoreInteractions(applicationEventPublisher,finremNotificationRequestMapper);
         }
 
@@ -582,18 +575,20 @@ class StopRepresentingClientServiceTest {
             verify(finremNotificationRequestMapper)
                 .getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister);
 
-            var expectedTemplate = CaseType.CONTESTED.equals(caseType)
-                ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-                : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
-
             verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
                 NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY,
-                expectedTemplate, caseDetails, caseDetailsBefore, notificationRequest);
+                applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
                 NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY,
-                expectedTemplate, caseDetails, caseDetailsBefore, notificationRequest);
+                applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
             verifyNoMoreInteractions(applicationEventPublisher,finremNotificationRequestMapper);
+        }
+
+        private EmailTemplateNames applicantExpectedTemplateNames(CaseType caseType) {
+            return CaseType.CONTESTED.equals(caseType)
+                ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
+                : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
         }
 
         private void verifySendCorrespondenceEvent(SendCorrespondenceEvent event, NotificationParty party, EmailTemplateNames template,
