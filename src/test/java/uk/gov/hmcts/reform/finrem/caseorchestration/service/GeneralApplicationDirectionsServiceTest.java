@@ -4,14 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -60,15 +57,11 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private static final String GA_DIRECTIONS = "/fixtures/contested/general-application-direction-start-reset.json";
 
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
-    private static final String HEARING_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
-    private static final String HEARING_DOCUMENT_NAME = "Hearing Notice.pdf";
 
     @Autowired
     private GeneralApplicationDirectionsService generalApplicationDirectionsService;
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private DocumentConfiguration documentConfiguration;
 
     @MockitoBean
     private BulkPrintService bulkPrintService;
@@ -80,11 +73,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private CcdService ccdService;
     @MockitoBean
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-
-    @Captor
-    ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
-    @Captor
-    ArgumentCaptor<List<BulkPrintDocument>> printDocumentsRequestDocumentListCaptor;
 
     private CaseDetails caseDetails;
 
