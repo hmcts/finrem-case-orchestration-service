@@ -372,6 +372,9 @@ class StopRepresentingClientServiceTest {
             if (isApplicant) {
                 when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
                     .thenReturn(NotificationRequest.builder().build());
+            } else {
+                when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class)))
+                    .thenReturn(NotificationRequest.builder().build());
             }
 
             // Act
@@ -421,6 +424,9 @@ class StopRepresentingClientServiceTest {
             when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(mock(CaseDetails.class));
             if (isApplicant) {
                 when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
+                    .thenReturn(NotificationRequest.builder().build());
+            } else {
+                when(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class)))
                     .thenReturn(NotificationRequest.builder().build());
             }
 
