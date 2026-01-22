@@ -370,8 +370,8 @@ class StopRepresentingClientServiceTest {
             ))).thenReturn(mockValidCaseDetails);
 
             if (isApplicant) {
-                when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
-                    .thenReturn(NotificationRequest.builder().build());
+                when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(any(FinremCaseDetails.class),
+                    eq(CaseRole.APP_SOLICITOR))).thenReturn(NotificationRequest.builder().build());
             }
 
             // Act
@@ -420,8 +420,8 @@ class StopRepresentingClientServiceTest {
 
             when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(mock(CaseDetails.class));
             if (isApplicant) {
-                when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
-                    .thenReturn(NotificationRequest.builder().build());
+                when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(any(FinremCaseDetails.class),
+                    eq(CaseRole.APP_SOLICITOR))).thenReturn(NotificationRequest.builder().build());
             }
 
             underTest.revokePartiesAccessAndNotifyParties(info);
@@ -455,8 +455,8 @@ class StopRepresentingClientServiceTest {
             StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails, caseDetailsBefore);
 
             NotificationRequest notificationRequest = NotificationRequest.builder().build();
-            when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetailsBefore))
-                .thenReturn(notificationRequest);
+            when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
+                CaseRole.APP_SOLICITOR)).thenReturn(notificationRequest);
 
             try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
                 mockedLocalDate.when(LocalDate::now).thenReturn(FIXED_DATE_NOW);
@@ -466,7 +466,8 @@ class StopRepresentingClientServiceTest {
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
             verify(applicationEventPublisher).publishEvent(captor.capture());
-            verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(caseDetailsBefore);
+            verify(finremNotificationRequestMapper).getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
+                CaseRole.APP_SOLICITOR);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
                 NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY,
@@ -490,7 +491,7 @@ class StopRepresentingClientServiceTest {
 
             NotificationRequest notificationRequest = NotificationRequest.builder().build();
             when(finremNotificationRequestMapper
-                .getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister))
+                .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister))
                 .thenReturn(notificationRequest);
 
             try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
@@ -502,7 +503,7 @@ class StopRepresentingClientServiceTest {
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
             verify(applicationEventPublisher).publishEvent(captor.capture());
             verify(finremNotificationRequestMapper)
-                .getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister);
+                .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
                 NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY,
@@ -526,11 +527,12 @@ class StopRepresentingClientServiceTest {
             Barrister applicantBarrister = mock(Barrister.class);
             mockApplicantBarristersChangeOnly(info, caseDataBefore, applicantBarrister);
 
-            NotificationRequest notificationRequest = NotificationRequest.builder().build();
-            when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetailsBefore))
-                .thenReturn(notificationRequest);
-            when(finremNotificationRequestMapper.getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister))
-                .thenReturn(notificationRequest);
+            NotificationRequest notificationRequest1 = NotificationRequest.builder().build();
+                        when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(
+                caseDetailsBefore, CaseRole.APP_SOLICITOR)).thenReturn(notificationRequest1);
+            NotificationRequest notificationRequest2 = NotificationRequest.builder().build();
+            when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister))
+                .thenReturn(notificationRequest2);
 
             try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
                 mockedLocalDate.when(LocalDate::now).thenReturn(FIXED_DATE_NOW);
@@ -541,15 +543,15 @@ class StopRepresentingClientServiceTest {
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
             verify(applicationEventPublisher, times(2)).publishEvent(captor.capture());
             verify(finremNotificationRequestMapper)
-                .getNotificationRequestForApplicantBarrister(caseDetailsBefore, applicantBarrister);
+                .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
                 NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY,
-                applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
+                applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest1);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
                 NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY,
-                applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
+                applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest2);
             verifyNoMoreInteractions(applicationEventPublisher,finremNotificationRequestMapper);
         }
 
