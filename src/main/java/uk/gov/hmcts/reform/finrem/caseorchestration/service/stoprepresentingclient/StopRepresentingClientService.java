@@ -46,8 +46,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.AP
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
 
 @Service
 @Slf4j
@@ -406,7 +406,7 @@ public class StopRepresentingClientService {
     private void notifyApplicantBarrister(StopRepresentingClientInfo info, Barrister barrister) {
         sendRepresentativeNotification(
             info,
-            List.of(PREVIOUS_APPLICANT_BARRISTER_ONLY),
+            List.of(FORMER_APPLICANT_BARRISTER_ONLY),
             getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister)
@@ -416,7 +416,7 @@ public class StopRepresentingClientService {
     private void notifyApplicantSolicitor(StopRepresentingClientInfo info) {
         sendRepresentativeNotification(
             info,
-            List.of(PREVIOUS_APPLICANT_SOLICITOR_ONLY),
+            List.of(FORMER_APPLICANT_SOLICITOR_ONLY),
             getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR)

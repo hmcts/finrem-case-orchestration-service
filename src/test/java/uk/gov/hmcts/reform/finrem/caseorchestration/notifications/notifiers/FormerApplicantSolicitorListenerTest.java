@@ -30,10 +30,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
 
 @ExtendWith(MockitoExtension.class)
-class PreviousApplicantSolicitorListenerTest {
+class FormerApplicantSolicitorListenerTest {
 
     @Mock
     private BulkPrintService bulkPrintService;
@@ -45,7 +45,7 @@ class PreviousApplicantSolicitorListenerTest {
     private InternationalPostalService internationalPostalService;
 
     @InjectMocks
-    private PreviousApplicantSolicitorListener underTest;
+    private FormerApplicantSolicitorListener underTest;
 
     private static NotificationRequest emailNotificationRequest(String solicitorReferenceNumber) {
         return NotificationRequest.builder()
@@ -66,7 +66,7 @@ class PreviousApplicantSolicitorListenerTest {
         return SendCorrespondenceEvent.builder()
             .caseDetails(FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build())
             .caseDetailsBefore(caseDetailsBefore)
-            .notificationParties(List.of(PREVIOUS_APPLICANT_SOLICITOR_ONLY))
+            .notificationParties(List.of(FORMER_APPLICANT_SOLICITOR_ONLY))
             .emailNotificationRequest(emailNotificationRequest(solicitorReferenceNumber))
             .emailTemplate(emailTemplate)
             .build();
@@ -77,7 +77,7 @@ class PreviousApplicantSolicitorListenerTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = NotificationParty.class, mode = EnumSource.Mode.EXCLUDE, names = {"PREVIOUS_APPLICANT_SOLICITOR_ONLY"})
+    @EnumSource(value = NotificationParty.class, mode = EnumSource.Mode.EXCLUDE, names = {"FORMER_APPLICANT_SOLICITOR_ONLY"})
     void shouldNotHandleIrrelevantNotificationParty(NotificationParty notificationParty) {
         SendCorrespondenceEvent otherEvent = SendCorrespondenceEvent.builder()
             .notificationParties(List.of(notificationParty))
