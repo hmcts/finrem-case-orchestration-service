@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.Notificat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -160,6 +162,11 @@ public class NotificationRequestBuilder {
         notificationEmail = Objects.toString(solicitorCaseData.getSolicitorEmailKey(), "");
         isNotDigital = solicitorCaseData.getSolicitorIsNotDigitalKey();
 
+        return this;
+    }
+
+    public NotificationRequestBuilder withDateOfIssue() {
+        dateOfIssue = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         return this;
     }
 

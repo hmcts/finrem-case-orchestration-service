@@ -33,25 +33,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.Barrister
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_RESPONDENT_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_RESPONDENT_SOLICITOR_ONLY;
 
 @Service
 @Slf4j
@@ -104,12 +100,6 @@ public class StopRepresentingClientService {
         return finremCaseData.isContestedApplication()
             ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
             : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
-    }
-
-    private static EmailTemplateNames getNotifyRespondentRepresentativeTemplateName(FinremCaseData finremCaseData) {
-        return finremCaseData.isContestedApplication()
-            ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT
-            : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
     }
 
     /**
@@ -220,7 +210,7 @@ public class StopRepresentingClientService {
      */
     public void setApplicantUnrepresented(FinremCaseData finremCaseData) {
         finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        finremCaseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
+        finremCaseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(APP_SOLICITOR));
     }
 
     /**
@@ -271,9 +261,6 @@ public class StopRepresentingClientService {
 
             if (revocation.applicantSolicitorRevoked) {
                 notifyApplicantSolicitor(info);
-            }
-            if (revocation.respondentSolicitorRevoked) {
-                notifyRespondentSolicitor(info);
             }
         }
     }
@@ -334,9 +321,6 @@ public class StopRepresentingClientService {
         SetUtils.emptyIfNull(barristerChange.getRemoved()).forEach(b -> {
             if (BarristerParty.APPLICANT.equals(barristerParty)) {
                 notifyApplicantBarrister(info, b);
-            }
-            if (BarristerParty.RESPONDENT.equals(barristerParty)) {
-                notifyRespondentBarrister(info, b);
             }
         });
     }
@@ -403,20 +387,15 @@ public class StopRepresentingClientService {
     }
 
     private void sendRepresentativeNotification(
-        StopRepresentingClientInfo info,
-        List<NotificationParty> parties,
-        EmailTemplateNames emailTemplate,
-        Supplier<NotificationRequest> notificationRequestSupplier
+        StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
+        NotificationRequest notificationRequest
     ) {
         String userAuthorisation = info.getUserAuthorisation();
         FinremCaseData finremCaseData = getFinremCaseData(info);
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
             .notificationParties(parties)
-            .emailNotificationRequest(notificationRequestSupplier.get()
-                .toBuilder()
-                .dateOfIssue(getDateOfIssue())
-                .build())
+            .emailNotificationRequest(notificationRequest)
             .emailTemplate(emailTemplate)
             .caseDetails(info.getCaseDetails())
             .caseDetailsBefore(info.getCaseDetailsBefore())
@@ -426,54 +405,22 @@ public class StopRepresentingClientService {
     }
 
     private void notifyApplicantBarrister(StopRepresentingClientInfo info, Barrister barrister) {
-        FinremCaseData caseData = getFinremCaseData(info);
-
         sendRepresentativeNotification(
             info,
             List.of(PREVIOUS_APPLICANT_BARRISTER_ONLY),
-            getNotifyApplicantRepresentativeTemplateName(caseData),
-            () -> finremNotificationRequestMapper
-                .getNotificationRequestForApplicantBarrister(info.getCaseDetailsBefore(), barrister)
+            getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
+            finremNotificationRequestMapper
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister)
         );
     }
 
     private void notifyApplicantSolicitor(StopRepresentingClientInfo info) {
-        FinremCaseData caseData = getFinremCaseData(info);
-
         sendRepresentativeNotification(
             info,
             List.of(PREVIOUS_APPLICANT_SOLICITOR_ONLY),
-            getNotifyApplicantRepresentativeTemplateName(caseData),
-            () -> finremNotificationRequestMapper
-                .getNotificationRequestForApplicantSolicitor(info.getCaseDetailsBefore())
+            getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
+            finremNotificationRequestMapper
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR)
         );
-    }
-
-    private void notifyRespondentSolicitor(StopRepresentingClientInfo info) {
-        FinremCaseData caseData = getFinremCaseData(info);
-
-        sendRepresentativeNotification(
-            info,
-            List.of(PREVIOUS_RESPONDENT_SOLICITOR_ONLY),
-            getNotifyRespondentRepresentativeTemplateName(caseData),
-            () -> finremNotificationRequestMapper
-                .getNotificationRequestForRespondentSolicitor(info.getCaseDetailsBefore())
-        );
-    }
-
-    private void notifyRespondentBarrister(StopRepresentingClientInfo info, Barrister barrister) {
-        FinremCaseData caseData = getFinremCaseData(info);
-
-        sendRepresentativeNotification(
-            info,
-            List.of(PREVIOUS_RESPONDENT_BARRISTER_ONLY),
-            getNotifyRespondentRepresentativeTemplateName(caseData),
-            () -> finremNotificationRequestMapper
-                .getNotificationRequestForRespondentBarrister(info.getCaseDetailsBefore(), barrister)
-        );
-    }
-
-    private String getDateOfIssue() {
-        return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 }

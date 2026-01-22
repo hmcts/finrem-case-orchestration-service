@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
@@ -22,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseD
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -34,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWales
 
 @ExtendWith(MockitoExtension.class)
 class NotificationRequestBuilderTest {
+    private static final LocalDate FIXED_DATE_NOW = LocalDate.of(2024, 11, 4);
 
     @InjectMocks
     private NotificationRequestBuilder builder;
@@ -64,6 +68,18 @@ class NotificationRequestBuilderTest {
         assertThat(notificationRequest.getPhoneOpeningHours()).isEqualTo(CTSC_OPENING_HOURS);
         assertThat(notificationRequest.getRespondentName()).isEqualTo("Davey Duck");
         assertThat(notificationRequest.getSelectedCourt()).isNull();
+    }
+
+    @Test
+    void givenAnyCase_whenWithDateOfIssue_thenDateOfIssuePopulated() {
+        try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
+            mockedLocalDate.when(LocalDate::now).thenReturn(FIXED_DATE_NOW);
+            NotificationRequest notificationRequest = builder
+                .withDateOfIssue()
+                .build();
+
+            assertThat(notificationRequest.getDateOfIssue()).isEqualTo("2024-11-04");
+        }
     }
 
     @Test
