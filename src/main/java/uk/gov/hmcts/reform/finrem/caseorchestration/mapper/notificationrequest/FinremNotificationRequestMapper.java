@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -59,10 +60,6 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getData(), isNotDigital));
     }
 
-    public NotificationRequest getNotificationRequestForApplicantBarrister(FinremCaseDetails caseDetails, Barrister barrister) {
-        return buildNotificationRequest(caseDetails, getApplicantBarristerCaseData(caseDetails.getData(), barrister));
-    }
-
     public NotificationRequest getNotificationRequestForIntervenerSolicitor(FinremCaseDetails caseDetails,
                                                                             SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         return buildNotificationRequest(caseDetails, caseDataKeysWrapper);
@@ -72,14 +69,6 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         return isRespondentSolicitorChangedOnLatestRepresentationUpdate(caseDetails)
             ? getNotificationRequestForRespondentSolicitor(caseDetails)
             : getNotificationRequestForApplicantSolicitor(caseDetails);
-    }
-
-    private SolicitorCaseDataKeysWrapper getApplicantBarristerCaseData(FinremCaseData caseData, Barrister barrister) {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(barrister.getEmail())
-            .solicitorNameKey(nullToEmpty(barrister.getName()))
-            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
-            .build();
     }
 
     private SolicitorCaseDataKeysWrapper getApplicantSolicitorCaseData(FinremCaseData caseData) {
@@ -226,6 +215,69 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .withSolicitorCaseData(solicitorCaseData)
             .notificationEmail(caseData.getGeneralEmailWrapper().getGeneralEmailRecipient())
             .generalEmailBody(caseData.getGeneralEmailWrapper().getGeneralEmailBody())
+            .build();
+    }
+
+    /**
+     * Builds a {@link NotificationRequest} for a "stop representing client" email
+     * to a solicitor identified by the given {@link CaseRole}.
+     *
+     * <p>
+     * The solicitor details are resolved from the case data based on the supplied
+     * role (applicant or respondent solicitor). The resulting notification request
+     * is populated with standard case defaults, solicitor-specific fields, and
+     * the date of issue.
+     * </p>
+     *
+     * @param caseDetails the Finrem case details
+     * @param caseRole the role identifying which solicitor should receive the notification
+     * @return the constructed {@link NotificationRequest}
+     * @throws IllegalStateException if the provided {@code caseRole} is not supported
+     */
+    public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
+                                                                                    CaseRole caseRole) {
+        FinremCaseData caseData = caseDetails.getData();
+        SolicitorCaseDataKeysWrapper solicitorCaseData =
+            switch (caseRole) {
+                case APP_SOLICITOR -> getApplicantSolicitorCaseData(caseData);
+                case RESP_SOLICITOR -> getRespondentSolicitorCaseData(caseData);
+                default -> throw new IllegalStateException("Unexpected value: " + caseRole);
+            };
+
+        return notificationRequestBuilder()
+            .withCaseDefaults(caseDetails)
+            .withSolicitorCaseData(solicitorCaseData)
+            .withDateOfIssue()
+            .build();
+    }
+
+    /**
+     * Builds a {@link NotificationRequest} for a "stop representing client" email
+     * to the specified barrister.
+     *
+     * <p>
+     * The barrister’s contact details are mapped directly into solicitor-related
+     * notification fields. The resulting notification request is populated with
+     * standard case defaults and the date of issue.
+     * </p>
+     *
+     * @param caseDetails the Finrem case details
+     * @param barrister the barrister who will receive the notification
+     * @return the constructed {@link NotificationRequest}
+     */
+    public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
+                                                                                    Barrister barrister) {
+        FinremCaseData caseData = caseDetails.getData();
+        SolicitorCaseDataKeysWrapper solicitorCaseData = SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(barrister.getEmail())
+            .solicitorNameKey(barrister.getName())
+            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
+            .build();
+
+        return notificationRequestBuilder()
+            .withCaseDefaults(caseDetails)
+            .withSolicitorCaseData(solicitorCaseData)
+            .withDateOfIssue()
             .build();
     }
 

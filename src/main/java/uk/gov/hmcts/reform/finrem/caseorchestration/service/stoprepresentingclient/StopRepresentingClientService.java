@@ -392,7 +392,7 @@ public class StopRepresentingClientService {
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
             .notificationParties(List.of(PREVIOUS_APPLICANT_BARRISTER_ONLY))
             .emailNotificationRequest(finremNotificationRequestMapper
-                .getNotificationRequestForApplicantBarrister(info.getCaseDetailsBefore(), barrister)
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister)
                 .toBuilder()
                 .dateOfIssue(getDateOfIssue())
                 .build())
@@ -411,7 +411,7 @@ public class StopRepresentingClientService {
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
             .notificationParties(List.of(PREVIOUS_APPLICANT_SOLICITOR_ONLY))
             .emailNotificationRequest(finremNotificationRequestMapper
-                .getNotificationRequestForApplicantSolicitor(info.getCaseDetailsBefore())
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), CaseRole.APP_SOLICITOR)
                 .toBuilder()
                 .dateOfIssue(getDateOfIssue())
                 .build())
