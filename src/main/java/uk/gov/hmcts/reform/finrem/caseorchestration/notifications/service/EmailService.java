@@ -148,7 +148,9 @@ public class EmailService {
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
         }
         if (EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL.name().equals(templateName)
-            || EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL.name().equals(templateName)) {
+            || EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL.name().equals(templateName)
+            || EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER.name().equals(templateName)
+            || EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER.name().equals(templateName)) {
             templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());

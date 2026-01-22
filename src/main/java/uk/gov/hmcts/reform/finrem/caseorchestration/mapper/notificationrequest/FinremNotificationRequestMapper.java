@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpda
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
@@ -102,6 +104,16 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
             .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()))
             .solicitorIsNotDigitalKey(isNotDigital)
+            .build();
+    }
+
+    private SolicitorCaseDataKeysWrapper getIntervenerSolicitorCaseData(FinremCaseData caseData, IntervenerType intervenerType) {
+        IntervenerDetails intervenerDetails = caseData.getIntervenerById(intervenerType.getIntervenerId());
+
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(intervenerDetails.getIntervenerSolEmail())
+            .solicitorNameKey(nullToEmpty(intervenerDetails.getIntervenerSolName()))
+            .solicitorReferenceKey(nullToEmpty(intervenerDetails.getIntervenerSolicitorReference()))
             .build();
     }
 
@@ -241,11 +253,23 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
      */
     public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
                                                                                     CaseRole caseRole) {
+        return getNotificationRequestForStopRepresentingClientEmail(caseDetails, caseRole, null);
+    }
+
+    // TODO gen JavaDoc
+    public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
+                                                                                    CaseRole caseRole,
+                                                                                    IntervenerType intervenerType) {
         FinremCaseData caseData = caseDetails.getData();
         SolicitorCaseDataKeysWrapper solicitorCaseData =
             switch (caseRole) {
                 case APP_SOLICITOR -> getApplicantSolicitorCaseData(caseData);
                 case RESP_SOLICITOR -> getRespondentSolicitorCaseData(caseData);
+                case INTVR_SOLICITOR_1, INTVR_SOLICITOR_2, INTVR_SOLICITOR_3, INTVR_SOLICITOR_4
+                    -> getIntervenerSolicitorCaseData(caseData, ofNullable(intervenerType)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                        "intervenerType must be provided for intervener solicitor roles"
+                    )));
                 default -> throw new IllegalStateException("Unexpected value: " + caseRole);
             };
 
@@ -253,25 +277,20 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .withCaseDefaults(caseDetails)
             .withSolicitorCaseData(solicitorCaseData)
             .withDateOfIssue()
+            .withIntervener(intervenerType != null
+                ? caseData.getIntervenerById(intervenerType.getIntervenerId()) : null
+            )
             .build();
     }
 
-    /**
-     * Builds a {@link NotificationRequest} for a "stop representing client" email
-     * to the specified barrister.
-     *
-     * <p>
-     * The barrister’s contact details are mapped directly into solicitor-related
-     * notification fields. The resulting notification request is populated with
-     * standard case defaults and the date of issue.
-     * </p>
-     *
-     * @param caseDetails the Finrem case details
-     * @param barrister the barrister who will receive the notification
-     * @return the constructed {@link NotificationRequest}
-     */
     public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
                                                                                     Barrister barrister) {
+        return getNotificationRequestForStopRepresentingClientEmail(caseDetails, barrister, null);
+    }
+
+    public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
+                                                                                    Barrister barrister,
+                                                                                    IntervenerType intervenerType) {
         FinremCaseData caseData = caseDetails.getData();
         SolicitorCaseDataKeysWrapper solicitorCaseData = SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(barrister.getEmail())
@@ -283,6 +302,9 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .withCaseDefaults(caseDetails)
             .withSolicitorCaseData(solicitorCaseData)
             .withDateOfIssue()
+            .withIntervener(intervenerType != null
+                ? caseData.getIntervenerById(intervenerType.getIntervenerId()) : null
+            )
             .build();
     }
 
