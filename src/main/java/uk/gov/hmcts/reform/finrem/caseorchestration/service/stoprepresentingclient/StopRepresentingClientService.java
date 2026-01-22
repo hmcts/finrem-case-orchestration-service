@@ -406,7 +406,6 @@ public class StopRepresentingClientService {
         NotificationRequest notificationRequest
     ) {
         String userAuthorisation = info.getUserAuthorisation();
-        FinremCaseData finremCaseData = getFinremCaseData(info);
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
             .notificationParties(parties)
