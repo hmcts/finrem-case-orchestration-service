@@ -1,23 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
 
@@ -32,48 +24,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
 
-@ExtendWith(MockitoExtension.class)
-class FormerApplicantSolicitorListenerTest {
-
-    @Mock
-    private BulkPrintService bulkPrintService;
-    @Mock
-    private EmailService emailService;
-    @Mock
-    private NotificationService notificationService;
-    @Mock
-    private InternationalPostalService internationalPostalService;
+class FormerApplicantSolicitorListenerTest extends BasePartyListenerTest {
 
     @InjectMocks
     private FormerApplicantSolicitorListener underTest;
 
-    private static NotificationRequest emailNotificationRequest(String solicitorReferenceNumber) {
-        return NotificationRequest.builder()
-            .notificationEmail(TEST_SOLICITOR_EMAIL)
-            .name(TEST_SOLICITOR_NAME)
-            .solicitorReferenceNumber(solicitorReferenceNumber)
-            .build();
-    }
-
-    private static SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(FinremCaseDetails caseDetailsBefore,
-                                                                                              EmailTemplateNames emailTemplate) {
-        return sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate, null);
-    }
-
-    private static SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(FinremCaseDetails caseDetailsBefore,
-                                                                                              EmailTemplateNames emailTemplate,
-                                                                                              String solicitorReferenceNumber) {
-        return SendCorrespondenceEvent.builder()
-            .caseDetails(FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build())
-            .caseDetailsBefore(caseDetailsBefore)
-            .notificationParties(List.of(FORMER_APPLICANT_SOLICITOR_ONLY))
-            .emailNotificationRequest(emailNotificationRequest(solicitorReferenceNumber))
-            .emailTemplate(emailTemplate)
-            .build();
-    }
-
-    private void verifyNoLetterSent() {
-        verifyNoInteractions(bulkPrintService, internationalPostalService);
+    FormerApplicantSolicitorListenerTest() {
+        super(FORMER_APPLICANT_SOLICITOR_ONLY);
     }
 
     @ParameterizedTest
