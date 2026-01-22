@@ -566,7 +566,7 @@ class StopRepresentingClientServiceTest {
                 CaseRole.RESP_SOLICITOR);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
-                NotificationParty.PREVIOUS_RESPONDENT_SOLICITOR_ONLY,
+                NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY,
                 respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
             verifyNoMoreInteractions(applicationEventPublisher, finremNotificationRequestMapper);
         }
@@ -598,7 +598,7 @@ class StopRepresentingClientServiceTest {
                 .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, respondentBarrister);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
-                NotificationParty.PREVIOUS_RESPONDENT_BARRISTER_ONLY,
+                NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY,
                 respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
             verifyNoMoreInteractions(applicationEventPublisher, finremNotificationRequestMapper);
         }
@@ -633,11 +633,11 @@ class StopRepresentingClientServiceTest {
                 .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
-                NotificationParty.PREVIOUS_RESPONDENT_SOLICITOR_ONLY,
+                NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY,
                 respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
-                NotificationParty.PREVIOUS_RESPONDENT_BARRISTER_ONLY,
+                NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY,
                 respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
             verifyNoMoreInteractions(applicationEventPublisher, finremNotificationRequestMapper);
         }

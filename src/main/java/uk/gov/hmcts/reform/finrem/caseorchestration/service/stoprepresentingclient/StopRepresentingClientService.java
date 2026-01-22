@@ -47,8 +47,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY;
 
 @Service
 @Slf4j
@@ -439,7 +441,7 @@ public class StopRepresentingClientService {
     private void notifyRespondentBarrister(StopRepresentingClientInfo info, Barrister barrister) {
         sendRepresentativeNotification(
             info,
-            List.of(PREVIOUS_RESPONDENT_BARRISTER_ONLY),
+            List.of(FORMER_RESPONDENT_BARRISTER_ONLY),
             getNotifyRespondentRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister)
@@ -449,7 +451,7 @@ public class StopRepresentingClientService {
     private void notifyRespondentSolicitor(StopRepresentingClientInfo info) {
         sendRepresentativeNotification(
             info,
-            List.of(PREVIOUS_RESPONDENT_SOLICITOR_ONLY),
+            List.of(FORMER_RESPONDENT_SOLICITOR_ONLY),
             getNotifyRespondentRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), RESP_SOLICITOR)

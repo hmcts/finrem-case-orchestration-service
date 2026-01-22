@@ -21,19 +21,19 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_RESPONDENT_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY;
 
-class PreviousRespondentBarristerListenerTest extends BasePartyListenerTest {
+class FormerRespondentBarristerListenerTest extends BasePartyListenerTest {
 
     @InjectMocks
-    private PreviousRespondentBarristerListener underTest;
+    private FormerRespondentBarristerListener underTest;
 
-    PreviousRespondentBarristerListenerTest() {
-        super(PREVIOUS_RESPONDENT_BARRISTER_ONLY);
+    FormerRespondentBarristerListenerTest() {
+        super(FORMER_RESPONDENT_BARRISTER_ONLY);
     }
 
     @ParameterizedTest
-    @EnumSource(value = NotificationParty.class, mode = EnumSource.Mode.EXCLUDE, names = {"PREVIOUS_RESPONDENT_BARRISTER_ONLY"})
+    @EnumSource(value = NotificationParty.class, mode = EnumSource.Mode.EXCLUDE, names = {"FORMER_RESPONDENT_BARRISTER_ONLY"})
     void shouldNotHandleIrrelevantNotificationParty(NotificationParty notificationParty) {
         SendCorrespondenceEvent otherEvent = SendCorrespondenceEvent.builder()
             .notificationParties(List.of(notificationParty))
