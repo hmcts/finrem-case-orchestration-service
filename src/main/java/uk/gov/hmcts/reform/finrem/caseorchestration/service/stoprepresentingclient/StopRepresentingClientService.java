@@ -43,11 +43,14 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_RESPONDENT_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_RESPONDENT_SOLICITOR_ONLY;
 
 @Service
 @Slf4j
@@ -100,6 +103,12 @@ public class StopRepresentingClientService {
         return finremCaseData.isContestedApplication()
             ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
             : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
+    }
+
+    private static EmailTemplateNames getNotifyRespondentRepresentativeTemplateName(FinremCaseData finremCaseData) {
+        return finremCaseData.isContestedApplication()
+            ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT
+            : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
     }
 
     /**
@@ -262,6 +271,9 @@ public class StopRepresentingClientService {
             if (revocation.applicantSolicitorRevoked) {
                 notifyApplicantSolicitor(info);
             }
+            if (revocation.respondentSolicitorRevoked) {
+                notifyRespondentSolicitor(info);
+            }
         }
     }
 
@@ -321,6 +333,9 @@ public class StopRepresentingClientService {
         SetUtils.emptyIfNull(barristerChange.getRemoved()).forEach(b -> {
             if (BarristerParty.APPLICANT.equals(barristerParty)) {
                 notifyApplicantBarrister(info, b);
+            }
+            if (BarristerParty.RESPONDENT.equals(barristerParty)) {
+                notifyRespondentBarrister(info, b);
             }
         });
     }
@@ -421,6 +436,26 @@ public class StopRepresentingClientService {
             getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR)
+        );
+    }
+
+    private void notifyRespondentBarrister(StopRepresentingClientInfo info, Barrister barrister) {
+        sendRepresentativeNotification(
+            info,
+            List.of(PREVIOUS_RESPONDENT_BARRISTER_ONLY),
+            getNotifyRespondentRepresentativeTemplateName(getFinremCaseData(info)),
+            finremNotificationRequestMapper
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister)
+        );
+    }
+
+    private void notifyRespondentSolicitor(StopRepresentingClientInfo info) {
+        sendRepresentativeNotification(
+            info,
+            List.of(PREVIOUS_RESPONDENT_SOLICITOR_ONLY),
+            getNotifyRespondentRepresentativeTemplateName(getFinremCaseData(info)),
+            finremNotificationRequestMapper
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), RESP_SOLICITOR)
         );
     }
 }
