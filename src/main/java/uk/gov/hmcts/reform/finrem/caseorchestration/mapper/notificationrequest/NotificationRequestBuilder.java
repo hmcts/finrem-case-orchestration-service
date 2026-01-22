@@ -154,12 +154,13 @@ public class NotificationRequestBuilder {
      * @return the NotificationRequestBuilder instance with solicitor data set
      */
     public NotificationRequestBuilder withSolicitorCaseData(SolicitorCaseDataKeysWrapper solicitorCaseData) {
-        if (solicitorCaseData != null) {
-            solicitorReferenceNumber = Objects.toString(solicitorCaseData.getSolicitorReferenceKey(), "");
-            name = Objects.toString(solicitorCaseData.getSolicitorNameKey(), "");
-            notificationEmail = Objects.toString(solicitorCaseData.getSolicitorEmailKey(), "");
-            isNotDigital = solicitorCaseData.getSolicitorIsNotDigitalKey();
+        if (solicitorCaseData == null) {
+            solicitorCaseData = SolicitorCaseDataKeysWrapper.builder().build();
         }
+        solicitorReferenceNumber = Objects.toString(solicitorCaseData.getSolicitorReferenceKey(), "");
+        name = Objects.toString(solicitorCaseData.getSolicitorNameKey(), "");
+        notificationEmail = Objects.toString(solicitorCaseData.getSolicitorEmailKey(), "");
+        isNotDigital = solicitorCaseData.getSolicitorIsNotDigitalKey();
         return this;
     }
 
