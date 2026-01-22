@@ -44,11 +44,11 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
     }
 
     public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails) {
-        return buildNotificationRequest(caseDetails, respondentSolicitorProvider(caseDetails.getData()));
+        return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData()));
     }
 
     public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails, boolean isNotDigital) {
-        return buildNotificationRequest(caseDetails, respondentSolicitorProvider(caseDetails.getData(), isNotDigital));
+        return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData(), isNotDigital));
     }
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails) {
@@ -87,7 +87,7 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .build();
     }
 
-    private SolicitorCaseDataKeysWrapper respondentSolicitorProvider(FinremCaseData caseData) {
+    private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
             .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
@@ -95,20 +95,12 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .build();
     }
 
-    private SolicitorCaseDataKeysWrapper respondentSolicitorProvider(FinremCaseData caseData, boolean isNotDigital) {
+    private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData, boolean isNotDigital) {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
             .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
             .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()))
             .solicitorIsNotDigitalKey(isNotDigital)
-            .build();
-    }
-
-    private SolicitorCaseDataKeysWrapper intervenerSolicitorProvider(IntervenerDetails intervenerDetails) {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(intervenerDetails.getIntervenerSolEmail())
-            .solicitorNameKey(nullToEmpty(Objects.toString(intervenerDetails.getIntervenerSolName(), intervenerDetails.getIntervenerSolicitorFirm())))
-            .solicitorReferenceKey(nullToEmpty(intervenerDetails.getIntervenerSolicitorReference()))
             .build();
     }
 
