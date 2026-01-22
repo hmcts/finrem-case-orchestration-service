@@ -80,19 +80,15 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
     }
 
     /**
-     * @deprecated Use {@link #getNotificationRequestForIntervenerSolicitor(FinremCaseDetails, int)}
-     * instead.
-     *
-     * <p>
      * This method accepts a {@link SolicitorCaseDataKeysWrapper} directly, which bypasses the
      * standard mapping logic from {@link IntervenerDetails}. The newer method centralises
      * the construction of solicitor-related fields and should be preferred to ensure
      * consistency and future maintainability.
-     * </p>
      *
      * @param caseDetails the Finrem case details
      * @param provider the solicitor case data keys wrapper
      * @return the constructed {@link NotificationRequest}
+     * @deprecated Use {@link #getNotificationRequestForIntervenerSolicitor(FinremCaseDetails, int)} instead.
      */
     @Deprecated
     public NotificationRequest getNotificationRequestForIntervenerSolicitor(FinremCaseDetails caseDetails,
@@ -111,14 +107,6 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .solicitorEmailKey(caseData.getAppSolicitorEmail())
             .solicitorNameKey(nullToEmpty(caseData.getAppSolicitorName()))
             .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
-            .build();
-    }
-
-    private SolicitorCaseDataKeysWrapper intervenerSolicitorProvider(IntervenerDetails intervenerDetails) {
-        return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(intervenerDetails.getIntervenerSolEmail())
-            .solicitorNameKey(nullToEmpty(Objects.toString(intervenerDetails.getIntervenerSolName(), intervenerDetails.getIntervenerSolicitorFirm())))
-            .solicitorReferenceKey(nullToEmpty(intervenerDetails.getIntervenerSolicitorReference()))
             .build();
     }
 
@@ -148,6 +136,14 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .build();
     }
 
+    private SolicitorCaseDataKeysWrapper intervenerSolicitorProvider(IntervenerDetails intervenerDetails) {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(intervenerDetails.getIntervenerSolEmail())
+            .solicitorNameKey(nullToEmpty(Objects.toString(intervenerDetails.getIntervenerSolName(), intervenerDetails.getIntervenerSolicitorFirm())))
+            .solicitorReferenceKey(nullToEmpty(intervenerDetails.getIntervenerSolicitorReference()))
+            .build();
+    }
+
     private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(FinremCaseDetails caseDetails) {
         return getLastRepresentationUpdate(caseDetails).getParty().equalsIgnoreCase(RESPONDENT);
     }
@@ -172,15 +168,15 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         notificationRequest.setGeneralApplicationRejectionReason(
             Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationRejectReason(), EMPTY_STRING));
         notificationRequest.setGeneralEmailBody(Objects.toString(caseData.getGeneralEmailWrapper().getGeneralEmailBody(), EMPTY_STRING));
-        notificationRequest.setApplicantName(Objects.toString(caseData.getFullApplicantName()));
+        notificationRequest.setApplicantName(caseData.getFullApplicantName());
         if (caseData.isConsentedApplication()) {
-            notificationRequest.setRespondentName(Objects.toString(caseData.getFullRespondentNameConsented()));
+            notificationRequest.setRespondentName(caseData.getFullRespondentNameConsented());
             setCaseOrderType(notificationRequest, caseData);
             log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
                 notificationRequest.getCaseReferenceNumber());
         }
         if (caseData.isContestedApplication()) {
-            notificationRequest.setRespondentName(Objects.toString(caseData.getFullRespondentNameContested()));
+            notificationRequest.setRespondentName(caseData.getFullRespondentNameContested());
             notificationRequest.setSelectedCourt(CourtHelper.getSelectedFrc(caseDetails));
             log.info("selectedCourt is {} for case ID: {}", notificationRequest.getSelectedCourt(),
                 notificationRequest.getCaseReferenceNumber());

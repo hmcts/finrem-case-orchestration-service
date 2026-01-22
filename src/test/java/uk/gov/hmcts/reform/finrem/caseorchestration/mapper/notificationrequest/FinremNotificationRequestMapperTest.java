@@ -363,40 +363,82 @@ class FinremNotificationRequestMapperTest {
     @CsvSource(value = {
         "CONTESTED", "CONSENTED"
     })
+    void givenSomeNullProperties_whenGetNotificationRequestForPartyInvoked_thenStandardPropertiesPopulated(
+        CaseType caseType) {
+
+        HearingTypeDirection mockedHearingTypeDirection = mock(HearingTypeDirection.class);
+        when(mockedHearingTypeDirection.getId()).thenReturn(TEST_HEARING_TYPE);
+        FinremCaseData finremCaseData = spiedFinremCaseData(mockedHearingTypeDirection);
+
+        when(finremCaseData.getFullApplicantName()).thenReturn("Full Applicant Name");
+        if (CaseType.CONTESTED.equals(caseType)) {
+            when(finremCaseData.getFullRespondentNameContested()).thenReturn("Full Respondent Name (CT)");
+        } else {
+            when(finremCaseData.getFullRespondentNameConsented()).thenReturn("Full Respondent Name (CS)");
+        }
+        when(finremCaseData.isConsentedApplication()).thenReturn(CaseType.CONSENTED.equals(caseType));
+        when(finremCaseData.isContestedApplication()).thenReturn(CaseType.CONTESTED.equals(caseType));
+        when(finremCaseData.getRespondentSolicitorName()).thenReturn(TEST_RESP_SOLICITOR_NAME);
+        when(finremCaseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(finremCaseData.getAppSolicitorName()).thenReturn(TEST_SOLICITOR_NAME);
+
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getId()).thenReturn(CASE_ID_IN_LONG);
+        when(caseDetails.getCaseType()).thenReturn(caseType);
+        when(caseDetails.getData()).thenReturn(finremCaseData);
+
+        if (CaseType.CONSENTED.equals(caseType)) {
+            when(consentedApplicationHelper.isVariationOrder(finremCaseData)).thenReturn(true);
+        }
+
+        finremCaseData.setDivorceCaseNumber(null);
+        finremCaseData.getGeneralApplicationWrapper().setGeneralApplicationRejectReason(null);
+        finremCaseData.getGeneralEmailWrapper().setGeneralEmailBody(null);
+        finremCaseData.getContactDetailsWrapper().setRespondentSolicitorReference(null);
+        finremCaseData.getContactDetailsWrapper().setSolicitorReference(null);
+        finremCaseData.getIntervenerOne().setIntervenerSolicitorReference(null);
+
+        NotificationRequest respondentSolicitorNotificationRequest = notificationRequestMapper
+            .getNotificationRequestForRespondentSolicitor(caseDetails);
+        verifyEmptyStringInNotificationRequest(respondentSolicitorNotificationRequest);
+
+        NotificationRequest nonDigitalRespondentSolicitorNotificationRequest = notificationRequestMapper
+            .getNotificationRequestForRespondentSolicitor(caseDetails, false);
+        verifyEmptyStringInNotificationRequest(nonDigitalRespondentSolicitorNotificationRequest);
+
+        NotificationRequest digitalRespondentSolicitorNotificationRequest = notificationRequestMapper
+            .getNotificationRequestForRespondentSolicitor(caseDetails, true);
+        verifyEmptyStringInNotificationRequest(digitalRespondentSolicitorNotificationRequest);
+
+        NotificationRequest applicantSolicitorNotificationRequest = notificationRequestMapper
+            .getNotificationRequestForApplicantSolicitor(caseDetails);
+        verifyEmptyStringInNotificationRequest(applicantSolicitorNotificationRequest);
+
+        NotificationRequest nonDigitalApplicantSolicitorNotificationRequest = notificationRequestMapper
+            .getNotificationRequestForApplicantSolicitor(caseDetails, false);
+        verifyEmptyStringInNotificationRequest(nonDigitalApplicantSolicitorNotificationRequest);
+
+        NotificationRequest isDigitalApplicantSolicitorNotificationRequest = notificationRequestMapper
+            .getNotificationRequestForApplicantSolicitor(caseDetails, true);
+        verifyEmptyStringInNotificationRequest(isDigitalApplicantSolicitorNotificationRequest);
+
+        if (CaseType.CONTESTED.equals(caseType)) {
+            NotificationRequest intervenerNotificationRequest = notificationRequestMapper
+                .getNotificationRequestForIntervenerSolicitor(caseDetails, 1);
+            verifyEmptyStringInNotificationRequest(intervenerNotificationRequest);
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "CONTESTED", "CONSENTED"
+    })
     void givenCase_whenGetNotificationRequestForPartyInvoked_thenStandardPropertiesPopulated(
         CaseType caseType) {
 
         HearingTypeDirection mockedHearingTypeDirection = mock(HearingTypeDirection.class);
         when(mockedHearingTypeDirection.getId()).thenReturn(TEST_HEARING_TYPE);
-        FinremCaseData finremCaseData = spy(FinremCaseData.builder()
-            .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
-            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
-                .generalApplicationRejectReason("generalApplicationRejectReason")
-                .build())
-            .generalEmailWrapper(GeneralEmailWrapper.builder()
-                .generalEmailBody("generalEmailBody")
-                .build())
-            .regionWrapper(RegionWrapper.builder()
-                .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
-                    .regionList(Region.HIGHCOURT)
-                    .highCourtFrcList(RegionHighCourtFrc.HIGHCOURT)
-                    .build())
-                .build())
-            .listForHearingWrapper(ListForHearingWrapper.builder()
-                .hearingType(mockedHearingTypeDirection)
-                .build())
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .respondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL)
-                .respondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE)
-                .solicitorReference(TEST_SOLICITOR_REFERENCE)
-                .build())
-            .intervenerOne(IntervenerOne.builder()
-                .intervenerSolName(TEST_INTV1_SOLICITOR_NAME) // next test null
-                .intervenerSolicitorFirm(TEST_INTV1_SOLICITOR_FIRM)
-                .intervenerSolEmail(TEST_INTV1_SOLICITOR_EMAIL)
-                .intervenerSolicitorReference(TEST_INTV1_SOLICITOR_REFERENCE)
-                .build())
-            .build());
+        FinremCaseData finremCaseData = spiedFinremCaseData(mockedHearingTypeDirection);
         when(finremCaseData.getFullApplicantName()).thenReturn("Full Applicant Name");
         if (CaseType.CONTESTED.equals(caseType)) {
             when(finremCaseData.getFullRespondentNameContested()).thenReturn("Full Respondent Name (CT)");
@@ -473,7 +515,60 @@ class FinremNotificationRequestMapperTest {
             assertThat(intervenerNotificationRequest.getName()).isEqualTo(TEST_INTV1_SOLICITOR_NAME);
             assertThat(intervenerNotificationRequest.getSolicitorReferenceNumber()).isEqualTo(TEST_INTV1_SOLICITOR_REFERENCE);
             assertThat(intervenerNotificationRequest.getNotificationEmail()).isEqualTo(TEST_INTV1_SOLICITOR_EMAIL);
+
+            finremCaseData.getIntervenerOne().setIntervenerSolName(null);
+            NotificationRequest intervenerNotificationRequestWithoutIntvSolicitorName = notificationRequestMapper
+                .getNotificationRequestForIntervenerSolicitor(caseDetails, 1);
+            verifyStandardNotificationRequest(caseType, intervenerNotificationRequestWithoutIntvSolicitorName);
+            assertThat(intervenerNotificationRequestWithoutIntvSolicitorName.getName())
+                .isEqualTo(TEST_INTV1_SOLICITOR_FIRM);
+            assertThat(intervenerNotificationRequestWithoutIntvSolicitorName.getSolicitorReferenceNumber())
+                .isEqualTo(TEST_INTV1_SOLICITOR_REFERENCE);
+            assertThat(intervenerNotificationRequestWithoutIntvSolicitorName.getNotificationEmail())
+                .isEqualTo(TEST_INTV1_SOLICITOR_EMAIL);
         }
+    }
+
+    private FinremCaseData spiedFinremCaseData(HearingTypeDirection mockedHearingTypeDirection) {
+        return spy(FinremCaseData.builder()
+            .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
+            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                .generalApplicationRejectReason("generalApplicationRejectReason")
+                .build())
+            .generalEmailWrapper(GeneralEmailWrapper.builder()
+                .generalEmailBody("generalEmailBody")
+                .build())
+            .regionWrapper(RegionWrapper.builder()
+                .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
+                    .regionList(Region.HIGHCOURT)
+                    .highCourtFrcList(RegionHighCourtFrc.HIGHCOURT)
+                    .build())
+                .build())
+            .listForHearingWrapper(ListForHearingWrapper.builder()
+                .hearingType(mockedHearingTypeDirection)
+                .build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL)
+                .respondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE)
+                .solicitorReference(TEST_SOLICITOR_REFERENCE)
+                .build())
+            .intervenerOne(IntervenerOne.builder()
+                .intervenerSolName(TEST_INTV1_SOLICITOR_NAME)
+                .intervenerSolicitorFirm(TEST_INTV1_SOLICITOR_FIRM)
+                .intervenerSolEmail(TEST_INTV1_SOLICITOR_EMAIL)
+                .intervenerSolicitorReference(TEST_INTV1_SOLICITOR_REFERENCE)
+                .build())
+            .build());
+    }
+
+    private void verifyEmptyStringInNotificationRequest(NotificationRequest actualResult) {
+        assertThat(actualResult)
+            .extracting(
+                NotificationRequest::getDivorceCaseNumber,
+                NotificationRequest::getGeneralApplicationRejectionReason,
+                NotificationRequest::getGeneralEmailBody,
+                NotificationRequest::getSolicitorReferenceNumber)
+            .containsOnly(EMPTY_STRING);
     }
 
     private void verifyStandardNotificationRequest(CaseType caseType, NotificationRequest actualResult) {
