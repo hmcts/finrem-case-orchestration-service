@@ -7,8 +7,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getNotificationParty;
 
 class NotificationPartyTest {
@@ -31,8 +31,8 @@ class NotificationPartyTest {
     }
 
     @Test
-    void shouldReturnPreviousNotificationParties() {
-        assertEquals(Optional.of(PREVIOUS_APPLICANT_SOLICITOR_ONLY), getNotificationParty(CaseRole.APP_SOLICITOR, false, true));
-        assertEquals(Optional.of(PREVIOUS_APPLICANT_BARRISTER_ONLY), getNotificationParty(CaseRole.APP_BARRISTER, false, true));
+    void shouldReturnFormerNotificationParties() {
+        assertEquals(Optional.of(FORMER_APPLICANT_SOLICITOR_ONLY), getNotificationParty(CaseRole.APP_SOLICITOR, false, true));
+        assertEquals(Optional.of(FORMER_APPLICANT_BARRISTER_ONLY), getNotificationParty(CaseRole.APP_BARRISTER, false, true));
     }
 }

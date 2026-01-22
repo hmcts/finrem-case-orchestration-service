@@ -461,7 +461,7 @@ class StopRepresentingClientServiceTest {
                 CaseRole.APP_SOLICITOR);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
-                NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY,
+                NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY,
                 applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
             verifyNoMoreInteractions(applicationEventPublisher, finremNotificationRequestMapper);
         }
@@ -493,7 +493,7 @@ class StopRepresentingClientServiceTest {
                 .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
-                NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY,
+                NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY,
                 applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
             verifyNoMoreInteractions(applicationEventPublisher, finremNotificationRequestMapper);
         }
@@ -529,11 +529,11 @@ class StopRepresentingClientServiceTest {
                 .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
-                NotificationParty.PREVIOUS_APPLICANT_SOLICITOR_ONLY,
+                NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY,
                 applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest1);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
-                NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY,
+                NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY,
                 applicantExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest2);
             verifyNoMoreInteractions(applicationEventPublisher, finremNotificationRequestMapper);
         }

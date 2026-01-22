@@ -7,23 +7,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Component
-public class PreviousApplicantBarristerListener extends EmailNotificationOnlyListener {
+public class FormerApplicantBarristerListener extends EmailNotificationOnlyListener {
 
-    public PreviousApplicantBarristerListener(BulkPrintService bulkPrintService,
-                                              EmailService emailService,
-                                              NotificationService notificationService,
-                                              InternationalPostalService internationalPostalService) {
+    public FormerApplicantBarristerListener(BulkPrintService bulkPrintService,
+                                            EmailService emailService,
+                                            NotificationService notificationService,
+                                            InternationalPostalService internationalPostalService) {
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
     }
 
     @Override
     protected String getNotificationParty() {
-        return "previous applicant barrister";
+        return "former applicant barrister";
     }
 
     @Override
     protected boolean isRelevantParty(SendCorrespondenceEvent event) {
-        return event.getNotificationParties().contains(NotificationParty.PREVIOUS_APPLICANT_BARRISTER_ONLY);
+        return event.getNotificationParties().contains(NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY);
     }
 
     @Override
