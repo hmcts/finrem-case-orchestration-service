@@ -125,7 +125,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
 
     private void moveInputManageCaseDocumentsToManagedCollections(FinremCaseData caseData) {
         final ManageCaseDocumentsAction action = caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentsActionSelection();
-        if (action == ManageCaseDocumentsAction.ADD_NEW) {
+        if (ManageCaseDocumentsAction.ADD_NEW.equals(action)) {
             List<UploadCaseDocumentCollection> newManageCaseDocumentCollection =
                 ofNullable(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection())
                     .orElse(new ArrayList<>());
@@ -133,7 +133,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
                 nullIfEmpty(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
             );
             caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(newManageCaseDocumentCollection);
-        } else if (action == ManageCaseDocumentsAction.AMEND) {
+        } else if (ManageCaseDocumentsAction.AMEND.equals(action)) {
             caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(
                 caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection()
             );
