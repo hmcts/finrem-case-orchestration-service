@@ -119,6 +119,18 @@ class NotificationRequestBuilderTest {
     }
 
     @Test
+    void givenContestedCaseWithoutDivorceCaseNumber_whenWithDefaults_thenCaseDetailsPopulated() {
+        mockCourtDetailsConfiguration();
+        FinremCaseDetails caseDetails = createContestedCase(true);
+
+        NotificationRequest notificationRequest = builder
+            .withCaseDefaults(caseDetails)
+            .build();
+
+        assertThat(notificationRequest.getDivorceCaseNumber()).isEqualTo("");
+    }
+
+    @Test
     void givenAllPropertiesSet_whenBuild_thenAllPropertiesPopulated() {
         byte[] documentContents = {1, 2, 3};
         NotificationRequest notificationRequest = builder
@@ -237,6 +249,10 @@ class NotificationRequestBuilderTest {
     }
 
     private FinremCaseDetails createContestedCase() {
+        return createContestedCase(false);
+    }
+
+    private FinremCaseDetails createContestedCase(boolean nullDivorceCaseNumber) {
         FinremCaseData caseData = FinremCaseData.builder()
             .regionWrapper(createRegionWrapper())
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
@@ -246,7 +262,7 @@ class NotificationRequestBuilderTest {
                 .respondentLname("Duck")
                 .build())
             .ccdCaseType(CaseType.CONTESTED)
-            .divorceCaseNumber("3657-4535-2355-7545")
+            .divorceCaseNumber(nullDivorceCaseNumber ? null : "3657-4535-2355-7545")
             .build();
         return FinremCaseDetails.builder()
             .id(3456865498462385L)
