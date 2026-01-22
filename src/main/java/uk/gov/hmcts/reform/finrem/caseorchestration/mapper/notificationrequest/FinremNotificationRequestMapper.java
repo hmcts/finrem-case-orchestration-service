@@ -60,8 +60,8 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
     }
 
     public NotificationRequest getNotificationRequestForIntervenerSolicitor(FinremCaseDetails caseDetails,
-                                                                            SolicitorCaseDataKeysWrapper provider) {
-        return buildNotificationRequest(caseDetails, provider);
+                                                                            SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+        return buildNotificationRequest(caseDetails, caseDataKeysWrapper);
     }
 
     public NotificationRequest getNotificationRequestForNoticeOfChange(FinremCaseDetails caseDetails) {

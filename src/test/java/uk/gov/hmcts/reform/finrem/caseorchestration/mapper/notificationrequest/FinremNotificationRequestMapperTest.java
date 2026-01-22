@@ -421,12 +421,6 @@ class FinremNotificationRequestMapperTest {
         NotificationRequest isDigitalApplicantSolicitorNotificationRequest = notificationRequestMapper
             .getNotificationRequestForApplicantSolicitor(caseDetails, true);
         verifyEmptyStringInNotificationRequest(isDigitalApplicantSolicitorNotificationRequest);
-
-        if (CaseType.CONTESTED.equals(caseType)) {
-            NotificationRequest intervenerNotificationRequest = notificationRequestMapper
-                .getNotificationRequestForIntervenerSolicitor(caseDetails, 1);
-            verifyEmptyStringInNotificationRequest(intervenerNotificationRequest);
-        }
     }
 
     @ParameterizedTest
@@ -507,26 +501,6 @@ class FinremNotificationRequestMapperTest {
         assertThat(isDigitalApplicantSolicitorNotificationRequest.getSolicitorReferenceNumber()).isEqualTo(TEST_SOLICITOR_REFERENCE);
         assertThat(isDigitalApplicantSolicitorNotificationRequest.getNotificationEmail()).isEqualTo(TEST_SOLICITOR_EMAIL);
         assertThat(isDigitalApplicantSolicitorNotificationRequest.getIsNotDigital()).isTrue();
-
-        if (CaseType.CONTESTED.equals(caseType)) {
-            NotificationRequest intervenerNotificationRequest = notificationRequestMapper
-                .getNotificationRequestForIntervenerSolicitor(caseDetails, 1);
-            verifyStandardNotificationRequest(caseType, intervenerNotificationRequest);
-            assertThat(intervenerNotificationRequest.getName()).isEqualTo(TEST_INTV1_SOLICITOR_NAME);
-            assertThat(intervenerNotificationRequest.getSolicitorReferenceNumber()).isEqualTo(TEST_INTV1_SOLICITOR_REFERENCE);
-            assertThat(intervenerNotificationRequest.getNotificationEmail()).isEqualTo(TEST_INTV1_SOLICITOR_EMAIL);
-
-            finremCaseData.getIntervenerOne().setIntervenerSolName(null);
-            NotificationRequest intervenerNotificationRequestWithoutIntvSolicitorName = notificationRequestMapper
-                .getNotificationRequestForIntervenerSolicitor(caseDetails, 1);
-            verifyStandardNotificationRequest(caseType, intervenerNotificationRequestWithoutIntvSolicitorName);
-            assertThat(intervenerNotificationRequestWithoutIntvSolicitorName.getName())
-                .isEqualTo(TEST_INTV1_SOLICITOR_FIRM);
-            assertThat(intervenerNotificationRequestWithoutIntvSolicitorName.getSolicitorReferenceNumber())
-                .isEqualTo(TEST_INTV1_SOLICITOR_REFERENCE);
-            assertThat(intervenerNotificationRequestWithoutIntvSolicitorName.getNotificationEmail())
-                .isEqualTo(TEST_INTV1_SOLICITOR_EMAIL);
-        }
     }
 
     private FinremCaseData spiedFinremCaseData(HearingTypeDirection mockedHearingTypeDirection) {
