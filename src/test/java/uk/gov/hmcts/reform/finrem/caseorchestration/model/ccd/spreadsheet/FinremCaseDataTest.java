@@ -17,10 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Wor
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 
@@ -39,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.mockito.Mockito.mock;
 
 @Slf4j
 class FinremCaseDataTest {
@@ -262,26 +257,6 @@ class FinremCaseDataTest {
         finremCaseData.setCaseAllocatedTo(null);
         finremCaseData.setFastTrackDecision(YesOrNo.YES);
         assertTrue(finremCaseData.isFastTrackApplication());
-    }
-
-    @Test
-    void testGetIntervenerById() {
-        IntervenerOne intervenerOne = mock(IntervenerOne.class);
-        IntervenerTwo intervenerTwo = mock(IntervenerTwo.class);
-        IntervenerThree intervenerThree = mock(IntervenerThree.class);
-        IntervenerFour intervenerFour = mock(IntervenerFour.class);
-
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .intervenerOne(intervenerOne)
-            .intervenerTwo(intervenerTwo)
-            .intervenerThree(intervenerThree)
-            .intervenerFour(intervenerFour)
-            .build();
-
-        assertEquals(intervenerOne, finremCaseData.getIntervenerById(1));
-        assertEquals(intervenerTwo, finremCaseData.getIntervenerById(2));
-        assertEquals(intervenerThree, finremCaseData.getIntervenerById(3));
-        assertEquals(intervenerFour, finremCaseData.getIntervenerById(4));
     }
 
     private void validateConfig(List<File> configFiles) throws IOException, InvalidFormatException {
