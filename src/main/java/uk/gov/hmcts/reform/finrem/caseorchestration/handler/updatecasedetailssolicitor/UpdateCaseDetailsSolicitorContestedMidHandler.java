@@ -83,5 +83,7 @@ public class UpdateCaseDetailsSolicitorContestedMidHandler extends FinremCallbac
         // sol email org ok
         // email address validation
         // case addresses
+
+        // PT todo, check which fields need to be temporary fields.  Will be at least currentUserCaseRole.
     }
 }
