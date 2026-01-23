@@ -6,12 +6,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.SCHEDULE_RAISE_DIRECTIONS_ORDER;
 
 @Service
 @Slf4j
@@ -60,6 +62,7 @@ public class ApproveOrderService {
                 continue;
             }
             processJudgeDecision(finremCaseDetails, draftOrdersWrapper, approval, userAuthorisation);
+            changeState(finremCaseDetails, approval);
         }
         buildConfirmationBody(finremCaseDetails, draftOrdersWrapper);
     }
@@ -175,6 +178,13 @@ public class ApproveOrderService {
             case JUDGE_NEEDS_TO_MAKE_CHANGES -> ordersChanged.add(fileName);
             case REVIEW_LATER -> ordersReviewLater.add(fileName);
             default -> throw new IllegalStateException("Unhandled judge decision for document:" + fileName);
+        }
+    }
+
+    private void changeState(FinremCaseDetails caseDetails, JudgeApproval approval) {
+        JudgeDecision decision = approval.getJudgeDecision();
+        if (decision != null && decision.isApproved()) {
+            caseDetails.getData().setState(SCHEDULE_RAISE_DIRECTIONS_ORDER.getStateId());
         }
     }
 }
