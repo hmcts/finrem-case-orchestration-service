@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -58,7 +60,7 @@ class RespondentPartyListenerTest {
         testDocument = CaseDocument.builder()
             .documentFilename(TEST_DOC_NAME)
             .build();
-        
+
         caseDetails = FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
             .data(FinremCaseData.builder()
@@ -183,5 +185,26 @@ class RespondentPartyListenerTest {
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
             caseDetails, RESPONDENT, List.of(bulkPrintDocument1, bulkPrintCoverSheet), false, AUTH_TOKEN
         );
+    }
+
+    /**
+     * Tests that when setPartySpecificDetails used,  null values are replaced with blank strings.
+     */
+    @ParameterizedTest
+    @CsvSource(value = {
+        "null,''",
+        "'a value', 'a value'"
+    }, nullValues = "null")
+    void shouldUseBlankStringsWhenPartySpecificDetailsNull(String provided, String expected) {
+
+        caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorName(provided);
+        caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorEmail(provided);
+        caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorReference(provided);
+
+        AbstractPartyListener.PartySpecificDetails details = respondentPartyListener.setPartySpecificDetails(event);
+
+        assertThat(details.recipientSolName()).isEqualTo(expected);
+        assertThat(details.recipientSolEmailAddress()).isEqualTo(expected);
+        assertThat(details.recipientSolReference()).isEqualTo(expected);
     }
 }

@@ -44,11 +44,13 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         ManageHearingsAction actionSelection = manageHearingsWrapper.getManageHearingsActionSelection();
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
+            log.info("Beginning hearing correspondence for {} action", ManageHearingsAction.ADD_HEARING.getDescription());
             manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }
 
         if (ManageHearingsAction.VACATE_HEARING.equals(actionSelection)) {
             manageHearingsCorresponder.sendVacatedHearingCorrespondence(callbackRequest, userAuthorisation);
+            log.info("Beginning hearing correspondence for {} action", ManageHearingsAction.VACATE_HEARING.getDescription());
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

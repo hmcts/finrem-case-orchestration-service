@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -182,5 +184,26 @@ class IntervenerThreePartyListenerTest {
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
             caseDetails, INTERVENER_THREE, List.of(bulkPrintDocument1, bulkPrintCoverSheet), false, AUTH_TOKEN
         );
+    }
+
+    /**
+     * Tests that when setPartySpecificDetails used,  null values are replaced with blank strings.
+     */
+    @ParameterizedTest
+    @CsvSource(value = {
+        "null,''",
+        "'a value', 'a value'"
+    }, nullValues = "null")
+    void shouldUseBlankStringsWhenPartySpecificDetailsNull(String provided, String expected) {
+
+        caseDetails.getData().getIntervenerThree().setIntervenerSolName(provided);
+        caseDetails.getData().getIntervenerThree().setIntervenerSolEmail(provided);
+        caseDetails.getData().getIntervenerThree().setIntervenerSolicitorReference(provided);
+
+        AbstractPartyListener.PartySpecificDetails details = intervenerThreePartyListener.setPartySpecificDetails(event);
+
+        assertThat(details.recipientSolName()).isEqualTo(expected);
+        assertThat(details.recipientSolEmailAddress()).isEqualTo(expected);
+        assertThat(details.recipientSolReference()).isEqualTo(expected);
     }
 }
