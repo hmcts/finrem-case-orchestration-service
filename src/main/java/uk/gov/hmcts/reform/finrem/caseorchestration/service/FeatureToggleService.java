@@ -18,6 +18,7 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASE_FILE_VIEW_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.EXPRESS_PILOT_ENABLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.FINREM_CITIZEN_UI_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.INTERVENER_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_CASE_DOCS_DELETE_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_HEARING_ENABLED;
@@ -108,6 +109,13 @@ public class FeatureToggleService {
 
     public boolean isManageCaseDocsDeleteEnabled() {
         return isFeatureEnabled(MANAGE_CASE_DOCS_DELETE_ENABLED);
+    }
+
+    /*
+     * Used for enable finrem citizen ui feature
+     */
+    public boolean isFinremCitizenUiEnabled() {
+        return isFeatureEnabled(FINREM_CITIZEN_UI_ENABLED);
     }
 
     /**
