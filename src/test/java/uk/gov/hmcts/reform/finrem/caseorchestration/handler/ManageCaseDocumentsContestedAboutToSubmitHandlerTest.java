@@ -46,6 +46,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
@@ -138,6 +140,34 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             hasSize(1));
         assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
             hasSize(0));
+    }
+
+    @Test
+    public void givenAManagedCaseWithCasesAddedAndRemovedAndFeatureToggleDisabled_WhenAnAboutToSubmitEventManageCaseDocuments_thenCollectionsSetAndManagedEmptyAndDeleteDocNotcalled() {
+        setUpRemovedDocuments();
+        setUpAddedDocuments();
+
+        when(featureToggleService.isManageCaseDocsDeleteEnabled()).thenReturn(false);
+
+        caseDetails.getData().getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(screenUploadDocumentList);
+
+        manageCaseDocumentsAboutToSubmitCaseHandler.handle(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
+            AUTH_TOKEN);
+
+        assertThat(caseData.getUploadCaseDocumentWrapper()
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.APP_OTHER_COLLECTION),
+            hasSize(4));
+        assertThat(caseData.getUploadCaseDocumentWrapper()
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION),
+            hasSize(3));
+        assertThat(caseData.getUploadCaseDocumentWrapper()
+                .getDocumentCollectionPerType(CaseDocumentCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
+            hasSize(1));
+        assertThat(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection(),
+            hasSize(0));
+        
+        verifyNoInteractions(evidenceManagementDeleteService);
     }
 
     @Test
