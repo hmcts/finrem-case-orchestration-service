@@ -373,7 +373,7 @@ class StopRepresentingClientServiceTest {
 
             if (isApplicant) {
                 when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(any(FinremCaseDetails.class),
-                    eq(CaseRole.APP_SOLICITOR))).thenReturn(NotificationRequest.builder().build());
+                    eq(CaseRole.APP_SOLICITOR))).thenReturn(mock(NotificationRequest.class));
             }
 
             // Act
@@ -423,7 +423,7 @@ class StopRepresentingClientServiceTest {
             when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(mock(CaseDetails.class));
             if (isApplicant) {
                 when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(any(FinremCaseDetails.class),
-                    eq(CaseRole.APP_SOLICITOR))).thenReturn(NotificationRequest.builder().build());
+                    eq(CaseRole.APP_SOLICITOR))).thenReturn(mock(NotificationRequest.class));
             }
 
             underTest.revokePartiesAccessAndNotifyParties(info);
@@ -521,10 +521,10 @@ class StopRepresentingClientServiceTest {
             Barrister applicantBarrister = mock(Barrister.class);
             mockApplicantBarristersChangeOnly(info, caseDataBefore, applicantBarrister);
 
-            NotificationRequest notificationRequest1 = NotificationRequest.builder().build();
+            NotificationRequest notificationRequest1 = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(
                 caseDetailsBefore, CaseRole.APP_SOLICITOR)).thenReturn(notificationRequest1);
-            NotificationRequest notificationRequest2 = NotificationRequest.builder().build();
+            NotificationRequest notificationRequest2 = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister))
                 .thenReturn(notificationRequest2);
 
@@ -559,7 +559,7 @@ class StopRepresentingClientServiceTest {
 
             StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails, caseDetailsBefore);
 
-            NotificationRequest notificationRequest = NotificationRequest.builder().build();
+            NotificationRequest notificationRequest = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 CaseRole.RESP_SOLICITOR)).thenReturn(notificationRequest);
 
@@ -592,7 +592,7 @@ class StopRepresentingClientServiceTest {
             Barrister respondentBarrister = mock(Barrister.class);
             mockRespondentBarristersChangeOnly(info, caseDataBefore, respondentBarrister);
 
-            NotificationRequest notificationRequest = NotificationRequest.builder().build();
+            NotificationRequest notificationRequest = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, respondentBarrister))
                 .thenReturn(notificationRequest);
