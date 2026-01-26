@@ -143,7 +143,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenAManagedCaseWithCasesAddedAndRemovedAndFeatureToggleDisabled_WhenAnAboutToSubmitEventManageCaseDocuments_thenCollectionsSetAndManagedEmptyAndDeleteDocNotcalled() {
+    public void givenAManagedCaseWithCasesAddedAndRemovedAndFeatureToggleDisabled_WhenAnAboutToSubmitEventManageCaseDocuments_thenCollectionsSetAndManagedEmptyAndDeleteDocNotCalled() {
         setUpRemovedDocuments();
         setUpAddedDocuments();
 
