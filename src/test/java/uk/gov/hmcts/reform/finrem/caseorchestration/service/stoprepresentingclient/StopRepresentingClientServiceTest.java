@@ -449,7 +449,7 @@ class StopRepresentingClientServiceTest {
 
             StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails, caseDetailsBefore);
 
-            NotificationRequest notificationRequest = NotificationRequest.builder().build();
+            NotificationRequest notificationRequest = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 CaseRole.APP_SOLICITOR)).thenReturn(notificationRequest);
 
@@ -480,7 +480,7 @@ class StopRepresentingClientServiceTest {
             Barrister applicantBarrister = mock(Barrister.class);
             mockApplicantBarristersChangeOnly(info, caseDataBefore, applicantBarrister);
 
-            NotificationRequest notificationRequest = NotificationRequest.builder().build();
+            NotificationRequest notificationRequest = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister))
                 .thenReturn(notificationRequest);
@@ -514,10 +514,10 @@ class StopRepresentingClientServiceTest {
             Barrister applicantBarrister = mock(Barrister.class);
             mockApplicantBarristersChangeOnly(info, caseDataBefore, applicantBarrister);
 
-            NotificationRequest notificationRequest1 = NotificationRequest.builder().build();
+            NotificationRequest notificationRequest1 = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(
                 caseDetailsBefore, CaseRole.APP_SOLICITOR)).thenReturn(notificationRequest1);
-            NotificationRequest notificationRequest2 = NotificationRequest.builder().build();
+            NotificationRequest notificationRequest2 = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister))
                 .thenReturn(notificationRequest2);
 
@@ -552,7 +552,7 @@ class StopRepresentingClientServiceTest {
 
             StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails, caseDetailsBefore);
 
-            NotificationRequest notificationRequest = NotificationRequest.builder().build();
+            NotificationRequest notificationRequest = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 CaseRole.RESP_SOLICITOR)).thenReturn(notificationRequest);
 
@@ -585,7 +585,7 @@ class StopRepresentingClientServiceTest {
             Barrister respondentBarrister = mock(Barrister.class);
             mockRespondentBarristersChangeOnly(info, caseDataBefore, respondentBarrister);
 
-            NotificationRequest notificationRequest = NotificationRequest.builder().build();
+            NotificationRequest notificationRequest = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, respondentBarrister))
                 .thenReturn(notificationRequest);
@@ -616,29 +616,30 @@ class StopRepresentingClientServiceTest {
             FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().data(caseDataBefore).build();
 
             StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails, caseDetailsBefore);
-            Barrister applicantBarrister = mock(Barrister.class);
-            mockRespondentBarristersChangeOnly(info, caseDataBefore, applicantBarrister);
+            Barrister respondentBarrister = mock(Barrister.class);
+            mockRespondentBarristersChangeOnly(info, caseDataBefore, respondentBarrister);
 
-            NotificationRequest notificationRequest = NotificationRequest.builder().build();
+            NotificationRequest notificationRequest0 = mock(NotificationRequest.class);
+            NotificationRequest notificationRequest1 = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
-                CaseRole.RESP_SOLICITOR)).thenReturn(notificationRequest);
-            when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister))
-                .thenReturn(notificationRequest);
+                CaseRole.RESP_SOLICITOR)).thenReturn(notificationRequest0);
+            when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, respondentBarrister))
+                .thenReturn(notificationRequest1);
 
             underTest.revokePartiesAccessAndNotifyParties(info);
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
             verify(applicationEventPublisher, times(2)).publishEvent(captor.capture());
             verify(finremNotificationRequestMapper)
-                .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister);
+                .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, respondentBarrister);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
                 NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY,
-                respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
+                respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest0);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
                 NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY,
-                respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
+                respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest1);
             verifyNoMoreInteractions(applicationEventPublisher, finremNotificationRequestMapper);
         }
 
