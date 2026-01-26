@@ -93,7 +93,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
 
         Optional.ofNullable(caseData.getConfidentialDocumentsUploaded()).ifPresent(List::clear);
 
-        if (featureToggleService.isSecureDocEnabled()) {
+        if (featureToggleService.isManageCaseDocsDeleteEnabled()) {
             deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
         }
 
@@ -138,7 +138,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
         List<UploadCaseDocumentCollection> allCollectionsBefore =
             caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
         allCollectionsBefore.removeAll(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
-
+        
         allCollectionsBefore.stream().map(this::getDocumentUrl)
             .forEach(docUrl -> evidenceManagementDeleteService.delete(docUrl, userAuthorisation));
     }
