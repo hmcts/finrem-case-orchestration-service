@@ -195,7 +195,7 @@ class RespondentPartyListenerTest {
         "null,''",
         "'a value', 'a value'"
     }, nullValues = "null")
-    void shouldUseBlankStringsWhenPartySpecificDetailsNull(String provided, String expected) {
+    void shouldUseBlankStringsWhenSetPartySpecificDetailsNull(String provided, String expected) {
 
         caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorName(provided);
         caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorEmail(provided);

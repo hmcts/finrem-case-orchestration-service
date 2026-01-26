@@ -194,7 +194,7 @@ class IntervenerOnePartyListenerTest {
         "null,''",
         "'a value', 'a value'"
     }, nullValues = "null")
-    void shouldUseBlankStringsWhenPartySpecificDetailsNull(String provided, String expected) {
+    void shouldUseBlankStringsWhenSetPartySpecificDetailsNull(String provided, String expected) {
 
         caseDetails.getData().getIntervenerOne().setIntervenerSolName(provided);
         caseDetails.getData().getIntervenerOne().setIntervenerSolEmail(provided);
