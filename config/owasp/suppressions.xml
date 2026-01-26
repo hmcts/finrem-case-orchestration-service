@@ -5,12 +5,8 @@
 False positive: CVE-2025-15104 (nu.validator:validator SSRF) is incorrectly mapped to
 hibernate-validator-8.0.3.Final.jar via a bad CPE match ("validator:validator").
     ]]></notes>
-
-        <until>2026-04-01</until>
-
         <!-- Exact jar at maven/org.hibernate.validator/hibernate-validator@8.0.3.Final-->
         <filePath regex="true">.*[/\\]hibernate-validator-8\.0\.3\.Final\.jar$</filePath>
-
         <cve>CVE-2025-15104</cve>
     </suppress>
 </suppressions>
