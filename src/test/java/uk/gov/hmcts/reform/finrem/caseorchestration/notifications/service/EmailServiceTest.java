@@ -58,6 +58,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
@@ -626,6 +627,34 @@ public class EmailServiceTest {
             emailService.buildTemplateVars(notificationRequest, FR_BARRISTER_ACCESS_REMOVED.name());
 
         assertEquals("1234567890", returnedTemplateVars.get("BarristerReferenceNumber"));
+        assertEquals(PHONE_OPENING_HOURS, returnedTemplateVars.get("phoneOpeningHours"));
+    }
+
+    @Test
+    public void givenCsStopRepresentingIntervenerEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+        setConsentedData();
+        notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
+        notificationRequest.setIntervenerFullName("test name");
+
+        Map<String, Object> returnedTemplateVars =
+            emailService.buildTemplateVars(notificationRequest, FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER.name());
+
+        assertEquals("1234567890", returnedTemplateVars.get("intervenerSolicitorReferenceNumber"));
+        assertEquals("test name", returnedTemplateVars.get("intervenerFullName"));
+        assertEquals(PHONE_OPENING_HOURS, returnedTemplateVars.get("phoneOpeningHours"));
+    }
+
+    @Test
+    public void givenCtStopRepresentingIntervenerEmailTemplate_whenPopulateTemplateVars_thenAddIntervenerSolReferenceNumberToTemplateVars() {
+        setContestedData();
+        notificationRequest.setIntervenerSolicitorReferenceNumber("1234567890");
+        notificationRequest.setIntervenerFullName("test name");
+
+        Map<String, Object> returnedTemplateVars =
+            emailService.buildTemplateVars(notificationRequest, FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER.name());
+
+        assertEquals("1234567890", returnedTemplateVars.get("intervenerSolicitorReferenceNumber"));
+        assertEquals("test name", returnedTemplateVars.get("intervenerFullName"));
         assertEquals(PHONE_OPENING_HOURS, returnedTemplateVars.get("phoneOpeningHours"));
     }
 
