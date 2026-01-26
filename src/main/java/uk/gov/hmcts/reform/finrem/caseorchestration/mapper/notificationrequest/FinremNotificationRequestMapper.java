@@ -118,27 +118,26 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
 
     private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
+        final FinremCaseData caseData = caseDetails.getData();
+
+        // TODO Consider using James' NotificationRequestBuilder
         NotificationRequest notificationRequest = NotificationRequest.builder().build();
-        FinremCaseData caseData = caseDetails.getData();
         notificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
-        notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseDataKeysWrapper.getSolicitorReferenceKey(), EMPTY_STRING));
         notificationRequest.setDivorceCaseNumber(Objects.toString(caseData.getDivorceCaseNumber(), EMPTY_STRING));
-        notificationRequest.setName(caseDataKeysWrapper.getSolicitorNameKey());
-        notificationRequest.setNotificationEmail(caseDataKeysWrapper.getSolicitorEmailKey());
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
         notificationRequest.setGeneralApplicationRejectionReason(
             Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationRejectReason(), EMPTY_STRING));
         notificationRequest.setGeneralEmailBody(Objects.toString(caseData.getGeneralEmailWrapper().getGeneralEmailBody(), EMPTY_STRING));
-        notificationRequest.setApplicantName(Objects.toString(caseData.getFullApplicantName()));
+        notificationRequest.setApplicantName(caseData.getFullApplicantName());
         if (caseData.isConsentedApplication()) {
-            notificationRequest.setRespondentName(Objects.toString(caseData.getFullRespondentNameConsented()));
+            notificationRequest.setRespondentName(caseData.getFullRespondentNameConsented());
             setCaseOrderType(notificationRequest, caseData);
             log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
                 notificationRequest.getCaseReferenceNumber());
         }
         if (caseData.isContestedApplication()) {
-            notificationRequest.setRespondentName(Objects.toString(caseData.getFullRespondentNameContested()));
+            notificationRequest.setRespondentName(caseData.getFullRespondentNameContested());
             notificationRequest.setSelectedCourt(CourtHelper.getSelectedFrc(caseDetails));
             log.info("selectedCourt is {} for case ID: {}", notificationRequest.getSelectedCourt(),
                 notificationRequest.getCaseReferenceNumber());
@@ -147,7 +146,13 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         notificationRequest.setHearingType(listForHearingWrapper.getHearingType() != null
             ? listForHearingWrapper.getHearingType().getId()
             : "");
-        notificationRequest.setIsNotDigital(caseDataKeysWrapper.getSolicitorIsNotDigitalKey());
+
+        if (caseDataKeysWrapper != null) {
+            notificationRequest.setName(caseDataKeysWrapper.getSolicitorNameKey());
+            notificationRequest.setNotificationEmail(caseDataKeysWrapper.getSolicitorEmailKey());
+            notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseDataKeysWrapper.getSolicitorReferenceKey(), EMPTY_STRING));
+            notificationRequest.setIsNotDigital(caseDataKeysWrapper.getSolicitorIsNotDigitalKey());
+        }
 
         return notificationRequest;
     }
@@ -282,7 +287,7 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
     }
 
     private void setCaseOrderType(NotificationRequest notificationRequest, FinremCaseData caseData) {
-        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
+        if (consentedApplicationHelper.isVariationOrder(caseData)) {
             notificationRequest.setCaseOrderType("variation");
             notificationRequest.setCamelCaseOrderType("Variation");
         } else {
