@@ -38,6 +38,8 @@ public class TestConstants {
     public static final String TEST_INTV1_SOLICITOR_EMAIL = "testIntvSolicitor@email.com";
     public static final String TEST_INTV1_SOLICITOR_FIRM = "INTV1 SOL FIRM";
 
+    public static final String TEST_INTV1_BARRISTER_EMAIL = "testIntvBarrister@email.com";
+
     public static final String TEST_CTSC_EMAIL = "testCtsc@email.com";
     public static final String TEST_JUDGE_EMAIL = "testJudge@email.com";
 
