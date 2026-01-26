@@ -135,12 +135,10 @@ public class ManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCall
     private void deleteRemovedDocuments(FinremCaseData caseData,
                                         FinremCaseData caseDataBefore,
                                         String userAuthorisation) {
-        // Manage collection shouldn't contain original document.
         List<UploadCaseDocumentCollection> allCollectionsBefore =
             caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
         allCollectionsBefore.removeAll(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
-
-        // collection id = c7c69fcb-4c63-4d5e-ba82-ee352e0af39b
+        
         allCollectionsBefore.stream().map(this::getDocumentUrl)
             .forEach(docUrl -> evidenceManagementDeleteService.delete(docUrl, userAuthorisation));
     }
