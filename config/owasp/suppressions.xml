@@ -8,7 +8,7 @@ hibernate-validator-8.0.3.Final.jar via a bad CPE match ("validator:validator").
 
         <until>2026-04-01</until>
 
-        <!-- Match the exact jar name shown in the report -->
+        <!-- Exact jar at maven/org.hibernate.validator/hibernate-validator@8.0.3.Final-->
         <filePath regex="true">.*[/\\]hibernate-validator-8\.0\.3\.Final\.jar$</filePath>
 
         <cve>CVE-2025-15104</cve>
