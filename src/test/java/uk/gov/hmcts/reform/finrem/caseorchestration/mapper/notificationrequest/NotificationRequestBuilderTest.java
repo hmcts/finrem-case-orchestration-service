@@ -18,7 +18,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -127,6 +129,23 @@ class NotificationRequestBuilderTest {
         assertThat(notificationRequest.getPhoneOpeningHours()).isEqualTo(CTSC_OPENING_HOURS);
         assertThat(notificationRequest.getRespondentName()).isEqualTo("Davey Duck");
         assertThat(notificationRequest.getSelectedCourt()).isEqualTo(NORTH_WALES.getValue());
+    }
+
+    @Test
+    void givenAnyCase_whenWithIntervener_thenIntervenerDetailsPopulated() {
+        IntervenerDetails intervenerDetails = IntervenerOne.builder()
+            .intervenerName("Jack Jack")
+            .intervenerSolicitorFirm("Jack Solicitor & Co.")
+            .intervenerSolicitorReference("RX22598989")
+            .build();
+
+        NotificationRequest notificationRequest = builder
+            .withIntervener(intervenerDetails)
+            .build();
+
+        assertThat(notificationRequest.getIntervenerFullName()).isEqualTo("Jack Jack");
+        assertThat(notificationRequest.getIntervenerSolicitorFirm()).isEqualTo("Jack Solicitor & Co.");
+        assertThat(notificationRequest.getIntervenerSolicitorReferenceNumber()).isEqualTo("RX22598989");
     }
 
     @Test
