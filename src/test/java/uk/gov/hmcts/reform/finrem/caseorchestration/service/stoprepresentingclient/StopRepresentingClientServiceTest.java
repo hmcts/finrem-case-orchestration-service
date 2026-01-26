@@ -78,6 +78,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_US
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisationPolicy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
@@ -160,7 +161,7 @@ class StopRepresentingClientServiceTest {
         boolean isConsentedApplication) {
 
         FinremCaseData caseData = FinremCaseData.builder()
-            .ccdCaseType(isConsentedApplication ? CaseType.CONSENTED : CaseType.CONTESTED)
+            .ccdCaseType(isConsentedApplication ? CaseType.CONSENTED : CONTESTED)
             .build();
 
         underTest.setRespondentUnrepresented(caseData);
@@ -207,16 +208,16 @@ class StopRepresentingClientServiceTest {
     class IntervenerRepresentativeRequestTests {
 
         @Test
-        void givenIntervenerOrganisationChange_whenHandled_thenShouldSendRequestToCaseAssigment() {
+        void givenIntervenerOrganisationChange_whenHandled_thenShouldSendRequestToCaseAssigmentAndNotifySolicitor() {
             FinremCaseData caseData = FinremCaseData.builder()
                 .intervenerOne(IntervenerOne.builder()
                     .intervenerOrganisation(OrganisationPolicy.builder()
-                        .organisation(organisation(null))
+                        .organisation(organisation("AAA"))
                         .build())
                     .build())
                 .intervenerTwo(IntervenerTwo.builder()
                     .intervenerOrganisation(OrganisationPolicy.builder()
-                        .organisation(organisation("BBB"))
+                        .organisation(organisation(null))
                         .build())
                     .build())
                 .build();
@@ -233,21 +234,32 @@ class StopRepresentingClientServiceTest {
                     .build())
                 .build();
             FinremCaseData caseDataBefore = FinremCaseData.builder()
+                .ccdCaseType(CONTESTED)
                 .intervenerOne(intervenerOne)
                 .intervenerTwo(intervenerTwo)
                 .build();
 
             FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(
-                    Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+                    Long.valueOf(CASE_ID), CONTESTED, caseData)
                 .build();
+            FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().data(caseDataBefore).build();
 
-            StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails,
-                FinremCaseDetails.builder().data(caseDataBefore).build());
+            StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails, caseDetailsBefore);
+
+            NotificationRequest notificationRequest0 = mock(NotificationRequest.class);
+            when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
+                CaseRole.INTVR_SOLICITOR_2, IntervenerType.INTERVENER_TWO)).thenReturn(notificationRequest0);
 
             underTest.revokePartiesAccessAndNotifyParties(info);
 
-            verify(intervenerService).revokeIntervenerSolicitor(Long.parseLong(CASE_ID), intervenerOne);
-            verify(intervenerService, never()).revokeIntervenerSolicitor(Long.parseLong(CASE_ID), intervenerTwo);
+            ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
+            verify(applicationEventPublisher).publishEvent(captor.capture());
+            verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
+                NotificationParty.FORMER_INTERVENER_TWO_SOLICITOR_ONLY,
+                intervenerExpectedTemplateNames(CONTESTED), caseDetails, caseDetailsBefore, notificationRequest0);
+
+            verify(intervenerService).revokeIntervenerSolicitor(Long.parseLong(CASE_ID), intervenerTwo);
+            verify(intervenerService, never()).revokeIntervenerSolicitor(Long.parseLong(CASE_ID), intervenerOne);
             verifyNoMoreInteractions(intervenerService);
             verify(assignCaseAccessService, never()).applyDecision(eq(TEST_SYSTEM_TOKEN), any(CaseDetails.class));
         }
@@ -714,43 +726,15 @@ class StopRepresentingClientServiceTest {
         }
 
         private static EmailTemplateNames applicantExpectedTemplateNames(CaseType caseType) {
-            return CaseType.CONTESTED.equals(caseType)
+            return CONTESTED.equals(caseType)
                 ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
                 : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
         }
 
         private static EmailTemplateNames respondentExpectedTemplateNames(CaseType caseType) {
-            return CaseType.CONTESTED.equals(caseType)
+            return CONTESTED.equals(caseType)
                 ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT
                 : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
-        }
-
-        private static EmailTemplateNames intervenerExpectedTemplateNames(CaseType caseType) {
-            return CaseType.CONTESTED.equals(caseType)
-                ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER
-                : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
-        }
-
-        private void verifySendCorrespondenceEvent(SendCorrespondenceEvent event, NotificationParty party, EmailTemplateNames template,
-                                                   FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore,
-                                                   NotificationRequest notificationRequest) {
-            assertThat(event)
-                .extracting(
-                    SendCorrespondenceEvent::getNotificationParties,
-                    SendCorrespondenceEvent::getEmailTemplate,
-                    SendCorrespondenceEvent::getCaseDetails,
-                    SendCorrespondenceEvent::getCaseDetailsBefore,
-                    SendCorrespondenceEvent::getAuthToken,
-                    SendCorrespondenceEvent::getEmailNotificationRequest
-                )
-                .contains(
-                    List.of(party),
-                    template,
-                    caseDetails,
-                    caseDetailsBefore,
-                    AUTH_TOKEN,
-                    notificationRequest
-                );
         }
     }
 
@@ -1061,5 +1045,33 @@ class StopRepresentingClientServiceTest {
             .caseDetailsBefore(caseDetailsBefore)
             .userAuthorisation(AUTH_TOKEN)
             .build();
+    }
+
+    private void verifySendCorrespondenceEvent(SendCorrespondenceEvent event, NotificationParty party, EmailTemplateNames template,
+                                               FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore,
+                                               NotificationRequest notificationRequest) {
+        assertThat(event)
+            .extracting(
+                SendCorrespondenceEvent::getNotificationParties,
+                SendCorrespondenceEvent::getEmailTemplate,
+                SendCorrespondenceEvent::getCaseDetails,
+                SendCorrespondenceEvent::getCaseDetailsBefore,
+                SendCorrespondenceEvent::getAuthToken,
+                SendCorrespondenceEvent::getEmailNotificationRequest
+            )
+            .contains(
+                List.of(party),
+                template,
+                caseDetails,
+                caseDetailsBefore,
+                AUTH_TOKEN,
+                notificationRequest
+            );
+    }
+
+    private static EmailTemplateNames intervenerExpectedTemplateNames(CaseType caseType) {
+        return CONTESTED.equals(caseType)
+            ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER
+            : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
     }
 }

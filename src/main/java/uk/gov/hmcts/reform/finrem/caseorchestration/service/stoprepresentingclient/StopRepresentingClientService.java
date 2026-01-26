@@ -438,7 +438,7 @@ public class StopRepresentingClientService {
 
     private void sendRepresentativeNotification(
         StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
-        NotificationRequest notificationRequest, IntervenerType intervenerType, Barrister barrsiter
+        NotificationRequest notificationRequest, IntervenerType intervenerType, Barrister barrister
     ) {
         String userAuthorisation = info.getUserAuthorisation();
 
@@ -450,7 +450,7 @@ public class StopRepresentingClientService {
             .caseDetailsBefore(info.getCaseDetailsBefore())
             .authToken(userAuthorisation)
             .intervenerType(intervenerType)
-            .barrister(barrsiter)
+            .barrister(barrister)
             .build()
         );
     }
