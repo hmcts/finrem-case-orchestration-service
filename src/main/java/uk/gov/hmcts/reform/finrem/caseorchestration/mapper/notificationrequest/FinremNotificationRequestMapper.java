@@ -256,7 +256,36 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         return getNotificationRequestForStopRepresentingClientEmail(caseDetails, caseRole, null);
     }
 
-    // TODO gen JavaDoc
+    /**
+     * Builds a {@link NotificationRequest} for a "stop representing client" email
+     * to a solicitor identified by the given {@link CaseRole}.
+     *
+     * <p>
+     * The solicitor details are resolved from the case data based on the supplied
+     * role:
+     * </p>
+     * <ul>
+     *   <li>Applicant or respondent solicitor for {@code APP_SOLICITOR} or {@code RESP_SOLICITOR}</li>
+     *   <li>Intervener solicitor for {@code INTVR_SOLICITOR_*} roles, in which case an
+     *   {@link IntervenerType} must be provided</li>
+     * </ul>
+     *
+     * <p>
+     * The resulting notification request is populated with standard case defaults,
+     * solicitor-specific fields, the date of issue, and (when applicable) intervener
+     * details.
+     * </p>
+     *
+     * @param caseDetails the Finrem case details
+     * @param caseRole the role identifying which solicitor should receive the notification
+     * @param intervenerType the intervener type, required when the {@code caseRole}
+     *                       represents an intervener solicitor; may be {@code null}
+     *                       otherwise
+     * @return the constructed {@link NotificationRequest}
+     * @throws IllegalArgumentException if an intervener solicitor role is provided
+     *                                  without an {@code intervenerType}
+     * @throws IllegalStateException if the provided {@code caseRole} is not supported
+     */
     public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
                                                                                     CaseRole caseRole,
                                                                                     IntervenerType intervenerType) {
@@ -283,11 +312,42 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .build();
     }
 
+    /**
+     * Builds a {@link NotificationRequest} for a "stop representing client" email
+     * to the given {@link Barrister}.
+     *
+     * <p>
+     * This is a convenience overload that delegates to
+     * {@link #getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails, Barrister, IntervenerType)}
+     * with no intervener context.
+     * </p>
+     *
+     * @param caseDetails the Finrem case details
+     * @param barrister the barrister who should receive the notification
+     * @return the constructed {@link NotificationRequest}
+     */
     public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
                                                                                     Barrister barrister) {
         return getNotificationRequestForStopRepresentingClientEmail(caseDetails, barrister, null);
     }
 
+    /**
+     * Builds a {@link NotificationRequest} for a "stop representing client" email
+     * to the given {@link Barrister}.
+     *
+     * <p>
+     * The notification request is populated using the barrister's contact details
+     * (email and name) along with standard case defaults, the date of issue, and
+     * the solicitor reference from the case data. When an {@link IntervenerType}
+     * is provided, the corresponding intervener details are also included.
+     * </p>
+     *
+     * @param caseDetails the Finrem case details
+     * @param barrister the barrister who should receive the notification
+     * @param intervenerType the intervener type to associate with the notification;
+     *                       may be {@code null} if not applicable
+     * @return the constructed {@link NotificationRequest}
+     */
     public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
                                                                                     Barrister barrister,
                                                                                     IntervenerType intervenerType) {
