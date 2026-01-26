@@ -17,7 +17,8 @@ public enum Features {
     CASE_FILE_VIEW_ENABLED("case_file_view_enabled"),
     EXPRESS_PILOT_ENABLED("express_pilot_enabled"),
     MANAGE_HEARING_ENABLED("manage_hearing_enabled"),
-    VACATE_HEARING_ENABLED("vacate_hearing_enabled");
+    VACATE_HEARING_ENABLED("vacate_hearing_enabled"),
+    MANAGE_CASE_DOCS_DELETE_ENABLED("manage_case_docs_delete_enabled");
 
     private final String name;
 }
