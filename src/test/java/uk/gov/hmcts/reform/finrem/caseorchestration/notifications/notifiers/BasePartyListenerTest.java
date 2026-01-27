@@ -5,6 +5,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -30,9 +31,9 @@ abstract class BasePartyListenerTest {
     @Mock
     protected InternationalPostalService internationalPostalService;
 
-    protected NotificationParty notificationParty;
+    protected NotificationParty[] notificationParty;
 
-    BasePartyListenerTest(NotificationParty notificationParty) {
+    BasePartyListenerTest(NotificationParty... notificationParty) {
         this.notificationParty = notificationParty;
     }
 
@@ -53,12 +54,20 @@ abstract class BasePartyListenerTest {
     protected SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(
         FinremCaseDetails caseDetailsBefore, EmailTemplateNames emailTemplate, String solicitorReferenceNumber) {
 
+        return sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate, solicitorReferenceNumber, null);
+    }
+
+    protected SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(
+        FinremCaseDetails caseDetailsBefore, EmailTemplateNames emailTemplate, String solicitorReferenceNumber,
+        IntervenerType intervenerType) {
+
         return SendCorrespondenceEvent.builder()
             .caseDetails(FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build())
             .caseDetailsBefore(caseDetailsBefore)
             .notificationParties(List.of(notificationParty))
             .emailNotificationRequest(emailNotificationRequest(solicitorReferenceNumber))
             .emailTemplate(emailTemplate)
+            .intervenerType(intervenerType)
             .build();
     }
 
