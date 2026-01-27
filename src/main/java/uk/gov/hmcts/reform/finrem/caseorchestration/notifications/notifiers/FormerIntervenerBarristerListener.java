@@ -4,12 +4,15 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.Set;
+
+import static java.util.Optional.ofNullable;
 
 @Component
 public class FormerIntervenerBarristerListener extends EmailNotificationOnlyListener {
@@ -41,11 +44,14 @@ public class FormerIntervenerBarristerListener extends EmailNotificationOnlyList
 
     @Override
     protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
-        if (event.getCaseDetailsBefore() != null && event.getIntervenerType() != null) {
+        IntervenerType intervenerType = event.getIntervenerType();
+        if (event.getCaseDetailsBefore() != null && intervenerType != null) {
             Barrister barrister = event.getBarrister();
             FinremCaseData caseDataBefore = event.getCaseDetailsBefore().getData();
-            return caseDataBefore.getBarristerCollectionWrapper()
-                .getIntervenerBarristersByIndex(event.getIntervenerType().getIntervenerId())
+            return ofNullable(
+                    caseDataBefore.getBarristerCollectionWrapper()
+                        .getIntervenerBarristersByIndex(intervenerType.getIntervenerId())
+                ).orElseThrow(IllegalStateException::new)
                 .stream()
                 .map(BarristerCollectionItem::getValue)
                 .anyMatch(b -> b.equals(barrister));

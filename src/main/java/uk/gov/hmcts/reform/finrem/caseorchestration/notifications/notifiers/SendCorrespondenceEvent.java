@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 public class SendCorrespondenceEvent {
     List<NotificationParty> notificationParties;
     NotificationRequest emailNotificationRequest;
