@@ -354,11 +354,11 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
                                                                                     IntervenerType intervenerType) {
         FinremCaseData caseData = caseDetails.getData();
 
-        boolean isApplicantBarrister = caseData.getBarristerCollectionWrapper().getApplicantBarristers()
+        boolean isApplicantBarrister = intervenerType == null && caseData.getBarristerCollectionWrapper().getApplicantBarristers()
             .stream().map(BarristerCollectionItem::getValue)
             .anyMatch(b -> b.equals(barrister));
 
-        boolean isRespondentBarrister = caseData.getBarristerCollectionWrapper().getRespondentBarristers()
+        boolean isRespondentBarrister = intervenerType == null && caseData.getBarristerCollectionWrapper().getRespondentBarristers()
             .stream().map(BarristerCollectionItem::getValue)
             .anyMatch(b -> b.equals(barrister));
 
@@ -367,6 +367,9 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             solicitorReferenceKey = caseData.getContactDetailsWrapper().getSolicitorReference();
         } else if (isRespondentBarrister) {
             solicitorReferenceKey = caseData.getContactDetailsWrapper().getRespondentSolicitorReference();
+        } else if (intervenerType != null) {
+            solicitorReferenceKey = caseData.getIntervenerById(intervenerType.getIntervenerId())
+                .getIntervenerSolicitorReference();
         }
 
         SolicitorCaseDataKeysWrapper solicitorCaseData = SolicitorCaseDataKeysWrapper.builder()
