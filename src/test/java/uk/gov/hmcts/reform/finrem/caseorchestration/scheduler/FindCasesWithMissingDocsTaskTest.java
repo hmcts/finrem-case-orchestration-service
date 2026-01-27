@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -44,7 +45,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CASE_CRON;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
 class FindCasesWithMissingDocsTaskTest {
@@ -82,11 +82,10 @@ class FindCasesWithMissingDocsTaskTest {
         );
 
         ReflectionTestUtils.setField(task, "taskEnabled", true);
-        ReflectionTestUtils.setField(task, "csvFile", "test.csv");
+        ReflectionTestUtils.setField(task, "csvFile", "findCasesWithMissingDocs.csv");
         ReflectionTestUtils.setField(task, "secret", "DUMMY_SECRET");
         ReflectionTestUtils.setField(task, "caseTypeId", CaseType.CONTESTED.getCcdType());
 
-        // Attach log appender (optional, but useful for the "logs error" test)
         Logger logger = (Logger) org.slf4j.LoggerFactory.getLogger(FindCasesWithMissingDocsTask.class);
         logAppender = new ListAppender<>();
         logAppender.start();
@@ -107,7 +106,7 @@ class FindCasesWithMissingDocsTaskTest {
 
     @Test
     void givenCaseHasNoDocuments_whenTaskRun_thenNoDownloadCalls() {
-        CaseDetails caseDetails = createCaseWithCollections(List.of()); // no docs
+        CaseDetails caseDetails = createCaseWithCollections(List.of());
 
         mockLoadCaseReferenceList();
         mockSystemUserToken();
@@ -117,6 +116,9 @@ class FindCasesWithMissingDocsTaskTest {
         task.run();
 
         verify(evidenceManagementDownloadService, never()).download(anyString(), anyString());
+        assertThat(logAppender.list)
+            .anyMatch(e -> e.getLevel() == Level.INFO
+                && e.getFormattedMessage().contains("Completed missing document scan for caseId=" + REFERENCE));
     }
 
     @Test
@@ -141,9 +143,63 @@ class FindCasesWithMissingDocsTaskTest {
     }
 
     @Test
-    void givenDocStoreReturns4xx_whenTaskRun_thenLogsErrorWithCaseDetails() {
-        UploadCaseDocumentCollection doc = collectionWithDoc("1", CaseDocumentType.STATEMENT_OF_ISSUES,
-            "file.pdf", "http://doc-url", "http://binary-url");
+    void givenDocStoreReturns4xx_whenTaskRun_thenLogsSingleErrorWithAllMissingDocs() {
+        UploadCaseDocumentCollection doc1 = collectionWithDoc("1", CaseDocumentType.STATEMENT_OF_ISSUES,
+            "file1.pdf", "http://doc-url1", "http://binary-url1");
+        UploadCaseDocumentCollection doc2 = collectionWithDoc("2", CaseDocumentType.STATEMENT_OF_ISSUES,
+            "file2.pdf", "http://doc-url2", "http://binary-url2");
+
+        CaseDetails caseDetails = createCaseWithCollections(List.of(doc1, doc2));
+
+        mockLoadCaseReferenceList();
+        mockSystemUserToken();
+        mockSearchCases(caseDetails);
+        mockStartEvent(caseDetails);
+
+        when(evidenceManagementDownloadService.download("http://binary-url1", AUTH_TOKEN))
+            .thenThrow(HttpClientErrorException.NotFound.create(
+                HttpStatus.NOT_FOUND,
+                "Not Found",
+                HttpHeaders.EMPTY,
+                null,
+                null
+            ));
+
+        when(evidenceManagementDownloadService.download("http://binary-url2", AUTH_TOKEN))
+            .thenThrow(HttpClientErrorException.NotFound.create(
+                HttpStatus.NOT_FOUND,
+                "Not Found",
+                HttpHeaders.EMPTY,
+                null,
+                null
+            ));
+
+        task.run();
+
+        assertThat(logAppender.list)
+            .anyMatch(e ->
+                e.getLevel() == Level.ERROR
+                    && e.getFormattedMessage().contains("Missing documents detected (404)")
+                    && e.getFormattedMessage().contains("caseId=" + REFERENCE)
+                    && e.getFormattedMessage().contains("missingCount=2")
+                    && e.getFormattedMessage().contains("filename=file1.pdf")
+                    && e.getFormattedMessage().contains("filename=file2.pdf")
+                    && e.getFormattedMessage().contains("url=http://doc-url1")
+                    && e.getFormattedMessage().contains("url=http://doc-url2")
+                    && e.getFormattedMessage().contains("binaryUrl=http://binary-url1")
+                    && e.getFormattedMessage().contains("binaryUrl=http://binary-url2")
+            );
+    }
+
+    @Test
+    void givenDocStoreThrowsUnexpectedException_whenTaskRun_thenLogsUnexpectedErrorWithDetails() {
+        UploadCaseDocumentCollection doc = collectionWithDoc(
+            "1",
+            CaseDocumentType.STATEMENT_OF_ISSUES,
+            "file1.pdf",
+            "http://doc-url1",
+            "http://binary-url1"
+        );
 
         CaseDetails caseDetails = createCaseWithCollections(List.of(doc));
 
@@ -152,26 +208,31 @@ class FindCasesWithMissingDocsTaskTest {
         mockSearchCases(caseDetails);
         mockStartEvent(caseDetails);
 
-        when(evidenceManagementDownloadService.download("http://binary-url", AUTH_TOKEN))
-            .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "Not Found"));
+        when(evidenceManagementDownloadService.download("http://binary-url1", AUTH_TOKEN))
+            .thenThrow(new RuntimeException("boom"));
 
         task.run();
 
         assertThat(logAppender.list)
             .anyMatch(e ->
                 e.getLevel() == Level.ERROR
-                    && e.getFormattedMessage().contains("Error checking document existence:")
+                    && e.getFormattedMessage().contains("Unexpected error downloading document:")
                     && e.getFormattedMessage().contains("caseId=" + REFERENCE)
-                    && e.getFormattedMessage().contains("filename=file.pdf")
-                    && e.getFormattedMessage().contains("url=http://doc-url")
-                    && e.getFormattedMessage().contains("binaryUrl=http://binary-url")
+                    && e.getFormattedMessage().contains("state=APPLICATION_ISSUED")
+                    && e.getFormattedMessage().contains("collection=STATEMENT_OF_ISSUES")
+                    && e.getFormattedMessage().contains("binaryUrl=http://binary-url1")
+                    && e.getThrowableProxy() != null
+                    && e.getThrowableProxy().getClassName().equals(RuntimeException.class.getName())
+                    && e.getThrowableProxy().getMessage().contains("boom")
             );
+
+        verify(evidenceManagementDownloadService).download("http://binary-url1", AUTH_TOKEN);
     }
 
     private void mockLoadCaseReferenceList() {
         CaseReference caseReference = new CaseReference();
         caseReference.setCaseReference(REFERENCE);
-        when(caseReferenceCsvLoader.loadCaseReferenceList("test.csv", "DUMMY_SECRET"))
+        when(caseReferenceCsvLoader.loadCaseReferenceList("findCasesWithMissingDocs.csv", "DUMMY_SECRET"))
             .thenReturn(List.of(caseReference));
     }
 
@@ -193,7 +254,7 @@ class FindCasesWithMissingDocsTaskTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(ccdService.startEventForCaseWorker(AUTH_TOKEN, REFERENCE, CONTESTED.getCcdType(),
+        when(ccdService.startEventForCaseWorker(AUTH_TOKEN, REFERENCE, CaseType.CONTESTED.getCcdType(),
             AMEND_CASE_CRON.getCcdType())).thenReturn(startEventResponse);
     }
 
