@@ -913,7 +913,7 @@ class FinremNotificationRequestMapperTest {
     }
 
     @Test
-    void givenCase_whenStopRepresentingEmailToIntBarrister_thenBuildNotificationRequest() {
+    void givenCase_whenStopRepresentingEmailToIntvBarrister_thenBuildNotificationRequest() {
         NotificationRequestBuilder builder = spy(new NotificationRequestBuilder(courtDetailsConfiguration, consentedApplicationHelper));
         when(builderFactory.newInstance()).thenReturn(builder);
 
