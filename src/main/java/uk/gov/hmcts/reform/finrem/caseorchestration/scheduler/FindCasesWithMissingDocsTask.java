@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -48,12 +51,25 @@ public class FindCasesWithMissingDocsTask extends EncryptedCsvFileProcessingTask
         FinremCaseData caseData = finremCaseDetails.getData();
         String caseId = finremCaseDetails.getCaseIdAsString();
 
+        //collect missing docs for this case (only 404s)
+        List<String> missingDocs = new ArrayList<>();
+
         caseData.getUploadCaseDocumentWrapper()
             .getAllManageableCollections()
             .stream()
             .map(UploadCaseDocumentCollection::getUploadCaseDocument)
             .filter(Objects::nonNull)
-            .forEach(uploadCaseDocument -> checkAndLogMissingDocument(caseId, caseData, uploadCaseDocument));
+            .forEach(uploadCaseDocument -> checkAndCollectMissingDocument(caseId, caseData,
+                uploadCaseDocument, missingDocs));
+
+        if (!missingDocs.isEmpty()) {
+            String header = String.format(
+                "Missing documents detected (404) | caseId=%s | state=%s | missingCount=%d",
+                caseId, finremCaseDetails.getState(), missingDocs.size()
+            );
+
+            log.error("{}\n{}", header, String.join("\n", missingDocs));
+        }
 
         log.info("Completed missing document scan for caseId={}", caseId);
     }
@@ -69,7 +85,11 @@ public class FindCasesWithMissingDocsTask extends EncryptedCsvFileProcessingTask
      * @param caseData           the data associated with the case, containing state and document details
      * @param uploadCaseDocument the document to be checked for existence, including its metadata and URLs
      */
-    private void checkAndLogMissingDocument(String caseId, FinremCaseData caseData, UploadCaseDocument uploadCaseDocument) {
+    private void checkAndCollectMissingDocument(String caseId,
+                                                FinremCaseData caseData,
+                                                UploadCaseDocument uploadCaseDocument,
+                                                List<String> missingDocs) {
+
         String caseState = caseData.getState();
         String documentUrl = uploadCaseDocument.getCaseDocuments().getDocumentUrl();
         String documentFilename = uploadCaseDocument.getCaseDocuments().getDocumentFilename();
@@ -81,9 +101,12 @@ public class FindCasesWithMissingDocsTask extends EncryptedCsvFileProcessingTask
 
         try {
             evidenceManagementDownloadService.download(binaryFileUrl, systemUserService.getSysUserToken());
-        } catch (HttpClientErrorException ex) {
-            log.error("Error checking document existence: caseId={}, state={}, collection={}, filename={}, url={}, binaryUrl={}",
-                caseId, caseState, collectionName, documentFilename, documentUrl, binaryFileUrl, ex);
+        } catch (HttpClientErrorException.NotFound | FeignException.NotFound ex) {
+            missingDocs.add(String.format("collection=%s, filename=%s, url=%s, binaryUrl=%s",
+                collectionName, documentFilename, documentUrl, binaryFileUrl));
+        } catch (Exception ex) {
+            log.error("Unexpected error downloading document: caseId={}, state={}, collection={}, binaryUrl={}",
+                caseId, caseState, collectionName, binaryFileUrl, ex);
         }
     }
 
