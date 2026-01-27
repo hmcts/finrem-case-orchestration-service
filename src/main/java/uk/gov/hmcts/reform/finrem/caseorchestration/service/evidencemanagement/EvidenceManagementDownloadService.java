@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
 
 import static java.lang.String.format;
 
