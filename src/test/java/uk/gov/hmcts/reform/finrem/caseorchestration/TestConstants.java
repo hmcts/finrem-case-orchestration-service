@@ -33,6 +33,10 @@ public class TestConstants {
     public static final String TEST_RESP_SOLICITOR_NAME = "Test Resp Sol";
     public static final String TEST_RESP_SOLICITOR_EMAIL = "testRespSolicitor@email.com";
 
+    public static final String TEST_APP_BARRISTER_USER_ID = "APPasd41290423948234";
+    public static final String TEST_APP_BARRISTER_NAME = "Test Applicant Bar";
+    public static final String TEST_APP_BARRISTER_EMAIL = "testApplBarrister@email.com";
+
     public static final String TEST_RESP_BARRISTER_USER_ID = "asdasd41290423948234";
     public static final String TEST_RESP_BARRISTER_NAME = "Test Resp Bar";
     public static final String TEST_RESP_BARRISTER_EMAIL = "testRespBarrister@email.com";
@@ -50,6 +54,7 @@ public class TestConstants {
     public static final String TEST_INTV_SOLICITOR_FIRM = "INTV SOL FIRM";
     public static final String TEST_INTV_BARRISTER_EMAIL = "testIntvBarrister@email.com";
     public static final String TEST_INTV_BARRISTER_NAME = "Test Intv Barrister";
+    public static final String TEST_INTV_BARRISTER_USER_ID = "bbbasdd41290423948234";
 
     public static final String TEST_CTSC_EMAIL = "testCtsc@email.com";
     public static final String TEST_JUDGE_EMAIL = "testJudge@email.com";
