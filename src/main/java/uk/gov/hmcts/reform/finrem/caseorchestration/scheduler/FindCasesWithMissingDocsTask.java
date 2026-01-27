@@ -93,7 +93,6 @@ public class FindCasesWithMissingDocsTask extends EncryptedCsvFileProcessingTask
 
         String caseState = caseData.getState();
         String documentUrl = uploadCaseDocument.getCaseDocuments().getDocumentUrl();
-        String documentFilename = uploadCaseDocument.getCaseDocuments().getDocumentFilename();
         String binaryFileUrl = uploadCaseDocument.getCaseDocuments().getDocumentBinaryUrl();
 
         String collectionName = uploadCaseDocument.getCaseDocumentType() != null
@@ -103,8 +102,8 @@ public class FindCasesWithMissingDocsTask extends EncryptedCsvFileProcessingTask
         try {
             evidenceManagementDownloadService.download(binaryFileUrl, systemUserService.getSysUserToken());
         } catch (HttpClientErrorException.NotFound | FeignException.NotFound ex) {
-            missingDocs.add(String.format("collection=%s, filename=%s, url=%s, binaryUrl=%s",
-                collectionName, documentFilename, documentUrl, binaryFileUrl));
+            missingDocs.add(String.format("collection=%s, url=%s",
+                collectionName, documentUrl));
         } catch (Exception ex) {
             log.error("Unexpected error downloading document: caseId={}, state={}, collection={}, binaryUrl={}",
                 caseId, caseState, collectionName, binaryFileUrl, ex);
