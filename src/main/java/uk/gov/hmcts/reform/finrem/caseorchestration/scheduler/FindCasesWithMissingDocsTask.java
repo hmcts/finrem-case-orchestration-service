@@ -112,8 +112,7 @@ public class FindCasesWithMissingDocsTask extends EncryptedCsvFileProcessingTask
 
     @Override
     protected String getDescription(FinremCaseDetails finremCaseDetails) {
-        return String.format("Check for dm store: %s",
-            finremCaseDetails.getData().getCcdCaseId());
+        return "Admin document integrity check";
     }
 
     @Override
