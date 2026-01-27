@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -15,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
 import java.util.Objects;
-import java.util.Optional;
 
 @Component
 @Slf4j
@@ -37,51 +37,53 @@ public class FindCasesWithMissingDocsTask extends EncryptedCsvFileProcessingTask
     public FindCasesWithMissingDocsTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService,
                                         SystemUserService systemUserService,
                                         FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                        EvidenceManagementDownloadService evidenceManagementDownloadService, SystemUserService systemUserService1) {
+                                        EvidenceManagementDownloadService evidenceManagementDownloadService) {
         super(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
         this.evidenceManagementDownloadService = evidenceManagementDownloadService;
-        this.systemUserService = systemUserService1;
+        this.systemUserService = systemUserService;
     }
 
-@Override
-protected void executeTask(FinremCaseDetails finremCaseDetails) {
-    FinremCaseData caseData = finremCaseDetails.getData();
-    String caseId = finremCaseDetails.getCaseIdAsString();
+    @Override
+    protected void executeTask(FinremCaseDetails finremCaseDetails) {
+        FinremCaseData caseData = finremCaseDetails.getData();
+        String caseId = finremCaseDetails.getCaseIdAsString();
 
-    caseData.getUploadCaseDocumentWrapper()
-        .getAllManageableCollections()
-        .stream()
-        .map(UploadCaseDocumentCollection::getUploadCaseDocument)
-        .filter(Objects::nonNull)
-        .forEach(uploadCaseDocument -> checkAndLogMissingDocument(caseId, uploadCaseDocument));
+        caseData.getUploadCaseDocumentWrapper()
+            .getAllManageableCollections()
+            .stream()
+            .map(UploadCaseDocumentCollection::getUploadCaseDocument)
+            .filter(Objects::nonNull)
+            .forEach(uploadCaseDocument -> checkAndLogMissingDocument(caseId, caseData, uploadCaseDocument));
 
-    log.info("Completed missing document scan for caseId={}", caseId);
-}
+        log.info("Completed missing document scan for caseId={}", caseId);
+    }
 
     /**
-     * Checks if the document exists and logs if missing.
+     * Checks if the document exists in the document management store and logs an error if it is missing.
+     * <p>
+     * This method attempts to download the document using its binary file URL. If the download fails,
+     * an error is logged with details about the case, document, and the exception.
+     * </p>
      *
-     * @param caseId the case reference
-     * @param uploadCaseDocument the document to check
+     * @param caseId             the unique identifier of the case
+     * @param caseData           the data associated with the case, containing state and document details
+     * @param uploadCaseDocument the document to be checked for existence, including its metadata and URLs
      */
-    private void checkAndLogMissingDocument(String caseId, UploadCaseDocument uploadCaseDocument) {
+    private void checkAndLogMissingDocument(String caseId, FinremCaseData caseData, UploadCaseDocument uploadCaseDocument) {
+        String caseState = caseData.getState();
         String documentUrl = uploadCaseDocument.getCaseDocuments().getDocumentUrl();
         String documentFilename = uploadCaseDocument.getCaseDocuments().getDocumentFilename();
+        String binaryFileUrl = uploadCaseDocument.getCaseDocuments().getDocumentBinaryUrl();
 
-        //if we need this
         String collectionName = uploadCaseDocument.getCaseDocumentType() != null
             ? uploadCaseDocument.getCaseDocumentType().name()
             : "unknownType";
 
         try {
-            Optional<Boolean> exists = evidenceManagementDownloadService.documentExists(documentUrl, systemUserService.getSysUserToken());
-            if (exists.isPresent() && !exists.get()) {
-                log.warn("Missing document detected: caseId={}, collection={}, filename={}, url={}, status=404",
-                    caseId, collectionName, documentFilename, documentUrl);
-            }
-        } catch (Exception ex) {
-            log.error("Error checking document existence: caseId={}, collection={}, filename={}, url={}",
-                caseId, collectionName, documentFilename, documentUrl, ex);
+            evidenceManagementDownloadService.download(binaryFileUrl, systemUserService.getSysUserToken());
+        } catch (HttpClientErrorException ex) {
+            log.error("Error checking document existence: caseId={}, state={}, collection={}, filename={}, url={}, binaryUrl={}",
+                caseId, caseState, collectionName, documentFilename, documentUrl, binaryFileUrl, ex);
         }
     }
 
