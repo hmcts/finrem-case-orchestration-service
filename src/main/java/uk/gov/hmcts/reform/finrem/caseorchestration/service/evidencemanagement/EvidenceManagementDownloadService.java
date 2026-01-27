@@ -53,30 +53,6 @@ public class EvidenceManagementDownloadService {
     }
 
     /**
-     * Checks if a document exists at the given URL in docstore or secure doc.
-     *
-     * @param documentUrl the document URL to check
-     * @param auth the authentication token
-     * @return Optional\<Boolean\> true if the document exists (HTTP 200), false if not (HTTP 404), empty if error
-     */
-    public Optional<Boolean> documentExists(String documentUrl, String auth) {
-        try {
-            if (featureToggleService.isSecureDocEnabled()) {
-                downloadFromSecDoc(documentUrl, auth);
-            } else {
-                downloadFromDmStore(documentUrl);
-            }
-            return Optional.of(true);
-        } catch (HttpClientErrorException.NotFound ex) {
-            log.warn("Document not found at URL: {}", documentUrl);
-            return Optional.of(false);
-        } catch (Exception ex) {
-            log.error("Error checking document existence for URL: {}", documentUrl, ex);
-            return Optional.empty();
-        }
-    }
-
-    /**
      * Downloads the document from the given CaseDocument and returns its content as a byte array.
      *
      * @param caseDocument the CaseDocument containing the URL of the document to download
