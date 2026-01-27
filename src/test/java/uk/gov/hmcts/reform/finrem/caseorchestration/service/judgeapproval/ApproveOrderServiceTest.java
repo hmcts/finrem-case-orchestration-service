@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -17,12 +18,14 @@ import java.util.stream.Stream;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.SCHEDULE_RAISE_DIRECTIONS_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.LEGAL_REP_NEEDS_TO_MAKE_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
@@ -93,5 +96,27 @@ class ApproveOrderServiceTest {
                 0, FALSE, FALSE
             )
         );
+    }
+
+    @Test
+    void testStateChangesWhenOrderApproved() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().build())
+            .build();
+
+        CaseDocument targetDoc = CaseDocument.builder()
+            .documentFilename("draftOrder.docx")
+            .build();
+
+        DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
+            .judgeApproval1(JudgeApproval.builder()
+                .document(targetDoc)
+                .judgeDecision(READY_TO_BE_SEALED)
+                .build())
+            .build();
+
+        underTest.populateJudgeDecisions(caseDetails, draftOrdersWrapper, AUTH_TOKEN);
+
+        assertThat(caseDetails.getData().getState()).isEqualTo(SCHEDULE_RAISE_DIRECTIONS_ORDER.getStateId());
     }
 }
