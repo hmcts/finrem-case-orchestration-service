@@ -58,6 +58,33 @@ protected void executeTask(FinremCaseDetails finremCaseDetails) {
     log.info("Completed missing document scan for caseId={}", caseId);
 }
 
+    /**
+     * Checks if the document exists and logs if missing.
+     *
+     * @param caseId the case reference
+     * @param uploadCaseDocument the document to check
+     */
+    private void checkAndLogMissingDocument(String caseId, UploadCaseDocument uploadCaseDocument) {
+        String documentUrl = uploadCaseDocument.getCaseDocuments().getDocumentUrl();
+        String documentFilename = uploadCaseDocument.getCaseDocuments().getDocumentFilename();
+
+        //if we need this
+        String collectionName = uploadCaseDocument.getCaseDocumentType() != null
+            ? uploadCaseDocument.getCaseDocumentType().name()
+            : "unknownType";
+
+        try {
+            Optional<Boolean> exists = evidenceManagementDownloadService.documentExists(documentUrl, systemUserService.getSysUserToken());
+            if (exists.isPresent() && !exists.get()) {
+                log.warn("Missing document detected: caseId={}, collection={}, filename={}, url={}, status=404",
+                    caseId, collectionName, documentFilename, documentUrl);
+            }
+        } catch (Exception ex) {
+            log.error("Error checking document existence: caseId={}, collection={}, filename={}, url={}",
+                caseId, collectionName, documentFilename, documentUrl, ex);
+        }
+    }
+
     @Override
     protected String getDescription(FinremCaseDetails finremCaseDetails) {
         return String.format("Check for dm store: %s",
