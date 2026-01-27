@@ -76,6 +76,7 @@ public class FindCasesWithMissingDocsTask extends EncryptedCsvFileProcessingTask
 
     /**
      * Checks if the document exists in the document management store and logs an error if it is missing.
+     *
      * <p>
      * This method attempts to download the document using its binary file URL. If the download fails,
      * an error is logged with details about the case, document, and the exception.
