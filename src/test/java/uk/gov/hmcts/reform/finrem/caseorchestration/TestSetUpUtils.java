@@ -567,13 +567,27 @@ public class TestSetUpUtils {
     }
 
     public static List<BarristerCollectionItem> barristers(String orgId, String userId) {
+        return barristers(orgId, userId, null, null);
+    }
+
+    public static List<BarristerCollectionItem> barristers(String orgId, String userId, String name) {
+        return barristers(orgId, userId, name, null);
+    }
+
+    public static List<BarristerCollectionItem> barristers(String orgId, String userId, String name, String email) {
         return new ArrayList<>(List.of(
             BarristerCollectionItem.builder()
-                .value(Barrister.builder()
-                    .organisation(organisation(orgId))
-                    .userId(userId)
-                    .build())
+                .value(barrister(orgId, userId, name, email))
                 .build()
         ));
+    }
+
+    public static Barrister barrister(String orgId, String userId, String name, String email) {
+        return Barrister.builder()
+            .organisation(organisation(orgId))
+            .userId(userId)
+            .name(name)
+            .email(email)
+            .build();
     }
 }

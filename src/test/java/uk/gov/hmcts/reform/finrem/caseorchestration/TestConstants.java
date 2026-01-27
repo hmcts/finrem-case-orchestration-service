@@ -33,12 +33,23 @@ public class TestConstants {
     public static final String TEST_RESP_SOLICITOR_NAME = "Test Resp Sol";
     public static final String TEST_RESP_SOLICITOR_EMAIL = "testRespSolicitor@email.com";
 
-    public static final String TEST_INTV1_SOLICITOR_REFERENCE = "IN-987654321";
-    public static final String TEST_INTV1_SOLICITOR_NAME = "Test Intv Sol";
-    public static final String TEST_INTV1_SOLICITOR_EMAIL = "testIntvSolicitor@email.com";
-    public static final String TEST_INTV1_SOLICITOR_FIRM = "INTV1 SOL FIRM";
+    public static final String TEST_RESP_BARRISTER_USER_ID = "asdasd41290423948234";
+    public static final String TEST_RESP_BARRISTER_NAME = "Test Resp Bar";
+    public static final String TEST_RESP_BARRISTER_EMAIL = "testRespBarrister@email.com";
 
-    public static final String TEST_INTV1_BARRISTER_EMAIL = "testIntvBarrister@email.com";
+    public static final String TEST_INTV1_SOLICITOR_REFERENCE = "IN-987654321";
+    public static final String TEST_INTV1_SOLICITOR_NAME = "Test Intv1 Sol";
+    public static final String TEST_INTV1_SOLICITOR_EMAIL = "testIntv1Solicitor@email.com";
+    public static final String TEST_INTV1_SOLICITOR_FIRM = "INTV1 SOL FIRM";
+    public static final String TEST_INTV1_BARRISTER_EMAIL = "testIntv1Barrister@email.com";
+    public static final String TEST_INTV1_BARRISTER_NAME = "Test Intv 1 Barrister";
+
+    public static final String TEST_INTV_SOLICITOR_REFERENCE = "IN-X87654321";
+    public static final String TEST_INTV_SOLICITOR_NAME = "Test Intv Sol";
+    public static final String TEST_INTV_SOLICITOR_EMAIL = "testIntvSolicitor@email.com";
+    public static final String TEST_INTV_SOLICITOR_FIRM = "INTV SOL FIRM";
+    public static final String TEST_INTV_BARRISTER_EMAIL = "testIntvBarrister@email.com";
+    public static final String TEST_INTV_BARRISTER_NAME = "Test Intv Barrister";
 
     public static final String TEST_CTSC_EMAIL = "testCtsc@email.com";
     public static final String TEST_JUDGE_EMAIL = "testJudge@email.com";

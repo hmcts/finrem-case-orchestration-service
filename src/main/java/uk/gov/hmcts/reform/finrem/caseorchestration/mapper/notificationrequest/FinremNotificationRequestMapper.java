@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
@@ -354,11 +355,11 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
                                                                                     IntervenerType intervenerType) {
         FinremCaseData caseData = caseDetails.getData();
 
-        boolean isApplicantBarrister = intervenerType == null && caseData.getBarristerCollectionWrapper().getApplicantBarristers()
+        boolean isApplicantBarrister = intervenerType == null && emptyIfNull(caseData.getBarristerCollectionWrapper().getApplicantBarristers())
             .stream().map(BarristerCollectionItem::getValue)
             .anyMatch(b -> b.equals(barrister));
 
-        boolean isRespondentBarrister = intervenerType == null && caseData.getBarristerCollectionWrapper().getRespondentBarristers()
+        boolean isRespondentBarrister = intervenerType == null && emptyIfNull(caseData.getBarristerCollectionWrapper().getRespondentBarristers())
             .stream().map(BarristerCollectionItem::getValue)
             .anyMatch(b -> b.equals(barrister));
 

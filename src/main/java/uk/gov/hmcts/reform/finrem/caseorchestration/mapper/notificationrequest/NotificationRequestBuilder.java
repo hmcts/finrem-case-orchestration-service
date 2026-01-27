@@ -87,7 +87,7 @@ public class NotificationRequestBuilder {
     public NotificationRequestBuilder withCaseDefaults(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
 
-        caseReferenceNumber = String.valueOf(caseDetails.getId());
+        caseReferenceNumber = caseDetails.getCaseIdAsString();
         applicantName = caseData.getFullApplicantName();
         caseType = CaseType.CONTESTED.equals(caseDetails.getCaseType()) ? EmailService.CONTESTED : EmailService.CONSENTED;
         divorceCaseNumber = caseData.getDivorceCaseNumber();
