@@ -46,7 +46,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -106,7 +105,6 @@ class FinremNotificationRequestMapperTest {
 
     private static final String TEST_JSON = "/fixtures/contested/interim-hearing-three-collection-no-track.json";
     protected static final String EMPTY_STRING = "";
-    private static final LocalDate TODAY = LocalDate.of(2024, 11, 4);
 
     @InjectMocks
     FinremNotificationRequestMapper notificationRequestMapper;
