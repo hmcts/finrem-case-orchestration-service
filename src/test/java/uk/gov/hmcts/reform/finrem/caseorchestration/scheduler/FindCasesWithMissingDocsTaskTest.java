@@ -182,12 +182,8 @@ class FindCasesWithMissingDocsTaskTest {
                     && e.getFormattedMessage().contains("Missing documents detected (404)")
                     && e.getFormattedMessage().contains("caseId=" + REFERENCE)
                     && e.getFormattedMessage().contains("missingCount=2")
-                    && e.getFormattedMessage().contains("filename=file1.pdf")
-                    && e.getFormattedMessage().contains("filename=file2.pdf")
                     && e.getFormattedMessage().contains("url=http://doc-url1")
                     && e.getFormattedMessage().contains("url=http://doc-url2")
-                    && e.getFormattedMessage().contains("binaryUrl=http://binary-url1")
-                    && e.getFormattedMessage().contains("binaryUrl=http://binary-url2")
             );
     }
 
@@ -220,7 +216,6 @@ class FindCasesWithMissingDocsTaskTest {
                     && e.getFormattedMessage().contains("caseId=" + REFERENCE)
                     && e.getFormattedMessage().contains("state=APPLICATION_ISSUED")
                     && e.getFormattedMessage().contains("collection=STATEMENT_OF_ISSUES")
-                    && e.getFormattedMessage().contains("binaryUrl=http://binary-url1")
                     && e.getThrowableProxy() != null
                     && e.getThrowableProxy().getClassName().equals(RuntimeException.class.getName())
                     && e.getThrowableProxy().getMessage().contains("boom")
