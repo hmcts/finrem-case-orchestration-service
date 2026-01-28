@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionHighCourtFrc;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,33 +34,15 @@ class DocumentConfigurationTest {
     @Autowired
     private DocumentConfiguration documentConfiguration;
 
-    private FinremCaseDetails finremCaseDetails;
-
-    @BeforeEach
-    void setUp() {
-        finremCaseDetails = FinremCaseDetails.builder()
-            .id(1L)
-            .data(
-                FinremCaseData.builder()
-                    .regionWrapper(
-                        RegionWrapper.builder()
-                            .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
-                                .build())
-                            .build())
-                    .build())
-            .build();
-    }
-
     @Test
     void returnsStandardTemplate_whenHighCourtNotSelected() {
-        assertThat(documentConfiguration.getVacateHearingNoticeTemplate(finremCaseDetails))
+        assertThat(documentConfiguration.getVacateOrAdjournNoticeTemplate(Region.SOUTHWEST))
             .isEqualTo("FL-FRM-HNO-ENG-00024.docx");
     }
 
     @Test
     void returnsHighCourtTemplate_whenHighCourtSelected() {
-        finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setHighCourtFrcList(RegionHighCourtFrc.HIGHCOURT);
-        assertThat(documentConfiguration.getVacateHearingNoticeTemplate(finremCaseDetails))
+        assertThat(documentConfiguration.getVacateOrAdjournNoticeTemplate(Region.HIGHCOURT))
             .isEqualTo("FL-FRM-HNO-ENG-00025.docx");
     }
 }

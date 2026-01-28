@@ -106,7 +106,8 @@ public class ManageHearingsCorresponder {
             finremCaseDetails,
             vacateOrAdjournedHearing,
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
-            userAuthorisation, documentsToPost,
+            userAuthorisation,
+            documentsToPost,
             FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR
         );
     }

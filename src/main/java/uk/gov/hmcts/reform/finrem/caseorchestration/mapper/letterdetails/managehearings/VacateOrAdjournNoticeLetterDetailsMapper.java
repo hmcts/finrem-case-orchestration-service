@@ -20,10 +20,10 @@ import java.util.UUID;
 import static java.util.Optional.ofNullable;
 
 @Component
-public class VacateHearingNoticeLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
+public class VacateOrAdjournNoticeLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
 
-    public VacateHearingNoticeLetterDetailsMapper(CourtDetailsConfiguration courtDetailsConfiguration,
-                                                  ObjectMapper objectMapper) {
+    public VacateOrAdjournNoticeLetterDetailsMapper(CourtDetailsConfiguration courtDetailsConfiguration,
+                                                    ObjectMapper objectMapper) {
         super(objectMapper, courtDetailsConfiguration);
     }
 
@@ -61,6 +61,7 @@ public class VacateHearingNoticeLetterDetailsMapper extends AbstractManageHearin
             .typeOfApplication(getSchedule1OrMatrimonial(caseData))
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
             .vacateHearingReasons(reasonString)
+            .vacateOrAdjournAction(vacatedOrAdjournedHearing.getHearingStatus().getDescription())
             .build();
     }
 }
