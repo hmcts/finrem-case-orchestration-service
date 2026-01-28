@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -124,9 +125,9 @@ class FindCasesWithMissingDocsTaskTest {
     @Test
     void givenCaseHasTwoDocuments_whenTaskRun_thenDownloadsBothBinaryUrlsWithSysToken() {
         UploadCaseDocumentCollection doc1 = collectionWithDoc("1", CaseDocumentType.STATEMENT_OF_ISSUES,
-            "a.pdf", "http://a", "http://a-bin");
+            "a.pdf", "http://doc-url-a/b28d4f46-7eb3-4816-828d-49eec9ed1497", "http://doc-url-a/b28d4f46-7eb3-4816-828d-49eec9ed1497/binary");
         UploadCaseDocumentCollection doc2 = collectionWithDoc("2", CaseDocumentType.STATEMENT_OF_ISSUES,
-            "b.pdf", "http://b", "http://b-bin");
+            "b.pdf", "http://doc-url-b/2e66b42d-ac38-42c7-93ad-6e2ff8c2c851", "http://doc-url-b/2e66b42d-ac38-42c7-93ad-6e2ff8c2c851/binary");
 
         CaseDetails caseDetails = createCaseWithCollections(List.of(doc1, doc2));
 
@@ -138,16 +139,16 @@ class FindCasesWithMissingDocsTaskTest {
         task.run();
 
         verify(systemUserService, atLeastOnce()).getSysUserToken();
-        verify(evidenceManagementDownloadService).download("http://a-bin", AUTH_TOKEN);
-        verify(evidenceManagementDownloadService).download("http://b-bin", AUTH_TOKEN);
+        verify(evidenceManagementDownloadService).getDocumentMetaData(UUID.fromString("b28d4f46-7eb3-4816-828d-49eec9ed1497"), AUTH_TOKEN);
+        verify(evidenceManagementDownloadService).getDocumentMetaData(UUID.fromString("2e66b42d-ac38-42c7-93ad-6e2ff8c2c851"), AUTH_TOKEN);
     }
 
     @Test
     void givenDocStoreReturns4xx_whenTaskRun_thenLogsSingleErrorWithAllMissingDocs() {
         UploadCaseDocumentCollection doc1 = collectionWithDoc("1", CaseDocumentType.STATEMENT_OF_ISSUES,
-            "file1.pdf", "http://doc-url1", "http://binary-url1");
+            "a.pdf", "http://doc-url-a/b28d4f46-7eb3-4816-828d-49eec9ed1497", "http://doc-url-a/b28d4f46-7eb3-4816-828d-49eec9ed1497/binary");
         UploadCaseDocumentCollection doc2 = collectionWithDoc("2", CaseDocumentType.STATEMENT_OF_ISSUES,
-            "file2.pdf", "http://doc-url2", "http://binary-url2");
+            "b.pdf", "http://doc-url-b/2e66b42d-ac38-42c7-93ad-6e2ff8c2c851", "http://doc-url-b/2e66b42d-ac38-42c7-93ad-6e2ff8c2c851/binary");
 
         CaseDetails caseDetails = createCaseWithCollections(List.of(doc1, doc2));
 
@@ -156,7 +157,7 @@ class FindCasesWithMissingDocsTaskTest {
         mockSearchCases(caseDetails);
         mockStartEvent(caseDetails);
 
-        when(evidenceManagementDownloadService.download("http://binary-url1", AUTH_TOKEN))
+        when(evidenceManagementDownloadService.getDocumentMetaData(UUID.fromString("b28d4f46-7eb3-4816-828d-49eec9ed1497"), AUTH_TOKEN))
             .thenThrow(HttpClientErrorException.NotFound.create(
                 HttpStatus.NOT_FOUND,
                 "Not Found",
@@ -165,7 +166,7 @@ class FindCasesWithMissingDocsTaskTest {
                 null
             ));
 
-        when(evidenceManagementDownloadService.download("http://binary-url2", AUTH_TOKEN))
+        when(evidenceManagementDownloadService.getDocumentMetaData(UUID.fromString("2e66b42d-ac38-42c7-93ad-6e2ff8c2c851"), AUTH_TOKEN))
             .thenThrow(HttpClientErrorException.NotFound.create(
                 HttpStatus.NOT_FOUND,
                 "Not Found",
@@ -182,8 +183,8 @@ class FindCasesWithMissingDocsTaskTest {
                     && e.getFormattedMessage().contains("Missing documents detected (404)")
                     && e.getFormattedMessage().contains("caseId=" + REFERENCE)
                     && e.getFormattedMessage().contains("missingCount=2")
-                    && e.getFormattedMessage().contains("url=http://doc-url1")
-                    && e.getFormattedMessage().contains("url=http://doc-url2")
+                    && e.getFormattedMessage().contains("url=http://doc-url-a/b28d4f46-7eb3-4816-828d-49eec9ed1497")
+                    && e.getFormattedMessage().contains("url=http://doc-url-b/2e66b42d-ac38-42c7-93ad-6e2ff8c2c851")
             );
     }
 
@@ -193,8 +194,8 @@ class FindCasesWithMissingDocsTaskTest {
             "1",
             CaseDocumentType.STATEMENT_OF_ISSUES,
             "file1.pdf",
-            "http://doc-url1",
-            "http://binary-url1"
+            "http://doc-url/b28d4f46-7eb3-4816-828d-49eec9ed1497",
+            "http://binary-url/b28d4f46-7eb3-4816-828d-49eec9ed1497/binary"
         );
 
         CaseDetails caseDetails = createCaseWithCollections(List.of(doc));
@@ -204,7 +205,7 @@ class FindCasesWithMissingDocsTaskTest {
         mockSearchCases(caseDetails);
         mockStartEvent(caseDetails);
 
-        when(evidenceManagementDownloadService.download("http://binary-url1", AUTH_TOKEN))
+        when(evidenceManagementDownloadService.getDocumentMetaData(UUID.fromString("b28d4f46-7eb3-4816-828d-49eec9ed1497"), AUTH_TOKEN))
             .thenThrow(new RuntimeException("boom"));
 
         task.run();
@@ -221,7 +222,7 @@ class FindCasesWithMissingDocsTaskTest {
                     && e.getThrowableProxy().getMessage().contains("boom")
             );
 
-        verify(evidenceManagementDownloadService).download("http://binary-url1", AUTH_TOKEN);
+        verify(evidenceManagementDownloadService).getDocumentMetaData(UUID.fromString("b28d4f46-7eb3-4816-828d-49eec9ed1497"), AUTH_TOKEN);
     }
 
     private void mockLoadCaseReferenceList() {
