@@ -240,9 +240,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             Address intervener2Addr = mock(Address.class);
 
             FinremCaseData caseData = FinremCaseData.builder()
-                .intervenerThree(IntervenerThree.builder().intervenerAddress(intervener3Addr).build())
+                .intervenerThree(IntervenerThree.builder().build())
                 .barristerCollectionWrapper(intervenerBarristerCollectionWrapper(3, TEST_ORG_ID, TEST_USER_ID))
-                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(null).toBuilder()
+                .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(intervener3Addr).toBuilder()
                     .extraClientAddr1(respondentAddr)
                     .extraClientAddr1Confidential(YesOrNo.forValue(false))
                     .extraClientAddr1Id(ExtraAddrType.RESPONDENT.getId())
