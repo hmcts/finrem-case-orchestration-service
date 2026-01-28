@@ -442,8 +442,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     private void populateMainServiceAddressToIntervener(StopRepresentingRequest request,
                                                         Pair<Address, Boolean> serviceAddressConfig) {
         Address serviceAddress = serviceAddressConfig.getLeft();
-        if (isRepresentingAnyIntervenerBarristers(request)) {
-            // could be null and skip this population
+        if (isRepresentingAnyIntervenerBarristers(request) && serviceAddress == null) {
+            // serviceAddress could be null and skip this population
             return;
         } else {
             throwIfServiceAddressIsNull(serviceAddress);
