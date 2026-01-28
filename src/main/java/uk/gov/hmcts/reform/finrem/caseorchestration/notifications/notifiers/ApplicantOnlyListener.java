@@ -36,6 +36,7 @@ public class ApplicantOnlyListener extends AbstractPartyListener {
 
     @Override
     protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
+        // return null as it is used in email notification only.
         return null;
     }
 
