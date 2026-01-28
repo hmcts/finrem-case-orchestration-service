@@ -19,7 +19,11 @@ public class RespondentPartyListener extends AbstractPartyListener {
                                    NotificationService notificationService,
                                    InternationalPostalService internationalPostalService) {
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
-        this.notificationParty = RESPONDENT;
+    }
+
+    @Override
+    protected String getNotificationParty() {
+        return RESPONDENT;
     }
 
     @Override

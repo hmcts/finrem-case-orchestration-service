@@ -19,7 +19,11 @@ public class IntervenerOnePartyListener extends AbstractPartyListener {
                                       NotificationService notificationService,
                                       InternationalPostalService internationalPostalService) {
         super(bulkPrintService, emailService, notificationService, internationalPostalService);
-        this.notificationParty = IntervenerConstant.INTERVENER_ONE;
+    }
+
+    @Override
+    protected String getNotificationParty() {
+        return IntervenerConstant.INTERVENER_ONE;
     }
 
     @Override
