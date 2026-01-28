@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,8 @@ public class SendCorrespondenceEvent {
     String authToken;
     IntervenerType intervenerType;
     Barrister barrister;
+    boolean letterNotificationOnly;
+    boolean coversheetNotRequired;
 
     public FinremCaseData getCaseData() {
         return Optional.ofNullable(caseDetails)
@@ -40,5 +43,21 @@ public class SendCorrespondenceEvent {
         return Optional.ofNullable(getCaseData())
             .map(FinremCaseData::getCcdCaseId)
             .orElse(null);
+    }
+
+    /**
+     * Returns the list of notification parties.
+     *
+     * <p>
+     * If the list has not been initialised, it will be created as an empty {@link ArrayList}.
+     * This method never returns {@code null}.
+     *
+     * @return a non-null, mutable list of {@link NotificationParty}
+     */
+    public List<NotificationParty> getNotificationParties() {
+        if (notificationParties == null) {
+            this.notificationParties = new ArrayList<>();
+        }
+        return notificationParties;
     }
 }
