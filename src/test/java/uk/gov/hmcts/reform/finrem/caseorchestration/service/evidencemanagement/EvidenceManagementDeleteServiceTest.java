@@ -80,7 +80,7 @@ public class EvidenceManagementDeleteServiceTest {
 
         verify(idamAuthService, times(1)).getIdamToken(AUTH);
         verify(caseDocumentClient, times(1))
-            .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID),true);
+            .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID),false);
     }
 
     @Test
@@ -88,13 +88,13 @@ public class EvidenceManagementDeleteServiceTest {
         when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
         doThrow(Mockito.mock(FeignException.NotFound.class))
             .when(caseDocumentClient)
-            .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID), true);
+            .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID), false);
 
         emDeleteService.delete(FILE_URL, AUTH);
 
         verify(idamAuthService, times(1)).getIdamToken(AUTH);
         verify(caseDocumentClient, times(1))
-            .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID), true);
+            .deleteDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, UUID.fromString(DOC_UUID), false);
 
         assertThat(logs.getWarns()).contains(format(
             "Document url %s not found in document store while attempting to delete document.",
