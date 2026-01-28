@@ -56,6 +56,12 @@ public class LetterDetailsMapper {
     }
 
     public Map<String, Object> getLetterDetailsAsMap(FinremCaseDetails caseDetails,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+        return getLetterDetailsAsMap(caseDetails, recipient,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+    }
+
+    public Map<String, Object> getLetterDetailsAsMap(FinremCaseDetails caseDetails,
                                      DocumentHelper.PaperNotificationRecipient recipient,
                                      CourtListWrapper courtList) {
         Map<String, Object> documentTemplateDetails =

@@ -82,7 +82,7 @@ public abstract class AbstractPartyListener {
     }
 
     private void sendNotification(SendCorrespondenceEvent event) {
-        if (shouldSendEmailNotification(event)) {
+        if (!event.isLetterNotificationOnly() && shouldSendEmailNotification(event)) {
             enrichAndSendEmailNotification(event);
         } else if (shouldSendPaperNotification(event)) {
             sendPaperNotification(event);
@@ -147,7 +147,10 @@ public abstract class AbstractPartyListener {
             .orElseThrow(() ->
                 new IllegalArgumentException("No documents to post provided for paper notification, case ID: " + event.getCaseId()));
 
-        docsToPrint.add(getPartyCoversheet(event));
+        CaseDocument partyCoversheet = event.isCoversheetNotRequired() ? null : getPartyCoversheet(event);
+        if (partyCoversheet != null) {
+            docsToPrint.add(partyCoversheet);
+        }
         List<BulkPrintDocument> bpDocs =
             bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint, event.authToken, event.getCaseDetails().getCaseType());
         boolean isOutsideUK = isPartyOutsideUK(event);
