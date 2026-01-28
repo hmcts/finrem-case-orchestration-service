@@ -119,4 +119,27 @@ class ApproveOrderServiceTest {
 
         assertThat(caseDetails.getData().getState()).isEqualTo(SCHEDULE_RAISE_DIRECTIONS_ORDER.getStateId());
     }
+
+    @Test
+    void testStateIsNullWhenOrderNotApproved() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().build())
+            .build();
+
+        CaseDocument targetDoc = CaseDocument.builder()
+            .documentFilename("draftOrder.docx")
+            .build();
+
+        DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
+            .judgeApproval1(JudgeApproval.builder()
+                .document(targetDoc)
+                .judgeDecision(LEGAL_REP_NEEDS_TO_MAKE_CHANGE)
+                .build())
+            .build();
+
+        underTest.populateJudgeDecisions(caseDetails, draftOrdersWrapper, AUTH_TOKEN);
+
+        assertThat(caseDetails.getData().getState())
+            .isNotEqualTo(SCHEDULE_RAISE_DIRECTIONS_ORDER.getStateId());
+    }
 }
