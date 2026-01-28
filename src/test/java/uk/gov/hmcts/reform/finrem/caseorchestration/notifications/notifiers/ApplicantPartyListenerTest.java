@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -22,7 +24,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
@@ -111,31 +112,24 @@ class ApplicantPartyListenerTest {
     }
 
     /**
-     * Tests setPartySpecificDetails null email throws exception.
+     * Tests that when setPartySpecificDetails used,  null values are replaced with blank strings.
      */
-    @Test
-    void shouldThrowExceptionWhenPartySpecificEmailDetailsNull() {
+    @ParameterizedTest
+    @CsvSource(value = {
+        "null,''",
+        "'a value', 'a value'"
+    }, nullValues = "null")
+    void shouldUseBlankStringsWhenSetPartySpecificDetailsNull(String provided, String expected) {
 
-        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorEmail(null);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorName(provided);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorEmail(provided);
+        caseDetails.getData().getContactDetailsWrapper().setSolicitorReference(provided);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> applicantPartyListener.setPartySpecificDetails(event));
+        AbstractPartyListener.PartySpecificDetails details = applicantPartyListener.setPartySpecificDetails(event);
 
-        assertTrue(exception.getMessage().contains("PartySpecificDetails fields must not be null"));
-    }
-
-    /**
-     * Tests setPartySpecificDetails null sol name throws exception.
-     */
-    @Test
-    void shouldThrowExceptionWhenPartySpecificSolNameDetailsNull() {
-
-        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorName(null);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> applicantPartyListener.setPartySpecificDetails(event));
-
-        assertTrue(exception.getMessage().contains("PartySpecificDetails fields must not be null"));
+        assertThat(details.recipientSolName()).isEqualTo(expected);
+        assertThat(details.recipientSolEmailAddress()).isEqualTo(expected);
+        assertThat(details.recipientSolReference()).isEqualTo(expected);
     }
 
     /**

@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
+
 /**
  * Handles party-specific notification logic; subclass for different party types.
  */
@@ -59,6 +61,7 @@ public abstract class AbstractPartyListener {
 
     /**
      * Struct for holding party-specific contact details.
+     * Lenient, as these details are not always provided during case creation or amendment.
      */
     protected record PartySpecificDetails(
         @NotNull String recipientSolEmailAddress,
@@ -66,9 +69,9 @@ public abstract class AbstractPartyListener {
         @NotNull String recipientSolReference
     ) {
         public PartySpecificDetails {
-            if (recipientSolEmailAddress == null || recipientSolName == null || recipientSolReference == null) {
-                throw new IllegalArgumentException("PartySpecificDetails fields must not be null");
-            }
+            recipientSolName = nullToEmpty(recipientSolName);
+            recipientSolReference = nullToEmpty(recipientSolReference);
+            recipientSolEmailAddress = nullToEmpty(recipientSolEmailAddress);
         }
     }
 
