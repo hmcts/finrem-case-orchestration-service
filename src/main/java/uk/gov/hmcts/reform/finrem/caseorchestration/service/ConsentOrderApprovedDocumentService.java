@@ -418,12 +418,12 @@ public class ConsentOrderApprovedDocumentService {
                                                       DocumentHelper.PaperNotificationRecipient recipient) {
         final Long caseId = caseDetails.getId();
         Map<String, Object> placeholdersMap = bulkPrintLetterDetailsMapper
-                .getLetterDetailsAsMap(caseDetails, recipient, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+            .getLetterDetailsAsMap(caseDetails, recipient);
         CaseDocument bulkPrintCoverSheet = genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, placeholdersMap,
-                documentConfiguration.getBulkPrintTemplate(), documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate(), documentConfiguration.getBulkPrintFileName(),
             caseDetails.getCaseType());
         log.info("Generating consent order cover sheet {} from {} for role {} on Case ID: {}", documentConfiguration.getBulkPrintFileName(),
-                documentConfiguration.getBulkPrintTemplate(), recipient, caseId);
+            documentConfiguration.getBulkPrintTemplate(), recipient, caseId);
         return bulkPrintCoverSheet;
     }
 }
