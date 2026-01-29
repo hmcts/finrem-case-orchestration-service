@@ -36,8 +36,7 @@ public enum NotificationParty {
     FORMER_INTERVENER_ONE_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_1.getCcdCode(), false, true),
     FORMER_INTERVENER_TWO_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_2.getCcdCode(), false, true),
     FORMER_INTERVENER_THREE_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_3.getCcdCode(), false, true),
-    FORMER_INTERVENER_FOUR_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_4.getCcdCode(), false, true),
-    APPLICANT_ONLY(null, true, false);
+    FORMER_INTERVENER_FOUR_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_4.getCcdCode(), false, true);
 
     private final String role;
     private final boolean notifyRepresented;
@@ -45,7 +44,7 @@ public enum NotificationParty {
 
     public static NotificationParty getNotificationPartyFromRole(String role) {
         return Arrays.stream(NotificationParty.values())
-            .filter(party -> party.getRole().equals(role))
+            .filter(party -> role.equals(party.getRole()))
             .filter(NotificationParty::isNotifyRepresented)
             .filter(party -> !party.isFormerParty())
             .findFirst()
@@ -53,12 +52,12 @@ public enum NotificationParty {
     }
 
     public static Optional<NotificationParty> getNotificationParty(
-        CaseRole caseRole, boolean notifyRepresented, boolean historical) {
+        CaseRole caseRole, boolean notifyRepresented, boolean formerParty) {
 
         return Arrays.stream(NotificationParty.values())
             .filter(party -> party.getRole().equals(caseRole.getCcdCode()))
             .filter(party -> party.isNotifyRepresented() == notifyRepresented)
-            .filter(party -> party.isFormerParty() == historical)
+            .filter(party -> party.isFormerParty() == formerParty)
             .findFirst();
     }
 }
