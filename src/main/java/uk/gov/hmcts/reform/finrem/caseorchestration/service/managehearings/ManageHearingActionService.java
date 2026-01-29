@@ -150,14 +150,15 @@ public class ManageHearingActionService {
 
         log.info("Vacating hearing of for case id: {}", finremCaseDetails.getId());
 
-        ManageHearingsCollectionItem hearingToVacate = emptyIfNull(hearingsWrapper.getHearings()).stream()
+        List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
+            .filter(list -> !list.isEmpty())
+            .orElseThrow(() -> new IllegalStateException("Hearings collection is empty"));
+
+        ManageHearingsCollectionItem hearingToVacate = emptyIfNull(hearings).stream()
             .filter(item -> hearingsWrapper.getWorkingVacatedHearingId().equals(item.getId()))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("No hearing found with ID: " + hearingsWrapper.getWorkingVacatedHearingId()));
 
-        List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
-            .filter(list -> !list.isEmpty())
-            .orElseThrow(() -> new IllegalStateException("Hearings collection is empty"));
         hearings.remove(hearingToVacate);
 
         VacateOrAdjournedHearing vacatedHearing = VacateOrAdjournedHearing.fromHearingToVacatedOrAdjourned(hearingToVacate,

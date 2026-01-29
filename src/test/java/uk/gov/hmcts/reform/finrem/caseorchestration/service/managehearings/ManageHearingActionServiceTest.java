@@ -53,6 +53,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
@@ -388,6 +389,80 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getWorkingVacatedHearing()).isNull();
         assertThat(hearingWrapper.getIsRelistSelected()).isNull();
         assertThat(hearingWrapper.getShouldSendVacateOrAdjNotice()).isNull();
+    }
+
+    @Test
+    void performAdjournOrVacateHearing_shouldThrowExceptionForInvalidHearingId() {
+        hearingWrapper.setWorkingVacatedHearing(WorkingVacatedHearing.builder()
+            .chooseHearings(DynamicList.builder()
+                .value(DynamicListElement.builder().code(UUID.randomUUID().toString()).build())
+                .build())
+            .build());
+        hearingWrapper.setHearings(null);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+            manageHearingActionService.performAdjournOrVacateHearing(finremCaseDetails, AUTH_TOKEN)
+        );
+
+        assertThat(exception.getMessage()).startsWith("Hearings collection is empty");
+    }
+
+    @Test
+    void performAdjournOrVacateHearing_shouldThrowExceptionForEmptyHearingsCollection() {
+        UUID hearingToVacateId = UUID.randomUUID();
+
+        hearingWrapper.setWorkingVacatedHearing(WorkingVacatedHearing.builder()
+            .chooseHearings(DynamicList.builder()
+                .value(DynamicListElement.builder().code(hearingToVacateId.toString()).build())
+                .build())
+            .vacateOrAdjournAction(VacateOrAdjournAction.VACATE_HEARING)
+            .vacateReason(COURTROOM_UNAVAILABLE)
+            .build());
+
+        Hearing notTheHearing = createHearing(HearingType.FDR, "10:00", "30mins", LocalDate.now());
+
+        hearingWrapper.setHearings(new ArrayList<>(List.of(
+            ManageHearingsCollectionItem.builder().id(UUID.randomUUID()).value(notTheHearing).build()
+        )));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+                manageHearingActionService.performAdjournOrVacateHearing(finremCaseDetails, AUTH_TOKEN)
+        );
+
+        assertThat(exception.getMessage()).isEqualTo("No hearing found with ID: " + hearingToVacateId);
+    }
+
+    @Test
+    void performAdjournOrVacateHearing_shouldThrowExceptionForNullCourtRegion() {
+        UUID hearingToVacateId = UUID.randomUUID();
+
+        hearingWrapper.setWorkingVacatedHearing(WorkingVacatedHearing.builder()
+            .chooseHearings(DynamicList.builder()
+                .value(DynamicListElement.builder().code(hearingToVacateId.toString()).build())
+                .build())
+            .vacateOrAdjournAction(VacateOrAdjournAction.VACATE_HEARING)
+            .vacateReason(COURTROOM_UNAVAILABLE)
+            .build());
+
+        Hearing hearingWithNullRegion = Hearing.builder()
+                .hearingType(HearingType.FDR)
+                .hearingDate(LocalDate.now())
+                .hearingTime("10:00")
+                .hearingTimeEstimate("30mins")
+                .hearingCourtSelection(Court.builder()
+                        .region(null) // Set region as null
+                        .build())
+                .build();
+
+        hearingWrapper.setHearings(new ArrayList<>(List.of(
+                ManageHearingsCollectionItem.builder().id(hearingToVacateId).value(hearingWithNullRegion).build()
+        )));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+                manageHearingActionService.performAdjournOrVacateHearing(finremCaseDetails, AUTH_TOKEN)
+        );
+
+        assertThat(exception.getMessage()).isEqualTo("Court region is not set for the vacated hearing.");
     }
 
     @Test
