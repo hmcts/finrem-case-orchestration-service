@@ -129,6 +129,15 @@ class AbstractPartyListenerTest {
         }
     }
 
+    class PaperNotificationWithoutCoversheetListener extends RelevantPartyListener {
+
+        @Override
+        protected boolean shouldSendPaperNotification(SendCorrespondenceEvent event) {
+            return true;
+        }
+
+    }
+
     class InvalidSendEmailNotificationListener extends RelevantPartyListener {
 
         private final int nullPartySpecificField;
@@ -215,6 +224,8 @@ class AbstractPartyListenerTest {
 
     private EmailOrPaperNotificationListener emailOrPaperNotificationListener;
 
+    private PaperNotificationWithoutCoversheetListener paperNotificationWithoutCoversheetListener;
+
     @BeforeEach
     void setUp() {
         irrelevantPartyListener = new IrrelevantPartyListener();
@@ -227,6 +238,7 @@ class AbstractPartyListenerTest {
         sendPaperNotificationOutsideUkListener = new SendPaperNotificationListener(true);
         sendPaperNotificationListener = new SendPaperNotificationListener(false);
         emailOrPaperNotificationListener = new EmailOrPaperNotificationListener();
+        paperNotificationWithoutCoversheetListener = new PaperNotificationWithoutCoversheetListener();
     }
 
     @Test
@@ -278,6 +290,20 @@ class AbstractPartyListenerTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
             sendEmailNotificationListener.handleNotification(event));
         assertThat(exception.getMessage()).isEqualTo("Email template is required for digital notifications, case ID: "
+            + TEST_CASE_ID);
+    }
+
+    @Test
+    void givenCoversheetNotProvided_whenPaperNotificationWithoutCoversheetListenerCalled_thenExceptionIsThrown() {
+        SendCorrespondenceEvent event = spy(SendCorrespondenceEvent.builder()
+            .documentsToPost(List.of(mock(CaseDocument.class)))
+            .caseDetails(FinremCaseDetails.builder().build())
+            .build());
+        when(event.getCaseId()).thenReturn(TEST_CASE_ID);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+            paperNotificationWithoutCoversheetListener.handleNotification(event));
+        assertThat(exception.getMessage()).isEqualTo("No coversheet provided for paper notification, case ID: "
             + TEST_CASE_ID);
     }
 
