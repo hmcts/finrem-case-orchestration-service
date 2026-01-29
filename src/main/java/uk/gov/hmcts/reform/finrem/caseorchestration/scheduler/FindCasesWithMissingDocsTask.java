@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -95,12 +96,16 @@ public class FindCasesWithMissingDocsTask extends EncryptedCsvFileProcessingTask
         String documentUrl = uploadCaseDocument.getCaseDocuments().getDocumentUrl();
         String binaryFileUrl = uploadCaseDocument.getCaseDocuments().getDocumentBinaryUrl();
 
+        String[] segments = documentUrl.split("/");
+        String lastSegment = segments[segments.length - 1];
+        UUID documentId = UUID.fromString(lastSegment);
+
         String collectionName = uploadCaseDocument.getCaseDocumentType() != null
             ? uploadCaseDocument.getCaseDocumentType().name()
             : "unknownType";
 
         try {
-            evidenceManagementDownloadService.download(binaryFileUrl, systemUserService.getSysUserToken());
+            evidenceManagementDownloadService.getDocumentMetaData(documentId, systemUserService.getSysUserToken());
         } catch (HttpClientErrorException.NotFound | FeignException.NotFound ex) {
             missingDocs.add(String.format("collection=%s, url=%s",
                 collectionName, documentUrl));

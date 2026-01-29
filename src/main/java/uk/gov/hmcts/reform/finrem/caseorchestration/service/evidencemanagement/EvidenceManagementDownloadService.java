@@ -16,6 +16,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidUriException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.UUID;
 
 import static java.lang.String.format;
 
@@ -49,6 +51,13 @@ public class EvidenceManagementDownloadService {
         } else {
             return downloadFromDmStore(binaryFileUrl).getBody();
         }
+    }
+
+    public Document getDocumentMetaData(UUID documentId, String auth) throws HttpClientErrorException {
+        return caseDocumentClient.getMetadataForDocument(
+            idamAuthService.getIdamToken(auth).getIdamOauth2Token(),
+            idamAuthService.getIdamToken(auth).getServiceAuthorization(),
+            documentId);
     }
 
     /**
