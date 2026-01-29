@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.TestUtils;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -119,19 +122,22 @@ class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
         assertEquals(expected, actual);
     }
 
-    @Test
-    void givenValidCaseData_whenGetDetailsAsMap_thenReturnExpectedLetterDetails() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenValidCaseData_whenGetDetailsAsMap_thenReturnExpectedLetterDetails(boolean courtListNotProvided) {
         caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
         caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorReference("");
         BasicLetterDetails expected = getExpectedBasicLetterDetails("Respondent Name",
             "50 Respondent Street",
             DocumentHelper.PaperNotificationRecipient.RESPONDENT, mockedCourtDetailsTemplateFields);
 
-        Map<String, Object> placeholdersMap = letterDetailsMapper.getLetterDetailsAsMap(caseDetails,
-            DocumentHelper.PaperNotificationRecipient.RESPONDENT,
-            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+        Map<String, Object> placeholdersMap =
+            courtListNotProvided
+                ? letterDetailsMapper.getLetterDetailsAsMap(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT)
+                : letterDetailsMapper.getLetterDetailsAsMap(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT,
+                caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
-        Map<String, Object> actualData = getCaseData(placeholdersMap);
+        Map<String, Object> actualData = TestUtils.getCaseData(placeholdersMap);
         Map<String, Object> courtDetails = (Map<String, Object>) actualData.get("courtDetails");
 
         assertAll(
