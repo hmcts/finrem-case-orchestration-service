@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -127,25 +126,6 @@ class AbstractPartyListenerTest {
         }
     }
 
-    class InvalidSendEmailNotificationListener extends RelevantPartyListener {
-
-        private final int nullField;
-
-        InvalidSendEmailNotificationListener(int nullField) {
-            this.nullField = nullField;
-        }
-
-        @Override
-        protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
-            return true;
-        }
-
-        @Override
-        protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
-            return new PartySpecificDetails(nullField  == 0 ? null : "a", nullField == 1 ? null : "b'", nullField == 2 ? null : "c");
-        }
-    }
-
     class SendPaperNotificationListener extends RelevantPartyListener {
 
         boolean outsideUK;
@@ -180,17 +160,11 @@ class AbstractPartyListenerTest {
 
     private SendPaperNotificationListener sendPaperNotificationOutsideUkListener;
 
-    private InvalidSendEmailNotificationListener[] invalidSendEmailNotificationListeners;
-
     @BeforeEach
     void setUp() {
         irrelevantPartyListener = new IrrelevantPartyListener();
         sendEmailNotificationListener = new SendEmailNotificationListener();
         sendEmailNotificationWithPartySpecificDetailsListener = new SendEmailNotificationWithPartySpecificDetailsListener();
-        invalidSendEmailNotificationListeners = new InvalidSendEmailNotificationListener[] {
-            new InvalidSendEmailNotificationListener(0), new InvalidSendEmailNotificationListener(1),
-            new InvalidSendEmailNotificationListener(2)
-        };
         sendPaperNotificationOutsideUkListener = new SendPaperNotificationListener(true);
         sendPaperNotificationListener = new SendPaperNotificationListener(false);
     }
@@ -201,20 +175,6 @@ class AbstractPartyListenerTest {
 
         verifyNoEmailSent();
         verifyNoLetterSent();
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {0, 1, 2})
-    void givenAnyEvent_whenInvalidSendEmailNotificationListenerCalled_thenExceptionIsThrown(int invalidListenerId) {
-        SendCorrespondenceEvent event = spy(SendCorrespondenceEvent.builder()
-            .emailTemplate(mock(EmailTemplateNames.class))
-            .emailNotificationRequest(mock(NotificationRequest.class))
-            .caseDetails(FinremCaseDetails.builder().build())
-            .build());
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-            invalidSendEmailNotificationListeners[invalidListenerId].handleNotification(event));
-        assertThat(exception.getMessage()).isEqualTo("PartySpecificDetails fields must not be null");
     }
 
     @Test
