@@ -159,7 +159,7 @@ public class HearingCorrespondenceHelper {
         ManageHearingsAction actionSelection = getManageHearingsAction(caseData);
         boolean hearingRelisted = YesOrNo.YES.equals(
             caseData.getManageHearingsWrapper().getWasRelistSelected());
-        return isVacateHearingAction(actionSelection) && hearingRelisted;
+        return isAdjournOrVacateHearingAction(actionSelection) && hearingRelisted;
     }
 
     /**
@@ -186,9 +186,9 @@ public class HearingCorrespondenceHelper {
      * Determines if the action selection is to vacate a hearing.
      *
      * @param actionSelection the action selection to check
-     * @return true if the action selection is VACATE_HEARING, false otherwise
+     * @return true if the action selection is ADJOURN_OR_VACATE_HEARING, false otherwise
      */
-    private boolean isVacateHearingAction(ManageHearingsAction actionSelection) {
+    private boolean isAdjournOrVacateHearingAction(ManageHearingsAction actionSelection) {
         return ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(actionSelection);
     }
 
