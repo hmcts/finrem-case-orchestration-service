@@ -18,7 +18,9 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASE_FILE_VIEW_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.EXPRESS_PILOT_ENABLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.EXUI3990_WORKAROUND_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.INTERVENER_ENABLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_CASE_DOCS_DELETE_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_HEARING_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SECURE_DOC_ENABLED;
@@ -46,9 +48,13 @@ public class FeatureToggleService {
     private Map<String, String> toggle = new HashMap<>();
 
     private boolean isFeatureEnabled(Features feature) {
+        return isFeatureEnabled(feature, false);
+    }
+
+    private boolean isFeatureEnabled(Features feature, boolean defaultValue) {
         return Optional.ofNullable(toggle.get(feature.getName()))
             .map(Boolean::parseBoolean)
-            .orElse(false);
+            .orElse(defaultValue);
     }
 
     /*
@@ -91,6 +97,10 @@ public class FeatureToggleService {
         return isFeatureEnabled(EXPRESS_PILOT_ENABLED);
     }
 
+    public boolean isExui3990WorkaroundEnabled() {
+        return isFeatureEnabled(EXUI3990_WORKAROUND_ENABLED, true);
+    }
+
     /*
      * Used for enable manage hearing feature
      */
@@ -103,6 +113,10 @@ public class FeatureToggleService {
      */
     public boolean isVacateHearingEnabled() {
         return isFeatureEnabled(VACATE_HEARING_ENABLED);
+    }
+
+    public boolean isManageCaseDocsDeleteEnabled() {
+        return isFeatureEnabled(MANAGE_CASE_DOCS_DELETE_ENABLED);
     }
 
     /**
