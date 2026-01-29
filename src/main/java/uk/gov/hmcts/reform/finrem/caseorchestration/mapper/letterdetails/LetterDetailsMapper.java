@@ -55,9 +55,41 @@ public class LetterDetailsMapper {
             .build();
     }
 
+    /**
+     * Builds a map of letter details for the given case and paper notification recipient,
+     * using the default court list for the case region.
+     *
+     * <p>This is a convenience overload that delegates to
+     * {@link #getLetterDetailsAsMap(FinremCaseDetails, DocumentHelper.PaperNotificationRecipient, CourtListWrapper)}
+     * and automatically resolves the default court list from the case data.</p>
+     *
+     * @param caseDetails the financial remedy case details
+     * @param recipient the paper notification recipient
+     * @return a map containing the case details and letter template data, structured for document generation
+     */
     public Map<String, Object> getLetterDetailsAsMap(FinremCaseDetails caseDetails,
-                                     DocumentHelper.PaperNotificationRecipient recipient,
-                                     CourtListWrapper courtList) {
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+        return getLetterDetailsAsMap(caseDetails, recipient,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+    }
+
+    /**
+     * Builds a map of letter details for the given case, paper notification recipient,
+     * and court list.
+     *
+     * <p>The returned map is structured to match the expected document template format,
+     * with case data converted into a {@code Map<String, Object>} and wrapped under
+     * a {@code caseDetails} root element.</p>
+     *
+     * @param caseDetails the financial remedy case details
+     * @param recipient the paper notification recipient
+     * @param courtList the court list to be used when building the letter details
+     * @return a map containing the case identifier and letter template data,
+     *         suitable for document generation
+     */
+    public Map<String, Object> getLetterDetailsAsMap(FinremCaseDetails caseDetails,
+                                                     DocumentHelper.PaperNotificationRecipient recipient,
+                                                     CourtListWrapper courtList) {
         Map<String, Object> documentTemplateDetails =
             objectMapper.convertValue(buildLetterDetails(caseDetails, recipient, courtList),
                 TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));

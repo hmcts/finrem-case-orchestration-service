@@ -1,30 +1,32 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BristolCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.TestUtils;
 
 import java.time.LocalDate;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasKey;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
@@ -35,26 +37,40 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.formatAddressForLetterPrinting;
 
-public class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+@ExtendWith(MockitoExtension.class)
+class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
 
     public static final String TEST_JSON_CONTESTED = "/fixtures/basic-letter-details.json";
 
     @Mock
-    private CourtDetailsConfiguration courtDetailsConfiguration;
+    private ConsentedApplicationHelper consentedApplicationHelper;
 
-    @Autowired
+    @Mock
+    private CourtDetailsMapper courtDetailsMapper;
+
     private LetterDetailsMapper letterDetailsMapper;
 
-    @Before
-    public void setUp() throws Exception {
-        setCaseDetails(TEST_JSON_CONTESTED);
+    private CourtDetailsTemplateFields mockedCourtDetailsTemplateFields;
+
+    @BeforeEach
+    void setUp() {
+        mapper = new ObjectMapper();
+        mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+        setFinremCaseDetails(TEST_JSON_CONTESTED);
+
+        letterDetailsMapper = new LetterDetailsMapper(mapper, courtDetailsMapper, consentedApplicationHelper);
+        mockedCourtDetailsTemplateFields = mock(CourtDetailsTemplateFields.class);
+
+        when(courtDetailsMapper.getCourtDetails(caseDetails.getData().getRegionWrapper().getDefaultCourtList()))
+            .thenReturn(mockedCourtDetailsTemplateFields);
+        when(consentedApplicationHelper.getOrderType(caseDetails.getData())).thenReturn("consent");
     }
 
     @Test
-    public void givenAppSolRecipient_whenBuildLetterDetails_thenReturnExpectedLetterDetails() {
+    void givenAppSolRecipient_whenBuildLetterDetails_thenReturnExpectedLetterDetails() {
         BasicLetterDetails expected = getExpectedBasicLetterDetails("SolicitorName",
             "50 ApplicantSolicitor Street",
-            DocumentHelper.PaperNotificationRecipient.APP_SOLICITOR);
+            DocumentHelper.PaperNotificationRecipient.APP_SOLICITOR, mockedCourtDetailsTemplateFields);
 
         BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(caseDetails,
             DocumentHelper.PaperNotificationRecipient.APPLICANT,
@@ -64,12 +80,12 @@ public class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
     }
 
     @Test
-    public void givenApplicantRecipient_whenBuildLetterDetails_thenReturnExpectedLetterDetails() {
+    void givenApplicantRecipient_whenBuildLetterDetails_thenReturnExpectedLetterDetails() {
         caseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
         caseDetails.getData().getContactDetailsWrapper().setSolicitorReference("");
         BasicLetterDetails expected = getExpectedBasicLetterDetails("Applicant Name",
             "50 Applicant Street",
-            DocumentHelper.PaperNotificationRecipient.APPLICANT);
+            DocumentHelper.PaperNotificationRecipient.APPLICANT, mockedCourtDetailsTemplateFields);
 
         BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(caseDetails,
             DocumentHelper.PaperNotificationRecipient.APPLICANT,
@@ -79,10 +95,10 @@ public class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
     }
 
     @Test
-    public void givenRespSolRecipient_whenBuildLetterDetails_thenReturnExpectedLetterDetails() {
+    void givenRespSolRecipient_whenBuildLetterDetails_thenReturnExpectedLetterDetails() {
         BasicLetterDetails expected = getExpectedBasicLetterDetails("RespSolicitorName",
             "50 RespondentSolicitor Street",
-            DocumentHelper.PaperNotificationRecipient.RESP_SOLICITOR);
+            DocumentHelper.PaperNotificationRecipient.RESP_SOLICITOR, mockedCourtDetailsTemplateFields);
 
         BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(caseDetails,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT,
@@ -92,12 +108,12 @@ public class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
     }
 
     @Test
-    public void givenRespondentRecipient_whenBuildLetterDetails_thenReturnExpectedLetterDetails() {
+    void givenRespondentRecipient_whenBuildLetterDetails_thenReturnExpectedLetterDetails() {
         caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
         caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorReference("");
         BasicLetterDetails expected = getExpectedBasicLetterDetails("Respondent Name",
             "50 Respondent Street",
-            DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT, mockedCourtDetailsTemplateFields);
 
         BasicLetterDetails actual = letterDetailsMapper.buildLetterDetails(caseDetails,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT,
@@ -106,44 +122,54 @@ public class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
         assertEquals(expected, actual);
     }
 
-    @Test
-    public void givenValidCaseData_whenGetDetailsAsMap_thenReturnExpectedLetterDetails() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenValidCaseData_whenGetDetailsAsMap_thenReturnExpectedLetterDetails(boolean courtListNotProvided) {
         caseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
         caseDetails.getData().getContactDetailsWrapper().setRespondentSolicitorReference("");
         BasicLetterDetails expected = getExpectedBasicLetterDetails("Respondent Name",
             "50 Respondent Street",
-            DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT, mockedCourtDetailsTemplateFields);
 
-        Map<String, Object> placeholdersMap = letterDetailsMapper.getLetterDetailsAsMap(caseDetails,
-            DocumentHelper.PaperNotificationRecipient.RESPONDENT,
-            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+        Map<String, Object> placeholdersMap =
+            courtListNotProvided
+                ? letterDetailsMapper.getLetterDetailsAsMap(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT)
+                : letterDetailsMapper.getLetterDetailsAsMap(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT,
+                caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
-        Map<String, Object> actualData = getCaseData(placeholdersMap);
+        Map<String, Object> actualData = TestUtils.getCaseData(placeholdersMap);
         Map<String, Object> courtDetails = (Map<String, Object>) actualData.get("courtDetails");
 
-        assertThat(actualData, allOf(
-            hasEntry("applicantName", expected.getApplicantName()),
-            hasEntry("respondentName", expected.getRespondentName()),
-            hasEntry("caseNumber", expected.getCaseNumber()),
-            hasKey("courtDetails")
-        ));
+        assertAll(
+            () -> assertEquals(expected.getApplicantName(), actualData.get("applicantName")),
+            () -> assertEquals(expected.getRespondentName(), actualData.get("respondentName")),
+            () -> assertEquals(expected.getCaseNumber(), actualData.get("caseNumber")),
+            () -> assertTrue(actualData.containsKey("courtDetails"))
+        );
 
-        assertThat(courtDetails, allOf(
-            hasEntry("courtName", expected.getCourtDetails().getCourtName()),
-            hasEntry("courtAddress", expected.getCourtDetails().getCourtAddress())
-        ));
+        assertAll(
+            () -> assertEquals(
+                expected.getCourtDetails().getCourtName(),
+                courtDetails.get("courtName")
+            ),
+            () -> assertEquals(
+                expected.getCourtDetails().getCourtAddress(),
+                courtDetails.get("courtAddress")
+            )
+        );
     }
 
     private BasicLetterDetails getExpectedBasicLetterDetails(String name,
                                                              String addressLine1,
-                                                             DocumentHelper.PaperNotificationRecipient recipient) {
+                                                             DocumentHelper.PaperNotificationRecipient recipient,
+                                                             CourtDetailsTemplateFields mockedCourtDetailsTemplateFields) {
         return BasicLetterDetails.builder()
             .applicantName("Applicant Name")
             .respondentName("Respondent Name")
             .divorceCaseNumber("DD12D12345")
             .ctscContactDetails(getCtscContactDetails())
             .addressee(getAddressee(name, addressLine1))
-            .courtDetails(getCourtDetails())
+            .courtDetails(mockedCourtDetailsTemplateFields)
             .letterDate(String.valueOf(LocalDate.now()))
             .reference(getReference(recipient))
             .caseNumber("1596638099618923")
@@ -190,11 +216,5 @@ public class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
             .phoneNumber(CTSC_PHONE_NUMBER)
             .openingHours(CTSC_OPENING_HOURS)
             .build();
-    }
-
-    private CourtDetailsTemplateFields getCourtDetails() {
-        DefaultCourtListWrapper courtListWrapper = new DefaultCourtListWrapper();
-        courtListWrapper.setBristolCourtList(BristolCourt.BRISTOL_CIVIL_AND_FAMILY_JUSTICE_CENTRE);
-        return new CourtDetailsMapper(new ObjectMapper(), courtDetailsConfiguration).getCourtDetails(courtListWrapper);
     }
 }
