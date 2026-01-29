@@ -34,7 +34,7 @@ public enum NotificationParty {
 
     public static NotificationParty getNotificationPartyFromRole(String role) {
         return Arrays.stream(NotificationParty.values())
-            .filter(party -> party.getRole().equals(role))
+            .filter(party -> role.equals(party.getRole()))
             .filter(NotificationParty::isNotifyRepresented)
             .filter(party -> !party.isFormerParty())
             .findFirst()
@@ -42,12 +42,12 @@ public enum NotificationParty {
     }
 
     public static Optional<NotificationParty> getNotificationParty(
-        CaseRole caseRole, boolean notifyRepresented, boolean historical) {
+        CaseRole caseRole, boolean notifyRepresented, boolean formerParty) {
 
         return Arrays.stream(NotificationParty.values())
             .filter(party -> party.getRole().equals(caseRole.getCcdCode()))
             .filter(party -> party.isNotifyRepresented() == notifyRepresented)
-            .filter(party -> party.isFormerParty() == historical)
+            .filter(party -> party.isFormerParty() == formerParty)
             .findFirst();
     }
 }
