@@ -137,28 +137,6 @@ class AbstractPartyListenerTest {
 
     }
 
-    class InvalidSendEmailNotificationListener extends RelevantPartyListener {
-
-        private final int nullPartySpecificField;
-
-        InvalidSendEmailNotificationListener(int nullPartySpecificField) {
-            this.nullPartySpecificField = nullPartySpecificField;
-        }
-
-        @Override
-        protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
-            return true;
-        }
-
-        @Override
-        protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
-            return new PartySpecificDetails(
-                nullPartySpecificField == 0 ? null : "a",
-                nullPartySpecificField == 1 ? null : "b'",
-                nullPartySpecificField == 2 ? null : "c");
-        }
-    }
-
     class SendPaperNotificationListener extends RelevantPartyListener {
 
         boolean outsideUK;
