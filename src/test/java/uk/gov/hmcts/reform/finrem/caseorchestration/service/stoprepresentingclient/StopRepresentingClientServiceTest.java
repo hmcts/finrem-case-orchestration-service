@@ -401,7 +401,7 @@ class StopRepresentingClientServiceTest {
                 when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(any(FinremCaseDetails.class),
                     eq(CaseRole.APP_SOLICITOR))).thenReturn(mock(NotificationRequest.class));
             }
-            lenient().when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
                 .thenReturn(mock(CaseDocument.class));
 
             // Act
@@ -453,7 +453,7 @@ class StopRepresentingClientServiceTest {
                 when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(any(FinremCaseDetails.class),
                     eq(CaseRole.APP_SOLICITOR))).thenReturn(mock(NotificationRequest.class));
             }
-            lenient().when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
                 .thenReturn(mock(CaseDocument.class));
 
             underTest.revokePartiesAccessAndNotifyParties(info);
@@ -591,7 +591,7 @@ class StopRepresentingClientServiceTest {
 
         @ParameterizedTest
         @EnumSource(value = CaseType.class, names = {"CONSENTED", "CONTESTED"})
-        void shouldNotifyRespondentSolicitor(CaseType caseType) {
+        void shouldNotifyRespondentSolicitorAndLetterToRespondent(CaseType caseType) {
             FinremCaseData caseData = spy(FinremCaseData.class);
             caseData.getContactDetailsWrapper().setNocParty(NoticeOfChangeParty.RESPONDENT);
             caseData.setChangeOrganisationRequestField(mock(ChangeOrganisationRequest.class));
@@ -606,19 +606,24 @@ class StopRepresentingClientServiceTest {
             NotificationRequest notificationRequest = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 CaseRole.RESP_SOLICITOR)).thenReturn(notificationRequest);
+            CaseDocument generatedDocument = mock(CaseDocument.class);
+            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+                .thenReturn(generatedDocument);
 
             // Act
             underTest.revokePartiesAccessAndNotifyParties(info);
 
             // verify
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-            verify(applicationEventPublisher).publishEvent(captor.capture());
+            verify(applicationEventPublisher, times(2)).publishEvent(captor.capture());
             verify(finremNotificationRequestMapper).getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 CaseRole.RESP_SOLICITOR);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
                 NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY,
                 respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest);
+            verifySendCorrespondenceEventForLetter(captor.getAllValues().getLast(),
+                NotificationParty.RESPONDENT, caseDetails, caseDetailsBefore, List.of(generatedDocument));
             verifyNoMoreInteractions(applicationEventPublisher, finremNotificationRequestMapper);
         }
 
@@ -656,7 +661,7 @@ class StopRepresentingClientServiceTest {
 
         @ParameterizedTest
         @EnumSource(value = CaseType.class, names = {"CONSENTED", "CONTESTED"})
-        void shouldNotifyRespondentSolicitorAndBarrister(CaseType caseType) {
+        void shouldNotifyRespondentSolicitorAndBarristerAndLetterToRespondent(CaseType caseType) {
             FinremCaseData caseData = spy(FinremCaseData.class);
             caseData.getContactDetailsWrapper().setNocParty(NoticeOfChangeParty.RESPONDENT);
             caseData.setChangeOrganisationRequestField(mock(ChangeOrganisationRequest.class));
@@ -676,17 +681,23 @@ class StopRepresentingClientServiceTest {
                 CaseRole.RESP_SOLICITOR)).thenReturn(notificationRequest0);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, respondentBarrister))
                 .thenReturn(notificationRequest1);
+            CaseDocument generatedDocument = mock(CaseDocument.class);
+            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+                .thenReturn(generatedDocument);
 
             underTest.revokePartiesAccessAndNotifyParties(info);
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-            verify(applicationEventPublisher, times(2)).publishEvent(captor.capture());
+            verify(applicationEventPublisher, times(3)).publishEvent(captor.capture());
             verify(finremNotificationRequestMapper)
                 .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, respondentBarrister);
 
             verifySendCorrespondenceEvent(captor.getAllValues().getFirst(),
                 NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY,
                 respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest0);
+
+            verifySendCorrespondenceEventForLetter(captor.getAllValues().get(1),
+                NotificationParty.RESPONDENT, caseDetails, caseDetailsBefore, List.of(generatedDocument));
 
             verifySendCorrespondenceEvent(captor.getAllValues().getLast(),
                 NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY,
@@ -696,7 +707,7 @@ class StopRepresentingClientServiceTest {
 
         @ParameterizedTest
         @EnumSource(value = CaseType.class, names = {"CONTESTED", "CONSENTED"})
-        void givenSameOrgAsRespondent_whenCaseHandled_thenNotifyIntervenerSolicitorAndBarrister(CaseType caseType) {
+        void givenSameOrgAsRespondent_whenCaseHandled_thenNotifySolicitorsAndLetterToRespondent(CaseType caseType) {
             FinremCaseData caseData = spy(FinremCaseData.class);
             caseData.getContactDetailsWrapper().setNocParty(NoticeOfChangeParty.RESPONDENT);
             caseData.setChangeOrganisationRequestField(mock(ChangeOrganisationRequest.class));
@@ -736,11 +747,14 @@ class StopRepresentingClientServiceTest {
                 CaseRole.INTVR_SOLICITOR_1, IntervenerType.INTERVENER_ONE)).thenReturn(notificationRequest1);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 intervenerOneBarrister, IntervenerType.INTERVENER_ONE)).thenReturn(notificationRequest2);
+            CaseDocument generatedDocument = mock(CaseDocument.class);
+            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+                .thenReturn(generatedDocument);
 
             underTest.revokePartiesAccessAndNotifyParties(info);
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-            verify(applicationEventPublisher, times(3)).publishEvent(captor.capture());
+            verify(applicationEventPublisher, times(4)).publishEvent(captor.capture());
 
             verifySendCorrespondenceEvent(captor.getAllValues().get(0),
                 NotificationParty.FORMER_INTERVENER_ONE_SOLICITOR_ONLY,
@@ -750,7 +764,10 @@ class StopRepresentingClientServiceTest {
                 NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY,
                 respondentExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest0);
 
-            verifySendCorrespondenceEvent(captor.getAllValues().get(2),
+            verifySendCorrespondenceEventForLetter(captor.getAllValues().get(2),
+                NotificationParty.RESPONDENT, caseDetails, caseDetailsBefore, List.of(generatedDocument));
+
+            verifySendCorrespondenceEvent(captor.getAllValues().get(3),
                 NotificationParty.FORMER_INTERVENER_ONE_BARRISTER_ONLY,
                 intervenerExpectedTemplateNames(caseType), caseDetails, caseDetailsBefore, notificationRequest2);
 
