@@ -480,6 +480,11 @@ class AbstractPartyListenerTest {
             .toList();
     }
 
+    private List<CaseDocument> buildExpectedDocumentsWithCoversheet(List<CaseDocument> documentsToPost) {
+        return Stream.concat(documentsToPost.stream(), Stream.of(PARTY_COVERSHEET_DOCUMENT))
+            .toList();
+    }
+
     private void verifyNoEmailSent() {
         verifyNoInteractions(emailService);
     }
