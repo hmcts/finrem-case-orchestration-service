@@ -404,7 +404,9 @@ public class TestSetUpUtils {
 
     public static FinremCaseDetails finremCaseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
         try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
-            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+            FinremCaseDetails finremCaseDetails = mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+            finremCaseDetails.getData().setCcdCaseType(finremCaseDetails.getCaseType());
+            return finremCaseDetails;
         } catch (Exception exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         }
