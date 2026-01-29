@@ -547,7 +547,7 @@ public class StopRepresentingClientService {
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
             .letterNotificationOnly(true)
-            .notificationParties(List.of(NotificationParty.APPLICANT_ONLY))
+            .notificationParties(List.of(NotificationParty.APPLICANT))
             .caseDetails(info.getCaseDetails())
             .caseDetailsBefore(info.getCaseDetailsBefore())
             .authToken(userAuthorisation)
@@ -561,7 +561,7 @@ public class StopRepresentingClientService {
     private CaseDocument generateStopRepresentingApplicantLetter(FinremCaseDetails finremCaseDetails,
                                                                  String authorisationToken) {
         Map<String, Object> documentDataMap = letterDetailsMapper.getLetterDetailsAsMap(finremCaseDetails, APPLICANT);
-        String documentFilename = format("FT-FRM-LET-ENG-NOC003%s.pdf", LocalDateTime.now()
+        String documentFilename = format("FT-FRM-LET-ENG-NOC003_%s.pdf", LocalDateTime.now()
             .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
