@@ -350,14 +350,6 @@ class AbstractPartyListenerTest {
             + TEST_CASE_ID);
     }
 
-    private static Stream<Arguments> givenDocumentsToPostProvided_whenSendLetterNotificationListenerCalled_thenShouldSendToBulkPrintService() {
-        return Stream.of(
-            Arguments.of(List.of(caseDocument("file1")), true),
-            Arguments.of(List.of(caseDocument("file1")), false),
-            Arguments.of(List.of(caseDocument("file1"), caseDocument("file2")), false)
-        );
-    }
-
     @ParameterizedTest
     @MethodSource
     void givenDocumentsToPostProvided_whenSendLetterNotificationListenerCalled_thenShouldSendToBulkPrintService(
@@ -390,6 +382,14 @@ class AbstractPartyListenerTest {
         verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType);
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(caseDetails, SendPaperNotificationListener.class.getSimpleName(),
             bpDocs, isOutsideUK, AUTH_TOKEN);
+    }
+
+    private static Stream<Arguments> givenDocumentsToPostProvided_whenSendLetterNotificationListenerCalled_thenShouldSendToBulkPrintService() {
+        return Stream.of(
+            Arguments.of(List.of(caseDocument("file1")), true),
+            Arguments.of(List.of(caseDocument("file1")), false),
+            Arguments.of(List.of(caseDocument("file1"), caseDocument("file2")), false)
+        );
     }
 
     @Test
