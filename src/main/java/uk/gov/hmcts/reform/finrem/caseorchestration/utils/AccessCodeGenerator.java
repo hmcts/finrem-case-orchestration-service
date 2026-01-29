@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
+package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
