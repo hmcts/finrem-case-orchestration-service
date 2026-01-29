@@ -147,7 +147,7 @@ public abstract class AbstractPartyListener {
             .orElseThrow(() ->
                 new IllegalArgumentException("No documents to post provided for paper notification, case ID: " + event.getCaseId()));
 
-        CaseDocument partyCoversheet = event.isCoversheetNotRequired() ? null : getPartyCoversheet(event);
+        CaseDocument partyCoversheet = getPartyCoversheet(event);
         if (partyCoversheet != null) {
             docsToPrint.add(partyCoversheet);
         }

@@ -27,7 +27,6 @@ public class SendCorrespondenceEvent {
     IntervenerType intervenerType;
     Barrister barrister;
     boolean letterNotificationOnly;
-    boolean coversheetNotRequired;
 
     public FinremCaseData getCaseData() {
         return Optional.ofNullable(caseDetails)
@@ -36,7 +35,9 @@ public class SendCorrespondenceEvent {
     }
 
     public FinremCaseData getCaseDataBefore() {
-        return caseDetailsBefore.getData();
+        return Optional.ofNullable(caseDetailsBefore)
+            .map(FinremCaseDetails::getData)
+            .orElse(null);
     }
 
     public String getCaseId() {
