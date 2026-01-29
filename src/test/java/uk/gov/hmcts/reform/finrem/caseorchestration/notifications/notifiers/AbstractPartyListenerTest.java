@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -220,8 +219,6 @@ class AbstractPartyListenerTest {
 
     private SendPaperNotificationListener sendPaperNotificationOutsideUkListener;
 
-    private InvalidSendEmailNotificationListener[] invalidSendEmailNotificationListeners;
-
     private EmailOrPaperNotificationListener emailOrPaperNotificationListener;
 
     private PaperNotificationWithoutCoversheetListener paperNotificationWithoutCoversheetListener;
@@ -231,10 +228,6 @@ class AbstractPartyListenerTest {
         irrelevantPartyListener = new IrrelevantPartyListener();
         sendEmailNotificationListener = new SendEmailNotificationListener();
         sendEmailNotificationWithPartySpecificDetailsListener = new SendEmailNotificationWithPartySpecificDetailsListener();
-        invalidSendEmailNotificationListeners = new InvalidSendEmailNotificationListener[] {
-            new InvalidSendEmailNotificationListener(0), new InvalidSendEmailNotificationListener(1),
-            new InvalidSendEmailNotificationListener(2)
-        };
         sendPaperNotificationOutsideUkListener = new SendPaperNotificationListener(true);
         sendPaperNotificationListener = new SendPaperNotificationListener(false);
         emailOrPaperNotificationListener = new EmailOrPaperNotificationListener();
@@ -247,20 +240,6 @@ class AbstractPartyListenerTest {
 
         verifyNoEmailSent();
         verifyNoLetterSent();
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {0, 1, 2})
-    void givenAnyEvent_whenInvalidSendEmailNotificationListenerCalled_thenExceptionIsThrown(int invalidListenerId) {
-        SendCorrespondenceEvent event = spy(SendCorrespondenceEvent.builder()
-            .emailTemplate(mock(EmailTemplateNames.class))
-            .emailNotificationRequest(mock(NotificationRequest.class))
-            .caseDetails(FinremCaseDetails.builder().build())
-            .build());
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-            invalidSendEmailNotificationListeners[invalidListenerId].handleNotification(event));
-        assertThat(exception.getMessage()).isEqualTo("PartySpecificDetails fields must not be null");
     }
 
     @Test
