@@ -148,9 +148,11 @@ public abstract class AbstractPartyListener {
                 new IllegalArgumentException("No documents to post provided for paper notification, case ID: " + event.getCaseId()));
 
         CaseDocument partyCoversheet = getPartyCoversheet(event);
-        if (partyCoversheet != null) {
-            docsToPrint.add(partyCoversheet);
+        if (partyCoversheet == null) {
+            throw new IllegalArgumentException("No coversheet provided for paper notification, case ID: " + event.getCaseId());
         }
+        docsToPrint.add(partyCoversheet);
+
         List<BulkPrintDocument> bpDocs =
             bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint, event.authToken, event.getCaseDetails().getCaseType());
         boolean isOutsideUK = isPartyOutsideUK(event);

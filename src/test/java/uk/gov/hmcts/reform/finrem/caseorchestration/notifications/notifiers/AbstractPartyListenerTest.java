@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -132,10 +131,10 @@ class AbstractPartyListenerTest {
 
     class InvalidSendEmailNotificationListener extends RelevantPartyListener {
 
-        private final int nullField;
+        private final int nullPartySpecificField;
 
-        InvalidSendEmailNotificationListener(int nullField) {
-            this.nullField = nullField;
+        InvalidSendEmailNotificationListener(int nullPartySpecificField) {
+            this.nullPartySpecificField = nullPartySpecificField;
         }
 
         @Override
@@ -145,7 +144,10 @@ class AbstractPartyListenerTest {
 
         @Override
         protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
-            return new PartySpecificDetails(nullField  == 0 ? null : "a", nullField == 1 ? null : "b'", nullField == 2 ? null : "c");
+            return new PartySpecificDetails(
+                nullPartySpecificField == 0 ? null : "a",
+                nullPartySpecificField == 1 ? null : "b'",
+                nullPartySpecificField == 2 ? null : "c");
         }
     }
 
@@ -367,8 +369,7 @@ class AbstractPartyListenerTest {
         when(event.getCaseDetails()).thenReturn(caseDetails);
         when(event.getCaseId()).thenReturn(TEST_CASE_ID);
 
-        List<CaseDocument> expectedDocuments = new ArrayList<>(documentsToPost);
-        expectedDocuments.add(PARTY_COVERSHEET_DOCUMENT);
+        List<CaseDocument> expectedDocuments = buildExpectedDocumentsWithCoversheet(documentsToPost);
 
         List<BulkPrintDocument> bpDocs = mock(List.class);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType))
@@ -396,8 +397,7 @@ class AbstractPartyListenerTest {
 
         List<BulkPrintDocument> bpDocs = mock(List.class);
 
-        List<CaseDocument> expectedDocuments = Stream.concat(documentsToPost.stream(), Stream.of(PARTY_COVERSHEET_DOCUMENT))
-            .toList();
+        List<CaseDocument> expectedDocuments = buildExpectedDocumentsWithCoversheet(documentsToPost);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType))
             .thenReturn(bpDocs);
 
@@ -419,8 +419,7 @@ class AbstractPartyListenerTest {
 
         List<BulkPrintDocument> bpDocs = mock(List.class);
 
-        List<CaseDocument> expectedDocuments = Stream.concat(documentsToPost.stream(), Stream.of(PARTY_COVERSHEET_DOCUMENT))
-            .toList();
+        List<CaseDocument> expectedDocuments = buildExpectedDocumentsWithCoversheet(documentsToPost);
         lenient().when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType))
             .thenReturn(bpDocs);
 
@@ -448,6 +447,11 @@ class AbstractPartyListenerTest {
             .caseDetails(caseDetails)
             .documentsToPost(expectedDocuments)
             .build());
+    }
+
+    private List<CaseDocument> buildExpectedDocumentsWithCoversheet(List<CaseDocument> documentsToPost) {
+        return Stream.concat(documentsToPost.stream(), Stream.of(PARTY_COVERSHEET_DOCUMENT))
+            .toList();
     }
 
     private void verifyNoEmailSent() {
