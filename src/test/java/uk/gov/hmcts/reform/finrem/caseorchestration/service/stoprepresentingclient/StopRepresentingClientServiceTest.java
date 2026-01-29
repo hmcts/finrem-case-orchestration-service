@@ -345,8 +345,8 @@ class StopRepresentingClientServiceTest {
                 when(caseDataBefore.getRespondentOrganisationPolicy()).thenReturn(originalOrgPolicy);
             }
 
-            FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(
-                    Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+            FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory
+                .from(Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
             final StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails,
