@@ -182,7 +182,7 @@ class HearingsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenValidCaseData_whenHandleVacateWithrelist_thenPerformPerfomrAddAndVacateHearingCalled() {
+    void givenValidCaseData_whenHandleVacateWithRelist_thenPerformPerformAddAndVacateHearingCalled() {
         String caseReference = TestConstants.CASE_ID;
 
         FinremCaseData caseData = FinremCaseData.builder()

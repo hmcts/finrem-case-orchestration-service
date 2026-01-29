@@ -82,8 +82,14 @@ public class ManageHearingActionService {
     public void performAddHearing(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
-        HearingType hearingType = getHearingType(hearingWrapper.getWorkingHearing().getHearingTypeDynamicList());
-        Region courtRegion = hearingWrapper.getWorkingHearing().getHearingCourtSelection().getRegion();
+        WorkingHearing workingHearing = hearingWrapper.getWorkingHearing();
+        HearingType hearingType = getHearingType(workingHearing.getHearingTypeDynamicList());
+
+        log.info("Adding new hearing of type: {} to case id: {}", hearingType, finremCaseDetails.getId());
+
+        Region courtRegion = Optional.ofNullable(workingHearing.getHearingCourtSelection().getRegion()).orElseThrow(
+            () -> new IllegalStateException("Court region is not set for the new hearing.")
+        );
 
         UUID hearingId = UUID.randomUUID();
         addHearingToCollection(hearingWrapper, hearingId);
@@ -142,6 +148,8 @@ public class ManageHearingActionService {
 
         VacateOrAdjournAction action = vacateOrAdjournInput.getVacateOrAdjournAction();
 
+        log.info("Vacating hearing of for case id: {}", finremCaseDetails.getId());
+
         ManageHearingsCollectionItem hearingToVacate = emptyIfNull(hearingsWrapper.getHearings()).stream()
             .filter(item -> hearingsWrapper.getWorkingVacatedHearingId().equals(item.getId()))
             .findFirst()
@@ -167,7 +175,9 @@ public class ManageHearingActionService {
 
         Map<String, DocumentRecord> documentMap = new HashMap<>();
 
-        Region courtregion = vacatedItem.getValue().getHearingCourtSelection().getRegion();
+        Region courtregion = Optional.ofNullable(vacatedHearing.getHearingCourtSelection().getRegion()).orElseThrow(
+            () -> new IllegalStateException("Court region is not set for the vacated hearing.")
+        );
 
         generateVacateOrAdjournNotice(finremCaseDetails, courtregion, authToken, documentMap, action);
         generateVacateNoticeCoverSheetIfHearingNotRelisted(hearingsWrapper, finremCaseDetails, authToken);
