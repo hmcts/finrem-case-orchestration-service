@@ -307,6 +307,7 @@ public class StopRepresentingClientService {
             }
             if (revocation.respondentSolicitorRevoked) {
                 notifyRespondentSolicitor(info);
+                notifyRespondent(info);
             }
         }
     }
