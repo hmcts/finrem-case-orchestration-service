@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -377,8 +378,8 @@ class StopRepresentingClientServiceTest {
                 when(caseDataBefore.getRespondentOrganisationPolicy()).thenReturn(originalOrgPolicy);
             }
 
-            FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(
-                    Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+            FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory
+                .from(Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
                 .build();
 
             final StopRepresentingClientInfo info = stopRepresentingClientInfo(caseDetails,
@@ -400,6 +401,8 @@ class StopRepresentingClientServiceTest {
                 when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(any(FinremCaseDetails.class),
                     eq(CaseRole.APP_SOLICITOR))).thenReturn(mock(NotificationRequest.class));
             }
+            lenient().when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+                .thenReturn(mock(CaseDocument.class));
 
             // Act
             underTest.revokePartiesAccessAndNotifyParties(info);
@@ -450,6 +453,8 @@ class StopRepresentingClientServiceTest {
                 when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(any(FinremCaseDetails.class),
                     eq(CaseRole.APP_SOLICITOR))).thenReturn(mock(NotificationRequest.class));
             }
+            lenient().when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+                .thenReturn(mock(CaseDocument.class));
 
             underTest.revokePartiesAccessAndNotifyParties(info);
 
@@ -484,11 +489,14 @@ class StopRepresentingClientServiceTest {
             NotificationRequest notificationRequest = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 CaseRole.APP_SOLICITOR)).thenReturn(notificationRequest);
+            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+                .thenReturn(mock(CaseDocument.class));
 
+            // Act
             underTest.revokePartiesAccessAndNotifyParties(info);
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-            verify(applicationEventPublisher).publishEvent(captor.capture());
+            verify(applicationEventPublisher, times(2)).publishEvent(captor.capture());
             verify(finremNotificationRequestMapper).getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 CaseRole.APP_SOLICITOR);
 
@@ -552,11 +560,14 @@ class StopRepresentingClientServiceTest {
             NotificationRequest notificationRequest2 = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister))
                 .thenReturn(notificationRequest2);
+            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
+                .thenReturn(mock(CaseDocument.class));
 
+            // Act
             underTest.revokePartiesAccessAndNotifyParties(info);
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-            verify(applicationEventPublisher, times(2)).publishEvent(captor.capture());
+            verify(applicationEventPublisher, times(3)).publishEvent(captor.capture());
             verify(finremNotificationRequestMapper)
                 .getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister);
 
