@@ -542,7 +542,6 @@ public class StopRepresentingClientService {
     }
 
     private void notifyApplicant(StopRepresentingClientInfo info) {
-
         String userAuthorisation = info.getUserAuthorisation();
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
