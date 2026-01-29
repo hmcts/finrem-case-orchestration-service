@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLetterDetails;
 
 import java.time.LocalDate;
@@ -41,11 +42,14 @@ public class LetterDetailsMapper {
     public BasicLetterDetails buildLetterDetails(FinremCaseDetails caseDetails,
                                                  DocumentHelper.PaperNotificationRecipient recipient,
                                                  CourtListWrapper courtList) {
+
+        CourtDetailsTemplateFields courtDetails = courtDetailsMapper.getCourtDetails(courtList);
+
         return BasicLetterDetails.builder()
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
             .addressee(generateAddressee(caseDetails, recipient))
-            .courtDetails(courtDetailsMapper.getCourtDetails(courtList))
+            .courtDetails(courtDetails)
             .ctscContactDetails(getCtscContactDetails())
             .letterDate(String.valueOf(LocalDate.now()))
             .reference(getReference(caseDetails.getData(), recipient))
