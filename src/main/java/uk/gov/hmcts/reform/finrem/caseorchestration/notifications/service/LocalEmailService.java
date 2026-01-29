@@ -13,6 +13,18 @@ import uk.gov.service.notify.TemplatePreview;
 
 import java.util.Map;
 
+/**
+ * Local implementation of {@link EmailService} used when the {@code local} Spring profile is active.
+ *
+ * <p>
+ * This service is intended for local development only and typically avoids sending real emails,
+ * instead logging or handling them in a non-production manner.
+ * </p>
+ *
+ * @see <a href="https://tools.hmcts.net/confluence/x/O7kcbw">
+ *      HMCTS Confluence – Local Email Service guidance
+ *      </a>
+ */
 @Profile("local")
 @Service
 @Slf4j
@@ -36,7 +48,7 @@ public class LocalEmailService extends EmailService {
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
-                templateVars, notificationRequest.getEmailReplyToId());
+            templateVars, notificationRequest.getEmailReplyToId());
         log.info("Creating a preview email for Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
         previewEmail(emailToSend, "send Confirmation email for " + template.name());
     }
@@ -51,10 +63,10 @@ public class LocalEmailService extends EmailService {
         String referenceId = emailToSend.getReferenceId();
         try {
             log.info("Attempting to create a preview for {} with template {}. Reference ID: {}",
-                    emailDescription, templateId, referenceId);
+                emailDescription, templateId, referenceId);
             TemplatePreview templatePreview = emailClient.generateTemplatePreview(
-                    templateId,
-                    emailToSend.getTemplateFields()
+                templateId,
+                emailToSend.getTemplateFields()
             );
             log.info("Preview successful. Rendered template:\n{}", templatePreview);
         } catch (NotificationClientException e) {
