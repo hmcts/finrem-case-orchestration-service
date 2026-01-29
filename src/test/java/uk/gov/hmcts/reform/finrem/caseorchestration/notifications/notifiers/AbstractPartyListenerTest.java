@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -36,6 +35,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
@@ -249,9 +251,9 @@ class AbstractPartyListenerTest {
     void givenNotificationRequestProvided_whenSendEmailNotificationListenerCalled_thenSendEmailAndNoLetterSent() {
         EmailTemplateNames template = mock(EmailTemplateNames.class);
         NotificationRequest nr = spy(NotificationRequest.builder()
-            .notificationEmail("ashley@email.com")
-            .name("NR NAME")
-            .solicitorReferenceNumber("NR solicitorReferenceNumber")
+            .notificationEmail(TEST_SOLICITOR_EMAIL)
+            .name(TEST_SOLICITOR_NAME)
+            .solicitorReferenceNumber(TEST_SOLICITOR_REFERENCE)
             .build());
 
         SendCorrespondenceEvent event = SendCorrespondenceEvent.builder()
@@ -269,7 +271,7 @@ class AbstractPartyListenerTest {
                 NotificationRequest::getName,
                 NotificationRequest::getNotificationEmail,
                 NotificationRequest::getSolicitorReferenceNumber)
-            .contains("NR NAME", "ashley@email.com", "NR solicitorReferenceNumber");
+            .contains(TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
     }
 
     @Test
@@ -325,8 +327,7 @@ class AbstractPartyListenerTest {
         when(event.getCaseDetails()).thenReturn(caseDetails);
         when(event.getCaseId()).thenReturn(TEST_CASE_ID);
 
-        List<CaseDocument> expectedDocuments = new ArrayList<>(documentsToPost);
-        expectedDocuments.add(PARTY_COVERSHEET_DOCUMENT);
+        List<CaseDocument> expectedDocuments = buildExpectedDocumentsWithCoversheet(documentsToPost);
 
         List<BulkPrintDocument> bpDocs = mock(List.class);
         when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType))
@@ -350,6 +351,11 @@ class AbstractPartyListenerTest {
             Arguments.of(List.of(caseDocument("file1")), false),
             Arguments.of(List.of(caseDocument("file1"), caseDocument("file2")), false)
         );
+    }
+
+    private List<CaseDocument> buildExpectedDocumentsWithCoversheet(List<CaseDocument> documentsToPost) {
+        return Stream.concat(documentsToPost.stream(), Stream.of(PARTY_COVERSHEET_DOCUMENT))
+            .toList();
     }
 
     private void verifyNoEmailSent() {
