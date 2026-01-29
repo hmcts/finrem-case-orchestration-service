@@ -279,7 +279,7 @@ class AbstractPartyListenerTest {
     }
 
     @Test
-    void givenEmailTemplateNamesMissing_whenSendEmailNotificationListenerCalled_thenSendEmailAndNoLetterSent() {
+    void givenEmailTemplateNamesMissing_whenSendEmailNotificationListenerCalled_thenExceptionIsThrown() {
         SendCorrespondenceEvent event = spy(SendCorrespondenceEvent.builder()
             .emailTemplate(null)
             .emailNotificationRequest(mock(NotificationRequest.class))
