@@ -184,7 +184,7 @@ public class GenerateCoverSheetService {
                                             DocumentHelper.PaperNotificationRecipient recipient) {
 
         Map<String, Object> placeholdersMap = bulkPrintCoverLetterDetailsMapper
-            .getLetterDetailsAsMap(caseDetails, recipient);
+            .getLetterDetailsAsMap(caseDetails, recipient, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, placeholdersMap,
             documentConfiguration.getBulkPrintTemplate(), documentConfiguration.getBulkPrintFileName(),
