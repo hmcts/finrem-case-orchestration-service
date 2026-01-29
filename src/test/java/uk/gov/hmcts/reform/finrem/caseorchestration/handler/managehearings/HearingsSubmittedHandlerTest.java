@@ -64,7 +64,7 @@ class HearingsSubmittedHandlerTest {
         assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isNullOrEmpty();
         verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
-        verify(manageHearingsCorresponder, never()).sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder, never()).sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
 
     @Test
@@ -81,7 +81,7 @@ class HearingsSubmittedHandlerTest {
         assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isNullOrEmpty();
         verify(manageHearingsCorresponder, never()).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
-        verify(manageHearingsCorresponder).sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
 
     private FinremCallbackRequest buildCallbackRequest(UUID hearingID, UUID hearingItemId, ManageHearingsAction action) {
