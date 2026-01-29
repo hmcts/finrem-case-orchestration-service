@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
@@ -62,6 +63,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.manageheari
 class ManageHearingsCorresponderTest {
 
     private static final UUID hearingId = UUID.fromString("c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb");
+    private static final Set<CaseRole> ALL_SOLICITOR_ROLES = Set.of(
+        CaseRole.APP_SOLICITOR, CaseRole.RESP_SOLICITOR,
+        CaseRole.INTVR_SOLICITOR_1, CaseRole.INTVR_SOLICITOR_2,
+        CaseRole.INTVR_SOLICITOR_3, CaseRole.INTVR_SOLICITOR_4);
 
     @Mock
     private HearingCorrespondenceHelper hearingCorrespondenceHelper;
@@ -298,73 +303,13 @@ class ManageHearingsCorresponderTest {
     }
 
     @Test
-    void givenVacatedOrAdjournedHearingSelectedNoNotification_whenSendVacatedOrAdjournedHearingCorrespondence_thenNotificationSent() {
+    void givenVacatedHearingSelectedNoNotification_whenSendVacatedOrAdjournedHearingCorrespondence_thenNotificationSent() {
 
-        //Arrange
-        Set<CaseRole> caseRoles = Set.of(
-            CaseRole.APP_SOLICITOR,
-            CaseRole.RESP_SOLICITOR,
-            CaseRole.INTVR_SOLICITOR_1,
-            CaseRole.INTVR_SOLICITOR_2,
-            CaseRole.INTVR_SOLICITOR_3,
-            CaseRole.INTVR_SOLICITOR_4
-        );
-        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(caseRoles);
-
-        VacateOrAdjournedHearing hearing = VacateOrAdjournedHearing
-            .builder()
-            .hearingDate(LocalDate.of(2026, 1, 10))
-            .hearingTime("12:30")
-            .hearingTimeEstimate("120 minutes")
-            .hearingType(APPEAL_HEARING)
-            .hearingNoticePrompt(YesOrNo.YES)
-            .hearingMode(HearingMode.IN_PERSON)
-            .hearingCourtSelection(Court.builder()
-                .region(Region.LONDON)
-                .londonList(RegionLondonFrc.LONDON)
-                .courtListWrapper(DefaultCourtListWrapper.builder()
-                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
-                    .build())
-                .build())
-            .additionalHearingDocs(List.of(DocumentCollectionItem
-                .builder()
-                .value(CaseDocument.builder().documentFilename("AdditionalDoc.pdf").build())
-                .build()))
-            .partiesOnCase(partyList)
-            .vacateOrAdjournReason(VacateOrAdjournReason.OTHER)
-            .vacatedOrAdjournedDate(LocalDate.of(2026, 1, 1))
-            .wasVacOrAdjNoticeSent(YesOrNo.YES)
-            .build();
-
-        FinremCaseData caseData = FinremCaseData
-            .builder()
-            .ccdCaseId(CASE_ID)
-            .ccdCaseType(CaseType.CONTESTED)
-            .contactDetailsWrapper(ContactDetailsWrapper
-                .builder()
-                .applicantLname("Frodo")
-                .respondentLname("Gollum")
-                .build())
-            .manageHearingsWrapper(ManageHearingsWrapper
-                .builder()
-                .vacatedOrAdjournedHearings(List.of(VacatedOrAdjournedHearingsCollectionItem
-                    .builder()
-                    .value(hearing)
-                    .build()))
-                .workingVacatedHearingId(hearingId)
-                .hearingDocumentsCollection(List.of(ManageHearingDocumentsCollectionItem
-                    .builder()
-                    .value(ManageHearingDocument.builder()
-                        .hearingId(hearingId)
-                        .hearingDocument(CaseDocument
-                            .builder()
-                            .documentFilename("VacateHearingNotice.pdf")
-                            .build()).build())
-                    .build()))
-                .build())
-            .build();
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CaseType.CONTESTED, caseData);
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(ALL_SOLICITOR_ROLES);
+        VacateOrAdjournedHearing hearing = buildVacateOrAdjournedHearing(VacateOrAdjournAction.VACATE_HEARING, partyList);
+        FinremCaseData caseData = buildVacatedHearingCaseData(hearing);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
+            CASE_ID_IN_LONG, CaseType.CONTESTED, caseData);
 
         ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
 
@@ -406,6 +351,91 @@ class ManageHearingsCorresponderTest {
 
         assertThat(actualEvent.getAuthToken())
             .isEqualTo(expectedEvent.getAuthToken());
+    }
+
+    @Test
+    void givenAdjournedHearing_whenSendVacatedOrAdjournedHearingCorrespondence_thenAdjournNotificationSent() {
+
+        List<PartyOnCaseCollectionItem> partyList = buildPartiesList(ALL_SOLICITOR_ROLES);
+        VacateOrAdjournedHearing hearing = buildVacateOrAdjournedHearing(VacateOrAdjournAction.ADJOURN_HEARING, partyList);
+        FinremCaseData caseData = buildVacatedHearingCaseData(hearing);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
+            CASE_ID_IN_LONG, CaseType.CONTESTED, caseData);
+
+        ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
+
+        when(hearingCorrespondenceHelper.getVacateOrAdjournedHearingInContext(manageHearingsWrapper, hearingId)).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.getVacateHearingNotice(callbackRequest.getCaseDetails().getData())).thenReturn(
+            CaseDocument.builder().documentFilename("VacateHearingNotice.pdf").build());
+
+        corresponder.sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+
+        ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
+        verify(eventPublisher).publishEvent(captor.capture());
+
+        assertThat(captor.getValue().getEmailTemplate())
+            .isEqualTo(EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR);
+    }
+
+    private Court buildCourt() {
+        return Court.builder()
+            .region(Region.LONDON)
+            .londonList(RegionLondonFrc.LONDON)
+            .courtListWrapper(DefaultCourtListWrapper.builder()
+                .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                .build())
+            .build();
+    }
+
+    private VacateOrAdjournedHearing buildVacateOrAdjournedHearing(
+        VacateOrAdjournAction action,
+        List<PartyOnCaseCollectionItem> partyList) {
+        return VacateOrAdjournedHearing.builder()
+            .hearingDate(LocalDate.of(2026, 1, 10))
+            .hearingTime("12:30")
+            .hearingTimeEstimate("120 minutes")
+            .hearingType(APPEAL_HEARING)
+            .hearingNoticePrompt(YesOrNo.YES)
+            .hearingMode(HearingMode.IN_PERSON)
+            .hearingCourtSelection(buildCourt())
+            .additionalHearingDocs(List.of(DocumentCollectionItem.builder()
+                .value(CaseDocument.builder().documentFilename("AdditionalDoc.pdf").build())
+                .build()))
+            .partiesOnCase(partyList)
+            .vacateOrAdjournReason(VacateOrAdjournReason.OTHER)
+            .vacatedOrAdjournedDate(LocalDate.of(2026, 1, 1))
+            .wasVacOrAdjNoticeSent(YesOrNo.YES)
+            .hearingStatus(action)
+            .build();
+    }
+
+    private FinremCaseData buildVacatedHearingCaseData(VacateOrAdjournedHearing hearing) {
+        return FinremCaseData.builder()
+            .ccdCaseId(CASE_ID)
+            .ccdCaseType(CaseType.CONTESTED)
+            .contactDetailsWrapper(buildContactDetails())
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .vacatedOrAdjournedHearings(List.of(VacatedOrAdjournedHearingsCollectionItem.builder()
+                    .value(hearing)
+                    .build()))
+                .workingVacatedHearingId(hearingId)
+                .hearingDocumentsCollection(List.of(ManageHearingDocumentsCollectionItem.builder()
+                    .value(ManageHearingDocument.builder()
+                        .hearingId(hearingId)
+                        .hearingDocument(CaseDocument.builder()
+                            .documentFilename("VacateHearingNotice.pdf")
+                            .build())
+                        .build())
+                    .build()))
+                .build())
+            .build();
+    }
+
+    private ContactDetailsWrapper buildContactDetails() {
+        return ContactDetailsWrapper.builder()
+            .applicantLname("Frodo")
+            .respondentLname("Gollum")
+            .build();
     }
 
     private SendCorrespondenceEvent getExpectedHearingEvent(FinremCaseDetails caseDetails) {
@@ -483,12 +513,11 @@ class ManageHearingsCorresponderTest {
         // build the list elements from the passed set of case roles
         List<PartyOnCaseCollectionItem> parties = new ArrayList<>();
         for (CaseRole role : caseRoles) {
-            PartyOnCase party = PartyOnCase.builder()
-                .role(role.getCcdCode())
-                .label(role.name())
-                .build();
             parties.add(PartyOnCaseCollectionItem.builder()
-                .value(party)
+                .value(PartyOnCase.builder()
+                    .role(role.getCcdCode())
+                    .label(role.name())
+                    .build())
                 .build());
         }
         return parties;
