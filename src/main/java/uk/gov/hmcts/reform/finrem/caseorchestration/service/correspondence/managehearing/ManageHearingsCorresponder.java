@@ -82,7 +82,7 @@ public class ManageHearingsCorresponder {
      * @param callbackRequest the callback request containing case details and data
      * @param userAuthorisation the authorization token of the user initiating this action
      */
-    public void sendVacatedHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+    public void sendAdjournedOrVacatedHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
@@ -114,7 +114,8 @@ public class ManageHearingsCorresponder {
             finremCaseDetails,
             vacateOrAdjournedHearing,
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
-            userAuthorisation, documentsToPost,
+            userAuthorisation,
+            documentsToPost,
             templateName
         );
     }

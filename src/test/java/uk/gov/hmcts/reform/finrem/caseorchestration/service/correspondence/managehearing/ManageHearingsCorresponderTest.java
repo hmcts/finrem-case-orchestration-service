@@ -39,8 +39,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -73,9 +71,6 @@ class ManageHearingsCorresponderTest {
 
     @InjectMocks
     private ManageHearingsCorresponder corresponder;
-
-    @TestLogs
-    private final TestLogger logs = new TestLogger(ManageHearingsCorresponder.class);
 
     @Test
     void givenHearingSelectedNoNotification_whenSendHearingCorrespondence_thenNoNotificationSent() {
@@ -169,7 +164,7 @@ class ManageHearingsCorresponderTest {
 
         //Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-            corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN));
+            corresponder.sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN));
 
         assertTrue(exception.getMessage().contains("Hearing time must not be null"));
     }
@@ -296,7 +291,7 @@ class ManageHearingsCorresponderTest {
             .thenReturn(vacatedOrAdjournedHearing);
 
         //Act
-        corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        corresponder.sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         //Assert
         verifyNoInteractions(eventPublisher);
@@ -383,7 +378,7 @@ class ManageHearingsCorresponderTest {
         );
 
         //Act
-        corresponder.sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        corresponder.sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Assert
         ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
