@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
@@ -48,6 +49,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
@@ -84,6 +86,8 @@ class ManageHearingActionServiceTest {
     private GenerateCoverSheetService generateCoverSheetService;
     @Mock
     private HearingCorrespondenceHelper hearingCorrespondenceHelper;
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     @InjectMocks
     private ManageHearingActionService manageHearingActionService;
@@ -756,6 +760,48 @@ class ManageHearingActionServiceTest {
         assertEquals(epxectedWorkingHearing.getHearingDate(), actualWorkingHearing.getHearingDate());
         assertEquals(epxectedWorkingHearing.getHearingTime(), actualWorkingHearing.getHearingTime());
         assertEquals(epxectedWorkingHearing.getHearingTimeEstimate(), actualWorkingHearing.getHearingTimeEstimate());
+    }
+
+    @Test
+    void performAddHearing_generateAccessCodeWhenFormCisGenerated() {
+        workingHearing.setHearingTypeDynamicList(DynamicList.builder()
+            .value(DynamicListElement.builder()
+                .code(HearingType.FDA.name())
+                .label(HearingType.FDA.getId())
+                .build())
+            .build());
+        finremCaseDetails.getData().setFastTrackDecision(YesOrNo.YES);
+
+        CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
+        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
+            "http://example.com/OutOfCourtResolution");
+        Map<String, CaseDocument> pfdNcdrDocuments = Map.of(
+            PFD_NCDR_COMPLIANCE_LETTER, createCaseDocument("ComplianceLetter.pdf",
+                "http://example.com/compliance-letter"),
+            PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
+                "http://example.com/cover-letter"));
+
+        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
+            Pair.of(CaseDocumentType.FORM_C, "a template"));
+        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(pfdNcdrDocuments);
+        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(outOfCourtResolution);
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails,
+            AUTH_TOKEN)).thenReturn(createCaseDocument("HearingNotice.pdf",
+            "http://example.com/hearing-notice"));
+        when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(false);
+        when(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)).thenReturn(false);
+        when(featureToggleService.isFinremCitizenUiEnabled()).thenReturn(true);
+
+        manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
+
+        assertNotNull(finremCaseDetails.getData().getApplicantAccessCodes());
+        assertNotNull(finremCaseDetails.getData().getRespondentAccessCodes());
+        assertEquals(1, finremCaseDetails.getData().getApplicantAccessCodes().size());
+        assertEquals(1, finremCaseDetails.getData().getRespondentAccessCodes().size());
     }
 
     private ArgumentMatcher<ManageHearingsCollectionItem> hasHearing(Hearing expected) {

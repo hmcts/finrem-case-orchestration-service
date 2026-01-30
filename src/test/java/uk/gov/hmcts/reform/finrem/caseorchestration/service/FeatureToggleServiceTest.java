@@ -121,5 +121,10 @@ public class FeatureToggleServiceTest {
         public void isVacateHearingEnabled() {
             assertThat(featureToggleService.isVacateHearingEnabled(), is(false));
         }
+
+        @Test
+        public void isFinremCitizenUiEnabled() {
+            assertThat(featureToggleService.isFinremCitizenUiEnabled(), is(false));
+        }
     }
 }
