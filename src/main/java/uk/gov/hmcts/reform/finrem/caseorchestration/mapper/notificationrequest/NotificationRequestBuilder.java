@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.Notificat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -58,6 +60,7 @@ public class NotificationRequestBuilder {
     private String emailReplyToId;
     private String vacatedHearingDateTime;
     private String vacatedHearingType;
+    private String dateOfIssue;
 
     /**
      * Sets default values for the NotificationRequestBuilder based on the provided case details.
@@ -162,6 +165,11 @@ public class NotificationRequestBuilder {
         return this;
     }
 
+    public NotificationRequestBuilder withDateOfIssue() {
+        dateOfIssue = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return this;
+    }
+
     /**
      * Builds a NotificationRequest object using the values set in the builder.
      *
@@ -200,6 +208,7 @@ public class NotificationRequestBuilder {
         notificationRequest.setEmailReplyToId(emailReplyToId);
         notificationRequest.setVacatedHearingDateTime(vacatedHearingDateTime);
         notificationRequest.setVacatedHearingType(vacatedHearingType);
+        notificationRequest.setDateOfIssue(dateOfIssue);
 
         return notificationRequest;
     }
@@ -356,6 +365,11 @@ public class NotificationRequestBuilder {
 
     public NotificationRequestBuilder vacatedHearingType(String vacatedHearingType) {
         this.vacatedHearingType = vacatedHearingType;
+        return this;
+    }
+
+    public NotificationRequestBuilder dateOfIssue(String dateOfIssue) {
+        this.dateOfIssue = dateOfIssue;
         return this;
     }
 }
