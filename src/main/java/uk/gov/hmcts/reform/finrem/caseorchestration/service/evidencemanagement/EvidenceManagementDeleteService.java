@@ -43,13 +43,26 @@ public class EvidenceManagementDeleteService {
         }
     }
 
+    /**
+     * Deletes a document from a secure document store using the provided file URL and authentication token.
+     * This method interacts with the CaseDocumentClient to execute the deletion and logs the process.
+     * Handles cases where the document is not found in the store gracefully.
+     *
+     * <P>
+     *     Note: The boolean passed to caseDocumentClient.deleteDocument() toggles hard deleting in EM.
+     *     This boolean should remain false to enables EMs soft delete functionally so documents can be recovered
+     * </P>
+     *
+     * @param fileUrl The URL of the document to be deleted.
+     * @param auth The authentication token used to retrieve IdamToken and authorize the operation.
+     */
     private void deleteOnSecDoc(String fileUrl, String auth) {
         IdamToken idamTokens = idamAuthService.getIdamToken(auth);
         log.info("EMSDocStore Delete file: {} and docId: {}",
             fileUrl, getDocumentIdFromFileUrl(fileUrl));
         try {
             caseDocumentClient.deleteDocument(idamTokens.getIdamOauth2Token(), idamTokens.getServiceAuthorization(),
-                getDocumentIdFromFileUrl(fileUrl), Boolean.TRUE);
+                getDocumentIdFromFileUrl(fileUrl), Boolean.FALSE);
         } catch (FeignException.NotFound e) {
             log.warn(format(
                 "Document url %s not found in document store while attempting to delete document.",
