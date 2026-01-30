@@ -9,12 +9,15 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
@@ -51,6 +54,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.Barrister
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,6 +65,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -149,6 +154,10 @@ class StopRepresentingClientServiceTest {
         lenient().when(manageBarristerService
                 .getBarristerChange(any(FinremCaseDetails.class), any(FinremCaseData.class), any(BarristerParty.class)))
             .thenReturn(BarristerChange.builder().build());
+        lenient().when(documentConfiguration.getStopRepresentingLetterToApplicantTemplate())
+            .thenReturn("getStopRepresentingLetterToApplicantTemplate");
+        lenient().when(documentConfiguration.getStopRepresentingLetterToRespondentTemplate())
+            .thenReturn("getStopRepresentingLetterToRespondentTemplate");
     }
 
     @Test
@@ -401,8 +410,7 @@ class StopRepresentingClientServiceTest {
                 when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(any(FinremCaseDetails.class),
                     eq(CaseRole.APP_SOLICITOR))).thenReturn(mock(NotificationRequest.class));
             }
-            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
-                .thenReturn(mock(CaseDocument.class));
+            mockGeneratePartyLetter();
 
             // Act
             underTest.revokePartiesAccessAndNotifyParties(info);
@@ -453,8 +461,7 @@ class StopRepresentingClientServiceTest {
                 when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(any(FinremCaseDetails.class),
                     eq(CaseRole.APP_SOLICITOR))).thenReturn(mock(NotificationRequest.class));
             }
-            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
-                .thenReturn(mock(CaseDocument.class));
+            mockGeneratePartyLetter();
 
             underTest.revokePartiesAccessAndNotifyParties(info);
 
@@ -489,12 +496,14 @@ class StopRepresentingClientServiceTest {
             NotificationRequest notificationRequest = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 CaseRole.APP_SOLICITOR)).thenReturn(notificationRequest);
-            CaseDocument generatedDocument = mock(CaseDocument.class);
-            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
-                .thenReturn(generatedDocument);
+            final CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.APPLICANT,
+                "getStopRepresentingLetterToApplicantTemplate", "FT-FRM-LET-ENG-NOC003_20241018100001.pdf");
 
-            // Act
-            underTest.revokePartiesAccessAndNotifyParties(info);
+            LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0, 1);
+            try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+                mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+                underTest.revokePartiesAccessAndNotifyParties(info);
+            }
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
             verify(applicationEventPublisher, times(2)).publishEvent(captor.capture());
@@ -563,12 +572,15 @@ class StopRepresentingClientServiceTest {
             NotificationRequest notificationRequest2 = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister))
                 .thenReturn(notificationRequest2);
-            CaseDocument generatedDocument = mock(CaseDocument.class);
-            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
-                .thenReturn(generatedDocument);
+            final CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.APPLICANT,
+                "getStopRepresentingLetterToApplicantTemplate", "FT-FRM-LET-ENG-NOC003_20241018100001.pdf");
 
             // Act
-            underTest.revokePartiesAccessAndNotifyParties(info);
+            LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0, 1);
+            try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+                mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+                underTest.revokePartiesAccessAndNotifyParties(info);
+            }
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
             verify(applicationEventPublisher, times(3)).publishEvent(captor.capture());
@@ -606,12 +618,15 @@ class StopRepresentingClientServiceTest {
             NotificationRequest notificationRequest = mock(NotificationRequest.class);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 CaseRole.RESP_SOLICITOR)).thenReturn(notificationRequest);
-            CaseDocument generatedDocument = mock(CaseDocument.class);
-            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
-                .thenReturn(generatedDocument);
+            final CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.RESPONDENT,
+                "getStopRepresentingLetterToRespondentTemplate", "FT-FRM-LET-ENG-NOC004_20241018100001.pdf");
 
             // Act
-            underTest.revokePartiesAccessAndNotifyParties(info);
+            LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0, 1);
+            try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+                mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+                underTest.revokePartiesAccessAndNotifyParties(info);
+            }
 
             // verify
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
@@ -681,11 +696,14 @@ class StopRepresentingClientServiceTest {
                 CaseRole.RESP_SOLICITOR)).thenReturn(notificationRequest0);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, respondentBarrister))
                 .thenReturn(notificationRequest1);
-            CaseDocument generatedDocument = mock(CaseDocument.class);
-            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
-                .thenReturn(generatedDocument);
+            CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.RESPONDENT,
+                "getStopRepresentingLetterToRespondentTemplate", "FT-FRM-LET-ENG-NOC004_20241018100001.pdf");
 
-            underTest.revokePartiesAccessAndNotifyParties(info);
+            LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0, 1);
+            try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+                mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+                underTest.revokePartiesAccessAndNotifyParties(info);
+            }
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
             verify(applicationEventPublisher, times(3)).publishEvent(captor.capture());
@@ -747,11 +765,14 @@ class StopRepresentingClientServiceTest {
                 CaseRole.INTVR_SOLICITOR_1, IntervenerType.INTERVENER_ONE)).thenReturn(notificationRequest1);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 intervenerOneBarrister, IntervenerType.INTERVENER_ONE)).thenReturn(notificationRequest2);
-            CaseDocument generatedDocument = mock(CaseDocument.class);
-            when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any()))
-                .thenReturn(generatedDocument);
+            final CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.RESPONDENT,
+                "getStopRepresentingLetterToRespondentTemplate", "FT-FRM-LET-ENG-NOC004_20241018100001.pdf");
 
-            underTest.revokePartiesAccessAndNotifyParties(info);
+            LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0, 1);
+            try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+                mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+                underTest.revokePartiesAccessAndNotifyParties(info);
+            }
 
             ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
             verify(applicationEventPublisher, times(4)).publishEvent(captor.capture());
@@ -1137,5 +1158,26 @@ class StopRepresentingClientServiceTest {
         return CONTESTED.equals(caseType)
             ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER
             : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
+    }
+
+    private CaseDocument mockGeneratePartyLetter(StopRepresentingClientInfo info,
+                                                 DocumentHelper.PaperNotificationRecipient recipient,
+                                                 String template, String filenamePrefix) {
+        Map<String, Object> documentData = mock(Map.class);
+        when(letterDetailsMapper.getLetterDetailsAsMap(info.getCaseDetails(), recipient))
+            .thenReturn(documentData);
+        CaseDocument generatedDocument = mock(CaseDocument.class);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(AUTH_TOKEN, documentData, template,
+            filenamePrefix, info.getCaseDetails().getCaseType()))
+            .thenReturn(generatedDocument);
+        return generatedDocument;
+    }
+
+    private void mockGeneratePartyLetter() {
+        Map<String, Object> documentData = mock(Map.class);
+        when(letterDetailsMapper.getLetterDetailsAsMap(any(FinremCaseDetails.class),
+            any(DocumentHelper.PaperNotificationRecipient.class))).thenReturn(documentData);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), eq(documentData), anyString(),
+            anyString(), any(CaseType.class))).thenReturn(mock(CaseDocument.class));
     }
 }
