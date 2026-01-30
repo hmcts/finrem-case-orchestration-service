@@ -696,7 +696,7 @@ class StopRepresentingClientServiceTest {
                 CaseRole.RESP_SOLICITOR)).thenReturn(notificationRequest0);
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, respondentBarrister))
                 .thenReturn(notificationRequest1);
-            CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.RESPONDENT,
+            final CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.RESPONDENT,
                 "getStopRepresentingLetterToRespondentTemplate", "FT-FRM-LET-ENG-NOC004_20241018100001.pdf");
 
             LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0, 1);
