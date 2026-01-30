@@ -884,8 +884,7 @@ class ManageHearingActionServiceTest {
             AUTH_TOKEN)).thenReturn(pfdNcdrDocuments);
         when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(outOfCourtResolution);
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails,
-            AUTH_TOKEN)).thenReturn(createCaseDocument("HearingNotice.pdf",
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, Region.LONDON, AUTH_TOKEN)).thenReturn(createCaseDocument("HearingNotice.pdf",
             "http://example.com/hearing-notice"));
         when(hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails)).thenReturn(false);
         when(hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails)).thenReturn(false);
