@@ -19,11 +19,14 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidUriException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -72,6 +75,40 @@ class EvidenceManagementDownloadServiceTest {
             .serviceAuthorization(SERVICE_AUTH)
             .build();
         lenient().when(idamAuthService.getIdamToken(any())).thenReturn(idamToken);
+    }
+
+    @Test
+    void shouldRetrieveDocumentMetaDataSuccessfully() {
+        // Given
+        UUID documentId = UUID.randomUUID();
+        Document expectedDocument = Document.builder().build();
+        when(caseDocumentClient.getMetadataForDocument(anyString(), anyString(), any(UUID.class)))
+            .thenReturn(expectedDocument);
+
+        // When
+        Document result = downloadService.getDocumentMetaData(documentId, AUTH_TOKEN);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(expectedDocument, result);
+        verify(caseDocumentClient, times(1))
+            .getMetadataForDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, documentId);
+        verify(idamAuthService, times(2)).getIdamToken(AUTH_TOKEN);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenMetaDataRetrievalFails() {
+        // Given
+        UUID documentId = UUID.randomUUID();
+        when(caseDocumentClient.getMetadataForDocument(anyString(), anyString(), any(UUID.class)))
+            .thenThrow(HttpClientErrorException.class);
+
+        // When & Then
+        assertThrows(HttpClientErrorException.class,
+            () -> downloadService.getDocumentMetaData(documentId, AUTH_TOKEN));
+        verify(caseDocumentClient, times(1))
+            .getMetadataForDocument(IDAM_OAUTH_TOKEN, SERVICE_AUTH, documentId);
+        verify(idamAuthService, times(2)).getIdamToken(AUTH_TOKEN);
     }
 
     @Test

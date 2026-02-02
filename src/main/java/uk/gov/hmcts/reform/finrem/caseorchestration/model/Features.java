@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum Features {
 
+    EXUI3990_WORKAROUND_ENABLED("exui3990_workaround_enabled"),
     ASSIGN_CASE_ACCESS("assign_case_access"),
     SEND_TO_FRC("send_to_frc"),
     PAYMENT_REQUEST_USING_CASE_TYPE("pba_case_type"),
@@ -16,7 +17,8 @@ public enum Features {
     CASE_FILE_VIEW_ENABLED("case_file_view_enabled"),
     EXPRESS_PILOT_ENABLED("express_pilot_enabled"),
     MANAGE_HEARING_ENABLED("manage_hearing_enabled"),
-    VACATE_HEARING_ENABLED("vacate_hearing_enabled");
+    VACATE_HEARING_ENABLED("vacate_hearing_enabled"),
+    MANAGE_CASE_DOCS_DELETE_ENABLED("manage_case_docs_delete_enabled");
 
     private final String name;
 }
