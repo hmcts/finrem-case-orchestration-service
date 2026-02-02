@@ -21,7 +21,6 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTestUtils.givenSearchUserRoles;
@@ -62,7 +61,7 @@ class HwfApplicationAcceptedIntegrationTest {
         String expectedEmailAddress = "fr_applicant_solicitor1@mailinator.com";
 
         Mockito.verify(emailClient).sendEmail(eq(expectedTemplateId), eq(expectedEmailAddress),
-            anyMap(), anyString(), isNull(String.class));
+            anyMap(), anyString(), anyString());
 
     }
 
@@ -79,7 +78,7 @@ class HwfApplicationAcceptedIntegrationTest {
         String expectedEmailAddress = "fr_applicant_solicitor1@mailinator.com";
 
         Mockito.verify(emailClient).sendEmail(eq(expectedTemplateId), eq(expectedEmailAddress),
-            anyMap(), anyString(), isNull(String.class));
+            anyMap(), anyString(), anyString());
 
     }
 

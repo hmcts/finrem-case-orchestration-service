@@ -57,6 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
@@ -127,6 +128,8 @@ class FinremNotificationRequestMapperTest {
         courtDetailsConfiguration = mock(CourtDetailsConfiguration.class);
         consentedFinremCaseDetails = getConsentedFinremCaseDetails();
         contestedFinremCaseDetails = getContestedFinremCaseDetails();
+
+        mockNotificationRequestBuilderFactory();
     }
 
     @Test
@@ -665,8 +668,6 @@ class FinremNotificationRequestMapperTest {
 
     @Test
     void givenContestedCaseData_whenGeneralEmail_thenBuildNotificationRequest() {
-        mockNotificationRequestBuilderFactory();
-
         String emailRecipient = "test@test.com";
         String emailBody = "This is a contested case test email";
         contestedFinremCaseDetails.getData().setGeneralEmailWrapper(GeneralEmailWrapper.builder()
@@ -689,8 +690,6 @@ class FinremNotificationRequestMapperTest {
 
     @Test
     void givenConsentedCaseData_whenGeneralEmail_thenBuildNotificationRequest() {
-        mockNotificationRequestBuilderFactory();
-
         String emailRecipient = "test@test.com";
         String emailBody = "This is a consented case test email";
         consentedFinremCaseDetails.getData().setGeneralEmailWrapper(GeneralEmailWrapper.builder()
@@ -954,7 +953,7 @@ class FinremNotificationRequestMapperTest {
 
     private void mockNotificationRequestBuilderFactory() {
         NotificationRequestBuilder builder = new NotificationRequestBuilder(courtDetailsConfiguration, consentedApplicationHelper);
-        when(builderFactory.newInstance()).thenReturn(builder);
+        lenient().when(builderFactory.newInstance()).thenReturn(builder);
     }
 
     @SneakyThrows
