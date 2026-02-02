@@ -2,12 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -33,16 +30,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 public class FinremNotificationRequestMapper extends AbstractNotificationRequestMapper {
 
     private static final String RESPONDENT = "Respondent";
-    private static final String CONSENTED = "consented";
-    private static final String CONTESTED = "contested";
     private static final String EMPTY_STRING = "";
 
-    private final ConsentedApplicationHelper consentedApplicationHelper;
-
-    public FinremNotificationRequestMapper(NotificationRequestBuilderFactory notificationRequestBuilderFactory,
-                                           ConsentedApplicationHelper consentedApplicationHelper) {
+    public FinremNotificationRequestMapper(NotificationRequestBuilderFactory notificationRequestBuilderFactory) {
         super(notificationRequestBuilderFactory);
-        this.consentedApplicationHelper = consentedApplicationHelper;
     }
 
     public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails) {
@@ -121,39 +112,17 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
                                                          SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         final FinremCaseData caseData = caseDetails.getData();
 
-        // TODO Consider using James' NotificationRequestBuilder
-        NotificationRequest notificationRequest = NotificationRequest.builder().build();
-        notificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
-        notificationRequest.setDivorceCaseNumber(Objects.toString(caseData.getDivorceCaseNumber(), EMPTY_STRING));
-        notificationRequest.setCaseType(getCaseType(caseDetails));
-        notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
+        NotificationRequest notificationRequest = notificationRequestBuilder()
+            .withCaseDefaults(caseDetails)
+            .withSolicitorCaseData(caseDataKeysWrapper)
+            .build();
         notificationRequest.setGeneralApplicationRejectionReason(
             Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationRejectReason(), EMPTY_STRING));
         notificationRequest.setGeneralEmailBody(Objects.toString(caseData.getGeneralEmailWrapper().getGeneralEmailBody(), EMPTY_STRING));
-        notificationRequest.setApplicantName(caseData.getFullApplicantName());
-        if (caseData.isConsentedApplication()) {
-            notificationRequest.setRespondentName(caseData.getFullRespondentNameConsented());
-            setCaseOrderType(notificationRequest, caseData);
-            log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
-                notificationRequest.getCaseReferenceNumber());
-        }
-        if (caseData.isContestedApplication()) {
-            notificationRequest.setRespondentName(caseData.getFullRespondentNameContested());
-            notificationRequest.setSelectedCourt(CourtHelper.getSelectedFrc(caseDetails));
-            log.info("selectedCourt is {} for case ID: {}", notificationRequest.getSelectedCourt(),
-                notificationRequest.getCaseReferenceNumber());
-        }
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
         notificationRequest.setHearingType(listForHearingWrapper.getHearingType() != null
             ? listForHearingWrapper.getHearingType().getId()
             : "");
-
-        if (caseDataKeysWrapper != null) {
-            notificationRequest.setName(caseDataKeysWrapper.getSolicitorNameKey());
-            notificationRequest.setNotificationEmail(caseDataKeysWrapper.getSolicitorEmailKey());
-            notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseDataKeysWrapper.getSolicitorReferenceKey(), EMPTY_STRING));
-            notificationRequest.setIsNotDigital(caseDataKeysWrapper.getSolicitorIsNotDigitalKey());
-        }
 
         return notificationRequest;
     }
@@ -301,21 +270,5 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .withSolicitorCaseData(solicitorCaseData)
             .withDateOfIssue()
             .build();
-    }
-
-    private void setCaseOrderType(NotificationRequest notificationRequest, FinremCaseData caseData) {
-        if (consentedApplicationHelper.isVariationOrder(caseData)) {
-            notificationRequest.setCaseOrderType("variation");
-            notificationRequest.setCamelCaseOrderType("Variation");
-        } else {
-            notificationRequest.setCaseOrderType("consent");
-            notificationRequest.setCamelCaseOrderType("Consent");
-        }
-        log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
-            notificationRequest.getCaseReferenceNumber());
-    }
-
-    private String getCaseType(FinremCaseDetails caseDetails) {
-        return caseDetails.getCaseType().equals(CaseType.CONSENTED) ? CONSENTED : CONTESTED;
     }
 }
