@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -254,21 +253,5 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .withSolicitorCaseData(solicitorCaseData)
             .withDateOfIssue()
             .build();
-    }
-
-    private void setCaseOrderType(NotificationRequest notificationRequest, FinremCaseData caseData) {
-        if (consentedApplicationHelper.isVariationOrder(caseData)) {
-            notificationRequest.setCaseOrderType("variation");
-            notificationRequest.setCamelCaseOrderType("Variation");
-        } else {
-            notificationRequest.setCaseOrderType("consent");
-            notificationRequest.setCamelCaseOrderType("Consent");
-        }
-        log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
-            notificationRequest.getCaseReferenceNumber());
-    }
-
-    private String getCaseType(FinremCaseDetails caseDetails) {
-        return caseDetails.getCaseType().equals(CaseType.CONSENTED) ? CONSENTED : CONTESTED;
     }
 }
