@@ -66,6 +66,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_APP_BARRISTER_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_APP_BARRISTER_NAME;
@@ -127,6 +128,8 @@ class FinremNotificationRequestMapperTest {
         courtDetailsConfiguration = mock(CourtDetailsConfiguration.class);
         consentedFinremCaseDetails = getConsentedFinremCaseDetails();
         contestedFinremCaseDetails = getContestedFinremCaseDetails();
+
+        mockNotificationRequestBuilderFactory();
     }
 
     @Test
@@ -411,7 +414,7 @@ class FinremNotificationRequestMapperTest {
         when(finremCaseData.getAppSolicitorName()).thenReturn(TEST_SOLICITOR_NAME);
 
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        when(caseDetails.getId()).thenReturn(CASE_ID_IN_LONG);
+        when(caseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
         when(caseDetails.getCaseType()).thenReturn(caseType);
         when(caseDetails.getData()).thenReturn(finremCaseData);
 
@@ -474,7 +477,7 @@ class FinremNotificationRequestMapperTest {
         when(finremCaseData.getAppSolicitorName()).thenReturn(TEST_SOLICITOR_NAME);
 
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        when(caseDetails.getId()).thenReturn(CASE_ID_IN_LONG);
+        when(caseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
         when(caseDetails.getCaseType()).thenReturn(caseType);
         when(caseDetails.getData()).thenReturn(finremCaseData);
 
@@ -533,6 +536,7 @@ class FinremNotificationRequestMapperTest {
 
     private FinremCaseData spiedFinremCaseData(HearingTypeDirection mockedHearingTypeDirection) {
         return spy(FinremCaseData.builder()
+            .ccdCaseId(CASE_ID)
             .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
                 .generalApplicationRejectReason("generalApplicationRejectReason")
@@ -665,8 +669,6 @@ class FinremNotificationRequestMapperTest {
 
     @Test
     void givenContestedCaseData_whenGeneralEmail_thenBuildNotificationRequest() {
-        mockNotificationRequestBuilderFactory();
-
         String emailRecipient = "test@test.com";
         String emailBody = "This is a contested case test email";
         contestedFinremCaseDetails.getData().setGeneralEmailWrapper(GeneralEmailWrapper.builder()
@@ -689,8 +691,6 @@ class FinremNotificationRequestMapperTest {
 
     @Test
     void givenConsentedCaseData_whenGeneralEmail_thenBuildNotificationRequest() {
-        mockNotificationRequestBuilderFactory();
-
         String emailRecipient = "test@test.com";
         String emailBody = "This is a consented case test email";
         consentedFinremCaseDetails.getData().setGeneralEmailWrapper(GeneralEmailWrapper.builder()
@@ -954,7 +954,7 @@ class FinremNotificationRequestMapperTest {
 
     private void mockNotificationRequestBuilderFactory() {
         NotificationRequestBuilder builder = new NotificationRequestBuilder(courtDetailsConfiguration, consentedApplicationHelper);
-        when(builderFactory.newInstance()).thenReturn(builder);
+        lenient().when(builderFactory.newInstance()).thenReturn(builder);
     }
 
     @SneakyThrows
