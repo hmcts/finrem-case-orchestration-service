@@ -57,7 +57,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
@@ -67,6 +66,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_APP_BARRISTER_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_APP_BARRISTER_NAME;
@@ -414,7 +414,7 @@ class FinremNotificationRequestMapperTest {
         when(finremCaseData.getAppSolicitorName()).thenReturn(TEST_SOLICITOR_NAME);
 
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        when(caseDetails.getId()).thenReturn(CASE_ID_IN_LONG);
+        when(caseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
         when(caseDetails.getCaseType()).thenReturn(caseType);
         when(caseDetails.getData()).thenReturn(finremCaseData);
 
@@ -477,7 +477,7 @@ class FinremNotificationRequestMapperTest {
         when(finremCaseData.getAppSolicitorName()).thenReturn(TEST_SOLICITOR_NAME);
 
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        when(caseDetails.getId()).thenReturn(CASE_ID_IN_LONG);
+        when(caseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
         when(caseDetails.getCaseType()).thenReturn(caseType);
         when(caseDetails.getData()).thenReturn(finremCaseData);
 
@@ -536,6 +536,7 @@ class FinremNotificationRequestMapperTest {
 
     private FinremCaseData spiedFinremCaseData(HearingTypeDirection mockedHearingTypeDirection) {
         return spy(FinremCaseData.builder()
+            .ccdCaseId(CASE_ID)
             .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
                 .generalApplicationRejectReason("generalApplicationRejectReason")
