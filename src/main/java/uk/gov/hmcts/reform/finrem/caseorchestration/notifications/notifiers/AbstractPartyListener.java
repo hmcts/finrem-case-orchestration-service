@@ -142,13 +142,18 @@ public abstract class AbstractPartyListener {
         log.info("Preparing paper notification for party {} on case {}", notificationParty, event.getCaseId());
 
         // Defensive copy to avoid mutating an original event collection
-        List<CaseDocument> docsToPrint = Optional.ofNullable(event.documentsToPost)
-            .filter(docs -> !docs.isEmpty())
-            .map(ArrayList::new)
-            .orElseThrow(() ->
-                new IllegalArgumentException("No documents to post provided for paper notification, case ID: " + event.getCaseId()));
+        Optional<List<CaseDocument>> documentsToPost = Optional.ofNullable(event.documentsToPost)
+            .filter(docs -> !docs.isEmpty());
+
+        List<CaseDocument> documents = documentsToPost.orElseThrow(() ->
+            new IllegalArgumentException("No documents to post provided for paper notification, case ID: " + event.getCaseId())
+        );
+
+        List<CaseDocument> docsToPrint = new ArrayList<>();
 
         docsToPrint.add(getPartyCoversheet(event));
+        docsToPrint.addAll(documents);
+
         List<BulkPrintDocument> bpDocs =
                 bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint, event.authToken, event.getCaseDetails().getCaseType());
         boolean isOutsideUK = isPartyOutsideUK(event);

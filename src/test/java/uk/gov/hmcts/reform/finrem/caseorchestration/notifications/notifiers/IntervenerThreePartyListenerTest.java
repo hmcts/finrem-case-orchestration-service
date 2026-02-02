@@ -170,19 +170,20 @@ class IntervenerThreePartyListenerTest {
             .fileName(COVER_SHEET_FILE)
             .build();
 
+        // Cover sheet should be at the begging of the documents sent for bulk print
         when(notificationService
             .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerThree(), caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getIntervenerThreeCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
-        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType()))
-            .thenReturn(List.of(bulkPrintDocument1, bulkPrintCoverSheet));
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))
+            .thenReturn(List.of(bulkPrintCoverSheet, bulkPrintDocument1));
 
         intervenerThreePartyListener.handleNotification(event);
 
         verify(bulkPrintService).getIntervenerThreeCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType());
+        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType());
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
-            caseDetails, INTERVENER_THREE, List.of(bulkPrintDocument1, bulkPrintCoverSheet), false, AUTH_TOKEN
+            caseDetails, INTERVENER_THREE, List.of(bulkPrintCoverSheet, bulkPrintDocument1), false, AUTH_TOKEN
         );
     }
 
