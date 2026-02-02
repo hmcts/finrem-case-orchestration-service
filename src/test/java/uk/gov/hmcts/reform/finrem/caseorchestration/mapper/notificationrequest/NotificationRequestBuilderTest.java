@@ -2,6 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -27,6 +31,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -130,6 +135,18 @@ class NotificationRequestBuilderTest {
     }
 
     @Test
+    void givenContestedCaseWithoutDivorceCaseNumber_whenWithDefaults_thenCaseDetailsPopulated() {
+        mockCourtDetailsConfiguration();
+        FinremCaseDetails caseDetails = createContestedCase(true);
+
+        NotificationRequest notificationRequest = builder
+            .withCaseDefaults(caseDetails)
+            .build();
+
+        assertThat(notificationRequest.getDivorceCaseNumber()).isEqualTo("");
+    }
+
+    @Test
     void givenAllPropertiesSet_whenBuild_thenAllPropertiesPopulated() {
         byte[] documentContents = {1, 2, 3};
         NotificationRequest notificationRequest = builder
@@ -199,11 +216,10 @@ class NotificationRequestBuilderTest {
         assertThat(notificationRequest.getIsNotDigital()).isTrue();
     }
 
-    @Test
-    void givenMissingSolicitorData_whenWithSolicitorCaseData_thenSolicitorDetailsNotPopulated() {
-        SolicitorCaseDataKeysWrapper solicitorCaseData = SolicitorCaseDataKeysWrapper.builder()
-            .build();
-
+    @ParameterizedTest
+    @MethodSource
+    @NullSource
+    void givenMissingSolicitorData_whenWithSolicitorCaseData_thenSolicitorDetailsNotPopulated(SolicitorCaseDataKeysWrapper solicitorCaseData) {
         NotificationRequest notificationRequest = builder
             .withSolicitorCaseData(solicitorCaseData)
             .build();
@@ -212,6 +228,10 @@ class NotificationRequestBuilderTest {
         assertThat(notificationRequest.getNotificationEmail()).isEmpty();
         assertThat(notificationRequest.getSolicitorReferenceNumber()).isEmpty();
         assertThat(notificationRequest.getIsNotDigital()).isNull();
+    }
+
+    static Stream<Arguments> givenMissingSolicitorData_whenWithSolicitorCaseData_thenSolicitorDetailsNotPopulated() {
+        return Stream.of(Arguments.of(SolicitorCaseDataKeysWrapper.builder().build()));
     }
 
     @Test
@@ -246,6 +266,10 @@ class NotificationRequestBuilderTest {
     }
 
     private FinremCaseDetails createContestedCase() {
+        return createContestedCase(false);
+    }
+
+    private FinremCaseDetails createContestedCase(boolean nullDivorceCaseNumber) {
         FinremCaseData caseData = FinremCaseData.builder()
             .regionWrapper(createRegionWrapper())
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
@@ -255,7 +279,7 @@ class NotificationRequestBuilderTest {
                 .respondentLname("Duck")
                 .build())
             .ccdCaseType(CaseType.CONTESTED)
-            .divorceCaseNumber("3657-4535-2355-7545")
+            .divorceCaseNumber(nullDivorceCaseNumber ? null : "3657-4535-2355-7545")
             .build();
         return FinremCaseDetails.builder()
             .id(3456865498462385L)
