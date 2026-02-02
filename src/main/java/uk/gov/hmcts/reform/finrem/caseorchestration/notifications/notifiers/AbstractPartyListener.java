@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
@@ -160,10 +161,10 @@ public abstract class AbstractPartyListener {
 
         // Bulk print service requires implementation of exception handling -
         // consider building in retries and Server Error Handling as part of DFR-3308.
-        bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+        UUID letterId = bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             event.caseDetails, notificationParty, bpDocs, isOutsideUK, event.authToken
         );
 
-        log.info("Completed paper notification for party {} on case case {}", notificationParty, event.getCaseId());
+        log.info("Completed paper notification for party {} on case {} with letter ID: {}", notificationParty, event.getCaseId(), letterId);
     }
 }

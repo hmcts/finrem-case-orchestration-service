@@ -170,7 +170,7 @@ class IntervenerOnePartyListenerTest {
             .fileName(COVER_SHEET_FILE)
             .build();
 
-        // Cover sheet should be at the begging of the documents sent for bulk print
+        // Cover sheet should be at the beginning of the documents sent for bulk print
         when(notificationService
             .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(), caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
