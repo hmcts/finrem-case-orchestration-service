@@ -68,21 +68,30 @@ public class GenericDocumentService {
         return CaseDocument.from(stampedDocument);
     }
 
+    /**
+     * Converts the given {@link CaseDocument} to PDF format if it is not already a PDF.
+     *
+     * <p>
+     * If the document filename has a {@code .pdf} extension (case-insensitive), the original
+     * document is returned unchanged. Otherwise, the document is converted to PDF using the
+     * document conversion service.
+     * </p>
+     *
+     * <p><strong>Important:</strong> This method must be invoked from a <em>submitted</em> event
+     * context only. Calling it during a non-submitted event (e.g. mid-event or about-to-submit)
+     * may result in unexpected behaviour or side effects (e.g. orphaned documents in the
+     * Document Store).</p>
+     *
+     * @param document the case document to be checked and converted if required
+     * @param authorisationToken the authorisation token used to access the document store
+     * @param caseType the case type used to determine conversion behaviour
+     * @return the original document if it is already a PDF; otherwise, the converted PDF document
+     */
     public CaseDocument convertDocumentIfNotPdfAlready(CaseDocument document,
                                                        String authorisationToken,
                                                        CaseType caseType) {
         return !Files.getFileExtension(document.getDocumentFilename()).equalsIgnoreCase("pdf")
             ? convertDocumentToPdf(document, authorisationToken, caseType) : document;
-    }
-
-    private CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken, CaseType caseType) {
-        Document requestDocument = toDocument(document);
-        byte[] convertedDocContent =
-            documentConversionService.convertDocumentToPdf(requestDocument, authorisationToken);
-        String filename = documentConversionService.getConvertedFilename(requestDocument.getFileName());
-        Document storedDocument =
-            documentManagementService.storeDocument(convertedDocContent, filename, authorisationToken, caseType);
-        return CaseDocument.from(storedDocument);
     }
 
     public CaseDocument stampDocument(CaseDocument document,
@@ -98,6 +107,16 @@ public class GenericDocumentService {
                 .fileName(pdfCaseDocument.getDocumentFilename())
                 .build(), authorisationToken, false, stampType, caseType);
         return CaseDocument.from(stampedDocument);
+    }
+
+    private CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken, CaseType caseType) {
+        Document requestDocument = toDocument(document);
+        byte[] convertedDocContent =
+            documentConversionService.convertDocumentToPdf(requestDocument, authorisationToken);
+        String filename = documentConversionService.getConvertedFilename(requestDocument.getFileName());
+        Document storedDocument =
+            documentManagementService.storeDocument(convertedDocContent, filename, authorisationToken, caseType);
+        return CaseDocument.from(storedDocument);
     }
 
     private Document toDocument(CaseDocument caseDocument) {
