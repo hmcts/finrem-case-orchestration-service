@@ -170,19 +170,20 @@ class IntervenerOnePartyListenerTest {
             .fileName(COVER_SHEET_FILE)
             .build();
 
+        // Cover sheet should be at the beginning of the documents sent for bulk print
         when(notificationService
             .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(), caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getIntervenerOneCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
-        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType()))
-            .thenReturn(List.of(bulkPrintDocument1, bulkPrintCoverSheet));
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))
+            .thenReturn(List.of(bulkPrintCoverSheet, bulkPrintDocument1));
 
         intervenerOnePartyListener.handleNotification(event);
 
         verify(bulkPrintService).getIntervenerOneCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType());
+        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType());
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
-            caseDetails, INTERVENER_ONE, List.of(bulkPrintDocument1, bulkPrintCoverSheet), false, AUTH_TOKEN
+            caseDetails, INTERVENER_ONE, List.of(bulkPrintCoverSheet, bulkPrintDocument1), false, AUTH_TOKEN
         );
     }
 
