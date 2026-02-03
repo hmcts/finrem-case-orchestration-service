@@ -69,6 +69,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_RECITALS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
@@ -143,8 +144,8 @@ public class GeneralOrderService {
         caseData.put("GeneralOrderBodyText", caseDetails.getData().get(GENERAL_ORDER_BODY_TEXT));
 
         // if court region is southeast, add central frc contact details for footer
-        if (caseDetails.getData().get(REGION) != null
-            && caseDetails.getData().get(REGION).toString().equalsIgnoreCase("southeast")) {
+        if (caseDetails.getData().get(SOUTHEAST_FRC_LIST) != null
+            && caseDetails.getData().get(SOUTHEAST_FRC_LIST).toString().equalsIgnoreCase("kentfrc")) {
             caseData.put("centralFRCCourtAddress", OrchestrationConstants.CTSC_FRC_COURT_ADDRESS);
             caseData.put("centralFRCCourtEmail", OrchestrationConstants.CTSC_FRC_COURT_EMAIL_ADDRESS);
         }

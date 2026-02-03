@@ -78,7 +78,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
@@ -913,7 +913,7 @@ class GeneralOrderServiceTest {
     void verifyAdditionalFieldsForCentralFrcContactDetailsForSoutheastRegion() {
 
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put(REGION, "southeast");
+        caseData.put(SOUTHEAST_FRC_LIST, "kentfrc");
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
 
         Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, caseDetails);
