@@ -1,18 +1,20 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener;
 
+import lombok.Getter;
+
+@Getter
 public enum IntervenerType {
-    INTERVENER_ONE("intervener1"),
-    INTERVENER_TWO("intervener2"),
-    INTERVENER_THREE("intervener3"),
-    INTERVENER_FOUR("intervener4");
+    INTERVENER_ONE("intervener1", 1),
+    INTERVENER_TWO("intervener2", 2),
+    INTERVENER_THREE("intervener3", 3),
+    INTERVENER_FOUR("intervener4", 4);
 
-    private String value;
+    private final String typeValue;
 
-    IntervenerType(String value) {
-        this.value = value;
-    }
+    private final int intervenerId;
 
-    public String getTypeValue() {
-        return this.value;
+    IntervenerType(String typeValue, int intervenerId) {
+        this.typeValue = typeValue;
+        this.intervenerId = intervenerId;
     }
 }

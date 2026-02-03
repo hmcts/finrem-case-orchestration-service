@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.NotificationConstants.PHONE_OPENING_HOURS;
@@ -113,7 +114,7 @@ public class EmailServiceTest {
 
     @Before
     public void setUp() {
-        notificationRequest = new NotificationRequest();
+        notificationRequest = NotificationRequest.builder().build();
         notificationRequest.setNotificationEmail(TEST_SOLICITOR_EMAIL);
         notificationRequest.setCaseReferenceNumber(TEST_CASE_FAMILY_MAN_ID);
         notificationRequest.setSolicitorReferenceNumber(TEST_SOLICITOR_REFERENCE);
@@ -889,6 +890,85 @@ public class EmailServiceTest {
 
         assertThrows(SendEmailException.class,
             () -> emailService.sendConfirmationEmail(notificationRequest, FR_HWF_SUCCESSFUL));
+    }
+
+    @Test
+    public void shouldPopulateCourtInfoFromContestedContactedEmailsWhenSelectedCourtProvided() throws NotificationClientException {
+        final NotificationRequest nr = NotificationRequest.builder()
+            .caseType("contested")
+            .contactCourtEmail(null)
+            .contactCourtName(null)
+            .emailReplyToId("emailReplyToId")
+            .selectedCourt("testCourt")
+            .build();
+
+        {
+            emailService.sendConfirmationEmail(nr, mock(EmailTemplateNames.class));
+
+            verify(mockClient).sendEmail(
+                any(),
+                any(),
+                templateFieldsArgumentCaptor.capture(),
+                anyString(), eq("emailReplyToId"));
+            assertCourtNameAndCourtEmailFromContestedContactedEmails();
+
+            reset(mockClient);
+
+            // should be overridden if contact court name and email provided in NR
+            emailService.sendConfirmationEmail(nr.toBuilder()
+                .contactCourtEmail("NR_PROVIDED@justice.gov.uk")
+                .contactCourtName("NR_PROVIDED_COURT_NAME")
+                .build(), mock(EmailTemplateNames.class));
+
+            verify(mockClient).sendEmail(
+                any(),
+                any(),
+                templateFieldsArgumentCaptor.capture(),
+                anyString(), eq("emailReplyToId"));
+            assertCourtNameAndCourtEmailFromProvided();
+        }
+
+        reset(mockClient);
+
+        // caseType is missing but email template name is FR_CONSENTED_LIST_FOR_HEARING
+        {
+            emailService.sendConfirmationEmail(nr.toBuilder().caseType(null).build(), FR_CONSENTED_LIST_FOR_HEARING);
+
+            verify(mockClient).sendEmail(
+                any(),
+                any(),
+                templateFieldsArgumentCaptor.capture(),
+                anyString(), eq("emailReplyToId"));
+            assertCourtNameAndCourtEmailFromContestedContactedEmails();
+
+            reset(mockClient);
+
+            // should be overridden if contact court name and email provided in NR
+            emailService.sendConfirmationEmail(nr.toBuilder()
+                .caseType(null)
+                .contactCourtEmail("NR_PROVIDED@justice.gov.uk")
+                .contactCourtName("NR_PROVIDED_COURT_NAME")
+                .build(), FR_CONSENTED_LIST_FOR_HEARING);
+
+            verify(mockClient).sendEmail(
+                any(),
+                any(),
+                templateFieldsArgumentCaptor.capture(),
+                anyString(), eq("emailReplyToId"));
+            assertCourtNameAndCourtEmailFromProvided();
+        }
+    }
+
+    private void assertCourtNameAndCourtEmailFromContestedContactedEmails() {
+        assertThat(templateFieldsArgumentCaptor.getValue())
+            .containsEntry("courtName", "TEST SELECTED COURT")
+            .containsEntry("courtEmail", "selected@justice.gov.uk");
+    }
+
+    private void assertCourtNameAndCourtEmailFromProvided() {
+        assertThat(templateFieldsArgumentCaptor.getValue())
+            .containsEntry("courtName", "NR_PROVIDED_COURT_NAME")
+            .containsEntry("courtEmail", "NR_PROVIDED@justice.gov.uk");
     }
 
     private void assertContestedTemplateVariablesAreAbsent(Map<String, Object> returnedTemplateVars) {
