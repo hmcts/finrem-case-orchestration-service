@@ -75,7 +75,7 @@ public class GenericDocumentService {
             ? convertDocumentToPdf(document, authorisationToken, caseType) : document;
     }
 
-    public CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken, CaseType caseType) {
+    private CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken, CaseType caseType) {
         Document requestDocument = toDocument(document);
         byte[] convertedDocContent =
             documentConversionService.convertDocumentToPdf(requestDocument, authorisationToken);
@@ -100,7 +100,7 @@ public class GenericDocumentService {
         return CaseDocument.from(stampedDocument);
     }
 
-    public Document toDocument(CaseDocument caseDocument) {
+    private Document toDocument(CaseDocument caseDocument) {
         Document document = new Document();
         document.setBinaryUrl(caseDocument.getDocumentBinaryUrl());
         document.setFileName(caseDocument.getDocumentFilename());
