@@ -63,10 +63,9 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {}, callback {} for Case ID: {}",
-            callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
+        String caseId = caseDetails.getCaseIdAsString();
 
         try {
             FinremCaseData caseData = caseDetails.getData();
