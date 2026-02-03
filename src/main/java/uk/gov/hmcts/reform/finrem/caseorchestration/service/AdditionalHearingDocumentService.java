@@ -341,10 +341,6 @@ public class AdditionalHearingDocumentService {
         }
     }
 
-    public CaseDocument convertToPdf(CaseDocument document, String authorisationToken, CaseType caseType) {
-        return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken, caseType);
-    }
-
     private CaseDocument getStampedDocs(String authorisationToken, FinremCaseData caseData, CaseType caseType, CaseDocument uploadDraftDocument) {
         CaseDocument caseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(uploadDraftDocument, authorisationToken, caseType);
         StampType stampType = documentHelper.getStampType(caseData);

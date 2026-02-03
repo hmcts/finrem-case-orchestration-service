@@ -105,14 +105,6 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-    void convertToPdf() {
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), any())).thenReturn(caseDocument());
-        CaseDocument caseDocument = caseDocument(DOC_URL, "app_docs.docx", BINARY_URL);
-        CaseDocument toPdf = additionalHearingDocumentService.convertToPdf(caseDocument, AUTH_TOKEN, CONTESTED);
-        assertEquals("app_docs.pdf", toPdf.getDocumentFilename());
-    }
-
-    @Test
     void generateAndAddAdditionalHearingDocument() throws JsonProcessingException {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         caseDetails.getData().put(HEARING_DATE, "2021-01-01");
