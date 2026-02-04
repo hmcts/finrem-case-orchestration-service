@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremAdditionalHearingCorresponder;
 
@@ -45,7 +44,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_DOC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
@@ -86,10 +84,6 @@ public class AdditionalHearingDocumentService {
 
         CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
-    }
-
-    public void sendAdditionalHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
-        finremAdditionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 
     public List<DirectionOrderCollection> getApprovedHearingOrders(FinremCaseDetails caseDetails, String authorisationToken) {
@@ -310,35 +304,6 @@ public class AdditionalHearingDocumentService {
         additionalHearingDocumentDataList.add(generatedDocumentData);
 
         caseData.put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, additionalHearingDocumentDataList);
-    }
-
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
-    public void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
-        List<AdditionalHearingDocumentData> additionalHearingDocumentData =
-            documentHelper.convertToAdditionalHearingDocumentData(
-                caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
-
-        List<BulkPrintDocument> document = new ArrayList<>();
-        if (caseDetails.getData().get(HEARING_ADDITIONAL_DOC) != null) {
-            BulkPrintDocument additionalUploadedDoc
-                = documentHelper.getBulkPrintDocumentFromCaseDocument(documentHelper
-                .convertToCaseDocument(caseDetails.getData().get(HEARING_ADDITIONAL_DOC)));
-            document.add(additionalUploadedDoc);
-        }
-
-        AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
-
-        BulkPrintDocument additionalDoc
-            = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocument.getAdditionalHearingDocument().getDocument());
-
-        document.add(additionalDoc);
-
-        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
-        }
-        if (!notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
-        }
     }
 
     public CaseDocument convertToPdf(CaseDocument document, String authorisationToken, CaseType caseType) {

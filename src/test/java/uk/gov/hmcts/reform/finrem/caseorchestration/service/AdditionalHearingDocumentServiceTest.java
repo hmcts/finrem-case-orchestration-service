@@ -47,7 +47,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -316,70 +315,6 @@ class AdditionalHearingDocumentServiceTest {
                 .kentSurreyCourtList(KentSurreyCourt.FR_kent_surreyList_9)
                 .build())
             .build();
-    }
-
-    @Test
-    void printAdditionalHearingDocuments_forBothSolicitors() throws JsonProcessingException {
-        CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
-        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
-
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
-
-        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
-
-        verify(bulkPrintService, timeout(100).times(1))
-            .printRespondentDocuments(any(CaseDetails.class), any(), any());
-        verify(bulkPrintService, timeout(100).times(1))
-            .printApplicantDocuments(any(CaseDetails.class), any(), any());
-    }
-
-    @Test
-    void printAdditionalHearingDocuments_forNeitherSolicitor() throws JsonProcessingException {
-        CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
-        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
-
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
-
-        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
-
-        verify(bulkPrintService, timeout(100).times(0))
-            .printRespondentDocuments(any(CaseDetails.class), any(), any());
-        verify(bulkPrintService, timeout(100).times(0))
-            .printApplicantDocuments(any(CaseDetails.class), any(), any());
-    }
-
-    @Test
-    void printAdditionalHearingDocuments_forRespondentSolicitor() throws JsonProcessingException {
-        CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
-        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
-
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
-
-        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
-
-        verify(bulkPrintService, timeout(100).times(1))
-            .printRespondentDocuments(any(CaseDetails.class), any(), any());
-        verify(bulkPrintService, timeout(100).times(0))
-            .printApplicantDocuments(any(CaseDetails.class), any(), any());
-    }
-
-    @Test
-    void printAdditionalHearingDocuments_forContestedAppSolicitor() throws JsonProcessingException {
-        CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
-        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
-
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
-
-        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
-
-        verify(bulkPrintService, timeout(100).times(0))
-            .printRespondentDocuments(any(CaseDetails.class), any(), any());
-        verify(bulkPrintService, timeout(100).times(1))
-            .printApplicantDocuments(any(CaseDetails.class), any(), any());
     }
 
     @Test
