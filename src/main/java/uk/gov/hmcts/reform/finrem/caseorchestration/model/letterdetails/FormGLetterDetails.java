@@ -26,4 +26,6 @@ public class FormGLetterDetails implements DocumentTemplateDetails {
     private String respondentSolicitorReference;
     private String hearingDate;
     private String hearingTime;
+    private String typeOfApplication;
+    private String civilPartnership;
 }
