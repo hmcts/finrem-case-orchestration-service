@@ -26,6 +26,7 @@ public enum KentSurreyCourt implements CourtList {
     FR_kent_surreyList_14("FR_kent_surrey_hc_list_14"),
     FR_kent_surreyList_15("FR_kent_surrey_hc_list_15"),
     FR_kent_surreyList_16("FR_kent_surrey_hc_list_16"),
+    FR_kent_surreyList_17("FR_kent_surrey_hc_list_17"),
     CONSENTED_FR_kent_surreyList_1("FR_kent_surreyList_1"),
     CONSENTED_FR_kent_surreyList_2("FR_kent_surreyList_2"),
     CONSENTED_FR_kent_surreyList_3("FR_kent_surreyList_3"),
