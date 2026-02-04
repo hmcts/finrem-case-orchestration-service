@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -59,7 +58,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GeneralApplicationService {
 
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
     private final IdamService idamService;
     private final GenericDocumentService genericDocumentService;
     private final AssignCaseAccessService accessService;
