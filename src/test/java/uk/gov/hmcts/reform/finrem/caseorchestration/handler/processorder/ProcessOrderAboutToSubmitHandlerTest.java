@@ -461,7 +461,6 @@ class ProcessOrderAboutToSubmitHandlerTest {
         final var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         verify(additionalHearingDocumentService).stampAndUpdateOrderCollections(callbackRequest.getCaseDetails(), AUTH_TOKEN);
-        verify(additionalHearingDocumentService, never()).storeHearingNotice(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).performAddHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService).updateTabData(caseData);
         assertEquals(ManageHearingsAction.ADD_HEARING,
@@ -487,7 +486,6 @@ class ProcessOrderAboutToSubmitHandlerTest {
         final var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         verify(additionalHearingDocumentService).stampAndUpdateOrderCollections(callbackRequest.getCaseDetails(), AUTH_TOKEN);
-        verify(additionalHearingDocumentService, never()).storeHearingNotice(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService, never()).performAddHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(manageHearingActionService, never()).updateTabData(caseData);
         assertThat(response.getData().getManageHearingsWrapper().getWorkingHearing()).isNull();
