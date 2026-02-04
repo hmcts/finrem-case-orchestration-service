@@ -118,7 +118,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
             CaseDocument latestRefusedConsentOrder = null;
             if (wrapper.getConsentedNotApprovedOrders() != null && !wrapper.getConsentedNotApprovedOrders().isEmpty()) {
                 latestRefusedConsentOrder = wrapper.getConsentedNotApprovedOrders()
-                    .get(wrapper.getConsentedNotApprovedOrders().size() - 1).getApprovedOrder().getConsentOrder();
+                    .getLast().getApprovedOrder().getConsentOrder();
             }
 
             CaseDocument latestOrderDocument = consentOrderNotApprovedDocumentService.getLatestOrderDocument(
