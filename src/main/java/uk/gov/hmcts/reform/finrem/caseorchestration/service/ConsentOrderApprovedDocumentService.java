@@ -401,12 +401,12 @@ public class ConsentOrderApprovedDocumentService {
         List<ConsentOrderCollection> refusedOrders = wrapper.getConsentedNotApprovedOrders();
         List<ConsentOrderCollection> approvedOrders = wrapper.getContestedConsentedApprovedOrders();
         if (refusedOrders != null && !refusedOrders.isEmpty()) {
-            latestRefusedConsentOrder = refusedOrders.get(refusedOrders.size() - 1).getApprovedOrder().getConsentOrder();
+            latestRefusedConsentOrder = refusedOrders.getLast().getApprovedOrder().getConsentOrder();
         } else {
             return approvedOrders != null && !approvedOrders.isEmpty();
         }
         if (approvedOrders != null && !approvedOrders.isEmpty()) {
-            latestApprovedConsentOrder = approvedOrders.get(approvedOrders.size() - 1).getApprovedOrder().getConsentOrder();
+            latestApprovedConsentOrder = approvedOrders.getLast().getApprovedOrder().getConsentOrder();
         } else {
             return false;
         }
