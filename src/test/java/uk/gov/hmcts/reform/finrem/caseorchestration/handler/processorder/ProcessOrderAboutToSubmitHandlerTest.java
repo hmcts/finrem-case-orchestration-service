@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -56,6 +55,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
@@ -77,8 +77,6 @@ class ProcessOrderAboutToSubmitHandlerTest {
     private static final CaseDocument ADDITIONAL_DOCUMENT_1 = CaseDocument.builder().documentUrl("additionalDoc1.docx").build();
 
     private static final CaseDocument CONVERTED_DOCUMENT_1 = CaseDocument.builder().documentFilename("additionalDoc1.pdf").build();
-
-    private static final long CASE_ID = 12345678L;
 
     @InjectMocks
     private ProcessOrderAboutToSubmitHandler underTest;
@@ -122,7 +120,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
 
         List<DirectionOrderCollection> uploadHearingOrder = nullExistingUploadHearingOrder ? null : new ArrayList<>();
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CONTESTED, FinremCaseData.builder()
             .uploadHearingOrder(uploadHearingOrder)
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
@@ -201,7 +199,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         AgreedDraftOrderCollection test6;
         AgreedDraftOrderCollection test7;
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CONTESTED, FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
@@ -285,7 +283,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         AgreedDraftOrderCollection test3;
         AgreedDraftOrderCollection test4;
         AgreedDraftOrderCollection test5;
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CONTESTED, FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
@@ -350,7 +348,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
         AgreedDraftOrderCollection test3;
         AgreedDraftOrderCollection test4;
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CONTESTED, FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
@@ -409,7 +407,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
             .isOrderStamped(YesOrNo.YES)
             .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build();
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, CONTESTED, FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, CONTESTED, FinremCaseData.builder()
             .uploadHearingOrder(new ArrayList<>(List.of(
                 DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_4).build()).build()
             )))
@@ -443,7 +441,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldCallManageHearingServiceForProcessOrderEvent() throws JsonProcessingException {
+    void shouldCallManageHearingServiceForProcessOrderEvent() {
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper
                 .builder()
@@ -468,7 +466,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldNotCallManageHearingServiceForProcessOrderEvent_ifNoWorkingHearing() throws JsonProcessingException {
+    void shouldNotCallManageHearingServiceForProcessOrderEvent_ifNoWorkingHearing() {
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper
                 .builder()
