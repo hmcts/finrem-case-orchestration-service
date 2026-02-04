@@ -86,7 +86,7 @@ public class NotificationRequestBuilder {
         caseReferenceNumber = String.valueOf(caseDetails.getId());
         applicantName = caseData.getFullApplicantName();
         caseType = CaseType.CONTESTED.equals(caseDetails.getCaseType()) ? EmailService.CONTESTED : EmailService.CONSENTED;
-        divorceCaseNumber = caseData.getDivorceCaseNumber();
+        divorceCaseNumber = Objects.toString(caseData.getDivorceCaseNumber(), "");
         phoneOpeningHours = CTSC_OPENING_HOURS;
         addSelectedCourtDetails(caseData);
 
@@ -112,7 +112,7 @@ public class NotificationRequestBuilder {
     }
 
     private void setContestedDefaults(FinremCaseDetails caseDetails) {
-        respondentName = caseDetails.getData().getRespondentFullName();
+        respondentName = caseDetails.getData().getFullRespondentNameContested();
         selectedCourt = CourtHelper.getSelectedFrc(caseDetails);
     }
 
@@ -154,11 +154,13 @@ public class NotificationRequestBuilder {
      * @return the NotificationRequestBuilder instance with solicitor data set
      */
     public NotificationRequestBuilder withSolicitorCaseData(SolicitorCaseDataKeysWrapper solicitorCaseData) {
+        if (solicitorCaseData == null) {
+            solicitorCaseData = SolicitorCaseDataKeysWrapper.builder().build();
+        }
         solicitorReferenceNumber = Objects.toString(solicitorCaseData.getSolicitorReferenceKey(), "");
         name = Objects.toString(solicitorCaseData.getSolicitorNameKey(), "");
         notificationEmail = Objects.toString(solicitorCaseData.getSolicitorEmailKey(), "");
         isNotDigital = solicitorCaseData.getSolicitorIsNotDigitalKey();
-
         return this;
     }
 
@@ -168,7 +170,7 @@ public class NotificationRequestBuilder {
      * @return a NotificationRequest
      */
     public NotificationRequest build() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();;
         notificationRequest.setCaseReferenceNumber(caseReferenceNumber);
         notificationRequest.setSolicitorReferenceNumber(solicitorReferenceNumber);
         notificationRequest.setDivorceCaseNumber(divorceCaseNumber);

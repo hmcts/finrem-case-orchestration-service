@@ -39,7 +39,7 @@ public class LocalEmailServiceTest {
     @BeforeEach
     void setUp() throws Exception {
 
-        notificationRequest = new NotificationRequest();
+        notificationRequest = NotificationRequest.builder().build();
 
         Field templateVarsField = EmailService.class.getDeclaredField("emailTemplateVars");
         templateVarsField.setAccessible(true);
