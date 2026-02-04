@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthEastFrc
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremAdditionalHearingCorresponder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -70,15 +69,9 @@ class AdditionalHearingDocumentServiceTest {
     @Mock
     GenericDocumentService genericDocumentService;
     @Mock
-    BulkPrintService bulkPrintService;
-    @Mock
-    NotificationService notificationService;
-    @Mock
     OrderDateService orderDateService;
     FinremCaseDetailsMapper finremCaseDetailsMapper;
     DocumentHelper documentHelper;
-    @Mock
-    FinremAdditionalHearingCorresponder finremAdditionalHearingCorresponder;
     @Mock
     DocumentConfiguration documentConfiguration;
     @Mock
@@ -97,8 +90,8 @@ class AdditionalHearingDocumentServiceTest {
         documentHelper = new DocumentHelper(objectMapper, caseDataService, genericDocumentService, finremCaseDetailsMapper,
             letterAddresseeGenerator, postalService);
         additionalHearingDocumentService = new AdditionalHearingDocumentService(
-            genericDocumentService, documentConfiguration, documentHelper, objectMapper, bulkPrintService, caseDataService,
-            notificationService, finremAdditionalHearingCorresponder, finremCaseDetailsMapper, orderDateService);
+            genericDocumentService, documentConfiguration, documentHelper, objectMapper, caseDataService,
+            finremCaseDetailsMapper, orderDateService);
 
         lenient().when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
     }

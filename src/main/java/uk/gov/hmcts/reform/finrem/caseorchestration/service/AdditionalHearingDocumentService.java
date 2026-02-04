@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremAdditionalHearingCorresponder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -62,10 +61,7 @@ public class AdditionalHearingDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
-    private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
-    private final NotificationService notificationService;
-    private final FinremAdditionalHearingCorresponder finremAdditionalHearingCorresponder;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final OrderDateService orderDateService;
     private static final String ADDITIONAL_MESSAGE = "Additional hearing document not required for Case ID: {}";
