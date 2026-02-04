@@ -3,16 +3,20 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manage
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.apache.commons.lang3.ObjectUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CourtList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.KentSurreyCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -81,12 +85,21 @@ public abstract class AbstractManageHearingsLetterMapper {
 
         CourtDetails courtDetails = courtDetailsConfiguration.getCourts().get(courtSelection);
 
-        return CourtDetailsTemplateFields.builder()
+        CourtDetailsTemplateFields.CourtDetailsTemplateFieldsBuilder builder = CourtDetailsTemplateFields.builder()
             .courtName(courtDetails.getCourtName())
             .courtAddress(courtDetails.getCourtAddress())
             .phoneNumber(courtDetails.getPhoneNumber())
-            .email(courtDetails.getEmail())
-            .build();
+            .email(courtDetails.getEmail());
+
+        // Special handling for Kent and Surrey court to use CTSC FRC contact details
+        if (contains(courtSelection, KentSurreyCourt.class)) {
+            builder.centralFRCCourtAddress(OrchestrationConstants.CTSC_FRC_COURT_ADDRESS)
+                .centralFRCCourtEmail(OrchestrationConstants.CTSC_FRC_COURT_EMAIL_ADDRESS);
+        }
+
+        return builder.build();
+
+
     }
 
     protected Hearing getWorkingHearing(FinremCaseData caseData) {
@@ -94,5 +107,13 @@ public abstract class AbstractManageHearingsLetterMapper {
             .map(ManageHearingsWrapper::getWorkingHearing)
             .map(WorkingHearing::transformHearingInputsToHearing)
             .orElseThrow(() -> new IllegalArgumentException("Working hearing is null"));
+    }
+
+    public static boolean contains(String courtSelection, Class<? extends CourtList> courtListEnum) {
+        if (courtSelection == null || courtSelection.isBlank() || courtListEnum == null) {
+            return false;
+        }
+        return Arrays.stream(courtListEnum.getEnumConstants())
+            .anyMatch(court -> court.getSelectedCourtId().equalsIgnoreCase(courtSelection));
     }
 }
