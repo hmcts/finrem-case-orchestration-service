@@ -83,6 +83,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.SetUpUtils.CONTESTED_CASE_TYPE;
 
 @ExtendWith(MockitoExtension.class)
 class GeneralOrderServiceTest {
@@ -915,6 +916,7 @@ class GeneralOrderServiceTest {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOUTHEAST_FRC_LIST, "kentfrc");
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
+        caseDetails.setCaseTypeId(CONTESTED_CASE_TYPE);
 
         Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, caseDetails);
 

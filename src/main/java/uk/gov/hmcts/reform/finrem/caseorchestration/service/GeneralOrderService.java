@@ -143,8 +143,9 @@ public class GeneralOrderService {
         caseData.put("GeneralOrderBodyText", caseDetails.getData().get(GENERAL_ORDER_BODY_TEXT));
 
         // if court region is southeast, add central frc contact details for footer
-        if (caseDataService.isContestedApplication(caseDetails) &&
-            "kentfrc".equalsIgnoreCase(caseDetails.getData().get(SOUTHEAST_FRC_LIST).toString())) {
+        if (caseDataService.isContestedApplication(caseDetails)
+            && caseDetails.getData().get(SOUTHEAST_FRC_LIST) != null
+            && "kentfrc".equalsIgnoreCase(caseDetails.getData().get(SOUTHEAST_FRC_LIST).toString())) {
             caseData.put("centralFRCCourtAddress", OrchestrationConstants.CTSC_FRC_COURT_ADDRESS);
             caseData.put("centralFRCCourtEmail", OrchestrationConstants.CTSC_FRC_COURT_EMAIL_ADDRESS);
         }
