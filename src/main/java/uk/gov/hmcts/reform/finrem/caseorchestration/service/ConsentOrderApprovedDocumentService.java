@@ -175,7 +175,7 @@ public class ConsentOrderApprovedDocumentService {
             .mapToCaseDetails(finremCaseDetails), authToken);
         List<ConsentOrderCollection> approvedOrders = getConsentInContestedApprovedOrderCollection(caseData);
         if (approvedOrders != null && !approvedOrders.isEmpty()) {
-            ApprovedOrder approvedOrder = approvedOrders.get(approvedOrders.size() - 1).getApprovedOrder();
+            ApprovedOrder approvedOrder = approvedOrders.getLast().getApprovedOrder();
             approvedOrder.setOrderLetter(orderLetter);
             caseData.getConsentOrderWrapper().setContestedConsentedApprovedOrders(approvedOrders);
         }
