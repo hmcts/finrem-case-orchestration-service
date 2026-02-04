@@ -365,11 +365,6 @@ public class GeneralApplicationService {
             documentHelper.convertToCaseDocument(caseDocument), userAuthorisation, caseDetails.getCaseType());
     }
 
-    private List<GeneralApplicationData> convertToGeneralApplicationDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
     public void updateCaseDataStart(Map<String, Object> caseData, String authorisationToken) {
         Stream.of(GENERAL_APPLICATION_RECEIVED_FROM,
             GENERAL_APPLICATION_HEARING_REQUIRED,
