@@ -109,7 +109,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
 
         if (consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, userAuthorisation)) {
             List<ConsentOrderCollection> approvedConsentOrders = caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
-            ConsentOrderCollection latestApprovedConsentOrder = approvedConsentOrders.get(approvedConsentOrders.size() - 1);
+            ConsentOrderCollection latestApprovedConsentOrder = approvedConsentOrders.getLast();
             consentOrderDocumentPack = createApprovedOrderDocumentPack(latestApprovedConsentOrder);
             sendOrderPartyDocumentList.forEach(
                 handler -> handler.setUpConsentOrderApprovedDocumentsOnCase(caseDetails, parties, approvedConsentOrders, additionalDocuments));
