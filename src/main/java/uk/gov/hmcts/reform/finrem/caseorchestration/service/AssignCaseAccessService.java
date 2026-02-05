@@ -188,7 +188,7 @@ public class AssignCaseAccessService {
 
         if (creatorRoles.size() > 1) {
             throw new IllegalStateException(
-                    String.format("Multiple creator roles found for case ID: %s", caseIdInString));
+                String.format("Multiple creator roles found for case ID: %s", caseIdInString));
         }
 
         Optional<CaseAssignmentUserRole> userToRemove = getUserToRemove(creatorRoles, allRoles);
