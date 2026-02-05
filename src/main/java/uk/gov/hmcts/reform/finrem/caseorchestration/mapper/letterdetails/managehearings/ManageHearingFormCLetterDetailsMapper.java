@@ -75,7 +75,7 @@ public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearing
      * @param caseType the type of case (e.g., "Contested", "Consented")
      * @return a {@link CourtDetailsTemplateFields} object with the court details
      */
-    protected CourtDetailsTemplateFields buildCourtDetailsTemplateFields(String courtSelection, CaseType caseType) {
+    private CourtDetailsTemplateFields buildCourtDetailsTemplateFields(String courtSelection, CaseType caseType) {
         if (courtSelection == null || courtSelection.isBlank()) {
             throw new IllegalArgumentException("courtSelection must be provided and not blank");
         }

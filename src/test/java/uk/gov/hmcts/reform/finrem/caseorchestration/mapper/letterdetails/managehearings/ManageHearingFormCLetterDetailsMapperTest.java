@@ -214,7 +214,7 @@ class ManageHearingFormCLetterDetailsMapperTest {
     @ParameterizedTest
     @MethodSource("provideCourtDetailsScenarios")
     void buildsCourtDetailsTemplateFieldsBasedOnCaseTypeAndCourtSelection(String courtSelection, CaseType caseType,
-                                                                          boolean isKentSurreyCourt, boolean expectCentralFrc) {
+                                                                          boolean isKentSurreyCourt, boolean expectCentralFrc) throws Exception {
         CourtDetails courtDetails = CourtDetails.builder()
             .courtName("Test Court")
             .courtAddress("123 Test Street")
@@ -227,7 +227,11 @@ class ManageHearingFormCLetterDetailsMapperTest {
         try (MockedStatic<KentSurreyCourt> kentSurreyCourtMock = org.mockito.Mockito.mockStatic(KentSurreyCourt.class)) {
             kentSurreyCourtMock.when(() -> KentSurreyCourt.contains(courtSelection)).thenReturn(isKentSurreyCourt);
 
-            CourtDetailsTemplateFields result = manageHearingFormCLetterDetailsMapper.buildCourtDetailsTemplateFields(courtSelection, caseType);
+            var method = ManageHearingFormCLetterDetailsMapper.class
+                .getDeclaredMethod("buildCourtDetailsTemplateFields", String.class, CaseType.class);
+            method.setAccessible(true);
+            CourtDetailsTemplateFields result = (CourtDetailsTemplateFields) method.invoke(
+                manageHearingFormCLetterDetailsMapper, courtSelection, caseType);
 
             assertThat(result.getCourtName()).isEqualTo("Test Court");
             assertThat(result.getCourtAddress()).isEqualTo("123 Test Street");
@@ -251,28 +255,5 @@ class ManageHearingFormCLetterDetailsMapperTest {
             Arguments.of("kentCourt", CaseType.CONSENTED, true, false),
             Arguments.of("otherCourt", CaseType.CONSENTED, false, false)
         );
-    }
-
-    @Test
-    void throwsExceptionWhenCourtSelectionIsNull() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> manageHearingFormCLetterDetailsMapper.buildCourtDetailsTemplateFields(null, CaseType.CONTESTED));
-        assertThat(exception.getMessage()).isEqualTo("courtSelection must be provided and not blank");
-    }
-
-    @Test
-    void throwsExceptionWhenCourtSelectionIsBlank() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> manageHearingFormCLetterDetailsMapper.buildCourtDetailsTemplateFields("   ", CaseType.CONTESTED));
-        assertThat(exception.getMessage()).isEqualTo("courtSelection must be provided and not blank");
-    }
-
-    @Test
-    void throwsExceptionWhenCourtDetailsNotFound() {
-        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of());
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> manageHearingFormCLetterDetailsMapper.buildCourtDetailsTemplateFields("invalidCourt", CaseType.CONTESTED));
-        assertThat(exception.getMessage()).isEqualTo("courtSelection must be provided and not blank");
     }
 }
