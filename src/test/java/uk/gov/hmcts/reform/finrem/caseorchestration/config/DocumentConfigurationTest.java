@@ -37,12 +37,12 @@ class DocumentConfigurationTest {
     @Test
     void returnsStandardTemplate_whenHighCourtNotSelected() {
         assertThat(documentConfiguration.getVacateOrAdjournNoticeTemplate(Region.SOUTHWEST))
-            .isEqualTo("FL-FRM-HNO-ENG-00024.docx");
+            .isEqualTo("FL-FRM-HNO-ENG-00025.docx");
     }
 
     @Test
     void returnsHighCourtTemplate_whenHighCourtSelected() {
         assertThat(documentConfiguration.getVacateOrAdjournNoticeTemplate(Region.HIGHCOURT))
-            .isEqualTo("FL-FRM-HNO-ENG-00025.docx");
+            .isEqualTo("FL-FRM-HNO-ENG-00024.docx");
     }
 }
