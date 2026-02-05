@@ -1865,7 +1865,6 @@ class IntervenerServiceTest {
             verifyNoInteractions(organisationService);
             verifyNoInteractions(systemUserService);
         }
-    }
 
         @Test
         void givenMissingOrganisationPolicy_whenCalled_thenDoNothing() {
@@ -1935,6 +1934,7 @@ class IntervenerServiceTest {
             verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID,
                 INTVR_SOLICITOR_2.getCcdCode(), TEST_ORG_ID);
         }
+    }
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
