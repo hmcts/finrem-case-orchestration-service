@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.servlet.ServletException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
@@ -25,11 +24,9 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -146,7 +143,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldThrowExceptionWithInvalidChangeOrganisationRequest() throws Exception {
+    public void shouldReturnBadRequestWithInvalidChangeOrganisationRequest() throws Exception {
         doRequestSetUp(invalidChangeOrganisationRequestFixture());
 
         whenServiceUpdatesRepresentationValid().thenReturn(getUpdatedRepresentationData(beforeAppliedFixture()));
@@ -156,17 +153,11 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
             .build());
         whenRevokeCreatorCaseAccessValid().thenReturn(null);
 
-        ServletException exception = assertThrows(
-            ServletException.class,
-            () -> mvc.perform(
-                post(updateEndpoint())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header(AUTHORIZATION_HEADER, VALID_AUTH_TOKEN)
-                    .content(requestContent.toString())
-            ).andReturn()
-        );
-        assertThat(exception.getMessage())
-            .contains("Invalid ChangeOrganisationRequest");
+        mvc.perform(post(updateEndpoint())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(AUTHORIZATION_HEADER, VALID_AUTH_TOKEN)
+                .content(requestContent.toString()))
+            .andExpect(status().isBadRequest());
     }
 
     @Test

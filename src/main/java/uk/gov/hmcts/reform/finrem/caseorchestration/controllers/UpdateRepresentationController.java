@@ -57,7 +57,10 @@ public class UpdateRepresentationController extends BaseController {
         log.info("{} - Received request to apply Notice of Change Decision and update representation", caseId);
 
         validateCaseData(ccdRequest);
-        validateChangeOrganisationRequest(caseDetails);
+        var response = validateChangeOrganisationRequest(caseDetails);
+        if (response != null) {
+            return response;
+        }
 
         caseDetails.getData().remove(IS_NOC_REJECTED);
         assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
@@ -68,11 +71,13 @@ public class UpdateRepresentationController extends BaseController {
         return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
     }
 
-    private void validateChangeOrganisationRequest(CaseDetails caseDetails) {
+    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> validateChangeOrganisationRequest(CaseDetails caseDetails) {
         ChangeOrganisationRequest change = getChangeOrganisationRequest(caseDetails);
         if (isEmpty(change) || isEmpty(ofNullable(change.getCaseRoleId()).map(DynamicList::getValueCode))) {
-            throw new IllegalStateException("Invalid ChangeOrganisationRequest: " + change);
+            log.error("{} - Empty ChangeOrganisationRequest detected. It might be due to an unexpected retry.", caseDetails.getId());
+            return ResponseEntity.badRequest().build();
         }
+        return null;
     }
 
     private ChangeOrganisationRequest getChangeOrganisationRequest(CaseDetails caseDetails) {
