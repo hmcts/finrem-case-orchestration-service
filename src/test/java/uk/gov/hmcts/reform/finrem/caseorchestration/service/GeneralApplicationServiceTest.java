@@ -90,16 +90,14 @@ public class GeneralApplicationServiceTest {
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
     private CaseDetails caseDetails;
-    private CaseDetails caseDetailsBefore;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        caseDetailsBefore = getApplicationIssuedCaseDetailsBefore();
         caseDetails = CaseDetails.builder().data(new LinkedHashMap<>()).build();
         helper = new GeneralApplicationHelper(objectMapper, genericDocumentService);
         generalApplicationService = new GeneralApplicationService(documentHelper,
-            objectMapper, idamService, genericDocumentService, accessService, helper, service,
+            idamService, genericDocumentService, accessService, helper, service,
             generalApplicationsCategoriser);
     }
 

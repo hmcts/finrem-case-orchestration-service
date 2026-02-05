@@ -18,12 +18,12 @@ import java.util.List;
 @Service
 public class ManualPaymentAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final GenericDocumentService service;
+    private final GenericDocumentService genericDocumentService;
 
     public ManualPaymentAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         GenericDocumentService service) {
+                                             GenericDocumentService genericDocumentService) {
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.genericDocumentService = genericDocumentService;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class ManualPaymentAboutToSubmitHandler extends FinremCallbackHandler {
 
         return PaymentDocumentCollection.builder()
             .value(PaymentDocument.builder().typeOfDocument(paymentDocument.getTypeOfDocument())
-                .uploadedDocument(service.convertDocumentIfNotPdfAlready(paymentDocument
+                .uploadedDocument(genericDocumentService.convertDocumentIfNotPdfAlready(paymentDocument
                     .getUploadedDocument(),userAuthorisation, caseType)).build())
             .build();
     }

@@ -63,10 +63,9 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {}, callback {} for Case ID: {}",
-            callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
+        String caseId = caseDetails.getCaseIdAsString();
 
         try {
             FinremCaseData caseData = caseDetails.getData();
@@ -110,7 +109,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
 
         if (consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, userAuthorisation)) {
             List<ConsentOrderCollection> approvedConsentOrders = caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
-            ConsentOrderCollection latestApprovedConsentOrder = approvedConsentOrders.get(approvedConsentOrders.size() - 1);
+            ConsentOrderCollection latestApprovedConsentOrder = approvedConsentOrders.getLast();
             consentOrderDocumentPack = createApprovedOrderDocumentPack(latestApprovedConsentOrder);
             sendOrderPartyDocumentList.forEach(
                 handler -> handler.setUpConsentOrderApprovedDocumentsOnCase(caseDetails, parties, approvedConsentOrders, additionalDocuments));
@@ -119,7 +118,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
             CaseDocument latestRefusedConsentOrder = null;
             if (wrapper.getConsentedNotApprovedOrders() != null && !wrapper.getConsentedNotApprovedOrders().isEmpty()) {
                 latestRefusedConsentOrder = wrapper.getConsentedNotApprovedOrders()
-                    .get(wrapper.getConsentedNotApprovedOrders().size() - 1).getApprovedOrder().getConsentOrder();
+                    .getLast().getApprovedOrder().getConsentOrder();
             }
 
             CaseDocument latestOrderDocument = consentOrderNotApprovedDocumentService.getLatestOrderDocument(

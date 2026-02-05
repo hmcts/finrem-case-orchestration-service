@@ -34,8 +34,8 @@ public class CreateGeneralLetterAboutToSubmitHandler extends FinremCallbackHandl
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to generate general letter with Case ID: {}", caseDetails.getId());
         validateCaseData(callbackRequest);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {

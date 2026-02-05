@@ -56,7 +56,7 @@ public abstract class SendOrderPartyDocumentHandler {
             List<ConsentInContestedApprovedOrderCollection> orderColl = Optional.ofNullable(getConsentOrderCollectionForParty(caseData))
                     .orElse(new ArrayList<>());
             approvedConsentOrders.forEach(order -> orderColl.add(getConsentApprovedOrderCollection(order)));
-            orderColl.get(orderColl.size() - 1).getApprovedOrder().setAdditionalConsentDocuments(additionalDocuments);
+            orderColl.getLast().getApprovedOrder().setAdditionalConsentDocuments(additionalDocuments);
             addApprovedConsentOrdersToPartyCollection(caseData, orderColl);
         }
     }

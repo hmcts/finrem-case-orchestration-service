@@ -125,7 +125,7 @@ public class ApprovedOrderNoticeOfHearingService {
         }
         List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollections = hearingDirectionDetailsCollection.get();
         HearingDirectionDetailsCollection directionDetailsCollection
-            = hearingDirectionDetailsCollections.get(hearingDirectionDetailsCollections.size() - 1);
+            = hearingDirectionDetailsCollections.getLast();
         HearingDirectionDetail directionDetail = directionDetailsCollection.getValue();
 
         Map<String, Object> mapOfLetterDetails = getNoticeOfHearingLetterDetails(caseDetails, directionDetail);
