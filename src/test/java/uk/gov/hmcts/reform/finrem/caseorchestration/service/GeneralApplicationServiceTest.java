@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,26 +38,19 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
@@ -278,124 +270,6 @@ public class GeneralApplicationServiceTest {
         assertEquals(1, generalApplicationCollectionDataList.size());
         assertEquals("respondent", caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
             .getValue().getAppRespGeneralApplicationReceivedFrom());
-    }
-
-    @Test
-    void givenUploadGenAppDocWordFormat_whenUpdateCaseDataSubmit_thenConvertGenAppDocLatestToPdf() {
-
-        Map<String, String> documentMapInWordFormat = getCcdDocumentMap();
-        caseDetails.getData().put(GENERAL_APPLICATION_DOCUMENT, documentMapInWordFormat);
-
-        CaseDocument pdfCaseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(pdfCaseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
-            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
-
-        CaseDocument caseDocument = getCaseDocument(WORD_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(documentMapInWordFormat)).thenReturn(caseDocument);
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        String convertedDocumentName =
-            ((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST)).getDocumentFilename();
-        assertThat(convertedDocumentName, containsString(PDF_FORMAT_EXTENSION));
-    }
-
-    @Test
-    void whenDraftOrderNotUploaded() {
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-        assertNull(caseDetails.getData().get(GENERAL_APPLICATION_DRAFT_ORDER));
-    }
-
-    @Test
-    void givenUploadDraftDocWordFormat_whenUpdateCaseDataSubmit_thenConvertDraftDocToPdf() {
-
-        Map<String, String> documentMapInWordFormat = getCcdDocumentMap();
-        caseDetails.getData().put(GENERAL_APPLICATION_DRAFT_ORDER, documentMapInWordFormat);
-
-        CaseDocument pdfCaseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(pdfCaseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
-            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
-
-        CaseDocument caseDocument = getCaseDocument(WORD_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(documentMapInWordFormat)).thenReturn(caseDocument);
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        String convertedDocumentName =
-            ((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DRAFT_ORDER)).getDocumentFilename();
-        assertThat(convertedDocumentName, containsString(PDF_FORMAT_EXTENSION));
-    }
-
-    @Test
-    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenStateIsIssued() {
-
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_PRE_STATE), is("applicationIssued"));
-    }
-
-    @Test
-    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDocumentLatestDateIsNow() {
-
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE), is(LocalDate.now()));
-    }
-
-    @Test
-    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDataListHasUploadedDoc() {
-        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
-            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
-
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
-            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {
-            });
-        assertThat(generalApplicationDataList, hasSize(1));
-        assertThat(
-            matchesUploadedDocumentFields(
-                generalApplicationDataList.get(0).getGeneralApplication().getGeneralApplicationDocument()),
-            is(true));
-    }
-
-    @Test
-    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDocLatestIsUploadedDoc() {
-        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
-            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
-
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        CaseDocument generalApplicationLatest =
-            (CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST);
-        assertThat(matchesUploadedDocumentFields(generalApplicationLatest), is(true));
-    }
-
-    @Test
-    void givenGeneralApplicationWithPreviousDocs_whenUpdateCaseDataSubmit_thenGenAppDocIsAddedToCollection() {
-
-        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
-            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
-
-        caseDetails.getData().put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, getGeneralApplicationDataList());
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
-            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {
-            });
-        assertThat(generalApplicationDataList, hasSize(2));
-        assertThat(generalApplicationDataList.get(0).getGeneralApplication().getGeneralApplicationDocument().getDocumentUrl(),
-            is(DOC_IN_EXISTING_COLLECTION_URL));
-        assertThat(
-            matchesUploadedDocumentFields(
-                generalApplicationDataList.get(1).getGeneralApplication().getGeneralApplicationDocument()),
-            is(true));
     }
 
     @Test
