@@ -144,6 +144,8 @@ public class DocumentConfiguration {
     private String intervenerRemovedFilename;
     private String intervenerRemovedSolicitorTemplate;
     private String intervenerRemovedSolicitorFilename;
+    private String stopRepresentingLetterToApplicantTemplate;
+    private String stopRepresentingLetterToRespondentTemplate;
 
     public String getGeneralOrderTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? generalOrderHighCourtTemplate : generalOrderTemplate;
