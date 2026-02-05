@@ -15,6 +15,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
@@ -31,9 +32,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustment
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
@@ -53,6 +57,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
@@ -69,18 +74,17 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
 
     @InjectMocks
     private AmendApplicationDetailsAboutToSubmitHandler handler;
-    
+
     @Mock
     private OnlineFormDocumentService onlineFormDocumentService;
-
     @Mock
     private CaseFlagsService caseFlagsService;
-
     @Mock
     private FeatureToggleService featureToggleService;
-
     @Mock
     private ExpressCaseService expressCaseService;
+    @Mock
+    private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     @Test
     void testCanHandle() {
@@ -917,7 +921,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
         }
     }
-  
+
     @Test
     void givenDivorceStageReachedIsNull_whenHandled_thenExceptionWasNotThrown() {
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
@@ -929,6 +933,18 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
+    }
+
+    @Test
+    void givenCaseData_whenMandatoryDataValidationFails_thenReturnsError() {
+        FinremCallbackRequest callbackRequest = buildFinRemCallbackRequest();
+        when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(List.of("Validation failed"));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).hasSize(1);
+        assertThat(response.getErrors().getFirst()).isEqualTo("Validation failed");
+        assertThat(response.getData()).isNotNull();
     }
 
     private <T> void assertContainsOnlyNulls(T target, List<?> functions) {
@@ -943,5 +959,17 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
             assertThat(target).extracting(functions.toArray(new Function[0]))
                 .doesNotContainNull();
         }
+    }
+
+    private FinremCallbackRequest buildFinRemCallbackRequest() {
+        ScheduleOneWrapper wrapper = ScheduleOneWrapper.builder().typeOfApplication(
+            Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build();
+        UploadAdditionalDocument uploadAdditionalDocument = UploadAdditionalDocument.builder().additionalDocuments(caseDocument()).build();
+        UploadAdditionalDocumentCollection collection = UploadAdditionalDocumentCollection.builder().value(uploadAdditionalDocument).build();
+        FinremCaseData caseData = FinremCaseData.builder().civilPartnership(YesOrNo.NO)
+            .promptForUrgentCaseQuestion(YesOrNo.NO).uploadAdditionalDocument(List.of(collection))
+            .scheduleOneWrapper(wrapper).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
+        return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
     }
 }
