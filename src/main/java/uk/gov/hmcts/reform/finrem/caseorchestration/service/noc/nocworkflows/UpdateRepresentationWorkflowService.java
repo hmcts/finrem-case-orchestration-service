@@ -72,7 +72,6 @@ public class UpdateRepresentationWorkflowService {
         Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken,
             originalCaseDetails);
 
-
         if (isNoOrganisationsToAddOrRemove(caseDetails)) {
             persistDefaultOrganisationPolicy(caseDetails);
 
