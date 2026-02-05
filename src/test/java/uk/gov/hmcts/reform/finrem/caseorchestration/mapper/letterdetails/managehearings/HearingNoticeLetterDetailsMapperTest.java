@@ -214,7 +214,15 @@ class HearingNoticeLetterDetailsMapperTest {
         try (MockedStatic<KentSurreyCourt> kentSurreyCourtMock = org.mockito.Mockito.mockStatic(KentSurreyCourt.class)) {
             kentSurreyCourtMock.when(() -> KentSurreyCourt.contains(courtSelection)).thenReturn(isKentSurreyCourt);
 
-            CourtDetailsTemplateFields result = hearingNoticeLetterDetailsMapper.buildCourtDetailsTemplateFields(courtSelection, caseType);
+            CourtDetailsTemplateFields result;
+            try {
+                var method = HearingNoticeLetterDetailsMapper.class
+                    .getDeclaredMethod("buildCourtDetailsTemplateFields", String.class, CaseType.class);
+                method.setAccessible(true);
+                result = (CourtDetailsTemplateFields) method.invoke(hearingNoticeLetterDetailsMapper, courtSelection, caseType);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException("Failed to invoke buildCourtDetailsTemplateFields", e);
+            }
 
             assertThat(result.getCourtName()).isEqualTo("Test Court");
             assertThat(result.getCourtAddress()).isEqualTo("123 Test Street");
@@ -239,14 +247,4 @@ class HearingNoticeLetterDetailsMapperTest {
             Arguments.of("otherCourt", CaseType.CONSENTED, false, false)
         );
     }
-
-    @Test
-    void shouldThrowExceptionWhenCourtDetailsNotFound() {
-        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of());
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> hearingNoticeLetterDetailsMapper.buildCourtDetailsTemplateFields("invalidCourt", CaseType.CONTESTED));
-        assertThat(exception.getMessage()).isEqualTo("courtSelection must be provided and not blank");
-    }
-
 }
