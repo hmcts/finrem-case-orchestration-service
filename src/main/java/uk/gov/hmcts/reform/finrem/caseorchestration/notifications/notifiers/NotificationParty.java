@@ -2,25 +2,48 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 @RequiredArgsConstructor
+@Getter
 public enum NotificationParty {
-    APPLICANT("[APPSOLICITOR]"),
-    RESPONDENT("[RESPSOLICITOR]"),
-    INTERVENER_ONE("[INTVRSOLICITOR1]"),
-    INTERVENER_TWO("[INTVRSOLICITOR2]"),
-    INTERVENER_THREE("[INTVRSOLICITOR3]"),
-    INTERVENER_FOUR("[INTVRSOLICITOR4]");
+    // notify both applicant and applicant solicitor
+    APPLICANT("[APPSOLICITOR]", true, false),
+    // notify both respondent and respondent solicitor
+    RESPONDENT("[RESPSOLICITOR]", true, false),
+    // notify both intervener and intervener solicitor
+    INTERVENER_ONE("[INTVRSOLICITOR1]", true, false),
+    INTERVENER_TWO("[INTVRSOLICITOR2]", true, false),
+    INTERVENER_THREE("[INTVRSOLICITOR3]", true, false),
+    INTERVENER_FOUR("[INTVRSOLICITOR4]", true, false),
+    // notify former applicant solicitor only
+    FORMER_APPLICANT_SOLICITOR_ONLY(CaseRole.APP_SOLICITOR.getCcdCode(), false, true),
+    // notify former applicant barristers only
+    FORMER_APPLICANT_BARRISTER_ONLY(CaseRole.APP_BARRISTER.getCcdCode(), false, true);
 
-    @Getter
     private final String role;
+    private final boolean notifyRepresented;
+    private final boolean isFormerParty;
 
     public static NotificationParty getNotificationPartyFromRole(String role) {
-        for (NotificationParty party : NotificationParty.values()) {
-            if (party.getRole().equals(role)) {
-                return party;
-            }
-        }
-        return null;
+        return Arrays.stream(NotificationParty.values())
+            .filter(party -> role.equals(party.getRole()))
+            .filter(NotificationParty::isNotifyRepresented)
+            .filter(party -> !party.isFormerParty())
+            .findFirst()
+            .orElse(null);
+    }
+
+    public static Optional<NotificationParty> getNotificationParty(
+        CaseRole caseRole, boolean notifyRepresented, boolean formerParty) {
+
+        return Arrays.stream(NotificationParty.values())
+            .filter(party -> party.getRole().equals(caseRole.getCcdCode()))
+            .filter(party -> party.isNotifyRepresented() == notifyRepresented)
+            .filter(party -> party.isFormerParty() == formerParty)
+            .findFirst();
     }
 }
