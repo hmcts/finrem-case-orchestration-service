@@ -1840,7 +1840,7 @@ class IntervenerServiceTest {
             .solUserId(INTERVENER_USER_ID)
             .intervenerRepresented(YesOrNo.YES)
             .build();
-        service.revokeIntervener(CASE_ID_IN_LONG, intervenerWrapper);
+        service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper);
         verify(assignCaseAccessService).removeCaseRoleToUser(
             CASE_ID_IN_LONG,
             INTERVENER_USER_ID,
