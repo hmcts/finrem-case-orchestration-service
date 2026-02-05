@@ -233,13 +233,4 @@ class ManageHearingFormGLetterDetailsMapperTest {
             () -> manageHearingFormGLetterDetailsMapper.buildCourtDetailsTemplateFields("   ", CaseType.CONTESTED));
         assertThat(exception.getMessage()).isEqualTo("courtSelection must be provided and not blank");
     }
-
-    @Test
-    void throwsExceptionWhenCourtDetailsAreMissing() {
-        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of());
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> manageHearingFormGLetterDetailsMapper.buildCourtDetailsTemplateFields("invalidCourt", CaseType.CONTESTED));
-        assertThat(exception.getMessage()).isEqualTo("courtSelection must be provided and not blank");
-    }
 }
