@@ -76,7 +76,7 @@ public class HearingNoticeLetterDetailsMapper extends AbstractManageHearingsLett
 
         if (CONTESTED.equals(caseType) && KentSurreyCourt.contains(courtSelection)) {
             builder.centralFRCCourtAddress(OrchestrationConstants.CTSC_FRC_COURT_ADDRESS)
-                .centralFRCCourtEmail(OrchestrationConstants.CTSC_FRC_COURT_EMAIL_ADDRESS);
+                .centralFRCCourtEmail(OrchestrationConstants.FRC_KENT_SURREY_COURT_EMAIL_ADDRESS);
         }
 
         return builder.build();
