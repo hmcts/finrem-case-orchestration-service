@@ -64,11 +64,12 @@ public class UpdateRepresentationWorkflowService {
     public AboutToStartOrSubmitCallbackResponse handleNoticeOfChangeWorkflow(CaseDetails caseDetails,
                                                                              String authorisationToken,
                                                                              CaseDetails originalCaseDetails) {
-        log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
+        Long caseId = caseDetails.getId();
+        log.info("Received request to update representation on case with Case ID: {}", caseId);
 
-        assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
+        assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
 
-        log.info("findAndRevokeCreatorRole executed {}", caseDetails.getId());
+        log.info("findAndRevokeCreatorRole executed {}", caseId);
         Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken,
             originalCaseDetails);
 

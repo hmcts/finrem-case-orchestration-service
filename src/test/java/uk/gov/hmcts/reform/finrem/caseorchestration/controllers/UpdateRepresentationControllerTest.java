@@ -31,6 +31,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -96,7 +97,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
     }
 
     protected OngoingStubbing<CaseAssignmentUserRolesResponse> whenRevokeCreatorCaseAccessValid() {
-        return when(assignCaseAccessService.findAndRevokeCreatorRole(any(CaseDetails.class)));
+        return when(assignCaseAccessService.findAndRevokeCreatorRole(anyString()));
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {

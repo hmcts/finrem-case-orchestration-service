@@ -164,22 +164,6 @@ public class AssignCaseAccessService {
     }
 
     /**
-     * Finds and revokes the creator role for the given case.
-     *
-     * <p>This method is deprecated and only kept for backwards compatibility.
-     * It accepts a {@link CaseDetails} object, extracts the case ID, and delegates
-     * to {@link #findAndRevokeCreatorRole(String)}.</p>
-     *
-     * @param caseDetails the case details containing the ID of the case
-     * @return a response containing the result of the creator role revocation
-     * @deprecated use {@link #findAndRevokeCreatorRole(String)} instead
-     */
-    @Deprecated
-    public CaseAssignmentUserRolesResponse findAndRevokeCreatorRole(CaseDetails caseDetails) {
-        return findAndRevokeCreatorRole(String.valueOf(caseDetails.getId()));
-    }
-
-    /**
      * Finds and revokes the creator role for the case with the given ID.
      *
      * @param caseIdInString the ID of the case, as a string

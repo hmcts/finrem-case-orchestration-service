@@ -60,7 +60,7 @@ public class UpdateRepresentationController extends BaseController {
         validateChangeOrganisationRequest(caseDetails);
 
         caseDetails.getData().remove(IS_NOC_REJECTED);
-        assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
+        assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
         Map<String, Object> caseData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);
         log.info("{} - Solicitor representation has been updated.", caseId);
         caseDetails.getData().putAll(caseData);
