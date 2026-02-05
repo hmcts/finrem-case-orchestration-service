@@ -1847,6 +1847,7 @@ class IntervenerServiceTest {
             INTVR_SOLICITOR_1.getCcdCode(),
             SOME_ORG_ID
         );
+    }
       
     @Nested
     class RevokeIntervenerSolicitorTests {
@@ -1864,6 +1865,7 @@ class IntervenerServiceTest {
             verifyNoInteractions(organisationService);
             verifyNoInteractions(systemUserService);
         }
+    }
 
         @Test
         void givenMissingOrganisationPolicy_whenCalled_thenDoNothing() {
