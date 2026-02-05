@@ -207,7 +207,7 @@ class ManageHearingFormGLetterDetailsMapperTest {
 
             if (expectCentralFrc) {
                 assertThat(result.getCentralFRCCourtAddress()).isEqualTo(OrchestrationConstants.CTSC_FRC_COURT_ADDRESS);
-                assertThat(result.getCentralFRCCourtEmail()).isEqualTo(OrchestrationConstants.CTSC_FRC_COURT_EMAIL_ADDRESS);
+                assertThat(result.getCentralFRCCourtEmail()).isEqualTo(OrchestrationConstants.FRC_KENT_SURREY_COURT_EMAIL_ADDRESS);
             } else {
                 assertThat(result.getCentralFRCCourtAddress()).isNull();
                 assertThat(result.getCentralFRCCourtEmail()).isNull();

@@ -52,7 +52,7 @@ public class OrchestrationConstants {
 
     // DOCUMENT FOOTER CONSTANTS
     public static final String CTSC_FRC_COURT_ADDRESS = "HMCTS Financial Remedy, PO Box 12746, HARLOW, CM20 9QZ";
-    public static final String CTSC_FRC_COURT_EMAIL_ADDRESS = "FRCKSS@justice.gov.uk";
+    public static final String FRC_KENT_SURREY_COURT_EMAIL_ADDRESS = "FRCKSS@justice.gov.uk";
 
     // VARIATION ORDER RELATED
 
