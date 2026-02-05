@@ -22,7 +22,11 @@ public enum NotificationParty {
     // notify former applicant solicitor only
     FORMER_APPLICANT_SOLICITOR_ONLY(CaseRole.APP_SOLICITOR.getCcdCode(), false, true),
     // notify former applicant barristers only
-    FORMER_APPLICANT_BARRISTER_ONLY(CaseRole.APP_BARRISTER.getCcdCode(), false, true);
+    FORMER_APPLICANT_BARRISTER_ONLY(CaseRole.APP_BARRISTER.getCcdCode(), false, true),
+    // notify former respondent solicitor only
+    FORMER_RESPONDENT_SOLICITOR_ONLY(CaseRole.RESP_SOLICITOR.getCcdCode(), false, true),
+    // notify former respondent barristers only
+    FORMER_RESPONDENT_BARRISTER_ONLY(CaseRole.RESP_BARRISTER.getCcdCode(), false, true);
 
     private final String role;
     private final boolean notifyRepresented;
