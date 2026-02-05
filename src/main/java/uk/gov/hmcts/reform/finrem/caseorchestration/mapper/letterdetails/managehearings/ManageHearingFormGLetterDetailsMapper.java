@@ -59,7 +59,7 @@ public class ManageHearingFormGLetterDetailsMapper extends AbstractManageHearing
      * @param caseType the type of case (e.g., "Contested", "Consented")
      * @return a {@link CourtDetailsTemplateFields} object with the court details
      */
-    protected CourtDetailsTemplateFields buildCourtDetailsTemplateFields(String courtSelection, CaseType caseType) {
+    private CourtDetailsTemplateFields buildCourtDetailsTemplateFields(String courtSelection, CaseType caseType) {
         if (courtSelection == null || courtSelection.isBlank()) {
             throw new IllegalArgumentException("courtSelection must be provided and not blank");
         }
@@ -74,7 +74,7 @@ public class ManageHearingFormGLetterDetailsMapper extends AbstractManageHearing
 
         if (CONTESTED.equals(caseType) && KentSurreyCourt.contains(courtSelection)) {
             builder.centralFRCCourtAddress(OrchestrationConstants.CTSC_FRC_COURT_ADDRESS)
-                .centralFRCCourtEmail(OrchestrationConstants.CTSC_FRC_COURT_EMAIL_ADDRESS);
+                .centralFRCCourtEmail(OrchestrationConstants.FRC_KENT_SURREY_COURT_EMAIL_ADDRESS);
         }
 
         return builder.build();
