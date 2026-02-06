@@ -17,6 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 /**
  * Handles party-specific notification logic; subclass for different party types.
@@ -59,6 +62,7 @@ public abstract class AbstractPartyListener {
 
     /**
      * Struct for holding party-specific contact details.
+     * Lenient, as these details are not always provided during case creation or amendment.
      */
     protected record PartySpecificDetails(
         @NotNull String recipientSolEmailAddress,
@@ -66,9 +70,9 @@ public abstract class AbstractPartyListener {
         @NotNull String recipientSolReference
     ) {
         public PartySpecificDetails {
-            if (recipientSolEmailAddress == null || recipientSolName == null || recipientSolReference == null) {
-                throw new IllegalArgumentException("PartySpecificDetails fields must not be null");
-            }
+            recipientSolName = nullToEmpty(recipientSolName);
+            recipientSolReference = nullToEmpty(recipientSolReference);
+            recipientSolEmailAddress = nullToEmpty(recipientSolEmailAddress);
         }
     }
 
@@ -139,23 +143,28 @@ public abstract class AbstractPartyListener {
         log.info("Preparing paper notification for party {} on case {}", notificationParty, event.getCaseId());
 
         // Defensive copy to avoid mutating an original event collection
-        List<CaseDocument> docsToPrint = Optional.ofNullable(event.documentsToPost)
-            .filter(docs -> !docs.isEmpty())
-            .map(ArrayList::new)
-            .orElseThrow(() ->
-                new IllegalArgumentException("No documents to post provided for paper notification, case ID: " + event.getCaseId()));
+        Optional<List<CaseDocument>> documentsToPost = Optional.ofNullable(event.documentsToPost)
+            .filter(docs -> !docs.isEmpty());
+
+        List<CaseDocument> documents = documentsToPost.orElseThrow(() ->
+            new IllegalArgumentException("No documents to post provided for paper notification, case ID: " + event.getCaseId())
+        );
+
+        List<CaseDocument> docsToPrint = new ArrayList<>();
 
         docsToPrint.add(getPartyCoversheet(event));
+        docsToPrint.addAll(documents);
+
         List<BulkPrintDocument> bpDocs =
                 bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint, event.authToken, event.getCaseDetails().getCaseType());
         boolean isOutsideUK = isPartyOutsideUK(event);
 
         // Bulk print service requires implementation of exception handling -
         // consider building in retries and Server Error Handling as part of DFR-3308.
-        bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+        UUID letterId = bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             event.caseDetails, notificationParty, bpDocs, isOutsideUK, event.authToken
         );
 
-        log.info("Completed paper notification for party {} on case case {}", notificationParty, event.getCaseId());
+        log.info("Completed paper notification for party {} on case {} with letter ID: {}", notificationParty, event.getCaseId(), letterId);
     }
 }

@@ -44,6 +44,9 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         ManageHearingsAction actionSelection = manageHearingsWrapper.getManageHearingsActionSelection();
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
+            log.info("Beginning hearing correspondence for {} action. Case reference: {}",
+                ManageHearingsAction.ADD_HEARING.getDescription(),
+                callbackRequest.getCaseDetails().getCaseIdAsString());
             manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
         }
 

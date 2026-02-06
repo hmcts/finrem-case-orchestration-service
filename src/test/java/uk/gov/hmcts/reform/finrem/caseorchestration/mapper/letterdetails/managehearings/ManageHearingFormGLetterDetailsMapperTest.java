@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
@@ -20,12 +22,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.FormGLetterDetails;
@@ -53,11 +58,16 @@ class ManageHearingFormGLetterDetailsMapperTest {
             new ObjectMapper(), courtDetailsConfiguration);
     }
 
-    @Test
-    void shouldBuildDocumentTemplateDetails() {
+    @ParameterizedTest
+    @CsvSource(value = {
+        "MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS, YES",
+        "SCHEDULE_1_CHILDREN_ACT_1989, NO",
+    })
+    void shouldBuildDocumentTemplateDetails(Schedule1OrMatrimonialAndCpList schedule1OrMatrimonial, YesOrNo civilPartnership) {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
+            .civilPartnership(civilPartnership)
             .contactDetailsWrapper(ContactDetailsWrapper
                 .builder()
                 .applicantFmName("John")
@@ -66,6 +76,10 @@ class ManageHearingFormGLetterDetailsMapperTest {
                 .respondentLname("Smith")
                 .solicitorReference(TestConstants.TEST_SOLICITOR_REFERENCE)
                 .respondentSolicitorReference(TestConstants.TEST_RESP_SOLICITOR_REFERENCE)
+                .build())
+            .scheduleOneWrapper(ScheduleOneWrapper
+                .builder()
+                .typeOfApplication(schedule1OrMatrimonial)
                 .build())
             .manageHearingsWrapper(
                 ManageHearingsWrapper.builder()
@@ -136,6 +150,8 @@ class ManageHearingFormGLetterDetailsMapperTest {
         assertThat(formGLetterDetails.getHearingDate()).isEqualTo("2025-08-01");
         assertThat(formGLetterDetails.getHearingTime()).isEqualTo("10:00 AM");
         assertThat(formGLetterDetails.getCourtDetails()).isEqualTo(courtTemplateFields);
+        assertThat(formGLetterDetails.getCivilPartnership()).isEqualTo(civilPartnership.getYesOrNo());
+        assertThat(formGLetterDetails.getTypeOfApplication()).isEqualTo(schedule1OrMatrimonial.getValue());
     }
 
     @Test
