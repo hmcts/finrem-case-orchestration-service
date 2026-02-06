@@ -86,10 +86,11 @@ public class UpdateRepresentationWorkflowService {
 
         // TODO remove me
         try {
-            Thread.sleep(10000); // 10 seconds
+            Thread.sleep(30000000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        log.info("{} - SLEEP FINISHED", caseId);
 
         return assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), caseDetails);
     }
