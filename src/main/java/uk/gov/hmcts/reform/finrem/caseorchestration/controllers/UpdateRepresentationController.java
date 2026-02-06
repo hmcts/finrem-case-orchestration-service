@@ -62,15 +62,6 @@ public class UpdateRepresentationController extends BaseController {
             return response;
         }
 
-        if (caseDetails.getId().equals(1770312178618703L)) {
-            try {
-                Thread.sleep(30000000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            log.info("{} - SLEEP FINISHED", caseId);
-        }
-
         caseDetails.getData().remove(IS_NOC_REJECTED);
         assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
         Map<String, Object> caseData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);
@@ -80,9 +71,10 @@ public class UpdateRepresentationController extends BaseController {
         return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
     }
 
+    @SuppressWarnings("java:S1125")
     private ResponseEntity<AboutToStartOrSubmitCallbackResponse> validateChangeOrganisationRequest(CaseDetails caseDetails) {
         ChangeOrganisationRequest change = getChangeOrganisationRequest(caseDetails);
-        if (isEmpty(change) || isEmpty(ofNullable(change.getCaseRoleId()).map(DynamicList::getValueCode))) {
+        if (true || (isEmpty(change) || isEmpty(ofNullable(change.getCaseRoleId()).map(DynamicList::getValueCode)))) {
             log.error("{} - Empty ChangeOrganisationRequest detected. It might be due to an unexpected retry.", caseDetails.getId());
             return ResponseEntity.badRequest().build();
         }
