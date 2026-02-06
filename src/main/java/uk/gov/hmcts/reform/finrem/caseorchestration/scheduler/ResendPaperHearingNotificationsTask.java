@@ -120,17 +120,20 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
 
         String systemUserToken = getSystemUserToken();
 
-        List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(caseData.getManageHearingsWrapper().getHearings())
+        List<ManageHearingsCollectionItem> hearings =
+            Optional.ofNullable(caseData.getManageHearingsWrapper().getHearings())
             .orElse(List.of()).stream()
             .filter(hearingItem -> hearingItem.getValue().getHearingDate().isAfter(serviceManualHearingNoticeCutOff))
             .toList();
 
-        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings = Optional.ofNullable(caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings())
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings =
+            Optional.ofNullable(caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings())
             .orElse(List.of()).stream()
             .filter(hearingItem -> hearingItem.getValue().getHearingDate().isAfter(serviceManualVacatedNoticeCutOff))
             .toList();
 
-        log.info("Case ID: {} resending correspondence for {} active hearings and {} vacated hearings", finremCaseDetails.getId(), hearings.size(), vacatedHearings.size());
+        log.info("Case ID: {} resending correspondence for {} active hearings and {} vacated hearings",
+            finremCaseDetails.getId(), hearings.size(), vacatedHearings.size());
 
         hearings.forEach(hearing -> processHearingPaperNotification(finremCaseDetails, hearing, systemUserToken));
         vacatedHearings.forEach(vacatedHearing -> processVacatedHearingPaperNotification(finremCaseDetails, vacatedHearing, systemUserToken));
@@ -195,7 +198,8 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
         Hearing hearing = hearingItem.getValue();
         List<NotificationParty> partiesToPost = getPostalParties(hearing, caseDetails);
 
-        List<CaseDocument> hearingDocumentsToPost = new ArrayList<>(caseDetails.getData().getManageHearingsWrapper().getAssociatedHearingDocuments(hearingItem.getId()));
+        List<CaseDocument> hearingDocumentsToPost =
+            new ArrayList<>(caseDetails.getData().getManageHearingsWrapper().getAssociatedHearingDocuments(hearingItem.getId()));
         hearingCorrespondenceHelper.getMiniFormAIfRequired(caseDetails.getData(), hearing)
             .ifPresent(hearingDocumentsToPost::add);
         hearingDocumentsToPost.addAll(hearing.getAdditionalHearingDocs().stream().map(DocumentCollectionItem::getValue).toList());
@@ -212,7 +216,9 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
             .build());
     }
 
-    private void processVacatedHearingPaperNotification(FinremCaseDetails caseDetails, VacatedOrAdjournedHearingsCollectionItem vacatedHearingItem, String authToken) {
+    private void processVacatedHearingPaperNotification(FinremCaseDetails caseDetails,
+                                                        VacatedOrAdjournedHearingsCollectionItem vacatedHearingItem,
+                                                        String authToken) {
         VacateOrAdjournedHearing vacateHearing = vacatedHearingItem.getValue();
 
         List<NotificationParty> partiesToPost = getPostalParties(vacateHearing, caseDetails);
