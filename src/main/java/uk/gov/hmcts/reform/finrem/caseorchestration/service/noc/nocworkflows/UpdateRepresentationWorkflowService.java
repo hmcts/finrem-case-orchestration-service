@@ -65,11 +65,9 @@ public class UpdateRepresentationWorkflowService {
                                                                              String authorisationToken,
                                                                              CaseDetails originalCaseDetails) {
         Long caseId = caseDetails.getId();
-        log.info("Received request to update representation on case with Case ID: {}", caseId);
 
         assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
 
-        log.info("findAndRevokeCreatorRole executed {}", caseId);
         Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken,
             originalCaseDetails);
 
@@ -78,6 +76,7 @@ public class UpdateRepresentationWorkflowService {
 
             setDefaultChangeOrganisationRequest(caseDetails);
 
+            log.info("{} - return without apply NOC decision since there is no added/removed organisation", caseId);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
         }
 
