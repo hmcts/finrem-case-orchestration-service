@@ -86,7 +86,7 @@ class HearingsSubmittedHandlerTest {
         // Assert
         assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isNullOrEmpty();
-        assertThat(logs.getInfos()).contains("Beginning hearing correspondence for Hearing Vacated action. Case reference: 123");
+        assertThat(logs.getInfos()).contains("Beginning hearing correspondence for Hearing Adjourned Or Vacated action. Case reference: 123");
         verify(manageHearingsCorresponder, never()).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
         verify(manageHearingsCorresponder).sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
