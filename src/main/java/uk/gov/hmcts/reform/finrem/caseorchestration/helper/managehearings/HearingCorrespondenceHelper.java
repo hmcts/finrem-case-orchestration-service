@@ -214,7 +214,7 @@ public class HearingCorrespondenceHelper {
      * @param documentType a {@link CaseDocumentType} identifying the type of hearing document.
      * @return a {@link CaseDocument}
      */
-    private CaseDocument getCaseDocumentByTypeAndHearingUuid(CaseDocumentType documentType, ManageHearingsWrapper wrapper, UUID hearingId) {
+    public CaseDocument getCaseDocumentByTypeAndHearingUuid(CaseDocumentType documentType, ManageHearingsWrapper wrapper, UUID hearingId) {
         return wrapper.getHearingDocumentsCollection().stream()
             .map(ManageHearingDocumentsCollectionItem::getValue)
             .filter(Objects::nonNull)

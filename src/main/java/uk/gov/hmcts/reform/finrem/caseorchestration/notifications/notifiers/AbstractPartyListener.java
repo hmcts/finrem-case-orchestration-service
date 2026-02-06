@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -76,7 +75,6 @@ public abstract class AbstractPartyListener {
         }
     }
 
-    @Async
     @EventListener
     public void handleNotification(SendCorrespondenceEvent event) {
         if (isRelevantParty(event)) {
