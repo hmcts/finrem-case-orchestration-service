@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 import static java.util.Optional.ofNullable;
@@ -63,7 +62,7 @@ public class UpdateRepresentationController extends BaseController {
             return response;
         }
 
-        if (BigDecimal.valueOf(caseId).divideAndRemainder(BigDecimal.TWO)[1].equals(BigDecimal.ZERO)) {
+        if (caseDetails.getId().equals(1770312178618703L)) {
             try {
                 Thread.sleep(30000000);
             } catch (InterruptedException e) {
