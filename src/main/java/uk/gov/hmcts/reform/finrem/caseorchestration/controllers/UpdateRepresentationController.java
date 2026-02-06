@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import static java.util.Optional.ofNullable;
@@ -62,13 +63,14 @@ public class UpdateRepresentationController extends BaseController {
             return response;
         }
 
-        // TODO remove me
-        try {
-            Thread.sleep(30000000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        if (BigDecimal.valueOf(caseId).divideAndRemainder(BigDecimal.TWO)[1].equals(BigDecimal.ZERO)) {
+            try {
+                Thread.sleep(30000000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            log.info("{} - SLEEP FINISHED", caseId);
         }
-        log.info("{} - SLEEP FINISHED", caseId);
 
         caseDetails.getData().remove(IS_NOC_REJECTED);
         assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
