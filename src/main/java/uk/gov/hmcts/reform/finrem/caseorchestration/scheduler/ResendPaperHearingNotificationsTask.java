@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -30,6 +31,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getNotificationPartyFromRole;
 
@@ -61,6 +63,7 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
 
     // Service manual hearing notification up until 23rd Feb 2026
     private final LocalDate serviceManualHearingNoticeCutOff = LocalDate.of(2026, 2, 22);
+    // Service manual vacate notification up until 20th Feb 2026
     private final LocalDate serviceManualVacatedNoticeCutOff = LocalDate.of(2026, 2, 19);
 
     private final NotificationService notificationService;
@@ -84,22 +87,25 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         ManageHearingsWrapper hearingsWrapper = finremCaseDetails.getData().getManageHearingsWrapper();
 
-        List<Hearing> hearings = hearingsWrapper.getHearings().stream()
+        List<Hearing> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
+            .orElseGet(List::of).stream()
             .map(ManageHearingsCollectionItem::getValue)
             .filter(value -> value.getHearingDate().isAfter(serviceManualHearingNoticeCutOff))
             .toList();
 
-        List<VacateOrAdjournedHearing> vacatedHearings = hearingsWrapper.getVacatedOrAdjournedHearings().stream()
+        List<VacateOrAdjournedHearing> vacatedHearings = Optional.ofNullable(hearingsWrapper.getVacatedOrAdjournedHearings())
+            .orElseGet(List::of).stream()
             .map(VacatedOrAdjournedHearingsCollectionItem::getValue)
             .filter(value -> value.getHearingDate().isAfter(serviceManualVacatedNoticeCutOff))
             .toList();
 
         // Sanity check case has hearings past from the 3-week manual service notice period
-        if (!hearings.isEmpty() || !vacatedHearings.isEmpty()) {
+        if (!hearings.isEmpty() && !vacatedHearings.isEmpty()) {
             log.warn("Case ID: {} does not have hearings or vacated hearings within the cut off to post", finremCaseDetails.getId());
             return false;
         }
 
+        // If a LiP has been assigned rep since now and bug introduction, then they will not receive a postal notification.
         return isApplicantPostalRequired(finremCaseDetails)
             || isRespondentPostalRequired(finremCaseDetails)
             || isIntervenerOnePostalRequired(finremCaseDetails)
@@ -114,15 +120,17 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
 
         String systemUserToken = getSystemUserToken();
 
-        List<ManageHearingsCollectionItem> hearings = caseData.getManageHearingsWrapper().getHearings().stream()
+        List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(caseData.getManageHearingsWrapper().getHearings())
+            .orElse(List.of()).stream()
             .filter(hearingItem -> hearingItem.getValue().getHearingDate().isAfter(serviceManualHearingNoticeCutOff))
             .toList();
 
-        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings = caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings().stream()
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings = Optional.ofNullable(caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings())
+            .orElse(List.of()).stream()
             .filter(hearingItem -> hearingItem.getValue().getHearingDate().isAfter(serviceManualVacatedNoticeCutOff))
             .toList();
 
-        log.info(getActionLog(finremCaseDetails));
+        log.info("Case ID: {} resending correspondence for {} active hearings and {} vacated hearings", finremCaseDetails.getId(), hearings.size(), vacatedHearings.size());
 
         hearings.forEach(hearing -> processHearingPaperNotification(finremCaseDetails, hearing, systemUserToken));
         vacatedHearings.forEach(vacatedHearing -> processVacatedHearingPaperNotification(finremCaseDetails, vacatedHearing, systemUserToken));
@@ -155,7 +163,7 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
 
     @Override
     protected String getDescription(FinremCaseDetails finremCaseDetails) {
-        return getActionLog(finremCaseDetails);
+        return "Resending hearing correspondence for case";
     }
 
     private boolean isApplicantPostalRequired(FinremCaseDetails caseDetails) {
@@ -167,25 +175,24 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
     }
 
     private boolean isIntervenerOnePostalRequired(FinremCaseDetails caseDetails) {
-        return !notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOneWrapperIfPopulated(), caseDetails);
+        return !notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(), caseDetails);
     }
 
     private boolean isIntervenerTwoPostalRequired(FinremCaseDetails caseDetails) {
-        return !notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerTwoWrapperIfPopulated(), caseDetails);
+        return !notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerTwo(), caseDetails);
     }
 
     private boolean isIntervenerThreePostalRequired(FinremCaseDetails caseDetails) {
-        return !notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerThreeWrapperIfPopulated(), caseDetails);
+        return !notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerThree(), caseDetails);
     }
 
     private boolean isIntervenerFourPostalRequired(FinremCaseDetails caseDetails) {
-        return !notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerFourWrapperIfPopulated(), caseDetails);
+        return !notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerFour(), caseDetails);
     }
 
     private void processHearingPaperNotification(FinremCaseDetails caseDetails, ManageHearingsCollectionItem hearingItem, String authToken) {
 
         Hearing hearing = hearingItem.getValue();
-
         List<NotificationParty> partiesToPost = getPostalParties(hearing, caseDetails);
 
         List<CaseDocument> hearingDocumentsToPost = new ArrayList<>(caseDetails.getData().getManageHearingsWrapper().getAssociatedHearingDocuments(hearingItem.getId()));
@@ -193,7 +200,7 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
             .ifPresent(hearingDocumentsToPost::add);
         hearingDocumentsToPost.addAll(hearing.getAdditionalHearingDocs().stream().map(DocumentCollectionItem::getValue).toList());
 
-        log.info("Case ID: {} Sending hearing correspondence for parties: {}", caseDetails.getId(), partiesToPost);
+        log.info("Case ID: {} Sending active hearing correspondence for parties: {}", caseDetails.getId(), partiesToPost);
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
             .notificationParties(partiesToPost)
@@ -209,16 +216,14 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
         VacateOrAdjournedHearing vacateHearing = vacatedHearingItem.getValue();
 
         List<NotificationParty> partiesToPost = getPostalParties(vacateHearing, caseDetails);
-
-        List<CaseDocument> hearingDocumentsToPost = new ArrayList<>(caseDetails.getData().getManageHearingsWrapper().getAssociatedHearingDocuments(vacatedHearingItem.getId()));
+        CaseDocument vacateNotice =  hearingCorrespondenceHelper.getCaseDocumentByTypeAndHearingUuid(
+            CaseDocumentType.VACATE_HEARING_NOTICE, caseDetails.getData().getManageHearingsWrapper(), vacatedHearingItem.getId());
 
         log.info("Case ID: {} Sending vacated hearing correspondence for parties: {}", caseDetails.getId(), partiesToPost);
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
             .notificationParties(partiesToPost)
-            .emailNotificationRequest(null)
-            .emailTemplate(null)
-            .documentsToPost(hearingDocumentsToPost)
+            .documentsToPost(List.of(vacateNotice))
             .caseDetails(caseDetails)
             .authToken(authToken)
             .build());
@@ -247,25 +252,5 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
             case INTERVENER_FOUR -> isIntervenerFourPostalRequired(caseDetails);
             default -> false;
         };
-    }
-
-    private String getActionLog(FinremCaseDetails finremCaseDetails) {
-        return String.format("""
-                Case ID %s re-sending hearing correspondence for parties:
-                 applicant: %s,
-                 respondent: %s,
-                 intervener one: %s,
-                 intervener two: %s,
-                 intervener three: %s,
-                 intervener four: %s
-                """,
-            finremCaseDetails.getId(),
-            isApplicantPostalRequired(finremCaseDetails),
-            isRespondentPostalRequired(finremCaseDetails),
-            isIntervenerOnePostalRequired(finremCaseDetails),
-            isIntervenerTwoPostalRequired(finremCaseDetails),
-            isIntervenerThreePostalRequired(finremCaseDetails),
-            isIntervenerFourPostalRequired(finremCaseDetails)
-        );
     }
 }
