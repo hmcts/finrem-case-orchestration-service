@@ -70,14 +70,14 @@ class HearingsSubmittedHandlerTest {
         assertThat(response.getErrors()).isNullOrEmpty();
         assertThat(logs.getInfos()).contains("Beginning hearing correspondence for Hearing Added action. Case reference: 123");
         verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
-        verify(manageHearingsCorresponder, never()).sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder, never()).sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
 
     @Test
     void shouldHandleSubmittedCallbackForVacateHearing() {
         // Arrange
         UUID hearingID = UUID.randomUUID();
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, hearingID, ManageHearingsAction.VACATE_HEARING);
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, hearingID, ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
@@ -86,9 +86,9 @@ class HearingsSubmittedHandlerTest {
         // Assert
         assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isNullOrEmpty();
-        assertThat(logs.getInfos()).contains("Beginning hearing correspondence for Hearing Vacated action. Case reference: 123");
+        assertThat(logs.getInfos()).contains("Beginning hearing correspondence for Hearing Adjourned Or Vacated action. Case reference: 123");
         verify(manageHearingsCorresponder, never()).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
-        verify(manageHearingsCorresponder).sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
 
     private FinremCallbackRequest buildCallbackRequest(UUID hearingID, UUID hearingItemId, ManageHearingsAction action) {

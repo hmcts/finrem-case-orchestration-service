@@ -64,8 +64,8 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
             finremCaseData.setState(PREPARE_FOR_HEARING.getId());
         }
 
-        if (ManageHearingsAction.VACATE_HEARING.equals(actionSelection)) {
-            manageHearingActionService.performVacateHearing(finremCaseDetails, userAuthorisation);
+        if (ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(actionSelection)) {
+            manageHearingActionService.performAdjournOrVacateHearing(finremCaseDetails, userAuthorisation);
         }
 
         manageHearingActionService.updateTabData(finremCaseData);

@@ -209,7 +209,7 @@ class HearingCorrespondenceHelperTest {
 
     @Test
     void when_isVacatedAndRelistedHearing_returns_true() {
-        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.VACATE_HEARING);
+        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
         finremCaseDetails.getData().getManageHearingsWrapper().setWasRelistSelected(YesOrNo.YES);
         assertTrue(helper.isVacatedAndRelistedHearing(finremCaseDetails.getData()));
     }
@@ -230,7 +230,7 @@ class HearingCorrespondenceHelperTest {
     static Stream<Arguments> provideFalseArgsForIsVacatedAndRelistedHearing() {
         return Stream.of(
             arguments(
-                ManageHearingsAction.VACATE_HEARING, YesOrNo.NO
+                ManageHearingsAction.ADJOURN_OR_VACATE_HEARING, YesOrNo.NO
             ),
             arguments(
                 ManageHearingsAction.ADD_HEARING, YesOrNo.YES
