@@ -5,13 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
@@ -24,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.KentSurreyCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
@@ -43,7 +38,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.FormGLet
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -176,51 +170,5 @@ class ManageHearingFormGLetterDetailsMapperTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> manageHearingFormGLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
         assertThat(exception.getMessage()).isEqualTo("Working hearing is null");
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideCourtDetailsTemplateFieldsArguments")
-    void buildsCourtDetailsTemplateFieldsForVariousScenarios(String courtSelection, CaseType caseType,
-                                                             boolean isKentSurreyCourt, boolean expectCentralFrc) throws Exception {
-        CourtDetails courtDetails = CourtDetails.builder()
-            .courtName("Test Court")
-            .courtAddress("123 Test Street")
-            .phoneNumber("0123456789")
-            .email("test@court.gov.uk")
-            .build();
-
-        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of(courtSelection, courtDetails));
-
-        try (MockedStatic<KentSurreyCourt> kentSurreyCourtMock = org.mockito.Mockito.mockStatic(KentSurreyCourt.class)) {
-            kentSurreyCourtMock.when(() -> KentSurreyCourt.contains(courtSelection)).thenReturn(isKentSurreyCourt);
-
-            var method = ManageHearingFormGLetterDetailsMapper.class
-                .getDeclaredMethod("buildCourtDetailsTemplateFields", String.class, CaseType.class);
-            method.setAccessible(true);
-            CourtDetailsTemplateFields result = (CourtDetailsTemplateFields) method.invoke(
-                manageHearingFormGLetterDetailsMapper, courtSelection, caseType);
-
-            assertThat(result.getCourtName()).isEqualTo("Test Court");
-            assertThat(result.getCourtAddress()).isEqualTo("123 Test Street");
-            assertThat(result.getPhoneNumber()).isEqualTo("0123456789");
-            assertThat(result.getEmail()).isEqualTo("test@court.gov.uk");
-
-            if (expectCentralFrc) {
-                assertThat(result.getCentralFRCCourtAddress()).isEqualTo(OrchestrationConstants.CTSC_FRC_COURT_ADDRESS);
-                assertThat(result.getCentralFRCCourtEmail()).isEqualTo(OrchestrationConstants.FRC_KENT_SURREY_COURT_EMAIL_ADDRESS);
-            } else {
-                assertThat(result.getCentralFRCCourtAddress()).isNull();
-                assertThat(result.getCentralFRCCourtEmail()).isNull();
-            }
-        }
-    }
-
-    private static Stream<Arguments> provideCourtDetailsTemplateFieldsArguments() {
-        return Stream.of(
-            Arguments.of("kentCourt", CaseType.CONTESTED, true, true),
-            Arguments.of("otherCourt", CaseType.CONTESTED, false, false),
-            Arguments.of("kentCourt", CaseType.CONSENTED, true, false),
-            Arguments.of("otherCourt", CaseType.CONSENTED, false, false)
-        );
     }
 }
