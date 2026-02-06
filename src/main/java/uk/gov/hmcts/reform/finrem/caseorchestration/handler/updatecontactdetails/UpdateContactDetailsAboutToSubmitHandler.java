@@ -92,14 +92,14 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
                 .getData();
 
             finremCaseData = finremCaseDetailsMapper.mapToFinremCaseData(updateCaseData, caseDetails.getCaseTypeId());
-
         } else {
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
         }
 
+        // TODO Put this logic to the earliest stage
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
         errors.addAll(getPostCodeErrors(finremCaseDetails));
-      
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors)
             .data(finremCaseData).build();
     }

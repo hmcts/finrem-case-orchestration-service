@@ -62,6 +62,14 @@ public class UpdateRepresentationController extends BaseController {
             return response;
         }
 
+        // TODO remove me
+        try {
+            Thread.sleep(30000000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        log.info("{} - SLEEP FINISHED", caseId);
+
         caseDetails.getData().remove(IS_NOC_REJECTED);
         assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
         Map<String, Object> caseData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);

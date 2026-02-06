@@ -84,14 +84,6 @@ public class UpdateRepresentationWorkflowService {
         caseDetails = noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails,
             originalCaseDetails);
 
-        // TODO remove me
-        try {
-            Thread.sleep(30000000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        log.info("{} - SLEEP FINISHED", caseId);
-
         return assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), caseDetails);
     }
 
