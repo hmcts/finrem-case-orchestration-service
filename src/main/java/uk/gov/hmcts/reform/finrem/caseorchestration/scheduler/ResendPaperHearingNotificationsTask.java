@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
@@ -66,9 +65,24 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
     // Service manual vacate notification up until 20th Feb 2026
     private final LocalDate serviceManualVacatedNoticeCutOff = LocalDate.of(2026, 2, 19);
 
+    private final LocalDate bugIntroductionDate = LocalDate.of(2026, 1, 20);
+    private final LocalDate bugFixDate = LocalDate.of(2026, 2, 3);
+
     private final NotificationService notificationService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
+
+    /**
+     * Record to hold filtered hearings and vacated hearings.
+     *
+     * @param hearings        list of active hearings
+     * @param vacatedHearings list of vacated or adjourned hearings
+     */
+    private record HearingsResult(
+        List<ManageHearingsCollectionItem> hearings,
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings
+    ) {
+    }
 
     public ResendPaperHearingNotificationsTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService,
                                                SystemUserService systemUserService,
@@ -85,22 +99,14 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
     @Override
     protected boolean isUpdatedRequired(CaseDetails caseDetails) {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        ManageHearingsWrapper hearingsWrapper = finremCaseDetails.getData().getManageHearingsWrapper();
 
-        List<Hearing> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
-            .orElseGet(List::of).stream()
-            .map(ManageHearingsCollectionItem::getValue)
-            .filter(value -> value.getHearingDate().isAfter(serviceManualHearingNoticeCutOff))
-            .toList();
+        HearingsResult hearingsResult = getFilteredHearings(finremCaseDetails.getData());
 
-        List<VacateOrAdjournedHearing> vacatedHearings = Optional.ofNullable(hearingsWrapper.getVacatedOrAdjournedHearings())
-            .orElseGet(List::of).stream()
-            .map(VacatedOrAdjournedHearingsCollectionItem::getValue)
-            .filter(value -> value.getHearingDate().isAfter(serviceManualVacatedNoticeCutOff))
-            .toList();
+        List<ManageHearingsCollectionItem> hearings = hearingsResult.hearings();
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings = hearingsResult.vacatedHearings();
 
-        // Sanity check case has hearings past from the 3-week manual service notice period
-        if (!hearings.isEmpty() && !vacatedHearings.isEmpty()) {
+        // Sanity check notification is after service cutoff time and bug timeframe (for vacated hearings)
+        if (hearings.isEmpty() && vacatedHearings.isEmpty()) {
             log.warn("Case ID: {} does not have hearings or vacated hearings within the cut off to post", finremCaseDetails.getId());
             return false;
         }
@@ -120,17 +126,10 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
 
         String systemUserToken = getSystemUserToken();
 
-        List<ManageHearingsCollectionItem> hearings =
-            Optional.ofNullable(caseData.getManageHearingsWrapper().getHearings())
-            .orElse(List.of()).stream()
-            .filter(hearingItem -> hearingItem.getValue().getHearingDate().isAfter(serviceManualHearingNoticeCutOff))
-            .toList();
+        HearingsResult hearingsResult = getFilteredHearings(caseData);
 
-        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings =
-            Optional.ofNullable(caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings())
-            .orElse(List.of()).stream()
-            .filter(hearingItem -> hearingItem.getValue().getHearingDate().isAfter(serviceManualVacatedNoticeCutOff))
-            .toList();
+        List<ManageHearingsCollectionItem> hearings = hearingsResult.hearings();
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings = hearingsResult.vacatedHearings();
 
         log.info("Case ID: {} resending correspondence for {} active hearings and {} vacated hearings",
             finremCaseDetails.getId(), hearings.size(), vacatedHearings.size());
@@ -204,7 +203,8 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
             .ifPresent(hearingDocumentsToPost::add);
         hearingDocumentsToPost.addAll(hearing.getAdditionalHearingDocs().stream().map(DocumentCollectionItem::getValue).toList());
 
-        log.info("Case ID: {} Sending active hearing correspondence for parties: {}", caseDetails.getId(), partiesToPost);
+        log.info("Case ID: {} Sending active hearing correspondence with hearing date {}, for parties: {}",
+            caseDetails.getId(), hearing.getHearingDate(), partiesToPost);
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
             .notificationParties(partiesToPost)
@@ -222,10 +222,11 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
         VacateOrAdjournedHearing vacateHearing = vacatedHearingItem.getValue();
 
         List<NotificationParty> partiesToPost = getPostalParties(vacateHearing, caseDetails);
-        CaseDocument vacateNotice =  hearingCorrespondenceHelper.getCaseDocumentByTypeAndHearingUuid(
+        CaseDocument vacateNotice = hearingCorrespondenceHelper.getCaseDocumentByTypeAndHearingUuid(
             CaseDocumentType.VACATE_HEARING_NOTICE, caseDetails.getData().getManageHearingsWrapper(), vacatedHearingItem.getId());
 
-        log.info("Case ID: {} Sending vacated hearing correspondence for parties: {}", caseDetails.getId(), partiesToPost);
+        log.info("Case ID: {} Sending vacated hearing correspondence with Vacated date: {}. and hearing date: {}, for parties: {}",
+            caseDetails.getId(), vacateHearing.getVacatedOrAdjournedDate(), vacateHearing.getHearingDate(), partiesToPost);
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
             .notificationParties(partiesToPost)
@@ -233,6 +234,32 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
             .caseDetails(caseDetails)
             .authToken(authToken)
             .build());
+    }
+
+    /**
+     * Returns filtered hearings and vacated hearings based on cut-off and bug period.
+     *
+     * @param caseData the case data
+     * @return a record containing filtered hearings and vacated hearings
+     */
+    private HearingsResult getFilteredHearings(FinremCaseData caseData) {
+        List<ManageHearingsCollectionItem> hearings =
+            Optional.ofNullable(caseData.getManageHearingsWrapper().getHearings())
+                .orElse(List.of()).stream()
+                .filter(hearingItem -> hearingItem.getValue().getHearingDate().isAfter(serviceManualHearingNoticeCutOff))
+                .toList();
+
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings =
+            Optional.ofNullable(caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings())
+                .orElse(List.of()).stream()
+                .filter(hearingItem -> hearingItem.getValue().getHearingDate().isAfter(serviceManualVacatedNoticeCutOff))
+                .filter(hearingItem ->
+                    !hearingItem.getValue().getVacatedOrAdjournedDate().isBefore(bugIntroductionDate) // on or after introduction
+                        && !hearingItem.getValue().getVacatedOrAdjournedDate().isAfter(bugFixDate) // on or before fix date
+                )
+                .toList();
+
+        return new HearingsResult(hearings, vacatedHearings);
     }
 
     /**
