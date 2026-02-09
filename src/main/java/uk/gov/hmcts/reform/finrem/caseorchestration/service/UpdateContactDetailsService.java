@@ -143,30 +143,27 @@ public class UpdateContactDetailsService {
         }
     }
 
-    private void removeApplicantSolicitorDetails(FinremCaseData caseData, CaseType caseType) {
+    private void clearApplicantSolicitorDetailsForUnrepresentedApplicant(FinremCaseData caseData, CaseType caseType) {
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
-        Optional<YesOrNo> isApplicantRepresented = Optional.ofNullable(contactDetailsWrapper.getApplicantRepresented());
 
-        if (isApplicantRepresented.isEmpty()
-            || isApplicantRepresented.get() == YesOrNo.NO) {
-            if (CaseType.CONTESTED.equals(caseType)) {
-                contactDetailsWrapper.setApplicantSolicitorName(null);
-                contactDetailsWrapper.setApplicantSolicitorFirm(null);
-                contactDetailsWrapper.setApplicantSolicitorAddress(null);
-                contactDetailsWrapper.setApplicantSolicitorPhone(null);
-                contactDetailsWrapper.setApplicantSolicitorEmail(null);
-                contactDetailsWrapper.setApplicantSolicitorConsentForEmails(null);
-            } else {
-                contactDetailsWrapper.setSolicitorName(null);
-                contactDetailsWrapper.setSolicitorFirm(null);
-                contactDetailsWrapper.setSolicitorAddress(null);
-                contactDetailsWrapper.setSolicitorPhone(null);
-                contactDetailsWrapper.setSolicitorEmail(null);
-                contactDetailsWrapper.setSolicitorAgreeToReceiveEmails(null);
-            }
-            contactDetailsWrapper.setSolicitorReference(null);
-            caseData.setApplicantOrganisationPolicy(null);
+        if (CaseType.CONTESTED.equals(caseType)) {
+            contactDetailsWrapper.setApplicantSolicitorName(null);
+            contactDetailsWrapper.setApplicantSolicitorFirm(null);
+            contactDetailsWrapper.setApplicantSolicitorAddress(null);
+            contactDetailsWrapper.setApplicantSolicitorPhone(null);
+            contactDetailsWrapper.setApplicantSolicitorEmail(null);
+            contactDetailsWrapper.setApplicantSolicitorConsentForEmails(null);
+        } else {
+            contactDetailsWrapper.setSolicitorName(null);
+            contactDetailsWrapper.setSolicitorFirm(null);
+            contactDetailsWrapper.setSolicitorAddress(null);
+            contactDetailsWrapper.setSolicitorPhone(null);
+            contactDetailsWrapper.setSolicitorEmail(null);
+            contactDetailsWrapper.setSolicitorAgreeToReceiveEmails(null);
         }
+
+        contactDetailsWrapper.setSolicitorReference(null);
+        caseData.setApplicantOrganisationPolicy(null);
     }
 
     @Deprecated
