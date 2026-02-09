@@ -30,7 +30,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
@@ -57,7 +56,6 @@ public class GeneralApplicationDirectionsService {
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final CcdService ccdService;
 
-    private static final String CASE_NUMBER = "ccdCaseNumber";
     private static final String COURT_DETAIL = "courtDetails";
     private static final String APPLICANT_NAME = "applicantName";
     private static final String RESPONDENT_NAME = "respondentName";
@@ -108,13 +106,6 @@ public class GeneralApplicationDirectionsService {
     public void submitCollectionGeneralApplicationDirections(FinremCaseDetails caseDetails, List<BulkPrintDocument> dirDocuments,
                                                              String authorisationToken) {
         printDocumentPackAndSendToRelevantParties(caseDetails, authorisationToken, dirDocuments);
-    }
-
-    public CaseDocument getBulkPrintDocument(CaseDetails caseDetails, String authorisationToken) {
-        Map<String, Object> caseData = caseDetails.getData();
-        return caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED).equals(YES_VALUE)
-            ? prepareHearingRequiredNoticeDocument(caseDetails, authorisationToken)
-            : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
     }
 
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
@@ -213,23 +204,6 @@ public class GeneralApplicationDirectionsService {
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralApplicationOrderTemplate(caseDetails),
             documentConfiguration.getGeneralApplicationOrderFileName());
-    }
-
-    @SuppressWarnings("java:S1874")
-    private CaseDocument prepareHearingRequiredNoticeDocument(CaseDetails caseDetails, String authorisationToken) {
-        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        Map<String, Object> caseData = caseDetailsCopy.getData();
-
-        caseData.put(CASE_NUMBER, caseDetails.getId());
-        caseData.put(COURT_DETAIL, buildFrcCourtDetails(caseData));
-        caseData.put(APPLICANT_NAME, documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put(RESPONDENT_NAME, documentHelper.getRespondentFullNameContested(caseDetailsCopy));
-        addHearingVenueDetails(caseDetailsCopy);
-        caseData.put(LETTER_DATE, String.valueOf(LocalDate.now()));
-
-        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getGeneralApplicationHearingNoticeTemplate(caseDetails),
-            documentConfiguration.getGeneralApplicationHearingNoticeFileName());
     }
 
     private void addHearingVenueDetails(CaseDetails caseDetails) {
