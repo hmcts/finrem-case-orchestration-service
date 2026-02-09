@@ -42,7 +42,7 @@ public class SystemUserTokenProvider {
      */
     @Cacheable(cacheNames = {SYS_USER_CACHE})
     public String getSysUserToken() {
-        log.info("Fetching system user token");
+        log.debug("Fetching system user token");
         return idamAuthService.getAccessToken(systemUpdateUserConfiguration.getUserName(), systemUpdateUserConfiguration.getPassword());
     }
 
@@ -56,6 +56,6 @@ public class SystemUserTokenProvider {
     @CacheEvict(allEntries = true, cacheNames = {SYS_USER_CACHE})
     @Scheduled(fixedDelay = 1800000)
     public void cacheEvict() {
-        log.info("Evicting system user cron cache");
+        log.debug("Evicting system user cron cache");
     }
 }
