@@ -194,29 +194,17 @@ public class UpdateContactDetailsService {
         }
     }
 
-    private void removeRespondentDetails(FinremCaseData caseData, CaseType caseType) {
-        boolean isContested = CaseType.CONTESTED.equals(caseType);
-
+    private void clearRespondentSolicitorDetailsForUnrepresentedRespondent(FinremCaseData caseData) {
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
-        Optional<YesOrNo> isRespondentRepresented =
-            Optional.ofNullable(isContested
-                ? contactDetailsWrapper.getContestedRespondentRepresented()
-                : contactDetailsWrapper.getConsentedRespondentRepresented());
 
-        if (isRespondentRepresented.isPresent()
-            && isRespondentRepresented.get() == YesOrNo.YES) {
-            contactDetailsWrapper.setRespondentSolicitorAddress(null);
-            contactDetailsWrapper.setRespondentSolicitorPhone(null);
-            contactDetailsWrapper.setRespondentResideOutsideUK(YesOrNo.NO);
-        } else {
-            contactDetailsWrapper.setRespondentSolicitorName(null);
-            contactDetailsWrapper.setRespondentSolicitorFirm(null);
-            contactDetailsWrapper.setRespondentSolicitorAddress(null);
-            contactDetailsWrapper.setRespondentSolicitorPhone(null);
-            contactDetailsWrapper.setRespondentSolicitorEmail(null);
-            contactDetailsWrapper.setRespondentSolicitorDxNumber(null);
-            caseData.setRespSolNotificationsEmailConsent(null);
-            caseData.setRespondentOrganisationPolicy(null);
-        }
+        contactDetailsWrapper.setRespondentSolicitorName(null);
+        contactDetailsWrapper.setRespondentSolicitorFirm(null);
+        contactDetailsWrapper.setRespondentSolicitorAddress(null);
+        contactDetailsWrapper.setRespondentSolicitorPhone(null);
+        contactDetailsWrapper.setRespondentSolicitorEmail(null);
+        contactDetailsWrapper.setRespondentSolicitorDxNumber(null);
+
+        caseData.setRespSolNotificationsEmailConsent(null);
+        caseData.setRespondentOrganisationPolicy(null);
     }
 }
