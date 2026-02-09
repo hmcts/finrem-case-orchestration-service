@@ -87,7 +87,6 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
         additionalHearingDocumentService.stampAndUpdateOrderCollections(caseDetails, userAuthorisation);
 
-        final List<String> errors = new ArrayList<>();
         log.info("Storing Additional Hearing Document for Case ID: {}", caseId);
 
         Map<String, CaseDocument> stampedDocuments = getStampedDocuments(caseDetails, userAuthorisation);
@@ -108,7 +107,7 @@ public class ProcessOrderAboutToSubmitHandler extends FinremCallbackHandler {
         }
 
         hearingsWrapper.setWorkingHearing(null);
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
     private void handleNewDocumentInUnprocessedApprovedDocuments(FinremCaseData caseData) {
