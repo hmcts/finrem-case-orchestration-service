@@ -398,4 +398,96 @@ class UpdateContactDetailsServiceTest {
         );
     }
 
+    private static FinremCaseData createCaseData(NoticeOfChangeParty party, CaseType caseType,
+                                                 YesOrNo applicantRepresented, YesOrNo respondentRepresented) {
+        ContactDetailsWrapper contactDetails = ContactDetailsWrapper.builder()
+            .nocParty(party)
+            .applicantRepresented(applicantRepresented)
+            .applicantSolicitorName("A name")
+            .applicantSolicitorFirm("A firm")
+            .applicantSolicitorAddress(createAddress("A address"))
+            .applicantSolicitorPhone("123")
+            .applicantSolicitorEmail("a@test.com")
+            .applicantSolicitorConsentForEmails(YesOrNo.YES)
+            .solicitorName("S name")
+            .solicitorFirm("S firm")
+            .solicitorAddress(createAddress("S address"))
+            .solicitorPhone("456")
+            .solicitorEmail("s@test.com")
+            .solicitorAgreeToReceiveEmails(YesOrNo.YES)
+            .respondentSolicitorName("R name")
+            .respondentSolicitorFirm("R firm")
+            .respondentSolicitorAddress(createAddress("R address"))
+            .respondentSolicitorPhone("789")
+            .respondentSolicitorEmail("r@test.com")
+            .respondentSolicitorDxNumber("DX123")
+            .solicitorReference("REF")
+            .build();
+
+        if (caseType == CaseType.CONTESTED) {
+            contactDetails.setContestedRespondentRepresented(respondentRepresented);
+        } else {
+            contactDetails.setConsentedRespondentRepresented(respondentRepresented);
+        }
+
+        return FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetails)
+            .applicantOrganisationPolicy(new OrganisationPolicy())
+            .respondentOrganisationPolicy(new OrganisationPolicy())
+            .respSolNotificationsEmailConsent(YesOrNo.YES)
+            .build();
+    }
+
+    private static Address createAddress(String line1) {
+        return Address.builder()
+            .addressLine1(line1)
+            .addressLine2("Line 2")
+            .addressLine3("Line 3")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode("SE1")
+            .build();
+    }
+
+    private static void assertContestedApplicantCleared(FinremCaseData data) {
+        ContactDetailsWrapper contactDetailsWrapper = data.getContactDetailsWrapper();
+
+        assertNull(contactDetailsWrapper.getApplicantSolicitorName());
+        assertNull(contactDetailsWrapper.getApplicantSolicitorFirm());
+        assertNull(contactDetailsWrapper.getApplicantSolicitorAddress());
+        assertNull(contactDetailsWrapper.getApplicantSolicitorPhone());
+        assertNull(contactDetailsWrapper.getApplicantSolicitorEmail());
+        assertNull(contactDetailsWrapper.getApplicantSolicitorConsentForEmails());
+        assertNull(contactDetailsWrapper.getSolicitorReference());
+        assertNull(data.getApplicantOrganisationPolicy());
+    }
+
+    private static void assertConsentedApplicantCleared(FinremCaseData data) {
+        ContactDetailsWrapper contactDetailsWrapper = data.getContactDetailsWrapper();
+
+        assertNull(contactDetailsWrapper.getSolicitorName());
+        assertNull(contactDetailsWrapper.getSolicitorFirm());
+        assertNull(contactDetailsWrapper.getSolicitorAddress());
+        assertNull(contactDetailsWrapper.getSolicitorPhone());
+        assertNull(contactDetailsWrapper.getSolicitorEmail());
+        assertNull(contactDetailsWrapper.getSolicitorAgreeToReceiveEmails());
+        assertNull(contactDetailsWrapper.getSolicitorReference());
+        assertNull(data.getApplicantOrganisationPolicy());
+    }
+
+    private static void assertRespondentCleared(FinremCaseData data) {
+        ContactDetailsWrapper contactDetailsWrapper = data.getContactDetailsWrapper();
+
+        assertNull(contactDetailsWrapper.getRespondentSolicitorName());
+        assertNull(contactDetailsWrapper.getRespondentSolicitorFirm());
+        assertNull(contactDetailsWrapper.getRespondentSolicitorAddress());
+        assertNull(contactDetailsWrapper.getRespondentSolicitorPhone());
+        assertNull(contactDetailsWrapper.getRespondentSolicitorEmail());
+        assertNull(contactDetailsWrapper.getRespondentSolicitorDxNumber());
+
+        assertNull(data.getRespSolNotificationsEmailConsent());
+        assertNull(data.getRespondentOrganisationPolicy());
+    }
+
 }
