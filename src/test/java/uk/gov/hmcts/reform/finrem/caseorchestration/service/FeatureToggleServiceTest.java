@@ -192,7 +192,7 @@ public class FeatureToggleServiceTest {
 
         @Test
         public void isFinremCitizenUiEnabled() {
-            assertThat(featureToggleService.isFinremCitizenUiEnabled(), is(false));
+            assertThat(featureToggleService.isFinremCitizenUiEnabled()).isFalse();
         }
     }
 }
