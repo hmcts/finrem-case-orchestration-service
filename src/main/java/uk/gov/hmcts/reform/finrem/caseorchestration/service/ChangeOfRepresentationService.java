@@ -65,8 +65,6 @@ public class ChangeOfRepresentationService {
                 .build()
         ));
 
-        log.info("Updated change of representatives: {}", history);
-
         history.getRepresentationUpdateHistory().sort(Comparator.comparing(element -> element.getValue().getDate()));
 
         return history;
