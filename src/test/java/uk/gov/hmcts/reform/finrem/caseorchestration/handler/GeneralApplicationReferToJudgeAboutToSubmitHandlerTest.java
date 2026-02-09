@@ -33,6 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
@@ -57,7 +58,6 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
 
     @Mock
     private BulkPrintDocumentService bulkPrintDocumentService;
-    public static final String AUTH_TOKEN = "tokien:)";
     private static final String NO_GA_JSON = "/fixtures/contested/no-general-application-finrem.json";
     private static final String GA_JSON = "/fixtures/contested/general-application-details.json";
     private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application.json";
@@ -66,8 +66,8 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest extends Base
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
-        GeneralApplicationService gaService = new GeneralApplicationService(documentHelper, objectMapper, idamService,
-            service, accessService, helper, bulkPrintDocumentService, generalApplicationsCategoriser);
+        GeneralApplicationService gaService = new GeneralApplicationService(documentHelper, idamService, service, accessService,
+            helper, bulkPrintDocumentService, generalApplicationsCategoriser);
         startHandler = new GeneralApplicationReferToJudgeAboutToStartHandler(finremCaseDetailsMapper, helper);
         submitHandler = new GeneralApplicationReferToJudgeAboutToSubmitHandler(finremCaseDetailsMapper, helper, gaService);
     }
