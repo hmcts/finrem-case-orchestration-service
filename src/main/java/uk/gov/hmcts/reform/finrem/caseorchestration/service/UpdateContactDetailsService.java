@@ -115,13 +115,26 @@ public class UpdateContactDetailsService {
      *                 contact details should be cleared
      */
     public void handleRepresentationChange(FinremCaseData caseData, CaseType caseType) {
-        NoticeOfChangeParty nocPart = caseData.getContactDetailsWrapper().getNocParty();
+        ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+        NoticeOfChangeParty nocPart = contactDetailsWrapper.getNocParty();
+
         if (NoticeOfChangeParty.APPLICANT.equals(nocPart)) {
-            removeApplicantSolicitorDetails(caseData, caseType);
+            if (contactDetailsWrapper.getApplicantRepresented() == YesOrNo.NO) {
+                clearApplicantSolicitorDetailsForUnrepresentedApplicant(caseData, caseType);
+            }
+            return;
         }
 
         if (NoticeOfChangeParty.RESPONDENT.equals(nocPart)) {
-            removeRespondentDetails(caseData, caseType);
+            boolean isContested = CaseType.CONTESTED.equals(caseType);
+
+            YesOrNo respondentRepresented = isContested
+                ? contactDetailsWrapper.getContestedRespondentRepresented()
+                : contactDetailsWrapper.getConsentedRespondentRepresented();
+
+            if (respondentRepresented == YesOrNo.NO) {
+                clearRespondentSolicitorDetailsForUnrepresentedRespondent(caseData);
+            }
         }
     }
 
