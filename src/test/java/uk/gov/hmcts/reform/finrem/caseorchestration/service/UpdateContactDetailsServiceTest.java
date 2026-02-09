@@ -18,14 +18,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -280,121 +279,65 @@ class UpdateContactDetailsServiceTest {
         }
     }
 
-    @ParameterizedTest
-    @MethodSource("finremCaseDataParameters")
-    void shouldRemoveApplicantSolicitorDetails_withFinremCaseData(CaseType caseType,
-                                                                  FinremCaseData finremCaseData,
-                                                                  List<Function<FinremCaseData, Object>> propertiesToRemove) {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("clearingScenarios")
+    void shouldClearFields_whenScenarioRequiresClearing(String scenarioName,
+                                                        CaseType caseType,
+                                                        FinremCaseData caseData) {
+        service.handleRepresentationChange(caseData, caseType);
 
-        service.handleRepresentationChange(finremCaseData, caseType);
-
-        for (Function<FinremCaseData, Object> propertyGetter : propertiesToRemove) {
-            Object value = propertyGetter.apply(finremCaseData);
-            assertNull(value);
+        if (caseData.getContactDetailsWrapper().getNocParty() == NoticeOfChangeParty.APPLICANT) {
+            if (caseType == CaseType.CONTESTED) {
+                assertContestedApplicantCleared(caseData);
+            } else {
+                assertConsentedApplicantCleared(caseData);
+            }
+        } else {
+            assertRespondentCleared(caseData);
         }
     }
 
-    public static Stream<Arguments> finremCaseDataParameters() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("nonClearingScenarios")
+    void shouldNotClearFields_whenScenarioDoesNotRequireClearing(String scenarioName, CaseType caseType,
+                                                                 FinremCaseData caseData) {
+
+        service.handleRepresentationChange(caseData, caseType);
+
+        ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
+        Address initialRespondentAddress = contactDetails.getRespondentSolicitorAddress();
+        assertSame(initialRespondentAddress, contactDetails.getRespondentSolicitorAddress());
+
+        Address initialApplicantAddressContested = contactDetails.getApplicantSolicitorAddress();
+        assertSame(initialApplicantAddressContested, contactDetails.getApplicantSolicitorAddress());
+
+        Address initialApplicantAddressConsented = contactDetails.getSolicitorAddress();
+        assertSame(initialApplicantAddressConsented, contactDetails.getSolicitorAddress());
+    }
+
+    static Stream<Arguments> clearingScenarios() {
         return Stream.of(
-            Arguments.of(
-                CaseType.CONTESTED,
-                getContestedApplicantFinremCaseData(),
-                List.<Function<FinremCaseData, Object>>of(
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorName(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorPhone(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorEmail(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorConsentForEmails(),
-                    data -> data.getContactDetailsWrapper().getSolicitorReference(),
-                    FinremCaseData::getApplicantOrganisationPolicy
-                )
-            ),
-            Arguments.of(
-                CaseType.CONTESTED,
-                getContestedApplicantNullRepresentationFinremCaseData(),
-                List.<Function<FinremCaseData, Object>>of(
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorName(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorPhone(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorEmail(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorConsentForEmails(),
-                    data -> data.getContactDetailsWrapper().getSolicitorReference(),
-                    FinremCaseData::getApplicantOrganisationPolicy
-                )
-            ),
-            Arguments.of(
-                CaseType.CONSENTED,
-                getConsentedApplicantFinremCaseData(),
-                List.<Function<FinremCaseData, Object>>of(
-                    data -> data.getContactDetailsWrapper().getSolicitorName(),
-                    data -> data.getContactDetailsWrapper().getSolicitorFirm(),
-                    data -> data.getContactDetailsWrapper().getSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getSolicitorPhone(),
-                    data -> data.getContactDetailsWrapper().getSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getSolicitorEmail(),
-                    data -> data.getContactDetailsWrapper().getSolicitorAgreeToReceiveEmails(),
-                    data -> data.getContactDetailsWrapper().getSolicitorReference(),
-                    FinremCaseData::getApplicantOrganisationPolicy
-                )
-            ),
-            Arguments.of(
-                CaseType.CONTESTED,
-                getContestedRespondentRepresentedFinremCaseData(),
-                List.<Function<FinremCaseData, Object>>of(
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone()
-                )
-            ),
-            Arguments.of(
-                CaseType.CONSENTED,
-                getConsentedRespondentRepresentedFinremCaseData(),
-                List.<Function<FinremCaseData, Object>>of(
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone()
-                )
-            ),
-            Arguments.of(
-                CaseType.CONTESTED,
-                getContestedNotRespondentRepresentedFinremCaseData(),
-                List.<Function<FinremCaseData, Object>>of(
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorName(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorFirm(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorEmail(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorDxNumber(),
-                    FinremCaseData::getRespSolNotificationsEmailConsent,
-                    FinremCaseData::getRespondentOrganisationPolicy
-                )
-            ),
-            Arguments.of(
-                CaseType.CONTESTED,
-                getContestedNullRespondentRepresentedFinremCaseData(),
-                List.<Function<FinremCaseData, Object>>of(
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorName(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorFirm(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorEmail(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorDxNumber(),
-                    FinremCaseData::getRespSolNotificationsEmailConsent,
-                    FinremCaseData::getRespondentOrganisationPolicy
-                )
-            ),
-            Arguments.of(
-                CaseType.CONSENTED,
-                getConsentedNotRespondentRepresentedFinremCaseData(),
-                List.<Function<FinremCaseData, Object>>of(
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorName(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorFirm(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorEmail(),
-                    data -> data.getContactDetailsWrapper().getRespondentSolicitorDxNumber(),
-                    FinremCaseData::getRespSolNotificationsEmailConsent,
-                    FinremCaseData::getRespondentOrganisationPolicy
-                )
-            )
+            Arguments.of("CONTESTED - Applicant NoC + applicant NO", CaseType.CONTESTED,
+                createCaseData(NoticeOfChangeParty.APPLICANT, CaseType.CONTESTED, YesOrNo.NO, YesOrNo.YES)),
+            Arguments.of("CONSENTED - Applicant NoC + applicant NO", CaseType.CONSENTED,
+                createCaseData(NoticeOfChangeParty.APPLICANT, CaseType.CONSENTED, YesOrNo.NO, YesOrNo.YES)),
+            Arguments.of("CONTESTED - Respondent NoC + respondent NO", CaseType.CONTESTED,
+                createCaseData(NoticeOfChangeParty.RESPONDENT, CaseType.CONTESTED, YesOrNo.YES, YesOrNo.NO)),
+            Arguments.of("CONSENTED - Respondent NoC + respondent NO", CaseType.CONSENTED,
+                createCaseData(NoticeOfChangeParty.RESPONDENT, CaseType.CONSENTED, YesOrNo.YES, YesOrNo.NO))
+        );
+    }
+
+    static Stream<Arguments> nonClearingScenarios() {
+        return Stream.of(
+            Arguments.of("CONTESTED - Applicant NoC + applicant YES", CaseType.CONTESTED,
+                createCaseData(NoticeOfChangeParty.APPLICANT, CaseType.CONTESTED, YesOrNo.YES, YesOrNo.YES)),
+            Arguments.of("CONSENTED - Applicant NoC + applicant YES", CaseType.CONSENTED,
+                createCaseData(NoticeOfChangeParty.APPLICANT, CaseType.CONSENTED, YesOrNo.YES, YesOrNo.YES)),
+            Arguments.of("CONTESTED - Respondent NoC + respondent YES", CaseType.CONTESTED,
+                createCaseData(NoticeOfChangeParty.RESPONDENT, CaseType.CONTESTED, YesOrNo.YES, YesOrNo.YES)),
+            Arguments.of("CONSENTED - Respondent NoC + respondent YES", CaseType.CONSENTED,
+                createCaseData(NoticeOfChangeParty.RESPONDENT, CaseType.CONSENTED, YesOrNo.YES, YesOrNo.YES))
         );
     }
 
@@ -489,5 +432,4 @@ class UpdateContactDetailsServiceTest {
         assertNull(data.getRespSolNotificationsEmailConsent());
         assertNull(data.getRespondentOrganisationPolicy());
     }
-
 }
