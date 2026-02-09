@@ -20,8 +20,6 @@ public class BarristerUpdateDifferenceCalculator {
     public BarristerChange calculate(BarristerParty barristerParty, List<Barrister> original, List<Barrister> updated) {
         Set<RelevantUniqueInformation> addedUniqueBarristers = Sets.difference(toRelevantSet(updated), toRelevantSet(original));
         Set<RelevantUniqueInformation> removedUniqueBarristers = Sets.difference(toRelevantSet(original), toRelevantSet(updated));
-        log.info("Added Unique Barristers: {}", addedUniqueBarristers);
-        log.info("Removed Unique Barristers: {}", removedUniqueBarristers);
 
         return BarristerChange.builder()
             .barristerParty(barristerParty)
