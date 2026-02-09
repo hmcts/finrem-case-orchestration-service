@@ -175,7 +175,7 @@ public class ConsentOrderApprovedDocumentService {
             .mapToCaseDetails(finremCaseDetails), authToken);
         List<ConsentOrderCollection> approvedOrders = getConsentInContestedApprovedOrderCollection(caseData);
         if (approvedOrders != null && !approvedOrders.isEmpty()) {
-            ApprovedOrder approvedOrder = approvedOrders.get(approvedOrders.size() - 1).getApprovedOrder();
+            ApprovedOrder approvedOrder = approvedOrders.getLast().getApprovedOrder();
             approvedOrder.setOrderLetter(orderLetter);
             caseData.getConsentOrderWrapper().setContestedConsentedApprovedOrders(approvedOrders);
         }
@@ -401,12 +401,12 @@ public class ConsentOrderApprovedDocumentService {
         List<ConsentOrderCollection> refusedOrders = wrapper.getConsentedNotApprovedOrders();
         List<ConsentOrderCollection> approvedOrders = wrapper.getContestedConsentedApprovedOrders();
         if (refusedOrders != null && !refusedOrders.isEmpty()) {
-            latestRefusedConsentOrder = refusedOrders.get(refusedOrders.size() - 1).getApprovedOrder().getConsentOrder();
+            latestRefusedConsentOrder = refusedOrders.getLast().getApprovedOrder().getConsentOrder();
         } else {
             return approvedOrders != null && !approvedOrders.isEmpty();
         }
         if (approvedOrders != null && !approvedOrders.isEmpty()) {
-            latestApprovedConsentOrder = approvedOrders.get(approvedOrders.size() - 1).getApprovedOrder().getConsentOrder();
+            latestApprovedConsentOrder = approvedOrders.getLast().getApprovedOrder().getConsentOrder();
         } else {
             return false;
         }
