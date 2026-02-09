@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -101,18 +100,12 @@ public class UpdateContactDetailsService {
     }
 
     /**
-     * Orchestrates the representation change for the applicant or respondent,
-     * based on the value selected in the NoC field
-     * labelled: "Select Party to which the change in representation applies:".
+     * Handles the representation change for a financial remedy case.
+     * This method determines whether the Notice of Change (NoC) party is the applicant or respondent
+     * and clears solicitor details if the party is unrepresented.
      *
-     * <p>
-     * If the applicant is selected, this method clears the applicant solicitor
-     * details according to the provided {@code caseType}. If the respondent is
-     * selected, it clears the respondent solicitor details accordingly.
-     *
-     * @param caseData the {@link FinremCaseData} instance to update
-     * @param caseType the {@link CaseType} used to determine which solicitor
-     *                 contact details should be cleared
+     * @param caseData the financial remedy case data containing details about the case
+     * @param caseType the type of the case (e.g., contested or consented)
      */
     public void handleRepresentationChange(FinremCaseData caseData, CaseType caseType) {
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
