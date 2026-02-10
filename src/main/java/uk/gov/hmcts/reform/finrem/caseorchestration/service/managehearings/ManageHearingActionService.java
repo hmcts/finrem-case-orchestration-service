@@ -24,8 +24,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.VacatedOrAdjournedHearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -65,6 +67,7 @@ public class ManageHearingActionService {
     private final HearingTabDataMapper hearingTabDataMapper;
     private final GenerateCoverSheetService generateCoverSheetService;
     private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
+    private final FeatureToggleService featureToggleService;
 
     private record DocumentRecord(CaseDocument caseDocument, CaseDocumentType caseDocumentType) {
     }
@@ -406,6 +409,9 @@ public class ManageHearingActionService {
                 formCType
             )
         );
+        if (featureToggleService.isFinremCitizenUiEnabled()) {
+            AccessCodeGenerator.setAccessCode(finremCaseDetails.getData());
+        }
     }
 
     private void generateFormG(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
