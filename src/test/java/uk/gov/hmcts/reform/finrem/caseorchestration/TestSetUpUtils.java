@@ -14,12 +14,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsExcep
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentType;
@@ -400,7 +404,9 @@ public class TestSetUpUtils {
 
     public static FinremCaseDetails finremCaseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
         try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
-            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+            FinremCaseDetails finremCaseDetails = mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+            finremCaseDetails.getData().setCcdCaseType(finremCaseDetails.getCaseType());
+            return finremCaseDetails;
         } catch (Exception exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         }
@@ -544,5 +550,32 @@ public class TestSetUpUtils {
     @SuppressWarnings("unchecked")
     public static <T> Supplier<T> anySupplier() {
         return any(Supplier.class);
+    }
+
+    public static Organisation organisation(String id) {
+        return Organisation.builder()
+            .organisationID(id)
+            .build();
+    }
+
+    public static OrganisationPolicy organisationPolicy(String id) {
+        return OrganisationPolicy.builder()
+            .organisation(organisation(id))
+            .build();
+    }
+
+    public static List<BarristerCollectionItem> barristers(String orgId) {
+        return barristers(orgId, null);
+    }
+
+    public static List<BarristerCollectionItem> barristers(String orgId, String userId) {
+        return new ArrayList<>(List.of(
+            BarristerCollectionItem.builder()
+                .value(Barrister.builder()
+                    .organisation(organisation(orgId))
+                    .userId(userId)
+                    .build())
+                .build()
+        ));
     }
 }

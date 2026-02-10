@@ -547,6 +547,40 @@ public class FinremCaseData implements HasCaseDocument {
         return regionWrapper;
     }
 
+    /**
+     * Returns the {@link IntervenerWrapper} for the given intervener ID.
+     *
+     * <p>
+     * The supplied {@code id} is 1-based (Intervener 1–4), while the underlying
+     * list of interveners is 0-based. This method converts the ID to the correct
+     * list index by subtracting one.
+     * </p>
+     *
+     * @param id the 1-based intervener ID
+     * @return the matching {@link IntervenerWrapper}
+     * @throws IndexOutOfBoundsException if the id is less than 1 or greater than 4
+     */
+    @JsonIgnore
+    public IntervenerWrapper getIntervenerById(int id) {
+        return getInterveners().get(id - 1);
+    }
+
+    /**
+     * Returns all interveners as an ordered, immutable list.
+     *
+     * <p>
+     * The list is ordered as Intervener 1 through Intervener 4 to allow
+     * deterministic access by index (for example, via {@link #getIntervenerById(int)}).
+     * </p>
+     *
+     * <p>
+     * This method is annotated with {@link JsonIgnore} to prevent the derived list
+     * from being serialised, as the interveners are already represented by their
+     * individual fields.
+     * </p>
+     *
+     * @return an immutable list containing all intervener wrappers
+     */
     @JsonIgnore
     public List<IntervenerWrapper> getInterveners() {
         return List.of(getIntervenerOne(), getIntervenerTwo(), getIntervenerThree(), getIntervenerFour());
@@ -913,8 +947,8 @@ public class FinremCaseData implements HasCaseDocument {
     private String getNorthEastCourt(RegionNorthEastFrc frc, CourtListWrapper courtList) {
         if (frc != null) {
             return Map.of(
-                RegionNorthEastFrc.CLEAVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt(isConsentedApplication())),
-                RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt(isConsentedApplication())),
+                RegionNorthEastFrc.CLEAVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt()),
+                RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt()),
                 RegionNorthEastFrc.HS_YORKSHIRE, getCourtListIdOrDefault(courtList.getHumberCourt()),
                 RegionNorthEastFrc.NW_YORKSHIRE, getCourtListIdOrDefault(courtList.getNwYorkshireCourt())
             ).get(frc).getSelectedCourtId();

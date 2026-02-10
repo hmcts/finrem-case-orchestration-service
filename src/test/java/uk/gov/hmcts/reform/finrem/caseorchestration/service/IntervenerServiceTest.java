@@ -1,19 +1,30 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
@@ -36,11 +47,20 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
@@ -69,8 +89,12 @@ class IntervenerServiceTest {
     private PrdOrganisationService organisationService;
     @Mock
     private SystemUserService systemUserService;
+    @Mock
+    private IdamService idamService;
     @InjectMocks
     private IntervenerService service;
+    @Mock
+    private ChangeOfRepresentationService changeOfRepresentationService;
 
     @Test
     void givenCase_whenRemoveOperationChosenForIntv1NotRepresented_thenRemoveIntervener() {
@@ -1709,6 +1733,149 @@ class IntervenerServiceTest {
         FinremCaseData finremCaseData = FinremCaseData.builder().build();
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder().build();
         assertFalse(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+    }
+
+    @Test
+    void shouldUpdateIntervenerSolicitorStopRepresentingHistory() {
+        RepresentationUpdate shouldBeRetained = mock(RepresentationUpdate.class);
+
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerOne(IntervenerOne.builder()
+                .intervenerRepresented(YesOrNo.NO)
+                .intervenerOrganisation(OrganisationPolicy.builder()
+                .orgPolicyCaseAssignedRole("[INTVRSOLICITOR1]")
+                .build()).build())
+            .representationUpdateHistory(new ArrayList<>(
+                List.of(RepresentationUpdateHistoryCollection.builder().value(shouldBeRetained).build())
+            ))
+            .build();
+        FinremCaseData originalFinremCaseData = finremCaseData.toBuilder()
+            .intervenerOne(IntervenerOne.builder()
+                .intervenerRepresented(YesOrNo.YES)
+                .intervenerSolName("AAA DDD")
+                .intervenerSolEmail("aaa.ddd@gmail.com")
+                .intervenerOrganisation(OrganisationPolicy.builder()
+                    .organisation(organisation("AAA"))
+                    .orgPolicyCaseAssignedRole("[INTVRSOLICITOR1]")
+                    .build())
+                .build())
+            .build();
+
+        when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("Jack Neil");
+
+        ArgumentCaptor<ChangeOfRepresentationRequest> captor = ArgumentCaptor.forClass(ChangeOfRepresentationRequest.class);
+
+        RepresentationUpdate newUpdate = mock(RepresentationUpdate.class);
+        RepresentationUpdateHistory history = RepresentationUpdateHistory.builder()
+            .representationUpdateHistory(List.of(Element.<RepresentationUpdate>builder()
+                    .value(newUpdate)
+                .build()))
+            .build();
+        when(changeOfRepresentationService.generateRepresentationUpdateHistory(any(ChangeOfRepresentationRequest.class),
+            eq(STOP_REPRESENTING_CLIENT))).thenReturn(history);
+
+        service.updateIntervenerSolicitorStopRepresentingHistory(finremCaseData, originalFinremCaseData, AUTH_TOKEN);
+
+        verify(changeOfRepresentationService).generateRepresentationUpdateHistory(captor.capture(), eq(STOP_REPRESENTING_CLIENT));
+        verify(idamService).getIdamFullName(AUTH_TOKEN);
+
+        assertThat(finremCaseData.getRepresentationUpdateHistory())
+            .extracting(RepresentationUpdateHistoryCollection::getValue)
+            .containsExactly(shouldBeRetained, newUpdate);
+        assertThat(captor.getValue()).extracting(ChangeOfRepresentationRequest::getBy).isEqualTo("Jack Neil");
+        assertThat(captor.getValue()).extracting(ChangeOfRepresentationRequest::getRemovedRepresentative).isEqualTo(
+            ChangedRepresentative.builder()
+                .name("AAA DDD")
+                .email("aaa.ddd@gmail.com")
+                .organisation(organisation("AAA"))
+                .build());
+    }
+
+    @Nested
+    class RevokeIntervenerSolicitorTests {
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", " "})
+        @NullSource
+        void givenMissingIntervenerSolEmail_whenCalled_thenDoNothing(String email) {
+            IntervenerOne intervenerOne = IntervenerOne.builder().intervenerSolEmail(email)
+                .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(TEST_ORG_ID)).build())
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            verifyNoInteractions(assignCaseAccessService);
+            verifyNoInteractions(organisationService);
+            verifyNoInteractions(systemUserService);
+        }
+
+        @Test
+        void givenMissingOrganisationPolicy_whenCalled_thenDoNothing() {
+            IntervenerOne intervenerOne = IntervenerOne.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                .intervenerOrganisation(null)
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            verifyNoInteractions(assignCaseAccessService);
+            verifyNoInteractions(organisationService);
+            verifyNoInteractions(systemUserService);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", " "})
+        @NullSource
+        void givenMissingOrgId_whenCalled_thenDoNothing(String orgId) {
+            IntervenerOne intervenerOne = IntervenerOne.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(orgId)).build())
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            verifyNoInteractions(assignCaseAccessService);
+            verifyNoInteractions(organisationService);
+            verifyNoInteractions(systemUserService);
+        }
+
+        @Test
+        void givenMissingOrganisation_whenCalled_thenDoNothing() {
+            IntervenerOne intervenerOne = IntervenerOne.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                .intervenerOrganisation(OrganisationPolicy.builder().organisation(null).build())
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            verifyNoInteractions(assignCaseAccessService);
+            verifyNoInteractions(organisationService);
+            verifyNoInteractions(systemUserService);
+        }
+
+        @Test
+        void givenUserNotFound_whenCalled_thenDoThing() {
+            when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+            when(organisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN))
+                .thenReturn(Optional.empty());
+            IntervenerTwo intervenerTwo = IntervenerTwo.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(TEST_ORG_ID)).build())
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
+            verify(systemUserService).getSysUserToken();
+            verify(organisationService).findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN);
+            verifyNoInteractions(assignCaseAccessService);
+        }
+
+        @Test
+        void givenValidIntervenerWrapper_whenCalled_thenRevokeIntervener() {
+            when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+            when(organisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN))
+                .thenReturn(Optional.of(TEST_USER_ID));
+            IntervenerTwo intervenerTwo = IntervenerTwo.builder().intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(TEST_ORG_ID)).build())
+                .build();
+
+            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
+            verify(systemUserService).getSysUserToken();
+            verify(organisationService).findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN);
+            verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID,
+                INTVR_SOLICITOR_2.getCcdCode(), TEST_ORG_ID);
+        }
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

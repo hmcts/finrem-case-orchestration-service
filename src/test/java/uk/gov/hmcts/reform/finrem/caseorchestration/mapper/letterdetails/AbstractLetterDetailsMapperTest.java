@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.Map;
@@ -11,6 +12,10 @@ public abstract class AbstractLetterDetailsMapperTest extends BaseServiceTest {
 
     protected void setCaseDetails(String resource) {
         caseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(buildCaseDetailsFromJson(resource));
+    }
+
+    protected void setFinremCaseDetails(String resource) {
+        this.caseDetails = TestSetUpUtils.finremCaseDetailsFromResource(resource, mapper);
     }
 
     /**

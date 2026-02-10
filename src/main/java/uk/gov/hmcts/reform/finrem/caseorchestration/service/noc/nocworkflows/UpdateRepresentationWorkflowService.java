@@ -50,10 +50,8 @@ public class UpdateRepresentationWorkflowService {
      * @param viaEventType            the event type that triggered this update
      * @param userAuthorisation       the authorisation token of the user performing the action
      */
-    public void prepareChangeOrganisationRequestAndOrganisationPolicy(FinremCaseData finremCaseData,
-                                                                      FinremCaseData originalFinremCaseData,
-                                                                      EventType viaEventType,
-                                                                      String userAuthorisation) {
+    public void prepareNoticeOfChangeAndOrganisationPolicy(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
+                                                           EventType viaEventType, String userAuthorisation) {
         noticeOfChangeService.updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, viaEventType, userAuthorisation);
         noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
 

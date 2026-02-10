@@ -191,7 +191,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
     private void deleteRemovedDocuments(FinremCaseData caseData,
                                         FinremCaseData caseDataBefore,
                                         String userAuthorisation) {
-        if (featureToggleService.isSecureDocEnabled()) {
+        if (featureToggleService.isManageCaseDocsDeleteEnabled()) {
             List<UploadCaseDocumentCollection> allCollectionsBefore =
                 caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
             List<UploadCaseDocumentCollection> allCollections =

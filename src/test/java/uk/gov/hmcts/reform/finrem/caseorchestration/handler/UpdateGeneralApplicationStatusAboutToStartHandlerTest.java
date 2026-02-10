@@ -73,7 +73,7 @@ public class UpdateGeneralApplicationStatusAboutToStartHandlerTest extends BaseH
         handler = new UpdateGeneralApplicationStatusAboutToStartHandler(
             finremCaseDetailsMapper, helper, generalApplicationService);
         generalApplicationService = new GeneralApplicationService(
-            documentHelper, objectMapper, idamService, service, assignCaseAccessService, helper, bulkPrintDocumentService,
+            documentHelper, idamService, service, assignCaseAccessService, helper, bulkPrintDocumentService,
             generalApplicationsCategoriser);
     }
 
