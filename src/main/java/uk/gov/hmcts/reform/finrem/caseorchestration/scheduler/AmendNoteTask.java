@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
-import java.time.LocalDate;
-import java.util.List;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,23 +13,24 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
+import java.time.LocalDate;
+import java.util.List;
+
 /**
  * Scheduled task to find cases where GeneralEmailDataField is not empty and clear the field.
  * To enable the task to execute set environment variables:
  * <ul>
- *     <li>CRON_AMEND_GENERAL_EMAIL_ENABLED=true</li>
+ *     <li>CRON_AMEND_NOTE_TASK_ENABLED=true</li>
  *     <li>TASK_NAME=AmendGeneralEmailTask</li>
- *     <li>CRON_AMEND_GENERAL_EMAIL_CASE_TYPE_ID=FinancialRemedyContested | FinancialRemedyMVP2</li>
- *     <li>CRON_AMEND_GENERAL_EMAIL_BATCH_SIZE=number of cases to search for</li>
+ *     <li>CRON_AMEND_NOTE_TASK_CASE_TYPE_ID=FinancialRemedyContested | FinancialRemedyMVP2</li>
+ *     <li>CRON_AMEND_NOTE_TASK_BATCH_SIZE=number of cases to search for</li>
  *     <li>CRON_CSV_FILE_DECRYPT_KEY=secret key to decrypt the csv file</li>
  * </ul>
  */
 @Component
 @Slf4j
-public class AmendNoteTask extends CsvFileProcessingTask {
+public class AmendNoteTask extends EncryptedCsvFileProcessingTask {
 
-    @Value("${cron.csvFile.decrypt.key:DUMMY_SECRET}")
-    private String secret;
     private static final String TASK_NAME = "AmendNoteTask";
     private static final String SUMMARY = "DFR-4570";
     @Value("${cron.amendNoteTask.enabled:false}")
@@ -39,6 +39,7 @@ public class AmendNoteTask extends CsvFileProcessingTask {
     private String caseTypeId;
     @Value("${cron.amendNoteTask.batchSize:100}")
     private int batchSize;
+    @Setter
     @Value("${cron.amendNoteTask.caseListFileName:caserefs-encrypted.csv}")
     private String csvFile;
 
@@ -49,25 +50,25 @@ public class AmendNoteTask extends CsvFileProcessingTask {
 
     @Override
     protected List<CaseReference> getCaseReferences() {
-        log.info("Starting Task Cron....\n"
-                        + "TASK_NAME: {}\n"
-                        + "SUMMARY: {}\n"
-                        + "TASK_ENABLED: {}\n"
-                        + "BATCH_SIZE: {}\n"
-                        + "CASE_TYPE_ID: {}\n"
-                        + "CSV_FILE: {}\n"
-                        + "SECRET KEY EXIST: {}",
-                getTaskName(),
-                getSummary(),
-                taskEnabled,
-                batchSize,
-                caseTypeId,
-                getCaseListFileName(),
-                secret != null && !secret.isEmpty());
+        log.info("Starting Task Cron....\n" +
+                "TASK_NAME: {}\n" +
+                "SUMMARY: {}\n" +
+                "TASK_ENABLED: {}\n" +
+                "BATCH_SIZE: {}\n" +
+                "CASE_TYPE_ID: {}\n" +
+                "CSV_FILE: {}\n" +
+                "SECRET KEY EXIST: {}",
+            getTaskName(),
+            getSummary(),
+            taskEnabled,
+            batchSize,
+            caseTypeId,
+            getCaseListFileName(),
+            secret != null && !secret.isEmpty());
 
         if (secret.isEmpty()) {
             log.error("Secret key is empty. Unable to decrypt the csv file. "
-                    + "Please configure Azure Key Vault or set the secret key [cron-csv-file-decrypt-key].");
+                + "Please configure Azure Key Vault or set the secret key [cron-csv-file-decrypt-key].");
             return List.of();
         }
 
@@ -126,25 +127,5 @@ public class AmendNoteTask extends CsvFileProcessingTask {
         } else {
             log.info("Case {} has empty getCaseNotesCollection field", finremCaseDetails.getId());
         }
-    }
-
-    void setSecret(String secret) {
-        this.secret = secret;
-    }
-
-    void setTaskEnabled(boolean taskEnabled) {
-        this.taskEnabled = taskEnabled;
-    }
-
-    void setCaseTypeContested(String caseTypeId) {
-        this.caseTypeId = caseTypeId;
-    }
-
-    public String getCsvFile() {
-        return csvFile;
-    }
-
-    public void setCsvFile(String csvFile) {
-        this.csvFile = csvFile;
     }
 }
