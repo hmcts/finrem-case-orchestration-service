@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -86,7 +87,7 @@ public class NotificationRequestBuilder {
     public NotificationRequestBuilder withCaseDefaults(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
 
-        caseReferenceNumber = String.valueOf(caseDetails.getId());
+        caseReferenceNumber = caseDetails.getCaseIdAsString();
         applicantName = caseData.getFullApplicantName();
         caseType = CaseType.CONTESTED.equals(caseDetails.getCaseType()) ? EmailService.CONTESTED : EmailService.CONSENTED;
         divorceCaseNumber = Objects.toString(caseData.getDivorceCaseNumber(), "");
@@ -101,6 +102,16 @@ public class NotificationRequestBuilder {
             setContestedDefaults(caseDetails);
         }
 
+        return this;
+    }
+
+    public NotificationRequestBuilder withIntervener(IntervenerDetails intervener) {
+        this.intervenerFullName = Optional.ofNullable(intervener)
+            .map(IntervenerDetails::getIntervenerName).orElse("");
+        this.intervenerSolicitorFirm = Optional.ofNullable(intervener)
+            .map(IntervenerDetails::getIntervenerSolicitorFirm).orElse("");
+        this.intervenerSolicitorReferenceNumber = Optional.ofNullable(intervener)
+            .map(IntervenerDetails::getIntervenerSolicitorReference).orElse("");
         return this;
     }
 
