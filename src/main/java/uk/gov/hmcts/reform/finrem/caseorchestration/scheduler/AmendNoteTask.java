@@ -50,14 +50,14 @@ public class AmendNoteTask extends EncryptedCsvFileProcessingTask {
 
     @Override
     protected List<CaseReference> getCaseReferences() {
-        log.info("Starting Task Cron....\n" +
-                "TASK_NAME: {}\n" +
-                "SUMMARY: {}\n" +
-                "TASK_ENABLED: {}\n" +
-                "BATCH_SIZE: {}\n" +
-                "CASE_TYPE_ID: {}\n" +
-                "CSV_FILE: {}\n" +
-                "SECRET KEY EXIST: {}",
+        log.info("Starting Task Cron....\n"
+                + "TASK_NAME: {}\n"
+                + "SUMMARY: {}\n"
+                + "TASK_ENABLED: {}\n"
+                + "BATCH_SIZE: {}\n"
+                + "CASE_TYPE_ID: {}\n"
+                + "CSV_FILE: {}\n"
+                + "SECRET KEY EXIST: {}",
             getTaskName(),
             getSummary(),
             taskEnabled,
