@@ -199,9 +199,26 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
 
         List<CaseDocument> hearingDocumentsToPost =
             new ArrayList<>(caseDetails.getData().getManageHearingsWrapper().getAssociatedHearingDocuments(hearingItem.getId()));
+
+        // Some C=core hearing documents should always be there
+        if (hearingDocumentsToPost.isEmpty()) {
+            log.error("Case ID: {} with hearing date {}, for parties: {} contained no hearing documents.",
+                caseDetails.getId(), hearing.getHearingDate(), partiesToPost);
+            return;
+        }
+
+        // Mini form A not always required
         hearingCorrespondenceHelper.getMiniFormAIfRequired(caseDetails.getData(), hearing)
             .ifPresent(hearingDocumentsToPost::add);
-        hearingDocumentsToPost.addAll(hearing.getAdditionalHearingDocs().stream().map(DocumentCollectionItem::getValue).toList());
+
+        // Additional documents are optional.
+        hearingDocumentsToPost.addAll(
+            hearing.getAdditionalHearingDocs() == null
+                ? List.of()
+                : hearing.getAdditionalHearingDocs().stream()
+                .map(DocumentCollectionItem::getValue)
+                .toList()
+        );
 
         log.info("Case ID: {} Sending active hearing correspondence with hearing date {}, for parties: {}",
             caseDetails.getId(), hearing.getHearingDate(), partiesToPost);
