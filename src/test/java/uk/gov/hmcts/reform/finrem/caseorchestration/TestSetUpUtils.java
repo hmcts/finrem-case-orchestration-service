@@ -404,7 +404,9 @@ public class TestSetUpUtils {
 
     public static FinremCaseDetails finremCaseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
         try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
-            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+            FinremCaseDetails finremCaseDetails = mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+            finremCaseDetails.getData().setCcdCaseType(finremCaseDetails.getCaseType());
+            return finremCaseDetails;
         } catch (Exception exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         }
@@ -563,10 +565,15 @@ public class TestSetUpUtils {
     }
 
     public static List<BarristerCollectionItem> barristers(String orgId) {
+        return barristers(orgId, null);
+    }
+
+    public static List<BarristerCollectionItem> barristers(String orgId, String userId) {
         return new ArrayList<>(List.of(
             BarristerCollectionItem.builder()
                 .value(Barrister.builder()
                     .organisation(organisation(orgId))
+                    .userId(userId)
                     .build())
                 .build()
         ));

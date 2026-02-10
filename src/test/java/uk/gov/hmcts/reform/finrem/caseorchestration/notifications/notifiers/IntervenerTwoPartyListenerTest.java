@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -171,19 +173,41 @@ class IntervenerTwoPartyListenerTest {
             .fileName(COVER_SHEET_FILE)
             .build();
 
+        // Cover sheet should be at the beginning of the documents sent for bulk print
         when(notificationService
             .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerTwo(), caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getIntervenerTwoCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
-        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType()))
-            .thenReturn(List.of(bulkPrintDocument1, bulkPrintCoverSheet));
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))
+            .thenReturn(List.of(bulkPrintCoverSheet, bulkPrintDocument1));
 
         intervenerTwoPartyListener.handleNotification(event);
 
         verify(bulkPrintService).getIntervenerTwoCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType());
+        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType());
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
-            caseDetails, INTERVENER_TWO, List.of(bulkPrintDocument1, bulkPrintCoverSheet), false, AUTH_TOKEN
+            caseDetails, INTERVENER_TWO, List.of(bulkPrintCoverSheet, bulkPrintDocument1), false, AUTH_TOKEN
         );
+    }
+
+    /**
+     * Tests that when setPartySpecificDetails used,  null values are replaced with blank strings.
+     */
+    @ParameterizedTest
+    @CsvSource(value = {
+        "null,''",
+        "'a value', 'a value'"
+    }, nullValues = "null")
+    void shouldUseBlankStringsWhenSetPartySpecificDetailsNull(String provided, String expected) {
+
+        caseDetails.getData().getIntervenerTwo().setIntervenerSolName(provided);
+        caseDetails.getData().getIntervenerTwo().setIntervenerSolEmail(provided);
+        caseDetails.getData().getIntervenerTwo().setIntervenerSolicitorReference(provided);
+
+        AbstractPartyListener.PartySpecificDetails details = intervenerTwoPartyListener.setPartySpecificDetails(event);
+
+        assertThat(details.recipientSolName()).isEqualTo(expected);
+        assertThat(details.recipientSolEmailAddress()).isEqualTo(expected);
+        assertThat(details.recipientSolReference()).isEqualTo(expected);
     }
 }

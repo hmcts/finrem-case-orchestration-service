@@ -1,26 +1,20 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSuportingDocumentItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
@@ -33,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,12 +37,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
@@ -69,7 +58,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GeneralApplicationService {
 
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
     private final IdamService idamService;
     private final GenericDocumentService genericDocumentService;
     private final AssignCaseAccessService accessService;
@@ -373,52 +361,6 @@ public class GeneralApplicationService {
     private CaseDocument convertToPdf(FinremCaseDetails caseDetails, CaseDocument caseDocument, String userAuthorisation) {
         return genericDocumentService.convertDocumentIfNotPdfAlready(
             documentHelper.convertToCaseDocument(caseDocument), userAuthorisation, caseDetails.getCaseType());
-    }
-
-    public void updateCaseDataSubmit(Map<String, Object> caseData,
-                                     CaseDetails caseDetailsBefore,
-                                     String authorisationToken) {
-        caseData.put(GENERAL_APPLICATION_PRE_STATE, caseDetailsBefore.getState());
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE, LocalDate.now());
-
-        CaseType caseType = CaseType.forValue(caseDetailsBefore.getCaseTypeId());
-        CaseDocument applicationDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
-            documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)), authorisationToken,
-            caseType);
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, applicationDocument);
-
-        if (caseData.get(GENERAL_APPLICATION_DRAFT_ORDER) != null) {
-            CaseDocument draftOrderPdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
-                documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER)),
-                authorisationToken, caseType);
-            caseData.put(GENERAL_APPLICATION_DRAFT_ORDER, draftOrderPdfDocument);
-        }
-        updateGeneralApplicationDocumentCollection(caseData, applicationDocument);
-    }
-
-    private void updateGeneralApplicationDocumentCollection(Map<String, Object> caseData,
-                                                            CaseDocument applicationDocument) {
-        GeneralApplication generalApplication = GeneralApplication.builder()
-            .generalApplicationDocument(applicationDocument).build();
-
-        List<GeneralApplicationData> generalApplicationList = Optional.ofNullable(
-                caseData.get(GENERAL_APPLICATION_DOCUMENT_COLLECTION))
-            .map(this::convertToGeneralApplicationDataList)
-            .orElse(new ArrayList<>());
-
-        generalApplicationList.add(
-            GeneralApplicationData.builder()
-                .id(UUID.randomUUID().toString())
-                .generalApplication(generalApplication)
-                .build()
-        );
-
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, generalApplicationList);
-    }
-
-    private List<GeneralApplicationData> convertToGeneralApplicationDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
     }
 
     public void updateCaseDataStart(Map<String, Object> caseData, String authorisationToken) {

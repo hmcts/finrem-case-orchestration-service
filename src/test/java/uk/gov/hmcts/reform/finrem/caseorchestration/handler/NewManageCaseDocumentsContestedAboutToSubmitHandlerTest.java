@@ -304,8 +304,8 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenSecuredDocToggle_whenHandle_thenDeleteRemovedDocumentsOnlyWhenSecureDocFeatureEnabled(boolean featureToggleEnabled) {
-        when(featureToggleService.isSecureDocEnabled()).thenReturn(featureToggleEnabled);
+    void givenManageCaseDocDeleteToggle_whenHandle_thenDeleteRemovedDocumentsOnlyWhenSecureDocFeatureEnabled(boolean featureToggleEnabled) {
+        when(featureToggleService.isManageCaseDocsDeleteEnabled()).thenReturn(featureToggleEnabled);
 
         CaseDocument removedDocument = caseDocument("removed.pdf");
         UploadCaseDocumentCollection removed = UploadCaseDocumentCollection.builder()
