@@ -26,7 +26,9 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -126,6 +128,15 @@ class AbstractPartyListenerTest {
         }
     }
 
+    class PaperNotificationWithoutCoversheetListener extends RelevantPartyListener {
+
+        @Override
+        protected boolean shouldSendPaperNotification(SendCorrespondenceEvent event) {
+            return true;
+        }
+
+    }
+
     class SendPaperNotificationListener extends RelevantPartyListener {
 
         boolean outsideUK;
@@ -150,6 +161,32 @@ class AbstractPartyListenerTest {
         }
     }
 
+    class EmailOrPaperNotificationListener extends RelevantPartyListener {
+
+        EmailOrPaperNotificationListener() {
+        }
+
+        @Override
+        protected boolean shouldSendPaperNotification(SendCorrespondenceEvent event) {
+            return true;
+        }
+
+        @Override
+        protected boolean shouldSendEmailNotification(SendCorrespondenceEvent event) {
+            return true;
+        }
+
+        @Override
+        protected CaseDocument getPartyCoversheet(SendCorrespondenceEvent event) {
+            return PARTY_COVERSHEET_DOCUMENT;
+        }
+
+        @Override
+        protected PartySpecificDetails setPartySpecificDetails(SendCorrespondenceEvent event) {
+            return new PartySpecificDetails(RECIPIENT_EMAIL, RECIPIENT_NAME, RECIPIENT_REFERENCE);
+        }
+    }
+
     private IrrelevantPartyListener irrelevantPartyListener;
 
     private SendEmailNotificationListener sendEmailNotificationListener;
@@ -160,6 +197,10 @@ class AbstractPartyListenerTest {
 
     private SendPaperNotificationListener sendPaperNotificationOutsideUkListener;
 
+    private EmailOrPaperNotificationListener emailOrPaperNotificationListener;
+
+    private PaperNotificationWithoutCoversheetListener paperNotificationWithoutCoversheetListener;
+
     @BeforeEach
     void setUp() {
         irrelevantPartyListener = new IrrelevantPartyListener();
@@ -167,6 +208,8 @@ class AbstractPartyListenerTest {
         sendEmailNotificationWithPartySpecificDetailsListener = new SendEmailNotificationWithPartySpecificDetailsListener();
         sendPaperNotificationOutsideUkListener = new SendPaperNotificationListener(true);
         sendPaperNotificationListener = new SendPaperNotificationListener(false);
+        emailOrPaperNotificationListener = new EmailOrPaperNotificationListener();
+        paperNotificationWithoutCoversheetListener = new PaperNotificationWithoutCoversheetListener();
     }
 
     @Test
@@ -204,6 +247,20 @@ class AbstractPartyListenerTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
             sendEmailNotificationListener.handleNotification(event));
         assertThat(exception.getMessage()).isEqualTo("Email template is required for digital notifications, case ID: "
+            + TEST_CASE_ID);
+    }
+
+    @Test
+    void givenCoversheetNotProvided_whenPaperNotificationWithoutCoversheetListenerCalled_thenExceptionIsThrown() {
+        SendCorrespondenceEvent event = spy(SendCorrespondenceEvent.builder()
+            .documentsToPost(List.of(mock(CaseDocument.class)))
+            .caseDetails(FinremCaseDetails.builder().build())
+            .build());
+        when(event.getCaseId()).thenReturn(TEST_CASE_ID);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+            paperNotificationWithoutCoversheetListener.handleNotification(event));
+        assertThat(exception.getMessage()).isEqualTo("No coversheet provided for paper notification, case ID: "
             + TEST_CASE_ID);
     }
 
@@ -311,6 +368,68 @@ class AbstractPartyListenerTest {
             Arguments.of(List.of(caseDocument("file1")), false),
             Arguments.of(List.of(caseDocument("file1"), caseDocument("file2")), false)
         );
+    }
+
+    @Test
+    void givenLetterNotificationOnly_whenEmailOrPaperNotificationListenerCalled_thenShouldSendLetterOnly() {
+        CaseType caseType = mock(CaseType.class);
+        List<CaseDocument> documentsToPost = List.of(caseDocument("file1"));
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        SendCorrespondenceEvent event = buildEventFOrEmailOrPaperNotificationListener(caseDetails, caseType, documentsToPost)
+            .toBuilder().letterNotificationOnly(true).build();
+
+        List<BulkPrintDocument> bpDocs = mock(List.class);
+
+        List<CaseDocument> expectedDocuments = buildExpectedDocumentsWithCoversheet(documentsToPost);
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType))
+            .thenReturn(bpDocs);
+
+        // act
+        emailOrPaperNotificationListener.handleNotification(event);
+
+        // assert
+        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType);
+        verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(caseDetails, EmailOrPaperNotificationListener.class.getSimpleName(),
+            bpDocs, false, AUTH_TOKEN);
+    }
+
+    @Test
+    void givenCase_whenEmailOrPaperNotificationListenerCalled_thenShouldEmailAndNoLetterSent() {
+        CaseType caseType = mock(CaseType.class);
+        List<CaseDocument> documentsToPost = List.of(caseDocument("file1"));
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        SendCorrespondenceEvent event = buildEventFOrEmailOrPaperNotificationListener(caseDetails, caseType, documentsToPost);
+
+        List<BulkPrintDocument> bpDocs = mock(List.class);
+
+        List<CaseDocument> expectedDocuments = buildExpectedDocumentsWithCoversheet(documentsToPost);
+        lenient().when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(expectedDocuments, AUTH_TOKEN, caseType))
+            .thenReturn(bpDocs);
+
+        // act
+        emailOrPaperNotificationListener.handleNotification(event);
+
+        ArgumentCaptor<NotificationRequest> captor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(captor.capture(), any());
+        verifyNoLetterSent();
+        assertThat(captor.getValue())
+            .extracting(
+                NotificationRequest::getName,
+                NotificationRequest::getNotificationEmail,
+                NotificationRequest::getSolicitorReferenceNumber)
+            .contains(RECIPIENT_NAME, RECIPIENT_EMAIL, RECIPIENT_REFERENCE);
+    }
+
+    private SendCorrespondenceEvent buildEventFOrEmailOrPaperNotificationListener(FinremCaseDetails caseDetails,
+                                                                                  CaseType caseType, List<CaseDocument> expectedDocuments) {
+        lenient().when(caseDetails.getCaseType()).thenReturn(caseType);
+        return spy(SendCorrespondenceEvent.builder()
+            .emailTemplate(mock(EmailTemplateNames.class))
+            .emailNotificationRequest(NotificationRequest.builder().build())
+            .authToken(AUTH_TOKEN)
+            .caseDetails(caseDetails)
+            .documentsToPost(expectedDocuments)
+            .build());
     }
 
     private List<CaseDocument> buildExpectedDocumentsWithCoversheet(List<CaseDocument> documentsToPost) {
