@@ -463,7 +463,7 @@ public class CaseDataService {
      */
     public boolean isLitigantRepresented(FinremCaseData finremCaseData, boolean isApplicant) {
         return YesOrNo.isYes(isApplicant ? finremCaseData.getContactDetailsWrapper().getApplicantRepresented()
-            : getRespondentRepresented(finremCaseData));
+            : YesOrNo.forValue(finremCaseData.isRespondentRepresentedByASolicitor()));
     }
 
     private String getLitigantRepresentedKey(CaseDetails caseDetails, boolean isApplicant) {
@@ -473,11 +473,5 @@ public class CaseDataService {
     private String getRespondentRepresentedKey(CaseDetails caseDetails) {
         return isConsentedApplication(caseDetails)
             ? CONSENTED_RESPONDENT_REPRESENTED : CONTESTED_RESPONDENT_REPRESENTED;
-    }
-
-    private YesOrNo getRespondentRepresented(FinremCaseData finremCaseData) {
-        return finremCaseData.isConsentedApplication()
-            ? finremCaseData.getContactDetailsWrapper().getConsentedRespondentRepresented()
-            : finremCaseData.getContactDetailsWrapper().getContestedRespondentRepresented();
     }
 }

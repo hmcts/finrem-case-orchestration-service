@@ -49,8 +49,6 @@ public class ChangeOfRepresentationService {
     public RepresentationUpdateHistory generateRepresentationUpdateHistory(
         ChangeOfRepresentationRequest changeOfRepresentationRequest, EventType viaEventType) {
 
-        log.info("Updating change of representatives for case.");
-
         RepresentationUpdateHistory history = Optional.ofNullable(changeOfRepresentationRequest.getCurrent()).map(
                 current -> buildNewHistory(current.getRepresentationUpdateHistory()))
             .orElse(RepresentationUpdateHistory.builder().representationUpdateHistory(new ArrayList<>()).build());
@@ -66,8 +64,6 @@ public class ChangeOfRepresentationService {
                 .removed(changeOfRepresentationRequest.getRemovedRepresentative())
                 .build()
         ));
-
-        log.info("Updated change of representatives: {}", history);
 
         history.getRepresentationUpdateHistory().sort(Comparator.comparing(element -> element.getValue().getDate()));
 

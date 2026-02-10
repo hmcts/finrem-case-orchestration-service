@@ -1,11 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.stoprepresentingclient;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.event.StopRepresentingClientEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -13,8 +11,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
@@ -25,14 +28,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 @Service
 public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandler {
 
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final StopRepresentingClientService stopRepresentingClientService;
+
+    private final FeatureToggleService featureToggleService;
 
     private static final String CONFIRMATION_HEADER = "# Notice of change request submitted";
 
     public StopRepresentingClientSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                  ApplicationEventPublisher applicationEventPublisher) {
+                                                  StopRepresentingClientService stopRepresentingClientService,
+                                                  FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
-        this.applicationEventPublisher = applicationEventPublisher;
+        this.stopRepresentingClientService = stopRepresentingClientService;
+        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -47,11 +54,25 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        applicationEventPublisher.publishEvent(StopRepresentingClientEvent.builder()
-            .userAuthorisation(userAuthorisation)
-            .caseDetails(callbackRequest.getCaseDetails())
-            .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
-            .build());
+        if (featureToggleService.isExui3990WorkaroundEnabled()) {
+            stopRepresentingClientService.applyCaseAssignment(
+                StopRepresentingClientInfo.builder()
+                    .userAuthorisation(userAuthorisation)
+                    .caseDetails(callbackRequest.getCaseDetails())
+                    .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
+                    .build());
+        } else {
+            CompletableFuture.runAsync(() ->
+                stopRepresentingClientService.applyCaseAssignment(
+                    StopRepresentingClientInfo.builder()
+                        .userAuthorisation(userAuthorisation)
+                        .caseDetails(callbackRequest.getCaseDetails())
+                        .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
+                        .build()),
+                // Add a delay to prevent a fast response so the confirmation body is not shown
+                CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS)
+            );
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .confirmationHeader(CONFIRMATION_HEADER)

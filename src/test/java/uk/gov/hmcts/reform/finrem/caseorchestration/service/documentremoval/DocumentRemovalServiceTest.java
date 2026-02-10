@@ -28,38 +28,47 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentRemovalServiceTest {
 
     private DocumentRemovalService documentRemovalService;
-
-    private ObjectMapper objectMapper;
-
     @Mock
     private GenericDocumentService genericDocumentService;
-
     @Mock
     private FeatureToggleService featureToggleService;
 
+    @TestLogs
+    private final TestLogger logs = new TestLogger(DocumentRemovalService.class);
+
     @BeforeEach
-    public void setUp() {
-        objectMapper = JsonMapper
-                .builder()
-                .addModule(new JavaTimeModule())
-                .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .build();
+    void setUp() {
+        ObjectMapper objectMapper = JsonMapper
+            .builder()
+            .addModule(new JavaTimeModule())
+            .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
 
         documentRemovalService = new DocumentRemovalService(objectMapper, genericDocumentService, featureToggleService);
     }
@@ -74,7 +83,6 @@ class DocumentRemovalServiceTest {
 
     @Test
     void testGetCaseDocumentsList_testEmptyArray() {
-
         List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
             .uploadDocuments(new ArrayList<>())
@@ -84,7 +92,6 @@ class DocumentRemovalServiceTest {
 
     @Test
     void testGetCaseDocumentsList_RootDocument() {
-
         List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
             .miniFormA(CaseDocument.builder()
@@ -93,7 +100,6 @@ class DocumentRemovalServiceTest {
                 .documentBinaryUrl("https://example.com/binary")
                 .build())
             .build());
-
 
         assertEquals(1, result.size());
         assertEquals("https://example.com/123", result.get(0).getValue().getCaseDocument().getDocumentUrl());
@@ -119,7 +125,6 @@ class DocumentRemovalServiceTest {
                 .build())
             .build());
 
-
         assertEquals(1, result.size());
         assertEquals("https://example.com/123", result.get(0).getValue().getCaseDocument().getDocumentUrl());
         assertEquals("Form-C.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
@@ -132,12 +137,12 @@ class DocumentRemovalServiceTest {
         List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
             .uploadDocuments(List.of(UploadDocumentCollection.builder()
-                .value(UploadDocument.builder()
-                    .documentLink(CaseDocument.builder()
-                        .documentUrl("https://example1.com/123")
-                        .documentFilename("Form-C.pdf")
-                        .documentBinaryUrl("https://example1.com/binary")
-                        .build()).build()).build(),
+                    .value(UploadDocument.builder()
+                        .documentLink(CaseDocument.builder()
+                            .documentUrl("https://example1.com/123")
+                            .documentFilename("Form-C.pdf")
+                            .documentBinaryUrl("https://example1.com/binary")
+                            .build()).build()).build(),
                 UploadDocumentCollection.builder().value(UploadDocument.builder()
                     .documentLink(CaseDocument.builder()
                         .documentUrl("https://example2.com/456")
@@ -196,8 +201,6 @@ class DocumentRemovalServiceTest {
                 .build())
             .build());
 
-
-
         assertEquals(3, result.size());
 
         assertEquals("https://example1.com/123", result.get(0).getValue().getCaseDocument().getDocumentUrl());
@@ -231,51 +234,51 @@ class DocumentRemovalServiceTest {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
         List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
-                // ApprovedOrderCollection as example of complex nested data.  Has third-oldest upload date
-                .ccdCaseId(TestConstants.CASE_ID)
-                .orderWrapper(OrderWrapper.builder()
-                    .appOrderCollection(List.of(
-                        ApprovedOrderCollection.builder()
-                            .value(ApproveOrder.builder()
-                                .caseDocument(CaseDocument.builder()
-                                    .documentUrl("https://example3.com/789")
-                                    .documentFilename("ThirdDoc.pdf")
-                                    .documentBinaryUrl("https://example3.com/binary")
-                                    .uploadTimestamp(LocalDateTime.parse(thirdDate, formatter))
-                                    .build())
+            // ApprovedOrderCollection as example of complex nested data.  Has third-oldest upload date
+            .ccdCaseId(TestConstants.CASE_ID)
+            .orderWrapper(OrderWrapper.builder()
+                .appOrderCollection(List.of(
+                    ApprovedOrderCollection.builder()
+                        .value(ApproveOrder.builder()
+                            .caseDocument(CaseDocument.builder()
+                                .documentUrl("https://example3.com/789")
+                                .documentFilename("ThirdDoc.pdf")
+                                .documentBinaryUrl("https://example3.com/binary")
+                                .uploadTimestamp(LocalDateTime.parse(thirdDate, formatter))
                                 .build())
-                            .build()))
-                        .build())
-                // uploaded documents collection as example of data at in an array.  Has first, fourth and a null upload date.
-                .uploadDocuments(List.of(UploadDocumentCollection.builder()
-                                .value(UploadDocument.builder()
-                                        .documentLink(CaseDocument.builder()
-                                                .documentUrl("https://example1.com/123")
-                                                .documentFilename("FirstDoc.pdf")
-                                                .documentBinaryUrl("https://example1.com/binary")
-                                                .uploadTimestamp(LocalDateTime.parse(firstDate, formatter))
-                                                .build()).build()).build(),
-                        UploadDocumentCollection.builder().value(UploadDocument.builder()
-                                .documentLink(CaseDocument.builder()
-                                        .documentUrl("https://example4.com/101112")
-                                        .documentFilename("FourthDoc.pdf")
-                                        .documentBinaryUrl("https://example4.com/binary")
-                                        .uploadTimestamp(LocalDateTime.parse(fourthDate, formatter))
-                                        .build()).build()).build(),
-                        UploadDocumentCollection.builder().value(UploadDocument.builder()
-                                .documentLink(CaseDocument.builder()
-                                        .documentUrl("https://example5.com/131415")
-                                        .documentFilename("NullDoc.pdf")
-                                        .documentBinaryUrl("https://example5.com/binary")
-                                        .build()).build()).build()))
-                // miniFormA as example of data at a root level.  Has second-oldest upload date
-                .miniFormA(CaseDocument.builder()
-                        .documentUrl("https://example2.com/456")
-                        .documentFilename("secondDoc.pdf")
-                        .documentBinaryUrl("https://example2.com/binary")
-                        .uploadTimestamp(LocalDateTime.parse(secondDate, formatter))
-                        .build())
-                .build());
+                            .build())
+                        .build()))
+                .build())
+            // uploaded documents collection as example of data at in an array.  Has first, fourth and a null upload date.
+            .uploadDocuments(List.of(UploadDocumentCollection.builder()
+                    .value(UploadDocument.builder()
+                        .documentLink(CaseDocument.builder()
+                            .documentUrl("https://example1.com/123")
+                            .documentFilename("FirstDoc.pdf")
+                            .documentBinaryUrl("https://example1.com/binary")
+                            .uploadTimestamp(LocalDateTime.parse(firstDate, formatter))
+                            .build()).build()).build(),
+                UploadDocumentCollection.builder().value(UploadDocument.builder()
+                    .documentLink(CaseDocument.builder()
+                        .documentUrl("https://example4.com/101112")
+                        .documentFilename("FourthDoc.pdf")
+                        .documentBinaryUrl("https://example4.com/binary")
+                        .uploadTimestamp(LocalDateTime.parse(fourthDate, formatter))
+                        .build()).build()).build(),
+                UploadDocumentCollection.builder().value(UploadDocument.builder()
+                    .documentLink(CaseDocument.builder()
+                        .documentUrl("https://example5.com/131415")
+                        .documentFilename("NullDoc.pdf")
+                        .documentBinaryUrl("https://example5.com/binary")
+                        .build()).build()).build()))
+            // miniFormA as example of data at a root level.  Has second-oldest upload date
+            .miniFormA(CaseDocument.builder()
+                .documentUrl("https://example2.com/456")
+                .documentFilename("secondDoc.pdf")
+                .documentBinaryUrl("https://example2.com/binary")
+                .uploadTimestamp(LocalDateTime.parse(secondDate, formatter))
+                .build())
+            .build());
 
         assertEquals(5, result.size());
 
@@ -304,12 +307,12 @@ class DocumentRemovalServiceTest {
             .build();
         FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
 
-        assertEquals(caseData.getContactDetailsWrapper().getApplicantLname(),result.getContactDetailsWrapper().getApplicantLname());
+        assertEquals(caseData.getContactDetailsWrapper().getApplicantLname(), result.getContactDetailsWrapper().getApplicantLname());
         assertNull(result.getDocumentToKeepCollection());
     }
 
     @Test
-    void testRemoveDocuments_TopLevelDoc() {
+    void testRemoveDocuments_TopLevelDoc_SecureDocEnabled() {
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
             .d11(CaseDocument.builder()
@@ -334,7 +337,97 @@ class DocumentRemovalServiceTest {
                 .build()))
             .build();
 
-        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
+
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
+
+        await().atMost(2, TimeUnit.SECONDS)
+            .untilAsserted(() -> verify(genericDocumentService)
+                .deleteDocument("https://example1.com/123", AUTH_TOKEN));
+
+        assertNull(result.getD11());
+        assertNotNull(result.getDivorceUploadEvidence1());
+        assertEquals("Additional Hearing Doc.pdf", result.getDivorceUploadEvidence1().getDocumentFilename());
+        assertNull(result.getDocumentToKeepCollection());
+    }
+
+    @Test
+    void testRemoveDocuments_TopLevelDoc_DeleteDocThrowsExcetion() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .d11(CaseDocument.builder()
+                .documentUrl("https://example1.com/123")
+                .documentFilename("Approved Order Doc.pdf")
+                .documentBinaryUrl("https://example1.com/binary")
+                .build())
+            .divorceUploadEvidence1(CaseDocument.builder()
+                .documentUrl("https://example2.com/456")
+                .documentFilename("Additional Hearing Doc.pdf")
+                .documentBinaryUrl("https://example2.com/binary")
+                .build())
+            .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
+                .value(DocumentToKeep.builder()
+                    .documentId("456")
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("Additional Hearing Doc.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .build())
+                    .build())
+                .build()))
+            .build();
+
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(true);
+
+        doThrow(new RuntimeException("Document deletion failed"))
+            .when(genericDocumentService).deleteDocument("https://example1.com/123", AUTH_TOKEN);
+
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
+
+        await().atMost(2, TimeUnit.SECONDS)
+            .untilAsserted(() -> verify(genericDocumentService)
+                .deleteDocument("https://example1.com/123", AUTH_TOKEN));
+
+        assertThat(logs.getErrors()).contains(
+            "Document Removal Service failed to delete document url https://example1.com/123 for case ID 1");
+
+        assertNull(result.getD11());
+        assertNotNull(result.getDivorceUploadEvidence1());
+        assertEquals("Additional Hearing Doc.pdf", result.getDivorceUploadEvidence1().getDocumentFilename());
+        assertNull(result.getDocumentToKeepCollection());
+    }
+
+    @Test
+    void testRemoveDocuments_TopLevelDoc_SecureDocDisabled() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .d11(CaseDocument.builder()
+                .documentUrl("https://example1.com/123")
+                .documentFilename("Approved Order Doc.pdf")
+                .documentBinaryUrl("https://example1.com/binary")
+                .build())
+            .divorceUploadEvidence1(CaseDocument.builder()
+                .documentUrl("https://example2.com/456")
+                .documentFilename("Additional Hearing Doc.pdf")
+                .documentBinaryUrl("https://example2.com/binary")
+                .build())
+            .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
+                .value(DocumentToKeep.builder()
+                    .documentId("456")
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("Additional Hearing Doc.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .build())
+                    .build())
+                .build()))
+            .build();
+
+        when(featureToggleService.isSecureDocEnabled()).thenReturn(false);
+
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, AUTH_TOKEN);
+
+        verifyNoInteractions(genericDocumentService);
 
         assertNull(result.getD11());
         assertNotNull(result.getDivorceUploadEvidence1());
@@ -356,33 +449,33 @@ class DocumentRemovalServiceTest {
                         .build())
                     .build(),
                 UploadDocumentCollection.builder().value(UploadDocument.builder()
-                    .documentLink(CaseDocument.builder()
-                        .documentUrl("https://example2.com/456")
-                        .documentFilename("Form-D.pdf")
-                        .documentBinaryUrl("https://example2.com/binary")
+                        .documentLink(CaseDocument.builder()
+                            .documentUrl("https://example2.com/456")
+                            .documentFilename("Form-D.pdf")
+                            .documentBinaryUrl("https://example2.com/binary")
+                            .build())
                         .build())
-                    .build())
                     .build()))
             .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
-                .value(DocumentToKeep.builder()
-                    .documentId("123")
-                    .caseDocument(CaseDocument.builder()
-                        .documentUrl("https://example1.com/123")
-                        .documentFilename("Form-C.pdf")
-                        .documentBinaryUrl("https://example1.com/binary")
+                    .value(DocumentToKeep.builder()
+                        .documentId("123")
+                        .caseDocument(CaseDocument.builder()
+                            .documentUrl("https://example1.com/123")
+                            .documentFilename("Form-C.pdf")
+                            .documentBinaryUrl("https://example1.com/binary")
+                            .build())
                         .build())
-                    .build())
-                .build(),
+                    .build(),
                 DocumentToKeepCollection.builder()
-                .value(DocumentToKeep.builder()
-                    .documentId("456")
-                    .caseDocument(CaseDocument.builder()
-                        .documentUrl("https://example2.com/456")
-                        .documentFilename("Form-D.pdf")
-                        .documentBinaryUrl("https://example2.com/binary")
+                    .value(DocumentToKeep.builder()
+                        .documentId("456")
+                        .caseDocument(CaseDocument.builder()
+                            .documentUrl("https://example2.com/456")
+                            .documentFilename("Form-D.pdf")
+                            .documentBinaryUrl("https://example2.com/binary")
+                            .build())
                         .build())
-                    .build())
-                .build()))
+                    .build()))
             .build();
 
         FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
@@ -413,15 +506,15 @@ class DocumentRemovalServiceTest {
                         .build())
                     .build()))
             .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
-                    .value(DocumentToKeep.builder()
-                        .documentId("123")
-                        .caseDocument(CaseDocument.builder()
-                            .documentUrl("https://example1.com/123")
-                            .documentFilename("Form-C.pdf")
-                            .documentBinaryUrl("https://example1.com/binary")
-                            .build())
+                .value(DocumentToKeep.builder()
+                    .documentId("123")
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl("https://example1.com/123")
+                        .documentFilename("Form-C.pdf")
+                        .documentBinaryUrl("https://example1.com/binary")
                         .build())
-                    .build()))
+                    .build())
+                .build()))
             .build();
 
         FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
@@ -441,14 +534,14 @@ class DocumentRemovalServiceTest {
                         .documentFilename("Approved Order1.pdf")
                         .documentBinaryUrl("https://example1.com/binary")
                         .build())
-                .build(),
+                    .build(),
                 DocumentCollectionItem.builder()
                     .value(CaseDocument.builder()
                         .documentUrl("https://example2.com/456")
                         .documentFilename("Additional Hearing Doc.pdf")
                         .documentBinaryUrl("https://example2.com/binary")
                         .build())
-                .build()
+                    .build()
             ))
             .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
                 .value(DocumentToKeep.builder()
@@ -475,27 +568,27 @@ class DocumentRemovalServiceTest {
             .ccdCaseId(TestConstants.CASE_ID)
             .orderWrapper(OrderWrapper.builder()
                 .appOrderCollections(List.of(ApprovedOrderConsolidateCollection.builder()
-                        .value(ApproveOrdersHolder.builder()
-                            .approveOrders(List.of(
-                                ApprovedOrderCollection.builder()
-                                    .value(ApproveOrder.builder()
-                                        .caseDocument(CaseDocument.builder()
-                                            .documentUrl("https://example1.com/123")
-                                            .documentFilename("Approved Order Doc.pdf")
-                                            .documentBinaryUrl("https://example1.com/binary")
-                                            .build())
+                    .value(ApproveOrdersHolder.builder()
+                        .approveOrders(List.of(
+                            ApprovedOrderCollection.builder()
+                                .value(ApproveOrder.builder()
+                                    .caseDocument(CaseDocument.builder()
+                                        .documentUrl("https://example1.com/123")
+                                        .documentFilename("Approved Order Doc.pdf")
+                                        .documentBinaryUrl("https://example1.com/binary")
                                         .build())
-                                    .build(),
-                                ApprovedOrderCollection.builder()
-                                    .value(ApproveOrder.builder()
-                                        .caseDocument(CaseDocument.builder()
-                                            .documentUrl("https://example2.com/456")
-                                            .documentFilename("Additional Hearing Doc.pdf")
-                                            .documentBinaryUrl("https://example2.com/binary")
-                                            .build())
+                                    .build())
+                                .build(),
+                            ApprovedOrderCollection.builder()
+                                .value(ApproveOrder.builder()
+                                    .caseDocument(CaseDocument.builder()
+                                        .documentUrl("https://example2.com/456")
+                                        .documentFilename("Additional Hearing Doc.pdf")
+                                        .documentBinaryUrl("https://example2.com/binary")
                                         .build())
-                                    .build()))
-                            .build())
+                                    .build())
+                                .build()))
+                        .build())
                     .build()))
                 .build())
             .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()

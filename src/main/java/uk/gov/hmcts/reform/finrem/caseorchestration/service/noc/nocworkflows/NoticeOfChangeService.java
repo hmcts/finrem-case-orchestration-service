@@ -46,7 +46,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRep
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest.RESPONDENT_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -103,23 +102,25 @@ public class NoticeOfChangeService {
     }
 
     /**
-     * Updates the representation update history on the given {@link FinremCaseData} object.
+     * Updates the representation update history on the given {@link FinremCaseData}.
      *
-     * <p>This method builds the current representation change details and sends them to the
-     * {@code changeOfRepresentationService} to generate an updated history. The returned
-     * history is then copied onto the {@code finremCaseData} object.</p>
+     * <p>This method builds a {@link ChangeOfRepresentationRequest} using the current and original
+     * case data. If a change of representation is detected, it delegates to
+     * {@code changeOfRepresentationService} to generate new representation update history.</p>
      *
-     * <p>The {@code viaEventType} parameter indicates the event type that triggered this update.</p>
+     * <p>The newly generated history entries are appended to any existing
+     * representation update history on {@code finremCaseData}. If no change of
+     * representation is identified, the case data remains unchanged.</p>
      *
-     * @param finremCaseData          the case data to update
-     * @param originalFinremCaseData  the original case data before any changes
-     * @param viaEventType            the event type that triggered this update
-     * @param authToken               the authorisation token used for the request
+     * <p>The {@code viaEventType} parameter indicates the event that triggered this update.</p>
+     *
+     * @param finremCaseData         the case data to be updated with representation history
+     * @param originalFinremCaseData the original case data prior to the change
+     * @param viaEventType           the event type that triggered this update
+     * @param authToken              the authorisation token used to build the request
      */
-    public void updateRepresentationUpdateHistory(FinremCaseData finremCaseData,
-                                                  FinremCaseData originalFinremCaseData,
-                                                  EventType viaEventType,
-                                                  String authToken) {
+    public void updateRepresentationUpdateHistory(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
+                                                  EventType viaEventType, String authToken) {
         ChangeOfRepresentationRequest changeOfRepresentationRequest = buildChangeOfRepresentationRequest(authToken,
             finremCaseData, originalFinremCaseData);
         boolean hasChange = changeOfRepresentationRequest != null;
@@ -130,7 +131,7 @@ public class NoticeOfChangeService {
 
             // modifying finremCaseData reference object
             finremCaseData.setRepresentationUpdateHistory(
-                nullIfEmpty(history.getRepresentationUpdateHistory()).stream()
+                emptyIfNull(history.getRepresentationUpdateHistory()).stream()
                     .map(element -> RepresentationUpdateHistoryCollection.builder()
                         .id(element.getId())
                         .value(element.getValue())
@@ -205,7 +206,8 @@ public class NoticeOfChangeService {
 
         boolean noChange = organisationToAdd == null && organisationToRemove == null;
         if (noChange) {
-            log.info("Do not generate change organisation request if there is no change on organisation policy");
+            log.info("{} - No ChangeOrganisationRequest generated due to no changes on organisation policy",
+                finremCaseData.getCcdCaseId());
             return null;
         }
 

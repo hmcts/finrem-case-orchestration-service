@@ -342,7 +342,6 @@ public class CCDConfigConstant {
     public static final String HEARING_NOTICE_DOCUMENT = "hearingNotice";
     public static final String VACATE_HEARING_NOTICE_DOCUMENT = "vacateHearingNotice";
     public static final String OUT_OF_COURT_RESOLUTION = "outOfCourtResolution";
-    public static final String OUT_OF_FAMILY_COURT_RESOLUTION = "outOfFamilyCourtResolution";
     public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String PFD_NCDR_COMPLIANCE_LETTER = "pfdNcdrComplianceLetter";
@@ -411,8 +410,6 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_TIME_ESTIMATE = "generalApplicationTimeEstimate";
     public static final String GENERAL_APPLICATION_SPECIAL_MEASURES = "generalApplicationSpecialMeasures";
     public static final String GENERAL_APPLICATION_DRAFT_ORDER = "generalApplicationDraftOrder";
-    public static final String GENERAL_APPLICATION_DOCUMENT_COLLECTION = "generalApplicationCollection";
-    public static final String GENERAL_APPLICATION_DOCUMENT_LATEST_DATE = "generalApplicationLatestDocumentDate";
     public static final String GENERAL_APPLICATION_PRE_STATE = "generalApplicationPreState";
     public static final String GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL = "generalApplicationReferToJudgeEmail";
 
@@ -445,7 +442,6 @@ public class CCDConfigConstant {
     public static final String HELP_WITH_FEES_QUESTION = "helpWithFeesQuestion";
     public static final String PBA_NUMBER = "PBANumber";
     public static final String PBA_REFERENCE = "PBAreference";
-    public static final String ISSUE_DATE = "issueDate";
     public static final String FAST_TRACK_DECISION = "fastTrackDecision";
     public static final String CONSENTED_AUTHORISATION_FIRM = "authorisationFirm";
     public static final String CONTESTED_AUTHORISATION_FIRM = "solicitorFirm";
@@ -484,7 +480,6 @@ public class CCDConfigConstant {
 
     //scheduled hearings
     public static final String ADDITIONAL_HEARING_DOCUMENT_COLLECTION = "additionalHearingDocuments";
-    public static final String ADDITIONAL_HEARING_DOCUMENTS_OPTION = "additionalHearingDocumentsOption";
     public static final String HEARING_TYPE = "hearingType";
     public static final String TIME_ESTIMATE = "timeEstimate";
     public static final String HEARING_DATE = "hearingDate";
@@ -524,17 +519,13 @@ public class CCDConfigConstant {
     public static final String INTERIM_HEARING_COLLECTION = "interimHearings";
     public static final String INTERIM_HEARING_REGION_LIST = "interim_regionList";
     public static final String INTERIM_HEARING_CFC_COURT_LIST = "interim_cfcCourtList";
-    public static final String INTERIM_HEARING_PROMPT_FOR_DOCUMENT = "interimPromptForAnyDocument";
     public static final String INTERIM_HEARING_TRACKING = "iHCollectionItemIds";
 
     public static final String INTERIM_HEARING_ALL_DOCUMENT = "interimHearingDocuments";
 
-    public static final String INTERIM_HEARING_UPLOADED_DOCUMENT = "interimUploadAdditionalDocument";
-
     //NoC
     public static final String NOC_PARTY = "nocParty";
     public static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
-    public static final String INCLUDES_REPRESENTATION_CHANGE = "updateIncludesRepresentativeChange";
     public static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
     public static final String INCLUDES_REPRESENTATIVE_UPDATE = "updateIncludesRepresentativeChange";
     public static final String UPDATE_CONTACT_DETAILS_EVENT = "FR_updateContactDetails";
@@ -544,7 +535,6 @@ public class CCDConfigConstant {
     public static final String HEARING_UPLOAD_BUNDLE_COLLECTION = "hearingUploadBundle";
 
     //Upload Approved Order
-    public static final String HEARING_DIRECTION_DETAILS_COLLECTION = "hearingDirectionDetailsCollection";
     public static final String HEARING_NOTICE_DOCUMENT_PACK = "hearingNoticeDocumentPack";
 
     //Consented List for hearings
@@ -587,17 +577,6 @@ public class CCDConfigConstant {
     public static final String HEARING_SOUTHWEST_FRC_LIST = "hearing_southWestFRCList";
     public static final String HEARING_WALES_FRC_LIST = "hearing_walesFRCList";
     public static final String HEARING_HIGHCOURT_FRC_LIST = "hearing_highCourtFRCList";
-    public static final String HEARING_CFC_COURT_LIST = "hearing_cfcCourtList";
-    public static final String HEARING_HUMBER_COURT_LIST = "hearing_humberCourtList";
-    public static final String HEARING_NEWPORT_COURT_LIST = "hearing_newportCourtList";
-    public static final String HEARING_SWANSEA_COURT_LIST = "hearing_swanseaCourtList";
-    public static final String HEARING_LIVERPOOL_COURT_LIST = "hearing_liverpoolCourtList";
-    public static final String HEARING_BIRMINGHAM_COURT_LIST = "hearing_birminghamCourtList";
-    public static final String HEARING_CLEAVELAND_COURT_LIST = "hearing_cleavelandCourtList";
-    public static final String HEARING_KENT_SURREY_COURT_LIST = "hearing_kentSurreyCourtList";
-    public static final String HEARING_MANCHESTER_COURT_LIST = "hearing_manchesterCourtList";
-    public static final String HEARING_NOTTINGHAM_COURT_LIST = "hearing_nottinghamCourtList";
-    public static final String HEARING_NWYORKSHIRE_COURT_LIST = "hearing_nwyorkshireCourtList";
 
     //international postal flag
     public static final String APPLICANT_RESIDE_OUTSIDE_UK = "applicantResideOutsideUK";

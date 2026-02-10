@@ -289,7 +289,7 @@ public class NotificationRequestMapper {
     @Deprecated(since = "15-june-2023")
     @SuppressWarnings("java:S1133")
     private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         Map<String, Object> caseData = caseDetails.getData();
 
         notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
@@ -332,7 +332,7 @@ public class NotificationRequestMapper {
 
     private NotificationRequest getNotificationCoreData(FinremCaseDetails caseDetails,
                                                         SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
         Map<String, Object> notificationRequestPayload = null;
         FinremCaseData data = caseDetails.getData();
         notificationRequestPayload = caseDataService.getPayloadOffFinremCaseData(data);

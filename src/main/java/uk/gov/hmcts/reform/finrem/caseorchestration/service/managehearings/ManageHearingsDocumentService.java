@@ -11,31 +11,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.VacateHearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.SYSTEM_DUPLICATES;
@@ -43,6 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 @Service
 @RequiredArgsConstructor
 @Slf4j
+// Service for managing hearing-related document generation.
 public class ManageHearingsDocumentService {
 
     private final GenericDocumentService genericDocumentService;
@@ -206,76 +194,6 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Get the hearing notice document, or return null if not found.
-     *
-     * @param finremCaseDetails the case details containing the hearing documents
-     * @return a {@link CaseDocument}
-     */
-    public CaseDocument getHearingNotice(FinremCaseDetails finremCaseDetails) {
-        return getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.HEARING_NOTICE);
-    }
-
-    /**
-     * Get the vacate hearing notice document, or return null if not found.
-     *
-     * @param finremCaseDetails the case details containing the hearing documents
-     * @return a {@link CaseDocument}
-     */
-    public CaseDocument getVacateHearingNotice(FinremCaseDetails finremCaseDetails) {
-        return getByWorkingVacatedHearingAndDocumentType(finremCaseDetails, CaseDocumentType.VACATE_HEARING_NOTICE);
-    }
-
-    /**
-     * Retrieves the additional hearing documents from the working hearing in the provided wrapper.
-     *
-     * <p>
-     * This method navigates through the `ManageHearingsWrapper` to locate the working hearing
-     * using its ID, extracts the additional hearing documents, and returns them as a list of
-     * {@link CaseDocument} objects. If the wrapper or any intermediate data is null, an empty list is returned.
-     * </p>
-     *
-     * @param wrapper the {@link ManageHearingsWrapper} containing hearing data
-     * @return a list of {@link CaseDocument} representing the additional hearing documents
-     */
-    public List<CaseDocument> getAdditionalHearingDocsFromWorkingHearing(ManageHearingsWrapper wrapper) {
-        return Optional.of(wrapper)
-            .map(w -> w.getManageHearingsCollectionItemById(w.getWorkingHearingId()))
-            .map(ManageHearingsCollectionItem::getValue)
-            .map(Hearing::getAdditionalHearingDocs)
-            .stream()
-            .flatMap(List::stream)
-            .map(DocumentCollectionItem::getValue)
-            .filter(Objects::nonNull)
-            .toList();
-    }
-
-    /**
-     * Retrieves all hearing documents that need to be posted for the current working hearing.
-     * Note: FDR Hearings should only reach this point for Express cases.
-     *
-     * @param finremCaseDetails the case details containing the hearing documents
-     * @return a {@link CaseDocument}
-     */
-    public List<CaseDocument> getHearingDocumentsToPost(FinremCaseDetails finremCaseDetails) {
-        HearingType workingHearingType = getLastWorkingHearingType(finremCaseDetails);
-
-        ArrayList<CaseDocument> hearingDocumentsToPost = new ArrayList<>();
-
-        if (HearingType.FDA.equals(workingHearingType)) {
-            hearingDocumentsToPost.addAll(getFdaHearingDocumentsToPost(finremCaseDetails));
-        }
-
-        if (HearingType.FDR.equals(workingHearingType)) {
-            hearingDocumentsToPost.addAll(getFdrExpressHearingDocumentsToPost(finremCaseDetails));
-        }
-
-        // These hearing documents are always needed, so add to the list
-        hearingDocumentsToPost.addAll(getHearingDocumentsThatAreAlwaysPosted(finremCaseDetails));
-
-        return hearingDocumentsToPost;
-    }
-
-    /**
      * Determines the appropriate Form C template to use for a given case and
      * returns it along with the corresponding {@link CaseDocumentType}.
      *
@@ -303,138 +221,4 @@ public class ManageHearingsDocumentService {
         }
     }
 
-    /**
-     * Gets the most recent hearing document with the passed CaseDocumentType argument.
-     * If no notice is found, returns an empty list.
-     *
-     * @param finremCaseDetails the case details containing the hearing documents.
-     * @param documentType      a {@link CaseDocumentType} identifying the type of hearing document.
-     * @return a {@link CaseDocument}
-     */
-    private CaseDocument getByWorkingHearingAndDocumentType(FinremCaseDetails finremCaseDetails,
-                                                            CaseDocumentType documentType) {
-        ManageHearingsWrapper wrapper = finremCaseDetails.getData().getManageHearingsWrapper();
-        UUID hearingId = wrapper.getWorkingHearingId();
-        return getCaseDocumentByTypeAndHearingUuid(documentType, wrapper, hearingId);
-    }
-
-    /**
-     * Gets the most recent Vacated hearing document with the passed CaseDocumentType argument.
-     * If no notice is found, returns an empty list.
-     *
-     * @param finremCaseDetails the case details containing the hearing documents.
-     * @param documentType      a {@link CaseDocumentType} identifying the type of hearing document.
-     * @return a {@link CaseDocument}
-     */
-    private CaseDocument getByWorkingVacatedHearingAndDocumentType(FinremCaseDetails finremCaseDetails,
-                                                            CaseDocumentType documentType) {
-        ManageHearingsWrapper wrapper = finremCaseDetails.getData().getManageHearingsWrapper();
-        UUID hearingId = wrapper.getWorkingVacatedHearingId();
-        return getCaseDocumentByTypeAndHearingUuid(documentType, wrapper, hearingId);
-    }
-
-    /**
-     * Retrieves a case document filtered on the UUID of the hearing and document type.
-     *
-     * @param wrapper the ManageHearings wrapper holding the docs
-     * @param documentType      a {@link CaseDocumentType} identifying the type of hearing document.
-     * @return a {@link CaseDocument}
-     */
-    private CaseDocument getCaseDocumentByTypeAndHearingUuid(CaseDocumentType documentType, ManageHearingsWrapper wrapper, UUID hearingId) {
-        return wrapper.getHearingDocumentsCollection().stream()
-            .map(ManageHearingDocumentsCollectionItem::getValue)
-            .filter(Objects::nonNull)
-            .filter(doc -> Objects.equals(hearingId, doc.getHearingId()))
-            .filter(doc -> Objects.equals(documentType, doc.getHearingCaseDocumentType()))
-            .map(ManageHearingDocument::getHearingDocument)
-            .filter(Objects::nonNull)
-            .max(Comparator.comparing(CaseDocument::getUploadTimestamp,
-                Comparator.nullsLast(Comparator.naturalOrder())))
-            .orElse(null);
-    }
-
-    /**
-     * FDA Hearings (and FDR hearings for express cases)  have a core set of documents that need to be posted whem
-     * listed or relisted.
-     * These are the documents that are always posted.
-     * <ul>
-     *     <li>Hearing Notice</li>
-     *     <li>Out of Court Resolution</li>
-     *     <li>PDF NCDR Compliance Letter</li>
-     *     <li>PDF NCDR Cover Letter</li>
-     * </ul>
-     * Removes non-null objects from the list, so exceptions are not thrown when documents are missing.
-     * The Form A doesn't exist in the hearing documents collection, so it is added separately.
-     *
-     * @param finremCaseDetails the case details containing the hearing documents
-     * @return a list of {@link CaseDocument} that are posted for all cases
-     */
-    private List<CaseDocument> getHearingDocumentsThatAreAlwaysPosted(FinremCaseDetails finremCaseDetails) {
-        return Stream.of(
-                getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.HEARING_NOTICE),
-                getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.OUT_OF_COURT_RESOLUTION),
-                getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER),
-                getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.PFD_NCDR_COVER_LETTER),
-                finremCaseDetails.getData().getMiniFormA()
-            )
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Gets an Express Form C and Form G CaseDocument.
-     * Filters out non-null case documents from the list, so exceptions are not thrown when documents are missing.
-     *
-     * @param finremCaseDetails the case details containing the hearing documents
-     * @return a list of {@link CaseDocument} that are posted for FDR Express cases
-     */
-    private List<CaseDocument> getFdrExpressHearingDocumentsToPost(FinremCaseDetails finremCaseDetails) {
-        CaseDocument formC = getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.FORM_C_EXPRESS);
-        CaseDocument formG = getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.FORM_G);
-
-        return Stream.of(formC, formG)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Posted documents for FDA Hearings depend on whether the case is fast track or not.
-     * Fast track cases only post the fast track Form C.
-     * Standard FDA cases post both Form C and Form G.
-     * Filters out non-null case documents from the list, so exceptions are not thrown when documents are missing.
-     *
-     * @param finremCaseDetails the case details containing the hearing documents
-     * @return a list of {@link CaseDocument} that are posted for FDA cases
-     */
-    private List<CaseDocument> getFdaHearingDocumentsToPost(FinremCaseDetails finremCaseDetails) {
-        CaseDocument formC = finremCaseDetails.getData().isFastTrackApplication()
-            ? getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.FORM_C_FAST_TRACK)
-            : getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.FORM_C);
-
-        CaseDocument formG = finremCaseDetails.getData().isFastTrackApplication()
-            ? null
-            : getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.FORM_G);
-
-        return Stream.of(formC, formG)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Retrieves hearing type for the latest hearing to be the working hearing.
-     * The working hearing is nullified in about to submit handler, but working hearing ID is retained.
-     *
-     * @param finremCaseDetails the case details containing the hearing information
-     * @return the type of working hearing
-     */
-    private HearingType getLastWorkingHearingType(FinremCaseDetails finremCaseDetails) {
-        return ofNullable(finremCaseDetails)
-            .map(FinremCaseDetails::getData)
-            .map(FinremCaseData::getManageHearingsWrapper)
-            .map(wrapper ->
-                wrapper.getManageHearingsCollectionItemById(wrapper.getWorkingHearingId()))
-            .map(ManageHearingsCollectionItem::getValue)
-            .map(Hearing::getHearingType)
-            .orElse(null);
-    }
 }
