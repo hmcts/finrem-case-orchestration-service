@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
@@ -47,27 +48,29 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
-class VacateHearingNoticeLetterDetailsMapperTest {
+class VacateOrAdjournNoticeLetterDetailsMapperTest {
 
     @Mock
     private CourtDetailsConfiguration courtDetailsConfiguration;
 
-    private VacateHearingNoticeLetterDetailsMapper vacateHearingNoticeLetterDetailsMapper;
+    private VacateOrAdjournNoticeLetterDetailsMapper vacateOrAdjournNoticeLetterDetailsMapper;
 
     private static final String testUuid = "c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb";
 
     @BeforeEach
     void setUp() {
-        vacateHearingNoticeLetterDetailsMapper =
-            new VacateHearingNoticeLetterDetailsMapper(courtDetailsConfiguration, new ObjectMapper());
+        vacateOrAdjournNoticeLetterDetailsMapper =
+            new VacateOrAdjournNoticeLetterDetailsMapper(courtDetailsConfiguration, new ObjectMapper());
     }
 
     @ParameterizedTest
     @MethodSource("provideHearingDetailsAffectingLogic")
-    void should_buildDocumentTemplateDetails(YesOrNo civilPartnership, String schedule1OrMatrimonial,
-                                            VacateOrAdjournReason vacateOrAdjournReason) {
+    void should_buildDocumentTemplateDetails(YesOrNo civilPartnership,
+                                             String schedule1OrMatrimonial,
+                                             VacateOrAdjournAction action,
+                                             VacateOrAdjournReason vacateOrAdjournReason) {
         // Arrange
-        FinremCaseDetails caseDetails = buildCaseDetails(civilPartnership, schedule1OrMatrimonial, vacateOrAdjournReason);
+        FinremCaseDetails caseDetails = buildCaseDetails(civilPartnership, schedule1OrMatrimonial, action, vacateOrAdjournReason);
 
         CourtDetailsTemplateFields courtTemplateFields = CourtDetailsTemplateFields.builder()
             .courtName("London Court")
@@ -86,7 +89,7 @@ class VacateHearingNoticeLetterDetailsMapperTest {
         when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of("FR_s_CFCList_1", courtDetails));
 
         // Act
-        DocumentTemplateDetails result = vacateHearingNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails);
+        DocumentTemplateDetails result = vacateOrAdjournNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails);
 
         // Assert.  Note that Vacate Hearings reuses HearingNoticeLetterDetails.  The values for each template are almost the same.
         HearingNoticeLetterDetails vacateHearingNoticeDetails = (HearingNoticeLetterDetails) result;
@@ -100,6 +103,7 @@ class VacateHearingNoticeLetterDetailsMapperTest {
         assertThat(vacateHearingNoticeDetails.getHearingVenue()).isEqualTo("London Court, 123 Court Street, London");
         assertThat(vacateHearingNoticeDetails.getCivilPartnership()).isEqualTo(civilPartnership.getYesOrNo());
         assertThat(vacateHearingNoticeDetails.getTypeOfApplication()).isEqualTo(schedule1OrMatrimonial);
+        assertThat(vacateHearingNoticeDetails.getVacateOrAdjournAction()).isEqualTo(action.getDescription());
 
         if (VacateOrAdjournReason.OTHER.equals(vacateOrAdjournReason)) {
             assertThat(vacateHearingNoticeDetails.getVacateHearingReasons()).isEqualTo("illness");
@@ -113,12 +117,19 @@ class VacateHearingNoticeLetterDetailsMapperTest {
             Arguments.of(
                 YesOrNo.YES,
                 Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989.getValue(),
+                VacateOrAdjournAction.VACATE_HEARING,
                 VacateOrAdjournReason.OTHER
-
             ),
             Arguments.of(
                 YesOrNo.NO,
                 Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.getValue(),
+                VacateOrAdjournAction.VACATE_HEARING,
+                VacateOrAdjournReason.CASE_SETTLED
+            ),
+            Arguments.of(
+                YesOrNo.NO,
+                Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.getValue(),
+                VacateOrAdjournAction.ADJOURN_HEARING,
                 VacateOrAdjournReason.ADJOURNED
             )
         );
@@ -140,7 +151,7 @@ class VacateHearingNoticeLetterDetailsMapperTest {
 
         // Act & Assert, static method getWorkingVacatedHearingId on ManageHearingsWrapper raises the exception.
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> vacateHearingNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
+            () -> vacateOrAdjournNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
         assertThat(exception.getMessage()).isEqualTo("Could not find a vacated hearing with id " + testUuid);
     }
 
@@ -166,7 +177,7 @@ class VacateHearingNoticeLetterDetailsMapperTest {
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> vacateHearingNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
+            () -> vacateOrAdjournNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
         assertThat(exception.getMessage()).isEqualTo("Could not find a vacated hearing with id c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb");
     }
 
@@ -180,7 +191,9 @@ class VacateHearingNoticeLetterDetailsMapperTest {
      *   - vacated/adjourned hearing
      * No working hearing required.
      */
-    private FinremCaseDetails buildCaseDetails(YesOrNo civilPartnership, String schedule1OrMatrimonial,
+    private FinremCaseDetails buildCaseDetails(YesOrNo civilPartnership,
+                                               String schedule1OrMatrimonial,
+                                               VacateOrAdjournAction vacateOrAdjournAction,
                                                VacateOrAdjournReason vacateOrAdjournReason) {
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
@@ -214,6 +227,7 @@ class VacateHearingNoticeLetterDetailsMapperTest {
                                 .hearingTime("10:00 AM")
                                 .vacateOrAdjournReason(vacateOrAdjournReason)
                                 .specifyOtherReason("illness")
+                                .hearingStatus(vacateOrAdjournAction)
                                 .hearingCourtSelection(Court.builder()
                                     .region(Region.LONDON)
                                     .londonList(RegionLondonFrc.LONDON)

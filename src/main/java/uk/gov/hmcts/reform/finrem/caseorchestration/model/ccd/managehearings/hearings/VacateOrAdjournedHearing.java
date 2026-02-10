@@ -12,8 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingVacatedHearing;
 
@@ -46,15 +46,16 @@ public class VacateOrAdjournedHearing implements HearingLike {
     private LocalDate vacatedOrAdjournedDate;
     private VacateOrAdjournReason vacateOrAdjournReason;
     private String specifyOtherReason;
-    private ManageHearingsAction hearingStatus;
+    private VacateOrAdjournAction hearingStatus;
 
     public boolean shouldSendNotifications() {
         return YesOrNo.YES.equals(this.getWasVacOrAdjNoticeSent());
     }
 
-    public static VacateOrAdjournedHearing fromHearingToVacatedHearing(ManageHearingsCollectionItem hearingToVacate,
-                                                                       WorkingVacatedHearing vacateHearingInput,
-                                                                       YesOrNo wasVacateOrAdjournNoticeSent) {
+    public static VacateOrAdjournedHearing fromHearingToVacatedOrAdjourned(ManageHearingsCollectionItem hearingToVacate,
+                                                                           WorkingVacatedHearing vacateHearingInput,
+                                                                           YesOrNo wasVacateOrAdjournNoticeSent,
+                                                                           VacateOrAdjournAction hearingStatus) {
         Hearing hearing = hearingToVacate.getValue();
         return VacateOrAdjournedHearing.builder()
             .hearingDate(hearing.getHearingDate())
@@ -71,7 +72,7 @@ public class VacateOrAdjournedHearing implements HearingLike {
             .wasMigrated(hearing.getWasMigrated())
             .vacatedOrAdjournedDate(vacateHearingInput.getVacateHearingDate())
             .vacateOrAdjournReason(vacateHearingInput.getVacateReason())
-            .hearingStatus(ManageHearingsAction.VACATE_HEARING)
+            .hearingStatus(hearingStatus)
             .specifyOtherReason(vacateHearingInput.getSpecifyOtherReason())
             .wasVacOrAdjNoticeSent(wasVacateOrAdjournNoticeSent)
             .build();

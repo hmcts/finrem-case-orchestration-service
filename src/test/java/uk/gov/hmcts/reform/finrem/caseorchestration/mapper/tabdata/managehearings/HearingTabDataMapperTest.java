@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearin
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,9 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
@@ -28,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -129,8 +133,19 @@ class HearingTabDataMapperTest {
             .anyMatch(doc -> doc.getValue().getDocumentFilename().equals(DOCUMENT_2_FILENAME)));
     }
 
-    @Test
-    void mapVacatedOrAdjournedHearingToTabData() {
+    private static Stream<Arguments> mapVacatedOrAdjournedHearingToTabData() {
+        return Stream.of(Arguments.of(
+                VacateOrAdjournAction.VACATE_HEARING, "Vacated"
+            ),
+            Arguments.of(
+                VacateOrAdjournAction.ADJOURN_HEARING, "Adjourned"
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("mapVacatedOrAdjournedHearingToTabData")
+    void testMapVacatedOrAdjournedHearingToTabData(VacateOrAdjournAction hearingStatus, String expectedStatus) {
         // Arrange
         UUID hearingId = UUID.randomUUID();
         when(courtDetailsMapper.convertToFrcCourtDetails(any()))
@@ -157,7 +172,7 @@ class HearingTabDataMapperTest {
                     .documentFilename(DOCUMENT_1_FILENAME)
                     .build())
                 .build()))
-            .hearingStatus(ManageHearingsAction.VACATE_HEARING)
+            .hearingStatus(hearingStatus)
             .vacatedOrAdjournedDate(LocalDate.of(2025, 11, 25))
             .vacateOrAdjournReason(OTHER)
             .specifyOtherReason("Some other reason")
@@ -165,9 +180,9 @@ class HearingTabDataMapperTest {
 
         VacatedOrAdjournedHearingsCollectionItem hearingCollectionItem =
             VacatedOrAdjournedHearingsCollectionItem.builder()
-            .id(hearingId)
-            .value(hearing)
-            .build();
+                .id(hearingId)
+                .value(hearing)
+                .build();
 
         List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection = List.of(
             ManageHearingDocumentsCollectionItem.builder()
@@ -201,7 +216,7 @@ class HearingTabDataMapperTest {
         assertEquals(OTHER.getDisplayValue(), result.getTabVacateOrAdjournReason());
         assertEquals(OTHER_REASON, result.getTabSpecifyOtherReason());
         assertEquals(VACATED_OR_ADJOURNED_DATE, result.getTabVacatedOrAdjournedDate());
-        assertEquals(ManageHearingsAction.VACATE_HEARING.getDescription(), result.getTabHearingStatus());
+        assertEquals(expectedStatus, result.getTabHearingStatus());
     }
 
     @Test

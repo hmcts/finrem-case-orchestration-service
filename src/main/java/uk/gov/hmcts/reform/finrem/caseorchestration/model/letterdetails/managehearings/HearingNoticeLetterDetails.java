@@ -28,4 +28,5 @@ public class HearingNoticeLetterDetails implements DocumentTemplateDetails {
     private String vacateHearingReasons;
     private String typeOfApplication;
     private String civilPartnership;
+    private String vacateOrAdjournAction;
 }
