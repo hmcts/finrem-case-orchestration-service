@@ -91,4 +91,5 @@ public class ConsentOrderWrapper implements HasCaseDocument {
     private List<UnapprovedOrderCollection> intv2RefusedOrderCollection;
     private List<UnapprovedOrderCollection> intv3RefusedOrderCollection;
     private List<UnapprovedOrderCollection> intv4RefusedOrderCollection;
+    private CaseDocument latestDivorceOrderUpload;
 }
