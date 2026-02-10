@@ -5,8 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -21,14 +22,16 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateContactDetailsServiceTest {
 
-    private final UpdateContactDetailsService service = new UpdateContactDetailsService();
+    @InjectMocks
+    private UpdateContactDetailsService service;
 
-    @MockitoBean
-    UpdateContactDetailsService updateContactDetailsService;
+    @Mock
+    private CaseDataService caseDataService;
 
     @Test
     void shouldPersistOrgPolicies_withFinremCaseData() {
@@ -66,6 +69,11 @@ class UpdateContactDetailsServiceTest {
     void shouldClearFields_whenScenarioRequiresClearing(String scenarioName,
                                                         CaseType caseType,
                                                         FinremCaseData caseData) {
+
+        if (caseData.getContactDetailsWrapper().getNocParty() == NoticeOfChangeParty.RESPONDENT) {
+            when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(false);
+        }
+
         service.handleRepresentationChange(caseData, caseType);
 
         if (caseData.getContactDetailsWrapper().getNocParty() == NoticeOfChangeParty.APPLICANT) {
@@ -81,19 +89,23 @@ class UpdateContactDetailsServiceTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("nonClearingScenarios")
-    void shouldNotClearFields_whenScenarioDoesNotRequireClearing(String scenarioName, CaseType caseType,
+    void shouldNotClearFields_whenScenarioDoesNotRequireClearing(String scenarioName,
+                                                                 CaseType caseType,
                                                                  FinremCaseData caseData) {
+
+        if (caseData.getContactDetailsWrapper().getNocParty() == NoticeOfChangeParty.RESPONDENT) {
+            when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(true);
+        }
+
+        ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
+        final Address initialRespondentAddress = contactDetails.getRespondentSolicitorAddress();
+        final Address initialApplicantAddressContested = contactDetails.getApplicantSolicitorAddress();
+        final Address initialApplicantAddressConsented = contactDetails.getSolicitorAddress();
 
         service.handleRepresentationChange(caseData, caseType);
 
-        ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
-        Address initialRespondentAddress = contactDetails.getRespondentSolicitorAddress();
         assertSame(initialRespondentAddress, contactDetails.getRespondentSolicitorAddress());
-
-        Address initialApplicantAddressContested = contactDetails.getApplicantSolicitorAddress();
         assertSame(initialApplicantAddressContested, contactDetails.getApplicantSolicitorAddress());
-
-        Address initialApplicantAddressConsented = contactDetails.getSolicitorAddress();
         assertSame(initialApplicantAddressConsented, contactDetails.getSolicitorAddress());
     }
 
