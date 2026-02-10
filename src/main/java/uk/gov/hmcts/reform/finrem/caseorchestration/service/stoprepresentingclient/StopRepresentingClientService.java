@@ -2,9 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingcli
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.SetUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
@@ -17,6 +20,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -35,14 +42,19 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class StopRepresentingClientService {
+
+    private static final Revocation NO_NOC_INVOLVED = new Revocation(false, false);
 
     private final AssignCaseAccessService assignCaseAccessService;
 
@@ -62,6 +74,10 @@ public class StopRepresentingClientService {
 
     private final IdamService idamService;
 
+    private final FinremNotificationRequestMapper finremNotificationRequestMapper;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     private static FinremCaseData getFinremCaseDataBefore(StopRepresentingClientInfo info) {
         return info.getCaseDetailsBefore().getData();
     }
@@ -80,19 +96,26 @@ public class StopRepresentingClientService {
         return map;
     }
 
+    private static EmailTemplateNames getNotifyApplicantRepresentativeTemplateName(FinremCaseData finremCaseData) {
+        return finremCaseData.isContestedApplication()
+            ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
+            : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
+    }
+
     /**
-     * Applies case assignment changes when a representative stops representing a client.
+     * Revoke the case assess and send notifications to affected parties.
      *
      * <p>This method:
      * <ul>
-     *   <li>Handles case assignment updates for intervener representatives</li>
-     *   <li>Handles case assignment updates for applicant or respondent representatives</li>
-     *   <li>Notifies the case assignment service of any barrister representation changes</li>
+     *   <li>Handles requests for intervener representatives</li>
+     *   <li>Handles requests for applicant or respondent representatives</li>
+     *   <li>Handles requests for any barrister representation changes</li>
+     *   <li>Sends notification to parties like applicant, respondent and the parties being revoked</li>
      * </ul>
      *
      * @param info the stop-representing context containing case details and user authorisation
      */
-    public void applyCaseAssignment(StopRepresentingClientInfo info) {
+    public void revokePartiesAccessAndNotifyParties(StopRepresentingClientInfo info) {
         handleIntervenerRepresentativeRequest(info);
         handleApplicantOrRespondentRepresentativeRequest(info);
         sendAllBarristerChangeToCaseAssignmentService(info);
@@ -187,7 +210,7 @@ public class StopRepresentingClientService {
      */
     public void setApplicantUnrepresented(FinremCaseData finremCaseData) {
         finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        finremCaseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR));
+        finremCaseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(APP_SOLICITOR));
     }
 
     /**
@@ -230,11 +253,15 @@ public class StopRepresentingClientService {
         final CaseType caseType = finremCaseData.getCcdCaseType();
         final long caseId = getCaseId(info);
 
-        boolean isNocRequestSent = sendNocRequestToCaseAssignmentService(info);
+        Revocation revocation = revokeApplicantSolicitorOrRespondentSolicitor(info);
 
-        if (isNocRequestSent) {
+        if (revocation.isRevoked()) {
             // save a call if changeOrganisationRequestField is null
             clearChangeOrganisationRequestAfterThisEvent(caseType, caseId);
+
+            if (revocation.applicantSolicitorRevoked) {
+                notifyApplicantSolicitor(info);
+            }
         }
     }
 
@@ -291,9 +318,21 @@ public class StopRepresentingClientService {
         BarristerChange barristerChange = manageBarristerService
             .getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
         barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, barristerChange);
+        SetUtils.emptyIfNull(barristerChange.getRemoved()).forEach(b -> {
+            if (BarristerParty.APPLICANT.equals(barristerParty)) {
+                notifyApplicantBarrister(info, b);
+            }
+        });
     }
 
-    private boolean sendNocRequestToCaseAssignmentService(StopRepresentingClientInfo info) {
+    private record Revocation(boolean applicantSolicitorRevoked, boolean respondentSolicitorRevoked) {
+
+        boolean isRevoked() {
+            return applicantSolicitorRevoked || respondentSolicitorRevoked;
+        }
+    }
+
+    private Revocation revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
         final FinremCaseData finremCaseData = getFinremCaseData(info);
         final FinremCaseData originalFinremCaseData = getFinremCaseDataBefore(info);
 
@@ -301,26 +340,27 @@ public class StopRepresentingClientService {
         if (finremCaseData.getChangeOrganisationRequestField() == null) {
             log.info("{} - Not sending request to case assignment service due to changeOrganisationRequestField is null",
                 finremCaseData.getCcdCaseId());
-            return false;
+            return NO_NOC_INVOLVED;
         }
 
         // aac handles org policy modification based on the Change Organisation Request,
         // so we need to revert the org policies to their value before the event started
         // Refer to NoticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess
-        boolean isReverted = false;
-        if (isApplicantForRepresentationChange(finremCaseData)) {
+        boolean shouldPerformNoc = false;
+        boolean isApplicantForRepresentationChange = isApplicantForRepresentationChange(finremCaseData);
+        if (isApplicantForRepresentationChange) {
             finremCaseData.setApplicantOrganisationPolicy(originalFinremCaseData.getApplicantOrganisationPolicy());
-            isReverted = true;
+            shouldPerformNoc = true;
         } else if (isRespondentForRepresentationChange(finremCaseData)) {
             finremCaseData.setRespondentOrganisationPolicy(originalFinremCaseData.getRespondentOrganisationPolicy());
-            isReverted = true;
+            shouldPerformNoc = true;
         }
 
         // Going to apply decision
-        if (isReverted) {
+        if (shouldPerformNoc) {
             assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(),
                 buildCaseDetailsFromEventCaseData(info));
-            return true;
+            return new Revocation(isApplicantForRepresentationChange, !isApplicantForRepresentationChange);
         }
         throw new IllegalStateException(format("%s - ChangeOrganisationRequest populated with unknown or null NOC Party : %s",
             finremCaseData.getContactDetailsWrapper().getNocParty(),
@@ -344,5 +384,42 @@ public class StopRepresentingClientService {
             .orgPolicyReference(null)
             .orgPolicyCaseAssignedRole(role.getCcdCode())
             .build();
+    }
+
+    private void sendRepresentativeNotification(
+        StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
+        NotificationRequest notificationRequest
+    ) {
+        String userAuthorisation = info.getUserAuthorisation();
+
+        applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
+            .notificationParties(parties)
+            .emailNotificationRequest(notificationRequest)
+            .emailTemplate(emailTemplate)
+            .caseDetails(info.getCaseDetails())
+            .caseDetailsBefore(info.getCaseDetailsBefore())
+            .authToken(userAuthorisation)
+            .build()
+        );
+    }
+
+    private void notifyApplicantBarrister(StopRepresentingClientInfo info, Barrister barrister) {
+        sendRepresentativeNotification(
+            info,
+            List.of(FORMER_APPLICANT_BARRISTER_ONLY),
+            getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
+            finremNotificationRequestMapper
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister)
+        );
+    }
+
+    private void notifyApplicantSolicitor(StopRepresentingClientInfo info) {
+        sendRepresentativeNotification(
+            info,
+            List.of(FORMER_APPLICANT_SOLICITOR_ONLY),
+            getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
+            finremNotificationRequestMapper
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR)
+        );
     }
 }
