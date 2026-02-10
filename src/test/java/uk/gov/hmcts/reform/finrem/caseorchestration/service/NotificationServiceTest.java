@@ -1688,6 +1688,25 @@ class NotificationServiceTest {
             .isEqualTo(expected);
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "true, true, true",
+        "true, false, false",
+        "false, true, false",
+        "false, false, false"
+    })
+    void returnsTrueOnlyWhenSolicitorIsPopulatedAndRespondentIsRepresented(boolean populated, boolean represented, boolean expected) {
+        FinremCaseData finremCaseData = mock(FinremCaseData.class);
+        when(finremCaseData.isRespondentSolicitorPopulated()).thenReturn(populated);
+        lenient().when(finremCaseData.isRespondentRepresentedByASolicitor()).thenReturn(represented);
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+
+        assertThat(notificationService.isRespondentSolicitorEmailPopulatedAndPresented(finremCaseDetails))
+            .isEqualTo(expected);
+    }
+
     private FinremCaseData getFinremCaseData() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.getContactDetailsWrapper().setApplicantFmName("Victoria");
