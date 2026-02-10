@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 @Slf4j
 public class UpdateContactDetailsService {
 
+    private final CaseDataService caseDataService;
+
     /**
      * Persists the organisation policies through the callback request.
      *
@@ -45,13 +47,9 @@ public class UpdateContactDetailsService {
         }
 
         if (NoticeOfChangeParty.RESPONDENT.equals(nocParty)) {
-            boolean isContested = CaseType.CONTESTED.equals(caseType);
+            boolean respondentRepresented = caseDataService.isRespondentRepresentedByASolicitor(caseData);
 
-            YesOrNo respondentRepresented = isContested
-                ? contactDetailsWrapper.getContestedRespondentRepresented()
-                : contactDetailsWrapper.getConsentedRespondentRepresented();
-
-            if (respondentRepresented == YesOrNo.NO) {
+            if (!respondentRepresented) {
                 clearRespondentSolicitorDetailsForUnrepresentedRespondent(caseData);
             }
         }
