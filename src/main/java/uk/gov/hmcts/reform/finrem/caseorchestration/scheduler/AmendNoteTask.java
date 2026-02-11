@@ -15,11 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 import java.time.LocalDate;
 
 /**
- * Scheduled task to find cases where GeneralEmailDataField is not empty and clear the field.
+ * One-off scheduled task to delete a note based on a target date.
  * To enable the task to execute set environment variables:
  * <ul>
  *     <li>CRON_AMEND_NOTE_TASK_ENABLED=true</li>
- *     <li>TASK_NAME=AmendGeneralEmailTask</li>
+ *     <li>TASK_NAME=AmendNoteTask</li>
  *     <li>CRON_AMEND_NOTE_TASK_CASE_TYPE_ID=FinancialRemedyContested | FinancialRemedyMVP2</li>
  *     <li>CRON_AMEND_NOTE_TASK_BATCH_SIZE=number of cases to search for</li>
  *     <li>CRON_CSV_FILE_DECRYPT_KEY=secret key to decrypt the csv file</li>
