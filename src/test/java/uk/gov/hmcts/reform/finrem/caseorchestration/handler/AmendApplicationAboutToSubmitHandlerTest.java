@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -67,12 +68,15 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
     private ConsentOrderService consentOrderService;
     @Mock
     private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
+    @Mock
+    private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     @BeforeEach
     void setUp() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         underTest = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
-            consentOrderService, updateRepresentationWorkflowService);
+            consentOrderService, updateRepresentationWorkflowService,
+            createCaseMandatoryDataValidator);
         lenient().when(consentOrderService.getLatestConsentOrderData(isA(CallbackRequest.class)))
             .thenReturn(caseDocument(DOC_URL, FILE_NAME, BINARY_URL));
     }
@@ -359,6 +363,18 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
             mockedStatic.verify(() -> ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
             assertThat(response.getErrors()).containsExactly("VALIDATION FAILED");
         }
+    }
+
+    @Test
+    void givenCaseData_whenMandatoryDataValidationFails_thenReturnsError() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(List.of("Validation failed"));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).hasSize(1);
+        assertThat(response.getErrors().getFirst()).isEqualTo("Validation failed");
+        assertThat(response.getData()).isNotNull();
     }
 
     private static void setupApplicantRepresented(FinremCaseData caseData, Address applicantSolicitorAddress) {
