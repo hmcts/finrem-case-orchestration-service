@@ -93,6 +93,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
         clearLegacyCollections(caseData);
         deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
         clearTemporaryField(caseData);
+        clearActionSelection(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
     }
@@ -117,6 +118,9 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
             emptyIfNull(documentHandlers).forEach(documentHandler ->
                 documentHandler.replaceManagedDocumentsInCollectionType(caseData, managedCollections, false));
         }
+    }
+    private void clearActionSelection(FinremCaseData caseData) {
+        caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentsActionSelection(null);
     }
 
     private List<UploadCaseDocumentCollection> getManagedCollections(FinremCaseData caseData) {
