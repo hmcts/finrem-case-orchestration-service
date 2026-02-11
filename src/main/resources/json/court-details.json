@@ -79,7 +79,7 @@
   "FR_s_CFCList_17": {
     "courtName": "The Royal Courts of Justice",
     "courtAddress": "The Royal Courts of Justice, Strand, London, WC2A 2LL",
-    "phoneNumber": "0207 421 8594",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCLondon@justice.gov.uk",
     "emailReplyToId": "ef8dbd1d-9fa2-4277-8b6e-111bcee3c9b9"
   },
@@ -296,7 +296,7 @@
   "FR_cleaveland_hc_list_9": {
     "courtName": "Darlington Magistrates Court",
     "courtAddress": "Parkgate, Darlington, DL1 1RU",
-    "phoneNumber": "01642 340000",
+    "phoneNumber": "0300 123 5577",
     "email": "family.middlesbrough.countycourt@justice.gov.uk",
     "emailReplyToId": "543e8a6e-35eb-43cc-9c10-9848d4bef106"
   },
@@ -527,7 +527,7 @@
   "FR_kent_surrey_hc_list_11": {
     "courtName": "Thanet Family Court Hearing Centre",
     "courtAddress": "2nd Floor, The Courthouse, Cecil Square, Margate, Kent CT9 1RL",
-    "phoneNumber": "01227 819200",
+    "phoneNumber": "0300 123 5577",
     "email": "Family.canterbury.countycourt@justice.gov.uk",
     "emailReplyToId": "6e422e35-c6b0-4440-9ba7-91eee7a2018b"
   },
