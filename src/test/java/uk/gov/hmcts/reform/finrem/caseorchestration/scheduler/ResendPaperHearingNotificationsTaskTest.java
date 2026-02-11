@@ -5,6 +5,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.converter.JavaTimeConversionPattern;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -53,9 +57,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -69,16 +74,12 @@ class ResendPaperHearingNotificationsTaskTest {
     private static final String REFERENCE = "1234567890123456";
     private static final String VACATE_NOTICE_TEST_ID = "VacateHearingNotice";
 
-    // For hearings, Service manually processing hearings with dates up to 23:59 22nd Feb '26
-    private static final LocalDate hearing_date_for_hearings_in_scope = LocalDate.of(2026, 2, 23);;
-    private static final LocalDate bug_for_hearing_outside_scope_date = LocalDate.of(2026, 2, 22);
+    // For hearings, Service are manually processing hearings with dates up to 23:59 22nd Feb '26
+    private static final LocalDate latest_hearing_date_for_hearings_in_scope = LocalDate.of(2026, 2, 23);;
     // For vacated hearings,  Service manually processing vacated notices for hearings with dates up to 23:59 19th Feb '26
     // If the hearing dates are later than this, and the hearing was vacated when the bug was live (20th Jan to 3rd Feb),
     // then we post vacate notices again.
     private static final LocalDate hearing_date_for_vacated_hearings_in_scope = LocalDate.of(2026, 2, 20);
-    private static final LocalDate vacated_date_for_vacated_hearings_in_scope = LocalDate.of(2026, 1, 20);
-    private static final LocalDate hearing_date_vacated_hearings_outside_scope = LocalDate.of(2026, 2, 19);
-    private static final LocalDate vacated_date_vacated_hearings_outside_scope = LocalDate.of(2026, 2, 19);
 
     @TestLogs
     private final TestLogger logs = new TestLogger(ResendPaperHearingNotificationsTask.class);
@@ -129,47 +130,41 @@ class ResendPaperHearingNotificationsTaskTest {
         verifyNoInteractions(applicantPartyListener);
     }
 
-    // Todo -
-    // hearings only - write a new set of tests for vacated.
-    // in scope only - write a new set of tests for out of scope.
-    // applicant only, you could parameterise for each party. Write one for test for all parties,
+    // Checks all parties, within NotificationParty; Applicant, Respondent and all four Interveners.
     @Test
-    void givenApplicantHearingNoticeRequired_whenExecuteTask_andDateInScope_thenEventPublishedForPosting() {
+    void givenHearingNoticeRequired_whenExecuteTask_andDateInScope_thenEventPublishedForPosting() {
 
         // Arrange
         UUID hearingId = UUID.randomUUID();
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.ADD_HEARING;
 
-        PartyOnCase applicantParty = PartyOnCase.builder()
-            .role(NotificationParty.APPLICANT.getRole())
-            .label("ApplicantParty").build();
-
-        List<PartyOnCaseCollectionItem> partiesOnCase = List.of(
-            PartyOnCaseCollectionItem.builder()
-                .value(applicantParty)
-                .build()
-        );
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(NotificationParty.values());
 
         CaseDocument hearingNotice = buildCaseDocument("hearingNotice");
 
         List<ManageHearingDocumentsCollectionItem> associatedHearingDocumentsCollection =
             buildAssociatedHearingDocumentCollection(hearingItemId, hearingNotice);
 
+        List<ManageHearingsCollectionItem> hearings = buildHearingsCollection(
+            hearingItemId,
+            latest_hearing_date_for_hearings_in_scope,
+            partiesOnCase);
+
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings = List.of();
+
         FinremCaseData finremCaseData = buildFinremCaseData(
             hearingId,
-            hearingItemId,
             action,
-            hearing_date_for_hearings_in_scope,
-            partiesOnCase,
-            associatedHearingDocumentsCollection
+            associatedHearingDocumentsCollection,
+            hearings,
+            vacatedHearings
         );
 
         FinremCaseDetails finremCaseDetails = buildCaseDetails(finremCaseData);
 
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
-        mockApplicantSolicitorDigital(false);
         orchestrateCronMocks(caseDetails);
 
         // Act
@@ -180,8 +175,8 @@ class ResendPaperHearingNotificationsTaskTest {
             "Case ID: 1234567890123456 resending correspondence for 1 active hearings and 0 vacated hearings");
         assertThat(logs.getInfos()).contains(
             "Case ID: 1234567890123456 Sending active hearing correspondence with hearing date "
-                + hearing_date_for_hearings_in_scope
-                + ", for parties: [APPLICANT]");
+                + latest_hearing_date_for_hearings_in_scope
+                + ", for parties: " + List.of(NotificationParty.values()));
 
         ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
         verify(applicationEventPublisher).publishEvent(captor.capture());
@@ -193,51 +188,50 @@ class ResendPaperHearingNotificationsTaskTest {
                 SendCorrespondenceEvent::getEmailNotificationRequest,
                 SendCorrespondenceEvent::getEmailTemplate
             )
-            .containsExactly(AUTH_TOKEN, List.of(NotificationParty.APPLICANT), List.of(hearingNotice), null, null);
+            .containsExactly(AUTH_TOKEN, List.of(NotificationParty.values()), List.of(hearingNotice), null, null);
     }
 
-    // Todo - FIX THIS
-    // hearings only - write a new set of tests for vacated.
-    // in scope only - write a new set of tests for out of scope.
-    // applicant only, you could parameterise for each party. Write one for test for all parties,
-    @Test
-    void givenApplicantVacateNoticeRequired_whenExecuteTask_andDateInScope_thenEventPublishedForPosting() {
+    // Checks all parties, within NotificationParty; Applicant, Respondent and all four Interveners.
+    // The Hearing date for the vacated hearing must be hearing_date_for_vacated_hearings_in_scope.
+    // 20th Jan 2026 is the earliest vacated date we consider for processing.
+    // 2nd Feb 2026 is the latest vacated date we consider for processing.
+    @ParameterizedTest
+    @ValueSource(strings = {"2026 1 20", "2026 2 2"})
+    void givenVacateNoticeRequired_whenExecuteTask_andDateInScope_thenEventPublishedForPosting(
+        @JavaTimeConversionPattern("uuuu M d") LocalDate boundaryVacatedDate) {
 
         // Arrange
         UUID hearingId = UUID.randomUUID();
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.VACATE_HEARING;
 
-        PartyOnCase applicantParty = PartyOnCase.builder()
-            .role(NotificationParty.APPLICANT.getRole())
-            .label("ApplicantParty").build();
-
-        List<PartyOnCaseCollectionItem> partiesOnCase = List.of(
-            PartyOnCaseCollectionItem.builder()
-                .value(applicantParty)
-                .build()
-        );
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(NotificationParty.values());
 
         CaseDocument vacateNotice = buildCaseDocument(VACATE_NOTICE_TEST_ID);
 
         List<ManageHearingDocumentsCollectionItem> associatedHearingDocumentsCollection =
             buildAssociatedHearingDocumentCollection(hearingItemId, vacateNotice);
 
-        FinremCaseData finremCaseData = buildFinremCaseDataVacated(
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings =
+            buildVacatedHearingsCollection(hearingItemId,
+                boundaryVacatedDate,
+                hearing_date_for_vacated_hearings_in_scope,
+                partiesOnCase);
+
+        List<ManageHearingsCollectionItem> hearings = List.of();
+
+        FinremCaseData finremCaseData = buildFinremCaseData(
             hearingId,
-            hearingItemId,
             action,
-            vacated_date_for_vacated_hearings_in_scope,
-            hearing_date_for_vacated_hearings_in_scope,
-            partiesOnCase,
-            associatedHearingDocumentsCollection
+            associatedHearingDocumentsCollection,
+            hearings,
+            vacatedHearings
         );
 
         FinremCaseDetails finremCaseDetails = buildCaseDetails(finremCaseData);
 
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
-        mockApplicantSolicitorDigital(false);
         orchestrateCronMocks(caseDetails);
 
         // Mock getting the Vacate Hearing Notice.
@@ -252,7 +246,11 @@ class ResendPaperHearingNotificationsTaskTest {
 
         // Assert
         assertThat(logs.getInfos()).contains("Case ID: 1234567890123456 resending correspondence for 0 active hearings and 1 vacated hearings");
-        assertThat(logs.getInfos()).contains("Case ID: 1234567890123456 Sending vacated hearing correspondence with Vacated date: " + vacated_date_for_vacated_hearings_in_scope + " and hearing date: " + hearing_date_for_vacated_hearings_in_scope + ", for parties: [APPLICANT]");
+        assertThat(logs.getInfos()).contains("Case ID: 1234567890123456 Sending vacated hearing correspondence with Vacated date: "
+            + boundaryVacatedDate
+            + " and hearing date: "
+            + hearing_date_for_vacated_hearings_in_scope + ", for parties: "
+            + List.of(NotificationParty.values()));
 
         ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
         verify(applicationEventPublisher).publishEvent(captor.capture());
@@ -264,48 +262,94 @@ class ResendPaperHearingNotificationsTaskTest {
                 SendCorrespondenceEvent::getEmailNotificationRequest,
                 SendCorrespondenceEvent::getEmailTemplate
             )
-            .containsExactly(AUTH_TOKEN, List.of(NotificationParty.APPLICANT), List.of(vacateNotice), null, null);
+            .containsExactly(AUTH_TOKEN, List.of(NotificationParty.values()), List.of(vacateNotice), null, null);
     }
 
-    @Test
-    void givenRespondentActiveHearingPostalRequired_whenExecuteTask_thenRespondentNotificationTriggered() {
-       //TODO
+    /*
+     * serviceManualHearingNoticeCutOff is '2026 2 22'.
+     * This means, for hearings, we should NOT process anything with a hearing date earlier than that.
+     *
+     * serviceManualVacatedNoticeCutOff is '2026 2 19'.
+     * This means, for vacated hearings, we should NOT process anything with a hearing date earlier than that.
+     *
+     * bugIntroductionDate is '2026 1 20'.
+     * This means, for vacated hearings, we should NOT process anything with a vacated date earlier than that.
+     *
+     * bugFixDate is '2026 2 3'.
+     * This means, for vacated hearings, we should NOT process anything with a vacated date later than that.
+     *
+     * Asserts that under these conditions, the right warning is logged.
+    */
+    @ParameterizedTest
+    @CsvSource(value = {
+        "'2026 2 22', '2026 2 19', '2026 1 19'", // Hearing dates too late, and vacated date Just too early
+        "'2026 2 22', '2026 2 19', '2026 2 3'" // Hearing dates too late, and vacated date Just too late
+    })
+    void givenNoCandidateHearings_whenIsUpdatedRequired_thenWarnLogged(
+        @JavaTimeConversionPattern("uuuu M d") LocalDate hearingDateForHearingTooEarly,
+        @JavaTimeConversionPattern("uuuu M d") LocalDate hearingDateForVacatedHearingTooEarly,
+        @JavaTimeConversionPattern("uuuu M d") LocalDate vacatedDate) {
+
+        // Arrange
+        UUID hearingId = UUID.randomUUID();
+        UUID hearingItemId = UUID.randomUUID();
+        ManageHearingsAction action = ManageHearingsAction.VACATE_HEARING;
+
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(NotificationParty.APPLICANT);
+
+        List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings =
+            buildVacatedHearingsCollection(hearingItemId,
+                vacatedDate,
+                hearingDateForVacatedHearingTooEarly,
+                partiesOnCase);
+
+        List<ManageHearingsCollectionItem> hearings =
+            buildHearingsCollection(hearingItemId,
+                hearingDateForHearingTooEarly,
+                partiesOnCase);
+
+        List<ManageHearingDocumentsCollectionItem> associatedHearingDocumentsCollection = List.of();
+
+        FinremCaseData finremCaseData = buildFinremCaseData(
+            hearingId,
+            action,
+            associatedHearingDocumentsCollection,
+            hearings,
+            vacatedHearings
+        );
+
+        FinremCaseDetails finremCaseDetails = buildCaseDetails(finremCaseData);
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+
+        orchestrateCronMocks(caseDetails);
+
+        // Act
+        resendTask.run();
+
+        // Assert that all the scenarios show the logs to indicate that the subjects are out of scope.
+        assertThat(logs.getWarns()).contains("Case ID: "
+            + REFERENCE
+            + " does not have hearings or vacated hearings within the cut off to post");
     }
 
-    @Test
-    void givenIntervenerActiveHearingPostalRequired_whenExecuteTask_thenIntervenerNotificationTriggered() {
-      // TODO, repeat for all four
-    }
-
-
+    //Done
     // Test setup needs a list of hearings and vacated hearings
-    // look at getFilteredHearings and populate lists with date range.
-    // Check no hearings outside date range included.
-    // Test log warn("Case ID: {} does not have hearings or vacated hearings within the cut off to post")
-    // isApplicantPostalRequired, Test all parties for success and not, depending if post required
-    // check miniforma
-    // Seems like proof of test success is a log saying "Notification event received for party {} on case {}"
-    // and ("Case ID: {} Sending active hearing correspondence with hearing date {}, for parties: {}" or "Case ID: {} Sending vacated hearing correspondence with Vacated date: {}. and hearing date: {}, for parties: {}"
-    // Check "Case ID: {} resending correspondence for {} active hearings and {} vacated hearings"
-    // Test that cover each of the is[party]PostalRequired methods, true and false
-    // Check that additional documents added.
-    // test isUpdate required - hopefully using log.
-    // log.error("Case ID: {} with hearing date {}, for parties: {} contained no hearing documents.",
+    // look at getFilteredHearings and populate lists with date range. -
     // The vacated filters have extra dates that could mean a case is out of scope.  Consider.
+    // Check "Case ID: {} resending correspondence for {} active hearings and {} vacated hearings" - core assertion
+    // and ("Case ID: {} Sending active hearing correspondence with hearing date {}, for parties: {}" or "Case ID: {} Sending vacated hearing correspondence with Vacated date: {}. and hearing date: {}, for parties: {}"
+    // Seems like proof of test success is a log saying "Notification event received for party {} on case {}" - used captor instead
+    // test isUpdate required - hopefully using log. - do fail
+    // Test log warn("Case ID: {} does not have hearings or vacated hearings within the cut off to post")
+    // Check no hearings outside date range included.
+    // Test that cover each of the is[party]PostalRequired methods, true and false - implicit if each party tested
+    // Check date boundaries
 
-
-
-    // Todo - below are copied and handy - consider adding to UTIL
-
-    private void mockApplicantSolicitorDigital(boolean applicantSolicitorDigital) {
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class)))
-            .thenReturn(applicantSolicitorDigital);
-    }
-
-    private void mockRespondentSolicitorDigital(boolean respondentSolicitorDigital) {
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class)))
-            .thenReturn(respondentSolicitorDigital);
-    }
+    //Todo
+    // check miniforma
+    // Check that additional documents added.
+    // Check vacate & hearing work together
+    // log.error("Case ID: {} with hearing date {}, for parties: {} contained no hearing documents.",
 
     private void mockLoadCaseReferenceList() {
         CaseReference caseReference = new CaseReference();
@@ -319,7 +363,7 @@ class ResendPaperHearingNotificationsTaskTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(ccdService.startEventForCaseWorker(AUTH_TOKEN, REFERENCE, CONTESTED.getCcdType(),
+        lenient().when(ccdService.startEventForCaseWorker(AUTH_TOKEN, REFERENCE, CONTESTED.getCcdType(),
             AMEND_CASE_CRON.getCcdType())).thenReturn(startEventResponse);
     }
 
@@ -373,85 +417,84 @@ class ResendPaperHearingNotificationsTaskTest {
         );
     }
 
-    private FinremCaseData buildFinremCaseData(UUID hearingId, UUID hearingItemId, ManageHearingsAction action,
-                                               LocalDate hearingDate, List<PartyOnCaseCollectionItem> partiesOnCase,
-                                               List<ManageHearingDocumentsCollectionItem> associatedHearingDocumentsCollection) {
+    private FinremCaseData buildFinremCaseData(UUID hearingId, ManageHearingsAction action,
+                                               List<ManageHearingDocumentsCollectionItem> associatedHearingDocumentsCollection,
+                                               List<ManageHearingsCollectionItem> hearings,
+                                               List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings) {
         return FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
-            .manageHearingsWrapper(ManageHearingsWrapper
-                .builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .manageHearingsActionSelection(action)
                 .workingHearingId(hearingId)
-                .hearings(List.of(
-                    ManageHearingsCollectionItem
-                        .builder()
-                        .id(hearingItemId)
-                        .value(Hearing
-                            .builder()
-                            .hearingType(HearingType.APPEAL_HEARING)
-                            .hearingDate(hearingDate)
-                            .hearingTime("10:00 AM")
-                            .hearingTimeEstimate("2 hours")
-                            .hearingMode(HearingMode.IN_PERSON)
-                            .additionalHearingInformation("Additional Info")
-                            .hearingCourtSelection(Court.builder()
-                                .region(Region.LONDON)
-                                .londonList(RegionLondonFrc.LONDON)
-                                .courtListWrapper(DefaultCourtListWrapper.builder()
-                                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
-                                    .build())
-                                .build())
-                            .partiesOnCase(partiesOnCase)
-                            .additionalHearingDocs(null)
-                            .build())
-                        .build()
-                ))
+                .hearings(hearings)
+                .vacatedOrAdjournedHearings(vacatedHearings)
                 .hearingDocumentsCollection(associatedHearingDocumentsCollection)
                 .build())
             .miniFormA(null)
             .build();
     }
 
-    // todo - consider one case data build method, passing hearing or vacated hearing collections.
-    // differences are its a vacated or adj item, and date is different
-    private FinremCaseData buildFinremCaseDataVacated(UUID hearingId, UUID hearingItemId, ManageHearingsAction action,
-                                               LocalDate vacatedOrAdjournedDate, LocalDate hearingDate,
-                                               List<PartyOnCaseCollectionItem> partiesOnCase,
-                                               List<ManageHearingDocumentsCollectionItem> associatedHearingDocumentsCollection) {
-        return FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONTESTED)
-            .manageHearingsWrapper(ManageHearingsWrapper
+    private List<VacatedOrAdjournedHearingsCollectionItem> buildVacatedHearingsCollection (
+        UUID hearingItemId, LocalDate vacatedOrAdjournedDate, LocalDate hearingDate, List<PartyOnCaseCollectionItem> partiesOnCase) {
+        return List.of(
+            VacatedOrAdjournedHearingsCollectionItem
                 .builder()
-                .manageHearingsActionSelection(action)
-                .workingHearingId(hearingId)
-                .vacatedOrAdjournedHearings(List.of(
-                    VacatedOrAdjournedHearingsCollectionItem
-                        .builder()
-                        .id(hearingItemId)
-                        .value(VacateOrAdjournedHearing
-                            .builder()
-                            .vacatedOrAdjournedDate(vacatedOrAdjournedDate)
-                            .hearingType(HearingType.APPEAL_HEARING)
-                            .hearingDate(hearingDate)
-                            .hearingTime("10:00 AM")
-                            .hearingTimeEstimate("2 hours")
-                            .hearingMode(HearingMode.IN_PERSON)
-                            .additionalHearingInformation("Additional Info")
-                            .hearingCourtSelection(Court.builder()
-                                .region(Region.LONDON)
-                                .londonList(RegionLondonFrc.LONDON)
-                                .courtListWrapper(DefaultCourtListWrapper.builder()
-                                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
-                                    .build())
-                                .build())
-                            .partiesOnCase(partiesOnCase)
-                            .additionalHearingDocs(null)
+                .id(hearingItemId)
+                .value(VacateOrAdjournedHearing
+                    .builder()
+                    .vacatedOrAdjournedDate(vacatedOrAdjournedDate)
+                    .hearingType(HearingType.APPEAL_HEARING)
+                    .hearingDate(hearingDate)
+                    .hearingTime("10:00 AM")
+                    .hearingTimeEstimate("2 hours")
+                    .hearingMode(HearingMode.IN_PERSON)
+                    .additionalHearingInformation("Additional Info")
+                    .hearingCourtSelection(Court.builder()
+                        .region(Region.LONDON)
+                        .londonList(RegionLondonFrc.LONDON)
+                        .courtListWrapper(DefaultCourtListWrapper.builder()
+                            .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
                             .build())
-                        .build()
-                ))
-                .hearingDocumentsCollection(associatedHearingDocumentsCollection)
-                .build())
-            .miniFormA(null)
-            .build();
+                        .build())
+                    .partiesOnCase(partiesOnCase)
+                    .additionalHearingDocs(null)
+                    .build())
+                .build()
+        );
+    }
+
+    private List<ManageHearingsCollectionItem> buildHearingsCollection(
+        UUID hearingItemId, LocalDate hearingDate, List<PartyOnCaseCollectionItem> partiesOnCase) {
+        return List.of(
+            ManageHearingsCollectionItem
+                .builder()
+                .id(hearingItemId)
+                .value(Hearing
+                    .builder()
+                    .hearingType(HearingType.APPEAL_HEARING)
+                    .hearingDate(hearingDate)
+                    .hearingTime("10:00 AM")
+                    .hearingTimeEstimate("2 hours")
+                    .hearingMode(HearingMode.IN_PERSON)
+                    .additionalHearingInformation("Additional Info")
+                    .hearingCourtSelection(Court.builder()
+                        .region(Region.LONDON)
+                        .londonList(RegionLondonFrc.LONDON)
+                        .courtListWrapper(DefaultCourtListWrapper.builder()
+                            .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                            .build())
+                        .build())
+                    .partiesOnCase(partiesOnCase)
+                    .additionalHearingDocs(null)
+                    .build())
+                .build()
+        );
+    }
+
+    private List<PartyOnCaseCollectionItem> buildPartiesOnCase(NotificationParty... parties) {
+        return List.of(parties).stream()
+            .map(p -> PartyOnCase.builder().role(p.getRole()).build())
+            .map(poc -> PartyOnCaseCollectionItem.builder().value(poc).build())
+            .collect(Collectors.toUnmodifiableList());
     }
 }

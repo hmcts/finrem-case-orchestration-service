@@ -254,9 +254,11 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
     }
 
     /**
-     * Returns filtered hearings and vacated hearings based on cut-off and bug period.
+     * Returns filtered hearings and vacated hearings based on cut-off and bug period.\
+     * Candidate cases have been identified, and these form the CSV.
      * The bug was fixed 3rd Feb at 11:38.  But this filter, by date, doesn't retrieve those vacated cases.
      * Vacate hearing notices sent before that time are being resent using a manual process.  See DFR-4546.
+     * Generally,
      *
      * @param caseData the case data
      * @return a record containing filtered hearings and vacated hearings
