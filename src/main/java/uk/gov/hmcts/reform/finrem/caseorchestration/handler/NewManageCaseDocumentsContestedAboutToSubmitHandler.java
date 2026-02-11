@@ -119,6 +119,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
                 documentHandler.replaceManagedDocumentsInCollectionType(caseData, managedCollections, false));
         }
     }
+
     private void clearActionSelection(FinremCaseData caseData) {
         caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentsActionSelection(null);
     }
