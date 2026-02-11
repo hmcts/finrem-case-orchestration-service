@@ -10,11 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * Scheduled task to find cases where GeneralEmailDataField is not empty and clear the field.
@@ -37,8 +35,6 @@ public class AmendNoteTask extends EncryptedCsvFileProcessingTask {
     private boolean taskEnabled;
     @Value("${cron.amendNoteTask.caseTypeId:FinancialRemedyContested}")
     private String caseTypeId;
-    @Value("${cron.amendNoteTask.batchSize:100}")
-    private int batchSize;
     @Setter
     @Value("${cron.amendNoteTask.caseListFileName:caserefs-encrypted.csv}")
     private String csvFile;
@@ -46,40 +42,6 @@ public class AmendNoteTask extends EncryptedCsvFileProcessingTask {
     protected AmendNoteTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService, SystemUserService systemUserService,
                             FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
-    }
-
-    @Override
-    protected List<CaseReference> getCaseReferences() {
-        log.info("Starting Task Cron....\n"
-                + "TASK_NAME: {}\n"
-                + "SUMMARY: {}\n"
-                + "TASK_ENABLED: {}\n"
-                + "BATCH_SIZE: {}\n"
-                + "CASE_TYPE_ID: {}\n"
-                + "CSV_FILE: {}\n"
-                + "SECRET KEY EXIST: {}",
-            getTaskName(),
-            getSummary(),
-            taskEnabled,
-            batchSize,
-            caseTypeId,
-            getCaseListFileName(),
-            secret != null && !secret.isEmpty());
-
-        if (secret.isEmpty()) {
-            log.error("Secret key is empty. Unable to decrypt the csv file. "
-                + "Please configure Azure Key Vault or set the secret key [cron-csv-file-decrypt-key].");
-            return List.of();
-        }
-
-        String caseListFileName = getCaseListFileName();
-        log.info("Getting case references for Task migration from csv file {}", caseListFileName);
-
-        CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
-        List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(caseListFileName, secret);
-
-        log.info("CaseReferences has {} cases.", caseReferences.size());
-        return caseReferences;
     }
 
     @Override
