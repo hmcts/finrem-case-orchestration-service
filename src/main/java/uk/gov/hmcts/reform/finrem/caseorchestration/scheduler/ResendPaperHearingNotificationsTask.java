@@ -242,7 +242,7 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
         CaseDocument vacateNotice = hearingCorrespondenceHelper.getCaseDocumentByTypeAndHearingUuid(
             CaseDocumentType.VACATE_HEARING_NOTICE, caseDetails.getData().getManageHearingsWrapper(), vacatedHearingItem.getId());
 
-        log.info("Case ID: {} Sending vacated hearing correspondence with Vacated date: {}. and hearing date: {}, for parties: {}",
+        log.info("Case ID: {} Sending vacated hearing correspondence with Vacated date: {} and hearing date: {}, for parties: {}",
             caseDetails.getId(), vacateHearing.getVacatedOrAdjournedDate(), vacateHearing.getHearingDate(), partiesToPost);
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
@@ -255,6 +255,8 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
 
     /**
      * Returns filtered hearings and vacated hearings based on cut-off and bug period.
+     * The bug was fixed 3rd Feb at 11:38.  But this filter, by date, doesn't retrieve those vacated cases.
+     * Vacate hearing notices sent before that time are being resent using a manual process.  See DFR-4546.
      *
      * @param caseData the case data
      * @return a record containing filtered hearings and vacated hearings

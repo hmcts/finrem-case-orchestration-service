@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
@@ -34,6 +35,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Par
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacatedOrAdjournedHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.ApplicantPartyListener;
@@ -48,7 +51,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,14 +67,18 @@ class ResendPaperHearingNotificationsTaskTest {
 
     private static final String AUTH_TOKEN = "testAuthToken";
     private static final String REFERENCE = "1234567890123456";
+    private static final String VACATE_NOTICE_TEST_ID = "VacateHearingNotice";
 
-    private static final LocalDate bug_for_hearing_in_scope_date = LocalDate.of(2026, 2, 23);;
+    // For hearings, Service manually processing hearings with dates up to 23:59 22nd Feb '26
+    private static final LocalDate hearing_date_for_hearings_in_scope = LocalDate.of(2026, 2, 23);;
     private static final LocalDate bug_for_hearing_outside_scope_date = LocalDate.of(2026, 2, 22);
-    private static final LocalDate bug_for_vacated_in_scope_date = LocalDate.of(2026, 2, 20);;
-    private static final LocalDate bug_for_vacated_outside_scope_date = LocalDate.of(2026, 2, 19);
-
-    private final LocalDate bugIntroductionDate = LocalDate.of(2026, 1, 20);
-    private final LocalDate bugFixDate = LocalDate.of(2026, 2, 3);
+    // For vacated hearings,  Service manually processing vacated notices for hearings with dates up to 23:59 19th Feb '26
+    // If the hearing dates are later than this, and the hearing was vacated when the bug was live (20th Jan to 3rd Feb),
+    // then we post vacate notices again.
+    private static final LocalDate hearing_date_for_vacated_hearings_in_scope = LocalDate.of(2026, 2, 20);
+    private static final LocalDate vacated_date_for_vacated_hearings_in_scope = LocalDate.of(2026, 1, 20);
+    private static final LocalDate hearing_date_vacated_hearings_outside_scope = LocalDate.of(2026, 2, 19);
+    private static final LocalDate vacated_date_vacated_hearings_outside_scope = LocalDate.of(2026, 2, 19);
 
     @TestLogs
     private final TestLogger logs = new TestLogger(ResendPaperHearingNotificationsTask.class);
@@ -124,14 +130,14 @@ class ResendPaperHearingNotificationsTaskTest {
     }
 
     // Todo -
-    // hearings only
-    // in scope only
-    // applicant only
+    // hearings only - write a new set of tests for vacated.
+    // in scope only - write a new set of tests for out of scope.
+    // applicant only, you could parameterise for each party. Write one for test for all parties,
     @Test
-    void givenApplicantActiveHearingPostalRequired_whenExecuteTask_thenApplicantNotificationTriggered() {
-        //TODO
+    void givenApplicantHearingNoticeRequired_whenExecuteTask_andDateInScope_thenEventPublishedForPosting() {
 
-        UUID hearingID = UUID.randomUUID();
+        // Arrange
+        UUID hearingId = UUID.randomUUID();
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.ADD_HEARING;
 
@@ -139,79 +145,43 @@ class ResendPaperHearingNotificationsTaskTest {
             .role(NotificationParty.APPLICANT.getRole())
             .label("ApplicantParty").build();
 
-
-        CaseDocument caseDocument = CaseDocument.builder()
-            .documentFilename("filename")
-            .documentUrl("url")
-            .documentBinaryUrl("binary")
-            .build();
-
-        List<ManageHearingDocumentsCollectionItem> associatedHearingDocumentsCollection = new ArrayList<ManageHearingDocumentsCollectionItem>();
-        associatedHearingDocumentsCollection.add(
-            ManageHearingDocumentsCollectionItem.builder()
-                .value(ManageHearingDocument.builder()
-                    .hearingId(hearingItemId)
-                    .hearingDocument(caseDocument)
-                    .build())
+        List<PartyOnCaseCollectionItem> partiesOnCase = List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(applicantParty)
                 .build()
         );
 
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONTESTED)
-            .manageHearingsWrapper(ManageHearingsWrapper
-                .builder()
-                .manageHearingsActionSelection(action)
-                .workingHearingId(hearingID)
-                .hearings(List.of(
-                    ManageHearingsCollectionItem
-                        .builder()
-                        .id(hearingItemId)
-                        .value(Hearing
-                            .builder()
-                            .hearingType(HearingType.APPEAL_HEARING)
-                            .hearingDate(bug_for_hearing_in_scope_date)
-                            .hearingTime("10:00 AM")
-                            .hearingTimeEstimate("2 hours")
-                            .hearingMode(HearingMode.IN_PERSON)
-                            .additionalHearingInformation("Additional Info")
-                            .hearingCourtSelection(Court.builder()
-                                .region(Region.LONDON)
-                                .londonList(RegionLondonFrc.LONDON)
-                                .courtListWrapper(DefaultCourtListWrapper.builder()
-                                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
-                                    .build())
-                                .build())
-                            .partiesOnCase(List.of(
-                                PartyOnCaseCollectionItem.builder()
-                                    .value(applicantParty)
-                                    .build()
-                            ))
-                            .build())
-                        .build()
-                ))
-                .hearingDocumentsCollection(associatedHearingDocumentsCollection)
-                .build())
-            .build();
+        CaseDocument hearingNotice = buildCaseDocument("hearingNotice");
 
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
-            .data(finremCaseData)
-            .id(Long.parseLong(REFERENCE))
-            .caseType(CaseType.CONTESTED)
-            .state(State.APPLICATION_ISSUED)
-            .build();
+        List<ManageHearingDocumentsCollectionItem> associatedHearingDocumentsCollection =
+            buildAssociatedHearingDocumentCollection(hearingItemId, hearingNotice);
+
+        FinremCaseData finremCaseData = buildFinremCaseData(
+            hearingId,
+            hearingItemId,
+            action,
+            hearing_date_for_hearings_in_scope,
+            partiesOnCase,
+            associatedHearingDocumentsCollection
+        );
+
+        FinremCaseDetails finremCaseDetails = buildCaseDetails(finremCaseData);
 
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
         mockApplicantSolicitorDigital(false);
-        mockLoadCaseReferenceList();
-        mockSystemUserToken();
-        mockSearchCases(caseDetails);
-        mockStartEvent(caseDetails);
+        orchestrateCronMocks(caseDetails);
 
+        // Act
         resendTask.run();
 
-        assertThat(logs.getInfos()).contains("Case ID: 1234567890123456 resending correspondence for 1 active hearings and 0 vacated hearings");
-        assertThat(logs.getInfos()).contains("Case ID: 1234567890123456 Sending active hearing correspondence with hearing date " + bug_for_hearing_in_scope_date + ", for parties: [APPLICANT]");
+        // Assert
+        assertThat(logs.getInfos()).contains(
+            "Case ID: 1234567890123456 resending correspondence for 1 active hearings and 0 vacated hearings");
+        assertThat(logs.getInfos()).contains(
+            "Case ID: 1234567890123456 Sending active hearing correspondence with hearing date "
+                + hearing_date_for_hearings_in_scope
+                + ", for parties: [APPLICANT]");
 
         ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
         verify(applicationEventPublisher).publishEvent(captor.capture());
@@ -223,9 +193,78 @@ class ResendPaperHearingNotificationsTaskTest {
                 SendCorrespondenceEvent::getEmailNotificationRequest,
                 SendCorrespondenceEvent::getEmailTemplate
             )
-            .containsExactly(AUTH_TOKEN, List.of(NotificationParty.APPLICANT), List.of(caseDocument), null, null);
+            .containsExactly(AUTH_TOKEN, List.of(NotificationParty.APPLICANT), List.of(hearingNotice), null, null);
+    }
 
+    // Todo - FIX THIS
+    // hearings only - write a new set of tests for vacated.
+    // in scope only - write a new set of tests for out of scope.
+    // applicant only, you could parameterise for each party. Write one for test for all parties,
+    @Test
+    void givenApplicantVacateNoticeRequired_whenExecuteTask_andDateInScope_thenEventPublishedForPosting() {
 
+        // Arrange
+        UUID hearingId = UUID.randomUUID();
+        UUID hearingItemId = UUID.randomUUID();
+        ManageHearingsAction action = ManageHearingsAction.VACATE_HEARING;
+
+        PartyOnCase applicantParty = PartyOnCase.builder()
+            .role(NotificationParty.APPLICANT.getRole())
+            .label("ApplicantParty").build();
+
+        List<PartyOnCaseCollectionItem> partiesOnCase = List.of(
+            PartyOnCaseCollectionItem.builder()
+                .value(applicantParty)
+                .build()
+        );
+
+        CaseDocument vacateNotice = buildCaseDocument(VACATE_NOTICE_TEST_ID);
+
+        List<ManageHearingDocumentsCollectionItem> associatedHearingDocumentsCollection =
+            buildAssociatedHearingDocumentCollection(hearingItemId, vacateNotice);
+
+        FinremCaseData finremCaseData = buildFinremCaseDataVacated(
+            hearingId,
+            hearingItemId,
+            action,
+            vacated_date_for_vacated_hearings_in_scope,
+            hearing_date_for_vacated_hearings_in_scope,
+            partiesOnCase,
+            associatedHearingDocumentsCollection
+        );
+
+        FinremCaseDetails finremCaseDetails = buildCaseDetails(finremCaseData);
+
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+
+        mockApplicantSolicitorDigital(false);
+        orchestrateCronMocks(caseDetails);
+
+        // Mock getting the Vacate Hearing Notice.
+        when(hearingCorrespondenceHelper.getCaseDocumentByTypeAndHearingUuid(
+            CaseDocumentType.VACATE_HEARING_NOTICE,
+            finremCaseData.getManageHearingsWrapper(),
+            hearingItemId))
+            .thenReturn(buildCaseDocument(VACATE_NOTICE_TEST_ID));
+
+        // Act
+        resendTask.run();
+
+        // Assert
+        assertThat(logs.getInfos()).contains("Case ID: 1234567890123456 resending correspondence for 0 active hearings and 1 vacated hearings");
+        assertThat(logs.getInfos()).contains("Case ID: 1234567890123456 Sending vacated hearing correspondence with Vacated date: " + vacated_date_for_vacated_hearings_in_scope + " and hearing date: " + hearing_date_for_vacated_hearings_in_scope + ", for parties: [APPLICANT]");
+
+        ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
+        verify(applicationEventPublisher).publishEvent(captor.capture());
+        assertThat(captor.getValue())
+            .extracting(
+                SendCorrespondenceEvent::getAuthToken,
+                SendCorrespondenceEvent::getNotificationParties,
+                SendCorrespondenceEvent::getDocumentsToPost,
+                SendCorrespondenceEvent::getEmailNotificationRequest,
+                SendCorrespondenceEvent::getEmailTemplate
+            )
+            .containsExactly(AUTH_TOKEN, List.of(NotificationParty.APPLICANT), List.of(vacateNotice), null, null);
     }
 
     @Test
@@ -252,6 +291,7 @@ class ResendPaperHearingNotificationsTaskTest {
     // Check that additional documents added.
     // test isUpdate required - hopefully using log.
     // log.error("Case ID: {} with hearing date {}, for parties: {} contained no hearing documents.",
+    // The vacated filters have extra dates that could mean a case is out of scope.  Consider.
 
 
 
@@ -293,5 +333,125 @@ class ResendPaperHearingNotificationsTaskTest {
             .total(1)
             .build();
         when(ccdService.getCaseByCaseId(REFERENCE, CaseType.CONTESTED, AUTH_TOKEN)).thenReturn(searchResult);
+    }
+
+    // Runs the common methods needed to mock a CRON job.
+    private void orchestrateCronMocks(CaseDetails caseDetails) {
+        mockLoadCaseReferenceList();
+        mockSystemUserToken();
+        mockSearchCases(caseDetails);
+        mockStartEvent(caseDetails);
+    }
+
+    private FinremCaseDetails buildCaseDetails(FinremCaseData finremCaseData) {
+        return FinremCaseDetails.builder()
+            .data(finremCaseData)
+            .id(Long.parseLong(REFERENCE))
+            .caseType(CaseType.CONTESTED)
+            .state(State.APPLICATION_ISSUED)
+            .build();
+    }
+
+    private CaseDocument buildCaseDocument(String description) {
+        return CaseDocument.builder()
+            .documentFilename(description + " filename")
+            .documentUrl(description + "url")
+            .documentBinaryUrl(description + "binary")
+            .build();
+    }
+
+    private List<ManageHearingDocumentsCollectionItem> buildAssociatedHearingDocumentCollection(
+        UUID hearingItemId, CaseDocument caseDocument) {
+
+        return List.of(
+            ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument.builder()
+                    .hearingId(hearingItemId)
+                    .hearingDocument(caseDocument)
+                    .build())
+                .build()
+        );
+    }
+
+    private FinremCaseData buildFinremCaseData(UUID hearingId, UUID hearingItemId, ManageHearingsAction action,
+                                               LocalDate hearingDate, List<PartyOnCaseCollectionItem> partiesOnCase,
+                                               List<ManageHearingDocumentsCollectionItem> associatedHearingDocumentsCollection) {
+        return FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .manageHearingsWrapper(ManageHearingsWrapper
+                .builder()
+                .manageHearingsActionSelection(action)
+                .workingHearingId(hearingId)
+                .hearings(List.of(
+                    ManageHearingsCollectionItem
+                        .builder()
+                        .id(hearingItemId)
+                        .value(Hearing
+                            .builder()
+                            .hearingType(HearingType.APPEAL_HEARING)
+                            .hearingDate(hearingDate)
+                            .hearingTime("10:00 AM")
+                            .hearingTimeEstimate("2 hours")
+                            .hearingMode(HearingMode.IN_PERSON)
+                            .additionalHearingInformation("Additional Info")
+                            .hearingCourtSelection(Court.builder()
+                                .region(Region.LONDON)
+                                .londonList(RegionLondonFrc.LONDON)
+                                .courtListWrapper(DefaultCourtListWrapper.builder()
+                                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                                    .build())
+                                .build())
+                            .partiesOnCase(partiesOnCase)
+                            .additionalHearingDocs(null)
+                            .build())
+                        .build()
+                ))
+                .hearingDocumentsCollection(associatedHearingDocumentsCollection)
+                .build())
+            .miniFormA(null)
+            .build();
+    }
+
+    // todo - consider one case data build method, passing hearing or vacated hearing collections.
+    // differences are its a vacated or adj item, and date is different
+    private FinremCaseData buildFinremCaseDataVacated(UUID hearingId, UUID hearingItemId, ManageHearingsAction action,
+                                               LocalDate vacatedOrAdjournedDate, LocalDate hearingDate,
+                                               List<PartyOnCaseCollectionItem> partiesOnCase,
+                                               List<ManageHearingDocumentsCollectionItem> associatedHearingDocumentsCollection) {
+        return FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .manageHearingsWrapper(ManageHearingsWrapper
+                .builder()
+                .manageHearingsActionSelection(action)
+                .workingHearingId(hearingId)
+                .vacatedOrAdjournedHearings(List.of(
+                    VacatedOrAdjournedHearingsCollectionItem
+                        .builder()
+                        .id(hearingItemId)
+                        .value(VacateOrAdjournedHearing
+                            .builder()
+                            .vacatedOrAdjournedDate(vacatedOrAdjournedDate)
+                            .hearingType(HearingType.APPEAL_HEARING)
+                            .hearingDate(hearingDate)
+                            .hearingTime("10:00 AM")
+                            .hearingTimeEstimate("2 hours")
+                            .hearingMode(HearingMode.IN_PERSON)
+                            .additionalHearingInformation("Additional Info")
+                            .hearingCourtSelection(Court.builder()
+                                .region(Region.LONDON)
+                                .londonList(RegionLondonFrc.LONDON)
+                                .courtListWrapper(DefaultCourtListWrapper.builder()
+                                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                                    .build())
+                                .build())
+                            .partiesOnCase(partiesOnCase)
+                            .additionalHearingDocs(null)
+                            .build())
+                        .build()
+                ))
+                .hearingDocumentsCollection(associatedHearingDocumentsCollection)
+                .build())
+            .miniFormA(null)
+            .build();
     }
 }
