@@ -43,7 +43,7 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         CaseDocument document = onlineFormDocumentService.generateContestedMiniForm(userAuthorisation, callbackRequest.getCaseDetails());
-        log.info("Issue application generated document {} for Case ID: {}", document, caseId);
+        log.info("{} - Generated contested mini form A {}", caseId, document);
         caseData.setMiniFormA(document);
 
         if (ObjectUtils.isEmpty(caseData.getDivorceCaseNumber())) {
