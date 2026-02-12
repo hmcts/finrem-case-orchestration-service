@@ -77,13 +77,15 @@ class ResendPaperHearingNotificationsTaskTest {
     private static final String REFERENCE = "1234567890123456";
     private static final String HEARING_NOTICE_TEST_ID = "hearingNotice";
     private static final String VACATE_NOTICE_TEST_ID = "VacateHearingNotice";
-    private static final String MINI_FORM_A_TEST_ID = "MiniFormA";
+    private static final String MINI_FORM_A_TEST_ID = "miniFormA";
 
-    // For hearings, Service are manually processing hearings with dates up to 23:59 22nd Feb '26
-    private static final LocalDate latest_hearing_date_for_hearings_in_scope = LocalDate.of(2026, 2, 23);;
-    // For vacated hearings,  Service manually processing vacated notices for hearings with dates up to 23:59 19th Feb '26
-    // If the hearing dates are later than this, and the hearing was vacated when the bug was live (20th Jan to 3rd Feb),
-    // then we post vacate notices again.
+    /*
+     * For hearings, Service are manually processing hearings with dates up to 23:59 22nd Feb '26.
+     * For vacated hearings,  Service manually processing vacated notices for hearings with dates up to 23:59 19th Feb '26.
+     * If the hearing dates are later than this, and the hearing was vacated when the bug was live (20th Jan to 3rd Feb),
+     * then we post vacate notices again.
+     */
+    private static final LocalDate latest_hearing_date_for_hearings_in_scope = LocalDate.of(2026, 2, 23);
     private static final LocalDate hearing_date_for_vacated_hearings_in_scope = LocalDate.of(2026, 2, 20);
     private static final LocalDate vacated_date_for_vacated_hearings_in_scope = LocalDate.of(2026, 1, 20);
 
@@ -116,7 +118,6 @@ class ResendPaperHearingNotificationsTaskTest {
             finremCaseDetailsMapper, notificationService,
             applicationEventPublisher, hearingCorrespondenceHelper);
 
-        // reflection hack to set the @Value fields if needed
         ReflectionTestUtils.setField(resendTask, "taskEnabled", true);
         ReflectionTestUtils.setField(resendTask, "csvFile", "resendPaperHearingNotifications-encrypted.csv");
         ReflectionTestUtils.setField(resendTask, "secret", "DUMMY_SECRET");
@@ -136,12 +137,13 @@ class ResendPaperHearingNotificationsTaskTest {
         verifyNoInteractions(applicantPartyListener);
     }
 
-    // Checks all parties, within NotificationParty; Applicant, Respondent and all four Interveners.
-    // Runs test twice, with and without mini form a.
+    /*
+     * Checks all parties, within NotificationParty; Applicant, Respondent and all four Interveners.
+     * Runs test twice.  Once with mini form A and additional documents. Once without.
+     */
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenHearingNoticeRequired_whenExecuteTask_andDateInScope_thenEventPublishedForPosting(boolean extraDocuments) {
-
         // Arrange
         UUID hearingId = UUID.randomUUID();
         UUID hearingItemId = UUID.randomUUID();
@@ -192,9 +194,9 @@ class ResendPaperHearingNotificationsTaskTest {
 
         // Assert
         assertThat(logs.getInfos()).contains(
-            "Case ID: 1234567890123456 resending correspondence for 1 active hearings and 0 vacated hearings");
+            "Case ID: " + REFERENCE + " resending correspondence for 1 active hearings and 0 vacated hearings");
         assertThat(logs.getInfos()).contains(
-            "Case ID: 1234567890123456 Sending active hearing correspondence with hearing date "
+            "Case ID: " + REFERENCE + " Sending active hearing correspondence with hearing date "
                 + latest_hearing_date_for_hearings_in_scope
                 + ", for parties: " + List.of(NotificationParty.values()));
 
@@ -222,7 +224,6 @@ class ResendPaperHearingNotificationsTaskTest {
     @ValueSource(strings = {"2026 1 20", "2026 2 2"})
     void givenVacateNoticeRequired_whenExecuteTask_andDateInScope_thenEventPublishedForPosting(
         @JavaTimeConversionPattern("uuuu M d") LocalDate boundaryVacatedDate) {
-
         // Arrange
         UUID hearingId = UUID.randomUUID();
         UUID hearingItemId = UUID.randomUUID();
@@ -268,8 +269,12 @@ class ResendPaperHearingNotificationsTaskTest {
         resendTask.run();
 
         // Assert
-        assertThat(logs.getInfos()).contains("Case ID: 1234567890123456 resending correspondence for 0 active hearings and 1 vacated hearings");
-        assertThat(logs.getInfos()).contains("Case ID: 1234567890123456 Sending vacated hearing correspondence with Vacated date: "
+        assertThat(logs.getInfos()).contains("Case ID: "
+            + REFERENCE
+            + " resending correspondence for 0 active hearings and 1 vacated hearings");
+        assertThat(logs.getInfos()).contains("Case ID: "
+            + REFERENCE
+            + " Sending vacated hearing correspondence with Vacated date: "
             + boundaryVacatedDate
             + " and hearing date: "
             + hearing_date_for_vacated_hearings_in_scope + ", for parties: "
@@ -290,7 +295,6 @@ class ResendPaperHearingNotificationsTaskTest {
 
     @Test
     void givenHearingAndVacatedNotices_whenExecuteTask_andDateInScope_thenBothEventsPublishedForPosting() {
-
         // Arrange
         UUID hearingId = UUID.randomUUID();
         UUID hearingItemId = UUID.randomUUID();
@@ -332,7 +336,7 @@ class ResendPaperHearingNotificationsTaskTest {
         // Act
         resendTask.run();
 
-        // Assert that all the scenarios show the logs to indicate that the subjects are out of scope.
+        // Assert
         assertThat(logs.getInfos()).contains(
             "Case ID: "
                 + REFERENCE
@@ -349,12 +353,13 @@ class ResendPaperHearingNotificationsTaskTest {
                 + vacated_date_for_vacated_hearings_in_scope
                 + " and hearing date: "
                 + hearing_date_for_vacated_hearings_in_scope
-                +", for parties: "
+                + ", for parties: "
                 + List.of(NotificationParty.values()));
     }
 
-
     /*
+     * CsvSource contains dates that mean that the subject cases don't process and a warning is logged.
+     *
      * serviceManualHearingNoticeCutOff is '2026 2 22'.
      * This means, for hearings, we should NOT process anything with a hearing date earlier than that.
      *
@@ -465,35 +470,20 @@ class ResendPaperHearingNotificationsTaskTest {
 
         // Assert
         assertThat(logs.getErrors()).contains(
-            "Case ID: 1234567890123456 with hearing date "
+            "Case ID: " + REFERENCE + " with hearing date "
                 + latest_hearing_date_for_hearings_in_scope
                 + ", for parties: "
                 + List.of(NotificationParty.values())
-                +" contained no hearing documents.");
+                + " contained no hearing documents.");
         verifyNoInteractions(hearingCorrespondenceHelper);
     }
-
-    // considered
-    // Test setup needs a list of hearings and vacated hearings
-    // look at getFilteredHearings and populate lists with date range. -
-    // The vacated filters have extra dates that could mean a case is out of scope.  Consider.
-    // Check "Case ID: {} resending correspondence for {} active hearings and {} vacated hearings" - core assertion
-    // and ("Case ID: {} Sending active hearing correspondence with hearing date {}, for parties: {}" or "Case ID: {} Sending vacated hearing correspondence with Vacated date: {}. and hearing date: {}, for parties: {}"
-    // Seems like proof of test success is a log saying "Notification event received for party {} on case {}" - used captor instead
-    // test isUpdate required - hopefully using log. - do fail
-    // Test log warn("Case ID: {} does not have hearings or vacated hearings within the cut off to post")
-    // Check no hearings outside date range included.
-    // Test that cover each of the is[party]PostalRequired methods, true and false - implicit if each party tested
-    // Check date boundaries
-    // log.error("Case ID: {} with hearing date {}, for parties: {} contained no hearing documents.",
-    // check miniforma
-    // Check that additional documents added.
-    // Check vacate & hearing work together
 
     private void mockLoadCaseReferenceList() {
         CaseReference caseReference = new CaseReference();
         caseReference.setCaseReference(REFERENCE);
-        when(caseReferenceCsvLoader.loadCaseReferenceList("resendPaperHearingNotifications-encrypted.csv", "DUMMY_SECRET"))
+        when(caseReferenceCsvLoader.loadCaseReferenceList(
+            "resendPaperHearingNotifications-encrypted.csv",
+            "DUMMY_SECRET"))
             .thenReturn(List.of(caseReference));
     }
 
@@ -583,7 +573,7 @@ class ResendPaperHearingNotificationsTaskTest {
             .build();
     }
 
-    private List<VacatedOrAdjournedHearingsCollectionItem> buildVacatedHearingsCollection (
+    private List<VacatedOrAdjournedHearingsCollectionItem> buildVacatedHearingsCollection(
         UUID hearingItemId, LocalDate vacatedOrAdjournedDate, LocalDate hearingDate, List<PartyOnCaseCollectionItem> partiesOnCase) {
         return List.of(
             VacatedOrAdjournedHearingsCollectionItem

@@ -200,7 +200,7 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
         List<CaseDocument> hearingDocumentsToPost =
             new ArrayList<>(caseDetails.getData().getManageHearingsWrapper().getAssociatedHearingDocuments(hearingItem.getId()));
 
-        // Some C=core hearing documents should always be there
+        // Core hearing documents should always be there
         if (hearingDocumentsToPost.isEmpty()) {
             log.error("Case ID: {} with hearing date {}, for parties: {} contained no hearing documents.",
                 caseDetails.getId(), hearing.getHearingDate(), partiesToPost);
