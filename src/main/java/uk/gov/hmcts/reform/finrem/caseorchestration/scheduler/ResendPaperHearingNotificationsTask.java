@@ -60,10 +60,10 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
     @Value("${cron.resendPaperHearingNotifications.caseListFileName:resendPaperHearingNotifications-encrypted.csv}")
     private String csvFile;
 
-    // Service manual hearing notification up until 23rd Feb 2026
-    private final LocalDate serviceManualHearingNoticeCutOff = LocalDate.of(2026, 2, 22);
-    // Service manual vacate notification up until 20th Feb 2026
-    private final LocalDate serviceManualVacatedNoticeCutOff = LocalDate.of(2026, 2, 19);
+    // Service manual hearing notification up until 23:59 2nd March 2026.
+    private final LocalDate serviceManualHearingNoticeCutOff = LocalDate.of(2026, 3, 02);
+    // Service manual vacate notification up until 23:59 2nd March 2026
+    private final LocalDate serviceManualVacatedNoticeCutOff = LocalDate.of(2026, 3, 02);
 
     private final LocalDate bugIntroductionDate = LocalDate.of(2026, 1, 20);
     private final LocalDate bugFixDate = LocalDate.of(2026, 2, 3);

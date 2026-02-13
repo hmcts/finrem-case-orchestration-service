@@ -80,13 +80,13 @@ class ResendPaperHearingNotificationsTaskTest {
     private static final String MINI_FORM_A_TEST_ID = "miniFormA";
 
     /*
-     * For hearings, Service are manually processing hearings with dates up to 23:59 22nd Feb '26.
-     * For vacated hearings,  Service manually processing vacated notices for hearings with dates up to 23:59 19th Feb '26.
-     * If the hearing dates are later than this, and the hearing was vacated when the bug was live (20th Jan to 3rd Feb),
-     * then we post vacate notices again.
+     * For hearings, Service are manually processing hearings with dates up to 23:59 2nd March '26.
+     * For vacated hearings,  Service manually processing vacated notices for hearings with dates up to 23:59 2nd March '26.
+     * If the hearing dates, on these vacated hearings, are after this date and the hearing was vacated when the bug was
+     * live (20th Jan to 3rd Feb), then we post vacate notices again.
      */
-    private static final LocalDate latest_hearing_date_for_hearings_in_scope = LocalDate.of(2026, 2, 23);
-    private static final LocalDate hearing_date_for_vacated_hearings_in_scope = LocalDate.of(2026, 2, 20);
+    private static final LocalDate hearing_date_for_hearings_in_scope = LocalDate.of(2026, 3, 3);
+    private static final LocalDate hearing_date_for_vacated_hearings_in_scope = LocalDate.of(2026, 3, 3);
     private static final LocalDate vacated_date_for_vacated_hearings_in_scope = LocalDate.of(2026, 1, 20);
 
     @TestLogs
@@ -169,7 +169,7 @@ class ResendPaperHearingNotificationsTaskTest {
 
         List<ManageHearingsCollectionItem> hearings = buildHearingsCollection(
             hearingItemId,
-            latest_hearing_date_for_hearings_in_scope,
+            hearing_date_for_hearings_in_scope,
             partiesOnCase,
             additionalDocumentCollection
             );
@@ -197,7 +197,7 @@ class ResendPaperHearingNotificationsTaskTest {
             "Case ID: " + REFERENCE + " resending correspondence for 1 active hearings and 0 vacated hearings");
         assertThat(logs.getInfos()).contains(
             "Case ID: " + REFERENCE + " Sending active hearing correspondence with hearing date "
-                + latest_hearing_date_for_hearings_in_scope
+                + hearing_date_for_hearings_in_scope
                 + ", for parties: " + List.of(NotificationParty.values()));
 
         List<CaseDocument> expectedList = extraDocuments
@@ -218,8 +218,8 @@ class ResendPaperHearingNotificationsTaskTest {
 
     // Checks all parties, within NotificationParty; Applicant, Respondent and all four Interveners.
     // The Hearing date for the vacated hearing must be hearing_date_for_vacated_hearings_in_scope.
-    // 20th Jan 2026 is the earliest vacated date we consider for processing.
-    // 2nd Feb 2026 is the latest vacated date we consider for processing.
+    // 20th Jan 2026 is the earliest vacated date we consider for processing (bug went in).
+    // 2nd Feb 2026 is the latest vacated date we consider for processing (bug fixed on the 3rd).
     @ParameterizedTest
     @ValueSource(strings = {"2026 1 20", "2026 2 2"})
     void givenVacateNoticeRequired_whenExecuteTask_andDateInScope_thenEventPublishedForPosting(
@@ -312,7 +312,7 @@ class ResendPaperHearingNotificationsTaskTest {
 
         List<ManageHearingsCollectionItem> hearings =
             buildHearingsCollection(hearingItemId,
-                latest_hearing_date_for_hearings_in_scope,
+                hearing_date_for_hearings_in_scope,
                 partiesOnCase,
                 additionalDocumentCollection
             );
@@ -344,7 +344,7 @@ class ResendPaperHearingNotificationsTaskTest {
             "Case ID: "
                 + REFERENCE
                 + " Sending active hearing correspondence with hearing date "
-                + latest_hearing_date_for_hearings_in_scope
+                + hearing_date_for_hearings_in_scope
                 + ", for parties: "
                 + List.of(NotificationParty.values()),
             "Case ID: "
@@ -360,10 +360,10 @@ class ResendPaperHearingNotificationsTaskTest {
     /*
      * CsvSource contains dates that mean that the subject cases don't process and a warning is logged.
      *
-     * serviceManualHearingNoticeCutOff is '2026 2 22'.
+     * serviceManualHearingNoticeCutOff is '2026 3 2'.
      * This means, for hearings, we should NOT process anything with a hearing date earlier than that.
      *
-     * serviceManualVacatedNoticeCutOff is '2026 2 19'.
+     * serviceManualVacatedNoticeCutOff is '2026 3 2'.
      * This means, for vacated hearings, we should NOT process anything with a hearing date earlier than that.
      *
      * bugIntroductionDate is '2026 1 20'.
@@ -376,8 +376,8 @@ class ResendPaperHearingNotificationsTaskTest {
     */
     @ParameterizedTest
     @CsvSource(value = {
-        "'2026 2 22', '2026 2 19', '2026 1 19'", // Hearing dates too late, and vacated date Just too early
-        "'2026 2 22', '2026 2 19', '2026 2 3'" // Hearing dates too late, and vacated date Just too late
+        "'2026 3 1', '2026 3 1', '2026 1 19'", // Hearing dates too early (service sending), and vacated date before bug
+        "'2026 02 28', '2026 2 28', '2026 2 3'" // Hearing dates too early (service sending), and vacated date after bug
     })
     void givenNoCandidateHearings_whenIsUpdatedRequired_thenWarnLogged(
         @JavaTimeConversionPattern("uuuu M d") LocalDate hearingDateForHearingTooEarly,
@@ -389,7 +389,7 @@ class ResendPaperHearingNotificationsTaskTest {
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.VACATE_HEARING;
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(NotificationParty.APPLICANT);
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(NotificationParty.values());
 
         List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings =
             buildVacatedHearingsCollection(hearingItemId,
@@ -444,7 +444,7 @@ class ResendPaperHearingNotificationsTaskTest {
 
         List<ManageHearingsCollectionItem> hearings = buildHearingsCollection(
             hearingItemId,
-            latest_hearing_date_for_hearings_in_scope,
+            hearing_date_for_hearings_in_scope,
             partiesOnCase,
             additionalDocumentCollection
         );
@@ -471,7 +471,7 @@ class ResendPaperHearingNotificationsTaskTest {
         // Assert
         assertThat(logs.getErrors()).contains(
             "Case ID: " + REFERENCE + " with hearing date "
-                + latest_hearing_date_for_hearings_in_scope
+                + hearing_date_for_hearings_in_scope
                 + ", for parties: "
                 + List.of(NotificationParty.values())
                 + " contained no hearing documents.");
