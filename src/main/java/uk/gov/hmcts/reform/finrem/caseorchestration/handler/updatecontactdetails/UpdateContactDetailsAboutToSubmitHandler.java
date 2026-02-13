@@ -68,6 +68,11 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
 
         Optional<ContactDetailsWrapper> contactDetailsWrapper = Optional.ofNullable(finremCaseData.getContactDetailsWrapper());
 
+        // TODO: Determine if the update includes a representation change, and if so, handle the representation change
+        //  logic if update to solictor is made. Confirm if NOC logic should be triggered for all contact detail updates,
+        //  or just those that include a representation change.
+
+
         boolean includeRepresentationChange = contactDetailsWrapper
             .map(wrapper -> wrapper.getUpdateIncludesRepresentativeChange() == YesOrNo.YES)
             .orElse(false);
