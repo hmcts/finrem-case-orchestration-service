@@ -8,12 +8,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
-
-import java.util.Collections;
 
 @Service
 @Slf4j
@@ -72,7 +69,6 @@ public class RemoveVacatedHearing extends EncryptedCsvFileProcessingTask {
 
         log.info("vacatedOrAdjournedHearings: {}", caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings());
         log.info("vacatedOrAdjournedHearingTabItems: {}", caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingTabItems());
-
 
         log.info("Cleared vacatedOrAdjournedHearings for case id {}", finremCaseDetails.getId());
     }
