@@ -122,6 +122,7 @@ class ResendPaperHearingNotificationsTaskTest {
         ReflectionTestUtils.setField(resendTask, "csvFile", "resendPaperHearingNotifications-encrypted.csv");
         ReflectionTestUtils.setField(resendTask, "secret", "DUMMY_SECRET");
         ReflectionTestUtils.setField(resendTask, "caseTypeId", CaseType.CONTESTED.getCcdType());
+        ReflectionTestUtils.setField(resendTask, "dryRun", false);
     }
 
     @Test
@@ -293,9 +294,15 @@ class ResendPaperHearingNotificationsTaskTest {
             .containsExactly(AUTH_TOKEN, List.of(NotificationParty.values()), List.of(vacateNotice), null, null);
     }
 
-    @Test
-    void givenHearingAndVacatedNotices_whenExecuteTask_andDateInScope_thenBothEventsPublishedForPosting() {
+    /*
+     * Checks that when both hearing and vacate notices are in scope, both events are published for posting
+     * As this test covers most logs, also checks that during a dry run, the logs indicate that.
+     */
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenHearingAndVacatedNotices_whenExecuteTask_andDateInScope_thenBothEventsPublishedForPosting(boolean dryRun) {
         // Arrange
+        ReflectionTestUtils.setField(resendTask, "dryRun", dryRun);
         UUID hearingId = UUID.randomUUID();
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.VACATE_HEARING;
@@ -337,17 +344,29 @@ class ResendPaperHearingNotificationsTaskTest {
         resendTask.run();
 
         // Assert
-        assertThat(logs.getInfos()).contains(
-            "Case ID: "
+        List<String> expectedLogs = getExpectedLogsWhenDryRunOrNot(dryRun);
+        if (dryRun)
+            assertThat(logs.getTraces()).containsAll(expectedLogs);
+        else
+            assertThat(logs.getInfos()).containsAll(expectedLogs);
+    }
+
+    private static List<String> getExpectedLogsWhenDryRunOrNot(boolean dryRun) {
+        String dryRunPrefixIfNeeded = dryRun ? "[DRY RUN] " : "";
+        List<String> expectedLogs = List.of(
+            dryRunPrefixIfNeeded
+                + "Case ID: "
                 + REFERENCE
                 + " resending correspondence for 1 active hearings and 1 vacated hearings",
-            "Case ID: "
+            dryRunPrefixIfNeeded
+                + "Case ID: "
                 + REFERENCE
                 + " Sending active hearing correspondence with hearing date "
                 + hearing_date_for_hearings_in_scope
                 + ", for parties: "
                 + List.of(NotificationParty.values()),
-            "Case ID: "
+            dryRunPrefixIfNeeded
+                + "Case ID: "
                 + REFERENCE
                 + " Sending vacated hearing correspondence with Vacated date: "
                 + vacated_date_for_vacated_hearings_in_scope
@@ -355,6 +374,7 @@ class ResendPaperHearingNotificationsTaskTest {
                 + hearing_date_for_vacated_hearings_in_scope
                 + ", for parties: "
                 + List.of(NotificationParty.values()));
+        return expectedLogs;
     }
 
     /*

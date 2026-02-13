@@ -59,6 +59,8 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
     private String caseTypeId;
     @Value("${cron.resendPaperHearingNotifications.caseListFileName:resendPaperHearingNotifications-encrypted.csv}")
     private String csvFile;
+    @Value("${cron.dryRun:false}")
+    private boolean dryRun;
 
     // Service manual hearing notification up until 23:59 2nd March 2026.
     private final LocalDate serviceManualHearingNoticeCutOff = LocalDate.of(2026, 3, 02);
@@ -131,7 +133,7 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
         List<ManageHearingsCollectionItem> hearings = hearingsResult.hearings();
         List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings = hearingsResult.vacatedHearings();
 
-        log.info("Case ID: {} resending correspondence for {} active hearings and {} vacated hearings",
+        logInfoOrTrace("Case ID: {} resending correspondence for {} active hearings and {} vacated hearings",
             finremCaseDetails.getId(), hearings.size(), vacatedHearings.size());
 
         hearings.forEach(hearing -> processHearingPaperNotification(finremCaseDetails, hearing, systemUserToken));
@@ -220,7 +222,7 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
                 .toList()
         );
 
-        log.info("Case ID: {} Sending active hearing correspondence with hearing date {}, for parties: {}",
+        logInfoOrTrace("Case ID: {} Sending active hearing correspondence with hearing date {}, for parties: {}",
             caseDetails.getId(), hearing.getHearingDate(), partiesToPost);
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
@@ -242,15 +244,19 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
         CaseDocument vacateNotice = hearingCorrespondenceHelper.getCaseDocumentByTypeAndHearingUuid(
             CaseDocumentType.VACATE_HEARING_NOTICE, caseDetails.getData().getManageHearingsWrapper(), vacatedHearingItem.getId());
 
-        log.info("Case ID: {} Sending vacated hearing correspondence with Vacated date: {} and hearing date: {}, for parties: {}",
-            caseDetails.getId(), vacateHearing.getVacatedOrAdjournedDate(), vacateHearing.getHearingDate(), partiesToPost);
+        logInfoOrTrace(
+            "Case ID: {} Sending vacated hearing correspondence with Vacated date: {} and hearing date: {}, for parties: {}",
+            caseDetails.getId(), vacateHearing.getVacatedOrAdjournedDate(), vacateHearing.getHearingDate(), partiesToPost)
+        ;
 
-        applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
-            .notificationParties(partiesToPost)
-            .documentsToPost(List.of(vacateNotice))
-            .caseDetails(caseDetails)
-            .authToken(authToken)
-            .build());
+        if (!dryRun) {
+            applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
+                .notificationParties(partiesToPost)
+                .documentsToPost(List.of(vacateNotice))
+                .caseDetails(caseDetails)
+                .authToken(authToken)
+                .build());
+        }
     }
 
     /**
@@ -306,5 +312,13 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
             case INTERVENER_FOUR -> isIntervenerFourPostalRequired(caseDetails);
             default -> false;
         };
+    }
+
+    private void logInfoOrTrace(String message, Object... args) {
+        if (dryRun) {
+            log.trace("[DRY RUN] " + message, args);
+        } else {
+            log.info(message, args);
+        }
     }
 }
