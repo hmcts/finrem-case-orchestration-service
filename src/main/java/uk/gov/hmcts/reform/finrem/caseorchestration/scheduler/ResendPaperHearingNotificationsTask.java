@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getNotificationPartyFromRole;
 
 /**
@@ -260,7 +261,7 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
     }
 
     /**
-     * Returns filtered hearings and vacated hearings based on cut-off and bug period.\
+     * Returns filtered hearings and vacated hearings based on cut-off and bug period.
      * Candidate cases have been identified, and these form the CSV.
      * The bug was fixed 3rd Feb at 11:38.  But this filter, by date, doesn't retrieve those vacated cases.
      * Vacate hearing notices sent before that time are being resent using a manual process.  See DFR-4546.
@@ -277,8 +278,8 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
                 .toList();
 
         List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings =
-            Optional.ofNullable(caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings())
-                .orElse(List.of()).stream()
+            emptyIfNull(caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings())
+                .stream()
                 .filter(hearingItem -> hearingItem.getValue().getHearingDate().isAfter(serviceManualVacatedNoticeCutOff))
                 .filter(hearingItem ->
                     !hearingItem.getValue().getVacatedOrAdjournedDate().isBefore(bugIntroductionDate) // on or after introduction
