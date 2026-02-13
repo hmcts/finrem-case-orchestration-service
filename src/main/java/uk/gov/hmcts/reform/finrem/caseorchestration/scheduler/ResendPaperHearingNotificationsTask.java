@@ -226,14 +226,16 @@ public class ResendPaperHearingNotificationsTask extends EncryptedCsvFileProcess
         logInfoOrTrace("Case ID: {} Sending active hearing correspondence with hearing date {}, for parties: {}",
             caseDetails.getId(), hearing.getHearingDate(), partiesToPost);
 
-        applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
-            .notificationParties(partiesToPost)
-            .emailNotificationRequest(null)
-            .emailTemplate(null)
-            .documentsToPost(hearingDocumentsToPost)
-            .caseDetails(caseDetails)
-            .authToken(authToken)
-            .build());
+        if (!dryRun) {
+            applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
+                .notificationParties(partiesToPost)
+                .emailNotificationRequest(null)
+                .emailTemplate(null)
+                .documentsToPost(hearingDocumentsToPost)
+                .caseDetails(caseDetails)
+                .authToken(authToken)
+                .build());
+        }
     }
 
     private void processVacatedHearingPaperNotification(FinremCaseDetails caseDetails,
