@@ -98,6 +98,8 @@ public class AssignPartiesAccessService {
 
     private void grantAccess(Long caseId, String email, String orgId, String caseRole) {
         Optional<String> userId = prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
-        userId.ifPresent(s -> assignCaseAccessService.grantCaseRoleToUser(caseId, s, caseRole, orgId));
+        userId.ifPresentOrElse(s -> assignCaseAccessService.grantCaseRoleToUser(caseId, s, caseRole, orgId),
+            () -> log.info("{} - Attempting to grant {} but system is unable find any user with email address {} ", caseId,
+                email, caseRole));
     }
 }
