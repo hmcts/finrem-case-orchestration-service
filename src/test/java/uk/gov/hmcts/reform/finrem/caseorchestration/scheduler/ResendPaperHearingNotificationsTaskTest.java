@@ -348,8 +348,9 @@ class ResendPaperHearingNotificationsTaskTest {
         if (dryRun) {
             assertThat(logs.getTraces()).containsAll(expectedLogs);
             verifyNoInteractions(applicationEventPublisher);
-        } else
+        } else {
             assertThat(logs.getInfos()).containsAll(expectedLogs);
+        }
     }
 
     private static List<String> getExpectedLogsWhenDryRunOrNot(boolean dryRun) {
