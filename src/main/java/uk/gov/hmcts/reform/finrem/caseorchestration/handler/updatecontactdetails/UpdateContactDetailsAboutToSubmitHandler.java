@@ -68,9 +68,6 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
 
         Optional<ContactDetailsWrapper> contactDetailsWrapper = Optional.ofNullable(finremCaseData.getContactDetailsWrapper());
 
-        // TODO: Check if obsolete
-
-
         boolean includeRepresentationChange = contactDetailsWrapper
             .map(wrapper -> wrapper.getUpdateIncludesRepresentativeChange() == YesOrNo.YES)
             .orElse(false);
