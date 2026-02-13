@@ -14,28 +14,26 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 @Service
 public class IssueApplicationConsentedAboutToStartHandler extends FinremCallbackHandler {
 
-    private final OnStartDefaultValueService service;
+    private final OnStartDefaultValueService onStartDefaultValueService;
 
     public IssueApplicationConsentedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                        OnStartDefaultValueService service) {
+                                                        OnStartDefaultValueService onStartDefaultValueService) {
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.onStartDefaultValueService = onStartDefaultValueService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.ISSUE_APPLICATION.equals(eventType));
+            && EventType.ISSUE_APPLICATION.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
-        log.info("Handling consented {} about to start callback for Case ID: {}",
-            callbackRequest.getEventType(), callbackRequest.getCaseDetails().getId());
-        service.defaultIssueDate(callbackRequest);
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
+        onStartDefaultValueService.defaultIssueDate(callbackRequest);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData()).build();
     }
