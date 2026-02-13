@@ -150,4 +150,26 @@ public class ManageHearingsWrapper {
             .map(ManageHearingDocument::getHearingDocument)
             .toList();
     }
+
+    /**
+     * Retrieves a list of hearing-related documents associated with the specified hearing ID.
+     * The method filters the hearingDocumentsCollection to include only those documents
+     * linked to the provided hearing ID. If either the hearing ID or the hearingDocumentsCollection
+     * is null, an empty list is returned.
+     *
+     * @param hearingId the UUID of the hearing whose associated documents are to be retrieved
+     * @return a list of {@link CaseDocument} objects corresponding to the given hearing ID,
+     *         or an empty list if no matching documents are found or if the input data is null
+     */
+    @JsonIgnore
+    public List<CaseDocument> getAssociatedHearingDocuments(UUID hearingId) {
+        if (hearingId == null || hearingDocumentsCollection == null) {
+            return Collections.emptyList();
+        }
+        return hearingDocumentsCollection.stream()
+            .map(ManageHearingDocumentsCollectionItem::getValue)
+            .filter(doc -> hearingId.equals(doc.getHearingId()))
+            .map(ManageHearingDocument::getHearingDocument)
+            .toList();
+    }
 }
