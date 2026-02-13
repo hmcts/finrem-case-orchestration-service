@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.issueapplication.IssueApplicationContestedEmailCorresponder;
 
 @Slf4j
@@ -16,10 +17,14 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
     private final IssueApplicationContestedEmailCorresponder corresponder;
 
+    private final AssignPartiesAccessService assignPartiesAccessService;
+
     public IssueApplicationContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     IssueApplicationContestedEmailCorresponder corresponder) {
+                                                     IssueApplicationContestedEmailCorresponder corresponder,
+                                                     AssignPartiesAccessService assignPartiesAccessService) {
         super(finremCaseDetailsMapper);
         this.corresponder = corresponder;
+        this.assignPartiesAccessService = assignPartiesAccessService;
     }
 
     @Override
@@ -37,6 +42,8 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
         validateCaseData(callbackRequest);
 
         corresponder.sendCorrespondence(callbackRequest.getCaseDetails());
+
+        assignPartiesAccessService.grantRespondentSolicitor(callbackRequest.getCaseDetails().getData());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData()).build();
