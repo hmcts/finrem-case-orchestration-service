@@ -18,7 +18,7 @@ public class AssignPartiesAccessService {
 
     public void grantApplicantSolicitor(FinremCaseData finremCaseData) {
         if (finremCaseData.isApplicantRepresentedByASolicitor()) {
-            finremCaseData
+
         } else {
             log.info("No applicant represented by a solicitor");
         }
