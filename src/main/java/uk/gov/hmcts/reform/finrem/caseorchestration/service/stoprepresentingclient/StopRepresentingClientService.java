@@ -369,7 +369,7 @@ public class StopRepresentingClientService {
             if (BarristerParty.RESPONDENT.equals(barristerParty)) {
                 notifyRespondentBarrister(info, b);
             }
-            IntStream.range(1, 4).forEach(i -> {
+            IntStream.range(1, 5).forEach(i -> {
                 if (BarristerParty.getIntervenerBarristerByIndex(i).equals(barristerParty)) {
                     notifyIntervenerBarrister(info, i, b);
                 }
