@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,11 +37,15 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
@@ -416,6 +421,116 @@ public class GeneralApplicationServiceTest {
             "Please complete the General Application. No information has been entered for this application."
         );
         verifyNoInteractions(bulkPrintDocumentService);
+    }
+
+    @Test
+    void givenNoGeneralApplicationsBefore_whenCheckIfApplicationCompleted_thenValidatesAllCurrentGAs() {
+        // Given
+        FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(
+                Long.valueOf(CASE_ID), mock(CaseType.class))
+            .build();
+        List<String> errors = new ArrayList<>();
+
+        List<GeneralApplicationsCollection> generalApplicationsCollection = List.of(GeneralApplicationsCollection
+            .builder()
+            .value(GeneralApplicationItems
+                .builder()
+                .generalApplicationDocument(caseDocument("generalApplicationDocument.pdf"))
+                .generalApplicationDraftOrder(caseDocument("generalApplicationDraftOrder.docx"))
+                .gaSupportDocuments(List.of(GeneralApplicationSupportingDocumentData
+                    .builder()
+                    .value(GeneralApplicationSuportingDocumentItems
+                        .builder()
+                        .supportDocument(caseDocument("generalApplicationSupportingDocument.docx"))
+                        .build())
+                    .build()))
+                .build())
+            .build());
+
+        finremCaseDetails.getData().getGeneralApplicationWrapper()
+            .setGeneralApplications(generalApplicationsCollection);
+
+        // When
+        generalApplicationService.checkIfApplicationCompleted(finremCaseDetails, errors, generalApplicationsCollection,
+            null, AUTH_TOKEN);
+
+        // Then
+        verify(bulkPrintDocumentService, times(3))
+            .validateEncryptionOnUploadedDocument(any(CaseDocument.class),
+                eq(CASE_ID), eq(errors), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    void givenChangedExistingGaAndAdditionalSupportDoc_whenCheckIfApplicationCompleted_thenValidatesChangedGaDocsOnly() {
+        // Given
+        FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(
+                Long.valueOf(CASE_ID), mock(CaseType.class))
+            .build();
+        List<String> errors = new ArrayList<>();
+
+        UUID gaId = UUID.randomUUID();
+
+        // BEFORE: ga + draft + 1 support doc
+        List<GeneralApplicationsCollection> generalApplicationsBefore = List.of(
+            GeneralApplicationsCollection.builder()
+                .id(gaId)
+                .value(GeneralApplicationItems.builder()
+                    .generalApplicationDocument(caseDocument("generalApplicationDocument.pdf")) // same
+                    .generalApplicationDraftOrder(caseDocument("generalApplicationDraftOrder.docx")) // will change
+                    .gaSupportDocuments(List.of(
+                        GeneralApplicationSupportingDocumentData.builder()
+                            .value(GeneralApplicationSuportingDocumentItems.builder()
+                                .supportDocument(caseDocument("generalApplicationSupportingDocument-1.docx")) // existing
+                                .build())
+                            .build()
+                    ))
+                    .build())
+                .build()
+        );
+
+        // CURRENT: draft order replaced + extra support doc added (so id changes)
+        List<GeneralApplicationsCollection> generalApplicationsCurrent = List.of(
+            GeneralApplicationsCollection.builder()
+                .id(gaId)
+                .value(GeneralApplicationItems.builder()
+                    .generalApplicationDocument(caseDocument("generalApplicationDocument.pdf")) // unchanged
+                    .generalApplicationDraftOrder(caseDocument("generalApplicationDraftOrder-UPDATED.docx")) // changed
+                    .gaSupportDocuments(List.of(
+                        GeneralApplicationSupportingDocumentData.builder()
+                            .value(GeneralApplicationSuportingDocumentItems.builder()
+                                .supportDocument(caseDocument("generalApplicationSupportingDocument-1.docx")) // existing
+                                .build())
+                            .build(),
+                        GeneralApplicationSupportingDocumentData.builder()
+                            .value(GeneralApplicationSuportingDocumentItems.builder()
+                                .supportDocument(caseDocument("generalApplicationSupportingDocument-2-NEW.docx")) // new
+                                .build())
+                            .build()
+                    ))
+                    .build())
+                .build()
+        );
+
+        finremCaseDetails.getData().getGeneralApplicationWrapper()
+            .setGeneralApplications(generalApplicationsCurrent);
+
+        // When
+        generalApplicationService.checkIfApplicationCompleted(finremCaseDetails, errors,
+            generalApplicationsCurrent, generalApplicationsBefore, AUTH_TOKEN);
+
+        // Then
+        ArgumentCaptor<CaseDocument> captor = ArgumentCaptor.forClass(CaseDocument.class);
+        verify(bulkPrintDocumentService, times(4))
+            .validateEncryptionOnUploadedDocument(captor.capture(), eq(CASE_ID), eq(errors), eq(AUTH_TOKEN));
+
+        assertThat(captor.getAllValues())
+            .extracting(CaseDocument::getDocumentFilename)
+            .containsExactlyInAnyOrder(
+                "generalApplicationDocument.pdf",
+                "generalApplicationDraftOrder-UPDATED.docx",
+                "generalApplicationSupportingDocument-1.docx",
+                "generalApplicationSupportingDocument-2-NEW.docx"
+            );
     }
 
     private DynamicRadioList buildDynamicList(String role) {
