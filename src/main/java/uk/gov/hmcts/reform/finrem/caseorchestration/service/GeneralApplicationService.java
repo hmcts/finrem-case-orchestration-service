@@ -507,9 +507,6 @@ public class GeneralApplicationService {
     }
 
     private String buildDocumentStateSignature(GeneralApplicationsCollection ga) {
-        if (ga == null || ga.getValue() == null) {
-            return "";
-        }
 
         String main = extractDocumentUrl(ga.getValue().getGeneralApplicationDocument());
         String draft = extractDocumentUrl(ga.getValue().getGeneralApplicationDraftOrder());
