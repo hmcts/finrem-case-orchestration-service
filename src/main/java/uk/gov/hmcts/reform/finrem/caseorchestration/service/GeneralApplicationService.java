@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -228,7 +229,7 @@ public class GeneralApplicationService {
     }
 
     private void processGeneralApplicationForMainLititgants(FinremCaseData caseData,
-                                                                   List<GeneralApplicationsCollection> applicationCollection) {
+                                                            List<GeneralApplicationsCollection> applicationCollection) {
         List<GeneralApplicationsCollection> appRespCollection = new ArrayList<>();
         appRespCollection.addAll(applicationCollection);
         appRespCollection.forEach(ga -> {
@@ -249,8 +250,8 @@ public class GeneralApplicationService {
     }
 
     private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(FinremCaseDetails caseDetails, String loggedInUserCaseRole,
-         List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
-         FinremCaseData caseData, FinremCaseData caseDataBefore) {
+                                                                                       List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
+                                                                                       FinremCaseData caseData, FinremCaseData caseDataBefore) {
         switch (loggedInUserCaseRole) {
             case INTERVENER1 -> {
                 interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(
@@ -408,7 +409,18 @@ public class GeneralApplicationService {
         generalApplicationsCategoriser.uncategoriseDuplicatedCollections(caseData);
     }
 
-    public void checkIfApplicationCompleted(FinremCaseDetails caseDetails, List<String> errors,
+    /**
+     * Validates if the general application is completed and checks for document encryption.
+     * Adds error messages to the provided list if validation fails.
+     *
+     * @param caseDetails               the details of the current case
+     * @param errors                    the list to collect validation errors
+     * @param generalApplications       the current general applications
+     * @param generalApplicationsBefore the previous state of general applications
+     * @param userAuthorisation         the user authorisation token
+     */
+    public void checkIfApplicationCompleted(FinremCaseDetails caseDetails,
+                                            List<String> errors,
                                             List<GeneralApplicationsCollection> generalApplications,
                                             List<GeneralApplicationsCollection> generalApplicationsBefore,
                                             String userAuthorisation) {
@@ -416,102 +428,108 @@ public class GeneralApplicationService {
         String caseId = String.valueOf(caseDetails.getId());
 
         if (CollectionUtils.isEmpty(generalApplications)) {
-            log.info("Please complete the general application for Case ID: {}", caseDetails.getId());
             errors.add("Please complete the General Application. No information has been entered for this application.");
             return;
         }
 
         log.info("General application size {} for CaseId {}", generalApplications.size(), caseId);
 
-        /*
-         * We only want to validate encryption for GAs that are:
-         *  - newly added, OR
-         *  - have had their documents modified
-         *
-         * We do NOT want to validate every GA every time because:
-         *  - that triggers multiple dm-store downloads
-         *  - that can exceed CCD's 10 second mid-event timeout
-         */
-        List<GeneralApplicationsCollection> generalApplicationsToValidate = generalApplications;
-
-        if (CollectionUtils.isNotEmpty(generalApplicationsBefore)) {
-
-            /*
-             * Build a lookup map of:
-             *   GA Collection Item ID  ->  id of its document state (before)
-             */
-            Map<UUID, String> previousDocumentStateByGaId = generalApplicationsBefore.stream()
-                .collect(Collectors.toMap(
-                    GeneralApplicationsCollection::getId,
-                    this::buildDocumentStateSignature,
-                    (a, b) -> a
-                ));
-
-            /*
-             * Filter current GAs to include only:
-             *   - New GAs (no previous state)
-             *   - Existing GAs where document state has changed
-             */
-            generalApplicationsToValidate = generalApplications.stream()
-                .filter(currentGa -> {
-
-                    String previousId = previousDocumentStateByGaId.get(currentGa.getId());
-                    String currentId = buildDocumentStateSignature(currentGa);
-
-                    // If no previous entry exists -> this is a new GA
-                    // If id differ -> documents were changed
-                    return previousId == null || !previousId.equals(currentId);
-                })
-                .toList();
-        }
+        // Determine which general applications need validation (new or modified)
+        List<GeneralApplicationsCollection> generalApplicationsToValidate =
+            determineGeneralApplicationsToValidate(generalApplications, generalApplicationsBefore);
 
         log.info("CaseId {} validating encryption for {} GA(s) (new/changed only)",
             caseId, generalApplicationsToValidate.size());
 
-        /*
-         * Perform encryption validation only on the filtered GAs.
-         * This prevents unnecessary dm-store downloads for unchanged rows.
-         */
-        generalApplicationsToValidate.forEach(ga -> {
+        validateEncryptionForGeneralApplications(
+            generalApplicationsToValidate, caseId, errors, userAuthorisation
+        );
 
-            service.validateEncryptionOnUploadedDocument(
-                ga.getValue().getGeneralApplicationDocument(),
-                caseId, errors, userAuthorisation
-            );
-
-            service.validateEncryptionOnUploadedDocument(
-                ga.getValue().getGeneralApplicationDraftOrder(),
-                caseId, errors, userAuthorisation
-            );
-
-            List<GeneralApplicationSupportingDocumentData> supportDocs =
-                ga.getValue().getGaSupportDocuments();
-
-            if (CollectionUtils.isNotEmpty(supportDocs)) {
-                supportDocs.forEach(doc ->
-                    service.validateEncryptionOnUploadedDocument(
-                        doc.getValue().getSupportDocument(),
-                        caseId, errors, userAuthorisation
-                    )
-                );
-            }
-        });
-
-        if (generalApplicationsBefore != null
-            && generalApplicationsBefore.size() == generalApplications.size()) {
-
-            log.info("Please complete the general application for Case ID: {}", caseDetails.getId());
-            errors.add("Any changes to an existing General Applications will not be saved. "
-                + "Please add a new General Application in order to progress.");
+        if (generalApplicationsBefore != null && generalApplicationsBefore.size() == generalApplications.size()) {
+            errors.add("Any changes to an existing General Applications will not be saved. " + "Please add a new General Application in order to progress.");
         }
     }
 
-    private String buildDocumentStateSignature(GeneralApplicationsCollection ga) {
+    /**
+     * Determines which general applications need validation by comparing the current and previous states.
+     * Returns a list of applications that are either new or have modified documents.
+     *
+     * @param current the current list of general applications
+     * @param before  the previous list of general applications
+     * @return a list of general applications to validate
+     */
+    private List<GeneralApplicationsCollection> determineGeneralApplicationsToValidate(
+        List<GeneralApplicationsCollection> current,
+        List<GeneralApplicationsCollection> before) {
 
-        String main = extractDocumentUrl(ga.getValue().getGeneralApplicationDocument());
-        String draft = extractDocumentUrl(ga.getValue().getGeneralApplicationDraftOrder());
+        if (CollectionUtils.isEmpty(before)) {
+            // No previous state -> validate everything
+            return current;
+        }
 
-        List<GeneralApplicationSupportingDocumentData> support = ga.getValue().getGaSupportDocuments();
+        Map<UUID, String> previousStateByGaId = buildPreviousDocumentStateMap(before);
+
+        return current.stream()
+            .filter(ga -> isNewOrModified(ga, previousStateByGaId))
+            .toList();
+    }
+
+    /**
+     * Builds a map of previous document state signatures for general applications.
+     * The map key is the application UUID, and the value is the document state signature.
+     * This enables efficient comparison to detect changes in application documents.
+     *
+     * @param before the list of previous general applications
+     * @return a map of application UUID to document state signature
+     */
+    private Map<UUID, String> buildPreviousDocumentStateMap(
+        List<GeneralApplicationsCollection> before) {
+
+        return before.stream()
+            .collect(Collectors.toMap(
+                GeneralApplicationsCollection::getId,
+                ga -> buildDocumentStateSignature(ga.getValue()),
+                (a, b) -> a
+            ));
+    }
+
+    /**
+     * Determines if the provided general application is new or has been modified.
+     * Compares the current document state signature with the previous one.
+     *
+     * @param currentGa the current general application collection
+     * @param previousStateByGaId a map of previous document state signatures by application ID
+     * @return true if the application is new or its documents have changed; false otherwise
+     */
+    private boolean isNewOrModified(GeneralApplicationsCollection currentGa,
+                                    Map<UUID, String> previousStateByGaId) {
+
+        String previousState = previousStateByGaId.get(currentGa.getId());
+        String currentState = buildDocumentStateSignature(currentGa.getValue());
+
+        // Return true if this is a new application (no previous state)
+        if (previousState == null) {
+            return true;
+        }
+
+        // Return true if the document state has changed
+        return !previousState.equals(currentState);
+    }
+
+    /**
+     * Builds a unique signature string representing the state of a general application's documents.
+     * The signature includes URLs of the main document, draft order, and supporting documents.
+     * Used to detect changes in document state for validation purposes.
+     *
+     * @param generalApplicationItems the general application items to generate the signature for
+     * @return a signature string representing the document state
+     */
+    private String buildDocumentStateSignature(GeneralApplicationItems generalApplicationItems) {
+
+        String main = extractDocumentUrl(generalApplicationItems.getGeneralApplicationDocument());
+        String draft = extractDocumentUrl(generalApplicationItems.getGeneralApplicationDraftOrder());
+
+        List<GeneralApplicationSupportingDocumentData> support = generalApplicationItems.getGaSupportDocuments();
         String supportUrls = "";
         if (CollectionUtils.isNotEmpty(support)) {
             supportUrls = support.stream()
@@ -528,8 +546,64 @@ public class GeneralApplicationService {
         );
     }
 
+    /**
+     * Validates encryption for all documents in the provided general applications.
+     * Checks the main document, draft order, and supporting documents for each application.
+     * Adds error messages to the provided list if any document fails encryption validation.
+     *
+     * @param generalApplications the list of general applications to validate
+     * @param caseId the identifier of the current case
+     * @param errors the list to collect validation errors
+     * @param userAuthorisation the user authorisation token
+     */
+    private void validateEncryptionForGeneralApplications(
+        List<GeneralApplicationsCollection> generalApplications,
+        String caseId,
+        List<String> errors,
+        String userAuthorisation) {
+
+        generalApplications.stream()
+            .map(GeneralApplicationsCollection::getValue)
+            .forEach(items -> {
+
+                //Validate encryption on general application document and draft order (if present)
+                validateEncryptionOnDocument(
+                    items.getGeneralApplicationDocument(), caseId, errors, userAuthorisation
+                );
+
+                validateEncryptionOnDocument(
+                    items.getGeneralApplicationDraftOrder(), caseId, errors, userAuthorisation
+                );
+
+                //validate encryption on supporting documents (if present)
+                Optional.ofNullable(items.getGaSupportDocuments())
+                    .stream()
+                    .flatMap(List::stream)
+                    .map(GeneralApplicationSupportingDocumentData::getValue)
+                    .map(GeneralApplicationSuportingDocumentItems::getSupportDocument)
+                    .forEach(doc ->
+                        validateEncryptionOnDocument(doc, caseId, errors, userAuthorisation)
+                    );
+            });
+    }
+
     private String extractDocumentUrl(CaseDocument doc) {
         return doc == null ? null : doc.getDocumentUrl();
+    }
+
+    /**
+     * Validates encryption on the provided document if it is not null.
+     *
+     * @param document          the document to validate
+     * @param caseId            the case identifier
+     * @param errors            the list to collect errors
+     * @param userAuthorisation the user authorisation token
+     */
+    private void validateEncryptionOnDocument(CaseDocument document, String caseId, List<String> errors, String
+        userAuthorisation) {
+        if (document != null) {
+            service.validateEncryptionOnUploadedDocument(document, caseId, errors, userAuthorisation);
+        }
     }
 
     public void updateIntervenerDirectionsOrders(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
@@ -578,8 +652,9 @@ public class GeneralApplicationService {
         }
     }
 
-    private static List<GeneralApplicationCollectionData> getIntervenerGeneralApplications(List<GeneralApplicationCollectionData> generalApplications,
-                                                                                           String intervener1) {
+    private static List<GeneralApplicationCollectionData> getIntervenerGeneralApplications
+        (List<GeneralApplicationCollectionData> generalApplications,
+         String intervener1) {
         return generalApplications.stream().filter(ga -> intervener1
             .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).toList();
     }
@@ -604,7 +679,8 @@ public class GeneralApplicationService {
         return appRespGeneralApplications;
     }
 
-    private static void logGeneralApplications(List<GeneralApplicationCollectionData> generalApplications, String caseId) {
+    private static void logGeneralApplications
+        (List<GeneralApplicationCollectionData> generalApplications, String caseId) {
         generalApplications.forEach(ga -> {
             if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null) {
                 log.info("General application received from is {} on Case id {} with status {}",
