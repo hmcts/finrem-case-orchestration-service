@@ -18,32 +18,32 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentSe
 @Service
 public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final OnlineFormDocumentService service;
+    private final OnlineFormDocumentService onlineFormDocumentService;
 
     public IssueApplicationContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         OnlineFormDocumentService service) {
+                                                         OnlineFormDocumentService onlineFormDocumentService) {
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.onlineFormDocumentService = onlineFormDocumentService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.ISSUE_APPLICATION.equals(eventType));
+            && EventType.ISSUE_APPLICATION.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+
         Long caseId = callbackRequest.getCaseDetails().getId();
-        log.info("Invoking contested {} about to submit callback for Case ID: {}",
-            callbackRequest.getEventType(), caseId);
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        CaseDocument document = service.generateContestedMiniForm(userAuthorisation, callbackRequest.getCaseDetails());
-        log.info("Issue application generated document {} for Case ID: {}", document, caseId);
+        CaseDocument document = onlineFormDocumentService.generateContestedMiniForm(userAuthorisation, callbackRequest.getCaseDetails());
+        log.info("{} - Generated contested mini form A {}", caseId, document);
         caseData.setMiniFormA(document);
 
         if (ObjectUtils.isEmpty(caseData.getDivorceCaseNumber())) {
