@@ -8,8 +8,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.exceptions.SendEmailException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.issueapplication.IssueApplicationContestedEmailCorresponder;
+
+import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -41,7 +44,15 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
         validateCaseData(callbackRequest);
 
-        corresponder.sendCorrespondence(callbackRequest.getCaseDetails());
+        String caseId = callbackRequest.getCaseDetails().getCaseIdAsString();
+
+        try {
+            corresponder.sendCorrespondence(callbackRequest.getCaseDetails());
+        } catch (SendEmailException e) {
+            log.error(format(
+                "%s - Failed to send email during issue application", caseId
+            ), e);
+        }
 
         assignPartiesAccessService.grantRespondentSolicitor(callbackRequest.getCaseDetails().getData());
 
