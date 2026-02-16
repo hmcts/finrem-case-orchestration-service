@@ -14,6 +14,7 @@ public class TestLogger extends ListAppender<ILoggingEvent> implements AutoClose
 
     public TestLogger(Class loggedClass) {
         this.logger = (Logger) LoggerFactory.getLogger(loggedClass);
+        this.logger.setLevel(Level.TRACE);
         this.start();
         this.logger.addAppender(this);
     }
@@ -28,6 +29,10 @@ public class TestLogger extends ListAppender<ILoggingEvent> implements AutoClose
 
     public List<String> getErrors() {
         return get(Level.ERROR);
+    }
+
+    public List<String> getTraces() {
+        return get(Level.TRACE);
     }
 
     public List<String> getErrorThrowableClassNames() {
