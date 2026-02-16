@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.AssignApplicantSolicitorHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -30,14 +31,14 @@ public class SolicitorCreateContestedSubmittedHandler extends AssignApplicantSol
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.SOLICITOR_CREATE.equals(eventType));
+            && EventType.SOLICITOR_CREATE.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Processing Submitted callback for event {} with Case ID: {}",
-            EventType.SOLICITOR_CREATE, callbackRequest.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
+
         createCaseService.setSupplementaryData(callbackRequest, userAuthorisation);
         return super.handle(callbackRequest, userAuthorisation);
     }
