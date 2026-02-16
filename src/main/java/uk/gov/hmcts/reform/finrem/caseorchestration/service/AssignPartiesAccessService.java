@@ -116,8 +116,8 @@ public class AssignPartiesAccessService {
     }
 
     private boolean isOrgIdExists(OrganisationPolicy organisationPolicy) {
-        return organisationPolicy.getOrganisation() != null &&
-            StringUtils.isNotBlank(organisationPolicy.getOrganisation().getOrganisationID());
+        return organisationPolicy.getOrganisation() != null
+            && StringUtils.isNotBlank(organisationPolicy.getOrganisation().getOrganisationID());
     }
 
     private void grantAccess(Long caseId, String email, String orgId, String caseRole)
