@@ -22,7 +22,7 @@ public class ContestedRegisterService {
         String userToken = systemUserService.getSysUserToken();
         String authToken = authTokenGenerator.generate();
 
-        return caseDataApi.getCaseDetails(authToken, userToken, false, caseReference);
+        return caseDataApi.getCaseDetails(userToken, authToken, false, caseReference);
     }
 
 }

@@ -44,7 +44,7 @@ public class ContestedRegisterServiceTest extends BaseServiceTest {
     public void shouldGetCaseDetails() {
         CaseResource caseResource = getCaseResource();
 
-        when(caseDataApiV2.getCaseDetails(SERVICE_TOKEN, USER_TOKEN, false, CASE_ID))
+        when(caseDataApiV2.getCaseDetails(USER_TOKEN, SERVICE_TOKEN, false, CASE_ID))
             .thenReturn(caseResource);
 
         CaseResource caseDetails = contestedRegisterService.getCaseDetails(CASE_ID);
@@ -52,7 +52,7 @@ public class ContestedRegisterServiceTest extends BaseServiceTest {
         assertEquals(caseResource.getCaseType(), caseDetails.getCaseType());
         assertEquals(caseResource.getJurisdiction(), caseDetails.getJurisdiction());
 
-        verify(caseDataApiV2).getCaseDetails(SERVICE_TOKEN, USER_TOKEN, false, CASE_ID);
+        verify(caseDataApiV2).getCaseDetails(USER_TOKEN, SERVICE_TOKEN, false, CASE_ID);
         verify(authTokenGenerator).generate();
         verify(systemUserService).getSysUserToken();
     }
