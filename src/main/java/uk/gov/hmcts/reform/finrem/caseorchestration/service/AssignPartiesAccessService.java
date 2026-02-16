@@ -19,6 +19,21 @@ public class AssignPartiesAccessService {
     private final PrdOrganisationService prdOrganisationService;
     private final SystemUserService systemUserService;
 
+    /**
+     * Grants case access to the applicant's solicitor.
+     *
+     * <p>
+     * Access is granted only when:
+     * <ul>
+     *     <li>The applicant is represented by a solicitor, and</li>
+     *     <li>A valid organisation policy with an organisation ID exists.</li>
+     * </ul>
+     * If either condition is not met, no access is granted and an informational
+     * log entry is recorded.
+     *
+     * @param finremCaseData the financial remedy case data containing applicant
+     *                       representation details and organisation information
+     */
     public void grantApplicantSolicitor(FinremCaseData finremCaseData) {
         String caseId = finremCaseData.getCcdCaseId();
         if (finremCaseData.isApplicantRepresentedByASolicitor()
@@ -31,6 +46,21 @@ public class AssignPartiesAccessService {
         }
     }
 
+    /**
+     * Grants case access to the respondent's solicitor.
+     *
+     * <p>
+     * Access is granted only when:
+     * <ul>
+     *     <li>The respondent is represented by a solicitor, and</li>
+     *     <li>A valid organisation policy with an organisation ID exists.</li>
+     * </ul>
+     * If either condition is not met, no access is granted and an informational
+     * log entry is recorded.
+     *
+     * @param finremCaseData the financial remedy case data containing respondent
+     *                       representation details and organisation information
+     */
     public void grantRespondentSolicitor(FinremCaseData finremCaseData) {
         String caseId = finremCaseData.getCcdCaseId();
         if (finremCaseData.isRespondentRepresentedByASolicitor()
