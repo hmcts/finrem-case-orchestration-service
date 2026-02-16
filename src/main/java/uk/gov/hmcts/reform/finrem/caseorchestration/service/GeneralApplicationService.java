@@ -423,9 +423,23 @@ public class GeneralApplicationService {
 
         log.info("General application size {} for CaseId {}", generalApplications.size(), caseId);
 
+        /*
+         * We only want to validate encryption for GAs that are:
+         *  - newly added, OR
+         *  - have had their documents modified
+         *
+         * We do NOT want to validate every GA every time because:
+         *  - that triggers multiple dm-store downloads
+         *  - that can exceed CCD's 10 second mid-event timeout
+         */
         List<GeneralApplicationsCollection> generalApplicationsToValidate = generalApplications;
 
         if (CollectionUtils.isNotEmpty(generalApplicationsBefore)) {
+
+            /*
+             * Build a lookup map of:
+             *   GA Collection Item ID  ->  id of its document state (before)
+             */
             Map<UUID, String> previousDocumentStateByGaId = generalApplicationsBefore.stream()
                 .collect(Collectors.toMap(
                     GeneralApplicationsCollection::getId,
@@ -433,11 +447,19 @@ public class GeneralApplicationService {
                     (a, b) -> a
                 ));
 
+            /*
+             * Filter current GAs to include only:
+             *   - New GAs (no previous state)
+             *   - Existing GAs where document state has changed
+             */
             generalApplicationsToValidate = generalApplications.stream()
                 .filter(currentGa -> {
+
                     String previousId = previousDocumentStateByGaId.get(currentGa.getId());
                     String currentId = buildDocumentStateSignature(currentGa);
 
+                    // If no previous entry exists -> this is a new GA
+                    // If id differ -> documents were changed
                     return previousId == null || !previousId.equals(currentId);
                 })
                 .toList();
@@ -446,6 +468,10 @@ public class GeneralApplicationService {
         log.info("CaseId {} validating encryption for {} GA(s) (new/changed only)",
             caseId, generalApplicationsToValidate.size());
 
+        /*
+         * Perform encryption validation only on the filtered GAs.
+         * This prevents unnecessary dm-store downloads for unchanged rows.
+         */
         generalApplicationsToValidate.forEach(ga -> {
 
             service.validateEncryptionOnUploadedDocument(
