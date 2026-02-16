@@ -59,7 +59,8 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
+                                                                              String userAuthorisation) {
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String receivedFrom = getApplicationReceivedFrom(caseDetails, callbackRequest.getCaseDetailsBefore()) == null

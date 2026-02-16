@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -32,14 +33,17 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
 
     private final ConsentOrderService consentOrderService;
     private final UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
+    private final CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     @Autowired
     public AmendApplicationAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                                 ConsentOrderService consentOrderService,
-                                                UpdateRepresentationWorkflowService updateRepresentationWorkflowService) {
+                                                UpdateRepresentationWorkflowService updateRepresentationWorkflowService,
+                                                CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator) {
         super(mapper);
         this.consentOrderService = consentOrderService;
         this.updateRepresentationWorkflowService = updateRepresentationWorkflowService;
+        this.createCaseMandatoryDataValidator = createCaseMandatoryDataValidator;
     }
 
     @Override
@@ -53,12 +57,12 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        List<String> errors = new ArrayList<>();
 
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        // below validations are needed because users can use browser's back to bypass the validation in mid handler
+        // below validations are needed because users can use browser's back to bypass the validation in mid-handler
+        List<String> errors = new ArrayList<>();
         checkForEmptyApplicantPostcode(caseData.getContactDetailsWrapper(), errors);
         checkForEmptyRespondentPostcode(caseData.getContactDetailsWrapper(), errors);
         checkForEmptyApplicantSolicitorPostcode(caseData, caseData.getContactDetailsWrapper(), errors);
@@ -73,6 +77,13 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         updateLatestConsentOrder(callbackRequest);
 
         errors.addAll(ContactDetailsValidator.validateOrganisationPolicy(caseData));
+
+        List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
+        if (!mandatoryDataErrors.isEmpty()) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .errors(mandatoryDataErrors)
+                .data(caseData).build();
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
