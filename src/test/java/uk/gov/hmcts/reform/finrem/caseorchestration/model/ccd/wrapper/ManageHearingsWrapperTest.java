@@ -221,4 +221,49 @@ class ManageHearingsWrapperTest {
         assertNotNull(result);
         assertThat(result).isEmpty();
     }
+
+    @Test
+    void whenGetAssociatedHearingDocuments_givenNullHearingId_thenReturnsEmpty() {
+        var wrapper = ManageHearingsWrapper.builder()
+            .hearingDocumentsCollection(List.of())
+            .build();
+
+        assertThat(wrapper.getAssociatedHearingDocuments(null)).isEmpty();
+    }
+
+    @Test
+    void whenGetAssociatedHearingDocuments_givenNullCollection_thenReturnsEmpty() {
+        var wrapper = ManageHearingsWrapper.builder()
+            .hearingDocumentsCollection(null)
+            .build();
+
+        assertThat(wrapper.getAssociatedHearingDocuments(UUID.randomUUID())).isEmpty();
+    }
+
+    @Test
+    void whenGetAssociatedHearingDocuments_givenValidCollection_thenReturnsDocsInOrder() {
+        UUID target = UUID.randomUUID();
+        UUID other = UUID.randomUUID();
+
+        CaseDocument docA = CaseDocument.builder().documentFilename("A").build();
+        CaseDocument docB = CaseDocument.builder().documentFilename("B").build();
+
+        var itemB = ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder().hearingId(target).hearingDocument(docB).build())
+            .build();
+
+        var itemA = ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder().hearingId(target).hearingDocument(docA).build())
+            .build();
+
+        var itemOther = ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder().hearingId(other).hearingDocument(docA).build())
+            .build();
+
+        var wrapper = ManageHearingsWrapper.builder()
+            .hearingDocumentsCollection(List.of(itemB, itemOther, itemA))
+            .build();
+
+        assertThat(wrapper.getAssociatedHearingDocuments(target)).containsExactly(docB, docA);
+    }
 }
