@@ -403,7 +403,8 @@ public class GeneralApplicationServiceTest {
         CaseDocument gaSupportingDocument = caseData.getGeneralApplicationWrapper()
             .getGeneralApplications().get(1).getValue()
             .getGaSupportDocuments().get(0).getValue().getSupportDocument();
-        assertThat(gaSupportingDocument.getDocumentFilename()).doesNotContain(PDF_FORMAT_EXTENSION);    }
+        assertThat(gaSupportingDocument.getDocumentFilename()).doesNotContain(PDF_FORMAT_EXTENSION);
+    }
 
     @Test
     void givenEmptyGeneralApplications_whenCheckIfApplicationCompleted_thenAddsError() {
