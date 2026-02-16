@@ -72,7 +72,7 @@ class AssignPartiesAccessServiceTest {
     }
 
     @Test
-    void givenRegisteredEmail_whenGrantApplicantSolicitorInvoked_thenAssignAppSolicitorToCase() {
+    void givenEmailRegistered_whenGrantApplicantSolicitorInvoked_thenAssignAppSolicitorToCase() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
         when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
