@@ -18,9 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSuportingDocumentItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
@@ -33,7 +31,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -406,13 +403,13 @@ public class GeneralApplicationServiceTest {
     @Test
     void givenEmptyGeneralApplications_whenCheckIfApplicationCompleted_thenAddsError() {
         // Given
-        FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(
+        FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(
                 Long.valueOf(CASE_ID), mock(CaseType.class))
             .build();
         List<String> errors = new ArrayList<>();
 
         // When
-        generalApplicationService.checkIfApplicationCompleted(caseDetails, errors, List.of(), List.of(), AUTH_TOKEN);
+        generalApplicationService.checkIfApplicationCompleted(finremCaseDetails, errors, List.of(), List.of(), AUTH_TOKEN);
 
         // Then
         assertThat(errors).containsExactly(
