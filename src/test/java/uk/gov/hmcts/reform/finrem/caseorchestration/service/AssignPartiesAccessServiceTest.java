@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.Optional;
 
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
@@ -175,6 +178,67 @@ class AssignPartiesAccessServiceTest {
             assignPartiesAccessService.grantRespondentSolicitor(caseData);
 
             verifyNotGrantingCaseRoleToUser();
+        }
+    }
+
+    @Nested
+    class GrantIntervenerSolicitorTests {
+
+        @Test
+        void givenUnrepresentedIntervener_thenIgnoreTheRequest() throws UserNotFoundInOrganisationApiException {
+            IntervenerWrapper intervenerWrapper = mock(IntervenerWrapper.class);
+            when(intervenerWrapper.getIntervenerRepresented()).thenReturn(YesOrNo.NO);
+
+            // Act
+            assignPartiesAccessService.grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper);
+
+            verifyNotGrantingCaseRoleToUser();
+        }
+
+        @Test
+        void givenMissingOrgId_thenIgnoreTheRequest() throws UserNotFoundInOrganisationApiException {
+            IntervenerWrapper intervenerWrapper = mock(IntervenerWrapper.class);
+            when(intervenerWrapper.getIntervenerRepresented()).thenReturn(YesOrNo.YES);
+            when(intervenerWrapper.getIntervenerOrganisation()).thenReturn(organisationPolicy(null));
+
+            // Act
+            assignPartiesAccessService.grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper);
+
+            verifyNotGrantingCaseRoleToUser();
+        }
+
+        @Test
+        void givenMissingCaseRole_thenIgnoreTheRequest() throws UserNotFoundInOrganisationApiException {
+            IntervenerWrapper intervenerWrapper = mock(IntervenerWrapper.class);
+            when(intervenerWrapper.getIntervenerRepresented()).thenReturn(YesOrNo.YES);
+            when(intervenerWrapper.getIntervenerOrganisation()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            // Act
+            assignPartiesAccessService.grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper);
+
+            verifyNotGrantingCaseRoleToUser();
+        }
+
+        @Test
+        void givenEmailRegistered_thenAssignAppSolicitorToCase() throws UserNotFoundInOrganisationApiException {
+            IntervenerWrapper intervenerWrapper = mock(IntervenerWrapper.class);
+            when(intervenerWrapper.getIntervenerSolEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(intervenerWrapper.getIntervenerRepresented()).thenReturn(YesOrNo.YES);
+            when(intervenerWrapper.getIntervenerOrganisation()).thenReturn(organisationPolicy(TEST_ORG_ID));
+            CaseRole caseRole = mock(CaseRole.class);
+            when(caseRole.getCcdCode()).thenReturn(TEST_CASE_ROLE);
+            when(intervenerWrapper.getIntervenerSolicitorCaseRole()).thenReturn(caseRole);
+
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(
+                Optional.of(TEST_USER_ID)
+            );
+
+            // Act
+            assignPartiesAccessService.grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper);
+
+            verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID, TEST_CASE_ROLE,
+                TEST_ORG_ID);
+            verifyNoMoreInteractions(assignCaseAccessService);
         }
     }
 

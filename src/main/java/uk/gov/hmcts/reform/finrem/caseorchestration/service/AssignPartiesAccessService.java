@@ -101,7 +101,8 @@ public class AssignPartiesAccessService {
     public void grantIntervenerSolicitor(Long caseId, IntervenerWrapper intervenerWrapper)
         throws UserNotFoundInOrganisationApiException {
         if (isRepresented(intervenerWrapper)
-            && isOrgIdExists(intervenerWrapper.getIntervenerOrganisation())) {
+            && isOrgIdExists(intervenerWrapper.getIntervenerOrganisation())
+            && intervenerWrapper.getIntervenerSolicitorCaseRole() != null) {
             String intervenerSolEmail = intervenerWrapper.getIntervenerSolEmail();
             String appOrgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
             String intrvRole = intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode();
