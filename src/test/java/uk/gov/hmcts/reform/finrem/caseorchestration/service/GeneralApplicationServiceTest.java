@@ -439,45 +439,12 @@ public class GeneralApplicationServiceTest {
             .build();
     }
 
-    private List<GeneralApplicationData> getGeneralApplicationDataList() {
-        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        caseDocument.setDocumentUrl(DOC_IN_EXISTING_COLLECTION_URL);
-        GeneralApplication generalApplication = GeneralApplication.builder()
-            .generalApplicationDocument(caseDocument)
-            .build();
-        List<GeneralApplicationData> generalApplicationList = new ArrayList<>();
-        generalApplicationList.add(
-            GeneralApplicationData.builder()
-                .id(UUID.randomUUID().toString())
-                .generalApplication(generalApplication)
-                .build()
-        );
-        return generalApplicationList;
-    }
-
-    private boolean matchesUploadedDocumentFields(CaseDocument document) {
-        return document.getDocumentFilename().equals(DOC_UPLOADED_NAME + PDF_FORMAT_EXTENSION)
-            && document.getDocumentUrl().equals(DOC_UPLOADED_URL)
-            && document.getDocumentBinaryUrl().equals(DOC_UPLOADED_BINARY_URL);
-    }
-
     private CaseDocument getCaseDocument(String documentFormat) {
         return CaseDocument.builder()
             .documentUrl(DOC_UPLOADED_URL)
             .documentBinaryUrl(DOC_UPLOADED_BINARY_URL)
             .documentFilename(DOC_UPLOADED_NAME + documentFormat)
             .build();
-    }
-
-    private Map<String, String> getCcdDocumentMap() {
-        return Map.of(
-            "document_url", DOC_UPLOADED_URL,
-            "document_filename", DOC_UPLOADED_NAME + WORD_FORMAT_EXTENSION,
-            "document_binary_url", DOC_UPLOADED_BINARY_URL);
-    }
-
-    private CaseDetails getApplicationIssuedCaseDetailsBefore() {
-        return CaseDetails.builder().state("applicationIssued").caseTypeId(CaseType.CONTESTED.getCcdType()).build();
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
