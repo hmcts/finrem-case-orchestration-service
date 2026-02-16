@@ -462,7 +462,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    void givenChangedExistingGaAndAdditionalSupportDoc_whenCheckIfApplicationCompleted_thenValidatesChangedGaDocsOnly() {
+    void givenChangedExistingGaAndNewGa_whenCheckIfApplicationCompleted_thenValidatesChangedGaDocsOnly() {
         // Given
         FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(
                 Long.valueOf(CASE_ID), mock(CaseType.class))
@@ -489,28 +489,31 @@ public class GeneralApplicationServiceTest {
                 .build()
         );
 
-        // CURRENT: draft order replaced + extra support doc added (so id changes)
+        // Add another general application to the current list
         List<GeneralApplicationsCollection> generalApplicationsCurrent = List.of(
             GeneralApplicationsCollection.builder()
                 .id(gaId)
                 .value(GeneralApplicationItems.builder()
-                    .generalApplicationDocument(caseDocument("generalApplicationDocument.pdf")) // unchanged
-                    .generalApplicationDraftOrder(caseDocument("generalApplicationDraftOrder-UPDATED.docx")) // changed
+                    .generalApplicationDocument(caseDocument("generalApplicationDocument.pdf"))
+                    .generalApplicationDraftOrder(caseDocument("generalApplicationDraftOrder-UPDATED.docx"))
                     .gaSupportDocuments(List.of(
                         GeneralApplicationSupportingDocumentData.builder()
                             .value(GeneralApplicationSuportingDocumentItems.builder()
-                                .supportDocument(caseDocument("generalApplicationSupportingDocument-1.docx")) // existing
+                                .supportDocument(caseDocument("generalApplicationSupportingDocument-1.docx"))
                                 .build())
                             .build(),
                         GeneralApplicationSupportingDocumentData.builder()
                             .value(GeneralApplicationSuportingDocumentItems.builder()
-                                .supportDocument(caseDocument("generalApplicationSupportingDocument-2-NEW.docx")) // new
+                                .supportDocument(caseDocument("generalApplicationSupportingDocument-2-NEW.docx"))
                                 .build())
                             .build()
                     ))
                     .build())
-                .build()
-        );
+                .build(),
+            GeneralApplicationsCollection.builder()
+                .id(UUID.randomUUID())
+                .value(GeneralApplicationItems.builder()
+                    .generalApplicationDocument(caseDocument("anotherGeneralApplicationDocument.pdf")).build()).build());
 
         finremCaseDetails.getData().getGeneralApplicationWrapper()
             .setGeneralApplications(generalApplicationsCurrent);
@@ -521,7 +524,7 @@ public class GeneralApplicationServiceTest {
 
         // Then
         ArgumentCaptor<CaseDocument> captor = ArgumentCaptor.forClass(CaseDocument.class);
-        verify(bulkPrintDocumentService, times(4))
+        verify(bulkPrintDocumentService, times(5))
             .validateEncryptionOnUploadedDocument(captor.capture(), eq(CASE_ID), eq(errors), eq(AUTH_TOKEN));
 
         assertThat(captor.getAllValues())
@@ -530,7 +533,8 @@ public class GeneralApplicationServiceTest {
                 "generalApplicationDocument.pdf",
                 "generalApplicationDraftOrder-UPDATED.docx",
                 "generalApplicationSupportingDocument-1.docx",
-                "generalApplicationSupportingDocument-2-NEW.docx"
+                "generalApplicationSupportingDocument-2-NEW.docx",
+                "anotherGeneralApplicationDocument.pdf"
             );
     }
 
