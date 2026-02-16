@@ -156,7 +156,8 @@ class ResendPaperHearingNotificationsTaskTest {
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.ADD_HEARING;
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE,
+            INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
 
         CaseDocument miniFormA = extraDocuments ? buildCaseDocument(MINI_FORM_A_TEST_ID) : null;
         when(hearingCorrespondenceHelper.getMiniFormAIfRequired(any(), any()))
@@ -205,7 +206,8 @@ class ResendPaperHearingNotificationsTaskTest {
         assertThat(logs.getInfos()).contains(
             "Case ID: " + REFERENCE + " Sending active hearing correspondence with hearing date "
                 + hearing_date_for_hearings_in_scope
-                + ", for parties: " + List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR));
+                + ", for parties: " + List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE,
+                INTERVENER_FOUR));
 
         List<CaseDocument> expectedList = extraDocuments
             ? List.of(hearingNotice, miniFormA, additionalHearingDoc) : List.of(hearingNotice);
@@ -220,7 +222,8 @@ class ResendPaperHearingNotificationsTaskTest {
                 SendCorrespondenceEvent::getEmailNotificationRequest,
                 SendCorrespondenceEvent::getEmailTemplate
             )
-            .containsExactly(AUTH_TOKEN, List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR), expectedList, null, null);
+            .containsExactly(AUTH_TOKEN, List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO,
+                INTERVENER_THREE, INTERVENER_FOUR), expectedList, null, null);
     }
 
     // Checks all parties, within NotificationParty; Applicant, Respondent and all four Interveners.
@@ -236,7 +239,8 @@ class ResendPaperHearingNotificationsTaskTest {
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.VACATE_HEARING;
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE,
+            INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
 
         CaseDocument vacateNotice = buildCaseDocument(VACATE_NOTICE_TEST_ID);
 
@@ -297,7 +301,8 @@ class ResendPaperHearingNotificationsTaskTest {
                 SendCorrespondenceEvent::getEmailNotificationRequest,
                 SendCorrespondenceEvent::getEmailTemplate
             )
-            .containsExactly(AUTH_TOKEN, List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR), List.of(vacateNotice), null, null);
+            .containsExactly(AUTH_TOKEN, List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO,
+                INTERVENER_THREE, INTERVENER_FOUR), List.of(vacateNotice), null, null);
     }
 
     /*
@@ -313,7 +318,8 @@ class ResendPaperHearingNotificationsTaskTest {
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.VACATE_HEARING;
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO,
+            INTERVENER_THREE, INTERVENER_FOUR);
 
         List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings =
             buildVacatedHearingsCollection(hearingItemId,
@@ -416,7 +422,8 @@ class ResendPaperHearingNotificationsTaskTest {
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.VACATE_HEARING;
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE,
+            INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
 
         List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings =
             buildVacatedHearingsCollection(hearingItemId,
@@ -466,7 +473,8 @@ class ResendPaperHearingNotificationsTaskTest {
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.ADD_HEARING;
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE,
+            INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
         List<DocumentCollectionItem> additionalDocumentCollection = List.of();
 
         List<ManageHearingsCollectionItem> hearings = buildHearingsCollection(
