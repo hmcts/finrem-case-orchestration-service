@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -44,7 +45,30 @@ class AssignPartiesAccessServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+        lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+    }
+
+    @Test
+    void givenUnrepresentedApplicant_whenGrantApplicantSolicitorInvoked_thenIgnoreTheRequest() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(false);
+
+        // Act
+        assignPartiesAccessService.grantApplicantSolicitor(caseData);
+
+        verify(assignCaseAccessService, never()).grantCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void givenMissingOrgId_whenGrantApplicantSolicitorInvoked_thenIgnoreTheRequest() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+        when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(null));
+
+        // Act
+        assignPartiesAccessService.grantApplicantSolicitor(caseData);
+
+        verify(assignCaseAccessService, never()).grantCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
     }
 
     @Test

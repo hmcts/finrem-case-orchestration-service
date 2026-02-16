@@ -289,12 +289,12 @@ public class IntervenerService {
 
     /**
      * @deprecated This method is deprecated because case role
-     * assignment for interveners is now handled by {@link AssignPartiesAccessService#assignIntervenerRole(FinremCaseData)}
+     * assignment for interveners is now handled by {@link AssignPartiesAccessService#grantIntervenerSolicitor(FinremCaseData)}
      *
      * <p>This method performs a user lookup by email and grants a case role if the
      * user is found. If no user is found, it logs an error against the case.</p>
      *
-     * <p>Use {@code CaseAccessOrchestrator#assignIntervenerRole(FinremCaseData)} instead.</p>
+     * <p>Use {@code CaseAccessOrchestrator#grantIntervenerSolicitor(FinremCaseData)} instead.</p>
      */
     @Deprecated
     private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
