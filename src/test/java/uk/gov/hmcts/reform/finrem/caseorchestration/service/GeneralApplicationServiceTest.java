@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
@@ -36,14 +37,17 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
@@ -84,7 +88,7 @@ public class GeneralApplicationServiceTest {
     @Mock
     private AssignCaseAccessService accessService;
     @Mock
-    private BulkPrintDocumentService service;
+    private BulkPrintDocumentService bulkPrintDocumentService;
     @Mock
     private GeneralApplicationsCategoriser generalApplicationsCategoriser;
     private GeneralApplicationHelper helper;
@@ -97,7 +101,7 @@ public class GeneralApplicationServiceTest {
         caseDetails = CaseDetails.builder().data(new LinkedHashMap<>()).build();
         helper = new GeneralApplicationHelper(objectMapper, genericDocumentService);
         generalApplicationService = new GeneralApplicationService(documentHelper,
-            idamService, genericDocumentService, accessService, helper, service,
+            idamService, genericDocumentService, accessService, helper, bulkPrintDocumentService,
             generalApplicationsCategoriser);
     }
 
@@ -285,7 +289,7 @@ public class GeneralApplicationServiceTest {
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), AUTH_TOKEN);
 
         Stream.of(generalAppParameters)
-            .forEach(ccdFieldName -> assertThat(caseDetails.getData().get(ccdFieldName), is(nullValue())));
+            .forEach(ccdFieldName -> assertThat(caseDetails.getData().get(ccdFieldName)).isNull());
     }
 
     @Test
@@ -293,7 +297,7 @@ public class GeneralApplicationServiceTest {
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(USER_NAME);
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), AUTH_TOKEN);
 
-        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_CREATED_BY), is(USER_NAME));
+        assertThat(caseDetails.getData()).containsEntry(GENERAL_APPLICATION_CREATED_BY, USER_NAME);
     }
 
     @Test
@@ -401,7 +405,24 @@ public class GeneralApplicationServiceTest {
         CaseDocument gaSupportingDocument = caseData.getGeneralApplicationWrapper()
             .getGeneralApplications().get(1).getValue()
             .getGaSupportDocuments().get(0).getValue().getSupportDocument();
-        assertThat(gaSupportingDocument.getDocumentFilename(), not(containsString(PDF_FORMAT_EXTENSION)));
+        assertThat(gaSupportingDocument.getDocumentFilename()).doesNotContain(PDF_FORMAT_EXTENSION);    }
+
+    @Test
+    void givenEmptyGeneralApplications_whenCheckIfApplicationCompleted_thenAddsError() {
+        // Given
+        FinremCaseDetails caseDetails = FinremCaseDetailsBuilderFactory.from(
+                Long.valueOf(CASE_ID), mock(CaseType.class))
+            .build();
+        List<String> errors = new ArrayList<>();
+
+        // When
+        generalApplicationService.checkIfApplicationCompleted(caseDetails, errors, List.of(), List.of(), AUTH_TOKEN);
+
+        // Then
+        assertThat(errors).containsExactly(
+            "Please complete the General Application. No information has been entered for this application."
+        );
+        verifyNoInteractions(bulkPrintDocumentService);
     }
 
     private DynamicRadioList buildDynamicList(String role) {
