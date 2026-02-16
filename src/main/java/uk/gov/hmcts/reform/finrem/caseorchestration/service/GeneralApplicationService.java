@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -411,38 +412,101 @@ public class GeneralApplicationService {
                                             List<GeneralApplicationsCollection> generalApplications,
                                             List<GeneralApplicationsCollection> generalApplicationsBefore,
                                             String userAuthorisation) {
+
         String caseId = String.valueOf(caseDetails.getId());
 
-        if ((generalApplications == null || generalApplications.isEmpty())) {
+        if (CollectionUtils.isEmpty(generalApplications)) {
             log.info("Please complete the general application for Case ID: {}", caseDetails.getId());
             errors.add("Please complete the General Application. No information has been entered for this application.");
-        } else {
-            log.info("General application size {} for CaseId {}", generalApplications.size(), caseId);
-            List<GeneralApplicationsCollection> generalApplicationsTemp = new ArrayList<>(generalApplications);
-            if (generalApplicationsBefore != null && !generalApplicationsBefore.isEmpty()) {
-                List<GeneralApplicationsCollection> generalApplicationsBeforeTemp = new ArrayList<>(generalApplicationsBefore);
-                generalApplicationsTemp.removeAll(generalApplicationsBeforeTemp);
-            }
-            generalApplicationsTemp.forEach(ga -> {
-                service.validateEncryptionOnUploadedDocument(ga.getValue().getGeneralApplicationDocument(),
-                    caseId, errors, userAuthorisation);
-                service.validateEncryptionOnUploadedDocument(ga.getValue().getGeneralApplicationDraftOrder(),
-                    caseId, errors, userAuthorisation);
-                List<GeneralApplicationSupportingDocumentData> gaSupportDocuments = ga.getValue().getGaSupportDocuments();
-                if (gaSupportDocuments != null && !gaSupportDocuments.isEmpty()) {
-                    gaSupportDocuments.forEach(doc -> service.validateEncryptionOnUploadedDocument(doc.getValue().getSupportDocument(),
-                        caseId, errors, userAuthorisation));
-                }
-            });
+            return;
         }
 
-        if (generalApplicationsBefore != null && generalApplications != null
-            && (generalApplicationsBefore.size() == generalApplications.size())) {
+        log.info("General application size {} for CaseId {}", generalApplications.size(), caseId);
+
+        List<GeneralApplicationsCollection> generalApplicationsToValidate = generalApplications;
+
+        if (CollectionUtils.isNotEmpty(generalApplicationsBefore)) {
+            Map<UUID, String> previousDocumentStateByGaId = generalApplicationsBefore.stream()
+                .collect(Collectors.toMap(
+                    GeneralApplicationsCollection::getId,
+                    this::buildDocumentStateSignature,
+                    (a, b) -> a
+                ));
+
+            generalApplicationsToValidate = generalApplications.stream()
+                .filter(currentGa -> {
+                    String previousId = previousDocumentStateByGaId.get(currentGa.getId());
+                    String currentId = buildDocumentStateSignature(currentGa);
+
+                    return previousId == null || !previousId.equals(currentId);
+                })
+                .toList();
+        }
+
+        log.info("CaseId {} validating encryption for {} GA(s) (new/changed only)",
+            caseId, generalApplicationsToValidate.size());
+
+        generalApplicationsToValidate.forEach(ga -> {
+
+            service.validateEncryptionOnUploadedDocument(
+                ga.getValue().getGeneralApplicationDocument(),
+                caseId, errors, userAuthorisation
+            );
+
+            service.validateEncryptionOnUploadedDocument(
+                ga.getValue().getGeneralApplicationDraftOrder(),
+                caseId, errors, userAuthorisation
+            );
+
+            List<GeneralApplicationSupportingDocumentData> supportDocs =
+                ga.getValue().getGaSupportDocuments();
+
+            if (CollectionUtils.isNotEmpty(supportDocs)) {
+                supportDocs.forEach(doc ->
+                    service.validateEncryptionOnUploadedDocument(
+                        doc.getValue().getSupportDocument(),
+                        caseId, errors, userAuthorisation
+                    )
+                );
+            }
+        });
+
+        if (generalApplicationsBefore != null
+            && generalApplicationsBefore.size() == generalApplications.size()) {
+
             log.info("Please complete the general application for Case ID: {}", caseDetails.getId());
             errors.add("Any changes to an existing General Applications will not be saved. "
                 + "Please add a new General Application in order to progress.");
         }
+    }
 
+    private String buildDocumentStateSignature(GeneralApplicationsCollection ga) {
+        if (ga == null || ga.getValue() == null) {
+            return "";
+        }
+
+        String main = extractDocumentUrl(ga.getValue().getGeneralApplicationDocument());
+        String draft = extractDocumentUrl(ga.getValue().getGeneralApplicationDraftOrder());
+
+        List<GeneralApplicationSupportingDocumentData> support = ga.getValue().getGaSupportDocuments();
+        String supportUrls = "";
+        if (CollectionUtils.isNotEmpty(support)) {
+            supportUrls = support.stream()
+                .map(d -> extractDocumentUrl(d.getValue().getSupportDocument()))
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.joining("|"));
+        }
+
+        return String.join("||",
+            Objects.toString(main, ""),
+            Objects.toString(draft, ""),
+            supportUrls
+        );
+    }
+
+    private String extractDocumentUrl(CaseDocument doc) {
+        return doc == null ? null : doc.getDocumentUrl();
     }
 
     public void updateIntervenerDirectionsOrders(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
