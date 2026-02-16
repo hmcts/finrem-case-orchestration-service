@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
 import java.util.Optional;
 
@@ -40,7 +42,11 @@ public class AssignPartiesAccessService {
             && isOrgIdExists(finremCaseData.getApplicantOrganisationPolicy())) {
             String appSolicitorEmail = finremCaseData.getAppSolicitorEmail();
             String appOrgId = finremCaseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID();
-            grantAccess(Long.valueOf(caseId), appSolicitorEmail, appOrgId, CaseRole.APP_SOLICITOR.getCcdCode());
+            try {
+                grantAccess(Long.valueOf(caseId), appSolicitorEmail, appOrgId, CaseRole.APP_SOLICITOR.getCcdCode());
+            } catch (UserNotFoundInOrganisationApiException e) {
+                // ignore it
+            }
         } else {
             log.info("{} - No applicant represented by a solicitor or organisation policy missing", caseId);
         }
@@ -67,10 +73,46 @@ public class AssignPartiesAccessService {
             && isOrgIdExists(finremCaseData.getRespondentOrganisationPolicy())) {
             String respondentSolicitorEmail = finremCaseData.getRespondentSolicitorEmail();
             String appOrgId = finremCaseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID();
-            grantAccess(Long.valueOf(caseId), respondentSolicitorEmail, appOrgId, CaseRole.RESP_SOLICITOR.getCcdCode());
+            try {
+                grantAccess(Long.valueOf(caseId), respondentSolicitorEmail, appOrgId, CaseRole.RESP_SOLICITOR.getCcdCode());
+            }  catch (UserNotFoundInOrganisationApiException e) {
+                // ignore it
+            }
         } else {
             log.info("{} - No respondent represented by a solicitor or organisation policy missing", caseId);
         }
+    }
+
+    /**
+     * Grants case access to an intervener solicitor when the intervener is represented
+     * and a valid organisation policy exists.
+     *
+     * <p>The method retrieves the solicitor email, organisation ID, and case role
+     * from the provided {@link IntervenerWrapper} and delegates the access assignment
+     * to {@code grantAccess}. If the intervener is not represented or the organisation
+     * information is missing, no access is granted and an informational log entry is created.</p>
+     *
+     * @param caseId            the CCD case identifier
+     * @param intervenerWrapper the wrapper containing intervener solicitor and
+     *                          organisation details
+     * @throws UserNotFoundInOrganisationApiException if the solicitor cannot be
+     *         located via the Organisation API during access assignment
+     */
+    public void grantIntervenerSolicitor(Long caseId, IntervenerWrapper intervenerWrapper)
+        throws UserNotFoundInOrganisationApiException {
+        if (isRepresented(intervenerWrapper)
+            && isOrgIdExists(intervenerWrapper.getIntervenerOrganisation())) {
+            String intervenerSolEmail = intervenerWrapper.getIntervenerSolEmail();
+            String appOrgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
+            String intrvRole = intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode();
+            grantAccess(caseId, intervenerSolEmail, appOrgId, intrvRole);
+        } else {
+            log.info("{} - No intervener represented by a solicitor or organisation policy missing", caseId);
+        }
+    }
+
+    private boolean isRepresented(IntervenerWrapper intervenerWrapper) {
+        return YesOrNo.YES.equals(intervenerWrapper.getIntervenerRepresented());
     }
 
     private boolean isOrgIdExists(OrganisationPolicy organisationPolicy) {
@@ -78,10 +120,14 @@ public class AssignPartiesAccessService {
             StringUtils.isNotBlank(organisationPolicy.getOrganisation().getOrganisationID());
     }
 
-    private void grantAccess(Long caseId, String email, String orgId, String caseRole) {
+    private void grantAccess(Long caseId, String email, String orgId, String caseRole)
+        throws UserNotFoundInOrganisationApiException {
         Optional<String> userId = prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         userId.ifPresentOrElse(s -> assignCaseAccessService.grantCaseRoleToUser(caseId, s, caseRole, orgId),
             () -> log.info("{} - Attempting to grant {} but system is unable find any user with email address {} ", caseId,
                 email, caseRole));
+        if (userId.isEmpty()) {
+            throw new UserNotFoundInOrganisationApiException();
+        }
     }
 }

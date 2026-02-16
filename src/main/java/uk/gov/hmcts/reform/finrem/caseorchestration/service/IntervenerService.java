@@ -41,6 +41,7 @@ public class IntervenerService {
     private final SystemUserService systemUserService;
     private final ChangeOfRepresentationService changeOfRepresentationService;
     private final IdamService idamService;
+    private final AssignPartiesAccessService assignPartiesAccessService;
 
     /**
      * Revokes an intervener solicitor role for the given case.
@@ -112,7 +113,11 @@ public class IntervenerService {
             String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
             String email = intervenerWrapper.getIntervenerSolEmail();
             checkIfIntervenerSolicitorDetailsChanged(intervenerWrapper, caseDetailsBefore, orgId, email, errors);
-            addIntervenerRole(caseId, email, orgId, caseRole, errors);
+            try {
+                assignPartiesAccessService.grantIntervenerSolicitor(caseId, intervenerWrapper);
+            } catch (UserNotFoundInOrganisationApiException e) {
+                logError(caseId, errors);
+            }
         } else {
             FinremCaseData beforeData = caseDetailsBefore.getData();
             IntervenerWrapper beforeIntv = intervenerWrapper.getIntervenerWrapperFromCaseData(beforeData);
@@ -285,25 +290,6 @@ public class IntervenerService {
                 ).toList())
             );
         });
-    }
-
-    /**
-     * @deprecated This method is deprecated because case role
-     * assignment for interveners is now handled by {@link AssignPartiesAccessService#grantIntervenerSolicitor(FinremCaseData)}
-     *
-     * <p>This method performs a user lookup by email and grants a case role if the
-     * user is found. If no user is found, it logs an error against the case.</p>
-     *
-     * <p>Use {@code CaseAccessOrchestrator#grantIntervenerSolicitor(FinremCaseData)} instead.</p>
-     */
-    @Deprecated
-    private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
-        Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
-        if (userId.isPresent()) {
-            assignCaseAccessService.grantCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
-        } else {
-            logError(caseId, errors);
-        }
     }
 
     private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole) {
