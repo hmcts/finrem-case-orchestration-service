@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,64 +49,72 @@ class AssignPartiesAccessServiceTest {
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
     }
 
-    @Test
-    void givenUnrepresentedApplicant_whenGrantApplicantSolicitorInvoked_thenIgnoreTheRequest() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(false);
+    @Nested
+    class GrantApplicantSolicitorTests {
 
-        // Act
-        assignPartiesAccessService.grantApplicantSolicitor(caseData);
+        @Test
+        void givenUnrepresentedApplicant_thenIgnoreTheRequest() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(false);
 
-        verify(assignCaseAccessService, never()).grantCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+            // Act
+            assignPartiesAccessService.grantApplicantSolicitor(caseData);
+
+            verifyNotGrantingCaseRoleToUser();
+        }
+
+        @Test
+        void givenMissingOrgId_thenIgnoreTheRequest() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(null));
+
+            // Act
+            assignPartiesAccessService.grantApplicantSolicitor(caseData);
+
+            verifyNotGrantingCaseRoleToUser();
+        }
+
+        @Test
+        void givenEmailRegistered_thenAssignAppSolicitorToCase() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(
+                Optional.of(TEST_USER_ID)
+            );
+
+            // Act
+            assignPartiesAccessService.grantApplicantSolicitor(caseData);
+
+            verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID, CaseRole.APP_SOLICITOR.getCcdCode(),
+                TEST_ORG_ID);
+            verifyNoMoreInteractions(assignCaseAccessService);
+        }
+
+        @Test
+        void givenEmailNotFound_thenShouldNotAssignAppSolicitorToCase() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(
+                Optional.empty()
+            );
+
+            // Act
+            assignPartiesAccessService.grantApplicantSolicitor(caseData);
+
+            verifyNotGrantingCaseRoleToUser();
+        }
     }
 
-    @Test
-    void givenMissingOrgId_whenGrantApplicantSolicitorInvoked_thenIgnoreTheRequest() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
-        when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(null));
-
-        // Act
-        assignPartiesAccessService.grantApplicantSolicitor(caseData);
-
-        verify(assignCaseAccessService, never()).grantCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
-    }
-
-    @Test
-    void givenEmailRegistered_whenGrantApplicantSolicitorInvoked_thenAssignAppSolicitorToCase() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
-        when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
-        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
-        when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
-
-        when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(
-            Optional.of(TEST_USER_ID)
-        );
-
-        // Act
-        assignPartiesAccessService.grantApplicantSolicitor(caseData);
-
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID, CaseRole.APP_SOLICITOR.getCcdCode(),
-            TEST_ORG_ID);
-        verifyNoMoreInteractions(assignCaseAccessService);
-    }
-
-    @Test
-    void givenEmailNotFound_whenGrantApplicantSolicitorInvoked_thenShouldNotAssignAppSolicitorToCase() {
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
-        when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
-        when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
-        when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
-
-        when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(
-            Optional.empty()
-        );
-
-        // Act
-        assignPartiesAccessService.grantApplicantSolicitor(caseData);
-
+    private void verifyNotGrantingCaseRoleToUser() {
         verify(assignCaseAccessService, never()).grantCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
     }
 }
