@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.VacateOrAdjournAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.HearingLike;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.VacateOrAdjournedHearing;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getNotificationPartyFromRole;
@@ -80,7 +82,7 @@ public class ManageHearingsCorresponder {
      * @param callbackRequest the callback request containing case details and data
      * @param userAuthorisation the authorization token of the user initiating this action
      */
-    public void sendVacatedHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+    public void sendAdjournedOrVacatedHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
@@ -100,14 +102,21 @@ public class ManageHearingsCorresponder {
             return;
         }
 
+        VacateOrAdjournAction action = vacateOrAdjournedHearing.getHearingStatus();
+
         List<CaseDocument> documentsToPost = List.of(hearingCorrespondenceHelper.getVacateHearingNotice(finremCaseData));
+
+        EmailTemplateNames templateName = VacateOrAdjournAction.ADJOURN_HEARING.equals(action)
+            ? FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR
+            : FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
 
         publishEvent(
             finremCaseDetails,
             vacateOrAdjournedHearing,
-            ManageHearingsAction.VACATE_HEARING,
-            userAuthorisation, documentsToPost,
-            FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR
+            ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,
+            userAuthorisation,
+            documentsToPost,
+            templateName
         );
     }
 
@@ -126,7 +135,7 @@ public class ManageHearingsCorresponder {
         String vacatedHearingType = "";
         String vacatedHearingDateTime = "";
 
-        if (ManageHearingsAction.VACATE_HEARING.equals(action)) {
+        if (ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(action)) {
 
             vacatedHearingType = Optional.ofNullable(hearing.getHearingType())
                 .orElseThrow(() -> new IllegalStateException("Hearing type must not be null")).getId();
