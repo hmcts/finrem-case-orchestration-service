@@ -164,6 +164,10 @@ public class EmailService {
             templateVars.put("vacatedHearingType", notificationRequest.getVacatedHearingType());
             templateVars.put("vacatedHearingDateTime", notificationRequest.getVacatedHearingDateTime());
         }
+        if (EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR.name().equals(templateName)) {
+            templateVars.put("vacatedHearingType", notificationRequest.getVacatedHearingType());
+            templateVars.put("vacatedHearingDateTime", notificationRequest.getVacatedHearingDateTime());
+        }
         if (EmailTemplateNames.FR_INTERVENER_SOLICITOR_ADDED_EMAIL.name().equals(templateName)
             || EmailTemplateNames.FR_INTERVENER_SOLICITOR_REMOVED_EMAIL.name().equals(templateName)) {
             templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());

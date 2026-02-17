@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
@@ -93,10 +94,11 @@ public class DocumentConfiguration {
     private String manageHearingHighCourtNoticeTemplate;
     private String manageHearingNoticeFileName;
     @Getter(AccessLevel.NONE)
-    private String vacateHearingNoticeTemplate;
+    private String vacateOrAdjournNoticeTemplate;
     @Getter(AccessLevel.NONE)
-    private String vacateHearingHighCourtNoticeTemplate;
+    private String vacateOrAdjournHighCourtNoticeTemplate;
     private String vacateHearingNoticeFileName;
+    private String adjournHearingNoticeFileName;
     @Getter(AccessLevel.NONE)
     private String manageHearingFormCTemplate;
     @Getter(AccessLevel.NONE)
@@ -239,22 +241,19 @@ public class DocumentConfiguration {
             : hearingNoticeConsentedTemplate;
     }
 
-    public String getManageHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
-        return isHighCourtSelected(finremCaseDetails) ? manageHearingHighCourtNoticeTemplate
+    public String getManageHearingNoticeTemplate(Region region) {
+        return isHearingHighCourtSelected(region) ? manageHearingHighCourtNoticeTemplate
             : manageHearingNoticeTemplate;
     }
 
-    public String getVacateHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
-        return isHighCourtSelected(finremCaseDetails) ? vacateHearingHighCourtNoticeTemplate
-            : vacateHearingNoticeTemplate;
+    public String getVacateOrAdjournNoticeTemplate(Region region) {
+        return isHearingHighCourtSelected(region) ? vacateOrAdjournHighCourtNoticeTemplate
+            : vacateOrAdjournNoticeTemplate;
     }
 
     private boolean isHighCourtSelected(CaseDetails caseDetails) {
-        if (caseDetails != null && caseDetails.getData() != null
-            && caseDetails.getData().get(HIGHCOURT_COURTLIST) != null) {
-            return true;
-        }
-        return false;
+        return caseDetails != null && caseDetails.getData() != null
+            && caseDetails.getData().get(HIGHCOURT_COURTLIST) != null;
     }
 
     private boolean isHighCourtSelected(FinremCaseDetails caseDetails) {
@@ -265,5 +264,9 @@ public class DocumentConfiguration {
             && ObjectUtils.isNotEmpty(caseData.getRegionWrapper().getAllocatedRegionWrapper().getHighCourtFrcList())
             && caseData.getRegionWrapper().getAllocatedRegionWrapper().getHighCourtFrcList()
             .getValue().equalsIgnoreCase(HIGHCOURT);
+    }
+
+    private boolean isHearingHighCourtSelected(Region region) {
+        return HIGHCOURT.equals(region.getValue());
     }
 }
