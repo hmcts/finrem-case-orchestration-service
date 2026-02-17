@@ -85,17 +85,21 @@ public class AssignPartiesAccessService {
     }
 
     /**
-     * Grants case access to an intervener solicitor when the intervener is represented
-     * and a valid organisation policy exists.
+     * Grants case access to an intervener solicitor when the intervener is represented,
+     * a valid organisation policy exists, and a solicitor case role is provided.
      *
-     * <p>The method retrieves the solicitor email, organisation ID, and case role
-     * from the provided {@link IntervenerWrapper} and delegates the access assignment
-     * to {@code grantAccess}. If the intervener is not represented or the organisation
-     * information is missing, no access is granted and an informational log entry is created.</p>
+     * <p>The method retrieves the solicitor email, organisation ID, and CCD case role
+     * from the supplied {@link IntervenerWrapper} and delegates access assignment
+     * to {@code grantAccess}. When access is successfully granted, the returned user ID
+     * is stored in the wrapper.</p>
+     *
+     * <p>If the intervener is not represented, the organisation information is missing,
+     * or no solicitor case role is defined, no access is granted and an informational
+     * log entry is recorded.</p>
      *
      * @param caseId            the CCD case identifier
-     * @param intervenerWrapper the wrapper containing intervener solicitor and
-     *                          organisation details
+     * @param intervenerWrapper the wrapper containing intervener solicitor,
+     *                          organisation, and case-role details
      * @throws UserNotFoundInOrganisationApiException if the solicitor cannot be
      *         located via the Organisation API during access assignment
      */
