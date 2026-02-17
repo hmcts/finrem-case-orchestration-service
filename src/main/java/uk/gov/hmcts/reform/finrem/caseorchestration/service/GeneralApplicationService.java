@@ -249,9 +249,10 @@ public class GeneralApplicationService {
         log.info("GA for Applicant/Respondent size: {}", applicationCollection.size());
     }
 
-    private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(FinremCaseDetails caseDetails, String loggedInUserCaseRole,
-                                                                                       List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
-                                                                                       FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(
+        FinremCaseDetails caseDetails, String loggedInUserCaseRole,
+        List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
+        FinremCaseData caseData, FinremCaseData caseDataBefore) {
         switch (loggedInUserCaseRole) {
             case INTERVENER1 -> {
                 interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(
@@ -432,6 +433,12 @@ public class GeneralApplicationService {
             return;
         }
 
+        if (generalApplicationsBefore != null && generalApplicationsBefore.size() == generalApplications.size()) {
+            errors.add("Any changes to an existing General Applications will not be saved. "
+                + "Please add a new General Application in order to progress.");
+            return;
+        }
+
         log.info("General application size {} for CaseId {}", generalApplications.size(), caseId);
 
         // Determine which general applications need validation (new or modified)
@@ -444,10 +451,6 @@ public class GeneralApplicationService {
         validateEncryptionForGeneralApplications(
             generalApplicationsToValidate, caseId, errors, userAuthorisation
         );
-
-        if (generalApplicationsBefore != null && generalApplicationsBefore.size() == generalApplications.size()) {
-            errors.add("Any changes to an existing General Applications will not be saved. " + "Please add a new General Application in order to progress.");
-        }
     }
 
     /**
@@ -497,7 +500,7 @@ public class GeneralApplicationService {
      * Determines if the provided general application is new or has been modified.
      * Compares the current document state signature with the previous one.
      *
-     * @param currentGa the current general application collection
+     * @param currentGa           the current general application collection
      * @param previousStateByGaId a map of previous document state signatures by application ID
      * @return true if the application is new or its documents have changed; false otherwise
      */
@@ -552,9 +555,9 @@ public class GeneralApplicationService {
      * Adds error messages to the provided list if any document fails encryption validation.
      *
      * @param generalApplications the list of general applications to validate
-     * @param caseId the identifier of the current case
-     * @param errors the list to collect validation errors
-     * @param userAuthorisation the user authorisation token
+     * @param caseId              the identifier of the current case
+     * @param errors              the list to collect validation errors
+     * @param userAuthorisation   the user authorisation token
      */
     private void validateEncryptionForGeneralApplications(
         List<GeneralApplicationsCollection> generalApplications,
@@ -652,8 +655,8 @@ public class GeneralApplicationService {
         }
     }
 
-    private static List<GeneralApplicationCollectionData> getIntervenerGeneralApplications
-        (List<GeneralApplicationCollectionData> generalApplications,
+    private static List<GeneralApplicationCollectionData> getIntervenerGeneralApplications(
+        List<GeneralApplicationCollectionData> generalApplications,
          String intervener1) {
         return generalApplications.stream().filter(ga -> intervener1
             .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).toList();
@@ -679,8 +682,7 @@ public class GeneralApplicationService {
         return appRespGeneralApplications;
     }
 
-    private static void logGeneralApplications
-        (List<GeneralApplicationCollectionData> generalApplications, String caseId) {
+    private static void logGeneralApplications(List<GeneralApplicationCollectionData> generalApplications, String caseId) {
         generalApplications.forEach(ga -> {
             if (ga.getGeneralApplicationItems().getGeneralApplicationReceivedFrom() != null) {
                 log.info("General application received from is {} on Case id {} with status {}",
