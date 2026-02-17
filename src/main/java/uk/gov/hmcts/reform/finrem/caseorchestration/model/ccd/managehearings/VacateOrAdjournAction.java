@@ -10,9 +10,10 @@ import java.util.Arrays;
 
 @RequiredArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public enum ManageHearingsAction {
-    ADD_HEARING("Add_Hearing", "Hearing Added"),
-    ADJOURN_OR_VACATE_HEARING("Vacate_Hearing", "Hearing Adjourned Or Vacated");
+public enum VacateOrAdjournAction {
+
+    ADJOURN_HEARING("Adjourn_Hearing", "Adjourned"),
+    VACATE_HEARING("Vacate_Hearing", "Vacated");
 
     private final String value;
     @Getter
@@ -23,8 +24,8 @@ public enum ManageHearingsAction {
         return value;
     }
 
-    public static ManageHearingsAction forValue(String value) {
-        return Arrays.stream(ManageHearingsAction.values())
+    public static VacateOrAdjournAction forValue(String value) {
+        return Arrays.stream(VacateOrAdjournAction.values())
             .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst()
             .orElseThrow(IllegalArgumentException::new);
