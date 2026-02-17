@@ -313,7 +313,7 @@ public class IntervenerService {
 
     private void logError(Long caseId, List<String> errors) {
         String error = "Could not find intervener with provided email";
-        log.info(String.format(error + " for caseId %s", caseId));
+        log.info("{} for caseId {}", error, caseId);
         if (errors != null) {
             errors.add(error);
         }
