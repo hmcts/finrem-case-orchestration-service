@@ -237,7 +237,7 @@ class ResendPaperHearingNotificationsTaskTest {
         // Arrange
         UUID hearingId = UUID.randomUUID();
         UUID hearingItemId = UUID.randomUUID();
-        ManageHearingsAction action = ManageHearingsAction.VACATE_HEARING;
+        ManageHearingsAction action = ManageHearingsAction.ADJOURN_OR_VACATE_HEARING;
 
         List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE,
             INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
@@ -316,7 +316,7 @@ class ResendPaperHearingNotificationsTaskTest {
         ReflectionTestUtils.setField(resendTask, "dryRun", dryRun);
         UUID hearingId = UUID.randomUUID();
         UUID hearingItemId = UUID.randomUUID();
-        ManageHearingsAction action = ManageHearingsAction.VACATE_HEARING;
+        ManageHearingsAction action = ManageHearingsAction.ADJOURN_OR_VACATE_HEARING;
 
         List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO,
             INTERVENER_THREE, INTERVENER_FOUR);
@@ -420,7 +420,7 @@ class ResendPaperHearingNotificationsTaskTest {
         // Arrange
         UUID hearingId = UUID.randomUUID();
         UUID hearingItemId = UUID.randomUUID();
-        ManageHearingsAction action = ManageHearingsAction.VACATE_HEARING;
+        ManageHearingsAction action = ManageHearingsAction.ADJOURN_OR_VACATE_HEARING;
 
         List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE,
             INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
