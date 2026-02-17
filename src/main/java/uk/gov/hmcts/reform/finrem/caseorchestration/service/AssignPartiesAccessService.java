@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -148,16 +149,18 @@ public class AssignPartiesAccessService {
     }
 
     private boolean isOrgIdExists(OrganisationPolicy organisationPolicy) {
-        return organisationPolicy.getOrganisation() != null
-            && StringUtils.isNotBlank(organisationPolicy.getOrganisation().getOrganisationID());
+        return Optional.ofNullable(organisationPolicy)
+            .map(OrganisationPolicy::getOrganisation)
+            .map(Organisation::getOrganisationID)
+            .filter(StringUtils::isNotBlank)
+            .isPresent();
     }
 
     private void grantAccess(Long caseId, String email, String orgId, String caseRole)
         throws UserNotFoundInOrganisationApiException {
         Optional<String> userId = prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         userId.ifPresentOrElse(s -> assignCaseAccessService.grantCaseRoleToUser(caseId, s, caseRole, orgId),
-            () -> log.info("{} - Attempting to grant {} but system is unable find any user with email address {} ", caseId,
-                email, caseRole));
+            () -> log.info("{} - Attempting to grant role {} but unable to find user with email {}", caseId, caseRole, email));
         if (userId.isEmpty()) {
             throw new UserNotFoundInOrganisationApiException();
         }
