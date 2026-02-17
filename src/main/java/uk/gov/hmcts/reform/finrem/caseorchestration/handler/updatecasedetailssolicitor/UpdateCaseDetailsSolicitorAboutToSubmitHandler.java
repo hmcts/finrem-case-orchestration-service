@@ -44,7 +44,7 @@ public class UpdateCaseDetailsSolicitorAboutToSubmitHandler extends FinremCallba
         FinremCaseData caseData = caseDetails.getData();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
-        if(solicitorEmailChanged(caseDetails, caseDetailsBefore)) {
+        if (solicitorEmailChanged(caseDetails, caseDetailsBefore)) {
             handleSolicitorEmailChange(caseDetails, caseDetailsBefore);
         }
 
@@ -54,7 +54,7 @@ public class UpdateCaseDetailsSolicitorAboutToSubmitHandler extends FinremCallba
     /**
      * Determines if the representation change if applicant solicitor email has changed or applicant was not represented before.
      *
-     * @param caseDetails the current case data
+     * @param caseDetails       the current case data
      * @param caseDetailsBefore the case details before the update
      * @return true if the representation has changed, false otherwise
      */
@@ -65,26 +65,25 @@ public class UpdateCaseDetailsSolicitorAboutToSubmitHandler extends FinremCallba
         String beforeEmail = beforeContactDetailsWrapper.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse(null);
         log.info("TODO: Current Case ID {} Before CaseID {} caseDetailsBefore.getData().isApplicantRepresentedByASolicitor() {} currentEmail {} beforeEmail {}", caseDetails.getId(), caseDetailsBefore.getId(), caseDetailsBefore.getData().isApplicantRepresentedByASolicitor(), currentEmail, beforeEmail);
 
-        return (!caseDetailsBefore.getData().isApplicantRepresentedByASolicitor() && currentEmail !=null
-            || currentEmail !=null && !currentEmail.equals(beforeEmail)
+        return (!caseDetailsBefore.getData().isApplicantRepresentedByASolicitor() && currentEmail != null
+            || currentEmail != null && !currentEmail.equals(beforeEmail)
             || (caseDetailsBefore.getData().isApplicantRepresentedByASolicitor()
             && !caseDetails.getData().isApplicantRepresentedByASolicitor()));
     }
 
     private void handleSolicitorEmailChange(FinremCaseDetails finremCaseDetails, FinremCaseDetails caseDetailsBefore) {
         String caseId = finremCaseDetails.getData().getCcdCaseId();
-        if(finremCaseDetails.getData().isApplicantRepresentedByASolicitor()) {
+        if (finremCaseDetails.getData().isApplicantRepresentedByASolicitor()) {
             log.info("TODO: Granting access to the new solicitor {} for case ID: {}", finremCaseDetails.getData().getAppSolicitorEmail(), caseId);
             assignPartiesAccessService.grantApplicantSolicitor(finremCaseDetails.getData());
         }
 
-        if(caseDetailsBefore.getData().isApplicantRepresentedByASolicitor()) {
+        if (caseDetailsBefore.getData().isApplicantRepresentedByASolicitor()) {
             log.info("TODO: Revoking access for the previous solicitor {} for case ID: {}", caseDetailsBefore.getAppSolicitorEmail(), caseDetailsBefore.getData().getCcdCaseId());
             assignPartiesAccessService.revokeApplicantSolicitor(finremCaseDetails.getData().getCcdCaseId(), caseDetailsBefore.getData());
         }
 
     }
-
 
 
 }
