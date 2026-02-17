@@ -169,7 +169,7 @@ class HearingsAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .manageHearingsActionSelection(ManageHearingsAction.VACATE_HEARING)
+                .manageHearingsActionSelection(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING)
                 .build())
             .build();
 
@@ -178,16 +178,16 @@ class HearingsAboutToSubmitHandlerTest {
 
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
-        verify(manageHearingActionService).performVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
+        verify(manageHearingActionService).performAdjournOrVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
-    void givenValidCaseData_whenHandleVacateWithrelist_thenPerformPerfomrAddAndVacateHearingCalled() {
+    void givenValidCaseData_whenHandleVacateWithRelist_thenPerformPerformAddAndVacateHearingCalled() {
         String caseReference = TestConstants.CASE_ID;
 
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .manageHearingsActionSelection(ManageHearingsAction.VACATE_HEARING)
+                .manageHearingsActionSelection(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING)
                 .isRelistSelected(YesOrNo.YES)
                 .build())
             .build();
@@ -198,7 +198,7 @@ class HearingsAboutToSubmitHandlerTest {
         manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
         verify(manageHearingActionService).performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
-        verify(manageHearingActionService).performVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
+        verify(manageHearingActionService).performAdjournOrVacateHearing(request.getCaseDetails(), AUTH_TOKEN);
     }
 
     private WorkingHearing createHearingToAdd() {

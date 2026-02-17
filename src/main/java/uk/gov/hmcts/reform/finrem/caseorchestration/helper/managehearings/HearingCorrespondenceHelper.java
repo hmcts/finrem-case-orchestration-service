@@ -159,7 +159,7 @@ public class HearingCorrespondenceHelper {
         ManageHearingsAction actionSelection = getManageHearingsAction(caseData);
         boolean hearingRelisted = YesOrNo.YES.equals(
             caseData.getManageHearingsWrapper().getWasRelistSelected());
-        return isVacateHearingAction(actionSelection) && hearingRelisted;
+        return isAdjournOrVacateHearingAction(actionSelection) && hearingRelisted;
     }
 
     /**
@@ -186,10 +186,10 @@ public class HearingCorrespondenceHelper {
      * Determines if the action selection is to vacate a hearing.
      *
      * @param actionSelection the action selection to check
-     * @return true if the action selection is VACATE_HEARING, false otherwise
+     * @return true if the action selection is ADJOURN_OR_VACATE_HEARING, false otherwise
      */
-    private boolean isVacateHearingAction(ManageHearingsAction actionSelection) {
-        return ManageHearingsAction.VACATE_HEARING.equals(actionSelection);
+    private boolean isAdjournOrVacateHearingAction(ManageHearingsAction actionSelection) {
+        return ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(actionSelection);
     }
 
     /**
@@ -214,7 +214,7 @@ public class HearingCorrespondenceHelper {
      * @param documentType a {@link CaseDocumentType} identifying the type of hearing document.
      * @return a {@link CaseDocument}
      */
-    private CaseDocument getCaseDocumentByTypeAndHearingUuid(CaseDocumentType documentType, ManageHearingsWrapper wrapper, UUID hearingId) {
+    public CaseDocument getCaseDocumentByTypeAndHearingUuid(CaseDocumentType documentType, ManageHearingsWrapper wrapper, UUID hearingId) {
         return wrapper.getHearingDocumentsCollection().stream()
             .map(ManageHearingDocumentsCollectionItem::getValue)
             .filter(Objects::nonNull)
