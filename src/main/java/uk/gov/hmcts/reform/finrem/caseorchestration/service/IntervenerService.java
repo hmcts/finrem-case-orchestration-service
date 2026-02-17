@@ -292,6 +292,10 @@ public class IntervenerService {
         });
     }
 
+    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, IntervenerWrapper intervenerWrapper) {
+        revokeIntervenerRole(caseId, email, orgId, caseRole, null, intervenerWrapper);
+    }
+
     private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors,
                                       IntervenerWrapper intervenerWrapper) {
         String solUserID = intervenerWrapper.getSolUserId();
