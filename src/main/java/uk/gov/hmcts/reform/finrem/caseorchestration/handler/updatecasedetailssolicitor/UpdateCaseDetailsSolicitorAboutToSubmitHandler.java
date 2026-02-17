@@ -63,7 +63,6 @@ public class UpdateCaseDetailsSolicitorAboutToSubmitHandler extends FinremCallba
         String currentEmail = contactDetailsWrapper.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse(null);
         Optional<ContactDetailsWrapper> beforeContactDetailsWrapper = Optional.ofNullable(caseDetailsBefore.getData().getContactDetailsWrapper());
         String beforeEmail = beforeContactDetailsWrapper.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse(null);
-        log.info("TODO: Current Case ID {} Before CaseID {} caseDetailsBefore.getData().isApplicantRepresentedByASolicitor() {} currentEmail {} beforeEmail {}", caseDetails.getId(), caseDetailsBefore.getId(), caseDetailsBefore.getData().isApplicantRepresentedByASolicitor(), currentEmail, beforeEmail);
 
         return (!caseDetailsBefore.getData().isApplicantRepresentedByASolicitor() && currentEmail != null
             || currentEmail != null && !currentEmail.equals(beforeEmail)
@@ -79,11 +78,8 @@ public class UpdateCaseDetailsSolicitorAboutToSubmitHandler extends FinremCallba
         }
 
         if (caseDetailsBefore.getData().isApplicantRepresentedByASolicitor()) {
-            log.info("TODO: Revoking access for the previous solicitor {} for case ID: {}", caseDetailsBefore.getAppSolicitorEmail(), caseDetailsBefore.getData().getCcdCaseId());
+            log.info("Revoking access for the previous solicitor for case ID: {}", caseDetailsBefore.getData().getCcdCaseId());
             assignPartiesAccessService.revokeApplicantSolicitor(finremCaseDetails.getData().getCcdCaseId(), caseDetailsBefore.getData());
         }
-
     }
-
-
 }
