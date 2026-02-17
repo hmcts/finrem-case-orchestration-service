@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WorkingVacatedHearing {
+    private VacateOrAdjournAction vacateOrAdjournAction;
     private DynamicList chooseHearings;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate vacateHearingDate;

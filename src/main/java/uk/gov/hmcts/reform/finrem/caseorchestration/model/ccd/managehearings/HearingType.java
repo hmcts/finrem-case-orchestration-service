@@ -8,7 +8,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 public enum HearingType {
     MPS("Maintenance Pending Suit (MPS)"),
     FDA("First Directions Appointment (FDA)"),
+    ADJOURNED_FDA("Adjourned First Directions Appointment (FDA)"),
     FDR("Financial Dispute Resolution (FDR)"),
+    ADJOURNED_FDR("Adjourned Financial Dispute Resolution (FDR)"),
     FH("Final Hearing (FH)"),
     DIR("Directions (DIR)"),
     MENTION("Mention"),
