@@ -158,7 +158,8 @@ public class AssignPartiesAccessService {
 
     private void grantAccess(Long caseId, String email, String orgId, String caseRole)
         throws UserNotFoundInOrganisationApiException {
-        Optional<String> userId = prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
+        Optional<String> userId = StringUtils.isBlank(email) ? Optional.empty() :
+            prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         userId.ifPresentOrElse(s -> assignCaseAccessService.grantCaseRoleToUser(caseId, s, caseRole, orgId),
             () -> log.info("{} - Attempting to grant role {} but unable to find user with email {}", caseId, caseRole, email));
         if (userId.isEmpty()) {
