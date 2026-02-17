@@ -107,7 +107,8 @@ public class AssignPartiesAccessService {
             String intervenerSolEmail = intervenerWrapper.getIntervenerSolEmail();
             String appOrgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
             String intrvRole = intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode();
-            grantAccess(caseId, intervenerSolEmail, appOrgId, intrvRole);
+            Optional<String> userId = grantAccess(caseId, intervenerSolEmail, appOrgId, intrvRole);
+            userId.ifPresent(intervenerWrapper::setSolUserId);
         } else {
             log.info("{} - No intervener represented by a solicitor or organisation policy missing", caseId);
         }
@@ -125,7 +126,7 @@ public class AssignPartiesAccessService {
             .isPresent();
     }
 
-    private void grantAccess(Long caseId, String email, String orgId, String caseRole)
+    private Optional<String> grantAccess(Long caseId, String email, String orgId, String caseRole)
         throws UserNotFoundInOrganisationApiException {
         Optional<String> userId = StringUtils.isBlank(email) ? Optional.empty() :
             prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
@@ -134,5 +135,6 @@ public class AssignPartiesAccessService {
         if (userId.isEmpty()) {
             throw new UserNotFoundInOrganisationApiException();
         }
+        return userId;
     }
 }
