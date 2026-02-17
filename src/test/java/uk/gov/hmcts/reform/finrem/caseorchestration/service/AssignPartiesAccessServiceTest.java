@@ -265,7 +265,8 @@ class AssignPartiesAccessServiceTest {
         }
 
         @Test
-        void givenEmailRegistered_thenAssignAppSolicitorToCase() throws UserNotFoundInOrganisationApiException {
+        void givenEmailRegistered_thenAssignAppSolicitorToCaseAndSolUidIsSet()
+            throws UserNotFoundInOrganisationApiException {
             IntervenerWrapper intervenerWrapper = mock(IntervenerWrapper.class);
             when(intervenerWrapper.getIntervenerSolEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
             when(intervenerWrapper.getIntervenerRepresented()).thenReturn(YesOrNo.YES);
@@ -281,6 +282,8 @@ class AssignPartiesAccessServiceTest {
             // Act
             assignPartiesAccessService.grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper);
 
+            // Verify
+            verify(intervenerWrapper).setSolUserId(TEST_USER_ID);
             verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID, TEST_CASE_ROLE,
                 TEST_ORG_ID);
             verifyNoMoreInteractions(assignCaseAccessService);
