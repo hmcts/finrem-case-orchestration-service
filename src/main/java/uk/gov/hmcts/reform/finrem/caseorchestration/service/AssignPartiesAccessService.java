@@ -53,36 +53,33 @@ public class AssignPartiesAccessService {
     }
 
     /**
-     * Revokes case access from the applicant's solicitor where the applicant is no longer legally represented.
+     * Revokes case access from the applicant's solicitor if they were previously
+     * represented and had access granted.
      *
      * <p>
-     * This method retrieves the applicant solicitor's email address and organisation identifier
-     * from the provided {@link FinremCaseData}. If the applicant is no longer represented by a solicitor,
-     * the solicitor's {@link CaseRole#APP_SOLICITOR} role on the case is revoked.
-     * </p>
+     * Access is revoked only when:
+     * <ul>
+     *     <li>The applicant was previously represented by a solicitor, and</li>
+     *     <li>A valid organisation policy with an organisation ID existed at that time.</li>
+     * </ul>
+     * If either condition is not met, no access is revoked and an informational
+     * log entry is recorded.
      *
-     * <p>
-     * An {@link IllegalStateException} is thrown if the applicant organisation policy
-     * is missing when representation is indicated.
-     * </p>
-     *
-     * @param finremCaseDataBefore the case data containing applicant representation details,
-     *                       solicitor email, organisation policy, and CCD case ID
-     * @throws IllegalStateException if the applicant organisation policy is not present
-     *                               while the applicant is marked as represented
+     * @param caseId the CCD case identifier
+     * @param finremCaseDataBefore the financial remedy case data before the update,
+     *                             containing previous applicant representation details and organisation information
      */
     public void revokeApplicantSolicitor(String caseId, FinremCaseData finremCaseDataBefore) {
         if (finremCaseDataBefore.isApplicantRepresentedByASolicitor()) {
             String appSolicitorEmail = finremCaseDataBefore.getAppSolicitorEmail();
-            String appOrgId = ofNullable(finremCaseDataBefore.getApplicantOrganisationPolicy())
-                .map(OrganisationPolicy::getOrganisation)
-                .map(Organisation::getOrganisationID)
-                .orElseThrow(() -> new IllegalStateException(
-                    format("%s - Applicant organisation policy is missing", caseId)
-                ));
-            revokeAccess(Long.valueOf(caseId), appSolicitorEmail, appOrgId, CaseRole.APP_SOLICITOR.getCcdCode());
+            String appOrgId = finremCaseDataBefore.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID();
+            try {
+                revokeAccess(Long.valueOf(caseId), appSolicitorEmail, appOrgId, CaseRole.APP_SOLICITOR.getCcdCode());
+            } catch (UserNotFoundInOrganisationApiException e) {
+                // ignore it
+            }
         } else {
-            log.info("{} - No applicant represented by a solicitor", caseId);
+            log.info("{} - No applicant represented by a solicitor or organisation policy missing", caseId);
         }
     }
 
@@ -166,10 +163,14 @@ public class AssignPartiesAccessService {
         }
     }
 
-    private void revokeAccess(Long caseId, String email, String orgId, String caseRole) {
+    private void revokeAccess(Long caseId, String email, String orgId, String caseRole)
+        throws UserNotFoundInOrganisationApiException {
         Optional<String> userId = prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         userId.ifPresentOrElse(s -> assignCaseAccessService.removeCaseRoleToUser(caseId, s, caseRole, orgId),
             () -> log.info("{} - Attempting to revoke {} but system is unable find any user with email address {} ", caseId,
                 email, caseRole));
+        if (userId.isEmpty()) {
+            throw new UserNotFoundInOrganisationApiException();
+        }
     }
 }
