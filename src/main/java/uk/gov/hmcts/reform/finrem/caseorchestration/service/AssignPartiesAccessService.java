@@ -58,6 +58,40 @@ public class AssignPartiesAccessService {
     }
 
     /**
+     * Revokes case access from the applicant's solicitor where the applicant is no longer legally represented.
+     *
+     * <p>
+     * This method retrieves the applicant solicitor's email address and organisation identifier
+     * from the provided {@link FinremCaseData}. If the applicant is no longer represented by a solicitor,
+     * the solicitor's {@link CaseRole#APP_SOLICITOR} role on the case is revoked.
+     * </p>
+     *
+     * <p>
+     * An {@link IllegalStateException} is thrown if the applicant organisation policy
+     * is missing when representation is indicated.
+     * </p>
+     *
+     * @param finremCaseDataBefore the case data containing applicant representation details,
+     *                       solicitor email, organisation policy, and CCD case ID
+     * @throws IllegalStateException if the applicant organisation policy is not present
+     *                               while the applicant is marked as represented
+     */
+    public void revokeApplicantSolicitor(String caseId, FinremCaseData finremCaseDataBefore) {
+        if (finremCaseDataBefore.isApplicantRepresentedByASolicitor()) {
+            String appSolicitorEmail = finremCaseDataBefore.getAppSolicitorEmail();
+            String appOrgId = ofNullable(finremCaseDataBefore.getApplicantOrganisationPolicy())
+                .map(OrganisationPolicy::getOrganisation)
+                .map(Organisation::getOrganisationID)
+                .orElseThrow(() -> new IllegalStateException(
+                    format("%s - Applicant organisation policy is missing", caseId)
+                ));
+            revokeAccess(Long.valueOf(caseId), appSolicitorEmail, appOrgId, CaseRole.APP_SOLICITOR.getCcdCode());
+        } else {
+            log.info("{} - No applicant represented by a solicitor", caseId);
+        }
+    }
+
+    /**
      * Grants case access to the respondent's solicitor where the respondent is legally represented.
      *
      * <p>
@@ -100,6 +134,13 @@ public class AssignPartiesAccessService {
         Optional<String> userId = prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         userId.ifPresentOrElse(s -> assignCaseAccessService.grantCaseRoleToUser(caseId, s, caseRole, orgId),
             () -> log.info("{} - Attempting to grant {} but system is unable find any user with email address {} ", caseId,
+                email, caseRole));
+    }
+
+    private void revokeAccess(Long caseId, String email, String orgId, String caseRole) {
+        Optional<String> userId = prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
+        userId.ifPresentOrElse(s -> assignCaseAccessService.removeCaseRoleToUser(caseId, s, caseRole, orgId),
+            () -> log.info("{} - Attempting to revoke {} but system is unable find any user with email address {} ", caseId,
                 email, caseRole));
     }
 }
