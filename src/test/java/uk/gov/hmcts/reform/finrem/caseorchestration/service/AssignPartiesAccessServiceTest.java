@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -98,6 +99,20 @@ class AssignPartiesAccessServiceTest {
         }
 
         @Test
+        void givenMissingEmail_thenIgnoreTheRequest() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getAppSolicitorEmail()).thenReturn(null);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            // Act
+            assignPartiesAccessService.grantApplicantSolicitor(caseData);
+
+            verifyNotGrantingCaseRoleToUser();
+        }
+
+        @Test
         void givenEmailNotFound_thenShouldNotAssignAppSolicitorToCase() {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
@@ -163,6 +178,20 @@ class AssignPartiesAccessServiceTest {
         }
 
         @Test
+        void givenMissingEmail_thenIgnoreTheRequest() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getRespondentSolicitorEmail()).thenReturn(null);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            // Act
+            assignPartiesAccessService.grantRespondentSolicitor(caseData);
+
+            verifyNotGrantingCaseRoleToUser();
+        }
+
+        @Test
         void givenEmailNotFound_thenShouldNotAssignAppSolicitorToCase() {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
@@ -216,6 +245,22 @@ class AssignPartiesAccessServiceTest {
             // Act
             assignPartiesAccessService.grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper);
 
+            verifyNotGrantingCaseRoleToUser();
+        }
+
+        @Test
+        void givenMissingEmail_thenIgnoreTheRequest() {
+            IntervenerWrapper intervenerWrapper = mock(IntervenerWrapper.class);
+            when(intervenerWrapper.getIntervenerSolEmail()).thenReturn(null);
+            when(intervenerWrapper.getIntervenerRepresented()).thenReturn(YesOrNo.YES);
+            when(intervenerWrapper.getIntervenerOrganisation()).thenReturn(organisationPolicy(TEST_ORG_ID));
+            CaseRole caseRole = mock(CaseRole.class);
+            when(caseRole.getCcdCode()).thenReturn(TEST_CASE_ROLE);
+            when(intervenerWrapper.getIntervenerSolicitorCaseRole()).thenReturn(caseRole);
+
+            // Act
+            assertThrows(UserNotFoundInOrganisationApiException.class, ()
+                -> assignPartiesAccessService.grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper));
             verifyNotGrantingCaseRoleToUser();
         }
 
