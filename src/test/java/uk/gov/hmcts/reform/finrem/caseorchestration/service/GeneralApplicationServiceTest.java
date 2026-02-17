@@ -407,7 +407,7 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    void givenEmptyGeneralApplications_whenCheckIfApplicationCompleted_thenAddsError() {
+    void givenGeneralApplicationCollectionIsTheSame_whenCheckIfApplicationCompleted_thenAddsError() {
         // Given
         FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(
                 Long.valueOf(CASE_ID), mock(CaseType.class))
@@ -420,6 +420,39 @@ public class GeneralApplicationServiceTest {
         // Then
         assertThat(errors).containsExactly(
             "Please complete the General Application. No information has been entered for this application."
+        );
+        verifyNoInteractions(bulkPrintDocumentService);
+    }
+
+    @Test
+    void givenEmptyGeneralApplications_whenCheckIfApplicationCompleted_thenAddsError() {
+        // Given
+        List<GeneralApplicationsCollection> generalApplicationsCollection = List.of(GeneralApplicationsCollection
+            .builder()
+            .value(GeneralApplicationItems
+                .builder()
+                .generalApplicationDocument(caseDocument("generalApplicationDocument.pdf"))
+                .build())
+            .build());
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                .generalApplications(generalApplicationsCollection)
+                .build())
+            .build();
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(
+                Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+            .build();
+        List<String> errors = new ArrayList<>();
+
+        // When
+        generalApplicationService.checkIfApplicationCompleted(finremCaseDetails, errors,
+            generalApplicationsCollection, generalApplicationsCollection, AUTH_TOKEN);
+
+        // Then
+        assertThat(errors).containsExactly(
+            "Any changes to an existing General Applications will not be saved. Please add a new General Application in order to progress."
         );
         verifyNoInteractions(bulkPrintDocumentService);
     }
