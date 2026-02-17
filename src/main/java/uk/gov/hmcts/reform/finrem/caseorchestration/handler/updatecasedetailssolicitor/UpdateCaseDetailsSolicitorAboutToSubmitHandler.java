@@ -73,7 +73,7 @@ public class UpdateCaseDetailsSolicitorAboutToSubmitHandler extends FinremCallba
     private void handleSolicitorEmailChange(FinremCaseDetails finremCaseDetails, FinremCaseDetails caseDetailsBefore) {
         String caseId = finremCaseDetails.getData().getCcdCaseId();
         if (finremCaseDetails.getData().isApplicantRepresentedByASolicitor()) {
-            log.info("TODO: Granting access to the new solicitor {} for case ID: {}", finremCaseDetails.getData().getAppSolicitorEmail(), caseId);
+            log.info("Granting access to the new solicitor for case ID: {}", caseId);
             assignPartiesAccessService.grantApplicantSolicitor(finremCaseDetails.getData());
         }
 
