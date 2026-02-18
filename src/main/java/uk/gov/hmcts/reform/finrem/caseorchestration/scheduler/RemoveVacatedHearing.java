@@ -61,7 +61,8 @@ public class RemoveVacatedHearing extends EncryptedCsvFileProcessingTask {
         FinremCaseData caseData = finremCaseDetails.getData();
         log.info("Clearing vacatedOrAdjournedHearings for case id {}", finremCaseDetails.getId());
 
-        log.info("vacatedOrAdjournedHearings count: {}", caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings().size());
+        log.info("vacatedOrAdjournedHearings count: {}", caseData.getManageHearingsWrapper()
+            .getVacatedOrAdjournedHearings().size());
         log.info("vacatedOrAdjournedHearingTabItems count: {}", caseData.getManageHearingsWrapper()
             .getVacatedOrAdjournedHearingTabItems().size());
 
