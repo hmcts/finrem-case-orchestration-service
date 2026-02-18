@@ -61,15 +61,17 @@ public class RemoveVacatedHearing extends EncryptedCsvFileProcessingTask {
         FinremCaseData caseData = finremCaseDetails.getData();
         log.info("Clearing vacatedOrAdjournedHearings for case id {}", finremCaseDetails.getId());
 
-        log.info("vacatedOrAdjournedHearings: {}", caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings());
-        log.info("vacatedOrAdjournedHearingTabItems: {}", caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingTabItems());
+        log.info("vacatedOrAdjournedHearings count: {}", caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings().size());
+        log.info("vacatedOrAdjournedHearingTabItems count: {}", caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingTabItems().size());
 
-        caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings().clear();
-        caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingTabItems().clear();
+        if (caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings().size() == 1) {
+            caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings().clear();
+            caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingTabItems().clear();
+            log.info("Cleared vacatedOrAdjournedHearings for case id {}", finremCaseDetails.getId());
+        }
 
-        log.info("vacatedOrAdjournedHearings: {}", caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings());
-        log.info("vacatedOrAdjournedHearingTabItems: {}", caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingTabItems());
+        log.info("vacatedOrAdjournedHearings count after: {}", caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearings().size());
+        log.info("vacatedOrAdjournedHearingTabItems count after: {}", caseData.getManageHearingsWrapper().getVacatedOrAdjournedHearingTabItems().size());
 
-        log.info("Cleared vacatedOrAdjournedHearings for case id {}", finremCaseDetails.getId());
     }
 }
