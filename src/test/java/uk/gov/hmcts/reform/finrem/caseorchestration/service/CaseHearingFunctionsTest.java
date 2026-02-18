@@ -299,7 +299,7 @@ class CaseHearingFunctionsTest {
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
         assertEquals("Thanet Family Court Hearing Centre", stringObjectMap.get(COURT_DETAILS_NAME_KEY));
         assertEquals("2nd Floor, The Courthouse, Cecil Square, Margate, Kent CT9 1RL", stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY));
-        assertEquals("01227 819200", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
+        assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
         assertEquals("Family.canterbury.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
     }
 
@@ -330,6 +330,22 @@ class CaseHearingFunctionsTest {
         assertEquals("Green Lane, Old Elvet, Durham, DH1 3RG", stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY));
         assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
         assertEquals("Family.newcastle.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
+    }
+
+    @Test
+    void shouldPopulateDarlingtonMagistratesCourtDetailsFinrem() {
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.NORTHEAST)
+            .northEastFrcList(RegionNorthEastFrc.CLEVELAND)
+            .courtListWrapper(
+                DefaultCourtListWrapper.builder().cleavelandCourtList(ClevelandCourt.FR_CLEVELAND_HC_LIST_9)
+                    .build())
+            .build();
+        FinremCaseData caseData = getFinremCaseData(regionWrapper);
+        Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
+        assertEquals("Darlington Magistrates Court", stringObjectMap.get(COURT_DETAILS_NAME_KEY));
+        assertEquals("Parkgate, Darlington, DL1 1RU", stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY));
+        assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
+        assertEquals("family.middlesbrough.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
     }
 
     @Test
