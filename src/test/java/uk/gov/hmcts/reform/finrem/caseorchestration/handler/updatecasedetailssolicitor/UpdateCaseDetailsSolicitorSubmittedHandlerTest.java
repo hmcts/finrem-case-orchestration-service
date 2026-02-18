@@ -14,33 +14,32 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CASE_DETAILS_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateCaseDetailsSolicitorAboutToSubmitHandlerTest {
+class UpdateCaseDetailsSolicitorSubmittedHandlerTest {
 
     @Mock
-    private AssignPartiesAccessService assignPartiesAccessService;
+    private SolicitorAccessService solicitorAccessService;
     @InjectMocks
-    private UpdateCaseDetailsSolicitorAboutToSubmitHandler handler;
+    private UpdateCaseDetailsSolicitorSubmittedHandlerHandler handler;
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, ABOUT_TO_SUBMIT, CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR);
+        assertCanHandle(handler, SUBMITTED, CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR);
     }
 
     static Stream<Arguments> provideSolicitorEmailChangeScenarios() {
@@ -85,16 +84,10 @@ class UpdateCaseDetailsSolicitorAboutToSubmitHandlerTest {
             FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR, caseData, caseDataBefore);
 
         final GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        if (shouldGrant) {
-            verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
+        if (shouldGrant || shouldRevoke) {
+            verify(solicitorAccessService).updateApplicantSolicitor(caseData, caseDataBefore);
         } else {
-            verify(assignPartiesAccessService, never()).grantApplicantSolicitor(caseData);
-        }
-        if (shouldRevoke) {
-            verify(assignPartiesAccessService).revokeApplicantSolicitor(CASE_ID, caseDataBefore);
-        }
-        if (neverRevoke) {
-            verify(assignPartiesAccessService, never()).revokeApplicantSolicitor(anyString(), any());
+            verify(solicitorAccessService, never()).updateApplicantSolicitor(any(), any());
         }
         assertThat(response.getData()).isEqualTo(caseData);
     }
