@@ -67,6 +67,8 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
 
     private YesOrNo intervenerInRefuge;
 
+    private String solUserId;
+
     protected IntervenerWrapper() {
         intervenerCorrespondenceEnabled = Boolean.FALSE;
     }

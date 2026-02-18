@@ -16,47 +16,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class IssueApplicationContestedAboutToSubmitHandlerTest {
 
-    public static final String AUTH_TOKEN = "tokien:)";
     @InjectMocks
     private IssueApplicationContestedAboutToSubmitHandler handler;
     @Mock
     private OnlineFormDocumentService service;
 
     @Test
-    void givenContestedCase_whenCaseTypeIsConsented_thenHandlerWillNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.ISSUE_APPLICATION),
-            is(false));
-    }
-
-    @Test
-    void givenContestedCase_whenCallbackIsAboutToSubmit_thenHandlerWillNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.ISSUE_APPLICATION),
-            is(false));
-    }
-
-    @Test
-    void givenContestedCase_whenWrongEvent_thenHandlerWillNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
-    }
-
-    @Test
-    void givenContestedCase_whenAllCorrect_thenHandlerWillHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.ISSUE_APPLICATION),
-            is(true));
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.ISSUE_APPLICATION);
     }
 
     @Test
