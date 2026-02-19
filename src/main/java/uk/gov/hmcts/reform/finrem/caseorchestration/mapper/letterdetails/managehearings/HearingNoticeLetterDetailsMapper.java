@@ -27,7 +27,7 @@ public class HearingNoticeLetterDetailsMapper extends AbstractManageHearingsLett
         Hearing hearing = getWorkingHearing(caseData);
 
         CourtDetailsTemplateFields courtTemplateFields =
-            buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt());
+            buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt(), caseData.getCcdCaseType());
 
         return HearingNoticeLetterDetails.builder()
             .ccdCaseNumber(caseDetails.getCaseIdAsString())
