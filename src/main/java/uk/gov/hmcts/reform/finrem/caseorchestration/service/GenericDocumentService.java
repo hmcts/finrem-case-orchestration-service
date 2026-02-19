@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
@@ -38,6 +40,21 @@ public class GenericDocumentService {
         return generateDocumentFromPlaceholdersMap(authorisationToken, caseDetailsMap, template, fileName, caseType);
     }
 
+    /**
+     * Generates a case document by populating a template with the provided placeholders
+     * and storing the resulting document via the document management service.
+     *
+     * <p>The method delegates document generation and storage to
+     * {@code documentManagementService.storeDocument}, then converts the returned
+     * {@link Document} into a {@link CaseDocument}.
+     *
+     * @param authorisationToken the authorisation token used to authenticate the request
+     * @param placeholders       a map containing placeholder keys and values used to populate the template
+     * @param template           the document template identifier or location
+     * @param fileName           the name to assign to the generated document
+     * @param caseType           the case type associated with the document
+     * @return the generated {@link CaseDocument}
+     */
     public CaseDocument generateDocumentFromPlaceholdersMap(String authorisationToken, Map<String, Object> placeholders,
                                                             String template, String fileName, CaseType caseType) {
         Document generatedPdf = documentManagementService

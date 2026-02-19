@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.miniformacontested.ContestedMiniFormADetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -67,13 +68,50 @@ public class OnlineFormDocumentService {
     private final DocumentHelper documentHelper;
     private final ConsentedApplicationHelper consentedApplicationHelper;
     private final ContestedMiniFormADetailsMapper contestedMiniFormADetailsMapper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    /**
+     * Generates a Consented Mini Form A document using the provided {@link CaseDetails}.
+     *
+     * <p><strong>Deprecated:</strong> This method is retained for backward compatibility.
+     * New implementations should use the version that accepts {@link FinremCaseDetails}.
+     *
+     * <p>The method logs the generation request, creates a deep copy of the supplied
+     * case details to avoid mutating the original object, and delegates document
+     * generation to {@code genericDocumentService} using the configured template
+     * and file name.
+     *
+     * @param authorisationToken the authorisation token used to authenticate the request
+     * @param caseDetails        the case details used to populate the document
+     * @return the generated {@link CaseDocument} representing the Consented Mini Form A
+     * @deprecated use {@link #generateMiniFormA(String, FinremCaseDetails)} instead
+     */
+    @Deprecated
     public CaseDocument generateMiniFormA(String authorisationToken, CaseDetails caseDetails) {
 
         log.info("Generating Consented Mini Form A for Case ID : {}", caseDetails.getId());
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getMiniFormTemplate(caseDetails),
+            documentConfiguration.getMiniFormFileName());
+    }
+
+    /**
+     * Generates a Mini Form A document for the provided case details.
+     *
+     * <p>The method maps {@link FinremCaseDetails} to {@link CaseDetails},
+     * determines the appropriate template and file name from the document
+     * configuration, and delegates document generation to the
+     * {@code genericDocumentService}.
+     *
+     * @param authorisationToken the authorisation token used to authenticate the request
+     * @param finremCaseDetails  the financial remedy case details used to populate the document
+     * @return the generated {@link CaseDocument} representing the Mini Form A
+     */
+    public CaseDocument generateMiniFormA(String authorisationToken, FinremCaseDetails finremCaseDetails) {
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        return genericDocumentService.generateDocument(authorisationToken, caseDetails,
+            documentConfiguration.getMiniFormTemplate(finremCaseDetails),
             documentConfiguration.getMiniFormFileName());
     }
 
