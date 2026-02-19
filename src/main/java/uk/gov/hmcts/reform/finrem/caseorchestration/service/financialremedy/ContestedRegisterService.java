@@ -33,6 +33,7 @@ public class ContestedRegisterService {
         String userToken = systemUserService.getSysUserToken();
         String authToken = authTokenGenerator.generate();
 
+        log.debug("Getting case details for case reference {}", caseReference);
         return caseDataApi.getCaseDetails(userToken, authToken, false, caseReference);
     }
 
