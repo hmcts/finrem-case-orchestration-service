@@ -57,6 +57,7 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
         FinremCaseData caseData = caseDetails.getData();
         assignPartiesAccessService.grantRespondentSolicitor(caseData);
+        assignPartiesAccessService.grantApplicantSolicitor(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();

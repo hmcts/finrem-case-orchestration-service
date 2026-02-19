@@ -64,6 +64,16 @@ class IssueApplicationContestedSubmittedHandlerTest {
     }
 
     @Test
+    void givenCase_whenHandled_thenShouldGrantApplicantSolicitor() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
+
+        handler.handle(request, AUTH_TOKEN);
+
+        verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
+    }
+
+    @Test
     void givenCase_whenFailToSendEmail_thenLogErrorAndContinueGrantingRespondentSolicitor() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
