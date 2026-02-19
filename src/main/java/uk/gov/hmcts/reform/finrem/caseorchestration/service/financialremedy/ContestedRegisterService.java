@@ -20,10 +20,9 @@ public class ContestedRegisterService {
 
     /**
      * Retrieves the case details based on its unique reference.
-     * <p>
-     * This method provides a system-user token and a generated authorization token
+     *
+     * <p>This method provides a system-user token and a generated authorization token
      * to fetch case data from the {@code caseDataApi}.
-     * </p>
      *
      * @param caseReference the unique identifier of the case to be retrieved
      * @return a {@link CaseResource} object containing the case details
