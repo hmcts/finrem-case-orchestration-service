@@ -1,14 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
@@ -18,9 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSuportingDocumentItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
@@ -33,32 +32,27 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
@@ -92,22 +86,20 @@ public class GeneralApplicationServiceTest {
     @Mock
     private AssignCaseAccessService accessService;
     @Mock
-    private BulkPrintDocumentService service;
+    private BulkPrintDocumentService bulkPrintDocumentService;
     @Mock
     private GeneralApplicationsCategoriser generalApplicationsCategoriser;
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
     private CaseDetails caseDetails;
-    private CaseDetails caseDetailsBefore;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        caseDetailsBefore = getApplicationIssuedCaseDetailsBefore();
         caseDetails = CaseDetails.builder().data(new LinkedHashMap<>()).build();
         helper = new GeneralApplicationHelper(objectMapper, genericDocumentService);
         generalApplicationService = new GeneralApplicationService(documentHelper,
-            objectMapper, idamService, genericDocumentService, accessService, helper, service,
+            idamService, genericDocumentService, accessService, helper, bulkPrintDocumentService,
             generalApplicationsCategoriser);
     }
 
@@ -281,124 +273,6 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    void givenUploadGenAppDocWordFormat_whenUpdateCaseDataSubmit_thenConvertGenAppDocLatestToPdf() {
-
-        Map<String, String> documentMapInWordFormat = getCcdDocumentMap();
-        caseDetails.getData().put(GENERAL_APPLICATION_DOCUMENT, documentMapInWordFormat);
-
-        CaseDocument pdfCaseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(pdfCaseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
-            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
-
-        CaseDocument caseDocument = getCaseDocument(WORD_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(documentMapInWordFormat)).thenReturn(caseDocument);
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        String convertedDocumentName =
-            ((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST)).getDocumentFilename();
-        assertThat(convertedDocumentName, containsString(PDF_FORMAT_EXTENSION));
-    }
-
-    @Test
-    void whenDraftOrderNotUploaded() {
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-        assertNull(caseDetails.getData().get(GENERAL_APPLICATION_DRAFT_ORDER));
-    }
-
-    @Test
-    void givenUploadDraftDocWordFormat_whenUpdateCaseDataSubmit_thenConvertDraftDocToPdf() {
-
-        Map<String, String> documentMapInWordFormat = getCcdDocumentMap();
-        caseDetails.getData().put(GENERAL_APPLICATION_DRAFT_ORDER, documentMapInWordFormat);
-
-        CaseDocument pdfCaseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(pdfCaseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
-            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
-
-        CaseDocument caseDocument = getCaseDocument(WORD_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(documentMapInWordFormat)).thenReturn(caseDocument);
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        String convertedDocumentName =
-            ((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DRAFT_ORDER)).getDocumentFilename();
-        assertThat(convertedDocumentName, containsString(PDF_FORMAT_EXTENSION));
-    }
-
-    @Test
-    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenStateIsIssued() {
-
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_PRE_STATE), is("applicationIssued"));
-    }
-
-    @Test
-    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDocumentLatestDateIsNow() {
-
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE), is(LocalDate.now()));
-    }
-
-    @Test
-    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDataListHasUploadedDoc() {
-        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
-            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
-
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
-            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {
-            });
-        assertThat(generalApplicationDataList, hasSize(1));
-        assertThat(
-            matchesUploadedDocumentFields(
-                generalApplicationDataList.get(0).getGeneralApplication().getGeneralApplicationDocument()),
-            is(true));
-    }
-
-    @Test
-    void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDocLatestIsUploadedDoc() {
-        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
-            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
-
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        CaseDocument generalApplicationLatest =
-            (CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST);
-        assertThat(matchesUploadedDocumentFields(generalApplicationLatest), is(true));
-    }
-
-    @Test
-    void givenGeneralApplicationWithPreviousDocs_whenUpdateCaseDataSubmit_thenGenAppDocIsAddedToCollection() {
-
-        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
-            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
-
-        caseDetails.getData().put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, getGeneralApplicationDataList());
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
-
-        List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
-            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {
-            });
-        assertThat(generalApplicationDataList, hasSize(2));
-        assertThat(generalApplicationDataList.get(0).getGeneralApplication().getGeneralApplicationDocument().getDocumentUrl(),
-            is(DOC_IN_EXISTING_COLLECTION_URL));
-        assertThat(
-            matchesUploadedDocumentFields(
-                generalApplicationDataList.get(1).getGeneralApplication().getGeneralApplicationDocument()),
-            is(true));
-    }
-
-    @Test
     void givenGeneralApplicationWithPreviousData_whenUpdateCaseDataStart_thenPreviousDataDeleted() {
 
         String[] generalAppParameters = {GENERAL_APPLICATION_RECEIVED_FROM,
@@ -413,7 +287,7 @@ public class GeneralApplicationServiceTest {
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), AUTH_TOKEN);
 
         Stream.of(generalAppParameters)
-            .forEach(ccdFieldName -> assertThat(caseDetails.getData().get(ccdFieldName), is(nullValue())));
+            .forEach(ccdFieldName -> assertThat(caseDetails.getData().get(ccdFieldName)).isNull());
     }
 
     @Test
@@ -421,7 +295,7 @@ public class GeneralApplicationServiceTest {
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(USER_NAME);
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), AUTH_TOKEN);
 
-        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_CREATED_BY), is(USER_NAME));
+        assertThat(caseDetails.getData()).containsEntry(GENERAL_APPLICATION_CREATED_BY, USER_NAME);
     }
 
     @Test
@@ -529,7 +403,172 @@ public class GeneralApplicationServiceTest {
         CaseDocument gaSupportingDocument = caseData.getGeneralApplicationWrapper()
             .getGeneralApplications().get(1).getValue()
             .getGaSupportDocuments().get(0).getValue().getSupportDocument();
-        assertThat(gaSupportingDocument.getDocumentFilename(), not(containsString(PDF_FORMAT_EXTENSION)));
+        assertThat(gaSupportingDocument.getDocumentFilename()).doesNotContain(PDF_FORMAT_EXTENSION);
+    }
+
+    @Test
+    void givenGeneralApplicationCollectionIsTheSame_whenCheckIfApplicationCompleted_thenAddsError() {
+        // Given
+        FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(
+                Long.valueOf(CASE_ID), mock(CaseType.class))
+            .build();
+        List<String> errors = new ArrayList<>();
+
+        // When
+        generalApplicationService.checkIfApplicationCompleted(finremCaseDetails, errors, List.of(), List.of(), AUTH_TOKEN);
+
+        // Then
+        assertThat(errors).containsExactly(
+            "Please complete the General Application. No information has been entered for this application."
+        );
+        verifyNoInteractions(bulkPrintDocumentService);
+    }
+
+    @Test
+    void givenEmptyGeneralApplications_whenCheckIfApplicationCompleted_thenAddsError() {
+        // Given
+        List<GeneralApplicationsCollection> generalApplicationsCollection = List.of(GeneralApplicationsCollection
+            .builder()
+            .value(GeneralApplicationItems
+                .builder()
+                .generalApplicationDocument(caseDocument("generalApplicationDocument.pdf"))
+                .build())
+            .build());
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                .generalApplications(generalApplicationsCollection)
+                .build())
+            .build();
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(
+                Long.valueOf(CASE_ID), mock(CaseType.class), caseData)
+            .build();
+        List<String> errors = new ArrayList<>();
+
+        // When
+        generalApplicationService.checkIfApplicationCompleted(finremCaseDetails, errors,
+            generalApplicationsCollection, generalApplicationsCollection, AUTH_TOKEN);
+
+        // Then
+        assertThat(errors).containsExactly(
+            "Any changes to an existing General Applications will not be saved. Please add a new General Application in order to progress."
+        );
+        verifyNoInteractions(bulkPrintDocumentService);
+    }
+
+    @Test
+    void givenNoGeneralApplicationsBefore_whenCheckIfApplicationCompleted_thenValidatesAllCurrentGAs() {
+        // Given
+        FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(
+                Long.valueOf(CASE_ID), mock(CaseType.class))
+            .build();
+        List<String> errors = new ArrayList<>();
+
+        List<GeneralApplicationsCollection> generalApplicationsCollection = List.of(GeneralApplicationsCollection
+            .builder()
+            .value(GeneralApplicationItems
+                .builder()
+                .generalApplicationDocument(caseDocument("generalApplicationDocument.pdf"))
+                .generalApplicationDraftOrder(caseDocument("generalApplicationDraftOrder.docx"))
+                .gaSupportDocuments(List.of(GeneralApplicationSupportingDocumentData
+                    .builder()
+                    .value(GeneralApplicationSuportingDocumentItems
+                        .builder()
+                        .supportDocument(caseDocument("generalApplicationSupportingDocument.docx"))
+                        .build())
+                    .build()))
+                .build())
+            .build());
+
+        finremCaseDetails.getData().getGeneralApplicationWrapper()
+            .setGeneralApplications(generalApplicationsCollection);
+
+        // When
+        generalApplicationService.checkIfApplicationCompleted(finremCaseDetails, errors, generalApplicationsCollection,
+            null, AUTH_TOKEN);
+
+        // Then
+        verify(bulkPrintDocumentService, times(3))
+            .validateEncryptionOnUploadedDocument(any(CaseDocument.class),
+                eq(CASE_ID), eq(errors), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    void givenChangedExistingGaAndNewGa_whenCheckIfApplicationCompleted_thenValidatesChangedGaDocsOnly() {
+        // Given
+        FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(
+                Long.valueOf(CASE_ID), mock(CaseType.class))
+            .build();
+        List<String> errors = new ArrayList<>();
+
+        UUID gaId = UUID.randomUUID();
+
+        // BEFORE: ga + draft + 1 support doc
+        List<GeneralApplicationsCollection> generalApplicationsBefore = List.of(
+            GeneralApplicationsCollection.builder()
+                .id(gaId)
+                .value(GeneralApplicationItems.builder()
+                    .generalApplicationDocument(caseDocument("generalApplicationDocument.pdf")) // same
+                    .generalApplicationDraftOrder(caseDocument("generalApplicationDraftOrder.docx")) // will change
+                    .gaSupportDocuments(List.of(
+                        GeneralApplicationSupportingDocumentData.builder()
+                            .value(GeneralApplicationSuportingDocumentItems.builder()
+                                .supportDocument(caseDocument("generalApplicationSupportingDocument-1.docx")) // existing
+                                .build())
+                            .build()
+                    ))
+                    .build())
+                .build()
+        );
+
+        // Add another general application to the current list
+        List<GeneralApplicationsCollection> generalApplicationsCurrent = List.of(
+            GeneralApplicationsCollection.builder()
+                .id(gaId)
+                .value(GeneralApplicationItems.builder()
+                    .generalApplicationDocument(caseDocument("generalApplicationDocument.pdf"))
+                    .generalApplicationDraftOrder(caseDocument("generalApplicationDraftOrder-UPDATED.docx"))
+                    .gaSupportDocuments(List.of(
+                        GeneralApplicationSupportingDocumentData.builder()
+                            .value(GeneralApplicationSuportingDocumentItems.builder()
+                                .supportDocument(caseDocument("generalApplicationSupportingDocument-1.docx"))
+                                .build())
+                            .build(),
+                        GeneralApplicationSupportingDocumentData.builder()
+                            .value(GeneralApplicationSuportingDocumentItems.builder()
+                                .supportDocument(caseDocument("generalApplicationSupportingDocument-2-NEW.docx"))
+                                .build())
+                            .build()
+                    ))
+                    .build())
+                .build(),
+            GeneralApplicationsCollection.builder()
+                .id(UUID.randomUUID())
+                .value(GeneralApplicationItems.builder()
+                    .generalApplicationDocument(caseDocument("anotherGeneralApplicationDocument.pdf")).build()).build());
+
+        finremCaseDetails.getData().getGeneralApplicationWrapper()
+            .setGeneralApplications(generalApplicationsCurrent);
+
+        // When
+        generalApplicationService.checkIfApplicationCompleted(finremCaseDetails, errors,
+            generalApplicationsCurrent, generalApplicationsBefore, AUTH_TOKEN);
+
+        // Then
+        ArgumentCaptor<CaseDocument> captor = ArgumentCaptor.forClass(CaseDocument.class);
+        verify(bulkPrintDocumentService, times(5))
+            .validateEncryptionOnUploadedDocument(captor.capture(), eq(CASE_ID), eq(errors), eq(AUTH_TOKEN));
+
+        assertThat(captor.getAllValues())
+            .extracting(CaseDocument::getDocumentFilename)
+            .containsExactlyInAnyOrder(
+                "generalApplicationDocument.pdf",
+                "generalApplicationDraftOrder-UPDATED.docx",
+                "generalApplicationSupportingDocument-1.docx",
+                "generalApplicationSupportingDocument-2-NEW.docx",
+                "anotherGeneralApplicationDocument.pdf"
+            );
     }
 
     private DynamicRadioList buildDynamicList(String role) {
@@ -550,45 +589,12 @@ public class GeneralApplicationServiceTest {
             .build();
     }
 
-    private List<GeneralApplicationData> getGeneralApplicationDataList() {
-        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        caseDocument.setDocumentUrl(DOC_IN_EXISTING_COLLECTION_URL);
-        GeneralApplication generalApplication = GeneralApplication.builder()
-            .generalApplicationDocument(caseDocument)
-            .build();
-        List<GeneralApplicationData> generalApplicationList = new ArrayList<>();
-        generalApplicationList.add(
-            GeneralApplicationData.builder()
-                .id(UUID.randomUUID().toString())
-                .generalApplication(generalApplication)
-                .build()
-        );
-        return generalApplicationList;
-    }
-
-    private boolean matchesUploadedDocumentFields(CaseDocument document) {
-        return document.getDocumentFilename().equals(DOC_UPLOADED_NAME + PDF_FORMAT_EXTENSION)
-            && document.getDocumentUrl().equals(DOC_UPLOADED_URL)
-            && document.getDocumentBinaryUrl().equals(DOC_UPLOADED_BINARY_URL);
-    }
-
     private CaseDocument getCaseDocument(String documentFormat) {
         return CaseDocument.builder()
             .documentUrl(DOC_UPLOADED_URL)
             .documentBinaryUrl(DOC_UPLOADED_BINARY_URL)
             .documentFilename(DOC_UPLOADED_NAME + documentFormat)
             .build();
-    }
-
-    private Map<String, String> getCcdDocumentMap() {
-        return Map.of(
-            "document_url", DOC_UPLOADED_URL,
-            "document_filename", DOC_UPLOADED_NAME + WORD_FORMAT_EXTENSION,
-            "document_binary_url", DOC_UPLOADED_BINARY_URL);
-    }
-
-    private CaseDetails getApplicationIssuedCaseDetailsBefore() {
-        return CaseDetails.builder().state("applicationIssued").caseTypeId(CaseType.CONTESTED.getCcdType()).build();
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

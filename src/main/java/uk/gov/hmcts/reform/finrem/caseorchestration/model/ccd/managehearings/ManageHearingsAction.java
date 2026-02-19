@@ -12,7 +12,7 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public enum ManageHearingsAction {
     ADD_HEARING("Add_Hearing", "Hearing Added"),
-    VACATE_HEARING("Vacate_Hearing", "Hearing Vacated");
+    ADJOURN_OR_VACATE_HEARING("Vacate_Hearing", "Hearing Adjourned Or Vacated");
 
     private final String value;
     @Getter

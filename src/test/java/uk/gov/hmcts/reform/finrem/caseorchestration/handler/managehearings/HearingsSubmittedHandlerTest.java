@@ -25,6 +25,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCou
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -37,6 +39,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 
 @ExtendWith(MockitoExtension.class)
 class HearingsSubmittedHandlerTest {
+
+    @TestLogs
+    private final TestLogger logs = new TestLogger(ManageHearingsSubmittedHandler.class);
 
     @InjectMocks
     private ManageHearingsSubmittedHandler manageHearingsSubmittedHandler;
@@ -63,15 +68,16 @@ class HearingsSubmittedHandlerTest {
         // Assert
         assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isNullOrEmpty();
+        assertThat(logs.getInfos()).contains("Beginning hearing correspondence for Hearing Added action. Case reference: 123");
         verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
-        verify(manageHearingsCorresponder, never()).sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder, never()).sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
 
     @Test
     void shouldHandleSubmittedCallbackForVacateHearing() {
         // Arrange
         UUID hearingID = UUID.randomUUID();
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, hearingID, ManageHearingsAction.VACATE_HEARING);
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, hearingID, ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
@@ -80,8 +86,9 @@ class HearingsSubmittedHandlerTest {
         // Assert
         assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isNullOrEmpty();
+        assertThat(logs.getInfos()).contains("Beginning hearing correspondence for Hearing Adjourned Or Vacated action. Case reference: 123");
         verify(manageHearingsCorresponder, never()).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
-        verify(manageHearingsCorresponder).sendVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
     }
 
     private FinremCallbackRequest buildCallbackRequest(UUID hearingID, UUID hearingItemId, ManageHearingsAction action) {
@@ -117,6 +124,7 @@ class HearingsSubmittedHandlerTest {
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .data(finremCaseData)
+            .id(123L)
             .build();
 
         return FinremCallbackRequest.builder()

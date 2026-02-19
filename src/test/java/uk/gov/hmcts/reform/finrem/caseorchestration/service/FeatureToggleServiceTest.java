@@ -1,54 +1,117 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.Maps;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(Enclosed.class)
+@SpringBootTest
 public class FeatureToggleServiceTest {
 
-    @RunWith(SpringRunner.class)
-    @SpringBootTest(properties = {
-        "feature.toggle.send_to_frc=true",
-        "feature.toggle.assign_case_access=true",
-        "feature.toggle.pba_case_type=true"
-    })
-    public static class ApprovedConsentOrderNotificationSwitchedOn extends BaseServiceTest {
+    @Nested
+    class DefaultToggleValuesTests {
 
         @Autowired
         private FeatureToggleService featureToggleService;
 
         @Test
-        public void isSendToFRCEnabledReturnsTrue() {
-            assertThat(featureToggleService.isSendToFRCEnabled(), is(true));
+        void isAssignCaseAccessEnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isAssignCaseAccessEnabled()).isTrue();
         }
 
         @Test
-        public void isAssignCaseAccessEnabledReturnsTrue() {
-            assertThat(featureToggleService.isAssignCaseAccessEnabled(), is(true));
+        void isCaseFileViewEnabledReturnsFalse() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isCaseFileViewEnabled()).isFalse();
         }
 
         @Test
-        public void isPbaToggleEnabledReturnsTrue() {
-            assertThat(featureToggleService.isPBAUsingCaseTypeEnabled(), is(true));
+        void isExpressPilotEnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isExpressPilotEnabled()).isFalse();
+        }
+
+        @Test
+        void isExui3990WorkaroundEnabledReturnsTrue() {
+            // not in any application.properties
+            assertThat(featureToggleService.isExui3990WorkaroundEnabled()).isTrue();
+        }
+
+        @Test
+        void isIntervenerEnabledReturnsFalse() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isIntervenerEnabled()).isFalse();
+        }
+
+        @Test
+        void isPBAUsingCaseTypeEnabledReturnsFalse() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isPBAUsingCaseTypeEnabled()).isFalse();
+        }
+
+        @Test
+        void isSecureDocEnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isSecureDocEnabled()).isTrue();
+        }
+
+        @Test
+        void isSendLetterDuplicateCheckEnabledReturnsTrue() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isSendLetterDuplicateCheckEnabled()).isTrue();
+        }
+
+        @Test
+        void isSendToFRCEnabledReturnsFalse() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isSendToFRCEnabled()).isFalse();
+        }
+
+        @Test
+        void isVacateHearingEnabledReturnsFalse() {
+            // default value is defined in src/test/resources/application.properties
+            assertThat(featureToggleService.isVacateHearingEnabled()).isFalse();
         }
     }
 
-    @RunWith(SpringRunner.class)
-    @SpringBootTest(properties = {
+    @Nested
+    @TestPropertySource(properties = {
+        "feature.toggle.send_to_frc=true",
+        "feature.toggle.assign_case_access=true",
+        "feature.toggle.pba_case_type=true"
+    })
+    class ApprovedConsentOrderNotificationSwitchedOn {
+
+        @Autowired
+        private FeatureToggleService featureToggleService;
+
+        @Test
+        void isSendToFRCEnabledReturnsTrue() {
+            assertThat(featureToggleService.isSendToFRCEnabled()).isTrue();
+        }
+
+        @Test
+        void isAssignCaseAccessEnabledReturnsTrue() {
+            assertThat(featureToggleService.isAssignCaseAccessEnabled()).isTrue();
+        }
+
+        @Test
+        void isPbaToggleEnabledReturnsTrue() {
+            assertThat(featureToggleService.isPBAUsingCaseTypeEnabled()).isTrue();
+        }
+    }
+
+    @Nested
+    @TestPropertySource(properties = {
         "feature.toggle.send_to_frc=false",
         "feature.toggle.assign_case_access=false",
         "feature.toggle.pba_case_type=false",
@@ -60,71 +123,76 @@ public class FeatureToggleServiceTest {
         "feature.toggle.manage_hearing_enabled=false",
         "feature.toggle.vacate_hearing_enabled=false"
     })
-    public static class ApprovedConsentOrderNotificationSwitchedOff extends BaseServiceTest {
+    class ApprovedConsentOrderNotificationSwitchedOff {
 
         @Autowired
         private FeatureToggleService featureToggleService;
 
         @Test
-        public void getFieldsIgnoredDuringSerialisationContainsElementsWhenFeaturesDisabled() {
-            Map<Class, List<String>> ignoredFields = Maps.newHashMap();
-            ignoredFields.put(UploadCaseDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
-            assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(ignoredFields));
+        void getFieldsIgnoredDuringSerialisationContainsElementsWhenFeaturesDisabled() {
+            Map<Class, List<String>> ignoredFields = new HashMap<>();
+            ignoredFields.put(
+                UploadCaseDocument.class,
+                List.of("caseDocumentConfidential", "hearingDetails")
+            );
+
+            assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation())
+                .isEqualTo(ignoredFields);
         }
 
         @Test
-        public void isSendToFRCEnabledReturnsFalse() {
-            assertThat(featureToggleService.isSendToFRCEnabled(), is(false));
+        void isSendToFRCEnabledReturnsFalse() {
+            assertThat(featureToggleService.isSendToFRCEnabled()).isFalse();
         }
 
         @Test
-        public void isAssignCaseAccessEnabledReturnsFalse() {
-            assertThat(featureToggleService.isAssignCaseAccessEnabled(), is(false));
+        void isAssignCaseAccessEnabledReturnsFalse() {
+            assertThat(featureToggleService.isAssignCaseAccessEnabled()).isFalse();
         }
 
         @Test
-        public void isPbaToggleEnabledReturnsFalse() {
-            assertThat(featureToggleService.isPBAUsingCaseTypeEnabled(), is(false));
+        void isPbaToggleEnabledReturnsFalse() {
+            assertThat(featureToggleService.isPBAUsingCaseTypeEnabled()).isFalse();
         }
 
         @Test
-        public void isSendLetterDuplicateCheckReturnsFalse() {
-            assertThat(featureToggleService.isSendLetterDuplicateCheckEnabled(), is(false));
+        void isSendLetterDuplicateCheckReturnsFalse() {
+            assertThat(featureToggleService.isSendLetterDuplicateCheckEnabled()).isFalse();
         }
 
         @Test
-        public void isSecureDocEnabled() {
-            assertThat(featureToggleService.isSecureDocEnabled(), is(false));
+        void isSecureDocEnabledReturnsFalse() {
+            assertThat(featureToggleService.isSecureDocEnabled()).isFalse();
         }
 
         @Test
-        public void isIntervenerEnabled() {
-            assertThat(featureToggleService.isIntervenerEnabled(), is(false));
+        void isIntervenerEnabledReturnsFalse() {
+            assertThat(featureToggleService.isIntervenerEnabled()).isFalse();
         }
 
         @Test
-        public void isCaseFileViewEnabled() {
-            assertThat(featureToggleService.isCaseFileViewEnabled(), is(false));
+        void isCaseFileViewEnabledReturnsFalse() {
+            assertThat(featureToggleService.isCaseFileViewEnabled()).isFalse();
         }
 
         @Test
-        public void isExpressPilotEnabled() {
-            assertThat(featureToggleService.isExpressPilotEnabled(), is(false));
+        void isExpressPilotEnabledReturnsFalse() {
+            assertThat(featureToggleService.isExpressPilotEnabled()).isFalse();
         }
 
         @Test
-        public void isManageHearingEnabled() {
-            assertThat(featureToggleService.isManageHearingEnabled(), is(false));
+        void isManageHearingEnabledReturnsFalse() {
+            assertThat(featureToggleService.isManageHearingEnabled()).isFalse();
         }
 
         @Test
-        public void isVacateHearingEnabled() {
-            assertThat(featureToggleService.isVacateHearingEnabled(), is(false));
+        void isVacateHearingEnabledReturnsFalse() {
+            assertThat(featureToggleService.isVacateHearingEnabled()).isFalse();
         }
 
         @Test
         public void isFinremCitizenUiEnabled() {
-            assertThat(featureToggleService.isFinremCitizenUiEnabled(), is(false));
+            assertThat(featureToggleService.isFinremCitizenUiEnabled()).isFalse();
         }
     }
 }
