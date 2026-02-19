@@ -103,6 +103,10 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
             if(SolicitorAccessService.hasApplicantSolicitorChanged(finremCaseData, callbackRequest.getCaseDetailsBefore().getData())) {
                 solicitorAccessService.updateApplicantSolicitor(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
             }
+
+            if(SolicitorAccessService.hasRespondentSolicitorChanged(finremCaseData, callbackRequest.getCaseDetailsBefore().getData())) {
+                solicitorAccessService.updateRespondentSolicitor(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
+            }
         }
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
