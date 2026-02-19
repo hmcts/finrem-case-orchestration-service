@@ -90,6 +90,7 @@ public class EmailService {
             templateVars.put("caseOrderType", notificationRequest.getCaseOrderType());
             templateVars.put("camelCaseOrderType", notificationRequest.getCamelCaseOrderType());
         }
+        templateVars.put("dateOfIssue", notificationRequest.getDateOfIssue());
     }
 
     protected void populateDefaultTemplateVarsByDefault(Map<String, Object> templateVars) {
