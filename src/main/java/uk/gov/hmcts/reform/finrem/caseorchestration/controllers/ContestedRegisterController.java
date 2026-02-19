@@ -29,14 +29,11 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class ContestedRegisterController extends BaseController {
 
     private static final String OK = "OK";
-    private static final String BAD_REQUEST = "Bad Request";
-    private static final String UNSUPPORTED_MEDIA_TYPE = "Unsupported Media Type";
-    private static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
 
     private final ObjectMapper objectMapper;
     private final ContestedRegisterService contestedRegisterService;
 
-    @Operation(description = "Retrieve a case details identified by its case reference.")
+    @Operation(description = "Retrieve case details identified by its case reference.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = OK, content = {
             @Content(mediaType = "application/json", schema = @Schema(implementation = CaseResource.class))})
