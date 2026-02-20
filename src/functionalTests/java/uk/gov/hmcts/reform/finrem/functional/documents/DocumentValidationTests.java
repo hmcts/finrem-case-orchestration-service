@@ -38,7 +38,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
 
     private static final String RESPOND_TO_ORDER_SOLICITOR_JSON = "respond-to-order-solicitor.json";
     private static final String CONSENT_ORDER_JSON = "draft-consent-order.json";
-    private static final String consentedDir = "/json/latestConsentedConsentOrder/";
+    private static final String CONSENTED_DIR = "/json/latestConsentedConsentOrder/";
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private CallbackRequest callbackRequest;
@@ -61,7 +61,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private void setUpCaseDetails(String fileName) throws IOException {
         objectMapper.registerModule(new JavaTimeModule());
         try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream(consentedDir + fileName)) {
+                 getClass().getResourceAsStream(CONSENTED_DIR + fileName)) {
             callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
@@ -120,7 +120,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
 
     private CaseDocument generateCaseDocument(String fileName) {
         // generate pdf document to set it as consent order
-        JsonPath jsonPathEvaluator = generateDocument(fileName, generatorUrl, consentedDir);
+        JsonPath jsonPathEvaluator = generateDocument(fileName, generatorUrl, CONSENTED_DIR);
 
         return getCaseDocument(jsonPathEvaluator);
     }
