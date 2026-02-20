@@ -179,21 +179,22 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     private String getDocumentUrlOrDocumentBinaryUrl(String jsonFile, String url, String urlType, String documentType, String journeyType) {
         JsonPath jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
-        String path = null;
-        switch (documentType) {
-            case MINI_FORM_A -> path = "data.miniFormA";
-            case "generalOrder" -> path = "data.uploadOrder[0].value.DocumentLink";
-            case "approvedConsentOrder" -> path = "data.approvedConsentOrderLetter";
-            case "hearing" -> path = "data.formC";
-            case "hearingG" -> path = "data.formG";
-            default -> {
+        String path = documentType == null ? null : switch (documentType) {
+            case MINI_FORM_A -> "data.miniFormA";
+            case "generalOrder" -> "data.uploadOrder[0].value.DocumentLink";
+            case "approvedConsentOrder" -> "data.approvedConsentOrderLetter";
+            case "hearing" -> "data.formC";
+            case "hearingG" -> "data.formG";
+            default -> null;
+        };
+
+        if (path != null) {
+            if ("document".equals(urlType)) {
+                path = path + ".document_url";
+            } else if (BINARY_URL_TYPE.equals(urlType)) {
+                path = path + ".document_binary_url";
             }
         }
-
-        path = path == null ? null
-            : urlType.equals("document") ? path + ".document_url"
-            : urlType.equals(BINARY_URL_TYPE) ? path + ".document_binary_url"
-            : path;
 
         if (path != null) {
             url1 = jsonPathEvaluator.get(path);
