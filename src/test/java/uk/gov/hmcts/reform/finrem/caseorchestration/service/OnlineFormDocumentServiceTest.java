@@ -243,6 +243,7 @@ class OnlineFormDocumentServiceTest {
         assertCaseDocument(onlineFormDocumentService
             .generateConsentedInContestedMiniFormA(caseDetails, AUTH_TOKEN));
 
+        verify(consentedApplicationHelper).isVariationOrder(caseDetails.getData());
         verify(genericDocumentService).generateDocument(AUTH_TOKEN, caseDetailsArgumentCaptor.getValue(), "TEMPLATE", "FILE_NAME");
         verifyAdditionalFields(caseDetailsArgumentCaptor.getValue().getData());
     }
