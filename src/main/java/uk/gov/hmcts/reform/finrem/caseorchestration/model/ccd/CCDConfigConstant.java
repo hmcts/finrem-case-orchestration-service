@@ -326,7 +326,6 @@ public class CCDConfigConstant {
 
     //Document related
     public static final String MINI_FORM_A = "miniFormA";
-    public static final String MINI_FORM_A_CONSENTED_IN_CONTESTED = "consentMiniFormA";
     public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
     public static final String FORMA = "formA";
     public static final String FORMA_TYPE = "formAType";
@@ -342,7 +341,6 @@ public class CCDConfigConstant {
     public static final String HEARING_NOTICE_DOCUMENT = "hearingNotice";
     public static final String VACATE_HEARING_NOTICE_DOCUMENT = "vacateHearingNotice";
     public static final String OUT_OF_COURT_RESOLUTION = "outOfCourtResolution";
-    public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String PFD_NCDR_COMPLIANCE_LETTER = "pfdNcdrComplianceLetter";
     public static final String PFD_NCDR_COVER_LETTER = "pfdNcdrCoverLetter";
@@ -479,12 +477,8 @@ public class CCDConfigConstant {
     public static final String SUBMIT_CASE_DATE = "authorisation3";
 
     //scheduled hearings
-    public static final String ADDITIONAL_HEARING_DOCUMENT_COLLECTION = "additionalHearingDocuments";
     public static final String HEARING_TYPE = "hearingType";
-    public static final String TIME_ESTIMATE = "timeEstimate";
     public static final String HEARING_DATE = "hearingDate";
-    public static final String HEARING_TIME = "hearingTime";
-    public static final String HEARING_ADDITIONAL_INFO = "additionalInformationAboutHearing";
     public static final String DIRECTION_DETAILS_COLLECTION_CT = "directionDetailsCollection";
 
     //transfer to local courts
