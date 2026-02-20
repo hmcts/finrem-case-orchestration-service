@@ -30,7 +30,7 @@ public class UpdateCaseDetailsSolicitorSubmittedHandler extends FinremCallbackHa
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.UPDATE_CASE_DETAILS_SOLICITOR.equals(eventType);
+            && EventType.UPDATE_CONTACT_DETAILS.equals(eventType);
     }
 
     @Override
