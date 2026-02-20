@@ -108,26 +108,6 @@ class OnlineFormDocumentServiceTest {
     }
 
     @Test
-    void testDeprecatedGenerateMiniFormA() {
-        // Arrange
-        CaseDetails caseDetailsCopy = mock(CaseDetails.class);
-        when(documentHelper.deepCopy(any(CaseDetails.class), eq(CaseDetails.class))).thenReturn(caseDetailsCopy);
-
-        CaseDetails providedCaseDetails = mock(CaseDetails.class);
-        String template = "TEMPLATE";
-        when(documentConfiguration.getMiniFormTemplate(providedCaseDetails)).thenReturn(template);
-        String filename = "FILE_NAME";
-        when(documentConfiguration.getMiniFormFileName()).thenReturn(filename);
-
-        when(genericDocumentService.generateDocument(AUTH_TOKEN, caseDetailsCopy, "TEMPLATE", "FILE_NAME"))
-            .thenReturn(caseDocument());
-
-        // Act & Verify
-        assertCaseDocument(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, providedCaseDetails));
-        verify(genericDocumentService).generateDocument(AUTH_TOKEN, caseDetailsCopy, "TEMPLATE", "FILE_NAME");
-    }
-
-    @Test
     void testGenerateMiniFormA() {
         // Arrange
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);

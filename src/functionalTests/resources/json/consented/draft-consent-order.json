@@ -1,5 +1,4 @@
 {
-  "token": "test_token",
   "event_id": "FR_amendApplicationDetails",
   "case_details": {
     "id": "12345678",

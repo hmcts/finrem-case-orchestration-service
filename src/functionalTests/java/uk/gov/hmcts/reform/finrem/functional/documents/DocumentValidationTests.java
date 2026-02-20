@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
 
     private static final String RESPOND_TO_ORDER_SOLICITOR_JSON = "respond-to-order-solicitor.json";
     private static final String CONSENT_ORDER_JSON = "draft-consent-order.json";
-    private static final String consentedDir = "/json/latestConsentedConsentOrder/";
+    private static final String CONSENTED_DIR = "/json/latestConsentedConsentOrder/";
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private CallbackRequest callbackRequest;
@@ -57,16 +58,16 @@ public class DocumentValidationTests extends IntegrationTestBase {
     @Value("${cos.amend.consent.order.validation.api}")
     private String amendConsentOrderCollectionCheckUrl;
 
-    private void setUpCaseDetails(String fileName) throws Exception {
+    private void setUpCaseDetails(String fileName) throws IOException {
         objectMapper.registerModule(new JavaTimeModule());
         try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream(consentedDir + fileName)) {
+                 getClass().getResourceAsStream(CONSENTED_DIR + fileName)) {
             callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
 
     @Test
-    public void verifyDocumentForConsentOrderShouldReturnOkResponseCode() throws Exception {
+    public void verifyDocumentForConsentOrderShouldReturnOkResponseCode() throws IOException {
         setUpCaseDetails(CONSENT_ORDER_JSON);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
@@ -82,7 +83,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyDocumentForPensionCollectionShouldReturnOkResponseCode() throws Exception {
+    public void verifyDocumentForPensionCollectionShouldReturnOkResponseCode() throws IOException {
         setUpCaseDetails(CONSENT_ORDER_JSON);
         setPensionCollectionData();
         // call fileupload endpoint and assert
@@ -94,7 +95,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyDocumentForRespondToOrderShouldReturnOkResponseCode() throws Exception {
+    public void verifyDocumentForRespondToOrderShouldReturnOkResponseCode() throws IOException {
         setUpCaseDetails(RESPOND_TO_ORDER_SOLICITOR_JSON);
         setResponseToOrderDocument();
         // call fileupload check endpoint
@@ -106,7 +107,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyDocumentForConsentOrderCollectionShouldReturnOkResponseCode() throws Exception {
+    public void verifyDocumentForConsentOrderCollectionShouldReturnOkResponseCode() throws IOException {
         setUpCaseDetails("amend-consent-order-by-caseworker.json");
         setAmendConsentOrderCollectionData();
         // call fileupload endpoint and assert
@@ -119,7 +120,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
 
     private CaseDocument generateCaseDocument(String fileName) {
         // generate pdf document to set it as consent order
-        JsonPath jsonPathEvaluator = generateDocument(fileName, generatorUrl, consentedDir);
+        JsonPath jsonPathEvaluator = generateDocument(fileName, generatorUrl, CONSENTED_DIR);
 
         return getCaseDocument(jsonPathEvaluator);
     }
@@ -149,16 +150,12 @@ public class DocumentValidationTests extends IntegrationTestBase {
     }
 
     private List<RespondToOrderData> convertToRespondToOrderDataList(Object object) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper.convertValue(object, new TypeReference<List<RespondToOrderData>>() {
+        return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
 
     private List<PensionTypeCollection> convertToPensionCollectionDataList(Object object) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper.convertValue(object, new TypeReference<List<PensionTypeCollection>>() {});
+        return objectMapper.convertValue(object, new TypeReference<>() {});
     }
 
     private void setPensionCollectionData() {
@@ -185,7 +182,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         callbackRequest.setCaseDetails(caseDetails);
     }
 
-    private void setAmendConsentOrderCollectionData() throws Exception {
+    private void setAmendConsentOrderCollectionData() {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
         Object object = data.get(AMENDED_CONSENT_ORDER_COLLECTION);
@@ -199,9 +196,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
     }
 
     private List<AmendedConsentOrderData> convertToAmendedConsentOrderDataList(Object object) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper.convertValue(object, new TypeReference<List<AmendedConsentOrderData>>() {
+        return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
 }
