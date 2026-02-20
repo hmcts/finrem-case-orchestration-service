@@ -233,11 +233,11 @@ class FinremCaseDataTest {
     void testGetRespondentSolicitorEmail() {
 
         FinremCaseData finremCaseData = new FinremCaseData();
-        assertThat(finremCaseData.getRespondentSolicitorEmailForContested()).isEmpty();
+        assertThat(finremCaseData.getRespondentSolicitorEmail()).isEmpty();
 
         ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder().respondentSolicitorEmail("respondent@testemail.com").build();
         finremCaseData.setContactDetailsWrapper(wrapper);
-        assertThat(finremCaseData.getRespondentSolicitorEmailForContested()).isEqualTo("respondent@testemail.com");
+        assertThat(finremCaseData.getRespondentSolicitorEmail()).isEqualTo("respondent@testemail.com");
     }
 
     @Test
