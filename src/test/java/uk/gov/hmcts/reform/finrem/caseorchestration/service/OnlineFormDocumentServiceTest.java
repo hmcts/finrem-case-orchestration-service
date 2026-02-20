@@ -469,24 +469,24 @@ class OnlineFormDocumentServiceTest {
 
     private static void verifyAdditionalFields(Map<String, Object> data) {
         //Solicitor Details
-        assertThat(data.get(CONSENTED_SOLICITOR_NAME)).isEqualTo("Solicitor");
-        assertThat(data.get(CONSENTED_SOLICITOR_FIRM)).isEqualTo("Awesome Firm");
+        assertThat(data).containsEntry(CONSENTED_SOLICITOR_NAME, "Solicitor");
+        assertThat(data).containsEntry(CONSENTED_SOLICITOR_FIRM, "Awesome Firm");
 
         assertThat(data).containsKey(CONSENTED_SOLICITOR_ADDRESS);
         Map<String, Object> addressObject = convertToMap(data.get(CONSENTED_SOLICITOR_ADDRESS));
 
-        assertThat(addressObject.get("County").toString()).isEqualTo("County");
-        assertThat(addressObject.get("Country").toString()).isEqualTo("UK");
-        assertThat(addressObject.get("PostCode").toString()).isEqualTo("SW1A 1AA");
-        assertThat(addressObject.get("PostTown").toString()).isEqualTo("London");
-        assertThat(addressObject.get("AddressLine1").toString()).isEqualTo("Buckingham Palace");
-        assertThat(addressObject.get("AddressLine2").toString()).isEqualTo("null");
+        assertThat(addressObject.get("County")).hasToString("County");
+        assertThat(addressObject.get("Country")).hasToString("UK");
+        assertThat(addressObject.get("PostCode")).hasToString("SW1A 1AA");
+        assertThat(addressObject.get("PostTown")).hasToString("London");
+        assertThat(addressObject.get("AddressLine1")).hasToString("Buckingham Palace");
+        assertThat(addressObject.get("AddressLine2")).hasToString("null");
         assertNull(addressObject.get("AddressLine3"));
 
         //Respondent Details
-        assertThat(data.get(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME)).isEqualTo("john");
-        assertThat(data.get(CONSENTED_RESPONDENT_LAST_NAME)).isEqualTo("smith");
-        assertThat(data.get(CONSENTED_RESPONDENT_REPRESENTED)).isEqualTo("No");
+        assertThat(data).containsEntry(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "john");
+        assertThat(data).containsEntry(CONSENTED_RESPONDENT_LAST_NAME, "smith");
+        assertThat(data).containsEntry(CONSENTED_RESPONDENT_REPRESENTED, "No");
 
         //Checklist
         assertThat(data).containsKey(CONSENTED_NATURE_OF_APPLICATION);
@@ -494,21 +494,21 @@ class OnlineFormDocumentServiceTest {
             .extracting(Object::toString)
             .containsExactly("Periodical Payment Order", "Lump Sum Order", "Property Adjustment Order");
 
-        assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3A)).isEqualTo("test");
-        assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3B)).isEqualTo("test");
+        assertThat(data).containsEntry(CONSENTED_NATURE_OF_APPLICATION_3A, "test");
+        assertThat(data).containsEntry(CONSENTED_NATURE_OF_APPLICATION_3B, "test");
 
         //Order For Children Reasons
-        assertThat(data.get(CONSENTED_ORDER_FOR_CHILDREN)).isEqualTo("Yes");
-        assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_5)).isEqualTo("No");
+        assertThat(data).containsEntry(CONSENTED_ORDER_FOR_CHILDREN, "Yes");
+        assertThat(data).containsEntry(CONSENTED_NATURE_OF_APPLICATION_5, "No");
 
         assertThat(data).containsKey(CONSENTED_NATURE_OF_APPLICATION_6);
         assertThat((List<?>) data.get(CONSENTED_NATURE_OF_APPLICATION_6))
             .extracting(Object::toString)
             .containsExactly("item1", "item2");
 
-        assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_7)).isEqualTo("test");
+        assertThat(data).containsEntry(CONSENTED_NATURE_OF_APPLICATION_7, "test");
 
-        assertThat(data.get(CONSENTED_AUTHORISATION_FIRM)).isEqualTo("Authorised Firm");
+        assertThat(data).containsEntry(CONSENTED_AUTHORISATION_FIRM, "Authorised Firm");
     }
 
     protected static Map<String, Object> convertToMap(Object object) {
