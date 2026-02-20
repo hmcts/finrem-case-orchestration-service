@@ -443,6 +443,9 @@ public class FinremCaseData implements HasCaseDocument {
     @Getter(AccessLevel.NONE)
     private PaymentDetailsWrapper paymentDetailsWrapper;
 
+    private List<AccessCodeCollection> applicantAccessCodes;
+    private List<AccessCodeCollection> respondentAccessCodes;
+
     @JsonIgnore
     public StopRepresentationWrapper getStopRepresentationWrapper() {
         if (stopRepresentationWrapper == null) {
