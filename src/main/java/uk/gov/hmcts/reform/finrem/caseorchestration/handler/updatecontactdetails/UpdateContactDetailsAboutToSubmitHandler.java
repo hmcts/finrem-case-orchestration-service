@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
@@ -38,21 +37,18 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final InternationalPostalService internationalPostalService;
-    private final SolicitorAccessService solicitorAccessService;
 
     public UpdateContactDetailsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     UpdateContactDetailsService updateContactDetailsService,
                                                     OnlineFormDocumentService onlineFormDocumentService,
                                                     UpdateRepresentationWorkflowService nocWorkflowService,
-                                                    InternationalPostalService internationalPostalService,
-                                                    SolicitorAccessService solicitorAccessService
+                                                    InternationalPostalService internationalPostalService
     ) {
         super(finremCaseDetailsMapper);
         this.updateContactDetailsService = updateContactDetailsService;
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.nocWorkflowService = nocWorkflowService;
         this.internationalPostalService = internationalPostalService;
-        this.solicitorAccessService = solicitorAccessService;
     }
 
     @Override
@@ -99,14 +95,6 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
 
         } else {
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
-
-            if(SolicitorAccessService.hasApplicantSolicitorChanged(finremCaseData, callbackRequest.getCaseDetailsBefore().getData())) {
-                solicitorAccessService.updateApplicantSolicitor(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
-            }
-
-            if(SolicitorAccessService.hasRespondentSolicitorChanged(finremCaseData, callbackRequest.getCaseDetailsBefore().getData())) {
-                solicitorAccessService.updateRespondentSolicitor(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
-            }
         }
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));

@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails.UpdateCaseDetailsSolicitorSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -35,7 +36,7 @@ class UpdateCaseDetailsSolicitorSubmittedHandlerTest {
     @Mock
     private SolicitorAccessService solicitorAccessService;
     @InjectMocks
-    private UpdateCaseDetailsSolicitorSubmittedHandlerHandler handler;
+    private UpdateCaseDetailsSolicitorSubmittedHandler handler;
 
     @Test
     void testCanHandle() {

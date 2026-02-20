@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecasedetailssolicitor;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,12 +16,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessServi
 
 @Slf4j
 @Service
-public class UpdateCaseDetailsSolicitorSubmittedHandlerHandler extends FinremCallbackHandler {
+public class UpdateCaseDetailsSolicitorSubmittedHandler extends FinremCallbackHandler {
 
     private final SolicitorAccessService solicitorAccessService;
 
-    public UpdateCaseDetailsSolicitorSubmittedHandlerHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                             SolicitorAccessService solicitorAccessService) {
+    public UpdateCaseDetailsSolicitorSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                      SolicitorAccessService solicitorAccessService) {
         super(finremCaseDetailsMapper);
         this.solicitorAccessService = solicitorAccessService;
     }
@@ -42,8 +42,15 @@ public class UpdateCaseDetailsSolicitorSubmittedHandlerHandler extends FinremCal
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
+        // Fix for missing CCD Case ID in case data before, which is required for updating solicitor access
+        caseDataBefore.setCcdCaseId(String.valueOf(caseDetailsBefore.getId()));
+
         if(SolicitorAccessService.hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
             solicitorAccessService.updateApplicantSolicitor(caseData, caseDataBefore);
+        }
+
+        if(SolicitorAccessService.hasRespondentSolicitorChanged(caseData, caseDataBefore)) {
+            solicitorAccessService.updateRespondentSolicitor(caseData, caseDataBefore);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
