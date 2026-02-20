@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFact
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.miniformacontested.ContestedMiniFormADetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -95,6 +96,9 @@ class OnlineFormDocumentServiceTest {
     @Captor
     private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
     @BeforeEach
     void setUp() {
         optionIdToValueTranslator = spy(new OptionIdToValueTranslator("/options/options-id-value-transform.json",
@@ -104,7 +108,7 @@ class OnlineFormDocumentServiceTest {
     }
 
     @Test
-    void generateMiniFormA() {
+    void testDeprecatedGenerateMiniFormA() {
         // Arrange
         CaseDetails caseDetailsCopy = mock(CaseDetails.class);
         when(documentHelper.deepCopy(any(CaseDetails.class), eq(CaseDetails.class))).thenReturn(caseDetailsCopy);
@@ -121,6 +125,26 @@ class OnlineFormDocumentServiceTest {
         // Act & Verify
         assertCaseDocument(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, providedCaseDetails));
         verify(genericDocumentService).generateDocument(AUTH_TOKEN, caseDetailsCopy, "TEMPLATE", "FILE_NAME");
+    }
+
+    @Test
+    void testGenerateMiniFormA() {
+        // Arrange
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
+
+        String template = "TEMPLATE";
+        when(documentConfiguration.getMiniFormTemplate(finremCaseDetails)).thenReturn(template);
+        String filename = "FILE_NAME";
+        when(documentConfiguration.getMiniFormFileName()).thenReturn(filename);
+
+        when(genericDocumentService.generateDocument(AUTH_TOKEN, caseDetails, "TEMPLATE", "FILE_NAME"))
+            .thenReturn(caseDocument());
+
+        // Act & Verify
+        assertCaseDocument(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, finremCaseDetails));
+        verify(genericDocumentService).generateDocument(AUTH_TOKEN, caseDetails, "TEMPLATE", "FILE_NAME");
     }
 
     @Test
