@@ -33,7 +33,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static final String consentedDir = "/json/consented/";
 
     private String url1;
-    private JsonPath jsonPathEvaluator;
 
     @Value("${cos.document.miniform.api}")
     private String generatorUrl;
@@ -188,7 +187,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private String getDocumentUrlOrDocumentBinaryUrl(String jsonFile, String url, String urlType, String documentType, String journeyType) {
-        jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
+        JsonPath jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
         String path = null;
         switch (documentType) {
             case MINI_FORM_A -> path = "data.miniFormA";
