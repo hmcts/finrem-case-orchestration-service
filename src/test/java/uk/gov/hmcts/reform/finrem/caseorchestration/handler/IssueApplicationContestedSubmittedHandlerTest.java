@@ -14,8 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.issueapplication.IssueApplicationContestedEmailCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -27,8 +25,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class IssueApplicationContestedSubmittedHandlerTest {
 
-    @TestLogs
-    private final TestLogger logs = new TestLogger(IssueApplicationContestedSubmittedHandler.class);
     @InjectMocks
     private IssueApplicationContestedSubmittedHandler handler;
     @Mock
