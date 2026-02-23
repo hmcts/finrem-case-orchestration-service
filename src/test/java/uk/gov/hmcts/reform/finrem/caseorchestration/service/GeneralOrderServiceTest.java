@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -55,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,10 +78,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.SetUpUtils.CONTESTED_CASE_TYPE;
 
 @ExtendWith(MockitoExtension.class)
 class GeneralOrderServiceTest {
@@ -904,6 +908,30 @@ class GeneralOrderServiceTest {
                         .build())
                     .build())
             );
+    }
+
+    @Test
+    void verifyAdditionalFieldsForCentralFrcContactDetailsForSoutheastRegion() {
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(SOUTHEAST_FRC_LIST, "kentfrc");
+        CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
+        caseDetails.setCaseTypeId(CONTESTED_CASE_TYPE);
+
+        Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, caseDetails);
+
+        CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
+        doCaseDocumentAssert(result);
+
+        verify(genericDocumentService, times(1))
+            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+                eq("FL-FRM-GOR-ENG-00484.docx"),
+                argThat(fileName -> fileName.matches("generalOrder-\\d{8}-\\d{6}\\.pdf")));
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        assertEquals(OrchestrationConstants.CTSC_FRC_COURT_ADDRESS, data.get("centralFRCCourtAddress"),
+            "Central FRC court address should be set for southeast region");
+        assertEquals(OrchestrationConstants.CTSC_FRC_COURT_EMAIL_ADDRESS, data.get("centralFRCCourtEmail"),
+            "Central FRC court email should be set for southeast region");
     }
 
     private DynamicMultiSelectListElement getDynamicElementList(String role) {
