@@ -47,14 +47,6 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        try {
-            corresponder.sendCorrespondence(caseDetails);
-        } catch (SendEmailException e) {
-            log.error(format(
-                "%s - Failed to send email during issue application", caseDetails.getCaseIdAsString()
-            ), e);
-        }
-
         FinremCaseData caseData = caseDetails.getData();
         assignPartiesAccessService.grantRespondentSolicitor(caseData);
         assignPartiesAccessService.grantApplicantSolicitor(caseData);
