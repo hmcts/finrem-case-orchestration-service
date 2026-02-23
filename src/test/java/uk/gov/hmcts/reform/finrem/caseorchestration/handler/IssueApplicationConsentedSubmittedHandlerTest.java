@@ -2,11 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 
@@ -43,15 +46,22 @@ class IssueApplicationConsentedSubmittedHandlerTest {
     }
 
     @Test
-    void givenCase_whenHandled_thenShouldAssignApplicantAndRespondentSolicitorAccess() {
+    void givenCase_whenHandled_thenShouldAssignPartiesAccessBeforeSendCorrespondence() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
+
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = finremCaseDetails.getData();
 
         // Act
         handlerUnderTest.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(assignPartiesAccessService).grantApplicantSolicitor(callbackRequest.getCaseDetails().getData());
-        verify(assignPartiesAccessService).grantRespondentSolicitor(callbackRequest.getCaseDetails().getData());
+        InOrder inOrder = Mockito.inOrder(assignPartiesAccessService, issueApplicationConsentCorresponder);
+
+        inOrder.verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
+        inOrder.verify(assignPartiesAccessService).grantRespondentSolicitor(caseData);
+        inOrder.verify(issueApplicationConsentCorresponder).sendCorrespondence(finremCaseDetails, AUTH_TOKEN);
         verifyNoMoreInteractions(assignPartiesAccessService);
+        verifyNoMoreInteractions(issueApplicationConsentCorresponder);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

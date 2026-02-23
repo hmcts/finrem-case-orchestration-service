@@ -43,14 +43,16 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
+        // It must be before sendCorrespondence
         assignPartiesAccess(caseDetails.getData());
+
+        issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
 
     private void assignPartiesAccess(FinremCaseData caseData) {
-        assignPartiesAccessService.grantRespondentSolicitor(caseData);
         assignPartiesAccessService.grantApplicantSolicitor(caseData);
+        assignPartiesAccessService.grantRespondentSolicitor(caseData);
     }
 }
