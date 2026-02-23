@@ -44,10 +44,10 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        corresponder.sendCorrespondence(caseDetails);
         FinremCaseData caseData = caseDetails.getData();
         assignPartiesAccessService.grantRespondentSolicitor(caseData);
         assignPartiesAccessService.grantApplicantSolicitor(caseData);
+        corresponder.sendCorrespondence(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
