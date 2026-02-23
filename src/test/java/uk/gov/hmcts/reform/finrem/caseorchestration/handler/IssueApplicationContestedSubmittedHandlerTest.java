@@ -47,7 +47,7 @@ class IssueApplicationContestedSubmittedHandlerTest {
     }
 
     @Test
-    void givenCase_whenHandled_thenShouldGrantRespondentSolicitorAfterSendCorrespondence() {
+    void givenCase_whenHandled_thenShouldGrantPartiesAccessBeforeSendCorrespondence() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
 
@@ -55,6 +55,7 @@ class IssueApplicationContestedSubmittedHandlerTest {
 
         InOrder inOrder = Mockito.inOrder(assignPartiesAccessService, corresponder);
         inOrder.verify(assignPartiesAccessService).grantRespondentSolicitor(caseData);
+        inOrder.verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
         inOrder.verify(corresponder).sendCorrespondence(request.getCaseDetails());
         verifyNoMoreInteractions(assignPartiesAccessService, corresponder);
     }
