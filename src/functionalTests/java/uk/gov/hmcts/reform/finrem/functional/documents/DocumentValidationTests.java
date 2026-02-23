@@ -163,7 +163,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         Map<String, Object> data = caseDetails.getData();
         Object pensionObject = data.get(PENSION_DOCS_COLLECTION);
         List<PensionTypeCollection> respondToOrderData = convertToPensionCollectionDataList(pensionObject);
-        PensionType typedCaseDocument = respondToOrderData.get(0).getTypedCaseDocument();
+        PensionType typedCaseDocument = respondToOrderData.getFirst().getTypedCaseDocument();
         typedCaseDocument.setPensionDocument(generateCaseDocument(CONSENT_ORDER_JSON));
         data.put(PENSION_DOCS_COLLECTION, respondToOrderData);
         caseDetails.setData(data);
@@ -175,7 +175,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         Map<String, Object> data = caseDetails.getData();
         Object respondToOrderDocumentsObject = data.get(RESPOND_TO_ORDER_DOCUMENTS);
         List<RespondToOrderData> respondToOrderData = convertToRespondToOrderDataList(respondToOrderDocumentsObject);
-        RespondToOrder respondToOrder = respondToOrderData.get(0).getRespondToOrder();
+        RespondToOrder respondToOrder = respondToOrderData.getFirst().getRespondToOrder();
         respondToOrder.setDocumentLink(generateCaseDocument(RESPOND_TO_ORDER_SOLICITOR_JSON));
         data.put(RESPOND_TO_ORDER_DOCUMENTS, respondToOrderData);
         caseDetails.setData(data);
