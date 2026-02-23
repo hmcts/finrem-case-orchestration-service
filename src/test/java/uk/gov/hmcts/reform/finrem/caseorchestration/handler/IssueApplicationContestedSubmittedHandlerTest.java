@@ -47,7 +47,7 @@ class IssueApplicationContestedSubmittedHandlerTest {
     }
 
     @Test
-    void givenCase_whenHandled_thenShouldGrantRespondentSolicitorAfterSendCorrespondence() {
+    void givenCase_whenHandled_thenShouldGrantPartiesAccessBeforeSendCorrespondence() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData);
 
