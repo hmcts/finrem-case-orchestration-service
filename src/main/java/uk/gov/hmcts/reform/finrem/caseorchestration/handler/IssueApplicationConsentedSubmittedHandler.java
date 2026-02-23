@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 
 @Slf4j
@@ -18,11 +19,15 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
 
     private final IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
 
+    private final AssignPartiesAccessService assignPartiesAccessService;
+
     @Autowired
     public IssueApplicationConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     IssueApplicationConsentCorresponder issueApplicationConsentCorresponder) {
+                                                     IssueApplicationConsentCorresponder issueApplicationConsentCorresponder,
+                                                     AssignPartiesAccessService assignPartiesAccessService) {
         super(finremCaseDetailsMapper);
         this.issueApplicationConsentCorresponder = issueApplicationConsentCorresponder;
+        this.assignPartiesAccessService = assignPartiesAccessService;
     }
 
     @Override
@@ -39,6 +44,13 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
+        assignPartiesAccess(caseDetails.getData());
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
+    }
+
+    private void assignPartiesAccess(FinremCaseData caseData) {
+        assignPartiesAccessService.grantRespondentSolicitor(caseData);
+        assignPartiesAccessService.grantApplicantSolicitor(caseData);
     }
 }

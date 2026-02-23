@@ -7,9 +7,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.ISSUE_APPLICATION;
@@ -25,6 +27,9 @@ class IssueApplicationConsentedSubmittedHandlerTest {
     @Mock
     private IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
 
+    @Mock
+    private AssignPartiesAccessService assignPartiesAccessService;
+
     @Test
     void testCanHandle() {
         assertCanHandle(handlerUnderTest, SUBMITTED, CONSENTED, ISSUE_APPLICATION);
@@ -35,6 +40,18 @@ class IssueApplicationConsentedSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         handlerUnderTest.handle(callbackRequest, AUTH_TOKEN);
         verify(issueApplicationConsentCorresponder).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+    }
+
+    @Test
+    void givenCase_whenHandled_thenShouldAssignApplicantAndRespondentSolicitorAccess() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+
+        // Act
+        handlerUnderTest.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(assignPartiesAccessService).grantApplicantSolicitor(callbackRequest.getCaseDetails().getData());
+        verify(assignPartiesAccessService).grantRespondentSolicitor(callbackRequest.getCaseDetails().getData());
+        verifyNoMoreInteractions(assignPartiesAccessService);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
