@@ -48,6 +48,12 @@ public class CourtDetailsTemplateFields {
     @JsonProperty("hearingCourtOpeningHours")
     private String hearingCourtOpeningHours;
 
+    @JsonProperty("centralFRCCourtAddress")
+    private String centralFRCCourtAddress;
+
+    @JsonProperty("centralFRCCourtEmail")
+    private String centralFRCCourtEmail;
+
     @JsonIgnore
     public String getCourtContactDetailsAsOneLineAddressString() {
         return StringUtils.joinWith(", ", courtName, courtAddress);
