@@ -138,7 +138,7 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
 
     @Test
     @PactVerification()
-    public void verifyApplyNoticeOfChangeDecision() throws IOException, JSONException {
+    public void verifyApplyNoticeOfChangeDecision() throws JSONException {
 
         given(idamService.getIdamUserId(anyString())).willReturn(ASSIGNEE_ID);
         given(authTokenGenerator.generate()).willReturn(SERVICE_AUTH_TOKEN);
