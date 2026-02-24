@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -242,10 +243,26 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
     public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
                                                                                     Barrister barrister) {
         FinremCaseData caseData = caseDetails.getData();
+
+        boolean isApplicantBarrister = caseData.getBarristerCollectionWrapper().getApplicantBarristers()
+            .stream().map(BarristerCollectionItem::getValue)
+            .anyMatch(b -> b.equals(barrister));
+
+        boolean isRespondentBarrister = caseData.getBarristerCollectionWrapper().getRespondentBarristers()
+            .stream().map(BarristerCollectionItem::getValue)
+            .anyMatch(b -> b.equals(barrister));
+
+        String solicitorReferenceKey = null;
+        if (isApplicantBarrister) {
+            solicitorReferenceKey = caseData.getContactDetailsWrapper().getSolicitorReference();
+        } else if (isRespondentBarrister) {
+            solicitorReferenceKey = caseData.getContactDetailsWrapper().getRespondentSolicitorReference();
+        }
+
         SolicitorCaseDataKeysWrapper solicitorCaseData = SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(barrister.getEmail())
             .solicitorNameKey(barrister.getName())
-            .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
+            .solicitorReferenceKey(nullToEmpty(solicitorReferenceKey))
             .build();
 
         return notificationRequestBuilder()
