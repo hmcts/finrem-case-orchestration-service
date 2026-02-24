@@ -609,7 +609,7 @@ public class StopRepresentingClientService {
             finremCaseDetails,
             authorisationToken,
             APPLICANT,
-            "FT-FRM-LET-ENG-NOC003",
+            "ApplicantRepresentationRemovalNotice",
             documentConfiguration.getStopRepresentingLetterToApplicantTemplate()
         );
     }
@@ -620,7 +620,7 @@ public class StopRepresentingClientService {
             finremCaseDetails,
             authorisationToken,
             RESPONDENT,
-            "FT-FRM-LET-ENG-NOC004",
+            "RespondentRepresentationRemovalNotice",
             documentConfiguration.getStopRepresentingLetterToRespondentTemplate()
         );
     }

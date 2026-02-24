@@ -497,7 +497,7 @@ class StopRepresentingClientServiceTest {
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 CaseRole.APP_SOLICITOR)).thenReturn(notificationRequest);
             final CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.APPLICANT,
-                "getStopRepresentingLetterToApplicantTemplate", "FT-FRM-LET-ENG-NOC003_20241018100001.pdf");
+                "getStopRepresentingLetterToApplicantTemplate", "ApplicantRepresentationRemovalNotice_20241018100001.pdf");
 
             LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0, 1);
             try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
@@ -573,7 +573,7 @@ class StopRepresentingClientServiceTest {
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, applicantBarrister))
                 .thenReturn(notificationRequest2);
             final CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.APPLICANT,
-                "getStopRepresentingLetterToApplicantTemplate", "FT-FRM-LET-ENG-NOC003_20241018100001.pdf");
+                "getStopRepresentingLetterToApplicantTemplate", "ApplicantRepresentationRemovalNotice_20241018100001.pdf");
 
             // Act
             LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0, 1);
@@ -619,7 +619,7 @@ class StopRepresentingClientServiceTest {
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 CaseRole.RESP_SOLICITOR)).thenReturn(notificationRequest);
             final CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.RESPONDENT,
-                "getStopRepresentingLetterToRespondentTemplate", "FT-FRM-LET-ENG-NOC004_20241018100001.pdf");
+                "getStopRepresentingLetterToRespondentTemplate", "RespondentRepresentationRemovalNotice_20241018100001.pdf");
 
             // Act
             LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0, 1);
@@ -697,7 +697,7 @@ class StopRepresentingClientServiceTest {
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore, respondentBarrister))
                 .thenReturn(notificationRequest1);
             final CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.RESPONDENT,
-                "getStopRepresentingLetterToRespondentTemplate", "FT-FRM-LET-ENG-NOC004_20241018100001.pdf");
+                "getStopRepresentingLetterToRespondentTemplate", "RespondentRepresentationRemovalNotice_20241018100001.pdf");
 
             LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0, 1);
             try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
@@ -766,7 +766,7 @@ class StopRepresentingClientServiceTest {
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(caseDetailsBefore,
                 intervenerOneBarrister, IntervenerType.INTERVENER_ONE)).thenReturn(notificationRequest2);
             final CaseDocument generatedDocument = mockGeneratePartyLetter(info, DocumentHelper.PaperNotificationRecipient.RESPONDENT,
-                "getStopRepresentingLetterToRespondentTemplate", "FT-FRM-LET-ENG-NOC004_20241018100001.pdf");
+                "getStopRepresentingLetterToRespondentTemplate", "RespondentRepresentationRemovalNotice_20241018100001.pdf");
 
             LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0, 1);
             try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
