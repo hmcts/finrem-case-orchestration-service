@@ -368,16 +368,13 @@ public class StopRepresentingClientService {
         barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, barristerChange);
         SetUtils.emptyIfNull(barristerChange.getRemoved()).forEach(b -> {
             if (BarristerParty.APPLICANT.equals(barristerParty)) {
-                log.info("Sending email to applicant barrister: " + b.getEmail());
                 notifyApplicantBarrister(info, b);
             }
             if (BarristerParty.RESPONDENT.equals(barristerParty)) {
-                log.info("Sending email to respondent barrister: " + b.getEmail());
                 notifyRespondentBarrister(info, b);
             }
             IntStream.range(1, 5).forEach(i -> {
                 if (BarristerParty.getIntervenerBarristerByIndex(i).equals(barristerParty)) {
-                    log.info("Sending email to intervener barrister: " + b.getEmail());
                     notifyIntervenerBarrister(info, i, b);
                 }
             });
