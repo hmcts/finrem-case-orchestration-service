@@ -129,8 +129,8 @@ public class UpdateRepresentationService {
 
     private boolean isApplicant(CaseDetails caseDetails, ChangeOrganisationRequest changeRequest) {
         if (Optional.ofNullable(changeRequest.getCaseRoleId())
-                .map(DynamicList::getValueCode)
-                .isEmpty()
+            .map(DynamicList::getValueCode)
+            .isEmpty()
         ) {
             throw new NoticeOfChangeInvalidRequestException(format("%s - unexpected empty caseRoleId", caseDetails.getId()));
         }
