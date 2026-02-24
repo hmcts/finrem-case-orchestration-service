@@ -111,4 +111,21 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     private static List<Class> getClassesWithTemporaryFieldAnnotation() {
         return List.of(StopRepresentationWrapper.class);
     }
+
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData) {
+        return response(finremCaseData, null, null);
+    }
+
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData,
+        List<String> warnings, List<String> errors) {
+        var builder = GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder();
+        builder.data(finremCaseData);
+        if (errors != null && !errors.isEmpty()) {
+            builder.errors(errors);
+        }
+        if (warnings != null && !warnings.isEmpty()) {
+            builder.warnings(warnings);
+        }
+        return builder.build();
+    }
 }

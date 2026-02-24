@@ -42,6 +42,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -224,9 +225,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     void givenInvalidOrganisationPolicy_whenHandle_thenReturnsValidationError() {
         FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        FinremCaseDetails caseDetailsBefore = mock(FinremCaseDetails.class);
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
         FinremCaseData finremCaseData = spy(FinremCaseData.class);
         when(caseDetails.getData()).thenReturn(finremCaseData);
 
@@ -242,11 +241,18 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
 
     @ParameterizedTest
     @EnumSource(CaseType.class)
-    void testGetPostCodeErrorsCalled(CaseType caseTypeParam) {
+    void givenValidationError_whenHandled_shouldReturnErrorAtTheEarliestStage(CaseType caseTypeParam) {
         //Arrange
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
+            Long.valueOf(CASE_ID), FinremCaseData.builder()
+                .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                    .updateIncludesRepresentativeChange(YesOrNo.YES)
+                    .build())
+                .build());
         callbackRequest.getCaseDetails().setCaseType(caseTypeParam);
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
+
+        when(internationalPostalService.validate(finremCaseData)).thenReturn(List.of("EXAMPLE_ERROR"));
 
         // handle, then assert
         try (MockedStatic<ContactDetailsValidator> mockedStatic = mockStatic(ContactDetailsValidator.class)) {
@@ -263,6 +269,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
             }
         }
         verify(internationalPostalService).validate(finremCaseData);
+        verifyNoMoreInteractions(nocWorkflowService, updateContactDetailsService);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
