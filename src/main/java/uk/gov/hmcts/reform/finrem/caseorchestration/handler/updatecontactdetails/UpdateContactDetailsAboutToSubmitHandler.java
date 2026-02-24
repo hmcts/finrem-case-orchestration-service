@@ -66,6 +66,12 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
+        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
+        errors.addAll(validatePostCodeAndEmailAddresses(finremCaseDetails));
+        if (!errors.isEmpty()) {
+            return response(finremCaseData, null, errors);
+        }
+
         Optional<ContactDetailsWrapper> contactDetailsWrapper = Optional.ofNullable(finremCaseData.getContactDetailsWrapper());
 
         boolean includeRepresentationChange = contactDetailsWrapper
@@ -92,16 +98,11 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
                 .getData();
 
             finremCaseData = finremCaseDetailsMapper.mapToFinremCaseData(updateCaseData, caseDetails.getCaseTypeId());
-
         } else {
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
         }
 
-        List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(finremCaseData));
-        errors.addAll(getPostCodeErrors(finremCaseDetails));
-      
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors)
-            .data(finremCaseData).build();
+        return response(finremCaseData);
     }
 
     private void considerContestedMiniFormA(FinremCaseDetails finremCaseDetails,
@@ -127,10 +128,13 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     /*
      * Distinct mid-event handlers validate postcodes for Consented and Contested cases.
      * This blends validation from each, to protect Users from skipping validation with browser controls.
+     * TODO Merge the duplicate validation methods from UpdateContactDetailsConsentedMidHandler
+     *  and UpdateContactDetailsContestedMidHandler.
+     *
      * @param finremCaseDetails case details
      * @return list of errors
      */
-    private List<String> getPostCodeErrors(FinremCaseDetails finremCaseDetails) {
+    private List<String> validatePostCodeAndEmailAddresses(FinremCaseDetails finremCaseDetails) {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         List<String> errors = new ArrayList<>();
         errors.addAll(internationalPostalService.validate(finremCaseData));
