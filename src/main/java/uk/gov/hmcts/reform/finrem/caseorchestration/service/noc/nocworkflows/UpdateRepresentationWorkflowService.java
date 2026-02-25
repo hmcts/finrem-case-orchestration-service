@@ -50,7 +50,7 @@ public class UpdateRepresentationWorkflowService {
      * @param viaEventType            the event type that triggered this update
      * @param userAuthorisation       the authorisation token of the user performing the action
      */
-    public void prepareNoticeOfChangeAndOrganisationPolicy(FinremCaseData finremCaseData,  FinremCaseData originalFinremCaseData,
+    public void prepareNoticeOfChangeAndOrganisationPolicy(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
                                                            EventType viaEventType, String userAuthorisation) {
         noticeOfChangeService.updateRepresentationUpdateHistory(finremCaseData, originalFinremCaseData, viaEventType, userAuthorisation);
         noticeOfChangeService.populateChangeOrganisationRequestField(finremCaseData, originalFinremCaseData);
@@ -64,20 +64,19 @@ public class UpdateRepresentationWorkflowService {
     public AboutToStartOrSubmitCallbackResponse handleNoticeOfChangeWorkflow(CaseDetails caseDetails,
                                                                              String authorisationToken,
                                                                              CaseDetails originalCaseDetails) {
-        log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
+        Long caseId = caseDetails.getId();
 
-        assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
+        assignCaseAccessService.findAndRevokeCreatorRole(String.valueOf(caseId));
 
-        log.info("findAndRevokeCreatorRole executed {}", caseDetails.getId());
         Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken,
             originalCaseDetails);
-
 
         if (isNoOrganisationsToAddOrRemove(caseDetails)) {
             persistDefaultOrganisationPolicy(caseDetails);
 
             setDefaultChangeOrganisationRequest(caseDetails);
 
+            log.info("{} - return without apply NOC decision since there is no added/removed organisation", caseId);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
         }
 

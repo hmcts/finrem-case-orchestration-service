@@ -105,7 +105,7 @@ class HearingsAboutToStartHandlerTest {
 
     @Test
     void givenVacateAHearing_shouldCallGenerateSelectableHearingsAsDynamicList() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.VACATE_HEARING);
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
 
         when(featureToggleService.isVacateHearingEnabled()).thenReturn(true);
 

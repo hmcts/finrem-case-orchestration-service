@@ -3,7 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -23,7 +24,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
@@ -45,7 +45,6 @@ class ApplicantPartyListenerTest {
     @Mock
     private InternationalPostalService internationalPostalService;
 
-    @InjectMocks
     private ApplicantPartyListener applicantPartyListener;
 
     private static final String APPLICANT_EMAIL = "applicant@solicitor.com";
@@ -113,31 +112,24 @@ class ApplicantPartyListenerTest {
     }
 
     /**
-     * Tests setPartySpecificDetails null email throws exception.
+     * Tests that when setPartySpecificDetails used,  null values are replaced with blank strings.
      */
-    @Test
-    void shouldThrowExceptionWhenPartySpecificEmailDetailsNull() {
+    @ParameterizedTest
+    @CsvSource(value = {
+        "null,''",
+        "'a value', 'a value'"
+    }, nullValues = "null")
+    void shouldUseBlankStringsWhenSetPartySpecificDetailsNull(String provided, String expected) {
 
-        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorEmail(null);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorName(provided);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorEmail(provided);
+        caseDetails.getData().getContactDetailsWrapper().setSolicitorReference(provided);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> applicantPartyListener.setPartySpecificDetails(event));
+        AbstractPartyListener.PartySpecificDetails details = applicantPartyListener.setPartySpecificDetails(event);
 
-        assertTrue(exception.getMessage().contains("PartySpecificDetails fields must not be null"));
-    }
-
-    /**
-     * Tests setPartySpecificDetails null sol name throws exception.
-     */
-    @Test
-    void shouldThrowExceptionWhenPartySpecificSolNameDetailsNull() {
-
-        caseDetails.getData().getContactDetailsWrapper().setApplicantSolicitorName(null);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> applicantPartyListener.setPartySpecificDetails(event));
-
-        assertTrue(exception.getMessage().contains("PartySpecificDetails fields must not be null"));
+        assertThat(details.recipientSolName()).isEqualTo(expected);
+        assertThat(details.recipientSolEmailAddress()).isEqualTo(expected);
+        assertThat(details.recipientSolReference()).isEqualTo(expected);
     }
 
     /**
@@ -250,18 +242,19 @@ class ApplicantPartyListenerTest {
             .fileName(COVER_SHEET_FILE)
             .build();
 
+        // Cover sheet should be at the beginning of the documents sent for bulk print
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
-        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType()))
-            .thenReturn(List.of(bulkPrintDocument1, bulkPrintCoverSheet));
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))
+            .thenReturn(List.of(bulkPrintCoverSheet, bulkPrintDocument1));
 
         applicantPartyListener.handleNotification(event);
 
         verify(bulkPrintService).getApplicantCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType());
+        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType());
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
-            caseDetails, APPLICANT, List.of(bulkPrintDocument1, bulkPrintCoverSheet), false, AUTH_TOKEN
+            caseDetails, APPLICANT, List.of(bulkPrintCoverSheet, bulkPrintDocument1), false, AUTH_TOKEN
         );
     }
 

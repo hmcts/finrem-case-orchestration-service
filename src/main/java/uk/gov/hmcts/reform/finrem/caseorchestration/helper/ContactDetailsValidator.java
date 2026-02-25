@@ -121,11 +121,10 @@ public class ContactDetailsValidator {
                 && postCodeIsInvalid(wrapper.getApplicantSolicitorAddress())) {
                 errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
             }
-        } else if (isConsented(caseData)) {
-            if (caseData.isApplicantRepresentedByASolicitor()
-                && postCodeIsInvalid(wrapper.getSolicitorAddress())) {
-                errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
-            }
+        } else if (isConsented(caseData)
+            && caseData.isApplicantRepresentedByASolicitor()
+            && postCodeIsInvalid(wrapper.getSolicitorAddress())) {
+            errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
         }
     }
 
@@ -314,19 +313,18 @@ public class ContactDetailsValidator {
     // PT todo - move to different visibility area of the class
     // PT todo - docs and test
     public static boolean checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
-                                                               List<String> errors) {
+                                                                 List<String> errors) {
         if (isContested(caseData)) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && !isValidEmailAddress(wrapper.getApplicantSolicitorEmail())) {
                 errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getApplicantSolicitorEmail()));
                 return false;
             }
-        } else if (isConsented(caseData)) {
-            if (caseData.isApplicantRepresentedByASolicitor()
-                && !isValidEmailAddress(wrapper.getSolicitorEmail())) {
-                errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getSolicitorEmail()));
-                return false;
-            }
+        } else if (isConsented(caseData)
+            && caseData.isApplicantRepresentedByASolicitor()
+            && !isValidEmailAddress(wrapper.getSolicitorEmail())) {
+            errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getSolicitorEmail()));
+            return false;
         }
         return true;
     }
@@ -347,10 +345,9 @@ public class ContactDetailsValidator {
 
     private static void checkForRespondentEmail(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         String respondentEmail = wrapper.getRespondentEmail();
-        if (!caseData.isRespondentRepresentedByASolicitor()) {
-            if (!isValidEmailAddress(respondentEmail, true)) {
-                errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, respondentEmail));
-            }
+        if (!caseData.isRespondentRepresentedByASolicitor()
+            && !isValidEmailAddress(respondentEmail, true)) {
+            errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, respondentEmail));
         }
     }
 

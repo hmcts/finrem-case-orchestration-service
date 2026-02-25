@@ -20,13 +20,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerA
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest.getIntervenerPartyByType;
 
 @Service
 @RequiredArgsConstructor
@@ -52,8 +55,8 @@ public class IntervenerService {
      * @param intervenerWrapper the intervener details containing organisation,
      *                          solicitor email, and case role information
      */
-    public void revokeIntervener(long caseId, IntervenerWrapper intervenerWrapper) {
-        String orgId = Optional.ofNullable(intervenerWrapper.getIntervenerOrganisation())
+    public void revokeIntervenerSolicitor(long caseId, IntervenerWrapper intervenerWrapper) {
+        String orgId = ofNullable(intervenerWrapper.getIntervenerOrganisation())
             .map(OrganisationPolicy::getOrganisation)
             .map(Organisation::getOrganisationID)
             .orElse(null);
@@ -64,7 +67,7 @@ public class IntervenerService {
             return;
         }
 
-        revokeIntervenerRole(caseId, email, orgId, intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode());
+        revokeIntervenerRole(caseId, email, orgId, intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), intervenerWrapper);
     }
 
     public IntervenerChangeDetails removeIntervenerDetails(IntervenerWrapper intervenerWrapper,
@@ -81,7 +84,7 @@ public class IntervenerService {
             String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
             String email = intervenerWrapper.getIntervenerSolEmail();
             revokeIntervenerRole(caseId, email, orgId,
-                intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors);
+                intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors, intervenerWrapper);
         }
 
         intervenerWrapper.removeIntervenerWrapperFromCaseData(caseData);
@@ -109,7 +112,7 @@ public class IntervenerService {
             String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
             String email = intervenerWrapper.getIntervenerSolEmail();
             checkIfIntervenerSolicitorDetailsChanged(intervenerWrapper, caseDetailsBefore, orgId, email, errors);
-            addIntervenerRole(caseId, email, orgId, caseRole, errors);
+            addIntervenerRole(caseId, email, orgId, caseRole, errors, intervenerWrapper);
         } else {
             FinremCaseData beforeData = caseDetailsBefore.getData();
             IntervenerWrapper beforeIntv = intervenerWrapper.getIntervenerWrapperFromCaseData(beforeData);
@@ -119,7 +122,7 @@ public class IntervenerService {
                 log.info("{} now not represented for Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
                 revokeIntervenerRole(caseId, beforeIntv.getIntervenerSolEmail(),
                     beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID(),
-                    intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors);
+                    intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors, beforeIntv);
                 intervenerWrapper.setIntervenerSolEmail(null);
                 intervenerWrapper.setIntervenerSolName(null);
                 intervenerWrapper.setIntervenerSolPhone(null);
@@ -159,7 +162,7 @@ public class IntervenerService {
             if (ObjectUtils.notEqual(beforeOrgId, orgId) || !beforeIntv.getIntervenerSolEmail().equals(email)) {
                 revokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervenerSolEmail(),
                     beforeOrgId,
-                    intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors);
+                    intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors, beforeIntv);
             }
         }
     }
@@ -220,78 +223,103 @@ public class IntervenerService {
     }
 
     /**
-     * Updates the representation update history when an intervener solicitor
-     * stops representing a client.
+     * Updates the representation update history when an intervener’s solicitor
+     * stops representing their client.
      *
-     * <p>If the intervener in the original case data has an associated organisation,
-     * a STOP_REPRESENTING_CLIENT entry is generated and appended to the existing
-     * representation update history in the current case data.</p>
+     * <p>The method compares the original and current case data for each of the
+     * four interveners (Intervener 1–4). If an intervener was previously marked as
+     * represented and is now marked as not represented, a
+     * {@code STOP_REPRESENTING_CLIENT} history entry is generated.</p>
      *
-     * <p>This method modifies the provided {@link FinremCaseData} instance by
-     * adding a new history record.</p>
+     * <p>The history entry records the user performing the action and the details
+     * of the removed solicitor, and is appended to the existing representation
+     * update history on the current {@link FinremCaseData}.</p>
      *
      * @param finremCaseData the current case data to be updated
-     * @param originalFinremCaseData the original case data used to determine the existing intervener details
-     * @param intervenerIndex the 1-based index of the intervener
-     * @param userAuthorisation the user authorisation used to identify who triggered the update
+     * @param originalFinremCaseData the original case data used to detect changes
+     *                                in intervener representation
+     * @param userAuthorisation the authorisation token of the user making the change
      */
-    public void updateIntervenerSolicitorStopRepresentingHistory(FinremCaseData finremCaseData,
-                                                                 FinremCaseData originalFinremCaseData,
-                                                                 int intervenerIndex, String userAuthorisation) {
-        IntervenerWrapper originalIntervener = originalFinremCaseData.getInterveners().get(intervenerIndex - 1);
-        if (originalIntervener.getIntervenerOrganisation() != null) {
-            // modifying finremCaseData reference object
-            RepresentationUpdateHistory history = changeOfRepresentationService.generateRepresentationUpdateHistory(
-                ChangeOfRepresentationRequest.builder()
-                    .by(idamService.getIdamFullName(userAuthorisation))
-                    .party(ChangeOfRepresentationRequest.getIntervenerPartyByIndex(intervenerIndex))
-                    .removedRepresentative(ChangedRepresentative.builder()
-                        .name(originalIntervener.getIntervenerSolName())
-                        .email(originalIntervener.getIntervenerSolEmail())
-                        .organisation(originalIntervener.getIntervenerOrganisation().getOrganisation())
-                        .build())
-                    .build(), STOP_REPRESENTING_CLIENT);
+    public void updateIntervenerSolicitorStopRepresentingHistory(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
+                                                                 String userAuthorisation) {
+        IntStream.range(0, 4).forEach(i -> {
+            IntervenerWrapper originalIntervener = originalFinremCaseData.getInterveners().get(i);
+            IntervenerWrapper currentIntervener = finremCaseData.getInterveners().get(i);
 
-            // modifying finremCaseData reference object
-            finremCaseData.setRepresentationUpdateHistory(Stream.concat(
-                    // existing
+            boolean hasChange =
+                YesOrNo.isYes(originalIntervener.getIntervenerRepresented())
+                    && YesOrNo.isNo(currentIntervener.getIntervenerRepresented());
+
+            if (!hasChange) {
+                return;
+            }
+
+            RepresentationUpdateHistory history =
+                changeOfRepresentationService.generateRepresentationUpdateHistory(
+                    ChangeOfRepresentationRequest.builder()
+                        .by(idamService.getIdamFullName(userAuthorisation))
+                        .party(getIntervenerPartyByType(originalIntervener.getIntervenerType()))
+                        .removedRepresentative(
+                            ChangedRepresentative.builder()
+                                .name(originalIntervener.getIntervenerSolName())
+                                .email(originalIntervener.getIntervenerSolEmail())
+                                .organisation(
+                                    ofNullable(originalIntervener.getIntervenerOrganisation())
+                                        .map(OrganisationPolicy::getOrganisation)
+                                        .orElse(null)
+                                )
+                                .build()
+                        )
+                        .build(),
+                    STOP_REPRESENTING_CLIENT
+                );
+
+            finremCaseData.setRepresentationUpdateHistory(
+                new ArrayList<>(Stream.concat(
                     emptyIfNull(finremCaseData.getRepresentationUpdateHistory()).stream(),
-                    // new
                     emptyIfNull(history.getRepresentationUpdateHistory()).stream()
-                        .map(element -> RepresentationUpdateHistoryCollection.builder()
-                            .id(element.getId())
-                            .value(element.getValue())
+                        .map(e -> RepresentationUpdateHistoryCollection.builder()
+                            .id(e.getId())
+                            .value(e.getValue())
                             .build())
-                ).collect(Collectors.toList())
+                ).toList())
             );
-        }
+        });
     }
 
-    private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
+    private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors,
+                                   IntervenerWrapper intervenerWrapper) {
         Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         if (userId.isPresent()) {
+            intervenerWrapper.setSolUserId(userId.get());
             assignCaseAccessService.grantCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
         } else {
             logError(caseId, errors);
         }
     }
 
-    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole) {
-        revokeIntervenerRole(caseId, email, orgId, caseRole, null);
+    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, IntervenerWrapper intervenerWrapper) {
+        revokeIntervenerRole(caseId, email, orgId, caseRole, null, intervenerWrapper);
     }
 
-    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
-        Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
-        if (userId.isPresent()) {
-            assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
+    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors,
+                                      IntervenerWrapper intervenerWrapper) {
+        String solUserID = intervenerWrapper.getSolUserId();
+        if (StringUtils.hasText(solUserID)) {
+            assignCaseAccessService.removeCaseRoleToUser(caseId, solUserID, caseRole, orgId);
         } else {
-            logError(caseId, errors);
+            Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
+            if (userId.isPresent()) {
+                assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
+            } else {
+                logError(caseId, errors);
+            }
         }
     }
 
     private void logError(Long caseId, List<String> errors) {
         String error = "Could not find intervener with provided email";
-        log.info(String.format(error + " for caseId %s", caseId));
+        log.info("{} for caseId {}", error, caseId);
         if (errors != null) {
             errors.add(error);
         }

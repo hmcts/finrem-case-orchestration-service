@@ -3,7 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -42,7 +43,6 @@ class IntervenerThreePartyListenerTest {
     @Mock
     private InternationalPostalService internationalPostalService;
 
-    @InjectMocks
     private IntervenerThreePartyListener intervenerThreePartyListener;
 
     private static final String INTERVENER_THREE_EMAIL = "intervenerThree@solicitor.com";
@@ -170,19 +170,41 @@ class IntervenerThreePartyListenerTest {
             .fileName(COVER_SHEET_FILE)
             .build();
 
+        // Cover sheet should be at the beginning of the documents sent for bulk print
         when(notificationService
             .isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerThree(), caseDetails)).thenReturn(false);
         CaseDocument coverSheet = CaseDocument.builder().documentFilename(COVER_SHEET_FILE).build();
         when(bulkPrintService.getIntervenerThreeCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(coverSheet);
-        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType()))
-            .thenReturn(List.of(bulkPrintDocument1, bulkPrintCoverSheet));
+        when(bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType()))
+            .thenReturn(List.of(bulkPrintCoverSheet, bulkPrintDocument1));
 
         intervenerThreePartyListener.handleNotification(event);
 
         verify(bulkPrintService).getIntervenerThreeCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(List.of(testDocument, coverSheet), AUTH_TOKEN, caseDetails.getCaseType());
+        verify(bulkPrintService).convertCaseDocumentsToBulkPrintDocuments(List.of(coverSheet, testDocument), AUTH_TOKEN, caseDetails.getCaseType());
         verify(bulkPrintService).bulkPrintFinancialRemedyLetterPack(
-            caseDetails, INTERVENER_THREE, List.of(bulkPrintDocument1, bulkPrintCoverSheet), false, AUTH_TOKEN
+            caseDetails, INTERVENER_THREE, List.of(bulkPrintCoverSheet, bulkPrintDocument1), false, AUTH_TOKEN
         );
+    }
+
+    /**
+     * Tests that when setPartySpecificDetails used,  null values are replaced with blank strings.
+     */
+    @ParameterizedTest
+    @CsvSource(value = {
+        "null,''",
+        "'a value', 'a value'"
+    }, nullValues = "null")
+    void shouldUseBlankStringsWhenSetPartySpecificDetailsNull(String provided, String expected) {
+
+        caseDetails.getData().getIntervenerThree().setIntervenerSolName(provided);
+        caseDetails.getData().getIntervenerThree().setIntervenerSolEmail(provided);
+        caseDetails.getData().getIntervenerThree().setIntervenerSolicitorReference(provided);
+
+        AbstractPartyListener.PartySpecificDetails details = intervenerThreePartyListener.setPartySpecificDetails(event);
+
+        assertThat(details.recipientSolName()).isEqualTo(expected);
+        assertThat(details.recipientSolEmailAddress()).isEqualTo(expected);
+        assertThat(details.recipientSolReference()).isEqualTo(expected);
     }
 }

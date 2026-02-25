@@ -1,26 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSuportingDocumentItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
@@ -44,12 +39,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
@@ -69,7 +60,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GeneralApplicationService {
 
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
     private final IdamService idamService;
     private final GenericDocumentService genericDocumentService;
     private final AssignCaseAccessService accessService;
@@ -239,7 +229,7 @@ public class GeneralApplicationService {
     }
 
     private void processGeneralApplicationForMainLititgants(FinremCaseData caseData,
-                                                                   List<GeneralApplicationsCollection> applicationCollection) {
+                                                            List<GeneralApplicationsCollection> applicationCollection) {
         List<GeneralApplicationsCollection> appRespCollection = new ArrayList<>();
         appRespCollection.addAll(applicationCollection);
         appRespCollection.forEach(ga -> {
@@ -259,9 +249,10 @@ public class GeneralApplicationService {
         log.info("GA for Applicant/Respondent size: {}", applicationCollection.size());
     }
 
-    private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(FinremCaseDetails caseDetails, String loggedInUserCaseRole,
-         List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
-         FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(
+        FinremCaseDetails caseDetails, String loggedInUserCaseRole,
+        List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
+        FinremCaseData caseData, FinremCaseData caseDataBefore) {
         switch (loggedInUserCaseRole) {
             case INTERVENER1 -> {
                 interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(
@@ -375,52 +366,6 @@ public class GeneralApplicationService {
             documentHelper.convertToCaseDocument(caseDocument), userAuthorisation, caseDetails.getCaseType());
     }
 
-    public void updateCaseDataSubmit(Map<String, Object> caseData,
-                                     CaseDetails caseDetailsBefore,
-                                     String authorisationToken) {
-        caseData.put(GENERAL_APPLICATION_PRE_STATE, caseDetailsBefore.getState());
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE, LocalDate.now());
-
-        CaseType caseType = CaseType.forValue(caseDetailsBefore.getCaseTypeId());
-        CaseDocument applicationDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
-            documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)), authorisationToken,
-            caseType);
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, applicationDocument);
-
-        if (caseData.get(GENERAL_APPLICATION_DRAFT_ORDER) != null) {
-            CaseDocument draftOrderPdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
-                documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER)),
-                authorisationToken, caseType);
-            caseData.put(GENERAL_APPLICATION_DRAFT_ORDER, draftOrderPdfDocument);
-        }
-        updateGeneralApplicationDocumentCollection(caseData, applicationDocument);
-    }
-
-    private void updateGeneralApplicationDocumentCollection(Map<String, Object> caseData,
-                                                            CaseDocument applicationDocument) {
-        GeneralApplication generalApplication = GeneralApplication.builder()
-            .generalApplicationDocument(applicationDocument).build();
-
-        List<GeneralApplicationData> generalApplicationList = Optional.ofNullable(
-                caseData.get(GENERAL_APPLICATION_DOCUMENT_COLLECTION))
-            .map(this::convertToGeneralApplicationDataList)
-            .orElse(new ArrayList<>());
-
-        generalApplicationList.add(
-            GeneralApplicationData.builder()
-                .id(UUID.randomUUID().toString())
-                .generalApplication(generalApplication)
-                .build()
-        );
-
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, generalApplicationList);
-    }
-
-    private List<GeneralApplicationData> convertToGeneralApplicationDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
     public void updateCaseDataStart(Map<String, Object> caseData, String authorisationToken) {
         Stream.of(GENERAL_APPLICATION_RECEIVED_FROM,
             GENERAL_APPLICATION_HEARING_REQUIRED,
@@ -465,42 +410,203 @@ public class GeneralApplicationService {
         generalApplicationsCategoriser.uncategoriseDuplicatedCollections(caseData);
     }
 
-    public void checkIfApplicationCompleted(FinremCaseDetails caseDetails, List<String> errors,
+    /**
+     * Validates if the general application is completed and checks for document encryption.
+     * Adds error messages to the provided list if validation fails.
+     *
+     * @param caseDetails               the details of the current case
+     * @param errors                    the list to collect validation errors
+     * @param generalApplications       the current general applications
+     * @param generalApplicationsBefore the previous state of general applications
+     * @param userAuthorisation         the user authorisation token
+     */
+    public void checkIfApplicationCompleted(FinremCaseDetails caseDetails,
+                                            List<String> errors,
                                             List<GeneralApplicationsCollection> generalApplications,
                                             List<GeneralApplicationsCollection> generalApplicationsBefore,
                                             String userAuthorisation) {
+
         String caseId = String.valueOf(caseDetails.getId());
 
-        if ((generalApplications == null || generalApplications.isEmpty())) {
-            log.info("Please complete the general application for Case ID: {}", caseDetails.getId());
+        if (CollectionUtils.isEmpty(generalApplications)) {
             errors.add("Please complete the General Application. No information has been entered for this application.");
-        } else {
-            log.info("General application size {} for CaseId {}", generalApplications.size(), caseId);
-            List<GeneralApplicationsCollection> generalApplicationsTemp = new ArrayList<>(generalApplications);
-            if (generalApplicationsBefore != null && !generalApplicationsBefore.isEmpty()) {
-                List<GeneralApplicationsCollection> generalApplicationsBeforeTemp = new ArrayList<>(generalApplicationsBefore);
-                generalApplicationsTemp.removeAll(generalApplicationsBeforeTemp);
-            }
-            generalApplicationsTemp.forEach(ga -> {
-                service.validateEncryptionOnUploadedDocument(ga.getValue().getGeneralApplicationDocument(),
-                    caseId, errors, userAuthorisation);
-                service.validateEncryptionOnUploadedDocument(ga.getValue().getGeneralApplicationDraftOrder(),
-                    caseId, errors, userAuthorisation);
-                List<GeneralApplicationSupportingDocumentData> gaSupportDocuments = ga.getValue().getGaSupportDocuments();
-                if (gaSupportDocuments != null && !gaSupportDocuments.isEmpty()) {
-                    gaSupportDocuments.forEach(doc -> service.validateEncryptionOnUploadedDocument(doc.getValue().getSupportDocument(),
-                        caseId, errors, userAuthorisation));
-                }
-            });
+            return;
         }
 
-        if (generalApplicationsBefore != null && generalApplications != null
-            && (generalApplicationsBefore.size() == generalApplications.size())) {
-            log.info("Please complete the general application for Case ID: {}", caseDetails.getId());
+        if (generalApplicationsBefore != null && generalApplicationsBefore.size() == generalApplications.size()) {
             errors.add("Any changes to an existing General Applications will not be saved. "
                 + "Please add a new General Application in order to progress.");
+            return;
         }
 
+        log.info("General application size {} for CaseId {}", generalApplications.size(), caseId);
+
+        // Determine which general applications need validation (new or modified)
+        List<GeneralApplicationsCollection> generalApplicationsToValidate =
+            determineGeneralApplicationsToValidate(generalApplications, generalApplicationsBefore);
+
+        log.info("CaseId {} validating encryption for {} GA(s) (new/changed only)",
+            caseId, generalApplicationsToValidate.size());
+
+        validateEncryptionForGeneralApplications(
+            generalApplicationsToValidate, caseId, errors, userAuthorisation
+        );
+    }
+
+    /**
+     * Determines which general applications need validation by comparing the current and previous states.
+     * Returns a list of applications that are either new or have modified documents.
+     *
+     * @param current the current list of general applications
+     * @param before  the previous list of general applications
+     * @return a list of general applications to validate
+     */
+    private List<GeneralApplicationsCollection> determineGeneralApplicationsToValidate(
+        List<GeneralApplicationsCollection> current,
+        List<GeneralApplicationsCollection> before) {
+
+        if (CollectionUtils.isEmpty(before)) {
+            // No previous state -> validate everything
+            return current;
+        }
+
+        Map<UUID, String> previousStateByGaId = buildPreviousDocumentStateMap(before);
+
+        return current.stream()
+            .filter(ga -> isNewOrModified(ga, previousStateByGaId))
+            .toList();
+    }
+
+    /**
+     * Builds a map of previous document state signatures for general applications.
+     * The map key is the application UUID, and the value is the document state signature.
+     * This enables efficient comparison to detect changes in application documents.
+     *
+     * @param before the list of previous general applications
+     * @return a map of application UUID to document state signature
+     */
+    private Map<UUID, String> buildPreviousDocumentStateMap(
+        List<GeneralApplicationsCollection> before) {
+
+        return before.stream()
+            .collect(Collectors.toMap(
+                GeneralApplicationsCollection::getId,
+                ga -> buildDocumentStateSignature(ga.getValue()),
+                (a, b) -> a
+            ));
+    }
+
+    /**
+     * Determines if the provided general application is new or has been modified.
+     * Compares the current document state signature with the previous one.
+     *
+     * @param currentGa           the current general application collection
+     * @param previousStateByGaId a map of previous document state signatures by application ID
+     * @return true if the application is new or its documents have changed; false otherwise
+     */
+    private boolean isNewOrModified(GeneralApplicationsCollection currentGa,
+                                    Map<UUID, String> previousStateByGaId) {
+
+        String previousState = previousStateByGaId.get(currentGa.getId());
+        String currentState = buildDocumentStateSignature(currentGa.getValue());
+
+        // Return true if this is a new application (no previous state)
+        if (previousState == null) {
+            return true;
+        }
+
+        // Return true if the document state has changed
+        return !previousState.equals(currentState);
+    }
+
+    /**
+     * Builds a unique signature string representing the state of a general application's documents.
+     * The signature includes URLs of the main document, draft order, and supporting documents.
+     * Used to detect changes in document state for validation purposes.
+     *
+     * @param generalApplicationItems the general application items to generate the signature for
+     * @return a signature string representing the document state
+     */
+    private String buildDocumentStateSignature(GeneralApplicationItems generalApplicationItems) {
+
+        String main = extractDocumentUrl(generalApplicationItems.getGeneralApplicationDocument());
+        String draft = extractDocumentUrl(generalApplicationItems.getGeneralApplicationDraftOrder());
+
+        List<GeneralApplicationSupportingDocumentData> support = generalApplicationItems.getGaSupportDocuments();
+        String supportUrls = "";
+        if (CollectionUtils.isNotEmpty(support)) {
+            supportUrls = support.stream()
+                .map(d -> extractDocumentUrl(d.getValue().getSupportDocument()))
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.joining("|"));
+        }
+
+        return String.join("||",
+            Objects.toString(main, ""),
+            Objects.toString(draft, ""),
+            supportUrls
+        );
+    }
+
+    /**
+     * Validates encryption for all documents in the provided general applications.
+     * Checks the main document, draft order, and supporting documents for each application.
+     * Adds error messages to the provided list if any document fails encryption validation.
+     *
+     * @param generalApplications the list of general applications to validate
+     * @param caseId              the identifier of the current case
+     * @param errors              the list to collect validation errors
+     * @param userAuthorisation   the user authorisation token
+     */
+    private void validateEncryptionForGeneralApplications(
+        List<GeneralApplicationsCollection> generalApplications,
+        String caseId,
+        List<String> errors,
+        String userAuthorisation) {
+
+        generalApplications.stream()
+            .map(GeneralApplicationsCollection::getValue)
+            .forEach(items -> {
+
+                //Validate encryption on general application document and draft order (if present)
+                validateEncryptionOnDocument(
+                    items.getGeneralApplicationDocument(), caseId, errors, userAuthorisation
+                );
+
+                validateEncryptionOnDocument(
+                    items.getGeneralApplicationDraftOrder(), caseId, errors, userAuthorisation
+                );
+
+                //validate encryption on supporting documents (if present)
+                Optional.ofNullable(items.getGaSupportDocuments())
+                    .stream()
+                    .flatMap(List::stream)
+                    .map(GeneralApplicationSupportingDocumentData::getValue)
+                    .map(GeneralApplicationSuportingDocumentItems::getSupportDocument)
+                    .forEach(doc ->
+                        validateEncryptionOnDocument(doc, caseId, errors, userAuthorisation)
+                    );
+            });
+    }
+
+    private String extractDocumentUrl(CaseDocument doc) {
+        return doc == null ? null : doc.getDocumentUrl();
+    }
+
+    /**
+     * Validates encryption on the provided document if it is not null.
+     *
+     * @param document          the document to validate
+     * @param caseId            the case identifier
+     * @param errors            the list to collect errors
+     * @param userAuthorisation the user authorisation token
+     */
+    private void validateEncryptionOnDocument(CaseDocument document, String caseId, List<String> errors, String
+        userAuthorisation) {
+        if (document != null) {
+            service.validateEncryptionOnUploadedDocument(document, caseId, errors, userAuthorisation);
+        }
     }
 
     public void updateIntervenerDirectionsOrders(GeneralApplicationItems items, FinremCaseDetails caseDetails) {
@@ -549,8 +655,9 @@ public class GeneralApplicationService {
         }
     }
 
-    private static List<GeneralApplicationCollectionData> getIntervenerGeneralApplications(List<GeneralApplicationCollectionData> generalApplications,
-                                                                                           String intervener1) {
+    private static List<GeneralApplicationCollectionData> getIntervenerGeneralApplications(
+        List<GeneralApplicationCollectionData> generalApplications,
+         String intervener1) {
         return generalApplications.stream().filter(ga -> intervener1
             .equals(ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue().getCode())).toList();
     }
