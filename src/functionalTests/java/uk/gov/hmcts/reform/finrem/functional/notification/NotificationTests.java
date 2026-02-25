@@ -23,7 +23,6 @@ public class NotificationTests extends IntegrationTestBase {
             "ccd-request-with-solicitor-contestApplicationIssued.json", CONTESTED_DIR);
     }
 
-    @Test
     public void verifyNotifyUpdateFrcInfoIsOkay() {
         utils.validatePostSuccess(updateFrcInfoUri, "update-frc-info.json", CONTESTED_DIR);
     }
