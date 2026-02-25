@@ -22,7 +22,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -135,15 +137,20 @@ class NotificationRequestBuilderTest {
     }
 
     @Test
-    void givenContestedCaseWithoutDivorceCaseNumber_whenWithDefaults_thenCaseDetailsPopulated() {
-        mockCourtDetailsConfiguration();
-        FinremCaseDetails caseDetails = createContestedCase(true);
-
-        NotificationRequest notificationRequest = builder
-            .withCaseDefaults(caseDetails)
+    void givenAnyCase_whenWithIntervener_thenIntervenerDetailsPopulated() {
+        IntervenerDetails intervenerDetails = IntervenerOne.builder()
+            .intervenerName("Jack Jack")
+            .intervenerSolicitorFirm("Jack Solicitor & Co.")
+            .intervenerSolicitorReference("RX22598989")
             .build();
 
-        assertThat(notificationRequest.getDivorceCaseNumber()).isEqualTo("");
+        NotificationRequest notificationRequest = builder
+            .withIntervener(intervenerDetails)
+            .build();
+
+        assertThat(notificationRequest.getIntervenerFullName()).isEqualTo("Jack Jack");
+        assertThat(notificationRequest.getIntervenerSolicitorFirm()).isEqualTo("Jack Solicitor & Co.");
+        assertThat(notificationRequest.getIntervenerSolicitorReferenceNumber()).isEqualTo("RX22598989");
     }
 
     @Test

@@ -33,9 +33,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.Barrister
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -49,6 +51,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfCha
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_FOUR_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_FOUR_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_ONE_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_ONE_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_THREE_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_THREE_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_TWO_BARRISTER_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_TWO_SOLICITOR_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY;
 
@@ -109,6 +119,12 @@ public class StopRepresentingClientService {
         return finremCaseData.isContestedApplication()
             ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT
             : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
+    }
+
+    private static EmailTemplateNames getNotifyIntervenerRepresentativeTemplateName(FinremCaseData finremCaseData) {
+        return finremCaseData.isContestedApplication()
+            ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER
+            : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
     }
 
     /**
@@ -308,6 +324,7 @@ public class StopRepresentingClientService {
                     .ifPresent(wrapper -> {
                         if (shouldRevokeIntervenerAccess(wrapper, originalWrapper)) {
                             intervenerService.revokeIntervenerSolicitor(info.getCaseDetails().getId(), originalWrapper);
+                            notifyIntervenerSolicitor(info, it);
                         }
                     });
             }
@@ -337,6 +354,11 @@ public class StopRepresentingClientService {
             if (BarristerParty.RESPONDENT.equals(barristerParty)) {
                 notifyRespondentBarrister(info, b);
             }
+            IntStream.range(1, 5).forEach(i -> {
+                if (BarristerParty.getIntervenerBarristerByIndex(i).equals(barristerParty)) {
+                    notifyIntervenerBarrister(info, i, b);
+                }
+            });
         });
     }
 
@@ -403,7 +425,20 @@ public class StopRepresentingClientService {
 
     private void sendRepresentativeNotification(
         StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
-        NotificationRequest notificationRequest
+        NotificationRequest notificationRequest) {
+        sendRepresentativeNotification(info, parties, emailTemplate, notificationRequest, null);
+    }
+
+    private void sendRepresentativeNotification(
+        StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
+        NotificationRequest notificationRequest, IntervenerType intervenerType
+    ) {
+        sendRepresentativeNotification(info, parties, emailTemplate, notificationRequest, intervenerType, null);
+    }
+
+    private void sendRepresentativeNotification(
+        StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
+        NotificationRequest notificationRequest, IntervenerType intervenerType, Barrister barrister
     ) {
         String userAuthorisation = info.getUserAuthorisation();
 
@@ -414,6 +449,8 @@ public class StopRepresentingClientService {
             .caseDetails(info.getCaseDetails())
             .caseDetailsBefore(info.getCaseDetailsBefore())
             .authToken(userAuthorisation)
+            .intervenerType(intervenerType)
+            .barrister(barrister)
             .build()
         );
     }
@@ -424,7 +461,8 @@ public class StopRepresentingClientService {
             List.of(FORMER_APPLICANT_BARRISTER_ONLY),
             getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
-                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister)
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
+            null, barrister
         );
     }
 
@@ -444,7 +482,8 @@ public class StopRepresentingClientService {
             List.of(FORMER_RESPONDENT_BARRISTER_ONLY),
             getNotifyRespondentRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
-                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister)
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
+            null, barrister
         );
     }
 
@@ -456,5 +495,54 @@ public class StopRepresentingClientService {
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), RESP_SOLICITOR)
         );
+    }
+
+    private void notifyIntervenerBarrister(StopRepresentingClientInfo info, int intervenerId, Barrister barrister) {
+        IntervenerType intervenerType = Arrays.stream(IntervenerType.values())
+            .filter(d -> d.getIntervenerId() == intervenerId)
+            .findFirst()
+            .orElse(null);
+
+        sendRepresentativeNotification(
+            info,
+            List.of(resolveIntervenerBarristerNotificationParty(intervenerId)),
+            getNotifyIntervenerRepresentativeTemplateName(getFinremCaseData(info)),
+            finremNotificationRequestMapper
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister, intervenerType),
+            intervenerType, barrister
+        );
+    }
+
+    private void notifyIntervenerSolicitor(StopRepresentingClientInfo info, IntervenerType intervenerType) {
+        int intervenerId = intervenerType.getIntervenerId();
+        sendRepresentativeNotification(
+            info,
+            List.of(resolveIntervenerSolicitorNotificationParty(intervenerId)),
+            getNotifyIntervenerRepresentativeTemplateName(getFinremCaseData(info)),
+            finremNotificationRequestMapper
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(),
+                    CaseRole.getIntervenerSolicitorByIndex(intervenerId), intervenerType),
+            intervenerType
+        );
+    }
+
+    private NotificationParty resolveIntervenerBarristerNotificationParty(int index) {
+        return switch(index) {
+            case 1 -> FORMER_INTERVENER_ONE_BARRISTER_ONLY;
+            case 2 -> FORMER_INTERVENER_TWO_BARRISTER_ONLY;
+            case 3 -> FORMER_INTERVENER_THREE_BARRISTER_ONLY;
+            case 4 -> FORMER_INTERVENER_FOUR_BARRISTER_ONLY;
+            default -> throw new IllegalArgumentException("Invalid index " + index);
+        };
+    }
+
+    private NotificationParty resolveIntervenerSolicitorNotificationParty(int index) {
+        return switch(index) {
+            case 1 -> FORMER_INTERVENER_ONE_SOLICITOR_ONLY;
+            case 2 -> FORMER_INTERVENER_TWO_SOLICITOR_ONLY;
+            case 3 -> FORMER_INTERVENER_THREE_SOLICITOR_ONLY;
+            case 4 -> FORMER_INTERVENER_FOUR_SOLICITOR_ONLY;
+            default -> throw new IllegalArgumentException("Invalid index " + index);
+        };
     }
 }
