@@ -69,14 +69,12 @@ class IssueApplicationContestedSubmittedHandlerTest {
         // wait until async retries complete
         await()
             .atMost(2, SECONDS)
-            .untilAsserted(() ->
-                {
-                    verify(assignPartiesAccessService, times(3))
-                        .grantRespondentSolicitor(request.getCaseDetails().getData());
-                    // verify correspondence still executed
-                    verify(corresponder)
-                        .sendCorrespondence(request.getCaseDetails());
-                }
-            );
+            .untilAsserted(() -> {
+                verify(assignPartiesAccessService, times(3))
+                    .grantRespondentSolicitor(request.getCaseDetails().getData());
+                // verify correspondence still executed
+                verify(corresponder)
+                    .sendCorrespondence(request.getCaseDetails());
+            });
     }
 }
