@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 
 import static org.mockito.Mockito.verify;
@@ -20,24 +19,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class IssueApplicationConsentedSubmittedHandlerTest {
 
     @InjectMocks
-    private IssueApplicationConsentedSubmittedHandler handlerUnderTest;
+    private IssueApplicationConsentedSubmittedHandler handler;
 
     @Mock
     private IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handlerUnderTest, SUBMITTED, CONSENTED, ISSUE_APPLICATION);
+        assertCanHandle(handler, SUBMITTED, CONSENTED, ISSUE_APPLICATION);
     }
 
     @Test
     void testHandle() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        handlerUnderTest.handle(callbackRequest, AUTH_TOKEN);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+        handler.handle(callbackRequest, AUTH_TOKEN);
         verify(issueApplicationConsentCorresponder).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
-    }
-
-    private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequestFactory.from(FinremCaseData.builder().ccdCaseType(CONSENTED).build());
     }
 }
