@@ -38,7 +38,6 @@ class IssueApplicationConsentedSubmittedHandlerTest {
         assertCanHandle(handler, SUBMITTED, CONSENTED, ISSUE_APPLICATION);
     }
 
-
     @Test
     void givenCase_whenHandled_thenShouldSendCorrespondence() {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from();
