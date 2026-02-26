@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 
 @Slf4j
@@ -18,11 +19,15 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
 
     private final IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
 
+    private final AssignPartiesAccessService assignPartiesAccessService;
+
     @Autowired
     public IssueApplicationConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     IssueApplicationConsentCorresponder issueApplicationConsentCorresponder) {
+                                                     IssueApplicationConsentCorresponder issueApplicationConsentCorresponder,
+                                                     AssignPartiesAccessService assignPartiesAccessService) {
         super(finremCaseDetailsMapper);
         this.issueApplicationConsentCorresponder = issueApplicationConsentCorresponder;
+        this.assignPartiesAccessService = assignPartiesAccessService;
     }
 
     @Override
@@ -38,9 +43,51 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
+        final String caseIdAsString = caseDetails.getCaseIdAsString();
 
-        issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
+        grantRespondentSolicitor(caseData, caseIdAsString, 3);
+        sendCorrespondenceWithRetry(caseDetails, caseIdAsString, 3);
 
         return response(caseData);
+    }
+
+    private void grantRespondentSolicitor(FinremCaseData caseData, String caseIdAsString, int retriesLeft) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                assignPartiesAccessService.grantRespondentSolicitor(caseData);
+
+            } catch (Exception e) {
+                log.error("{} - Failed granting respondent solicitor. Retries left: {}",
+                    caseIdAsString, retriesLeft, e);
+
+                if (retriesLeft > 0) {
+                    grantRespondentSolicitor(caseData, caseIdAsString, retriesLeft - 1);
+                } else {
+                    log.error("{} - All retry attempts exhausted while granting respondent solicitor",
+                        caseIdAsString);
+                }
+            }
+        }, CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS));
+    }
+
+    private void sendCorrespondenceWithRetry(FinremCaseDetails caseDetails, String caseIdAsString,
+                                             int retriesLeft) {
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                issueApplicationConsentCorresponder.sendCorrespondence(caseDetails);
+
+            } catch (Exception e) {
+                log.error("{} - Failed sending correspondence. Retries left: {}",
+                    caseIdAsString, retriesLeft, e);
+
+                if (retriesLeft > 0) {
+                    sendCorrespondenceWithRetry(caseDetails, caseIdAsString, retriesLeft - 1);
+                } else {
+                    log.error("{} - All retry attempts exhausted while sending correspondence",
+                        caseIdAsString);
+                }
+            }
+        }, CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS));
     }
 }
