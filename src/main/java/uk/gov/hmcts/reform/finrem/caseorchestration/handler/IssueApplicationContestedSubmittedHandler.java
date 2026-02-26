@@ -8,7 +8,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.issueapplication.IssueApplicationContestedEmailCorresponder;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -16,10 +21,14 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
     private final IssueApplicationContestedEmailCorresponder corresponder;
 
+    private final AssignPartiesAccessService assignPartiesAccessService;
+
     public IssueApplicationContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     IssueApplicationContestedEmailCorresponder corresponder) {
+                                                     IssueApplicationContestedEmailCorresponder corresponder,
+                                                     AssignPartiesAccessService assignPartiesAccessService) {
         super(finremCaseDetailsMapper);
         this.corresponder = corresponder;
+        this.assignPartiesAccessService = assignPartiesAccessService;
     }
 
     @Override
@@ -36,9 +45,53 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
         validateCaseData(callbackRequest);
 
-        corresponder.sendCorrespondence(callbackRequest.getCaseDetails());
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
+        final String caseIdAsString = caseDetails.getCaseIdAsString();
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData()).build();
+        grantRespondentSolicitor(caseData, caseIdAsString, 3);
+        sendCorrespondenceWithRetry(caseDetails, caseIdAsString, 3);
+
+        return response(caseData);
+    }
+
+    private void grantRespondentSolicitor(FinremCaseData caseData, String caseIdAsString, int retriesLeft) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                assignPartiesAccessService.grantRespondentSolicitor(caseData);
+
+            } catch (Exception e) {
+                log.error("{} - Failed granting respondent solicitor. Retries left: {}",
+                    caseIdAsString, retriesLeft, e);
+
+                if (retriesLeft > 0) {
+                    grantRespondentSolicitor(caseData, caseIdAsString, retriesLeft - 1);
+                } else {
+                    log.error("{} - All retry attempts exhausted while granting respondent solicitor",
+                        caseIdAsString);
+                }
+            }
+        }, CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS));
+    }
+
+    private void sendCorrespondenceWithRetry(FinremCaseDetails caseDetails, String caseIdAsString,
+                                             int retriesLeft) {
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                corresponder.sendCorrespondence(caseDetails);
+
+            } catch (Exception e) {
+                log.error("{} - Failed sending correspondence. Retries left: {}",
+                    caseIdAsString, retriesLeft, e);
+
+                if (retriesLeft > 0) {
+                    sendCorrespondenceWithRetry(caseDetails, caseIdAsString, retriesLeft - 1);
+                } else {
+                    log.error("{} - All retry attempts exhausted while sending correspondence",
+                        caseIdAsString);
+                }
+            }
+        }, CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS));
     }
 }
