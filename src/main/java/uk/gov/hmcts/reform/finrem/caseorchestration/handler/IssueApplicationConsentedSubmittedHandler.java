@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
 @Service
 public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHandler {
@@ -46,7 +49,7 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
         final String caseIdAsString = caseDetails.getCaseIdAsString();
 
         grantRespondentSolicitor(caseData, caseIdAsString, 3);
-        sendCorrespondenceWithRetry(caseDetails, caseIdAsString, 3);
+        sendCorrespondenceWithRetry(caseDetails, caseIdAsString, userAuthorisation, 3);
 
         return response(caseData);
     }
@@ -71,18 +74,18 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
     }
 
     private void sendCorrespondenceWithRetry(FinremCaseDetails caseDetails, String caseIdAsString,
-                                             int retriesLeft) {
+                                             String userAuthorisation, int retriesLeft) {
 
         CompletableFuture.runAsync(() -> {
             try {
-                issueApplicationConsentCorresponder.sendCorrespondence(caseDetails);
+                issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
 
             } catch (Exception e) {
                 log.error("{} - Failed sending correspondence. Retries left: {}",
                     caseIdAsString, retriesLeft, e);
 
                 if (retriesLeft > 0) {
-                    sendCorrespondenceWithRetry(caseDetails, caseIdAsString, retriesLeft - 1);
+                    sendCorrespondenceWithRetry(caseDetails, caseIdAsString, userAuthorisation, retriesLeft - 1);
                 } else {
                     log.error("{} - All retry attempts exhausted while sending correspondence",
                         caseIdAsString);
