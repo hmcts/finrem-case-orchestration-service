@@ -33,7 +33,7 @@ def versions = [
         wiremock             : '3.0.1',
         apacheLogging        : '2.25.3',
         idamClient           : '3.0.5',
-        springHateoas        : '1.5.6',
+        springHateoas        : '3.0.2',
         tika                 : '3.2.3',
         amClient             : '1.59.2',
         sendLetterClient     : '5.1.1',
