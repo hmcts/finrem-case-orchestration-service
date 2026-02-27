@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
 
 @Slf4j
@@ -16,10 +17,14 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
 
     private final CreateCaseService createCaseService;
 
+    private final AssignPartiesAccessService assignPartiesAccessService;
+
     public PaperCaseCreateContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                    CreateCaseService createCaseService) {
+                                                    CreateCaseService createCaseService,
+                                                    AssignPartiesAccessService assignPartiesAccessService) {
         super(finremCaseDetailsMapper);
         this.createCaseService = createCaseService;
+        this.assignPartiesAccessService = assignPartiesAccessService;
     }
 
     @Override
@@ -37,7 +42,18 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
 
         createCaseService.setSupplementaryData(callbackRequest, userAuthorisation);
+        grantApplicantSolicitor(finremCaseData);
 
         return response(finremCaseData);
+    }
+
+    private void grantApplicantSolicitor(FinremCaseData caseData) {
+
+        executeWithRetrySafely(log,
+            () -> assignPartiesAccessService.grantApplicantSolicitor(caseData),
+            caseData.getCcdCaseId(),
+            "granting respondent solicitor",
+            3
+        );
     }
 }
