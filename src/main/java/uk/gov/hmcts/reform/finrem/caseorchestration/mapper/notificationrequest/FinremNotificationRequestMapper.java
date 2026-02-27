@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -11,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpda
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
@@ -20,6 +23,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
@@ -92,6 +97,16 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .solicitorNameKey(nullToEmpty(caseData.getRespondentSolicitorName()))
             .solicitorReferenceKey(nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorReference()))
             .solicitorIsNotDigitalKey(isNotDigital)
+            .build();
+    }
+
+    private SolicitorCaseDataKeysWrapper getIntervenerSolicitorCaseData(FinremCaseData caseData, IntervenerType intervenerType) {
+        IntervenerDetails intervenerDetails = caseData.getIntervenerById(intervenerType.getIntervenerId());
+
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(intervenerDetails.getIntervenerSolEmail())
+            .solicitorNameKey(nullToEmpty(intervenerDetails.getIntervenerSolName()))
+            .solicitorReferenceKey(nullToEmpty(intervenerDetails.getIntervenerSolicitorReference()))
             .build();
     }
 
@@ -188,6 +203,158 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
             .withSolicitorCaseData(solicitorCaseData)
             .notificationEmail(caseData.getGeneralEmailWrapper().getGeneralEmailRecipient())
             .generalEmailBody(caseData.getGeneralEmailWrapper().getGeneralEmailBody())
+            .build();
+    }
+
+    /**
+     * Builds a {@link NotificationRequest} for a "stop representing client" email
+     * to a solicitor identified by the given {@link CaseRole}.
+     *
+     * <p>
+     * The solicitor details are resolved from the case data based on the supplied
+     * role (applicant or respondent solicitor). The resulting notification request
+     * is populated with standard case defaults, solicitor-specific fields, and
+     * the date of issue.
+     * </p>
+     *
+     * @param caseDetails the Finrem case details
+     * @param caseRole the role identifying which solicitor should receive the notification
+     * @return the constructed {@link NotificationRequest}
+     * @throws IllegalStateException if the provided {@code caseRole} is not supported
+     */
+    public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
+                                                                                    CaseRole caseRole) {
+        return getNotificationRequestForStopRepresentingClientEmail(caseDetails, caseRole, null);
+    }
+
+    /**
+     * Builds a {@link NotificationRequest} for a "stop representing client" email
+     * to a solicitor identified by the given {@link CaseRole}.
+     *
+     * <p>
+     * The solicitor details are resolved from the case data based on the supplied
+     * role:
+     * </p>
+     * <ul>
+     *   <li>Applicant or respondent solicitor for {@code APP_SOLICITOR} or {@code RESP_SOLICITOR}</li>
+     *   <li>Intervener solicitor for {@code INTVR_SOLICITOR_*} roles, in which case an
+     *   {@link IntervenerType} must be provided</li>
+     * </ul>
+     *
+     * <p>
+     * The resulting notification request is populated with standard case defaults,
+     * solicitor-specific fields, the date of issue, and (when applicable) intervener
+     * details.
+     * </p>
+     *
+     * @param caseDetails the Finrem case details
+     * @param caseRole the role identifying which solicitor should receive the notification
+     * @param intervenerType the intervener type, required when the {@code caseRole}
+     *                       represents an intervener solicitor; may be {@code null}
+     *                       otherwise
+     * @return the constructed {@link NotificationRequest}
+     * @throws IllegalArgumentException if an intervener solicitor role is provided
+     *                                  without an {@code intervenerType}
+     * @throws IllegalStateException if the provided {@code caseRole} is not supported
+     */
+    public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
+                                                                                    CaseRole caseRole,
+                                                                                    IntervenerType intervenerType) {
+        FinremCaseData caseData = caseDetails.getData();
+        SolicitorCaseDataKeysWrapper solicitorCaseData =
+            switch (caseRole) {
+                case APP_SOLICITOR -> getApplicantSolicitorCaseData(caseData);
+                case RESP_SOLICITOR -> getRespondentSolicitorCaseData(caseData);
+                case INTVR_SOLICITOR_1, INTVR_SOLICITOR_2, INTVR_SOLICITOR_3, INTVR_SOLICITOR_4
+                    -> getIntervenerSolicitorCaseData(caseData, ofNullable(intervenerType)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                        "intervenerType must be provided for intervener solicitor roles"
+                    )));
+                default -> throw new IllegalStateException("Unexpected value: " + caseRole);
+            };
+
+        return notificationRequestBuilder()
+            .withCaseDefaults(caseDetails)
+            .withSolicitorCaseData(solicitorCaseData)
+            .withDateOfIssue()
+            .withIntervener(intervenerType != null
+                ? caseData.getIntervenerById(intervenerType.getIntervenerId()) : null
+            )
+            .build();
+    }
+
+    /**
+     * Builds a {@link NotificationRequest} for a "stop representing client" email
+     * to the given {@link Barrister}.
+     *
+     * <p>
+     * This is a convenience overload that delegates to
+     * {@link #getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails, Barrister, IntervenerType)}
+     * with no intervener context.
+     * </p>
+     *
+     * @param caseDetails the Finrem case details
+     * @param barrister the barrister who should receive the notification
+     * @return the constructed {@link NotificationRequest}
+     */
+    public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
+                                                                                    Barrister barrister) {
+        return getNotificationRequestForStopRepresentingClientEmail(caseDetails, barrister, null);
+    }
+
+    /**
+     * Builds a {@link NotificationRequest} for a "stop representing client" email
+     * to the given {@link Barrister}.
+     *
+     * <p>
+     * The notification request is populated using the barrister's contact details
+     * (email and name) along with standard case defaults, the date of issue, and
+     * the solicitor reference from the case data. When an {@link IntervenerType}
+     * is provided, the corresponding intervener details are also included.
+     * </p>
+     *
+     * @param caseDetails the Finrem case details
+     * @param barrister the barrister who should receive the notification
+     * @param intervenerType the intervener type to associate with the notification;
+     *                       may be {@code null} if not applicable
+     * @return the constructed {@link NotificationRequest}
+     */
+    public NotificationRequest getNotificationRequestForStopRepresentingClientEmail(FinremCaseDetails caseDetails,
+                                                                                    Barrister barrister,
+                                                                                    IntervenerType intervenerType) {
+        FinremCaseData caseData = caseDetails.getData();
+
+        boolean isApplicantBarrister = intervenerType == null && emptyIfNull(caseData.getBarristerCollectionWrapper().getApplicantBarristers())
+            .stream().map(BarristerCollectionItem::getValue)
+            .anyMatch(b -> b.equals(barrister));
+
+        boolean isRespondentBarrister = intervenerType == null && emptyIfNull(caseData.getBarristerCollectionWrapper().getRespondentBarristers())
+            .stream().map(BarristerCollectionItem::getValue)
+            .anyMatch(b -> b.equals(barrister));
+
+        String solicitorReferenceKey = null;
+        if (isApplicantBarrister) {
+            solicitorReferenceKey = caseData.getContactDetailsWrapper().getSolicitorReference();
+        } else if (isRespondentBarrister) {
+            solicitorReferenceKey = caseData.getContactDetailsWrapper().getRespondentSolicitorReference();
+        } else if (intervenerType != null) {
+            solicitorReferenceKey = caseData.getIntervenerById(intervenerType.getIntervenerId())
+                .getIntervenerSolicitorReference();
+        }
+
+        SolicitorCaseDataKeysWrapper solicitorCaseData = SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(barrister.getEmail())
+            .solicitorNameKey(barrister.getName())
+            .solicitorReferenceKey(nullToEmpty(solicitorReferenceKey))
+            .build();
+
+        return notificationRequestBuilder()
+            .withCaseDefaults(caseDetails)
+            .withSolicitorCaseData(solicitorCaseData)
+            .withDateOfIssue()
+            .withIntervener(intervenerType != null
+                ? caseData.getIntervenerById(intervenerType.getIntervenerId()) : null
+            )
             .build();
     }
 }

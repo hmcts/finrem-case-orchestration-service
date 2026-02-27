@@ -59,7 +59,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,6 +69,12 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CASE_CRON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.INTERVENER_TWO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.RESPONDENT;
 
 @ExtendWith(MockitoExtension.class)
 class ResendPaperHearingNotificationsTaskTest {
@@ -150,7 +156,8 @@ class ResendPaperHearingNotificationsTaskTest {
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.ADD_HEARING;
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(NotificationParty.values());
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE,
+            INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
 
         CaseDocument miniFormA = extraDocuments ? buildCaseDocument(MINI_FORM_A_TEST_ID) : null;
         when(hearingCorrespondenceHelper.getMiniFormAIfRequired(any(), any()))
@@ -199,7 +206,8 @@ class ResendPaperHearingNotificationsTaskTest {
         assertThat(logs.getInfos()).contains(
             "Case ID: " + REFERENCE + " Sending active hearing correspondence with hearing date "
                 + hearing_date_for_hearings_in_scope
-                + ", for parties: " + List.of(NotificationParty.values()));
+                + ", for parties: " + List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE,
+                INTERVENER_FOUR));
 
         List<CaseDocument> expectedList = extraDocuments
             ? List.of(hearingNotice, miniFormA, additionalHearingDoc) : List.of(hearingNotice);
@@ -214,7 +222,8 @@ class ResendPaperHearingNotificationsTaskTest {
                 SendCorrespondenceEvent::getEmailNotificationRequest,
                 SendCorrespondenceEvent::getEmailTemplate
             )
-            .containsExactly(AUTH_TOKEN, List.of(NotificationParty.values()), expectedList, null, null);
+            .containsExactly(AUTH_TOKEN, List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO,
+                INTERVENER_THREE, INTERVENER_FOUR), expectedList, null, null);
     }
 
     // Checks all parties, within NotificationParty; Applicant, Respondent and all four Interveners.
@@ -230,7 +239,8 @@ class ResendPaperHearingNotificationsTaskTest {
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.ADJOURN_OR_VACATE_HEARING;
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(NotificationParty.values());
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE,
+            INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
 
         CaseDocument vacateNotice = buildCaseDocument(VACATE_NOTICE_TEST_ID);
 
@@ -279,7 +289,7 @@ class ResendPaperHearingNotificationsTaskTest {
             + boundaryVacatedDate
             + " and hearing date: "
             + hearing_date_for_vacated_hearings_in_scope + ", for parties: "
-            + List.of(NotificationParty.values()));
+            + List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR));
 
         ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
         verify(applicationEventPublisher).publishEvent(captor.capture());
@@ -291,7 +301,8 @@ class ResendPaperHearingNotificationsTaskTest {
                 SendCorrespondenceEvent::getEmailNotificationRequest,
                 SendCorrespondenceEvent::getEmailTemplate
             )
-            .containsExactly(AUTH_TOKEN, List.of(NotificationParty.values()), List.of(vacateNotice), null, null);
+            .containsExactly(AUTH_TOKEN, List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO,
+                INTERVENER_THREE, INTERVENER_FOUR), List.of(vacateNotice), null, null);
     }
 
     /*
@@ -307,7 +318,8 @@ class ResendPaperHearingNotificationsTaskTest {
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.ADJOURN_OR_VACATE_HEARING;
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(NotificationParty.values());
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO,
+            INTERVENER_THREE, INTERVENER_FOUR);
 
         List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings =
             buildVacatedHearingsCollection(hearingItemId,
@@ -355,7 +367,7 @@ class ResendPaperHearingNotificationsTaskTest {
 
     private static List<String> getExpectedLogsWhenDryRunOrNot(boolean dryRun) {
         String dryRunPrefixIfNeeded = dryRun ? "[DRY RUN] " : "";
-        List<String> expectedLogs = List.of(
+        return List.of(
             dryRunPrefixIfNeeded
                 + "Case ID: "
                 + REFERENCE
@@ -366,7 +378,7 @@ class ResendPaperHearingNotificationsTaskTest {
                 + " Sending active hearing correspondence with hearing date "
                 + hearing_date_for_hearings_in_scope
                 + ", for parties: "
-                + List.of(NotificationParty.values()),
+                + List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR),
             dryRunPrefixIfNeeded
                 + "Case ID: "
                 + REFERENCE
@@ -375,8 +387,7 @@ class ResendPaperHearingNotificationsTaskTest {
                 + " and hearing date: "
                 + hearing_date_for_vacated_hearings_in_scope
                 + ", for parties: "
-                + List.of(NotificationParty.values()));
-        return expectedLogs;
+                + List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR));
     }
 
     /*
@@ -411,7 +422,8 @@ class ResendPaperHearingNotificationsTaskTest {
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.ADJOURN_OR_VACATE_HEARING;
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(NotificationParty.values());
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE,
+            INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
 
         List<VacatedOrAdjournedHearingsCollectionItem> vacatedHearings =
             buildVacatedHearingsCollection(hearingItemId,
@@ -461,7 +473,8 @@ class ResendPaperHearingNotificationsTaskTest {
         UUID hearingItemId = UUID.randomUUID();
         ManageHearingsAction action = ManageHearingsAction.ADD_HEARING;
 
-        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(NotificationParty.values());
+        List<PartyOnCaseCollectionItem> partiesOnCase = buildPartiesOnCase(APPLICANT, RESPONDENT, INTERVENER_ONE,
+            INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR);
         List<DocumentCollectionItem> additionalDocumentCollection = List.of();
 
         List<ManageHearingsCollectionItem> hearings = buildHearingsCollection(
@@ -495,7 +508,7 @@ class ResendPaperHearingNotificationsTaskTest {
             "Case ID: " + REFERENCE + " with hearing date "
                 + hearing_date_for_hearings_in_scope
                 + ", for parties: "
-                + List.of(NotificationParty.values())
+                + List.of(APPLICANT, RESPONDENT, INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR)
                 + " contained no hearing documents.");
         verifyNoInteractions(hearingCorrespondenceHelper);
     }
@@ -654,9 +667,9 @@ class ResendPaperHearingNotificationsTaskTest {
     }
 
     private List<PartyOnCaseCollectionItem> buildPartiesOnCase(NotificationParty... parties) {
-        return List.of(parties).stream()
+        return Stream.of(parties)
             .map(p -> PartyOnCase.builder().role(p.getRole()).build())
             .map(poc -> PartyOnCaseCollectionItem.builder().value(poc).build())
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
     }
 }

@@ -897,16 +897,20 @@ public class FinremCaseData implements HasCaseDocument {
         AllocatedRegionWrapper allocatedRegionWrapper = getRegionWrapper().getAllocatedRegionWrapper();
         CourtListWrapper courtList = allocatedRegionWrapper.getDefaultCourtListWrapper();
 
-        return Map.of(
-            Region.MIDLANDS, getMidlandsCourt(allocatedRegionWrapper.getMidlandsFrcList(), courtList),
-            Region.LONDON, getCourtListIdOrDefault(allocatedRegionWrapper.getDefaultCourtListWrapper().getCfcCourtList()).getSelectedCourtId(),
-            Region.NORTHEAST, getNorthEastCourt(allocatedRegionWrapper.getNorthEastFrcList(), courtList),
-            Region.NORTHWEST, getNorthWestCourt(allocatedRegionWrapper.getNorthWestFrcList(), courtList),
-            Region.SOUTHWEST, getSouthWestCourt(allocatedRegionWrapper.getSouthWestFrcList(), courtList),
-            Region.SOUTHEAST, getSouthEastCourt(allocatedRegionWrapper.getSouthEastFrcList(), courtList),
-            Region.WALES, getWalesCourt(allocatedRegionWrapper.getWalesFrcList(), courtList),
-            Region.HIGHCOURT, getHighCourt(allocatedRegionWrapper.getHighCourtFrcList(), courtList)
-        ).get(allocatedRegionWrapper.getRegionList());
+        if (allocatedRegionWrapper.getRegionList() != null) {
+            return Map.of(
+                Region.MIDLANDS, getMidlandsCourt(allocatedRegionWrapper.getMidlandsFrcList(), courtList),
+                Region.LONDON, getCourtListIdOrDefault(allocatedRegionWrapper.getDefaultCourtListWrapper().getCfcCourtList()).getSelectedCourtId(),
+                Region.NORTHEAST, getNorthEastCourt(allocatedRegionWrapper.getNorthEastFrcList(), courtList),
+                Region.NORTHWEST, getNorthWestCourt(allocatedRegionWrapper.getNorthWestFrcList(), courtList),
+                Region.SOUTHWEST, getSouthWestCourt(allocatedRegionWrapper.getSouthWestFrcList(), courtList),
+                Region.SOUTHEAST, getSouthEastCourt(allocatedRegionWrapper.getSouthEastFrcList(), courtList),
+                Region.WALES, getWalesCourt(allocatedRegionWrapper.getWalesFrcList(), courtList),
+                Region.HIGHCOURT, getHighCourt(allocatedRegionWrapper.getHighCourtFrcList(), courtList)
+            ).get(allocatedRegionWrapper.getRegionList());
+        } else {
+            return null;
+        }
     }
 
     @JsonIgnore

@@ -32,7 +32,7 @@ public abstract class AbstractPartyListener {
     protected final NotificationService notificationService;
     protected final InternationalPostalService internationalPostalService;
 
-    protected String notificationParty;
+    protected abstract String getNotificationParty();
 
     /**
      * Should this listener handle notifications for this party/event.
@@ -78,7 +78,7 @@ public abstract class AbstractPartyListener {
     @EventListener
     public void handleNotification(SendCorrespondenceEvent event) {
         if (isRelevantParty(event)) {
-            log.info("Notification event received for party {} on case {}", notificationParty, event.getCaseId());
+            log.info("Notification event received for party {} on case {}", getNotificationParty(), event.getCaseId());
             sendNotification(event);
         }
     }
@@ -106,16 +106,18 @@ public abstract class AbstractPartyListener {
      */
     private void enrichAndSendEmailNotification(SendCorrespondenceEvent event) {
 
-        log.info("Preparing email notification for party {} on case {}", notificationParty, event.getCaseId());
+        log.info("Preparing email notification for party {} on case {}", getNotificationParty(), event.getCaseId());
         PartySpecificDetails details = setPartySpecificDetails(event);
 
         NotificationRequest emailRequest = Optional.ofNullable(event.getEmailNotificationRequest())
             .orElseThrow(() ->
                 new IllegalArgumentException("Notification Request is required for digital notifications, case ID: " + event.getCaseId()));
 
-        emailRequest.setName(details.recipientSolName);
-        emailRequest.setNotificationEmail(details.recipientSolEmailAddress);
-        emailRequest.setSolicitorReferenceNumber(details.recipientSolReference);
+        if (details != null) {
+            emailRequest.setName(details.recipientSolName);
+            emailRequest.setNotificationEmail(details.recipientSolEmailAddress);
+            emailRequest.setSolicitorReferenceNumber(details.recipientSolReference);
+        }
 
         EmailTemplateNames emailTemplate = Optional.ofNullable(event.getEmailTemplate()).orElseThrow(() ->
             new IllegalArgumentException("Email template is required for digital notifications, case ID: " + event.getCaseId()));
@@ -123,7 +125,7 @@ public abstract class AbstractPartyListener {
         // Email service handles email specific exceptions - consider building in retries to email service.
         emailService.sendConfirmationEmail(emailRequest, emailTemplate);
 
-        log.info("Completed email notification for party {} on case case {}", notificationParty, event.getCaseId());
+        log.info("Completed email notification for party {} on case {}", getNotificationParty(), event.getCaseId());
     }
 
     /**
@@ -138,7 +140,7 @@ public abstract class AbstractPartyListener {
      */
     private void sendPaperNotification(SendCorrespondenceEvent event) {
 
-        log.info("Preparing paper notification for party {} on case {}", notificationParty, event.getCaseId());
+        log.info("Preparing paper notification for party {} on case {}", getNotificationParty(), event.getCaseId());
 
         // Defensive copy to avoid mutating an original event collection
         Optional<List<CaseDocument>> documentsToPost = Optional.ofNullable(event.documentsToPost)
@@ -154,15 +156,19 @@ public abstract class AbstractPartyListener {
         docsToPrint.addAll(documents);
 
         List<BulkPrintDocument> bpDocs =
-                bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint, event.authToken, event.getCaseDetails().getCaseType());
+            bulkPrintService.convertCaseDocumentsToBulkPrintDocuments(docsToPrint, event.authToken, event.getCaseDetails().getCaseType());
         boolean isOutsideUK = isPartyOutsideUK(event);
 
         // Bulk print service requires implementation of exception handling -
         // consider building in retries and Server Error Handling as part of DFR-3308.
         UUID letterId = bulkPrintService.bulkPrintFinancialRemedyLetterPack(
-            event.caseDetails, notificationParty, bpDocs, isOutsideUK, event.authToken
+            event.caseDetails, getBulkPrintRecipient(), bpDocs, isOutsideUK, event.authToken
         );
 
-        log.info("Completed paper notification for party {} on case {} with letter ID: {}", notificationParty, event.getCaseId(), letterId);
+        log.info("Completed paper notification for party {} on case {} with letter ID: {}", getNotificationParty(), event.getCaseId(), letterId);
+    }
+
+    protected String getBulkPrintRecipient() {
+        return getNotificationParty();
     }
 }
