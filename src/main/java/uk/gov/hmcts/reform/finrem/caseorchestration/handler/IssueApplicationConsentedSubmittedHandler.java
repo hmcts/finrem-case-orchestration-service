@@ -45,42 +45,27 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
         FinremCaseData caseData = caseDetails.getData();
         final String caseIdAsString = caseDetails.getCaseIdAsString();
 
-        grantRespondentSolicitor(caseData, caseIdAsString, 3);
-        sendCorrespondenceWithRetry(caseDetails, caseIdAsString, userAuthorisation, 3);
+        grantRespondentSolicitor(caseData, caseIdAsString);
+        sendCorrespondenceWithRetry(caseDetails, caseIdAsString, userAuthorisation);
 
         return response(caseData);
     }
 
-    private void grantRespondentSolicitor(FinremCaseData caseData, String caseIdAsString, int attemptsLeft) {
-        try {
-            assignPartiesAccessService.grantRespondentSolicitor(caseData);
-        } catch (Exception e) {
-            log.error("{} - Failed granting respondent solicitor. Attempts left: {}",
-                caseIdAsString, attemptsLeft - 1, e);
-
-            if (attemptsLeft > 1) {
-                grantRespondentSolicitor(caseData, caseIdAsString, attemptsLeft - 1);
-            } else {
-                log.error("{} - All retry attempts exhausted while granting respondent solicitor",
-                    caseIdAsString);
-            }
-        }
+    private void grantRespondentSolicitor(FinremCaseData caseData, String caseIdAsString) {
+        executeWithRetrySafely(log,
+            () -> assignPartiesAccessService.grantRespondentSolicitor(caseData),
+            caseIdAsString,
+            "granting respondent solicitor",
+            3
+        );
     }
 
-    private void sendCorrespondenceWithRetry(FinremCaseDetails caseDetails, String caseIdAsString,
-                                             String userAuthorisation, int attemptsLeft) {
-        try {
-            issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
-        } catch (Exception e) {
-            log.error("{} - Failed sending correspondence. Attempts left: {}",
-                caseIdAsString, attemptsLeft, e);
-
-            if (attemptsLeft > 1) {
-                sendCorrespondenceWithRetry(caseDetails, caseIdAsString, userAuthorisation, attemptsLeft - 1);
-            } else {
-                log.error("{} - All retry attempts exhausted while sending correspondence",
-                    caseIdAsString);
-            }
-        }
+    private void sendCorrespondenceWithRetry(FinremCaseDetails caseDetails, String caseIdAsString, String userAuthorisation) {
+        executeWithRetrySafely(log,
+            () -> issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation),
+            caseIdAsString,
+            "sending correspondence",
+            3
+        );
     }
 }
