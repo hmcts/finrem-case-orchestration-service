@@ -41,6 +41,7 @@ public class IntervenerService {
     private final SystemUserService systemUserService;
     private final ChangeOfRepresentationService changeOfRepresentationService;
     private final IdamService idamService;
+    private final AssignPartiesAccessService assignPartiesAccessService;
 
     /**
      * Revokes an intervener solicitor role for the given case.
@@ -112,7 +113,11 @@ public class IntervenerService {
             String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
             String email = intervenerWrapper.getIntervenerSolEmail();
             checkIfIntervenerSolicitorDetailsChanged(intervenerWrapper, caseDetailsBefore, orgId, email, errors);
-            addIntervenerRole(caseId, email, orgId, caseRole, errors, intervenerWrapper);
+            try {
+                assignPartiesAccessService.grantIntervenerSolicitor(caseId, intervenerWrapper);
+            } catch (UserNotFoundInOrganisationApiException e) {
+                logError(caseId, errors);
+            }
         } else {
             FinremCaseData beforeData = caseDetailsBefore.getData();
             IntervenerWrapper beforeIntv = intervenerWrapper.getIntervenerWrapperFromCaseData(beforeData);
@@ -285,17 +290,6 @@ public class IntervenerService {
                 ).toList())
             );
         });
-    }
-
-    private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors,
-                                   IntervenerWrapper intervenerWrapper) {
-        Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
-        if (userId.isPresent()) {
-            intervenerWrapper.setSolUserId(userId.get());
-            assignCaseAccessService.grantCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
-        } else {
-            logError(caseId, errors);
-        }
     }
 
     private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, IntervenerWrapper intervenerWrapper) {
