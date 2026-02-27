@@ -9,13 +9,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.ISSUE_APPLICATION;
@@ -44,7 +43,7 @@ class IssueApplicationConsentedSubmittedHandlerTest {
 
         handler.handle(request, AUTH_TOKEN);
 
-        verify(issueApplicationConsentCorresponder, timeout(200)).sendCorrespondence(request.getCaseDetails(), AUTH_TOKEN);
+        verify(issueApplicationConsentCorresponder).sendCorrespondence(request.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
@@ -53,7 +52,7 @@ class IssueApplicationConsentedSubmittedHandlerTest {
 
         handler.handle(request, AUTH_TOKEN);
 
-        verify(assignPartiesAccessService, timeout(200)).grantRespondentSolicitor(request.getCaseDetails().getData());
+        verify(assignPartiesAccessService).grantRespondentSolicitor(request.getCaseDetails().getData());
     }
 
     @Test
@@ -67,15 +66,28 @@ class IssueApplicationConsentedSubmittedHandlerTest {
 
         handler.handle(request, AUTH_TOKEN);
 
-        // wait until async retries complete
-        await()
-            .atMost(2, SECONDS)
-            .untilAsserted(() -> {
-                verify(assignPartiesAccessService, times(3))
-                    .grantRespondentSolicitor(request.getCaseDetails().getData());
-                // verify correspondence still executed
-                verify(issueApplicationConsentCorresponder)
-                    .sendCorrespondence(request.getCaseDetails(), AUTH_TOKEN);
-            });
+        verify(assignPartiesAccessService, times(3))
+            .grantRespondentSolicitor(request.getCaseDetails().getData());
+        verify(issueApplicationConsentCorresponder)
+            .sendCorrespondence(request.getCaseDetails(), AUTH_TOKEN);
+        verifyNoMoreInteractions(assignPartiesAccessService, issueApplicationConsentCorresponder);
+    }
+
+    @Test
+    void givenFailToSendCorrespondence_whenHandled_thenShouldRetryThreeTimes() {
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from();
+
+        // always fail
+        doThrow(new RuntimeException("boom"))
+            .when(issueApplicationConsentCorresponder)
+            .sendCorrespondence(any(), eq(AUTH_TOKEN));
+
+        handler.handle(request, AUTH_TOKEN);
+
+        verify(assignPartiesAccessService)
+            .grantRespondentSolicitor(request.getCaseDetails().getData());
+        verify(issueApplicationConsentCorresponder, times(3))
+            .sendCorrespondence(request.getCaseDetails(), AUTH_TOKEN);
+        verifyNoMoreInteractions(assignPartiesAccessService, issueApplicationConsentCorresponder);
     }
 }
