@@ -59,7 +59,6 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
         CompletableFuture.runAsync(() -> {
             try {
                 assignPartiesAccessService.grantRespondentSolicitor(caseData);
-
             } catch (Exception e) {
                 log.error("{} - Failed granting respondent solicitor. Retries left: {}",
                     caseIdAsString, retriesLeft, e);
