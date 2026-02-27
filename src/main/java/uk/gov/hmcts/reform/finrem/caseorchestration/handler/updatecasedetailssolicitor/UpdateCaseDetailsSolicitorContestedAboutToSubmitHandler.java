@@ -12,22 +12,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 
 @Slf4j
 @Service
-public class UpdateCaseDetailsSolicitorContestedMidHandler extends AbstractUpdateCaseDetailsSolicitorHandler {
+public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends AbstractUpdateCaseDetailsSolicitorHandler {
 
-    public UpdateCaseDetailsSolicitorContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         UpdateRepresentationService updateRepresentationService) {
+    public UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                                   UpdateRepresentationService updateRepresentationService) {
         super(finremCaseDetailsMapper, updateRepresentationService);
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.MID_EVENT.equals(callbackType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && (CaseType.CONTESTED.equals(caseType) || CaseType.CONSENTED.equals(caseType))
             && EventType.UPDATE_CASE_DETAILS_SOLICITOR.equals(eventType);
     }
 
     @Override
     protected void handleLog(FinremCallbackRequest callbackRequest) {
-        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
     }
 }

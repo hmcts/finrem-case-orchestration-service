@@ -64,7 +64,6 @@ public class UpdateRepresentationService {
     private static final String NOT_ACTIVE_USER_ERROR = "Email is not linked to an active User within a HMCTS organisation";
     private static final String VALIDATE_EMAIL_ACTIVE_FOR_ORG_ERROR = "Email could not be linked to your organisation. Please check and try again";
 
-
     private final AuditEventService auditEventService;
     private final IdamAuthService idamClient;
     private final ObjectMapper objectMapper;

@@ -312,6 +312,7 @@ public class ContactDetailsValidator {
 
     // PT todo - move to different visibility area of the class
     // PT todo - docs and test
+    // PT todo rename?
     public static boolean checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                                  List<String> errors) {
         if (isContested(caseData)) {
