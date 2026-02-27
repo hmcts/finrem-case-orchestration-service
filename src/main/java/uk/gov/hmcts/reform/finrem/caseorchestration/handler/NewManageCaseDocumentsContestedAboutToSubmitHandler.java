@@ -107,10 +107,11 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
 
         if (ManageCaseDocumentsAction.AMEND.equals(action)) {
             List<UploadCaseDocumentCollection> inputDocuments =
-                emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection());
+                new ArrayList<>(emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection()));
 
             emptyIfNull(documentHandlers).forEach(documentHandler ->
                 documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, true));
+
         } else if (ManageCaseDocumentsAction.ADD_NEW.equals(action)) {
             List<UploadCaseDocumentCollection> managedCollections =
                 emptyIfNull(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection());
@@ -138,10 +139,6 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
                 nullIfEmpty(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
             );
             caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(newManageCaseDocumentCollection);
-        } else if (ManageCaseDocumentsAction.AMEND.equals(action)) {
-            caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(
-                caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection()
-            );
         }
     }
 
