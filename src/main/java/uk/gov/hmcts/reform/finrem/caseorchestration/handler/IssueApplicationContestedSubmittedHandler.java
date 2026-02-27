@@ -12,9 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.issueapplication.IssueApplicationContestedEmailCorresponder;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
 @Slf4j
 @Service
 public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHandler {
@@ -55,43 +52,36 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
         return response(caseData);
     }
 
-    private void grantRespondentSolicitor(FinremCaseData caseData, String caseIdAsString, int retriesLeft) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                assignPartiesAccessService.grantRespondentSolicitor(caseData);
+    private void grantRespondentSolicitor(FinremCaseData caseData, String caseIdAsString, int attemptsLeft) {
+        try {
+            assignPartiesAccessService.grantRespondentSolicitor(caseData);
+        } catch (Exception e) {
+            log.error("{} - Failed granting respondent solicitor. Attempts left: {}",
+                caseIdAsString, attemptsLeft - 1, e);
 
-            } catch (Exception e) {
-                log.error("{} - Failed granting respondent solicitor. Retries left: {}",
-                    caseIdAsString, retriesLeft, e);
-
-                if (retriesLeft > 0) {
-                    grantRespondentSolicitor(caseData, caseIdAsString, retriesLeft - 1);
-                } else {
-                    log.error("{} - All retry attempts exhausted while granting respondent solicitor",
-                        caseIdAsString);
-                }
+            if (attemptsLeft > 1) {
+                grantRespondentSolicitor(caseData, caseIdAsString, attemptsLeft - 1);
+            } else {
+                log.error("{} - All retry attempts exhausted while granting respondent solicitor",
+                    caseIdAsString);
             }
-        }, CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS));
+        }
     }
 
     private void sendCorrespondenceWithRetry(FinremCaseDetails caseDetails, String caseIdAsString,
-                                             int retriesLeft) {
+                                             int attemptsLeft) {
+        try {
+            corresponder.sendCorrespondence(caseDetails);
+        } catch (Exception e) {
+            log.error("{} - Failed sending correspondence. Attempts left: {}",
+                caseIdAsString, attemptsLeft, e);
 
-        CompletableFuture.runAsync(() -> {
-            try {
-                corresponder.sendCorrespondence(caseDetails);
-
-            } catch (Exception e) {
-                log.error("{} - Failed sending correspondence. Retries left: {}",
-                    caseIdAsString, retriesLeft, e);
-
-                if (retriesLeft > 0) {
-                    sendCorrespondenceWithRetry(caseDetails, caseIdAsString, retriesLeft - 1);
-                } else {
-                    log.error("{} - All retry attempts exhausted while sending correspondence",
-                        caseIdAsString);
-                }
+            if (attemptsLeft > 1) {
+                sendCorrespondenceWithRetry(caseDetails, caseIdAsString, attemptsLeft - 1);
+            } else {
+                log.error("{} - All retry attempts exhausted while sending correspondence",
+                    caseIdAsString);
             }
-        }, CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS));
+        }
     }
 }
