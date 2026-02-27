@@ -6,7 +6,9 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentDownloadException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
@@ -29,9 +32,8 @@ public class BulkPrintDocumentService {
     public List<byte[]> downloadDocuments(BulkPrintRequest bulkPrintRequest, String auth) {
         String caseId = bulkPrintRequest.getCaseId();
         log.info("Downloading document for bulk print for Case ID: {}", caseId);
-
         List<byte[]> documents = bulkPrintRequest.getBulkPrintDocuments().stream()
-            .map(bulkPrintDocument -> documentConversionService.flattenPdfDocument(service.download(bulkPrintDocument.getBinaryFileUrl(), auth)))
+            .map(bulkPrintDocument -> downloadAndFlattenDoc(bulkPrintDocument, auth))
             .toList();
         log.info("Download document count for bulk print {} for Case ID: {} ", documents.size(),
             caseId);
@@ -96,6 +98,25 @@ public class BulkPrintDocumentService {
             String errorMessage = String.format("Failed to parse the documents for %s", documentFilename);
             errors.add(errorMessage + "; " + exc.getMessage());
         }
+    }
+
+    private byte[] downloadAndFlattenDoc(BulkPrintDocument bulkPrintDocument, String auth) {
+        try {
+            byte[] documentBytes = service.download(bulkPrintDocument.getBinaryFileUrl(), auth);
+            return documentConversionService.flattenPdfDocument(documentBytes);
+        } catch (Exception e) {
+            throw new DocumentDownloadException(
+                String.format("Failed to download and flatten document with ID: %s",
+                    extractDocumentId(bulkPrintDocument.getBinaryFileUrl())), e);
+        }
+    }
+
+    private String extractDocumentId(String documentBinaryUrl) {
+        var matcher = Pattern.compile("/documents/([^/]+)/binary").matcher(documentBinaryUrl);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return "unknown";
     }
 
     private boolean isPdfConvertible(String documentFilename) {

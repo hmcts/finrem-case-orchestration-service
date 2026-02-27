@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentDownloadException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -23,8 +24,10 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
@@ -33,6 +36,7 @@ class BulkPrintDocumentServiceTest {
 
     private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
     private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
+    private static final String FILE_ID = "kbjh87y8y9JHVKKKJVJ";
     private static final String FILE_NAME = "abc.pdf";
     private static final String DOC_FILE_NAME = "abc.docx";
     private static final String XLS_FILE_NAME = "abc.xlsx";
@@ -242,5 +246,68 @@ class BulkPrintDocumentServiceTest {
 
         verify(documentConversionService, never()).convertDocumentToPdf(document, AUTH_TOKEN);
         verify(evidenceManagementService, never()).download(caseDocument.getDocumentBinaryUrl(), AUTH_TOKEN);
+    }
+
+    @Test
+    void shouldDownloadAndFlattenDocumentsSuccessfully() {
+        BulkPrintDocument bulkPrintDocument = BulkPrintDocument.builder()
+            .binaryFileUrl(FILE_BINARY_URL)
+            .fileName(FILE_NAME)
+            .build();
+        BulkPrintRequest bulkPrintRequest = BulkPrintRequest.builder()
+            .bulkPrintDocuments(singletonList(bulkPrintDocument))
+            .build();
+
+        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH_TOKEN)).thenReturn(someBytes);
+        when(documentConversionService.flattenPdfDocument(someBytes)).thenReturn(someFlattenedBytes);
+
+        List<byte[]> documents = service.downloadDocuments(bulkPrintRequest, AUTH_TOKEN);
+
+        assertThat(documents).hasSize(1);
+        assertThat(documents.getFirst()).isEqualTo(someFlattenedBytes);
+
+        verify(evidenceManagementService).download(FILE_BINARY_URL, AUTH_TOKEN);
+        verify(documentConversionService).flattenPdfDocument(someBytes);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDocumentDownloadFails() {
+        BulkPrintDocument bulkPrintDocument = BulkPrintDocument.builder()
+            .binaryFileUrl(FILE_BINARY_URL)
+            .fileName(FILE_NAME)
+            .build();
+        BulkPrintRequest bulkPrintRequest = BulkPrintRequest.builder()
+            .bulkPrintDocuments(singletonList(bulkPrintDocument))
+            .build();
+
+        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH_TOKEN)).thenThrow(new RuntimeException("Download error"));
+
+        assertThatThrownBy(() -> service.downloadDocuments(bulkPrintRequest, AUTH_TOKEN))
+            .isInstanceOf(DocumentDownloadException.class)
+            .hasMessageContaining(String.format("Failed to download and flatten document with ID: %s", FILE_ID));
+
+        verify(evidenceManagementService).download(FILE_BINARY_URL, AUTH_TOKEN);
+        verifyNoInteractions(documentConversionService);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenFlatteningFails() {
+        BulkPrintDocument bulkPrintDocument = BulkPrintDocument.builder()
+            .binaryFileUrl(FILE_BINARY_URL)
+            .fileName(FILE_NAME)
+            .build();
+        BulkPrintRequest bulkPrintRequest = BulkPrintRequest.builder()
+            .bulkPrintDocuments(singletonList(bulkPrintDocument))
+            .build();
+
+        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH_TOKEN)).thenReturn(someBytes);
+        when(documentConversionService.flattenPdfDocument(someBytes)).thenThrow(new RuntimeException("Flatten error"));
+
+        assertThatThrownBy(() -> service.downloadDocuments(bulkPrintRequest, AUTH_TOKEN))
+            .isInstanceOf(DocumentDownloadException.class)
+            .hasMessageContaining(String.format("Failed to download and flatten document with ID: %s", FILE_ID));
+
+        verify(evidenceManagementService).download(FILE_BINARY_URL, AUTH_TOKEN);
+        verify(documentConversionService).flattenPdfDocument(someBytes);
     }
 }
