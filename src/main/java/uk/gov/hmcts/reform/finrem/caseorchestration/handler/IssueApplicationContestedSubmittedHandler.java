@@ -44,28 +44,27 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        final String caseIdAsString = caseDetails.getCaseIdAsString();
 
-        grantRespondentSolicitor(caseData, caseIdAsString);
-        sendCorrespondenceWithRetry(caseDetails, caseIdAsString);
+        grantRespondentSolicitor(caseData);
+        sendCorrespondenceWithRetry(caseDetails);
 
         return response(caseData);
     }
 
-    private void grantRespondentSolicitor(FinremCaseData caseData, String caseIdAsString) {
+    private void grantRespondentSolicitor(FinremCaseData caseData) {
 
         executeWithRetrySafely(log,
             () -> assignPartiesAccessService.grantRespondentSolicitor(caseData),
-            caseIdAsString,
+            caseData.getCcdCaseId(),
             "granting respondent solicitor",
             3
         );
     }
 
-    private void sendCorrespondenceWithRetry(FinremCaseDetails caseDetails, String caseIdAsString) {
+    private void sendCorrespondenceWithRetry(FinremCaseDetails caseDetails) {
         executeWithRetrySafely(log,
             () -> corresponder.sendCorrespondence(caseDetails),
-            caseIdAsString,
+            caseDetails.getCaseIdAsString(),
             "sending correspondence",
             3
         );
