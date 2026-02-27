@@ -771,7 +771,6 @@ public class FinremCaseData implements HasCaseDocument {
         return YesOrNo.YES.equals(paperApplication);
     }
 
-
     @JsonIgnore
     public String getAppSolicitorName() {
         return isConsentedApplication()
