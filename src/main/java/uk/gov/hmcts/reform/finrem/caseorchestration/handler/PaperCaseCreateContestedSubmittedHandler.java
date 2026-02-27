@@ -43,13 +43,14 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
         String setSupplementaryDataError = setSupplementaryData(callbackRequest, userAuthorisation);
         String assignApplicantSolicitorError = grantApplicantSolicitor(callbackRequest);
 
-        return submittedResponse(toConfirmationHeader(!StringUtils.isAllBlank(setSupplementaryDataError,
-                assignApplicantSolicitorError)),
-            toConfirmationBody(setSupplementaryDataError, assignApplicantSolicitorError));
-    }
+        boolean isHavingErrors = !StringUtils.isAllBlank(setSupplementaryDataError, assignApplicantSolicitorError);
 
-    private String toConfirmationHeader(boolean withError) {
-        return "# Paper Case Created%s".formatted(withError ? " with error" : "");
+        if (isHavingErrors) {
+            return submittedResponse("# Paper Case Created with Errors",
+                toConfirmationBody(setSupplementaryDataError, assignApplicantSolicitorError));
+        } else {
+            return submittedResponse();
+        }
     }
 
     private String toConfirmationBody(String setSupplementaryDataError,
@@ -98,8 +99,7 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
             );
             return null;
         } catch (Exception ex) {
-            return "There was a problem granting access to application solicitor %s"
-                .formatted(appSolEmail);
+            return "There was a problem granting access to application solicitor %s".formatted(appSolEmail);
         }
     }
 }

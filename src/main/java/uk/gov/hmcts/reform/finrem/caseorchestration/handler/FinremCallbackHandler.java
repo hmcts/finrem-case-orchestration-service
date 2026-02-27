@@ -113,6 +113,10 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return List.of(StopRepresentationWrapper.class);
     }
 
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submittedResponse() {
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().build();
+    }
+
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submittedResponse(String confirmationHeader,
                                                                                             String confirmationBody) {
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
