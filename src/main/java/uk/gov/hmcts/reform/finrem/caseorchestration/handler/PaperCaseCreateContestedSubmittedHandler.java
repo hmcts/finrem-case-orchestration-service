@@ -1,42 +1,43 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
-
-import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@SuppressWarnings("java:S3740")
-public class PaperCaseCreateContestedSubmittedHandler implements CallbackHandler {
+public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHandler {
 
     private final CreateCaseService createCaseService;
+
+    public PaperCaseCreateContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                    CreateCaseService createCaseService) {
+        super(finremCaseDetailsMapper);
+        this.createCaseService = createCaseService;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.NEW_PAPER_CASE.equals(eventType));
+            && EventType.NEW_PAPER_CASE.equals(eventType);
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
-        log.info("Processing Submitted callback for event {} with Case ID: {}",
-            EventType.NEW_PAPER_CASE, callbackRequest.getCaseDetails().getId());
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
 
         createCaseService.setSupplementaryData(callbackRequest, userAuthorisation);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
+        return response(finremCaseData);
     }
 }
