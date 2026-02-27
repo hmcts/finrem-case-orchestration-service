@@ -109,7 +109,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      * @return a list of classes containing {@code @TemporaryField}-annotated fields
      */
     private static List<Class> getClassesWithTemporaryFieldAnnotation() {
-        return List.of(StopRepresentationWrapper.class);
+        return List.of(StopRepresentationWrapper.class, FinremCaseData.class);
     }
 
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData) {

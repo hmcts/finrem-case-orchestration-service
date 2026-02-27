@@ -38,6 +38,15 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
+    /*
+     * Used for testing only.  Better option that reflection.
+     * About-to-submit should return true, mid-event should return false.
+     * @return boolean.
+     */
+    public boolean clearsTemporaryFields() {
+        return shouldClearTemporaryFields();
+    }
+
     protected void handleLog(FinremCallbackRequest callbackRequest) {
 
     }
@@ -77,5 +86,6 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
         // case addresses
 
         // PT todo, check which fields need to be temporary fields.  Will be at least currentUserCaseRole.
+
     }
 }

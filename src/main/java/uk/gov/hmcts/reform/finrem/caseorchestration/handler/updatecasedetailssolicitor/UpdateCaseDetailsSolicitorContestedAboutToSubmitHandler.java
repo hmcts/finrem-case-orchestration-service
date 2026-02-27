@@ -20,6 +20,16 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
     }
 
     @Override
+    /*
+     * Method shouldClearTemporaryFields explicitly overridden in this about-to-submit handler.
+     * Generally, extending FinremAboutToSubmitCallbackHandler is better.
+     * But this extends AbstractUpdateCaseDetailsSolicitorHandler, shared with the mid-handler, which depends on the fields.
+     */
+    protected final boolean shouldClearTemporaryFields() {
+        return true;
+    }
+
+    @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && (CaseType.CONTESTED.equals(caseType) || CaseType.CONSENTED.equals(caseType))
