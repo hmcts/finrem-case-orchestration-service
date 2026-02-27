@@ -84,7 +84,7 @@ public abstract class AbstractPartyListener {
     }
 
     private void sendNotification(SendCorrespondenceEvent event) {
-        if (shouldSendEmailNotification(event)) {
+        if (!event.isLetterNotificationOnly() && shouldSendEmailNotification(event)) {
             enrichAndSendEmailNotification(event);
         } else if (shouldSendPaperNotification(event)) {
             sendPaperNotification(event);
@@ -151,8 +151,11 @@ public abstract class AbstractPartyListener {
         );
 
         List<CaseDocument> docsToPrint = new ArrayList<>();
-
-        docsToPrint.add(getPartyCoversheet(event));
+        CaseDocument partyCoversheet = getPartyCoversheet(event);
+        if (partyCoversheet == null) {
+            throw new IllegalArgumentException("No coversheet provided for paper notification, case ID: " + event.getCaseId());
+        }
+        docsToPrint.add(partyCoversheet);
         docsToPrint.addAll(documents);
 
         List<BulkPrintDocument> bpDocs =

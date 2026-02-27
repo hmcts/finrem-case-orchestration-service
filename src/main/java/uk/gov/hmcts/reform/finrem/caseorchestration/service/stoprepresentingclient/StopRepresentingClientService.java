@@ -6,15 +6,19 @@ import org.apache.commons.collections4.SetUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -26,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
@@ -33,6 +38,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.Barrister
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +49,7 @@ import java.util.stream.IntStream;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
@@ -90,6 +98,12 @@ public class StopRepresentingClientService {
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
 
     private final ApplicationEventPublisher applicationEventPublisher;
+
+    private final GenericDocumentService genericDocumentService;
+
+    private final DocumentConfiguration documentConfiguration;
+
+    private final LetterDetailsMapper letterDetailsMapper;
 
     private static FinremCaseData getFinremCaseDataBefore(StopRepresentingClientInfo info) {
         return info.getCaseDetailsBefore().getData();
@@ -286,6 +300,7 @@ public class StopRepresentingClientService {
 
             if (revocation.applicantSolicitorRevoked) {
                 notifyApplicantSolicitor(info);
+                notifyApplicant(info);
             }
             if (revocation.respondentSolicitorRevoked) {
                 notifyRespondentSolicitor(info);
@@ -523,6 +538,37 @@ public class StopRepresentingClientService {
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(),
                     CaseRole.getIntervenerSolicitorByIndex(intervenerId), intervenerType),
             intervenerType
+        );
+    }
+
+    private void notifyApplicant(StopRepresentingClientInfo info) {
+        String userAuthorisation = info.getUserAuthorisation();
+
+        applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
+            .letterNotificationOnly(true)
+            .notificationParties(List.of(NotificationParty.APPLICANT))
+            .caseDetails(info.getCaseDetails())
+            .caseDetailsBefore(info.getCaseDetailsBefore())
+            .authToken(userAuthorisation)
+            .documentsToPost(List.of(
+                generateStopRepresentingApplicantLetter(info.getCaseDetails(), info.userAuthorisation)
+            ))
+            .build()
+        );
+    }
+
+    private CaseDocument generateStopRepresentingApplicantLetter(FinremCaseDetails finremCaseDetails,
+                                                                 String authorisationToken) {
+        Map<String, Object> documentDataMap = letterDetailsMapper.getLetterDetailsAsMap(finremCaseDetails, APPLICANT);
+        String documentFilename = format("FT-FRM-LET-ENG-NOC003_%s.pdf", LocalDateTime.now()
+            .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(
+            authorisationToken,
+            documentDataMap,
+            documentConfiguration.getStopRepresentingLetterToApplicantTemplate(),
+            documentFilename,
+            finremCaseDetails.getCaseType()
         );
     }
 
