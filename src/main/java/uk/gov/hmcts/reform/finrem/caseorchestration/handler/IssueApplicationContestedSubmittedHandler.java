@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.issueapplication.IssueApplicationContestedEmailCorresponder;
 
 @Slf4j
@@ -16,10 +18,14 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
     private final IssueApplicationContestedEmailCorresponder corresponder;
 
+    private final AssignPartiesAccessService assignPartiesAccessService;
+
     public IssueApplicationContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     IssueApplicationContestedEmailCorresponder corresponder) {
+                                                     IssueApplicationContestedEmailCorresponder corresponder,
+                                                     AssignPartiesAccessService assignPartiesAccessService) {
         super(finremCaseDetailsMapper);
         this.corresponder = corresponder;
+        this.assignPartiesAccessService = assignPartiesAccessService;
     }
 
     @Override
@@ -36,9 +42,31 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
         validateCaseData(callbackRequest);
 
-        corresponder.sendCorrespondence(callbackRequest.getCaseDetails());
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData()).build();
+        grantRespondentSolicitor(caseData);
+        sendCorrespondenceWithRetry(caseDetails);
+
+        return response(caseData);
+    }
+
+    private void grantRespondentSolicitor(FinremCaseData caseData) {
+
+        executeWithRetrySafely(log,
+            () -> assignPartiesAccessService.grantRespondentSolicitor(caseData),
+            caseData.getCcdCaseId(),
+            "granting respondent solicitor",
+            3
+        );
+    }
+
+    private void sendCorrespondenceWithRetry(FinremCaseDetails caseDetails) {
+        executeWithRetrySafely(log,
+            () -> corresponder.sendCorrespondence(caseDetails),
+            caseDetails.getCaseIdAsString(),
+            "sending correspondence",
+            3
+        );
     }
 }
