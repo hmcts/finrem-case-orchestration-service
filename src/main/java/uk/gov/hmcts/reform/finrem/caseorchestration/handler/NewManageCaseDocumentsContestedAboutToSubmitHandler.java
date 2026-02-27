@@ -93,6 +93,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
         clearLegacyCollections(caseData);
         deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
         clearTemporaryField(caseData);
+        clearActionSelection(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
     }
@@ -102,9 +103,26 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
     }
 
     private void replaceManagedDocumentsInCollectionType(FinremCaseData caseData) {
-        emptyIfNull(documentHandlers).forEach(documentHandler ->
-            documentHandler.replaceManagedDocumentsInCollectionType(caseData, getManagedCollections(caseData),
-                false));
+        final ManageCaseDocumentsAction action = caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentsActionSelection();
+
+        if (ManageCaseDocumentsAction.AMEND.equals(action)) {
+            List<UploadCaseDocumentCollection> inputDocuments =
+                new ArrayList<>(emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection()));
+
+            emptyIfNull(documentHandlers).forEach(documentHandler ->
+                documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, true));
+
+        } else if (ManageCaseDocumentsAction.ADD_NEW.equals(action)) {
+            List<UploadCaseDocumentCollection> managedCollections =
+                emptyIfNull(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection());
+
+            emptyIfNull(documentHandlers).forEach(documentHandler ->
+                documentHandler.replaceManagedDocumentsInCollectionType(caseData, managedCollections, false));
+        }
+    }
+
+    private void clearActionSelection(FinremCaseData caseData) {
+        caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentsActionSelection(null);
     }
 
     private List<UploadCaseDocumentCollection> getManagedCollections(FinremCaseData caseData) {
@@ -113,7 +131,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
 
     private void moveInputManageCaseDocumentsToManagedCollections(FinremCaseData caseData) {
         final ManageCaseDocumentsAction action = caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentsActionSelection();
-        if (action == ManageCaseDocumentsAction.ADD_NEW) {
+        if (ManageCaseDocumentsAction.ADD_NEW.equals(action)) {
             List<UploadCaseDocumentCollection> newManageCaseDocumentCollection =
                 ofNullable(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection())
                     .orElse(new ArrayList<>());
@@ -194,10 +212,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
         if (featureToggleService.isManageCaseDocsDeleteEnabled()) {
             List<UploadCaseDocumentCollection> allCollectionsBefore =
                 caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
-            List<UploadCaseDocumentCollection> allCollections =
-                caseData.getUploadCaseDocumentWrapper().getAllManageableCollections();
-            allCollectionsBefore.removeAll(allCollections);
-
+            allCollectionsBefore.removeAll(caseData.getUploadCaseDocumentWrapper().getAllManageableCollections());
             allCollectionsBefore.stream().map(this::getDocumentUrl)
                 .forEach(docUrl -> evidenceManagementDeleteService.delete(docUrl, userAuthorisation));
         }
