@@ -27,18 +27,19 @@ public class PaperCaseCreateConsentedAboutToSubmitHandler extends FinremCallback
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.NEW_PAPER_CASE.equals(eventType));
+            && EventType.NEW_PAPER_CASE.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        log.info("{} - Invoking consented event {} about to submit callback", caseDetails.getId(), EventType.NEW_PAPER_CASE);
 
         representationWorkflowService.persistDefaultOrganisationPolicy(caseData);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return response(caseData);
     }
 }
