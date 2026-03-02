@@ -53,24 +53,6 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
         }
     }
 
-    private String toConfirmationBody(String setSupplementaryDataError,
-                                      String assignApplicantSolicitorError) {
-
-        StringBuilder body = new StringBuilder("<ul>");
-
-        if (setSupplementaryDataError != null && !setSupplementaryDataError.isBlank()) {
-            body.append("<li>").append(setSupplementaryDataError).append("</li>");
-        }
-
-        if (assignApplicantSolicitorError != null && !assignApplicantSolicitorError.isBlank()) {
-            body.append("<li>").append(assignApplicantSolicitorError).append("</li>");
-        }
-
-        body.append("</ul>");
-
-        return body.toString();
-    }
-
     private String setSupplementaryData(FinremCallbackRequest request, String userAuthorisation) {
         try {
             executeWithRetry(log,
