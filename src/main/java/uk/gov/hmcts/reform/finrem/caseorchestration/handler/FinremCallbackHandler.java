@@ -130,7 +130,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     }
 
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData,
-        List<String> warnings, List<String> errors) {
+                                                                                   List<String> warnings, List<String> errors) {
         var builder = GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder();
         builder.data(finremCaseData);
         if (errors != null && !errors.isEmpty()) {
@@ -213,5 +213,22 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
                     caseId, actionName);
             }
         }
+    }
+
+    protected String toConfirmationBody(String... errors) {
+        StringBuilder body = new StringBuilder("<ul>");
+
+        if (errors != null) {
+            for (String error : errors) {
+                if (error != null && !error.isBlank()) {
+                    body.append("<li>")
+                        .append(error)
+                        .append("</li>");
+                }
+            }
+        }
+
+        body.append("</ul>");
+        return body.toString();
     }
 }
