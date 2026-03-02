@@ -23,21 +23,27 @@ public class AssignPartiesAccessService {
     private final SystemUserService systemUserService;
 
     /**
-     * Grants case access to the applicant's solicitor.
+     * Grants case access to the applicant's solicitor when representation
+     * and organisation details are valid.
      *
-     * <p>
-     * Access is granted only when:
+     * <p>Access is granted only if:
      * <ul>
      *     <li>The applicant is represented by a solicitor, and</li>
-     *     <li>A valid organisation policy with an organisation ID exists.</li>
+     *     <li>An organisation policy exists with a valid organisation ID.</li>
      * </ul>
-     * If either condition is not met, no access is granted and an informational
-     * log entry is recorded.
+     *
+     * <p>If either condition is not satisfied, no access is granted and an
+     * informational log entry is recorded.
+     *
+     * <p>If the solicitor cannot be found within the specified organisation,
+     * the exception is caught and ignored to allow processing to continue
+     * without failing the overall workflow.
      *
      * @param finremCaseData the financial remedy case data containing applicant
-     *                       representation details and organisation information
+     *                       representation status, solicitor email, and
+     *                       organisation policy information
      */
-    public void grantApplicantSolicitor(FinremCaseData finremCaseData) {
+    public void grantApplicantSolicitor(FinremCaseData finremCaseData) throws UserNotFoundInOrganisationApiException {
         String caseId = finremCaseData.getCcdCaseId();
         if (finremCaseData.isApplicantRepresentedByASolicitor()
             && isOrgIdExists(finremCaseData.getApplicantOrganisationPolicy())) {
@@ -54,31 +60,32 @@ public class AssignPartiesAccessService {
     }
 
     /**
-     * Grants case access to the respondent's solicitor.
+     * Grants case access to the respondent's solicitor when representation
+     * and organisation details are valid.
      *
-     * <p>
-     * Access is granted only when:
+     * <p>Access is granted only if:
      * <ul>
      *     <li>The respondent is represented by a solicitor, and</li>
-     *     <li>A valid organisation policy with an organisation ID exists.</li>
+     *     <li>An organisation policy exists with a valid organisation ID.</li>
      * </ul>
-     * If either condition is not met, no access is granted and an informational
-     * log entry is recorded.
+     *
+     * <p>If either condition is not satisfied, no access is granted and an
+     * informational log entry is recorded. No exception is thrown in this case.
      *
      * @param finremCaseData the financial remedy case data containing respondent
-     *                       representation details and organisation information
+     *                       representation status, solicitor email, and
+     *                       organisation policy information
+     * @throws UserNotFoundInOrganisationApiException if the specified solicitor
+     *         cannot be found within the provided organisation when attempting
+     *         to grant access
      */
-    public void grantRespondentSolicitor(FinremCaseData finremCaseData) {
+    public void grantRespondentSolicitor(FinremCaseData finremCaseData) throws UserNotFoundInOrganisationApiException {
         String caseId = finremCaseData.getCcdCaseId();
         if (finremCaseData.isRespondentRepresentedByASolicitor()
             && isOrgIdExists(finremCaseData.getRespondentOrganisationPolicy())) {
             String respondentSolicitorEmail = finremCaseData.getRespondentSolicitorEmail();
             String appOrgId = finremCaseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID();
-            try {
-                grantAccess(Long.valueOf(caseId), respondentSolicitorEmail, appOrgId, CaseRole.RESP_SOLICITOR.getCcdCode());
-            }  catch (UserNotFoundInOrganisationApiException e) {
-                // ignore it
-            }
+            grantAccess(Long.valueOf(caseId), respondentSolicitorEmail, appOrgId, CaseRole.RESP_SOLICITOR.getCcdCode());
         } else {
             log.info("{} - No respondent represented by a solicitor or organisation policy missing", caseId);
         }
