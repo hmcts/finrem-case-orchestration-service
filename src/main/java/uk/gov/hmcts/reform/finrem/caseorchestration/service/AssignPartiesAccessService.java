@@ -38,6 +38,9 @@ public class AssignPartiesAccessService {
      *                       representation details and organisation information
      */
     public void grantApplicantSolicitor(FinremCaseData finremCaseData) {
+        if (true) {
+            throw new RuntimeException("TESTING ERROR");
+        }
         String caseId = finremCaseData.getCcdCaseId();
         if (finremCaseData.isApplicantRepresentedByASolicitor()
             && isOrgIdExists(finremCaseData.getApplicantOrganisationPolicy())) {
