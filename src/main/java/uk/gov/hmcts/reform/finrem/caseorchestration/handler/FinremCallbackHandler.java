@@ -142,34 +142,39 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return builder.build();
     }
 
+    @FunctionalInterface
+    public interface ThrowingRunnable {
+        void run() throws Exception;
+    }
+
     /**
-     * Executes the given action with retry logic.
+     * Executes the given action with retry support.
      *
-     * <p>If the action throws an exception, it will be retried until the configured
-     * number of attempts is exhausted. Each failure is logged together with the
-     * remaining retry count.</p>
+     * <p>If the action throws an exception, it will be retried until the number
+     * of attempts is exhausted. Each failure is logged together with the number
+     * of remaining attempts.</p>
      *
-     * <p>When all retry attempts are exhausted, the last encountered exception
-     * is rethrown to the caller.</p>
+     * <p>When all retry attempts are exhausted, the exception is rethrown wrapped
+     * in a {@link RuntimeException}.</p>
      *
-     * @param log          the logger used to record retry attempts and failures
+     * @param log          logger used to record retry attempts and failures
      * @param action       the operation to execute
-     * @param caseId       identifier used for logging context
-     * @param actionName   human-readable description of the action being performed
+     * @param caseId       identifier used for log traceability
+     * @param actionName   human-readable name of the action being executed
      * @param attemptsLeft number of attempts remaining (must be greater than 0)
      *
-     * @throws Exception if the action continues to fail after all retry attempts
+     * @throws RuntimeException if all retry attempts fail
      */
-    protected void executeWithRetry(Logger log, Runnable action, String caseId, String actionName, int attemptsLeft) {
+    protected void executeWithRetry(Logger log, ThrowingRunnable action, String caseId, String actionName, int attemptsLeft) {
         try {
             action.run();
-
         } catch (Exception e) {
             log.error("{} - Failed {}. Attempts left: {}",
                 caseId, actionName, attemptsLeft - 1, e);
 
             if (attemptsLeft > 1) {
-                executeWithRetry(log,
+                executeWithRetry(
+                    log,
                     action,
                     caseId,
                     actionName,
@@ -178,39 +183,44 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             } else {
                 log.error("{} - All retry attempts exhausted while {}",
                     caseId, actionName);
-                throw e;
+                throw new RuntimeException(e); // or rethrow if signature allows
             }
         }
     }
 
     /**
-     * Executes the given action with retry logic while suppressing exceptions.
+     * Executes the given action with retry support but suppresses any final failure.
      *
-     * <p>If the action throws an exception, it will be retried until the configured
-     * number of attempts is exhausted. Failures are logged, but no exception is
-     * propagated to the caller.</p>
+     * <p>If the action throws an exception, it will be retried until the number
+     * of attempts is exhausted. Failures are logged, but unlike
+     * {@code executeWithRetry}, no exception is propagated to the caller when all
+     * retries fail.</p>
      *
      * <p>This method should be used for non-critical operations where failure
-     * must not interrupt the main workflow.</p>
+     * should not interrupt the main workflow.</p>
      *
-     * @param log          the logger used to record retry attempts and failures
+     * @param log          logger used to record retry attempts and failures
      * @param action       the operation to execute
-     * @param caseId       identifier used for logging context
-     * @param actionName   human-readable description of the action being performed
+     * @param caseId       identifier used for log traceability
+     * @param actionName   human-readable name of the action being executed
      * @param attemptsLeft number of attempts remaining (must be greater than 0)
      */
-    protected void executeWithRetrySafely(Logger log, Runnable action, String caseId, String actionName, int attemptsLeft) {
+    protected void executeWithRetrySafely(Logger log, ThrowingRunnable action, String caseId, String actionName, int attemptsLeft) {
         try {
             action.run();
         } catch (Exception e) {
-            log.error("{} - Failed {}. Attempts left: {}",
-                caseId, actionName, attemptsLeft - 1, e);
+            log.error("{} - Failed {}. Attempts left: {}", caseId, actionName, attemptsLeft - 1, e);
 
             if (attemptsLeft > 1) {
-                executeWithRetrySafely(log, action, caseId, actionName, attemptsLeft - 1);
+                executeWithRetry(
+                    log,
+                    action,
+                    caseId,
+                    actionName,
+                    attemptsLeft - 1
+                );
             } else {
-                log.error("{} - All retry attempts exhausted while {}",
-                    caseId, actionName);
+                log.error("{} - All retry attempts exhausted while {}. Exceptions were suppressed", caseId, actionName);
             }
         }
     }
