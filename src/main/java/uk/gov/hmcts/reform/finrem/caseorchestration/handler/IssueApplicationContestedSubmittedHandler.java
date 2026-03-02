@@ -90,8 +90,7 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
                 3
             );
             return null;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return "There was a problem sending correspondence.";
         }
     }
