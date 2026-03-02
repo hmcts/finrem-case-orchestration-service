@@ -14,4 +14,19 @@ Suppress CVE-2025-15104 only when Dependency-Check maps a dependency to the gene
 
         <cve>CVE-2025-15104</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+Suppress CVE-2020-29582 only when Dependency-Check maps a dependency
+to the overly broad Kotlin CPE "jetbrains:kotlin" (known false positive
+for kotlin-stdlib, kotlin-stdlib-jdk7, kotlin-stdlib-jdk8).
+    ]]></notes>
+
+        <!-- Matches: cpe:2.3:a:jetbrains:kotlin:<any>:*:*:*:*:*:*:* -->
+        <cpe>cpe:2.3:a:jetbrains:kotlin:*:*:*:*:*:*:*:*</cpe>
+
+        <!-- Optional: cover legacy CPE format if your scans include it -->
+        <cpe>cpe:/a:jetbrains:kotlin</cpe>
+
+        <cve>CVE-2020-29582</cve>
+    </suppress>
 </suppressions>

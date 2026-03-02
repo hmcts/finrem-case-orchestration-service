@@ -290,6 +290,146 @@ class AssignPartiesAccessServiceTest {
         }
     }
 
+    @Nested
+    class RevokeApplicantSolicitorTests {
+
+        @Test
+        void givenUnrepresentedApplicant_thenIgnoreTheRequest() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(false);
+
+            assignPartiesAccessService.revokeApplicantSolicitor(caseData);
+
+            verify(assignCaseAccessService, never()).removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void givenMissingOrgId_thenIgnoreTheRequest() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(null));
+
+            assignPartiesAccessService.revokeApplicantSolicitor(caseData);
+
+            verify(assignCaseAccessService, never()).removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void givenMissingEmail_thenThrowException() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getAppSolicitorEmail()).thenReturn(null);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            assignPartiesAccessService.revokeApplicantSolicitor(caseData);
+
+            verify(assignCaseAccessService, never()).removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void givenEmailNotFound_thenThrowException() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(Optional.empty());
+
+            assignPartiesAccessService.revokeApplicantSolicitor(caseData);
+
+            verify(assignCaseAccessService, never()).removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void givenEmailRegistered_thenRevokeAppSolicitorFromCase() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(Optional.of(TEST_USER_ID));
+
+            assignPartiesAccessService.revokeApplicantSolicitor(caseData);
+
+            verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID, CaseRole.APP_SOLICITOR.getCcdCode(), TEST_ORG_ID);
+            verifyNoMoreInteractions(assignCaseAccessService);
+        }
+    }
+
+    @Nested
+    class RevokeRespondentSolicitorTests {
+
+        @Test
+        void givenUnrepresentedRespondent_thenIgnoreTheRequest() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(false);
+
+            assignPartiesAccessService.revokeRespondentSolicitor(caseData);
+
+            verify(assignCaseAccessService, never()).removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void givenMissingOrgId_thenIgnoreTheRequest() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(null));
+
+            assignPartiesAccessService.revokeRespondentSolicitor(caseData);
+
+            verify(assignCaseAccessService, never()).removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void givenMissingEmail_thenThrowException() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getRespondentSolicitorEmail()).thenReturn(null);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            assertThrows(UserNotFoundInOrganisationApiException.class, () ->
+                assignPartiesAccessService.revokeRespondentSolicitor(caseData));
+
+            verify(assignCaseAccessService, never()).removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void givenEmailNotFound_thenThrowException() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(Optional.empty());
+
+            assertThrows(UserNotFoundInOrganisationApiException.class, () ->
+                assignPartiesAccessService.revokeRespondentSolicitor(caseData));
+
+            verify(assignCaseAccessService, never()).removeCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void givenEmailRegistered_thenRevokeRespondentSolicitorFromCase() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(Optional.of(TEST_USER_ID));
+
+            assignPartiesAccessService.revokeRespondentSolicitor(caseData);
+
+            verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID, CaseRole.RESP_SOLICITOR.getCcdCode(), TEST_ORG_ID);
+            verifyNoMoreInteractions(assignCaseAccessService);
+        }
+    }
+
     private void verifyNotGrantingCaseRoleToUser() {
         verify(assignCaseAccessService, never()).grantCaseRoleToUser(anyLong(), anyString(), anyString(), anyString());
     }
