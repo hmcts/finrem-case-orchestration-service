@@ -49,11 +49,7 @@ public class AssignPartiesAccessService {
             && isOrgIdExists(finremCaseData.getApplicantOrganisationPolicy())) {
             String appSolicitorEmail = finremCaseData.getAppSolicitorEmail();
             String appOrgId = finremCaseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID();
-            try {
-                grantAccess(Long.valueOf(caseId), appSolicitorEmail, appOrgId, CaseRole.APP_SOLICITOR.getCcdCode());
-            } catch (UserNotFoundInOrganisationApiException e) {
-                // ignore it
-            }
+            grantAccess(Long.valueOf(caseId), appSolicitorEmail, appOrgId, CaseRole.APP_SOLICITOR.getCcdCode());
         } else {
             log.info("{} - No applicant represented by a solicitor or organisation policy missing", caseId);
         }

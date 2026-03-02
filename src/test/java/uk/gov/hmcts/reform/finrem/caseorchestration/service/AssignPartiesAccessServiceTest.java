@@ -99,7 +99,7 @@ class AssignPartiesAccessServiceTest {
         }
 
         @Test
-        void givenMissingEmail_thenIgnoreTheRequest() throws UserNotFoundInOrganisationApiException {
+        void givenMissingEmail_thenThrowUserNotFoundInOrganisationApiException() {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.getAppSolicitorEmail()).thenReturn(null);
             when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
@@ -107,13 +107,12 @@ class AssignPartiesAccessServiceTest {
             when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
 
             // Act
-            assignPartiesAccessService.grantApplicantSolicitor(caseData);
-
+            assertThrows(UserNotFoundInOrganisationApiException.class, () -> assignPartiesAccessService.grantApplicantSolicitor(caseData));
             verifyNotGrantingCaseRoleToUser();
         }
 
         @Test
-        void givenEmailNotFound_thenShouldNotAssignAppSolicitorToCase() throws UserNotFoundInOrganisationApiException {
+        void givenEmailNotFound_thenThrowUserNotFoundInOrganisationApiException() {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
             when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
@@ -125,8 +124,7 @@ class AssignPartiesAccessServiceTest {
             );
 
             // Act
-            assignPartiesAccessService.grantApplicantSolicitor(caseData);
-
+            assertThrows(UserNotFoundInOrganisationApiException.class, () -> assignPartiesAccessService.grantApplicantSolicitor(caseData));
             verifyNotGrantingCaseRoleToUser();
         }
     }
@@ -178,7 +176,7 @@ class AssignPartiesAccessServiceTest {
         }
 
         @Test
-        void givenMissingEmail_thenIgnoreTheRequest() throws UserNotFoundInOrganisationApiException {
+        void givenMissingEmail_thenThrowUserNotFoundInOrganisationApiException() {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.getRespondentSolicitorEmail()).thenReturn(null);
             when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
@@ -186,13 +184,12 @@ class AssignPartiesAccessServiceTest {
             when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
 
             // Act
-            assignPartiesAccessService.grantRespondentSolicitor(caseData);
-
+            assertThrows(UserNotFoundInOrganisationApiException.class, () -> assignPartiesAccessService.grantRespondentSolicitor(caseData));
             verifyNotGrantingCaseRoleToUser();
         }
 
         @Test
-        void givenEmailNotFound_thenShouldNotAssignAppSolicitorToCase() throws UserNotFoundInOrganisationApiException {
+        void givenEmailNotFound_thenShouldNotAssignAppSolicitorToCase() {
             FinremCaseData caseData = mock(FinremCaseData.class);
             when(caseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
             when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
@@ -204,7 +201,7 @@ class AssignPartiesAccessServiceTest {
             );
 
             // Act
-            assignPartiesAccessService.grantRespondentSolicitor(caseData);
+            assertThrows(UserNotFoundInOrganisationApiException.class, () -> assignPartiesAccessService.grantRespondentSolicitor(caseData));
 
             verifyNotGrantingCaseRoleToUser();
         }
