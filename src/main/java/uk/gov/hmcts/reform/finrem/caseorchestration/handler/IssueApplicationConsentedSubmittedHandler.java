@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -10,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 
@@ -43,29 +46,50 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        final String caseIdAsString = caseDetails.getCaseIdAsString();
 
-        grantRespondentSolicitor(caseData, caseIdAsString);
-        sendCorrespondenceWithRetry(caseDetails, caseIdAsString, userAuthorisation);
+        String assignRespondentSolicitorError = grantRespondentSolicitor(caseData);
+        String sendCorrespondenceError = sendCorrespondence(caseDetails, userAuthorisation);
+        boolean isHavingErrors = !StringUtils.isAllBlank(assignRespondentSolicitorError, sendCorrespondenceError);
 
-        return response(caseData);
+        if (isHavingErrors) {
+            return submittedResponse("# Application Issued with Errors",
+                toConfirmationBody(assignRespondentSolicitorError, sendCorrespondenceError));
+        } else {
+            return submittedResponse();
+        }
     }
 
-    private void grantRespondentSolicitor(FinremCaseData caseData, String caseIdAsString) {
-        executeWithRetrySafely(log,
-            () -> assignPartiesAccessService.grantRespondentSolicitor(caseData),
-            caseIdAsString,
-            "granting respondent solicitor",
-            3
-        );
+    private String grantRespondentSolicitor(FinremCaseData caseData) {
+        ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+        String respSolEmail = YesOrNo.isYes(contactDetailsWrapper.getConsentedRespondentRepresented())
+            ? caseData.getRespondentSolicitorEmail() : null;
+        if (StringUtils.isBlank(respSolEmail)) {
+            return null;
+        }
+        try {
+            executeWithRetry(log,
+                () -> assignPartiesAccessService.grantRespondentSolicitor(caseData),
+                caseData.getCcdCaseId(),
+                "granting respondent solicitor",
+                3
+            );
+            return null;
+        } catch (Exception ex) {
+            return "There was a problem granting access to respondent solicitor %s".formatted(respSolEmail);
+        }
     }
 
-    private void sendCorrespondenceWithRetry(FinremCaseDetails caseDetails, String caseIdAsString, String userAuthorisation) {
-        executeWithRetrySafely(log,
-            () -> issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation),
-            caseIdAsString,
-            "sending correspondence",
-            3
-        );
+    private String sendCorrespondence(FinremCaseDetails caseDetails, String userAuthorisation) {
+        try {
+            executeWithRetry(log,
+                () -> issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation),
+                caseDetails.getCaseIdAsString(),
+                "sending correspondence",
+                3
+            );
+            return null;
+        } catch (Exception ex) {
+            return "There was a problem sending correspondence.";
+        }
     }
 }
