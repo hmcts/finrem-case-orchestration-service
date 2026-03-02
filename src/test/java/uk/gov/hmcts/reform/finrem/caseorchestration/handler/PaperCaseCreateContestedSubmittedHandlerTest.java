@@ -61,7 +61,7 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
     }
 
     @Test
-    void givenApplicantNotRepresented_whenHandled_thenGrantApplicantSolicitor() {
+    void givenApplicantNotRepresented_whenHandled_thenShouldNotGrantApplicantSolicitor() {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from();
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
