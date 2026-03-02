@@ -27,7 +27,7 @@ public class ManageHearingFormGLetterDetailsMapper extends AbstractManageHearing
         ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
 
         CourtDetailsTemplateFields courtTemplateFields =
-            buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt(), caseData.getCcdCaseType());
+            buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt());
 
         return FormGLetterDetails.builder()
             .applicantFmName(contactDetails.getApplicantFmName())
