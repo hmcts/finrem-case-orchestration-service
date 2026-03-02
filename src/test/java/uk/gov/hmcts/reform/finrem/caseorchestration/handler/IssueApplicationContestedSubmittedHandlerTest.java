@@ -11,13 +11,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.issueapplication.IssueApplicationContestedEmailCorresponder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +63,29 @@ class IssueApplicationContestedSubmittedHandlerTest {
             .containsOnlyNulls();
 
         verify(assignPartiesAccessService, never()).grantRespondentSolicitor(request.getCaseDetails().getData());
+    }
+
+    @Test
+    void givenRespondentRepresented_whenHandled_thenGrantRespondentSolicitor() {
+        ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
+        when(contactDetailsWrapper.getContestedRespondentRepresented()).thenReturn(YesOrNo.YES);
+
+        FinremCaseData mockedCaseData = mock(FinremCaseData.class);
+        when(mockedCaseData.getContactDetailsWrapper()).thenReturn(contactDetailsWrapper);
+        when(mockedCaseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(mockedCaseData);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
+
+        assertThat(response)
+            .extracting(
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
+            .containsOnlyNulls();
+
+        verify(assignPartiesAccessService).grantRespondentSolicitor(request.getCaseDetails().getData());
+        verifyNoMoreInteractions(assignPartiesAccessService);
     }
 
 }
