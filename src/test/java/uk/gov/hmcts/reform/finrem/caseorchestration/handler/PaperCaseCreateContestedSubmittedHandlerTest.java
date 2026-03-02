@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UserNotFoundInOrganisationApiException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,7 +62,8 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
     }
 
     @Test
-    void givenApplicantNotRepresented_whenHandled_thenShouldNotGrantApplicantSolicitor() {
+    void givenApplicantNotRepresented_whenHandled_thenShouldNotGrantApplicantSolicitor()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from();
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
@@ -76,7 +78,7 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
     }
 
     @Test
-    void givenApplicantRepresented_whenHandled_thenGrantApplicantSolicitor() {
+    void givenApplicantRepresented_whenHandled_thenGrantApplicantSolicitor() throws UserNotFoundInOrganisationApiException {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         when(mockedCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
 
@@ -95,7 +97,8 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
     }
 
     @Test
-    void givenSupplementaryDataFailure_whenHandled_thenRetriesThreeTimesAndShowsError() {
+    void givenSupplementaryDataFailure_whenHandled_thenRetriesThreeTimesAndShowsError()
+        throws UserNotFoundInOrganisationApiException {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         when(mockedCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
 
@@ -121,7 +124,8 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
     }
 
     @Test
-    void givenAssignPartyAccessFailure_whenHandled_thenRetriesThreeTimesAndShowsError() {
+    void givenAssignPartyAccessFailure_whenHandled_thenRetriesThreeTimesAndShowsError()
+        throws UserNotFoundInOrganisationApiException {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         when(mockedCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
 
@@ -148,7 +152,8 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
     }
 
     @Test
-    void givenSetSupplementaryDataAndAssignPartyAccessFailure_whenHandled_thenRetriesThreeTimesAndShowsError() {
+    void givenSetSupplementaryDataAndAssignPartyAccessFailure_whenHandled_thenRetriesThreeTimesAndShowsError()
+        throws UserNotFoundInOrganisationApiException {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         when(mockedCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
 
