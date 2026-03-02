@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UserNotFoundInOrganisationApiException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,7 +59,8 @@ class IssueApplicationConsentedSubmittedHandlerTest {
     }
 
     @Test
-    void givenRespondentNotRepresented_whenHandled_thenShouldNotGrantRespondentSolicitor() {
+    void givenRespondentNotRepresented_whenHandled_thenShouldNotGrantRespondentSolicitor()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from();
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
@@ -73,7 +75,8 @@ class IssueApplicationConsentedSubmittedHandlerTest {
     }
 
     @Test
-    void givenRespondentRepresented_whenHandled_thenGrantRespondentSolicitor() {
+    void givenRespondentRepresented_whenHandled_thenGrantRespondentSolicitor()
+        throws UserNotFoundInOrganisationApiException {
         ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
         when(contactDetailsWrapper.getConsentedRespondentRepresented()).thenReturn(YesOrNo.YES);
 
@@ -96,7 +99,8 @@ class IssueApplicationConsentedSubmittedHandlerTest {
     }
 
     @Test
-    void givenSendCorrespondenceFailure_whenHandled_thenRetriesThreeTimesAndShowsError() {
+    void givenSendCorrespondenceFailure_whenHandled_thenRetriesThreeTimesAndShowsError()
+        throws UserNotFoundInOrganisationApiException {
         ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
         when(contactDetailsWrapper.getConsentedRespondentRepresented()).thenReturn(YesOrNo.YES);
 
@@ -126,7 +130,8 @@ class IssueApplicationConsentedSubmittedHandlerTest {
     }
 
     @Test
-    void givenGrantRespondentSolicitorFailure_whenHandled_thenRetriesThreeTimesAndShowsError() {
+    void givenGrantRespondentSolicitorFailure_whenHandled_thenRetriesThreeTimesAndShowsError()
+        throws UserNotFoundInOrganisationApiException {
         ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
         when(contactDetailsWrapper.getConsentedRespondentRepresented()).thenReturn(YesOrNo.YES);
 
@@ -158,7 +163,8 @@ class IssueApplicationConsentedSubmittedHandlerTest {
     }
 
     @Test
-    void givenSendCorrespondenceAndGrantRespondentSolicitorFailure_whenHandled_thenRetriesThreeTimesAndShowsError() {
+    void givenSendCorrespondenceAndGrantRespondentSolicitorFailure_whenHandled_thenRetriesThreeTimesAndShowsError()
+        throws UserNotFoundInOrganisationApiException {
         ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
         when(contactDetailsWrapper.getConsentedRespondentRepresented()).thenReturn(YesOrNo.YES);
 
