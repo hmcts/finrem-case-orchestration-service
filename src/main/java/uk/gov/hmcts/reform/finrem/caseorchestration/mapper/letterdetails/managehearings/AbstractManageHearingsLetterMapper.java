@@ -3,13 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manage
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.apache.commons.lang3.ObjectUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.KentSurreyCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.hearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -21,7 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 public abstract class AbstractManageHearingsLetterMapper {
     protected static final String CASE_DETAILS = "caseDetails";
@@ -112,12 +109,9 @@ public abstract class AbstractManageHearingsLetterMapper {
             .courtName(courtDetails.getCourtName())
             .courtAddress(courtDetails.getCourtAddress())
             .phoneNumber(courtDetails.getPhoneNumber())
-            .email(courtDetails.getEmail());
-
-        if (CONTESTED.equals(caseType) && KentSurreyCourt.contains(courtSelection)) {
-            builder.centralFRCCourtAddress(OrchestrationConstants.CTSC_FRC_COURT_ADDRESS)
-                .centralFRCCourtEmail(OrchestrationConstants.FRC_KENT_SURREY_COURT_EMAIL_ADDRESS);
-        }
+            .email(courtDetails.getEmail())
+            .centralFRCCourtAddress(courtDetails.getCentralFRCCourtAddress())
+            .centralFRCCourtEmail(courtDetails.getCentralFRCCourtEmail());
 
         return builder.build();
     }
