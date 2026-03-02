@@ -87,6 +87,4 @@ class AbstractManageHearingsLetterMapperTest {
             return null; // not used in these tests
         }
     }
-
-
 }
