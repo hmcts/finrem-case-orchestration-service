@@ -46,6 +46,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_CENTRAL_FRC_ADDRESS_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_CENTRAL_FRC_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
@@ -269,6 +271,8 @@ class CaseHearingFunctionsTest {
         assertEquals("Home Gardens, Dartford, DA1 1DX", stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY));
         assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
         assertEquals("family.dartford.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
+        assertEquals("HMCTS Financial Remedy, PO Box 12746, HARLOW, CM20 9QZ", stringObjectMap.get(COURT_DETAILS_CENTRAL_FRC_ADDRESS_KEY));
+        assertEquals("FRCKSS@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_CENTRAL_FRC_EMAIL_KEY));
     }
 
     @Test

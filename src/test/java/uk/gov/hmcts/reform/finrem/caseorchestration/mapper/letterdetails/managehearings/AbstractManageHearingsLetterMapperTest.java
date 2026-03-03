@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -91,8 +90,8 @@ class AbstractManageHearingsLetterMapperTest {
         when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of(courtSelection, courtDetails));
 
         var fields = testClass.buildCourtDetailsTemplateFields(courtSelection);
-        assertNull(fields.getCentralFRCCourtAddress());
-        assertNull(fields.getCentralFRCCourtEmail());
+        assertThat(fields.getCentralFRCCourtAddress()).isNull();
+        assertThat(fields.getCentralFRCCourtEmail()).isNull();
     }
 
     // Underlying Docmosis template logic expects specific strings.  This will flag any changes, which could cause document
