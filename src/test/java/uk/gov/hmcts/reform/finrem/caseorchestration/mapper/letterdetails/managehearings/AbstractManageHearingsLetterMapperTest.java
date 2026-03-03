@@ -9,17 +9,21 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractManageHearingsLetterMapperTest {
@@ -55,6 +59,40 @@ class AbstractManageHearingsLetterMapperTest {
 
         // then
         assertEquals(expected, result);
+    }
+
+    @Test
+    void when_centralFRCCourtAddressAndEmailAreProvided_thenFieldsAreSetCorrectly() {
+        String courtSelection = "CentralFRC";
+        var courtDetails = CourtDetails.builder()
+            .courtName("Central Family Court")
+            .courtAddress("123 Main St")
+            .phoneNumber("0123456789")
+            .email("central@frc.gov.uk")
+            .centralFRCCourtAddress("Central FRC Address")
+            .centralFRCCourtEmail("centralfrc@frc.gov.uk")
+            .build();
+        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of(courtSelection, courtDetails));
+
+        var fields = testClass.buildCourtDetailsTemplateFields(courtSelection);
+        assertThat(fields.getCentralFRCCourtAddress()).isEqualTo("Central FRC Address");
+        assertThat(fields.getCentralFRCCourtEmail()).isEqualTo("centralfrc@frc.gov.uk");
+    }
+
+    @Test
+    void when_centralFRCCourtAddressAndEmailAreNotProvided_thenFieldsAreSetToNull() {
+        String courtSelection = "CentralFRC";
+        var courtDetails = CourtDetails.builder()
+            .courtName("Central Family Court")
+            .courtAddress("123 Main St")
+            .phoneNumber("0123456789")
+            .email("central@frc.gov.uk")
+            .build();
+        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of(courtSelection, courtDetails));
+
+        var fields = testClass.buildCourtDetailsTemplateFields(courtSelection);
+        assertNull(fields.getCentralFRCCourtAddress());
+        assertNull(fields.getCentralFRCCourtEmail());
     }
 
     // Underlying Docmosis template logic expects specific strings.  This will flag any changes, which could cause document
