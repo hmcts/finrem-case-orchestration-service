@@ -53,8 +53,7 @@ public class PrdOrganisationService {
             log.info("Could not find user by email");
             return Optional.empty();
         } catch (FeignException exception) {
-            String stackTrace = getStackTrace(exception);
-            throw new RuntimeException(email != null ? maskEmail(stackTrace, email) : "Email is not valid or null");
+            throw new RuntimeException(email != null ? maskEmail(getStackTrace(exception), email) : "Email is not valid or null");
         }
     }
 
