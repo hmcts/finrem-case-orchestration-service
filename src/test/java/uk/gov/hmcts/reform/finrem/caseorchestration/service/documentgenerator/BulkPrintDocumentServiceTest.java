@@ -263,8 +263,7 @@ class BulkPrintDocumentServiceTest {
 
         List<byte[]> documents = service.downloadDocuments(bulkPrintRequest, AUTH_TOKEN);
 
-        assertThat(documents).hasSize(1);
-        assertThat(documents.getFirst()).isEqualTo(someFlattenedBytes);
+        assertThat(documents).hasSize(1).first().isEqualTo(someFlattenedBytes);
 
         verify(evidenceManagementService).download(FILE_BINARY_URL, AUTH_TOKEN);
         verify(documentConversionService).flattenPdfDocument(someBytes);
