@@ -928,9 +928,11 @@ class GeneralOrderServiceTest {
                 eq("FL-FRM-GOR-ENG-00484.docx"),
                 argThat(fileName -> fileName.matches("generalOrder-\\d{8}-\\d{6}\\.pdf")));
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
-        assertEquals(OrchestrationConstants.CTSC_FRC_COURT_ADDRESS, data.get("centralFRCCourtAddress"),
+        Map<String, Object> court = convertToMap(data.get("courtDetails"));
+
+        assertEquals(OrchestrationConstants.CTSC_FRC_COURT_ADDRESS, court.get("centralFRCCourtAddress"),
             "Central FRC court address should be set for southeast region");
-        assertEquals(OrchestrationConstants.FRC_KENT_SURREY_COURT_EMAIL_ADDRESS, data.get("centralFRCCourtEmail"),
+        assertEquals(OrchestrationConstants.FRC_KENT_SURREY_COURT_EMAIL_ADDRESS, court.get("centralFRCCourtEmail"),
             "Central FRC court email should be set for southeast region");
     }
 

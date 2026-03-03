@@ -39,8 +39,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_CENTRAL_FRC_ADDRESS_KEY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_CENTRAL_FRC_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
@@ -347,8 +345,6 @@ public final class CaseHearingFunctions {
                 .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
                 .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
                 .openingHours(CTSC_OPENING_HOURS)
-                .centralFRCCourtAddress((String) courtDetails.get(COURT_DETAILS_CENTRAL_FRC_ADDRESS_KEY))
-                .centralFRCCourtEmail((String) courtDetails.get(COURT_DETAILS_CENTRAL_FRC_EMAIL_KEY))
                 .build(), Map.class);
         } catch (IOException | NullPointerException e) {
             return Collections.emptyMap();
