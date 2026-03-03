@@ -292,6 +292,7 @@ public class FinremCaseData implements HasCaseDocument {
     private OrganisationPolicy applicantOrganisationPolicy;
     @JsonProperty("RespondentOrganisationPolicy")
     private OrganisationPolicy respondentOrganisationPolicy;
+    // pt todo - remove if you remove use of this in update contact details abs handler
     @TemporaryField
     private CaseRole currentUserCaseRole;
     private String currentUserCaseRoleLabel;

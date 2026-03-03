@@ -45,6 +45,7 @@ public class UpdateCaseDetailsSolicitorAboutToStartHandler extends FinremCallbac
         setCaseAssignedUserRole(caseDetails, userAuthorisation);
         CaseRole caseRole = caseData.getCurrentUserCaseRole();
         caseData.setCurrentUserCaseRoleLabel(caseRole.getCcdCode().replace("[", "").replace("]",""));
+        setFieldShowConditions(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData)
@@ -75,5 +76,18 @@ public class UpdateCaseDetailsSolicitorAboutToStartHandler extends FinremCallbac
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && (CaseType.CONTESTED.equals(caseType) || CaseType.CONSENTED.equals(caseType))
             && EventType.UPDATE_CASE_DETAILS_SOLICITOR.equals(eventType);
+    }
+
+    /*
+     * PT todo: can the setCurrentUserCaseRoleLabel be replaced with these fields?
+     * PT todo: can the setCurrentUserCaseRole be replaced with these fields?
+     * PT todo: Explain that two fields needed as its a two page journey
+     */
+    private void setFieldShowConditions(FinremCaseData finremCaseData) {
+        if (CaseRole.APP_SOLICITOR.equals(finremCaseData.getCurrentUserCaseRole())) {
+            finremCaseData.getContactDetailsWrapper().setCurrentUserIsApplicantSolicitor(YesOrNo.YES);
+        } else if (CaseRole.RESP_SOLICITOR.equals(finremCaseData.getCurrentUserCaseRole())) {
+            finremCaseData.getContactDetailsWrapper().setCurrentUserIsRespondentSolicitor(YesOrNo.YES);
+        }
     }
 }

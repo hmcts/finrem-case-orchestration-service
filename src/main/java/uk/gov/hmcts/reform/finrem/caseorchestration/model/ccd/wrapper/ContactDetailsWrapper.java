@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -85,6 +86,11 @@ public class ContactDetailsWrapper {
     @JsonProperty("appRespondentRep")
     private YesOrNo consentedRespondentRepresented;
     private String isAdmin;
+    @TemporaryField
+    private YesOrNo currentUserIsApplicantSolicitor;
+    @TemporaryField
+    private YesOrNo currentUserIsRespondentSolicitor;
+    // PT todo - if these above work, do the additional 2 config files to clear them out.
 
     /**
      * Compares two {@link ContactDetailsWrapper} objects field by field and returns a map

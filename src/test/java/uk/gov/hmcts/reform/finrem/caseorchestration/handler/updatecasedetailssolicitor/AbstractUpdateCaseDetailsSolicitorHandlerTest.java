@@ -69,7 +69,7 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
     /*
      All CaseRoles other that applicant and respondent solicitor should fail.
      */
-    void when_CaseRole_party_wrong_then_exceptionThrown(CaseRole caseRole) {
+    void when_caseRolePartyWrong_then_exceptionThrown(CaseRole caseRole) {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .currentUserCaseRole(caseRole)
@@ -81,11 +81,14 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
 
         // Act and assert
         assertThat(assertThrows(IllegalArgumentException.class, () -> underTest.handle(callbackRequest, AUTH_TOKEN)).getMessage())
-            .isEqualTo(String.format("Update Contact Details provided invalid CaseRole.  Case reference:%s", CASE_ID));
+            .isEqualTo(String.format(
+                "Update Contact Details: Current user is not applicant or respondent solicitor. Case reference:%s",
+                CASE_ID)
+            );
     }
 
     @Test
-    void when_CaseRole_party_null_then_exceptionThrown() {
+    void when_noPartySpecified_then_exceptionThrown() {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .build();
@@ -95,7 +98,10 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
 
         // Act and assert
         assertThat(assertThrows(IllegalArgumentException.class, () -> underTest.handle(callbackRequest, AUTH_TOKEN)).getMessage())
-            .isEqualTo(String.format("Update Contact Details: CaseRole is null. Case reference:%s", CASE_ID));
+            .isEqualTo(String.format(
+                "Update Contact Details: Current user is not applicant or respondent solicitor. Case reference:%s",
+                CASE_ID)
+            );
     }
 
     /*
@@ -110,10 +116,10 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
 
         ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
             .applicantSolicitorEmail(validEmail)
+            .currentUserIsApplicantSolicitor(YesOrNo.YES)
             .build();
 
         FinremCaseData caseData = FinremCaseData.builder()
-            .currentUserCaseRole(CaseRole.APP_SOLICITOR)
             .contactDetailsWrapper(wrapper)
             .build();
 
@@ -160,10 +166,10 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
             .postCode("PL2 2LP")
             .build();
 
-           String invalidEmail = "invalidEmail";
-           String validEmail = "email@test.com";
-           String invalidEmailError = invalidEmail + " is not a valid Email address.";
-           String invalidAddressError = "Postcode field is required for " + solicitorRole + " solicitor address.";
+        String invalidEmail = "invalidEmail";
+        String validEmail = "email@test.com";
+        String invalidEmailError = invalidEmail + " is not a valid Email address.";
+        String invalidAddressError = "Postcode field is required for " + solicitorRole + " solicitor address.";
 
         return Stream.of(
             Arguments.of(
@@ -200,11 +206,11 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
                     List<String> expectedErrors) {
 
         FinremCaseData caseData = FinremCaseData.builder()
-            .currentUserCaseRole(CaseRole.APP_SOLICITOR)
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
                 .applicantSolicitorEmail(email)
                 .applicantSolicitorAddress(address)
                 .applicantRepresented(YesOrNo.YES)
+                .currentUserIsApplicantSolicitor(YesOrNo.YES)
                 .build())
             .build();
 

@@ -6,9 +6,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 
@@ -34,7 +34,7 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
         FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
-        validateSolicitorFieldsByCaseRole(caseData.getCurrentUserCaseRole(), caseData, errors, userAuthorisation);
+        validateSolicitorFields(caseData, errors, userAuthorisation);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
@@ -51,16 +51,34 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
 
     }
 
-    protected void validateSolicitorFieldsByCaseRole(CaseRole caseRole, FinremCaseData caseData,
-                                                     List<String> errors, String userAuthorisation) {
-        switch (caseRole) {
-            case CaseRole.APP_SOLICITOR -> validateApplicantSolicitorFields(caseData, errors, userAuthorisation);
-            case CaseRole.RESP_SOLICITOR -> validateRespondentSolicitorFields();
-            case null -> throw new IllegalArgumentException(
-                "Update Contact Details: CaseRole is null. Case reference:" + caseData.getCcdCaseId());
-            default -> throw new IllegalArgumentException(
-                "Update Contact Details provided invalid CaseRole.  Case reference:" + caseData.getCcdCaseId());
+    protected void validateSolicitorFields(FinremCaseData caseData,
+                                           List<String> errors, String userAuthorisation) {
+        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
+
+        if (YesOrNo.YES.equals(wrapper.getCurrentUserIsApplicantSolicitor())) {
+            validateApplicantSolicitorFields(caseData, errors, userAuthorisation);
+            return;
         }
+
+        if (YesOrNo.YES.equals(wrapper.getCurrentUserIsRespondentSolicitor())) {
+            validateRespondentSolicitorFields(caseData, errors, userAuthorisation);
+            return;
+        }
+
+        throw new IllegalArgumentException(
+                "Update Contact Details: Current user is not applicant or respondent solicitor. "
+                + "Case reference:" + caseData.getCcdCaseId());
+
+
+        // remove this switch when replacement tested
+        //        switch (caseRole) {
+        //            case CaseRole.APP_SOLICITOR -> validateApplicantSolicitorFields(caseData, errors, userAuthorisation);
+        //            case CaseRole.RESP_SOLICITOR -> validateRespondentSolicitorFields(caseData, errors, userAuthorisation);
+        //            case null -> throw new IllegalArgumentException(
+        //                "Update Contact Details: CaseRole is null. Case reference:" + caseData.getCcdCaseId());
+        //            default -> throw new IllegalArgumentException(
+        //                "Update Contact Details provided invalid CaseRole.  Case reference:" + caseData.getCcdCaseId());
+        //        }
     }
 
     // PT todo - would benefit from javadoc with some pseudo
@@ -79,13 +97,19 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
         }
     }
 
-    private void validateRespondentSolicitorFields() {
-        log.info("to follow");
-        // sol email org ok
-        // email address validation
-        // case addresses
+    // PT todo - would benefit from javadoc with some pseudo
+    private void validateRespondentSolicitorFields(FinremCaseData caseData, List<String> errors, String userAuthorisation) {
 
-        // PT todo, check which fields need to be temporary fields.  Will be at least currentUserCaseRole.
+        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
+        ContactDetailsValidator.checkForEmptyApplicantSolicitorPostcode(caseData, wrapper, errors);
 
+        if (ContactDetailsValidator.checkForApplicantSolicitorEmailAddress(caseData, wrapper, errors)) {
+            errors.addAll(
+                updateRepresentationService.validateEmailActiveForOrganisation(
+                    caseData.getAppSolicitorEmail(),
+                    caseData.getCcdCaseId(),
+                    userAuthorisation)
+            );
+        }
     }
 }

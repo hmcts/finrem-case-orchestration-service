@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
@@ -68,7 +69,8 @@ class UpdateCaseDetailsSolicitorAboutToStartHandlerTest {
 
         assertThat(response.getData().getCurrentUserCaseRoleLabel()).isEqualTo("APPSOLICITOR");
         assertThat(response.getData().getContactDetailsWrapper().getApplicantRepresented()).isEqualTo(YesOrNo.YES);
-
+        assertThat(response.getData().getContactDetailsWrapper().getCurrentUserIsApplicantSolicitor()).isEqualTo(YesOrNo.YES);
+        assertNull(response.getData().getContactDetailsWrapper().getCurrentUserIsRespondentSolicitor());
     }
 
     @Test
@@ -88,6 +90,8 @@ class UpdateCaseDetailsSolicitorAboutToStartHandlerTest {
 
         assertThat(response.getData().getCurrentUserCaseRoleLabel()).isEqualTo("RESPSOLICITOR");
         assertThat(response.getData().getContactDetailsWrapper().getConsentedRespondentRepresented()).isEqualTo(YesOrNo.YES);
+        assertThat(response.getData().getContactDetailsWrapper().getCurrentUserIsRespondentSolicitor()).isEqualTo(YesOrNo.YES);
+        assertNull(response.getData().getContactDetailsWrapper().getCurrentUserIsApplicantSolicitor());
     }
 
     @Test
@@ -107,6 +111,8 @@ class UpdateCaseDetailsSolicitorAboutToStartHandlerTest {
 
         assertThat(response.getData().getCurrentUserCaseRoleLabel()).isEqualTo("RESPSOLICITOR");
         assertThat(response.getData().getContactDetailsWrapper().getContestedRespondentRepresented()).isEqualTo(YesOrNo.YES);
+        assertThat(response.getData().getContactDetailsWrapper().getCurrentUserIsRespondentSolicitor()).isEqualTo(YesOrNo.YES);
+        assertNull(response.getData().getContactDetailsWrapper().getCurrentUserIsApplicantSolicitor());
     }
 
     private FinremCaseData setUpCaseData() {
