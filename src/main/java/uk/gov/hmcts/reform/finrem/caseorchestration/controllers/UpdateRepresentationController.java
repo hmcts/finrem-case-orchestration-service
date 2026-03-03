@@ -74,7 +74,7 @@ public class UpdateRepresentationController extends BaseController {
     private ResponseEntity<AboutToStartOrSubmitCallbackResponse> validateChangeOrganisationRequest(CaseDetails caseDetails) {
         ChangeOrganisationRequest change = getChangeOrganisationRequest(caseDetails);
         if (isEmpty(change) || isEmpty(ofNullable(change.getCaseRoleId()).map(DynamicList::getValueCode))) {
-            log.error("{} - Empty ChangeOrganisationRequest detected. It might be due to an unexpected retry.", caseDetails.getId());
+            log.info("{} - Empty ChangeOrganisationRequest detected. It might be due to an unexpected retry.", caseDetails.getId());
             return ResponseEntity.badRequest().build();
         }
         return null;
