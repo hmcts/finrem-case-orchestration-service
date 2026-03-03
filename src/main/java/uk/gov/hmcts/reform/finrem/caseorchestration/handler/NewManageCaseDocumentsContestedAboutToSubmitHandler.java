@@ -87,7 +87,9 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
 
         calculateWarnings(caseData, warnings);
         moveInputManageCaseDocumentsToManagedCollections(caseData);
-        addDefaultsToAdministrativeDocuments(getManagedCollections(caseData));
+        addDefaultsToAdministrativeDocuments(
+            emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
+        );
         replaceManagedDocumentsInCollectionType(caseData);
         addUploadDateToNewDocuments(caseData, caseDataBefore);
         clearLegacyCollections(caseData);
@@ -113,20 +115,16 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
                 documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, true));
 
         } else if (ManageCaseDocumentsAction.ADD_NEW.equals(action)) {
-            List<UploadCaseDocumentCollection> managedCollections =
-                emptyIfNull(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection());
+            List<UploadCaseDocumentCollection> inputDocuments =
+                new ArrayList<>(emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection()));
 
             emptyIfNull(documentHandlers).forEach(documentHandler ->
-                documentHandler.replaceManagedDocumentsInCollectionType(caseData, managedCollections, false));
+                documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, false));
         }
     }
 
     private void clearActionSelection(FinremCaseData caseData) {
         caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentsActionSelection(null);
-    }
-
-    private List<UploadCaseDocumentCollection> getManagedCollections(FinremCaseData caseData) {
-        return emptyIfNull(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection());
     }
 
     private void moveInputManageCaseDocumentsToManagedCollections(FinremCaseData caseData) {
