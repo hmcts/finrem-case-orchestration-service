@@ -53,7 +53,36 @@ public class PrdOrganisationService {
             log.info("Could not find user by email");
             return Optional.empty();
         } catch (FeignException exception) {
-            throw new RuntimeException(email != null ? maskEmail(getStackTrace(exception), email) : "Email is not valid or null");
+            String stackTrace = getStackTrace(exception);
+            throw new RuntimeException(email != null ? maskEmail(stackTrace, email) : "Email is not valid or null");
+        }
+    }
+
+    /**
+     * Retrieves the organisation identifier associated with the given user ID.
+     *
+     * <p>This method calls the Organisation API to obtain organisation details
+     * for the specified user. If no organisation is found (HTTP 404), an empty
+     * {@link Optional} is returned. Any other API error results in a
+     * {@link RuntimeException}.
+     *
+     * @param userId   the unique identifier of the user whose organisation is to be retrieved
+     * @param authToken the authorisation token used to authenticate the API request
+     * @return an {@link Optional} containing the organisation identifier if found;
+     *         otherwise {@link Optional#empty()} when the user is not associated
+     *         with an organisation
+     *
+     * @throws RuntimeException if the user ID is invalid, null, or an unexpected
+     *                          error occurs while calling the Organisation API
+     */
+    public Optional<String> findOrganisationIdByUserId(String userId, String authToken) {
+        try {
+            return Optional.of(organisationApi.findOrganisationDetailsByUserr(authToken,
+                authTokenGenerator.generate(), userId).getOrganisationIdentifier());
+        } catch (FeignException.NotFound notFoundException) {
+            return Optional.empty();
+        } catch (FeignException exception) {
+            throw new RuntimeException("Given user_id is not valid or null");
         }
     }
 }

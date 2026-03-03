@@ -27,14 +27,15 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_URL;
@@ -122,7 +123,7 @@ class PrdOrganisationServiceTest {
             .thenThrow(FeignException.NotFound.class);
 
         Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, AUTH_TOKEN);
-        assertTrue(userId.isEmpty());
+        assertThat(userId).isEmpty();
 
         verify(organisationApi).findUserByEmail(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL);
     }
@@ -162,5 +163,45 @@ class PrdOrganisationServiceTest {
                 .isEqualTo("THIS IS A STACK TRACE WITH MASKED EMAIL");
             verify(organisationApi).findUserByEmail(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL);
         }
+    }
+
+    @Test
+    void givenRegisteredUser_whenFindOrganisationIdByUserId_thenReturnExpectedOrganisationId() {
+        OrganisationsResponse mockedResponse = mock(OrganisationsResponse.class);
+        when(mockedResponse.getOrganisationIdentifier()).thenReturn(TEST_ORG_ID);
+        when(organisationApi.findOrganisationDetailsByUserr(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
+            .thenReturn(mockedResponse);
+
+        // Act
+        Optional<String> organisationId = prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID, AUTH_TOKEN);
+
+        // Verify
+        assertThat(organisationId)
+            .isPresent()
+            .contains(TEST_ORG_ID);
+    }
+
+    @Test
+    void givenUnregisteredUser_whenFindOrganisationIdByUserId_thenReturnEmpty() {
+        when(organisationApi.findOrganisationDetailsByUserr(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
+            .thenThrow(FeignException.NotFound.class);
+
+        // Act
+        Optional<String> organisationId = prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID, AUTH_TOKEN);
+
+        // Verify
+        assertThat(organisationId).isEmpty();
+    }
+
+    @Test
+    void givenAnyUserId_whenOrganisationApiThrowsFeignException_thenThrowRuntimeException() {
+        when(organisationApi.findOrganisationDetailsByUserr(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
+            .thenThrow(FeignException.class);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+            prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID, AUTH_TOKEN));
+        assertThat(exception.getMessage())
+            .isEqualTo("Given user_id is not valid or null");
+        verify(organisationApi).findOrganisationDetailsByUserr(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID);
     }
 }
