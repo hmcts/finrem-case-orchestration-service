@@ -32,9 +32,10 @@ public interface OrganisationApi {
         @RequestHeader("UserEmail") final String email
     );
 
-    @GetMapping("/refdata/external/v1/organisations")
-    OrganisationsResponse findUserOrganisation(
+    @GetMapping("/refdata/internal/v1/organisations/orgDetails/{userId}")
+    OrganisationsResponse findOrganisationDetailsByUserr(
         @RequestHeader(AUTHORIZATION) String authorisation,
-        @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization
+        @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization,
+        @RequestParam(value = "userId") String userId
     );
 }
