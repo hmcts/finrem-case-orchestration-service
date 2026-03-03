@@ -255,8 +255,6 @@ public class CCDConfigConstant {
     public static final String COURT_DETAILS_ADDRESS_KEY = "courtAddress";
     public static final String COURT_DETAILS_PHONE_KEY = "phoneNumber";
     public static final String COURT_DETAILS_EMAIL_KEY = "email";
-    public static final String COURT_DETAILS_CENTRAL_FRC_ADDRESS_KEY = "centralFRCCourtAddress";
-    public static final String COURT_DETAILS_CENTRAL_FRC_EMAIL_KEY = "centralFRCCourtEmail";
 
     public static final String HEARING_COURT_DETAILS_NAME_KEY = "hearingCourtName";
     public static final String HEARING_COURT_DETAILS_ADDRESS_KEY = "hearingCourtAddress";
