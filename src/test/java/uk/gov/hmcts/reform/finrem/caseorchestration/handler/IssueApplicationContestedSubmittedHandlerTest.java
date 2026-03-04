@@ -116,10 +116,10 @@ class IssueApplicationContestedSubmittedHandlerTest {
 
         assertThat(response)
             .extracting(
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
-            .contains("# Application Issued with Errors",
-                "<ul><li><h2>There was a problem sending correspondence.<h2></li></ul>");
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
+            .containsExactly("# Application Issued with Errors",
+                "<ul><li><h2>There was a problem sending correspondence.</h2></li></ul>");
         verify(corresponder, times(3))
             .sendCorrespondence(request.getCaseDetails());
         verify(assignPartiesAccessService).grantRespondentSolicitor(request.getCaseDetails().getData());
@@ -147,9 +147,9 @@ class IssueApplicationContestedSubmittedHandlerTest {
 
         assertThat(response)
             .extracting(
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
-            .contains("# Application Issued with Errors",
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
+            .containsExactly("# Application Issued with Errors",
                 "<ul><li><h2>There was a problem granting access to respondent solicitor %s</h2></li></ul>"
                     .formatted(TEST_SOLICITOR_EMAIL));
         verify(corresponder)
@@ -183,12 +183,12 @@ class IssueApplicationContestedSubmittedHandlerTest {
 
         assertThat(response)
             .extracting(
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
-            .contains("# Application Issued with Errors",
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
+            .containsExactly("# Application Issued with Errors",
                 ("<ul>"
-                + "<li>There was a problem granting access to respondent solicitor %s</li>"
-                + "<li>There was a problem sending correspondence.</li>"
+                + "<li><h2>There was a problem granting access to respondent solicitor %s</h2></li>"
+                + "<li><h2>There was a problem sending correspondence.</h2></li>"
                 + "</ul>").formatted(TEST_SOLICITOR_EMAIL));
         verify(corresponder, times(3))
             .sendCorrespondence(request.getCaseDetails());
