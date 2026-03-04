@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.ArrayList;
@@ -40,14 +41,16 @@ class PaperCaseCreateContestedMidHandlerTest {
     @Mock
     private InternationalPostalService internationalPostalService;
 
+    @Mock
+    private ValidatePartiesService validatePartiesService;
+
     @Test
     void testCanHandle() {
         assertCanHandle(handler, MID_EVENT, CONTESTED, NEW_PAPER_CASE);
     }
 
     @Test
-    void testHandle() {
-
+    void givenInvalidAddressAndEmailError_whenHandled_thenPostCodeValidatedAndExpressCaseEnrollmentStatusSet() {
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest =
             FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, NEW_PAPER_CASE, caseData);
@@ -56,7 +59,7 @@ class PaperCaseCreateContestedMidHandlerTest {
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
                 .thenReturn(new ArrayList<>(List.of("address error")));
-            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, null))
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService))
                 .thenReturn(new ArrayList<>(List.of("email error")));
 
             when(internationalPostalService.validate(caseData)).thenReturn(new ArrayList<>(List.of("postal address error")));

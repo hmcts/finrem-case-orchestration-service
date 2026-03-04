@@ -54,6 +54,6 @@ public class PaperCaseCreateContestedMidHandler extends FinremCallbackHandler {
 
         expressCaseService.setExpressCaseEnrollmentStatus(caseDetails.getData());
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return response(caseData, NO_WARNINGS, errors);
     }
 }
