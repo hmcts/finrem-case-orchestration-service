@@ -44,7 +44,28 @@ public class PrdOrganisationService {
         return organisationApi.findOrganisationByOrgId(userToken, authTokenGenerator.generate(), orgId);
     }
 
+    /**
+     * Retrieves a user identifier for the given email address.
+     *
+     * <p>This method calls the organisation API to resolve the user by email
+     * using the provided authentication token. The result is cached using
+     * {@code BARRISTER_USER_CACHE} under the {@code APPLICATION_SCOPED_CACHE_MANAGER}.</p>
+     *
+     * <p>If no user is found, an empty {@link Optional} is returned.
+     * If the downstream service responds with an error other than 404 (Not Found),
+     * a {@link RuntimeException} is thrown. The exception message masks the email
+     * address where applicable.</p>
+     *
+     * @param email     the email address used to search for the user
+     * @param authToken the authorisation token used for the API call
+     * @return an {@link Optional} containing the user identifier if found;
+     *         otherwise {@link Optional#empty()}
+     *
+     * @deprecated use {@link #findUserByEmail(String)} which retrieves the
+     *             system user token internally instead of requiring it as a parameter
+     */
     @Cacheable(cacheManager = APPLICATION_SCOPED_CACHE_MANAGER, cacheNames = BARRISTER_USER_CACHE)
+    @Deprecated(forRemoval = true)
     public Optional<String> findUserByEmail(String email, String authToken) {
         try {
             log.info("Finding user by email");
@@ -58,25 +79,51 @@ public class PrdOrganisationService {
     }
 
     /**
+     * Retrieves a user identifier for the given email address using
+     * the system user authentication token.
+     *
+     * <p>This method calls the organisation API to resolve the user by email
+     * using an internally obtained system user token.</p>
+     *
+     * <p>If no user is found, an empty {@link Optional} is returned.
+     * If the downstream service responds with an error other than 404 (Not Found),
+     * a {@link RuntimeException} is thrown. The exception message masks the email
+     * address where applicable.</p>
+     *
+     * @param email the email address used to search for the user
+     * @return an {@link Optional} containing the user identifier if found;
+     *         otherwise {@link Optional#empty()}
+     */
+    public Optional<String> findUserByEmail(String email) {
+        try {
+            return Optional.of(organisationApi.findUserByEmail(systemUserService.getSysUserToken(),
+                authTokenGenerator.generate(), email).getUserIdentifier());
+        } catch (FeignException.NotFound notFoundException) {
+            return Optional.empty();
+        } catch (FeignException exception) {
+            throw new RuntimeException(email != null ? maskEmail(getStackTrace(exception), email) : "Email is not valid or null");
+        }
+    }
+
+    /**
      * Retrieves the organisation identifier associated with the given user ID.
      *
-     * <p>This method calls the Organisation API to obtain organisation details
-     * for the specified user. If no organisation is found (HTTP 404), an empty
-     * {@link Optional} is returned. Any other API error results in a
-     * {@link RuntimeException}.
+     * <p>This method invokes the organisation API using a system user authentication
+     * token to obtain organisation details for the supplied user ID.</p>
      *
-     * @param userId   the unique identifier of the user whose organisation is to be retrieved
-     * @param authToken the authorisation token used to authenticate the API request
+     * <p>If no organisation is found for the given user ID (HTTP 404),
+     * {@link Optional#empty()} is returned. If the downstream service responds
+     * with any other error, a {@link RuntimeException} is thrown.</p>
+     *
+     * @param userId the unique identifier of the user whose organisation is to be retrieved
      * @return an {@link Optional} containing the organisation identifier if found;
-     *         otherwise {@link Optional#empty()} when the user is not associated
-     *         with an organisation
-     *
-     * @throws RuntimeException if the user ID is invalid, null, or an unexpected
-     *                          error occurs while calling the Organisation API
+     *         otherwise {@link Optional#empty()}
+     * @throws RuntimeException if the user ID is invalid, {@code null},
+     *                          or an unexpected error occurs when calling the API
      */
-    public Optional<String> findOrganisationIdByUserId(String userId, String authToken) {
+    public Optional<String> findOrganisationIdByUserId(String userId) {
         try {
-            return Optional.of(organisationApi.findOrganisationDetailsByUserr(authToken,
+            return Optional.of(organisationApi.findOrganisationDetailsByUser(systemUserService.getSysUserToken(),
                 authTokenGenerator.generate(), userId).getOrganisationIdentifier());
         } catch (FeignException.NotFound notFoundException) {
             return Optional.empty();

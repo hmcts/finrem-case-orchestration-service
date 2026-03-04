@@ -38,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 
@@ -57,10 +58,13 @@ class PrdOrganisationServiceTest {
     private AuthTokenGenerator authTokenGenerator;
     @Spy
     protected ObjectMapper objectMapper;
+    @Mock
+    private SystemUserService systemUserService;
 
     @BeforeEach
     void setup() {
         lenient().when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
+        lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
     }
 
     @Test
@@ -169,11 +173,11 @@ class PrdOrganisationServiceTest {
     void givenRegisteredUser_whenFindOrganisationIdByUserId_thenReturnExpectedOrganisationId() {
         OrganisationsResponse mockedResponse = mock(OrganisationsResponse.class);
         when(mockedResponse.getOrganisationIdentifier()).thenReturn(TEST_ORG_ID);
-        when(organisationApi.findOrganisationDetailsByUserr(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
+        when(organisationApi.findOrganisationDetailsByUser(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
             .thenReturn(mockedResponse);
 
         // Act
-        Optional<String> organisationId = prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID, AUTH_TOKEN);
+        Optional<String> organisationId = prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID);
 
         // Verify
         assertThat(organisationId)
@@ -183,11 +187,11 @@ class PrdOrganisationServiceTest {
 
     @Test
     void givenUnregisteredUser_whenFindOrganisationIdByUserId_thenReturnEmpty() {
-        when(organisationApi.findOrganisationDetailsByUserr(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
+        when(organisationApi.findOrganisationDetailsByUser(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
             .thenThrow(FeignException.NotFound.class);
 
         // Act
-        Optional<String> organisationId = prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID, AUTH_TOKEN);
+        Optional<String> organisationId = prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID);
 
         // Verify
         assertThat(organisationId).isEmpty();
@@ -195,13 +199,13 @@ class PrdOrganisationServiceTest {
 
     @Test
     void givenAnyUserId_whenOrganisationApiThrowsFeignException_thenThrowRuntimeException() {
-        when(organisationApi.findOrganisationDetailsByUserr(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
+        when(organisationApi.findOrganisationDetailsByUser(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
             .thenThrow(FeignException.class);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID, AUTH_TOKEN));
+            prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID));
         assertThat(exception.getMessage())
             .isEqualTo("Given user_id is not valid or null");
-        verify(organisationApi).findOrganisationDetailsByUserr(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID);
+        verify(organisationApi).findOrganisationDetailsByUser(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID);
     }
 }

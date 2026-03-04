@@ -34,7 +34,7 @@ public interface OrganisationApi {
     );
 
     @GetMapping("/refdata/internal/v1/organisations/orgDetails/{userId}")
-    OrganisationsResponse findOrganisationDetailsByUserr(
+    OrganisationsResponse findOrganisationDetailsByUser(
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization,
         @PathVariable(value = "userId") String userId
