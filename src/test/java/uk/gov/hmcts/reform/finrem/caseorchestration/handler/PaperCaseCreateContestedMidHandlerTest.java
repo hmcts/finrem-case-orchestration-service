@@ -56,7 +56,7 @@ class PaperCaseCreateContestedMidHandlerTest {
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
                 .thenReturn(new ArrayList<>(List.of("address error")));
-            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, null))
                 .thenReturn(new ArrayList<>(List.of("email error")));
 
             when(internationalPostalService.validate(caseData)).thenReturn(new ArrayList<>(List.of("postal address error")));
