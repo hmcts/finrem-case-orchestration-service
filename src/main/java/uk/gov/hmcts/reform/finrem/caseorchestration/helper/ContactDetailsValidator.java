@@ -344,13 +344,14 @@ public class ContactDetailsValidator {
                                                                List<String> errors) {
         String applicantSolicitorEmail = caseData.getAppSolicitorEmail();
 
-        if (caseData.isApplicantRepresentedByASolicitor()
-            && !isValidEmailAddress(applicantSolicitorEmail)) {
-            errors.add(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(applicantSolicitorEmail));
-
-            String orgId = getOrganisationId(caseData.getApplicantOrganisationPolicy());
-            if (!isEmailValidForOrganisation(validatePartiesService, applicantSolicitorEmail, orgId)) {
-                errors.add(EMAIL_NOT_IN_APPLICANT_ORG_ERROR_MESSAGE.formatted(applicantSolicitorEmail));
+        if (caseData.isApplicantRepresentedByASolicitor()) {
+            if (!isValidEmailAddress(applicantSolicitorEmail)) {
+                errors.add(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(applicantSolicitorEmail));
+            } else {
+                String orgId = getOrganisationId(caseData.getApplicantOrganisationPolicy());
+                if (!isEmailValidForOrganisation(validatePartiesService, applicantSolicitorEmail, orgId)) {
+                    errors.add(EMAIL_NOT_IN_APPLICANT_ORG_ERROR_MESSAGE.formatted(applicantSolicitorEmail));
+                }
             }
         }
     }
