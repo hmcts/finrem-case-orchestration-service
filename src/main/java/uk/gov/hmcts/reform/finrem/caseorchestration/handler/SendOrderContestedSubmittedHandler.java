@@ -43,8 +43,8 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested {} submitted callback for Case ID: {}", callbackRequest.getEventType(), caseDetails.getId());
 
         List<String> parties = generalOrderService.getParties(caseDetails);
         log.info("Selected parties {} on Case ID: {}", parties, caseDetails.getId());
