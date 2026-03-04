@@ -119,7 +119,7 @@ class IssueApplicationContestedSubmittedHandlerTest {
                 GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
                 GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
             .contains("# Application Issued with Errors",
-                "<ul><li>There was a problem sending correspondence.</li></ul>");
+                "<ul><li><h2>There was a problem sending correspondence.<h2></li></ul>");
         verify(corresponder, times(3))
             .sendCorrespondence(request.getCaseDetails());
         verify(assignPartiesAccessService).grantRespondentSolicitor(request.getCaseDetails().getData());
@@ -150,7 +150,7 @@ class IssueApplicationContestedSubmittedHandlerTest {
                 GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
                 GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
             .contains("# Application Issued with Errors",
-                "<ul><li>There was a problem granting access to respondent solicitor %s</li></ul>"
+                "<ul><li><h2>There was a problem granting access to respondent solicitor %s</h2></li></ul>"
                     .formatted(TEST_SOLICITOR_EMAIL));
         verify(corresponder)
             .sendCorrespondence(request.getCaseDetails());

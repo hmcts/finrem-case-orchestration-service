@@ -231,9 +231,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         if (errors != null) {
             for (String error : errors) {
                 if (error != null && !error.isBlank()) {
-                    body.append("<li>")
-                        .append(error)
-                        .append("</li>");
+                    body.append("<li><h2>%s</h2></li>".formatted(error));
                 }
             }
         }
