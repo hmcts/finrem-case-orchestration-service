@@ -7,13 +7,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class SolicitorAccessServiceTest {
     @Mock
@@ -76,11 +78,13 @@ class SolicitorAccessServiceTest {
     @Test
     void updateRespondentSolicitor_grantsAndRevokesAccessWhenChanged() {
         FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().contestedRespondentRepresented(YesOrNo.YES).respondentSolicitorEmail("new@email.com").build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder().contestedRespondentRepresented(YesOrNo.YES)
+                .respondentSolicitorEmail("new@email.com").build())
             .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
             .build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().contestedRespondentRepresented(YesOrNo.YES).respondentSolicitorEmail("old@email.com").build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder().contestedRespondentRepresented(YesOrNo.YES)
+                .respondentSolicitorEmail("old@email.com").build())
             .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org2").build()).build())
             .build();
         solicitorAccessService.updateRespondentSolicitor(caseData, caseDataBefore);
@@ -140,4 +144,3 @@ class SolicitorAccessServiceTest {
         assertFalse(SolicitorAccessService.hasRespondentSolicitorChanged(caseData, caseDataBefore));
     }
 }
-

@@ -45,11 +45,11 @@ public class UpdateCaseDetailsSolicitorSubmittedHandler extends FinremCallbackHa
         // Fix for missing CCD Case ID in case data before, which is required for updating solicitor access
         caseDataBefore.setCcdCaseId(String.valueOf(caseDetailsBefore.getId()));
 
-        if(SolicitorAccessService.hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
+        if (SolicitorAccessService.hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
             solicitorAccessService.updateApplicantSolicitor(caseData, caseDataBefore);
         }
 
-        if(SolicitorAccessService.hasRespondentSolicitorChanged(caseData, caseDataBefore)) {
+        if (SolicitorAccessService.hasRespondentSolicitorChanged(caseData, caseDataBefore)) {
             solicitorAccessService.updateRespondentSolicitor(caseData, caseDataBefore);
         }
 
