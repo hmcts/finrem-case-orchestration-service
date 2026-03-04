@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -112,12 +113,24 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return List.of(StopRepresentationWrapper.class);
     }
 
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submittedResponse() {
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().build();
+    }
+
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submittedResponse(String confirmationHeader,
+                                                                                            String confirmationBody) {
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .confirmationHeader(confirmationHeader)
+            .confirmationBody(confirmationBody)
+            .build();
+    }
+
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData) {
         return response(finremCaseData, null, null);
     }
 
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData,
-        List<String> warnings, List<String> errors) {
+                                                                                   List<String> warnings, List<String> errors) {
         var builder = GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder();
         builder.data(finremCaseData);
         if (errors != null && !errors.isEmpty()) {
@@ -127,5 +140,103 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             builder.warnings(warnings);
         }
         return builder.build();
+    }
+
+    @FunctionalInterface
+    public interface ThrowingRunnable {
+        void run() throws Exception;
+    }
+
+    /**
+     * Executes the given action with retry support.
+     *
+     * <p>If the action throws an exception, it will be retried until the number
+     * of attempts is exhausted. Each failure is logged together with the number
+     * of remaining attempts.</p>
+     *
+     * <p>When all retry attempts are exhausted, the exception is rethrown wrapped
+     * in a {@link RuntimeException}.</p>
+     *
+     * @param log          logger used to record retry attempts and failures
+     * @param action       the operation to execute
+     * @param caseId       identifier used for log traceability
+     * @param actionName   human-readable name of the action being executed
+     * @param attemptsLeft number of attempts remaining (must be greater than 0)
+     *
+     * @throws RuntimeException if all retry attempts fail
+     */
+    protected void executeWithRetry(Logger log, ThrowingRunnable action, String caseId, String actionName, int attemptsLeft) {
+        try {
+            action.run();
+        } catch (Exception e) {
+            log.error("{} - Failed {}. Attempts left: {}",
+                caseId, actionName, attemptsLeft - 1, e);
+
+            if (attemptsLeft > 1) {
+                executeWithRetry(
+                    log,
+                    action,
+                    caseId,
+                    actionName,
+                    attemptsLeft - 1
+                );
+            } else {
+                log.error("{} - All retry attempts exhausted while {}",
+                    caseId, actionName);
+                throw new RuntimeException(e); // or rethrow if signature allows
+            }
+        }
+    }
+
+    /**
+     * Executes the given action with retry support but suppresses any final failure.
+     *
+     * <p>If the action throws an exception, it will be retried until the number
+     * of attempts is exhausted. Failures are logged, but unlike
+     * {@code executeWithRetry}, no exception is propagated to the caller when all
+     * retries fail.</p>
+     *
+     * <p>This method should be used for non-critical operations where failure
+     * should not interrupt the main workflow.</p>
+     *
+     * @param log          logger used to record retry attempts and failures
+     * @param action       the operation to execute
+     * @param caseId       identifier used for log traceability
+     * @param actionName   human-readable name of the action being executed
+     * @param attemptsLeft number of attempts remaining (must be greater than 0)
+     */
+    protected void executeWithRetrySafely(Logger log, ThrowingRunnable action, String caseId, String actionName, int attemptsLeft) {
+        try {
+            action.run();
+        } catch (Exception e) {
+            log.error("{} - Failed {}. Attempts left: {}", caseId, actionName, attemptsLeft - 1, e);
+
+            if (attemptsLeft > 1) {
+                executeWithRetry(
+                    log,
+                    action,
+                    caseId,
+                    actionName,
+                    attemptsLeft - 1
+                );
+            } else {
+                log.error("{} - All retry attempts exhausted while {}. Exceptions were suppressed", caseId, actionName);
+            }
+        }
+    }
+
+    protected String toConfirmationBody(String... errors) {
+        StringBuilder body = new StringBuilder("<ul>");
+
+        if (errors != null) {
+            for (String error : errors) {
+                if (error != null && !error.isBlank()) {
+                    body.append("<li><h2>%s</h2></li>".formatted(error));
+                }
+            }
+        }
+
+        body.append("</ul>");
+        return body.toString();
     }
 }
