@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -65,6 +66,15 @@ class PrdOrganisationServiceTest {
     void setup() {
         lenient().when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+    }
+
+    @Test
+    void testFindOrganisationByOrgId() {
+        OrganisationsResponse organisationsResponse = mock(OrganisationsResponse.class);
+        when(organisationApi.findOrganisationByOrgId(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_ORG_ID))
+            .thenReturn(organisationsResponse);
+
+        assertEquals(organisationsResponse, prdOrganisationService.findOrganisationByOrgId(TEST_ORG_ID));
     }
 
     @Test
@@ -113,40 +123,40 @@ class PrdOrganisationServiceTest {
     @Test
     void givenRegisteredUser_whenFindUserByEmail_thenReturnExpectedUserId() {
         OrganisationUser user = OrganisationUser.builder().userIdentifier(TEST_USER_ID).build();
-        when(organisationApi.findUserByEmail(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL)).thenReturn(user);
+        when(organisationApi.findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL)).thenReturn(user);
 
-        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, AUTH_TOKEN);
+        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL);
 
         assertThat(userId).contains(TEST_USER_ID);
-        verify(organisationApi).findUserByEmail(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL);
+        verify(organisationApi).findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL);
     }
 
     @Test
     void givenUnregisteredUser_whenFindUserByEmail_thenReturnEmpty() {
-        when(organisationApi.findUserByEmail(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL))
+        when(organisationApi.findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL))
             .thenThrow(FeignException.NotFound.class);
 
-        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, AUTH_TOKEN);
+        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL);
         assertThat(userId).isEmpty();
 
-        verify(organisationApi).findUserByEmail(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL);
+        verify(organisationApi).findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL);
     }
 
     @Test
     void givenEmailIsNull_whenOrganisationApiThrowsFeignException_thenThrowRuntimeException() {
-        when(organisationApi.findUserByEmail(AUTH_TOKEN, TEST_SERVICE_TOKEN, null))
+        when(organisationApi.findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, null))
             .thenThrow(FeignException.class);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            prdOrganisationService.findUserByEmail(null, AUTH_TOKEN));
+            prdOrganisationService.findUserByEmail(null));
         assertThat(exception.getMessage())
             .isEqualTo("Email is not valid or null");
-        verify(organisationApi).findUserByEmail(AUTH_TOKEN, TEST_SERVICE_TOKEN, null);
+        verify(organisationApi).findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, null);
     }
 
     @Test
     void givenEmailIsProvided_whenOrganisationApiThrowsFeignException_thenThrowRuntimeException() {
-        when(organisationApi.findUserByEmail(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL))
+        when(organisationApi.findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL))
             .thenThrow(FeignException.class);
 
         try (MockedStatic<ExceptionUtils> mockedExceptionUtils = mockStatic(ExceptionUtils.class);
@@ -159,13 +169,13 @@ class PrdOrganisationServiceTest {
                 .thenReturn("THIS IS A STACK TRACE WITH MASKED EMAIL");
 
             RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, AUTH_TOKEN));
+                prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL));
 
             mockedExceptionUtils.verify(() -> ExceptionUtils.getStackTrace(captor.capture()));
 
             assertThat(exception.getMessage())
                 .isEqualTo("THIS IS A STACK TRACE WITH MASKED EMAIL");
-            verify(organisationApi).findUserByEmail(AUTH_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL);
+            verify(organisationApi).findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL);
         }
     }
 
