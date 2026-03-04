@@ -113,10 +113,10 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
 
         assertThat(response)
             .extracting(
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
-            .contains("# Paper Case Created with Errors",
-                "<ul><li>There was a problem setting supplementary data.</li></ul>");
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
+            .containsExactly("# Paper Case Created with Errors",
+                "<ul><li><h2>There was a problem setting supplementary data.</h2></li></ul>");
         verify(createCaseService, times(3))
             .setSupplementaryData(any(FinremCallbackRequest.class), eq(AUTH_TOKEN));
         verify(assignPartiesAccessService).grantApplicantSolicitor(request.getCaseDetails().getData());
@@ -140,10 +140,10 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
 
         assertThat(response)
             .extracting(
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
-            .contains("# Paper Case Created with Errors",
-                "<ul><li>There was a problem granting access to application solicitor %s</li></ul>"
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
+            .containsExactly("# Paper Case Created with Errors",
+                "<ul><li><h2>There was a problem granting access to application solicitor %s</h2></li></ul>"
                     .formatted(TEST_SOLICITOR_EMAIL));
         verify(createCaseService)
             .setSupplementaryData(request, AUTH_TOKEN);
@@ -171,12 +171,12 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
 
         assertThat(response)
             .extracting(
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
-            .contains("# Paper Case Created with Errors",
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
+            .containsExactly("# Paper Case Created with Errors",
                 ("<ul>"
-                    + "<li>There was a problem setting supplementary data.</li>"
-                    + "<li>There was a problem granting access to application solicitor %s</li>"
+                    + "<li><h2>There was a problem setting supplementary data.</h2></li>"
+                    + "<li><h2>There was a problem granting access to application solicitor %s</h2></li>"
                     + "</ul>")
                     .formatted(TEST_SOLICITOR_EMAIL));
         verify(createCaseService, times(3))
