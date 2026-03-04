@@ -63,6 +63,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.isYes;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -740,11 +741,6 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     @JsonIgnore
-    public boolean isApplicantSolicitorResponsibleToDraftOrder() {
-        return SolicitorToDraftOrder.APPLICANT_SOLICITOR.equals(solicitorResponsibleForDraftingOrder);
-    }
-
-    @JsonIgnore
     public boolean isConsentedApplication() {
         return CaseType.CONSENTED.equals(ccdCaseType);
     }
@@ -752,11 +748,6 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     public boolean isContestedApplication() {
         return CaseType.CONTESTED.equals(ccdCaseType);
-    }
-
-    @JsonIgnore
-    public boolean isContestedPaperApplication() {
-        return isContestedApplication() && isPaperCase();
     }
 
     @JsonIgnore
@@ -781,39 +772,6 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     @JsonIgnore
-    public boolean isAppAddressConfidential() {
-        return YesOrNo.YES.equals(getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent());
-    }
-
-    @JsonIgnore
-    public String getApplicantSolicitorPostcode() {
-        if (isConsentedApplication()) {
-            Address solicitorAddress = getContactDetailsWrapper().getSolicitorAddress();
-            return solicitorAddress != null ? solicitorAddress.getPostCode() : null;
-        } else {
-            Address applicantAddress = getContactDetailsWrapper().getApplicantSolicitorAddress();
-            return applicantAddress != null ? applicantAddress.getPostCode() : null;
-        }
-    }
-
-    @JsonIgnore
-    public String getRespondentSolicitorPostcode() {
-        Address respondentAddress = getContactDetailsWrapper().getRespondentSolicitorAddress();
-        return respondentAddress != null ? respondentAddress.getPostCode() : null;
-    }
-
-    @JsonIgnore
-    public boolean isRespAddressConfidential() {
-        return YesOrNo.YES.equals(getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant());
-    }
-
-    @JsonIgnore
-    public boolean isContestedOrderNotApprovedCollectionPresent() {
-        return getConsentOrderWrapper().getConsentedNotApprovedOrders() != null
-            && !getConsentOrderWrapper().getConsentedNotApprovedOrders().isEmpty();
-    }
-
-    @JsonIgnore
     public String getAppSolicitorName() {
         return isConsentedApplication()
             ? getContactDetailsWrapper().getSolicitorName()
@@ -835,15 +793,22 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     @JsonIgnore
-    public boolean isApplicantSolicitorPopulated() {
-        return StringUtils.isNotEmpty(nullToEmpty(getAppSolicitorEmail()));
+    public String getAppSolicitorEmailIfRepresented() {
+        var contactWrapper = getContactDetailsWrapper();
+        if (contactWrapper == null || !isYes(contactWrapper.getApplicantRepresented())) {
+            return null;
+        }
+
+        if (isConsentedApplication()) {
+            return contactWrapper.getSolicitorEmail();
+        } else {
+            return contactWrapper.getApplicantSolicitorEmail();
+        }
     }
 
     @JsonIgnore
-    public String getAppSolicitorFirm() {
-        return isConsentedApplication()
-            ? getContactDetailsWrapper().getSolicitorFirm()
-            : getContactDetailsWrapper().getApplicantSolicitorFirm();
+    public boolean isApplicantSolicitorPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getAppSolicitorEmail()));
     }
 
     /**
@@ -1040,18 +1005,6 @@ public class FinremCaseData implements HasCaseDocument {
             return List.of();
         }
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
-    }
-
-    @JsonIgnore
-    public List<IntervenerHearingNoticeCollection> getIntervenerCollection(
-        IntervenerHearingNoticeCollectionName collectionName) {
-
-        return switch (collectionName) {
-            case INTV_1 -> getIntv1HearingNoticesCollection();
-            case INTV_2 -> getIntv2HearingNoticesCollection();
-            case INTV_3 -> getIntv3HearingNoticesCollection();
-            case INTV_4 -> getIntv4HearingNoticesCollection();
-        };
     }
 
     @JsonIgnore
