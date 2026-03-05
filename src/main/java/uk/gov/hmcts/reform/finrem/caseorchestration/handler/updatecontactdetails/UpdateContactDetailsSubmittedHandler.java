@@ -16,12 +16,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessServi
 
 @Slf4j
 @Service
-public class UpdateCaseDetailsSolicitorSubmittedHandler extends FinremCallbackHandler {
+public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
 
     private final SolicitorAccessService solicitorAccessService;
 
-    public UpdateCaseDetailsSolicitorSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                      SolicitorAccessService solicitorAccessService) {
+    public UpdateContactDetailsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                SolicitorAccessService solicitorAccessService) {
         super(finremCaseDetailsMapper);
         this.solicitorAccessService = solicitorAccessService;
     }
@@ -30,13 +30,13 @@ public class UpdateCaseDetailsSolicitorSubmittedHandler extends FinremCallbackHa
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.UPDATE_CASE_DETAILS_SOLICITOR.equals(eventType);
+            && EventType.UPDATE_CONTACT_DETAILS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();

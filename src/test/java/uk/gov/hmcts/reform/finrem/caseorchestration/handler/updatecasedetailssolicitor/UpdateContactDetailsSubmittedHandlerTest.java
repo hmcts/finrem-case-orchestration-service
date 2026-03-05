@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails.UpdateCaseDetailsSolicitorSubmittedHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails.UpdateContactDetailsSubmittedHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -27,20 +27,21 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CASE_DETAILS_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateCaseDetailsSolicitorSubmittedHandlerTest {
+class UpdateContactDetailsSubmittedHandlerTest {
 
     @Mock
     private SolicitorAccessService solicitorAccessService;
     @InjectMocks
-    private UpdateCaseDetailsSolicitorSubmittedHandler handler;
+    private UpdateContactDetailsSubmittedHandler handler;
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, SUBMITTED, CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR);
+        assertCanHandle(handler, SUBMITTED, CONTESTED, UPDATE_CONTACT_DETAILS);
     }
 
     static Stream<Arguments> provideSolicitorEmailChangeScenarios() {
