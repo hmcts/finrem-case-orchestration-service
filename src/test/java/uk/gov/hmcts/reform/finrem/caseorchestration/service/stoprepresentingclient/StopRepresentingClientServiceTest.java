@@ -376,7 +376,9 @@ class StopRepresentingClientServiceTest {
         void shouldApplyDecisionWithRevertedCaseDetails(boolean isApplicant) {
             FinremCaseData caseData = spy(FinremCaseData.class);
             caseData.getContactDetailsWrapper().setNocParty(isApplicant ? NoticeOfChangeParty.APPLICANT : NoticeOfChangeParty.RESPONDENT);
-            caseData.setChangeOrganisationRequestField(spy(ChangeOrganisationRequest.class));
+            ChangeOrganisationRequest changeOrganisationRequest = mock(ChangeOrganisationRequest.class);
+            when(changeOrganisationRequest.isNoOrganisationsToAddOrRemove()).thenReturn(false);
+            caseData.setChangeOrganisationRequestField(changeOrganisationRequest);
 
             // Setting original org policy
             FinremCaseData caseDataBefore = mock(FinremCaseData.class);
