@@ -47,12 +47,16 @@ class SolicitorAccessServiceTest {
     @Test
     void updateApplicantSolicitor_grantsAndRevokesAccessWhenChanged() {
         FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantRepresented(YesOrNo.YES).applicantSolicitorEmail("new@email.com").build())
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantRepresented(YesOrNo.YES)
+                .applicantSolicitorEmail("new@email.com").build())
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID("org1").build()).build())
             .build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantRepresented(YesOrNo.YES).applicantSolicitorEmail("old@email.com").build())
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org2").build()).build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantRepresented(YesOrNo.YES)
+                .applicantSolicitorEmail("old@email.com").build())
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID("org2").build()).build())
             .build();
         solicitorAccessService.updateApplicantSolicitor(caseData, caseDataBefore);
         verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
@@ -63,12 +67,16 @@ class SolicitorAccessServiceTest {
     @Test
     void updateApplicantSolicitor_doesNotGrantOrRevokeIfNoChange() {
         FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantRepresented(YesOrNo.YES).applicantSolicitorEmail("same@email.com").build())
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantRepresented(YesOrNo.YES)
+                .applicantSolicitorEmail("same@email.com").build())
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID("org1").build()).build())
             .build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantRepresented(YesOrNo.YES).applicantSolicitorEmail("same@email.com").build())
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantRepresented(YesOrNo.YES)
+                .applicantSolicitorEmail("same@email.com").build())
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID("org1").build()).build())
             .build();
         solicitorAccessService.updateApplicantSolicitor(caseData, caseDataBefore);
         verify(assignPartiesAccessService, org.mockito.Mockito.never()).grantApplicantSolicitor(caseData);
