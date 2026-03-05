@@ -39,7 +39,7 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
     }
 
     /*
-     * Used for testing only.  Better option that reflection.
+     * Used for testing only.  Better option than reflection.
      * About-to-submit should return true, mid-event should return false.
      * @return boolean.
      */
@@ -68,17 +68,6 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
         throw new IllegalArgumentException(
                 "Update Contact Details: Current user is not applicant or respondent solicitor. "
                 + "Case reference:" + caseData.getCcdCaseId());
-
-
-        // remove this switch when replacement tested
-        //        switch (caseRole) {
-        //            case CaseRole.APP_SOLICITOR -> validateApplicantSolicitorFields(caseData, errors, userAuthorisation);
-        //            case CaseRole.RESP_SOLICITOR -> validateRespondentSolicitorFields(caseData, errors, userAuthorisation);
-        //            case null -> throw new IllegalArgumentException(
-        //                "Update Contact Details: CaseRole is null. Case reference:" + caseData.getCcdCaseId());
-        //            default -> throw new IllegalArgumentException(
-        //                "Update Contact Details provided invalid CaseRole.  Case reference:" + caseData.getCcdCaseId());
-        //        }
     }
 
     // PT todo - would benefit from javadoc with some pseudo
@@ -101,12 +90,12 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
     private void validateRespondentSolicitorFields(FinremCaseData caseData, List<String> errors, String userAuthorisation) {
 
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
-        ContactDetailsValidator.checkForEmptyApplicantSolicitorPostcode(caseData, wrapper, errors);
+        ContactDetailsValidator.checkForEmptyRespondentSolicitorPostcode(caseData, wrapper, errors);
 
-        if (ContactDetailsValidator.checkForApplicantSolicitorEmailAddress(caseData, wrapper, errors)) {
+        if (ContactDetailsValidator.checkForRespondentSolicitorEmail(caseData, wrapper, errors)) {
             errors.addAll(
                 updateRepresentationService.validateEmailActiveForOrganisation(
-                    caseData.getAppSolicitorEmail(),
+                    caseData.getRespondentSolicitorEmail(),
                     caseData.getCcdCaseId(),
                     userAuthorisation)
             );

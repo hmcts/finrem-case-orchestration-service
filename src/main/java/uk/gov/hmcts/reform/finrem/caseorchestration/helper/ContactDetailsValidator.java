@@ -157,6 +157,7 @@ public class ContactDetailsValidator {
      * If the respondent is represented by a solicitor and the postcode in
      * {@code wrapper.getRespondentSolicitorAddress()} is missing or empty, an error message is added
      * to the provided {@code errors} list.
+     * Contested and Consented cases stored respondent solicitor address in a common field.
      * </p>
      *
      * @param caseData the case data indicating solicitor representation status
@@ -337,11 +338,14 @@ public class ContactDetailsValidator {
         }
     }
 
-    private static void checkForRespondentSolicitorEmail(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
+    // PT Todo - you changed visibility - needs Javadoc
+    public static boolean checkForRespondentSolicitorEmail(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()
             && !isValidEmailAddress(wrapper.getRespondentSolicitorEmail(), true)) {
             errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getRespondentSolicitorEmail()));
+            return false;
         }
+        return true;
     }
 
     private static void checkForRespondentEmail(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {

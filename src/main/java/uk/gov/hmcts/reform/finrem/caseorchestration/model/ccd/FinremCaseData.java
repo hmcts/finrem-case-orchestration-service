@@ -878,8 +878,11 @@ public class FinremCaseData implements HasCaseDocument {
         return StringUtils.isNotEmpty(nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail()));
     }
 
+    /*
+     * Respondent solictor email is kept in a consistent field for contested and consented cases.
+     */
     @JsonIgnore
-    public String getRespondentSolicitorEmailForContested() {
+    public String getRespondentSolicitorEmail() {
         return nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail());
     }
 
