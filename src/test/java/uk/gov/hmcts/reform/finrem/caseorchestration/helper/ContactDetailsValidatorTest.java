@@ -498,7 +498,7 @@ class ContactDetailsValidatorTest {
     @DisplayName("Email validation test cases")
     void shouldValidateEmailAddresses(String description, FinremCaseData caseData, List<String> expectedErrors) {
         List<String> errors = ContactDetailsValidator.validateCaseDataEmailAddresses(caseData);
-        assertEquals(expectedErrors, errors);
+        assertEquals(expectedErrors, errors, description);
     }
 
     private static Stream<Arguments> provideCaseDataScenarios() {
