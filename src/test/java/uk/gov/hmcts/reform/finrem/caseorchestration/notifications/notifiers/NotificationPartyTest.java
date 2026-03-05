@@ -34,7 +34,9 @@ class NotificationPartyTest {
 
     @Test
     void shouldReturnFormerNotificationParties() {
-        assertEquals(Optional.of(FORMER_APPLICANT_SOLICITOR_ONLY), getNotificationParty(CaseRole.APP_SOLICITOR, DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY));
-        assertEquals(Optional.of(FORMER_APPLICANT_BARRISTER_ONLY), getNotificationParty(CaseRole.APP_BARRISTER, DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY));
+        assertEquals(Optional.of(FORMER_APPLICANT_SOLICITOR_ONLY),
+            getNotificationParty(CaseRole.APP_SOLICITOR, DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY));
+        assertEquals(Optional.of(FORMER_APPLICANT_BARRISTER_ONLY),
+            getNotificationParty(CaseRole.APP_BARRISTER, DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY));
     }
 }
