@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -46,6 +47,12 @@ abstract class BasePartyListenerTest {
 
     protected SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(
         FinremCaseDetails caseDetailsBefore, EmailTemplateNames emailTemplate, String solicitorReferenceNumber) {
+        return sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate, solicitorReferenceNumber,
+            null);
+    }
+
+    protected SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(
+        FinremCaseDetails caseDetailsBefore, EmailTemplateNames emailTemplate, String solicitorReferenceNumber, Barrister barrister) {
 
         return SendCorrespondenceEvent.builder()
             .caseDetails(mock(FinremCaseDetails.class))
@@ -53,6 +60,7 @@ abstract class BasePartyListenerTest {
             .notificationParties(List.of(NotificationParty.values()))
             .emailNotificationRequest(emailNotificationRequest(solicitorReferenceNumber))
             .emailTemplate(emailTemplate)
+            .barrister(barrister)
             .build();
     }
 
