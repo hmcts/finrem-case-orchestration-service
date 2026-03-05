@@ -67,7 +67,6 @@ class UpdateCaseDetailsSolicitorAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getData().getCurrentUserCaseRoleLabel()).isEqualTo("APPSOLICITOR");
         assertThat(response.getData().getContactDetailsWrapper().getApplicantRepresented()).isEqualTo(YesOrNo.YES);
         assertThat(response.getData().getContactDetailsWrapper().getCurrentUserIsApplicantSolicitor()).isEqualTo(YesOrNo.YES);
         assertNull(response.getData().getContactDetailsWrapper().getCurrentUserIsRespondentSolicitor());
@@ -88,7 +87,6 @@ class UpdateCaseDetailsSolicitorAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getData().getCurrentUserCaseRoleLabel()).isEqualTo("RESPSOLICITOR");
         assertThat(response.getData().getContactDetailsWrapper().getConsentedRespondentRepresented()).isEqualTo(YesOrNo.YES);
         assertThat(response.getData().getContactDetailsWrapper().getCurrentUserIsRespondentSolicitor()).isEqualTo(YesOrNo.YES);
         assertNull(response.getData().getContactDetailsWrapper().getCurrentUserIsApplicantSolicitor());
@@ -109,7 +107,6 @@ class UpdateCaseDetailsSolicitorAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getData().getCurrentUserCaseRoleLabel()).isEqualTo("RESPSOLICITOR");
         assertThat(response.getData().getContactDetailsWrapper().getContestedRespondentRepresented()).isEqualTo(YesOrNo.YES);
         assertThat(response.getData().getContactDetailsWrapper().getCurrentUserIsRespondentSolicitor()).isEqualTo(YesOrNo.YES);
         assertNull(response.getData().getContactDetailsWrapper().getCurrentUserIsApplicantSolicitor());

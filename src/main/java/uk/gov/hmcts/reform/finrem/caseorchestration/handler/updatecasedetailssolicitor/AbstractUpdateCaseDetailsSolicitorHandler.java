@@ -40,7 +40,8 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
 
     /*
      * Used for testing only.  Better option than reflection.
-     * About-to-submit should return true, mid-event should return false.
+     * Mid-event override should return false (so about-to-submit has values).
+     * About-to-submit override should return true, to clear values so they're not persisted.
      * @return boolean.
      */
     public boolean clearsTemporaryFields() {
@@ -70,7 +71,15 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
                 + "Case reference:" + caseData.getCcdCaseId());
     }
 
-    // PT todo - would benefit from javadoc with some pseudo
+    /*
+     * Checks for an empty postcode.
+     * Checks for an email address.
+     * If the email is OK, checks it is active for the organisation.
+     *
+     * @param caseData the case data to validate.
+     * @param errors the list to add any errors to. Any failing checks append errors.
+     * @param userAuthorisation the user authorisation token to pass to the representation service.
+     */
     private void validateApplicantSolicitorFields(FinremCaseData caseData, List<String> errors, String userAuthorisation) {
 
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
@@ -86,7 +95,15 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
         }
     }
 
-    // PT todo - would benefit from javadoc with some pseudo
+    /*
+     * Checks for an empty postcode.
+     * Checks for an email address.
+     * If the email is OK, checks it is active for the organisation.
+     *
+     * @param caseData the case data to validate.
+     * @param errors the list to add any errors to. Any failing checks append errors.
+     * @param userAuthorisation the user authorisation token to pass to the representation service.
+     */
     private void validateRespondentSolicitorFields(FinremCaseData caseData, List<String> errors, String userAuthorisation) {
 
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();

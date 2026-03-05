@@ -90,7 +90,6 @@ public class ContactDetailsWrapper {
     private YesOrNo currentUserIsApplicantSolicitor;
     @TemporaryField
     private YesOrNo currentUserIsRespondentSolicitor;
-    // PT todo - if these above work, do the additional 2 config files to clear them out.
 
     /**
      * Compares two {@link ContactDetailsWrapper} objects field by field and returns a map

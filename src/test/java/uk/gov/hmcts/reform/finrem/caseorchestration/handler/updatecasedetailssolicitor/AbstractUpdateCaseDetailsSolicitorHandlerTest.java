@@ -45,6 +45,8 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
 
     private AbstractUpdateCaseDetailsSolicitorHandler underTest;
 
+    private static final String VALID_EMAIL = "validEmail@test.com";
+
     @Mock
     private UpdateRepresentationService updateRepresentationService;
 
@@ -109,15 +111,11 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
      * Test that applicant solicitor validation calls the right downstream methods with right params.
      * Then confirm representation service errors are shown in the response.
      */
-    @Test
-    void when_applicantSolicitor_then_correct_validation_called() {
+    @ParameterizedTest
+    @EnumSource(value = CaseRole.class, mode = EnumSource.Mode.INCLUDE,  names = {"APP_SOLICITOR", "RESP_SOLICITOR"})
+    void when_handle_thenCorrectValidationCalled(CaseRole caseRole) {
         // Arrange
-        String validEmail = "validEmail@test.com";
-
-        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
-            .applicantSolicitorEmail(validEmail)
-            .currentUserIsApplicantSolicitor(YesOrNo.YES)
-            .build();
+        ContactDetailsWrapper wrapper = getContactDetailsWrapper(caseRole);
 
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(wrapper)
@@ -129,14 +127,27 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
         List<String> noErrors = new ArrayList<>();
         List<String> errors = new ArrayList<>(List.of("an error"));
 
-        when(updateRepresentationService.validateEmailActiveForOrganisation(validEmail, CASE_ID, AUTH_TOKEN)).thenReturn(errors);
+        when(updateRepresentationService.validateEmailActiveForOrganisation(VALID_EMAIL, CASE_ID, AUTH_TOKEN)).thenReturn(errors);
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert validation methods called with the correct params.
+        if (CaseRole.APP_SOLICITOR.equals(caseRole)) {
+            verifyApplicantValidationAndParams(callbackRequest, caseData, wrapper, noErrors, underTest, updateRepresentationService);
+        } else {
+            verifyRespondentValidationAndParams(callbackRequest, caseData, wrapper, noErrors, underTest, updateRepresentationService);
+        }
+
+        // Assert mocked errors end up in the response
+        assertThat(response.getErrors()).isEqualTo(errors);
+    }
+
+    private static void verifyApplicantValidationAndParams(FinremCallbackRequest callbackRequest, FinremCaseData caseData,
+                                                           ContactDetailsWrapper wrapper, List<String> noErrors,
+                                                           AbstractUpdateCaseDetailsSolicitorHandler underTest,
+                                                           UpdateRepresentationService updateRepresentationService) {
         try (MockedStatic<ContactDetailsValidator> mocked = mockStatic(ContactDetailsValidator.class)) {
-            // run code that should call the static method
             underTest.handle(callbackRequest, AUTH_TOKEN);
             mocked.verify(() ->
                 ContactDetailsValidator.checkForEmptyApplicantSolicitorPostcode(caseData, wrapper, noErrors)
@@ -146,11 +157,43 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
             );
 
             verify(updateRepresentationService)
-                .validateEmailActiveForOrganisation(validEmail, CASE_ID, AUTH_TOKEN);
+                .validateEmailActiveForOrganisation(VALID_EMAIL, CASE_ID, AUTH_TOKEN);
         }
+    }
 
-        // Assert mocked errors end up in the response
-        assertThat(response.getErrors()).isEqualTo(errors);
+    private static void verifyRespondentValidationAndParams(FinremCallbackRequest callbackRequest,
+                                                            FinremCaseData caseData, ContactDetailsWrapper wrapper,
+                                                            List<String> noErrors,
+                                                            AbstractUpdateCaseDetailsSolicitorHandler underTest,
+                                                            UpdateRepresentationService updateRepresentationService) {
+        try (MockedStatic<ContactDetailsValidator> mocked = mockStatic(ContactDetailsValidator.class)) {
+            underTest.handle(callbackRequest, AUTH_TOKEN);
+            mocked.verify(() ->
+                ContactDetailsValidator.checkForEmptyRespondentSolicitorPostcode(caseData, wrapper, noErrors)
+            );
+            mocked.verify(() ->
+                ContactDetailsValidator.checkForRespondentSolicitorEmail(caseData, wrapper, noErrors)
+            );
+
+            verify(updateRepresentationService)
+                .validateEmailActiveForOrganisation(VALID_EMAIL, CASE_ID, AUTH_TOKEN);
+        }
+    }
+
+    private static ContactDetailsWrapper getContactDetailsWrapper(CaseRole caseRole) {
+        return switch (caseRole) {
+            case APP_SOLICITOR -> ContactDetailsWrapper.builder()
+                .applicantSolicitorEmail(VALID_EMAIL)
+                .currentUserIsApplicantSolicitor(YesOrNo.YES)
+                .build();
+
+            case RESP_SOLICITOR -> ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail(VALID_EMAIL)
+                .currentUserIsRespondentSolicitor(YesOrNo.YES)
+                .build();
+
+            default -> throw new IllegalArgumentException("Unsupported caseRole: " + caseRole);
+        };
     }
 
     static Stream<Arguments> errorScenarios(String solicitorRole) {
@@ -211,6 +254,35 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
                 .applicantSolicitorAddress(address)
                 .applicantRepresented(YesOrNo.YES)
                 .currentUserIsApplicantSolicitor(YesOrNo.YES)
+                .build())
+            .build();
+
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR, caseData);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).containsExactlyElementsOf(expectedErrors);
+    }
+
+    static Stream<Arguments> respondentSolicitorErrorScenarios() {
+        return errorScenarios("respondent");
+    }
+
+    // PT Todo - needs more work to cover consented, which uses consentedRespondentRepresented
+    @ParameterizedTest
+    @MethodSource("respondentSolicitorErrorScenarios")
+    void when_respondentSolicitorWithAddressErrors_then_handleErrors(Address address,
+                                                                    String email,
+                                                                    List<String> expectedErrors) {
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail(email)
+                .respondentSolicitorAddress(address)
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .currentUserIsRespondentSolicitor(YesOrNo.YES)
                 .build())
             .build();
 
