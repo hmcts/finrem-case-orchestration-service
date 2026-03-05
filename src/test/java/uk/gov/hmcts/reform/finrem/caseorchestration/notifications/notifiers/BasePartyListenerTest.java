@@ -45,8 +45,7 @@ abstract class BasePartyListenerTest {
     }
 
     protected SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(
-        FinremCaseDetails caseDetailsBefore,
-        EmailTemplateNames emailTemplate, String solicitorReferenceNumber) {
+        FinremCaseDetails caseDetailsBefore, EmailTemplateNames emailTemplate, String solicitorReferenceNumber) {
 
         return SendCorrespondenceEvent.builder()
             .caseDetails(mock(FinremCaseDetails.class))

@@ -33,7 +33,7 @@ class FormerIntervenerFourSolicitorListenerTest extends BasePartyListenerTest {
     @InjectMocks
     private FormerIntervenerFourSolicitorListener underTest;
 
-    private static SendCorrespondenceEvent.SendCorrespondenceEventBuilder notifyingIntervenerEvent() {
+    private static SendCorrespondenceEvent.SendCorrespondenceEventBuilder notifyingIntervenerSolicitorEvent() {
         return SendCorrespondenceEvent.builder()
             .caseDetailsBefore(FinremCaseDetails.builder()
                 .data(FinremCaseData.builder()
@@ -50,7 +50,7 @@ class FormerIntervenerFourSolicitorListenerTest extends BasePartyListenerTest {
         "FORMER_INTERVENER_FOUR_SOLICITOR_ONLY"
     })
     void shouldNotHandleIrrelevantNotificationParty(NotificationParty notificationParty) {
-        SendCorrespondenceEvent otherEvent = notifyingIntervenerEvent()
+        SendCorrespondenceEvent otherEvent = notifyingIntervenerSolicitorEvent()
             .notificationParties(List.of(notificationParty))
             .build();
 

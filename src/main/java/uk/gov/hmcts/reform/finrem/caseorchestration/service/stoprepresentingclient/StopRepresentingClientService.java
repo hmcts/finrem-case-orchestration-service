@@ -441,6 +441,12 @@ public class StopRepresentingClientService {
     private void sendRepresentativeNotification(
         StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
         NotificationRequest notificationRequest) {
+        sendRepresentativeNotification(info, parties, emailTemplate, notificationRequest, null);
+    }
+
+    private void sendRepresentativeNotification(
+        StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
+        NotificationRequest notificationRequest, Barrister barrister) {
         String userAuthorisation = info.getUserAuthorisation();
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
@@ -450,6 +456,7 @@ public class StopRepresentingClientService {
             .caseDetails(info.getCaseDetails())
             .caseDetailsBefore(info.getCaseDetailsBefore())
             .authToken(userAuthorisation)
+            .barrister(barrister)
             .build()
         );
     }
@@ -460,7 +467,8 @@ public class StopRepresentingClientService {
             List.of(FORMER_APPLICANT_BARRISTER_ONLY),
             getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
-                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister)
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
+            barrister
         );
     }
 
@@ -480,7 +488,8 @@ public class StopRepresentingClientService {
             List.of(FORMER_RESPONDENT_BARRISTER_ONLY),
             getNotifyRespondentRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
-                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister)
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
+            barrister
         );
     }
 
@@ -505,7 +514,8 @@ public class StopRepresentingClientService {
             List.of(resolveIntervenerBarristerNotificationParty(intervenerId)),
             getNotifyIntervenerRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
-                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister, intervenerType)
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister, intervenerType),
+            barrister
         );
     }
 

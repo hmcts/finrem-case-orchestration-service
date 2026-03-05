@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
 import lombok.Builder;
 import lombok.Getter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -22,6 +23,7 @@ public class SendCorrespondenceEvent {
     FinremCaseDetails caseDetails;
     FinremCaseDetails caseDetailsBefore;
     String authToken;
+    Barrister barrister;
     boolean letterNotificationOnly;
 
     public FinremCaseData getCaseData() {
