@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
@@ -44,12 +45,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
@@ -304,6 +307,7 @@ public class StopRepresentingClientService {
             }
             if (revocation.respondentSolicitorRevoked) {
                 notifyRespondentSolicitor(info);
+                notifyRespondent(info);
             }
         }
     }
@@ -541,34 +545,80 @@ public class StopRepresentingClientService {
         );
     }
 
-    private void notifyApplicant(StopRepresentingClientInfo info) {
+    private void notifyParty(StopRepresentingClientInfo info,
+                             NotificationParty notificationParty,
+                             Function<StopRepresentingClientInfo, CaseDocument> documentGenerator) {
+
         String userAuthorisation = info.getUserAuthorisation();
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
             .letterNotificationOnly(true)
-            .notificationParties(List.of(NotificationParty.APPLICANT))
+            .notificationParties(List.of(notificationParty))
             .caseDetails(info.getCaseDetails())
             .caseDetailsBefore(info.getCaseDetailsBefore())
             .authToken(userAuthorisation)
-            .documentsToPost(List.of(
-                generateStopRepresentingApplicantLetter(info.getCaseDetails(), info.userAuthorisation)
-            ))
+            .documentsToPost(List.of(documentGenerator.apply(info)))
             .build()
+        );
+    }
+
+    private void notifyApplicant(StopRepresentingClientInfo info) {
+        notifyParty(
+            info,
+            NotificationParty.APPLICANT,
+            i -> generateStopRepresentingApplicantLetter(i.getCaseDetails(), i.getUserAuthorisation())
+        );
+    }
+
+    private void notifyRespondent(StopRepresentingClientInfo info) {
+        notifyParty(
+            info,
+            NotificationParty.RESPONDENT,
+            i -> generateStopRepresentingRespondentLetter(i.getCaseDetails(), i.getUserAuthorisation())
+        );
+    }
+
+    private CaseDocument generateStopRepresentingLetter(FinremCaseDetails finremCaseDetails,
+                                                        String authorisationToken,
+                                                        DocumentHelper.PaperNotificationRecipient recipient,
+                                                        String filenamePrefix,
+                                                        String template) {
+        Map<String, Object> documentDataMap =
+            letterDetailsMapper.getLetterDetailsAsMap(finremCaseDetails, recipient);
+
+        String documentFilename = format("%s_%s.pdf",
+            filenamePrefix,
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+        );
+
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(
+            authorisationToken,
+            documentDataMap,
+            template,
+            documentFilename,
+            finremCaseDetails.getCaseType()
         );
     }
 
     private CaseDocument generateStopRepresentingApplicantLetter(FinremCaseDetails finremCaseDetails,
                                                                  String authorisationToken) {
-        Map<String, Object> documentDataMap = letterDetailsMapper.getLetterDetailsAsMap(finremCaseDetails, APPLICANT);
-        String documentFilename = format("FT-FRM-LET-ENG-NOC003_%s.pdf", LocalDateTime.now()
-            .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
-
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(
+        return generateStopRepresentingLetter(
+            finremCaseDetails,
             authorisationToken,
-            documentDataMap,
-            documentConfiguration.getStopRepresentingLetterToApplicantTemplate(),
-            documentFilename,
-            finremCaseDetails.getCaseType()
+            APPLICANT,
+            "ApplicantRepresentationRemovalNotice",
+            documentConfiguration.getStopRepresentingLetterToApplicantTemplate()
+        );
+    }
+
+    private CaseDocument generateStopRepresentingRespondentLetter(FinremCaseDetails finremCaseDetails,
+                                                                  String authorisationToken) {
+        return generateStopRepresentingLetter(
+            finremCaseDetails,
+            authorisationToken,
+            RESPONDENT,
+            "RespondentRepresentationRemovalNotice",
+            documentConfiguration.getStopRepresentingLetterToRespondentTemplate()
         );
     }
 
