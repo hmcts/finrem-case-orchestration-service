@@ -27,6 +27,8 @@ public class ContactDetailsValidator {
     static final String INVALID_EMAIL_ADDRESS_ERROR_MESSAGE = "%s is not a valid Email address.";
     static final String EMAIL_NOT_IN_APPLICANT_ORG_ERROR_MESSAGE = "%s is not a valid Email address. "
         + "The email address must be registered to access MyHMCTS";
+    static final String EMAIL_NOT_IN_RESPONDENT_ORG_ERROR_MESSAGE = "%s is not a valid Email address. "
+        + "The email address must be registered to access MyHMCTS";
     static final String ORGANISATION_POLICY_ERROR = "Solicitor can only represent one party.";
     static final String INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE = "%s. Method validatePostcodesByRepresentation is only for "
         + "updating contact details on consented cases. Use validateCaseDataAddresses whenever possible.";
@@ -244,7 +246,7 @@ public class ContactDetailsValidator {
 
         checkForApplicantSolicitorEmailAddress(caseData, validatePartiesService, errors);
         checkForApplicantEmail(wrapper, errors);
-        checkForRespondentSolicitorEmail(caseData, wrapper, errors);
+        checkForRespondentSolicitorEmail(caseData, validatePartiesService, errors);
         checkForRespondentEmail(caseData, wrapper, errors);
 
         return errors;
@@ -371,10 +373,19 @@ public class ContactDetailsValidator {
         }
     }
 
-    private static void checkForRespondentSolicitorEmail(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
-        if (caseData.isRespondentRepresentedByASolicitor()
-            && !isValidEmailAddress(wrapper.getRespondentSolicitorEmail(), true)) {
-            errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getRespondentSolicitorEmail()));
+    private static void checkForRespondentSolicitorEmail(FinremCaseData caseData, ValidatePartiesService validatePartiesService,
+                                                         List<String> errors) {
+        String respondentSolicitorEmail = caseData.getContactDetailsWrapper().getRespondentSolicitorEmail();
+
+        if (caseData.isRespondentRepresentedByASolicitor()) {
+            if (!isValidEmailAddress(respondentSolicitorEmail, true)) {
+                errors.add(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(respondentSolicitorEmail));
+            } else {
+                String orgId = getOrganisationId(caseData.getRespondentOrganisationPolicy());
+                if (!isEmailValidForOrganisation(validatePartiesService, respondentSolicitorEmail, orgId)) {
+                    errors.add(EMAIL_NOT_IN_RESPONDENT_ORG_ERROR_MESSAGE.formatted(respondentSolicitorEmail));
+                }
+            }
         }
     }
 

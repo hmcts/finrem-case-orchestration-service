@@ -493,6 +493,48 @@ class ContactDetailsValidatorTest {
         verifyNoMoreInteractions(validatePartiesService);
     }
 
+    @Test
+    void givenRespondentRepresentedInContested_whenEmailNotInOrg_thenErrorPopulated() {
+        ValidatePartiesService validatePartiesService = mock(ValidatePartiesService.class);
+        when(validatePartiesService.isEmailRegisteredInOrg(TEST_SOLICITOR_EMAIL, TEST_ORG_ID)).thenReturn(false);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .respondentSolicitorEmail(TEST_SOLICITOR_EMAIL)
+                .build())
+            .build();
+
+        List<String> errors = ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService);
+
+        assertThat(errors).contains("%s is not a valid Email address. ".formatted(TEST_SOLICITOR_EMAIL)
+            + "The email address must be registered to access MyHMCTS");
+        verify(validatePartiesService).isEmailRegisteredInOrg(TEST_SOLICITOR_EMAIL, TEST_ORG_ID);
+        verifyNoMoreInteractions(validatePartiesService);
+    }
+
+    @Test
+    void givenRespondentRepresentedInConsented_whenEmailNotInOrg_thenErrorPopulated() {
+        ValidatePartiesService validatePartiesService = mock(ValidatePartiesService.class);
+        when(validatePartiesService.isEmailRegisteredInOrg(TEST_SOLICITOR_EMAIL, TEST_ORG_ID)).thenReturn(false);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .consentedRespondentRepresented(YesOrNo.YES)
+                .respondentSolicitorEmail(TEST_SOLICITOR_EMAIL)
+                .build())
+            .build();
+
+        List<String> errors = ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService);
+
+        assertThat(errors).contains("%s is not a valid Email address. ".formatted(TEST_SOLICITOR_EMAIL)
+            + "The email address must be registered to access MyHMCTS");
+        verify(validatePartiesService).isEmailRegisteredInOrg(TEST_SOLICITOR_EMAIL, TEST_ORG_ID);
+        verifyNoMoreInteractions(validatePartiesService);
+    }
+
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("provideCaseDataScenarios")
     @DisplayName("Email validation test cases")
