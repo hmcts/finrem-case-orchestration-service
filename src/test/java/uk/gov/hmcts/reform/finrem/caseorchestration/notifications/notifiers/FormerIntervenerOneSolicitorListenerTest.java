@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
@@ -26,29 +25,32 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_FOUR_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_ONE_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_THREE_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_TWO_SOLICITOR_ONLY;
 
-class FormerIntervenerSolicitorListenerTest extends BasePartyListenerTest {
+class FormerIntervenerOneSolicitorListenerTest extends BasePartyListenerTest {
 
     @InjectMocks
-    private FormerIntervenerSolicitorListener underTest;
+    private FormerIntervenerOneSolicitorListener underTest;
 
-    FormerIntervenerSolicitorListenerTest() {
-        super(FORMER_INTERVENER_ONE_SOLICITOR_ONLY, FORMER_INTERVENER_TWO_SOLICITOR_ONLY,
-            FORMER_INTERVENER_THREE_SOLICITOR_ONLY, FORMER_INTERVENER_FOUR_SOLICITOR_ONLY);
+    private static SendCorrespondenceEvent.SendCorrespondenceEventBuilder notifyingIntervenerEvent() {
+        return SendCorrespondenceEvent.builder()
+            .caseDetailsBefore(FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .intervenerOne(IntervenerOne.builder()
+                        .intervenerRepresented(YesOrNo.YES)
+                        .intervenerSolEmail(TEST_SOLICITOR_EMAIL)
+                        .build())
+                    .build())
+                .build());
     }
 
     @ParameterizedTest
     @EnumSource(value = NotificationParty.class, mode = EnumSource.Mode.EXCLUDE, names = {
-        "FORMER_INTERVENER_ONE_SOLICITOR_ONLY", "FORMER_INTERVENER_TWO_SOLICITOR_ONLY",
-        "FORMER_INTERVENER_THREE_SOLICITOR_ONLY", "FORMER_INTERVENER_FOUR_SOLICITOR_ONLY"
+        "FORMER_INTERVENER_ONE_SOLICITOR_ONLY"
     })
     void shouldNotHandleIrrelevantNotificationParty(NotificationParty notificationParty) {
-        SendCorrespondenceEvent otherEvent = SendCorrespondenceEvent.builder()
+        SendCorrespondenceEvent otherEvent = notifyingIntervenerEvent()
             .notificationParties(List.of(notificationParty))
             .build();
 
@@ -74,7 +76,7 @@ class FormerIntervenerSolicitorListenerTest extends BasePartyListenerTest {
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
         SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
-            solicitorReferenceNumber, IntervenerType.INTERVENER_ONE);
+            solicitorReferenceNumber);
 
         underTest.handleNotification(event);
 
@@ -106,7 +108,7 @@ class FormerIntervenerSolicitorListenerTest extends BasePartyListenerTest {
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
         SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
-            TEST_INTV_SOLICITOR_REFERENCE, IntervenerType.INTERVENER_ONE);
+            TEST_INTV_SOLICITOR_REFERENCE);
 
         underTest.handleNotification(event);
 
@@ -130,7 +132,7 @@ class FormerIntervenerSolicitorListenerTest extends BasePartyListenerTest {
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
         SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
-            TEST_INTV_SOLICITOR_REFERENCE, IntervenerType.INTERVENER_ONE);
+            TEST_INTV_SOLICITOR_REFERENCE);
 
         underTest.handleNotification(event);
 

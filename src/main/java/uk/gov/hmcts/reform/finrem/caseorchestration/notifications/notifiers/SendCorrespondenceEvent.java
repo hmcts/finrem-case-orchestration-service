@@ -2,11 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 
 import lombok.Builder;
 import lombok.Getter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
@@ -24,8 +22,6 @@ public class SendCorrespondenceEvent {
     FinremCaseDetails caseDetails;
     FinremCaseDetails caseDetailsBefore;
     String authToken;
-    IntervenerType intervenerType;
-    Barrister barrister;
     boolean letterNotificationOnly;
 
     public FinremCaseData getCaseData() {

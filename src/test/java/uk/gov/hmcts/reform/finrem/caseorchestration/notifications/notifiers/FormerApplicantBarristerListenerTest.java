@@ -21,16 +21,11 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
 
 class FormerApplicantBarristerListenerTest extends BasePartyListenerTest {
 
     @InjectMocks
     private FormerApplicantBarristerListener underTest;
-
-    FormerApplicantBarristerListenerTest() {
-        super(FORMER_APPLICANT_BARRISTER_ONLY);
-    }
 
     @ParameterizedTest
     @EnumSource(value = NotificationParty.class, mode = EnumSource.Mode.EXCLUDE, names = {"FORMER_APPLICANT_BARRISTER_ONLY"})

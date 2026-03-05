@@ -22,16 +22,11 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
 
 class FormerApplicantSolicitorListenerTest extends BasePartyListenerTest {
 
     @InjectMocks
     private FormerApplicantSolicitorListener underTest;
-
-    FormerApplicantSolicitorListenerTest() {
-        super(FORMER_APPLICANT_SOLICITOR_ONLY);
-    }
 
     @ParameterizedTest
     @EnumSource(value = NotificationParty.class, mode = EnumSource.Mode.EXCLUDE, names = {"FORMER_APPLICANT_SOLICITOR_ONLY"})
