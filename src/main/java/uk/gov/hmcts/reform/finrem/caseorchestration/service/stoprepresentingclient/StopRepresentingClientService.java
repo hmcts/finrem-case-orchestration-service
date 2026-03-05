@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -45,6 +46,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -393,7 +395,9 @@ public class StopRepresentingClientService {
         final FinremCaseData originalFinremCaseData = getFinremCaseDataBefore(info);
 
         // to check if ChangeOrganisationRequest populated, otherwise skip it
-        if (finremCaseData.getChangeOrganisationRequestField() == null) {
+        if (Optional.ofNullable(finremCaseData.getChangeOrganisationRequestField())
+            .map(ChangeOrganisationRequest::isNoOrganisationsToAddOrRemove)
+                .orElse(true)) {
             log.info("{} - Not sending request to case assignment service due to changeOrganisationRequestField is null",
                 finremCaseData.getCcdCaseId());
             return NO_NOC_INVOLVED;
