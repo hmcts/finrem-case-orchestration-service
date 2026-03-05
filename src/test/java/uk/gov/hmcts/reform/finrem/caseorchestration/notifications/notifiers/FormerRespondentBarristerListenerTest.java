@@ -7,7 +7,11 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
@@ -21,16 +25,11 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY;
 
 class FormerRespondentBarristerListenerTest extends BasePartyListenerTest {
 
     @InjectMocks
     private FormerRespondentBarristerListener underTest;
-
-    FormerRespondentBarristerListenerTest() {
-        super(FORMER_RESPONDENT_BARRISTER_ONLY);
-    }
 
     @ParameterizedTest
     @EnumSource(value = NotificationParty.class, mode = EnumSource.Mode.EXCLUDE, names = {"FORMER_RESPONDENT_BARRISTER_ONLY"})
@@ -47,11 +46,20 @@ class FormerRespondentBarristerListenerTest extends BasePartyListenerTest {
     @ValueSource(strings = {TEST_SOLICITOR_REFERENCE})
     @NullAndEmptySource
     void shouldSendEmailNotification(String solicitorReferenceNumber) {
-        FinremCaseDetails caseDetailsBefore = mock(FinremCaseDetails.class);
+        Barrister barrister = mock(Barrister.class);
+        FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
+                    .respondentBarristers(List.of(BarristerCollectionItem.builder()
+                        .value(barrister)
+                        .build()))
+                    .build())
+                .build())
+            .build();
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
         SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
-            solicitorReferenceNumber);
+            solicitorReferenceNumber, barrister);
 
         underTest.handleNotification(event);
 

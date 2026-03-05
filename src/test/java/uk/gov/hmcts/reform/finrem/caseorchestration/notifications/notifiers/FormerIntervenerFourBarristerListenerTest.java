@@ -7,10 +7,11 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 
@@ -30,29 +31,36 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_OR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.barrister;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.barristers;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_FOUR_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_ONE_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_THREE_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_TWO_BARRISTER_ONLY;
 
-class FormerIntervenerBarristerListenerTest extends BasePartyListenerTest {
+class FormerIntervenerFourBarristerListenerTest extends BasePartyListenerTest {
 
     @InjectMocks
-    private FormerIntervenerBarristerListener underTest;
+    private FormerIntervenerFourBarristerListener underTest;
 
-    FormerIntervenerBarristerListenerTest() {
-        super(FORMER_INTERVENER_ONE_BARRISTER_ONLY, FORMER_INTERVENER_TWO_BARRISTER_ONLY,
-            FORMER_INTERVENER_THREE_BARRISTER_ONLY, FORMER_INTERVENER_FOUR_BARRISTER_ONLY);
+    private static SendCorrespondenceEvent.SendCorrespondenceEventBuilder notifyingIntervenerBarristerEvent(
+        Barrister barrister) {
+        return SendCorrespondenceEvent.builder()
+            .caseDetailsBefore(FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
+                        .intvr4Barristers(List.of(
+                            BarristerCollectionItem.builder().value(barrister).build()
+                        ))
+                        .build())
+                    .build())
+                .build());
     }
 
     @ParameterizedTest
     @EnumSource(value = NotificationParty.class, mode = EnumSource.Mode.EXCLUDE, names = {
-        "FORMER_INTERVENER_ONE_BARRISTER_ONLY", "FORMER_INTERVENER_TWO_BARRISTER_ONLY",
-        "FORMER_INTERVENER_THREE_BARRISTER_ONLY", "FORMER_INTERVENER_FOUR_BARRISTER_ONLY"
+        "FORMER_INTERVENER_FOUR_BARRISTER_ONLY"
     })
     void shouldNotHandleIrrelevantNotificationParty(NotificationParty notificationParty) {
-        SendCorrespondenceEvent otherEvent = SendCorrespondenceEvent.builder()
+        Barrister barrister = mock(Barrister.class);
+
+        SendCorrespondenceEvent otherEvent = notifyingIntervenerBarristerEvent(barrister)
             .notificationParties(List.of(notificationParty))
+            .barrister(barrister)
             .build();
 
         underTest.handleNotification(otherEvent);
@@ -65,7 +73,7 @@ class FormerIntervenerBarristerListenerTest extends BasePartyListenerTest {
     void shouldSendEmailNotification(String solicitorReferenceNumber) {
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
-                .intvr1Barristers(
+                .intvr4Barristers(
                     barristers(TEST_ORG_ID, TEST_INTV_BARRISTER_USER_ID, TEST_INTV_BARRISTER_NAME, TEST_INTV_BARRISTER_EMAIL)
                 )
                 .build())
@@ -77,7 +85,7 @@ class FormerIntervenerBarristerListenerTest extends BasePartyListenerTest {
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
         SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
-            solicitorReferenceNumber, IntervenerType.INTERVENER_ONE)
+            solicitorReferenceNumber)
             .toBuilder()
             .barrister(barrister(TEST_ORG_ID, TEST_INTV_BARRISTER_USER_ID, TEST_INTV_BARRISTER_NAME, TEST_INTV_BARRISTER_EMAIL))
             .build();
@@ -112,7 +120,7 @@ class FormerIntervenerBarristerListenerTest extends BasePartyListenerTest {
     void shouldNotSendEmailNotificationIfBarristerNotFound() {
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .barristerCollectionWrapper(BarristerCollectionWrapper.builder()
-                .intvr1Barristers(
+                .intvr4Barristers(
                     barristers(TEST_ORG_ID, "whatever", TEST_INTV_BARRISTER_NAME, TEST_INTV_BARRISTER_EMAIL)
                 )
                 .build())
@@ -124,7 +132,7 @@ class FormerIntervenerBarristerListenerTest extends BasePartyListenerTest {
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
         SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
-            TEST_INTV_SOLICITOR_REFERENCE, IntervenerType.INTERVENER_ONE)
+            TEST_INTV_SOLICITOR_REFERENCE)
             .toBuilder()
             .barrister(barrister(TEST_ORG_ID, TEST_INTV_BARRISTER_USER_ID, TEST_INTV_BARRISTER_NAME, TEST_INTV_BARRISTER_EMAIL))
             .build();

@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -45,6 +46,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -393,7 +395,9 @@ public class StopRepresentingClientService {
         final FinremCaseData originalFinremCaseData = getFinremCaseDataBefore(info);
 
         // to check if ChangeOrganisationRequest populated, otherwise skip it
-        if (finremCaseData.getChangeOrganisationRequestField() == null) {
+        if (Optional.ofNullable(finremCaseData.getChangeOrganisationRequestField())
+            .map(ChangeOrganisationRequest::isNoOrganisationsToAddOrRemove)
+                .orElse(true)) {
             log.info("{} - Not sending request to case assignment service due to changeOrganisationRequestField is null",
                 finremCaseData.getCcdCaseId());
             return NO_NOC_INVOLVED;
@@ -450,15 +454,7 @@ public class StopRepresentingClientService {
 
     private void sendRepresentativeNotification(
         StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
-        NotificationRequest notificationRequest, IntervenerType intervenerType
-    ) {
-        sendRepresentativeNotification(info, parties, emailTemplate, notificationRequest, intervenerType, null);
-    }
-
-    private void sendRepresentativeNotification(
-        StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
-        NotificationRequest notificationRequest, IntervenerType intervenerType, Barrister barrister
-    ) {
+        NotificationRequest notificationRequest, Barrister barrister) {
         String userAuthorisation = info.getUserAuthorisation();
 
         applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
@@ -468,7 +464,6 @@ public class StopRepresentingClientService {
             .caseDetails(info.getCaseDetails())
             .caseDetailsBefore(info.getCaseDetailsBefore())
             .authToken(userAuthorisation)
-            .intervenerType(intervenerType)
             .barrister(barrister)
             .build()
         );
@@ -481,7 +476,7 @@ public class StopRepresentingClientService {
             getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
-            null, barrister
+            barrister
         );
     }
 
@@ -502,7 +497,7 @@ public class StopRepresentingClientService {
             getNotifyRespondentRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
-            null, barrister
+            barrister
         );
     }
 
@@ -528,7 +523,7 @@ public class StopRepresentingClientService {
             getNotifyIntervenerRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister, intervenerType),
-            intervenerType, barrister
+            barrister
         );
     }
 
@@ -540,8 +535,7 @@ public class StopRepresentingClientService {
             getNotifyIntervenerRepresentativeTemplateName(getFinremCaseData(info)),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(),
-                    CaseRole.getIntervenerSolicitorByIndex(intervenerId), intervenerType),
-            intervenerType
+                    CaseRole.getIntervenerSolicitorByIndex(intervenerId), intervenerType)
         );
     }
 

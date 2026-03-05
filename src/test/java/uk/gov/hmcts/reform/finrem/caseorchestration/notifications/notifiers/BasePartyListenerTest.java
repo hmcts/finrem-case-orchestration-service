@@ -3,9 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
@@ -30,12 +30,6 @@ abstract class BasePartyListenerTest {
     protected NotificationService notificationService;
     @Mock
     protected InternationalPostalService internationalPostalService;
-
-    protected NotificationParty[] notificationParty;
-
-    BasePartyListenerTest(NotificationParty... notificationParty) {
-        this.notificationParty = notificationParty;
-    }
 
     protected static NotificationRequest emailNotificationRequest(String solicitorReferenceNumber) {
         return NotificationRequest.builder()
@@ -53,21 +47,20 @@ abstract class BasePartyListenerTest {
 
     protected SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(
         FinremCaseDetails caseDetailsBefore, EmailTemplateNames emailTemplate, String solicitorReferenceNumber) {
-
-        return sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate, solicitorReferenceNumber, null);
+        return sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate, solicitorReferenceNumber,
+            null);
     }
 
     protected SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(
-        FinremCaseDetails caseDetailsBefore, EmailTemplateNames emailTemplate, String solicitorReferenceNumber,
-        IntervenerType intervenerType) {
+        FinremCaseDetails caseDetailsBefore, EmailTemplateNames emailTemplate, String solicitorReferenceNumber, Barrister barrister) {
 
         return SendCorrespondenceEvent.builder()
-            .caseDetails(FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build())
+            .caseDetails(mock(FinremCaseDetails.class))
             .caseDetailsBefore(caseDetailsBefore)
-            .notificationParties(List.of(notificationParty))
+            .notificationParties(List.of(NotificationParty.values()))
             .emailNotificationRequest(emailNotificationRequest(solicitorReferenceNumber))
             .emailTemplate(emailTemplate)
-            .intervenerType(intervenerType)
+            .barrister(barrister)
             .build();
     }
 
