@@ -2,16 +2,21 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.OrganisationApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.MaskHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationUser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
@@ -20,23 +25,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PrdOrganisationServiceTest extends BaseServiceTest {
-
-    public static final String USER_ID = "someUserId";
-    public static final String TEST_EMAIL = "test@gmail.com";
+@ExtendWith(MockitoExtension.class)
+class PrdOrganisationServiceTest {
 
     @InjectMocks
     private PrdOrganisationService prdOrganisationService;
@@ -50,10 +58,27 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
     @Mock
     private AuthTokenGenerator authTokenGenerator;
     @Spy
-    private ObjectMapper objectMapper = new ObjectMapper();
+    protected ObjectMapper objectMapper;
+    @Mock
+    private SystemUserService systemUserService;
+
+    @BeforeEach
+    void setup() {
+        lenient().when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
+        lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+    }
 
     @Test
-    public void whenRetrieveOrganisationData_thenRestTemplateIsCalledWithExpectedParameters() {
+    void testFindOrganisationByOrgId() {
+        OrganisationsResponse organisationsResponse = mock(OrganisationsResponse.class);
+        when(organisationApi.findOrganisationByOrgId(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_ORG_ID))
+            .thenReturn(organisationsResponse);
+
+        assertEquals(organisationsResponse, prdOrganisationService.findOrganisationByOrgId(TEST_ORG_ID));
+    }
+
+    @Test
+    void whenRetrieveOrganisationData_thenRestTemplateIsCalledWithExpectedParameters() {
         String addressLine1 = "addressLine1";
         String addressLine2 = "addressLine2";
         String addressLine3 = "addressLine3";
@@ -79,50 +104,118 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
 
         OrganisationsResponse organisationsResponse = prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN);
 
-        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine1(), is(addressLine1));
-        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine2(), is(addressLine2));
-        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine3(), is(addressLine3));
-        assertThat(organisationsResponse.getContactInformation().get(0).getCountry(), is(country));
-        assertThat(organisationsResponse.getContactInformation().get(0).getCounty(), is(county));
-        assertThat(organisationsResponse.getContactInformation().get(0).getPostcode(), is(postCode));
-        assertThat(organisationsResponse.getContactInformation().get(0).getTownCity(), is(townCity));
+        assertThat(organisationsResponse.getContactInformation().getFirst())
+            .extracting(
+                OrganisationContactInformation::getAddressLine1,
+                OrganisationContactInformation::getAddressLine2,
+                OrganisationContactInformation::getAddressLine3,
+                OrganisationContactInformation::getCountry,
+                OrganisationContactInformation::getCounty,
+                OrganisationContactInformation::getPostcode,
+                OrganisationContactInformation::getTownCity)
+                .contains(addressLine1, addressLine2, addressLine3, country, county, townCity);
 
-        verify(restService, times(1)).restApiGetCall(AUTH_TOKEN, TEST_URL);
-        verify(prdOrganisationConfiguration, times(1)).getOrganisationsUrl();
+        verify(restService).restApiGetCall(AUTH_TOKEN, TEST_URL);
+        verify(prdOrganisationConfiguration).getOrganisationsUrl();
+        verifyNoMoreInteractions(restService, prdOrganisationConfiguration);
     }
 
     @Test
-    public void givenRegisteredUser_whenFindUserByEmail_thenReturnUserIdOptional() {
-        OrganisationUser user = OrganisationUser.builder().userIdentifier(USER_ID).build();
-        when(organisationApi.findUserByEmail(eq(AUTH_TOKEN), any(), eq(TEST_EMAIL))).thenReturn(user);
+    void givenRegisteredUser_whenFindUserByEmail_thenReturnExpectedUserId() {
+        OrganisationUser user = OrganisationUser.builder().userIdentifier(TEST_USER_ID).build();
+        when(organisationApi.findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL)).thenReturn(user);
 
-        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_EMAIL, AUTH_TOKEN);
+        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL);
 
-        assertTrue(userId.isPresent());
-        assertThat(userId.get(), is(USER_ID));
+        assertThat(userId).contains(TEST_USER_ID);
+        verify(organisationApi).findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL);
     }
 
     @Test
-    public void givenUnregisteredUser_whenFindUserByEmail_thenHandleNotFoundException() {
-        when(organisationApi.findUserByEmail(eq(AUTH_TOKEN), any(), eq(TEST_EMAIL)))
+    void givenUnregisteredUser_whenFindUserByEmail_thenReturnEmpty() {
+        when(organisationApi.findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL))
             .thenThrow(FeignException.NotFound.class);
 
-        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_EMAIL, AUTH_TOKEN);
+        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL);
+        assertThat(userId).isEmpty();
 
-        assertTrue(userId.isEmpty());
+        verify(organisationApi).findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL);
     }
 
     @Test
-    public void givenUnregisteredUser_whenFindUserByEmailAndEmailIsNull_thenHandleNotFoundException() {
-        when(organisationApi.findUserByEmail(eq(AUTH_TOKEN), any(), eq(TEST_EMAIL)))
+    void givenEmailIsNull_whenOrganisationApiThrowsFeignException_thenThrowRuntimeException() {
+        when(organisationApi.findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, null))
             .thenThrow(FeignException.class);
-        try {
-            prdOrganisationService.findUserByEmail(TEST_EMAIL, AUTH_TOKEN);
-        } catch (RuntimeException e) {
-            if (e instanceof FeignException) {
-                assertEquals("expecting exception to throw when email is null",
-                    "Email is not valid or null", e.getMessage());
-            }
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+            prdOrganisationService.findUserByEmail(null));
+        assertThat(exception.getMessage())
+            .isEqualTo("Email is not valid or null");
+        verify(organisationApi).findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, null);
+    }
+
+    @Test
+    void givenEmailIsProvided_whenOrganisationApiThrowsFeignException_thenThrowRuntimeException() {
+        when(organisationApi.findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL))
+            .thenThrow(FeignException.class);
+
+        try (MockedStatic<ExceptionUtils> mockedExceptionUtils = mockStatic(ExceptionUtils.class);
+             MockedStatic<MaskHelper> mockedMaskHelper = mockStatic(MaskHelper.class)) {
+            ArgumentCaptor<FeignException> captor = ArgumentCaptor.forClass(FeignException.class);
+
+            String stackTrace = "THIS IS A STACK TRACE";
+            mockedExceptionUtils.when(() -> ExceptionUtils.getStackTrace(any())).thenReturn(stackTrace);
+            mockedMaskHelper.when(() -> MaskHelper.maskEmail(stackTrace, TEST_SOLICITOR_EMAIL))
+                .thenReturn("THIS IS A STACK TRACE WITH MASKED EMAIL");
+
+            RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL));
+
+            mockedExceptionUtils.verify(() -> ExceptionUtils.getStackTrace(captor.capture()));
+
+            assertThat(exception.getMessage())
+                .isEqualTo("THIS IS A STACK TRACE WITH MASKED EMAIL");
+            verify(organisationApi).findUserByEmail(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_SOLICITOR_EMAIL);
         }
+    }
+
+    @Test
+    void givenRegisteredUser_whenFindOrganisationIdByUserId_thenReturnExpectedOrganisationId() {
+        OrganisationsResponse mockedResponse = mock(OrganisationsResponse.class);
+        when(mockedResponse.getOrganisationIdentifier()).thenReturn(TEST_ORG_ID);
+        when(organisationApi.findOrganisationDetailsByUser(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
+            .thenReturn(mockedResponse);
+
+        // Act
+        Optional<String> organisationId = prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID);
+
+        // Verify
+        assertThat(organisationId)
+            .isPresent()
+            .contains(TEST_ORG_ID);
+    }
+
+    @Test
+    void givenUnregisteredUser_whenFindOrganisationIdByUserId_thenReturnEmpty() {
+        when(organisationApi.findOrganisationDetailsByUser(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
+            .thenThrow(FeignException.NotFound.class);
+
+        // Act
+        Optional<String> organisationId = prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID);
+
+        // Verify
+        assertThat(organisationId).isEmpty();
+    }
+
+    @Test
+    void givenAnyUserId_whenOrganisationApiThrowsFeignException_thenThrowRuntimeException() {
+        when(organisationApi.findOrganisationDetailsByUser(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID))
+            .thenThrow(FeignException.class);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+            prdOrganisationService.findOrganisationIdByUserId(TEST_USER_ID));
+        assertThat(exception.getMessage())
+            .isEqualTo("Given user_id is not valid or null");
+        verify(organisationApi).findOrganisationDetailsByUser(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, TEST_USER_ID);
     }
 }
