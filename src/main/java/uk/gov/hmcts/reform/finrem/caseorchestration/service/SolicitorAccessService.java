@@ -3,9 +3,15 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -14,100 +20,92 @@ import java.util.Optional;
 public class SolicitorAccessService {
 
     private final AssignPartiesAccessService assignPartiesAccessService;
+    private final NotificationService notificationService;
+    private final NocLetterNotificationService nocLetterNotificationService;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     /**
-     * Adds Applicant solicitor to the case and grants access.
+     * Checks for changes in solicitor details and updates access accordingly.
      *
-     * @param caseData the current case data
      */
-    public void addApplicantSolicitor(FinremCaseData caseData) {
-        log.info("Adding solicitor for case ID: {}", caseData.getCcdCaseId());
-        try {
-            assignPartiesAccessService.grantApplicantSolicitor(caseData);
-        } catch (UserNotFoundInOrganisationApiException e) {
-            log.error("Failed to grant access to applicant solicitor for case ID: {}. Error: {}",
-                caseData.getCcdCaseId(), e.getMessage());
+    public void checkAndAssignSolicitorAccess(FinremCaseData caseData,
+                                              FinremCaseDetails caseDetailsBefore,
+                                              List<String> errors) {
+
+        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+        caseDataBefore.setCcdCaseId(String.valueOf(caseDetailsBefore.getId()));
+
+        // Applicant solicitor access update
+        if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
+            try {
+                updateApplicantSolicitor(caseData, caseDataBefore);
+            } catch (UserNotFoundInOrganisationApiException e) {
+                errors.add("Unable to update Applicant Solicitor access for Case");
+            }
         }
 
+        // Respondent solicitor access update
+        if (hasRespondentSolicitorChanged(caseData, caseDataBefore)) {
+            try {
+                updateRespondentSolicitor(caseData, caseDataBefore);
+            } catch (UserNotFoundInOrganisationApiException e) {
+                errors.add("Unable to update Respondent Solicitor access for Case");
+            }
+        }
     }
 
     /**
-     * Removes Applicant solicitor from the case and revokes access.
+     * This method checks if the contact details update includes a representative change and sends Notice of Change
+     * notifications to the caseworker if required.
      *
-     * @param caseData the current case data
      */
-    public void removeApplicantSolicitor(FinremCaseData caseData) {
-        log.info("Removing solicitor for case ID: {}", caseData.getCcdCaseId());
-        assignPartiesAccessService.revokeApplicantSolicitor(caseData);
+    public void sendNoticeOfChangeNotificationsCaseworker(FinremCallbackRequest callbackRequest,
+                                                          String userAuthorisation) {
+
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Optional<ContactDetailsWrapper> contactDetailsWrapper = Optional.ofNullable(caseDetails.getData().getContactDetailsWrapper());
+        boolean requiresNotifications = YesOrNo.YES.equals(Optional.ofNullable(
+            contactDetailsWrapper.get().getUpdateIncludesRepresentativeChange()).orElse(YesOrNo.NO));
+        if(!requiresNotifications) {
+            return;
+        }
+
+        log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
+
+        log.info("Call the noc letter service");
+        nocLetterNotificationService.sendNoticeOfChangeLetters(finremCaseDetailsMapper.mapToCaseDetails(caseDetails),
+            finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetailsBefore()), userAuthorisation);
+
+        contactDetailsWrapper.ifPresent(wrapper -> wrapper.setUpdateIncludesRepresentativeChange(null));
+        contactDetailsWrapper.ifPresent(wrapper -> wrapper.setNocParty(null));
     }
 
-    /**
-     * Updates Applicant solicitor details and grants/revokes access as needed.
-     *
-     * @param caseData       the current case data
-     * @param caseDataBefore the case data before the update
-     */
-    public void updateApplicantSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    private void updateApplicantSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore)
+        throws UserNotFoundInOrganisationApiException {
         if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
             if (caseData.isApplicantRepresentedByASolicitor()) {
-                addApplicantSolicitor(caseData);
+                assignPartiesAccessService.grantApplicantSolicitor(caseData);
             }
             if (caseDataBefore.isApplicantRepresentedByASolicitor()) {
-                removeApplicantSolicitor(caseDataBefore);
+                assignPartiesAccessService.revokeApplicantSolicitor(caseData);
             }
         }
     }
 
-    /**
-     * Adds Respondent solicitor to the case and grants access.
-     *
-     * @param caseData the current case data
-     */
-    public void addRespondentSolicitor(FinremCaseData caseData) {
-        log.info("Adding respondent solicitor for case ID: {}", caseData.getCcdCaseId());
-        try {
-            assignPartiesAccessService.grantRespondentSolicitor(caseData);
-        } catch (UserNotFoundInOrganisationApiException e) {
-            log.error("Failed to grant access to respondent solicitor for case ID: {}. Error: {}",
-                caseData.getCcdCaseId(), e.getMessage());
-        }
-    }
-
-    /**
-     * Removes Respondent solicitor from the case and revokes access.
-     *
-     * @param caseData the current case data
-     */
-    public void removeRespondentSolicitor(FinremCaseData caseData) {
-        log.info("Removing respondent solicitor for case ID: {}", caseData.getCcdCaseId());
-        assignPartiesAccessService.revokeRespondentSolicitor(caseData);
-    }
-
-    /**
-     * Updates Respondent solicitor details and grants/revokes access as needed.
-     *
-     * @param caseData       the current case data
-     * @param caseDataBefore the case data before the update
-     */
-    public void updateRespondentSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    private void updateRespondentSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore)
+        throws UserNotFoundInOrganisationApiException {
         if (hasRespondentSolicitorChanged(caseData, caseDataBefore)) {
             if (caseData.isRespondentRepresentedByASolicitor()) {
-                addRespondentSolicitor(caseData);
+                assignPartiesAccessService.grantRespondentSolicitor(caseData);
             }
             if (caseDataBefore.isRespondentRepresentedByASolicitor()) {
-                removeRespondentSolicitor(caseDataBefore);
+                assignPartiesAccessService.revokeRespondentSolicitor(caseData);
             }
         }
     }
 
-    /**
-     * Checks if the Applicant solicitor has changed by comparing email and organisation policy.
-     *
-     * @param caseData       the current case data
-     * @param caseDataBefore the case data before the update
-     * @return true if solicitor has changed, false otherwise
-     */
-    public static boolean hasApplicantSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    private boolean hasApplicantSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         Optional<ContactDetailsWrapper> currentContact = Optional.ofNullable(caseData.getContactDetailsWrapper());
         Optional<ContactDetailsWrapper> beforeContact = Optional.ofNullable(caseDataBefore.getContactDetailsWrapper());
         String currentEmail = currentContact.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse("");
@@ -119,14 +117,7 @@ public class SolicitorAccessService {
         return !currentEmail.equals(beforeEmail) || !currentOrgId.equals(beforeOrgId);
     }
 
-    /**
-     * Checks if the Respondent solicitor has changed by comparing email and organisation policy.
-     *
-     * @param caseData       the current case data
-     * @param caseDataBefore the case data before the update
-     * @return true if solicitor has changed, false otherwise
-     */
-    public static boolean hasRespondentSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    private boolean hasRespondentSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         Optional<ContactDetailsWrapper> currentContact = Optional.ofNullable(caseData.getContactDetailsWrapper());
         Optional<ContactDetailsWrapper> beforeContact = Optional.ofNullable(caseDataBefore.getContactDetailsWrapper());
         String currentEmail = currentContact.map(ContactDetailsWrapper::getRespondentSolicitorEmail).orElse("");
@@ -137,5 +128,4 @@ public class SolicitorAccessService {
             .map(orgPolicy -> orgPolicy.getOrganisation() != null ? orgPolicy.getOrganisation().getOrganisationID() : "").orElse("");
         return !currentEmail.equals(beforeEmail) || !currentOrgId.equals(beforeOrgId);
     }
-
 }

@@ -137,19 +137,15 @@ public class AssignPartiesAccessService {
      * @param finremCaseData the financial remedy case data before the update,
      *                             containing previous applicant representation details and organisation information
      */
-    public void revokeApplicantSolicitor(FinremCaseData finremCaseData) {
+    public void revokeApplicantSolicitor(FinremCaseData finremCaseData) throws UserNotFoundInOrganisationApiException {
         String caseId = finremCaseData.getCcdCaseId();
         if (finremCaseData.isApplicantRepresentedByASolicitor()
             && isOrgIdExists(finremCaseData.getApplicantOrganisationPolicy())) {
             String appSolicitorEmail = finremCaseData.getAppSolicitorEmail();
             String appOrgId = finremCaseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID();
-            try {
-                revokeAccess(Long.valueOf(caseId), appSolicitorEmail, appOrgId, CaseRole.APP_SOLICITOR.getCcdCode());
-            } catch (UserNotFoundInOrganisationApiException e) {
-                // ignore it
-            }
+            revokeAccess(Long.valueOf(caseId), appSolicitorEmail, appOrgId, CaseRole.APP_SOLICITOR.getCcdCode());
         } else {
-            log.info("{} - No applicant represented by a solicitor or organisation policy missing", caseId);
+            log.info("{} - Revoke access failed - No applicant represented by a solicitor or organisation policy missing", caseId);
         }
     }
 
@@ -169,19 +165,15 @@ public class AssignPartiesAccessService {
      * @param finremCaseData the financial remedy case data before the update,
      *                             containing previous respondent representation details and organisation information
      */
-    public void revokeRespondentSolicitor(FinremCaseData finremCaseData) {
+    public void revokeRespondentSolicitor(FinremCaseData finremCaseData) throws UserNotFoundInOrganisationApiException {
         String caseId = finremCaseData.getCcdCaseId();
         if (finremCaseData.isRespondentRepresentedByASolicitor()
             && isOrgIdExists(finremCaseData.getRespondentOrganisationPolicy())) {
             String respondentSolicitorEmail = finremCaseData.getRespondentSolicitorEmail();
-            String appOrgId = finremCaseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID();
-            try {
-                revokeAccess(Long.valueOf(caseId), respondentSolicitorEmail, appOrgId, CaseRole.RESP_SOLICITOR.getCcdCode());
-            }  catch (UserNotFoundInOrganisationApiException e) {
-                // ignore it
-            }
+            String respOrgId = finremCaseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID();
+            revokeAccess(Long.valueOf(caseId), respondentSolicitorEmail, respOrgId, CaseRole.RESP_SOLICITOR.getCcdCode());
         } else {
-            log.info("{} - No respondent represented by a solicitor or organisation policy missing", caseId);
+            log.info("{} - Revoke access failed - No respondent represented by a solicitor or organisation policy missing", caseId);
         }
     }
 
@@ -209,14 +201,15 @@ public class AssignPartiesAccessService {
         return userId;
     }
 
-    private void revokeAccess(Long caseId, String email, String orgId, String caseRole)
+    private Optional<String> revokeAccess(Long caseId, String email, String orgId, String caseRole)
         throws UserNotFoundInOrganisationApiException {
         Optional<String> userId = prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         userId.ifPresentOrElse(s -> assignCaseAccessService.removeCaseRoleToUser(caseId, s, caseRole, orgId),
-            () -> log.info("{} - Attempting to revoke {} but system is unable find any user with email address {} ", caseId,
+            () -> log.info("{} - Attempting to revoke role {} but system is unable find any user with email address {} ", caseId,
                 email, caseRole));
         if (userId.isEmpty()) {
             throw new UserNotFoundInOrganisationApiException();
         }
+        return userId;
     }
 }

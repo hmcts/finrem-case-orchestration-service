@@ -12,21 +12,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails.UpdateContactDetailsSubmittedHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CASE_DETAILS_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -44,32 +45,19 @@ class UpdateContactDetailsSubmittedHandlerTest {
         assertCanHandle(handler, SUBMITTED, CONTESTED, UPDATE_CONTACT_DETAILS);
     }
 
-    static Stream<Arguments> provideSolicitorEmailChangeScenarios() {
+    static Stream<Arguments> solicitorEmailChangeScenarios() {
         return Stream.of(
-            Arguments.of(
-                "newSolicitor@email.com", YesOrNo.YES, "oldSolicitor@email.com", YesOrNo.YES,
-                true, true, false // grant, revoke, neverRevoke
-            ),
-            Arguments.of(
-                "unchanged@email.com", YesOrNo.YES, "unchanged@email.com", YesOrNo.YES,
-                false, false, true
-            ),
-            Arguments.of(
-                "newSolicitor@email.com", YesOrNo.YES, null, YesOrNo.NO,
-                true, false, true
-            ),
-            Arguments.of(
-                null, YesOrNo.NO, "oldSolicitor@email.com", YesOrNo.YES,
-                false, true, false
-            )
+            org.junit.jupiter.params.provider.Arguments.of("new@email.com", YesOrNo.YES, "old@email.com", YesOrNo.YES),
+            org.junit.jupiter.params.provider.Arguments.of("same@email.com", YesOrNo.YES, "same@email.com", YesOrNo.YES),
+            org.junit.jupiter.params.provider.Arguments.of("new@email.com", YesOrNo.YES, "", YesOrNo.NO),
+            org.junit.jupiter.params.provider.Arguments.of("", YesOrNo.NO, "old@email.com", YesOrNo.YES)
         );
     }
 
     @ParameterizedTest
-    @MethodSource("provideSolicitorEmailChangeScenarios")
+    @MethodSource("solicitorEmailChangeScenarios")
     void handleSolicitorEmailChangeScenarios(String applicantSolicitorEmail, YesOrNo applicantRepresented,
-                                             String beforeApplicantSolicitorEmail, YesOrNo beforeApplicantRepresented,
-                                             boolean shouldGrant, boolean shouldRevoke, @SuppressWarnings("unused") boolean neverRevoke) {
+                                             String beforeApplicantSolicitorEmail, YesOrNo beforeApplicantRepresented) {
         FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder()
                 .applicantSolicitorEmail(applicantSolicitorEmail)
@@ -82,15 +70,19 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 .applicantRepresented(beforeApplicantRepresented)
                 .build()).build();
 
+        FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().caseType(CaseType.CONTESTED)
+            .data(caseDataBefore).build();
+
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR, caseData, caseDataBefore);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CONTACT_DETAILS, caseData, caseDataBefore);
+
+
+        List<String> errors = new ArrayList<>();
 
         final GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        if (shouldGrant || shouldRevoke) {
-            verify(solicitorAccessService).updateApplicantSolicitor(caseData, caseDataBefore);
-        } else {
-            verify(solicitorAccessService, never()).updateApplicantSolicitor(any(), any());
-        }
-        assertThat(response.getData()).isEqualTo(caseData);
+        verify(solicitorAccessService).checkAndAssignSolicitorAccess(caseData, caseDetailsBefore, errors);
+        verify(solicitorAccessService).sendNoticeOfChangeNotificationsCaseworker(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).isEmpty();
+        assertThat(response.getData()).isNotNull();
     }
 }
