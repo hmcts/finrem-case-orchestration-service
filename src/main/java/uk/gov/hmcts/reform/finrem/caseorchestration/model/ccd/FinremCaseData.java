@@ -876,7 +876,7 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     @JsonIgnore
-    public String getRespondentSolicitorEmailForContested() {
+    public String getRespondentSolicitorEmail() {
         return nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail());
     }
 
