@@ -43,10 +43,13 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        caseDetailsBefore.getData().setCcdCaseId(caseDetailsBefore.getCaseIdAsString());
+        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+
         List<String> errors = new ArrayList<>();
 
         // Check for changes in solicitor details and update access accordingly
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDetailsBefore, errors);
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
 
         // Check if the update includes a representative change and send Notice of Change notifications if required
         solicitorAccessService.sendNoticeOfChangeNotificationsCaseworker(callbackRequest, userAuthorisation);

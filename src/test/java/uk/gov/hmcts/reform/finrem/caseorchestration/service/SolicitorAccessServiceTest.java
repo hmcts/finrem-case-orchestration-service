@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -37,40 +36,28 @@ class SolicitorAccessServiceTest {
     @SneakyThrows
     @Test
     void givenApplicantSolicitorEmailChanged_ShouldGrantAndRevokesAccess() {
-
         List<String> errors = new ArrayList<>();
-
         FinremCallbackRequest finremCallbackRequest =
             buildCallbackRequestApplicantSolicitor("new@email.com", "org1", "old@email.com", "org2");
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore();
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
 
         verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
-        verify(assignPartiesAccessService).revokeApplicantSolicitor(caseData);
+        verify(assignPartiesAccessService).revokeApplicantSolicitor(caseDataBefore);
     }
 
     @SneakyThrows
     @Test
     void givenApplicantSolicitorEmailNotChanged_ShouldGrantAndRevokesAccess_doesNotGrantOrRevoke() {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantRepresented(YesOrNo.YES)
-                .applicantSolicitorEmail("same@email.com").build())
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID("org1").build()).build())
-            .build();
-        FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().applicantRepresented(YesOrNo.YES)
-                .applicantSolicitorEmail("same@email.com").build())
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID("org1").build()).build())
-            .build();
-        FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().caseType(CaseType.CONTESTED)
-            .data(caseDataBefore).build();
         List<String> errors = new ArrayList<>();
+        FinremCallbackRequest finremCallbackRequest =
+            buildCallbackRequestApplicantSolicitor("same@email.com", "org1", "same@email.com", "org1");
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDetailsBefore, errors);
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
 
         verify(assignPartiesAccessService, never()).grantApplicantSolicitor(caseData);
         verify(assignPartiesAccessService, never()).revokeApplicantSolicitor(caseDataBefore);
@@ -79,46 +66,28 @@ class SolicitorAccessServiceTest {
     @SneakyThrows
     @Test
     void givenRespondentSolicitorEmailChanged_ShouldGrantAndRevokesAccess() {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().contestedRespondentRepresented(YesOrNo.YES)
-                .respondentSolicitorEmail("new@email.com").build())
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
-            .build();
-        FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().contestedRespondentRepresented(YesOrNo.YES)
-                .respondentSolicitorEmail("old@email.com").build())
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org2").build()).build())
-            .build();
-
-        FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().caseType(CaseType.CONTESTED)
-            .data(caseDataBefore).build();
         List<String> errors = new ArrayList<>();
+        FinremCallbackRequest finremCallbackRequest =
+            buildCallbackRequestRespondentSolicitor("new@email.com", "org1", "old@email.com", "org2");
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDetailsBefore, errors);
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
 
         verify(assignPartiesAccessService).grantRespondentSolicitor(caseData);
-        verify(assignPartiesAccessService).revokeRespondentSolicitor(caseData);
+        verify(assignPartiesAccessService).revokeRespondentSolicitor(caseDataBefore);
     }
 
     @SneakyThrows
     @Test
     void givenRespondentSolicitorEmailNotChanged_ShouldNotGrantAndRevokesAccess() {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().contestedRespondentRepresented(YesOrNo.YES)
-                .respondentSolicitorEmail("same@email.com").build())
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
-            .build();
-        FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().contestedRespondentRepresented(YesOrNo.YES)
-                .respondentSolicitorEmail("same@email.com").build())
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
-            .build();
-
-        FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().caseType(CaseType.CONTESTED)
-            .data(caseDataBefore).build();
         List<String> errors = new ArrayList<>();
+        FinremCallbackRequest finremCallbackRequest =
+            buildCallbackRequestRespondentSolicitor("same@email.com", "org1", "same@email.com", "org1");
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDetailsBefore, errors);
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
 
         verify(assignPartiesAccessService, never()).grantRespondentSolicitor(caseData);
         verify(assignPartiesAccessService, never()).revokeRespondentSolicitor(caseDataBefore);

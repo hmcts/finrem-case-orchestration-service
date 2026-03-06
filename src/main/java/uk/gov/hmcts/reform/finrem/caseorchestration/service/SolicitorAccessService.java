@@ -29,11 +29,8 @@ public class SolicitorAccessService {
      *
      */
     public void checkAndAssignSolicitorAccess(FinremCaseData caseData,
-                                              FinremCaseDetails caseDetailsBefore,
+                                              FinremCaseData caseDataBefore,
                                               List<String> errors) {
-
-        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
-        caseDataBefore.setCcdCaseId(String.valueOf(caseDetailsBefore.getId()));
 
         // Applicant solicitor access update
         if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
