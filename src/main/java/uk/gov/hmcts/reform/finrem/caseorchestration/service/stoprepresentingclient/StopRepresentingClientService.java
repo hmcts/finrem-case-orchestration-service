@@ -245,11 +245,17 @@ public class StopRepresentingClientService {
     }
 
     /**
-     * Marks the applicant as unrepresented.
+     * Marks the applicant as unrepresented and removes any existing solicitor details.
      *
-     * <p>
-     * This sets the applicant represented flag to {@link YesOrNo#NO} and
-     * clears the organisation policy currently assigned to the applicant solicitor role.
+     * <p>This method:
+     * <ul>
+     *   <li>Sets the applicant represented flag to {@link YesOrNo#NO}</li>
+     *   <li>Clears all applicant solicitor contact and firm details</li>
+     *   <li>Resets the applicant solicitor organisation policy to the default value</li>
+     * </ul>
+     *
+     * <p>This ensures that any previously assigned solicitor information is removed
+     * when the applicant is no longer represented.
      *
      * @param finremCaseData the case data to update
      */
