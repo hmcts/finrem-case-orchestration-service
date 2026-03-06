@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.ArrayList;
@@ -48,6 +49,9 @@ class SolicitorCreateContestedMidHandlerTest {
 
     @Mock
     private ExpressCaseService expressCaseService;
+
+    @Mock
+    private ValidatePartiesService validatePartiesService;
 
     @Test
     void testCanHandle() {
@@ -96,7 +100,7 @@ class SolicitorCreateContestedMidHandlerTest {
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
                 .thenReturn(new ArrayList<>(addressErrors));
-            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService))
                 .thenReturn(new ArrayList<>(emailErrors));
             when(internationalPostalService.validate(caseData))
                 .thenReturn(new ArrayList<>(postalErrors));
