@@ -75,8 +75,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
         FinremCallbackRequest callbackRequest =
             FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CONTACT_DETAILS, caseData, caseDataBefore);
-
-
         List<String> errors = new ArrayList<>();
 
         final GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
