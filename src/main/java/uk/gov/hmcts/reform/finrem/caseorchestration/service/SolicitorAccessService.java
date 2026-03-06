@@ -61,21 +61,26 @@ public class SolicitorAccessService {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         Optional<ContactDetailsWrapper> contactDetailsWrapper = Optional.ofNullable(caseDetails.getData().getContactDetailsWrapper());
-        boolean requiresNotifications = YesOrNo.YES.equals(Optional.ofNullable(
-            contactDetailsWrapper.get().getUpdateIncludesRepresentativeChange()).orElse(YesOrNo.NO));
-        if(!requiresNotifications) {
+        boolean requiresNotifications = contactDetailsWrapper
+            .map(ContactDetailsWrapper::getUpdateIncludesRepresentativeChange)
+            .filter(YesOrNo.YES::equals)
+            .isPresent();
+        if (!requiresNotifications) {
             return;
         }
 
-        log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to send Notice of Change email and letter for Case ID: {}", caseDetails.getId());
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
 
         log.info("Call the noc letter service");
-        nocLetterNotificationService.sendNoticeOfChangeLetters(finremCaseDetailsMapper.mapToCaseDetails(caseDetails),
+        nocLetterNotificationService.sendNoticeOfChangeLetters(
+            finremCaseDetailsMapper.mapToCaseDetails(caseDetails),
             finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetailsBefore()), userAuthorisation);
 
-        contactDetailsWrapper.ifPresent(wrapper -> wrapper.setUpdateIncludesRepresentativeChange(null));
-        contactDetailsWrapper.ifPresent(wrapper -> wrapper.setNocParty(null));
+        contactDetailsWrapper.ifPresent(wrapper -> {
+            wrapper.setUpdateIncludesRepresentativeChange(null);
+            wrapper.setNocParty(null);
+        });
     }
 
     private void updateApplicantSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore)
