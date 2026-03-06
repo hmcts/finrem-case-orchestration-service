@@ -147,7 +147,7 @@ public class GeneralOrderService {
             && caseDetails.getData().get(SOUTHEAST_FRC_LIST) != null
             && "kentfrc".equalsIgnoreCase(caseDetails.getData().get(SOUTHEAST_FRC_LIST).toString())) {
             caseData.put("centralFRCCourtAddress", OrchestrationConstants.CTSC_FRC_COURT_ADDRESS);
-            caseData.put("centralFRCCourtEmail", OrchestrationConstants.CTSC_FRC_COURT_EMAIL_ADDRESS);
+            caseData.put("centralFRCCourtEmail", OrchestrationConstants.FRC_KENT_SURREY_COURT_EMAIL_ADDRESS);
         }
 
         return caseDetails;

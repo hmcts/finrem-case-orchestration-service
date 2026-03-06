@@ -61,4 +61,18 @@ public enum KentSurreyCourt implements CourtList {
     public String getSelectedCourtId() {
         return id;
     }
+
+    /**
+     * Checks if the given court selection matches any KentSurreyCourt enum constant.
+     *
+     * @param courtSelection the court selection string to check
+     * @return true if the selection matches a KentSurreyCourt, false otherwise
+     */
+    public static boolean contains(String courtSelection) {
+        if (courtSelection == null || courtSelection.isBlank()) {
+            return false;
+        }
+        return Arrays.stream(values())
+            .anyMatch(court -> court.getSelectedCourtId().equalsIgnoreCase(courtSelection));
+    }
 }
