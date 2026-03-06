@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -253,7 +254,28 @@ public class StopRepresentingClientService {
      * @param finremCaseData the case data to update
      */
     public void setApplicantUnrepresented(FinremCaseData finremCaseData) {
-        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
+        contactDetailsWrapper.setApplicantRepresented(YesOrNo.NO);
+
+        // consented & contested
+        contactDetailsWrapper.setSolicitorReference(null);
+        // consented
+        contactDetailsWrapper.setSolicitorName(null);
+        contactDetailsWrapper.setSolicitorFirm(null);
+        contactDetailsWrapper.setSolicitorAddress(null);
+        contactDetailsWrapper.setSolicitorPhone(null);
+        contactDetailsWrapper.setSolicitorEmail(null);
+        contactDetailsWrapper.setSolicitorDxNumber(null);
+        contactDetailsWrapper.setSolicitorAgreeToReceiveEmails(null);
+        // contested
+        contactDetailsWrapper.setApplicantSolicitorFirm(null);
+        contactDetailsWrapper.setApplicantSolicitorName(null);
+        contactDetailsWrapper.setApplicantSolicitorAddress(null);
+        contactDetailsWrapper.setApplicantSolicitorPhone(null);
+        contactDetailsWrapper.setApplicantSolicitorEmail(null);
+        contactDetailsWrapper.setApplicantSolicitorDxNumber(null);
+        contactDetailsWrapper.setApplicantSolicitorConsentForEmails(null);
+
         finremCaseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(APP_SOLICITOR));
     }
 
