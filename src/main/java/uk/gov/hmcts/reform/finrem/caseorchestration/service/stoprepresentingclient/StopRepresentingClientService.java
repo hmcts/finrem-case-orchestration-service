@@ -274,8 +274,8 @@ public class StopRepresentingClientService {
         contactDetailsWrapper.setSolicitorDxNumber(null);
         contactDetailsWrapper.setSolicitorAgreeToReceiveEmails(null);
         // contested
-        contactDetailsWrapper.setApplicantSolicitorFirm(null);
         contactDetailsWrapper.setApplicantSolicitorName(null);
+        contactDetailsWrapper.setApplicantSolicitorFirm(null);
         contactDetailsWrapper.setApplicantSolicitorAddress(null);
         contactDetailsWrapper.setApplicantSolicitorPhone(null);
         contactDetailsWrapper.setApplicantSolicitorEmail(null);
