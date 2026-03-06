@@ -85,7 +85,7 @@ public class SolicitorAccessService {
                 assignPartiesAccessService.grantApplicantSolicitor(caseData);
             }
             if (caseDataBefore.isApplicantRepresentedByASolicitor()) {
-                assignPartiesAccessService.revokeApplicantSolicitor(caseData);
+                assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore);
             }
         }
     }
@@ -97,7 +97,7 @@ public class SolicitorAccessService {
                 assignPartiesAccessService.grantRespondentSolicitor(caseData);
             }
             if (caseDataBefore.isRespondentRepresentedByASolicitor()) {
-                assignPartiesAccessService.revokeRespondentSolicitor(caseData);
+                assignPartiesAccessService.revokeRespondentSolicitor(caseDataBefore);
             }
         }
     }

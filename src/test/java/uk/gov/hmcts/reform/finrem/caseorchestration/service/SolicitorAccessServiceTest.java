@@ -71,6 +71,7 @@ class SolicitorAccessServiceTest {
             buildCallbackRequestRespondentSolicitor("new@email.com", "org1", "old@email.com", "org2");
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+        caseDataBefore.setCcdCaseId(finremCallbackRequest.getCaseDetails().getCaseIdAsString());
 
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
 
