@@ -288,19 +288,34 @@ public class StopRepresentingClientService {
     /**
      * Marks the respondent as unrepresented.
      *
-     * <p>
-     * For consented applications, the consented respondent represented flag is updated.
-     * For contested applications, the contested respondent represented flag is updated.
-     * In both cases, it clears the organisation policy currently assigned to the respondent solicitor role.
+     * <p>This method clears the respondent solicitor details and updates the
+     * respondent represented flag depending on the application type:
+     * <ul>
+     *   <li>For consented applications, {@code consentedRespondentRepresented} is set to {@link YesOrNo#NO}.</li>
+     *   <li>For contested applications, {@code contestedRespondentRepresented} is set to {@link YesOrNo#NO}.</li>
+     * </ul>
+     * It also resets the organisation policy assigned to the respondent solicitor role.
      *
      * @param finremCaseData the case data to update
      */
     public void setRespondentUnrepresented(FinremCaseData finremCaseData) {
+        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
+
+        // consented & contested
+        contactDetailsWrapper.setRespondentSolicitorName(null);
+        contactDetailsWrapper.setRespondentSolicitorFirm(null);
+        contactDetailsWrapper.setRespondentSolicitorReference(null);
+        contactDetailsWrapper.setRespondentSolicitorAddress(null);
+        contactDetailsWrapper.setRespondentSolicitorPhone(null);
+        contactDetailsWrapper.setRespondentSolicitorEmail(null);
+        contactDetailsWrapper.setRespondentSolicitorDxNumber(null);
+
         if (finremCaseData.isConsentedApplication()) {
             finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
         } else {
             finremCaseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
         }
+
         finremCaseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
     }
 
