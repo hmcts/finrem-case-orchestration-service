@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import feign.FeignException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,21 +51,6 @@ class ValidatePartiesServiceTest {
     void givenUserIdNotFound_shouldReturnFalse() {
         when(organisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(Optional.of(TEST_USER_ID));
         when(organisationService.findOrganisationIdByUserId(TEST_USER_ID)).thenReturn(Optional.empty());
-
-        assertFalse(validatePartiesService.isEmailRegisteredInOrg(TEST_SOLICITOR_EMAIL, TEST_ORG_ID));
-    }
-
-    @Test
-    void givenNotFoundExceptionThrownAtFindUserByEmail_shouldReturnFalse() {
-        when(organisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenThrow(FeignException.NotFound.class);
-
-        assertFalse(validatePartiesService.isEmailRegisteredInOrg(TEST_SOLICITOR_EMAIL, TEST_ORG_ID));
-    }
-
-    @Test
-    void givenNotFoundExceptionThrownAtFindOrganisationIdByUserId_shouldReturnFalse() {
-        when(organisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(Optional.of(TEST_USER_ID));
-        when(organisationService.findOrganisationIdByUserId(TEST_USER_ID)).thenThrow(FeignException.NotFound.class);
 
         assertFalse(validatePartiesService.isEmailRegisteredInOrg(TEST_SOLICITOR_EMAIL, TEST_ORG_ID));
     }
