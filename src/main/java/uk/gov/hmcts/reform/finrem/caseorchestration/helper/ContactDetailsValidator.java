@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -380,7 +381,7 @@ public class ContactDetailsValidator {
         if (caseData.isRespondentRepresentedByASolicitor()) {
             if (!isValidEmailAddress(respondentSolicitorEmail, true)) {
                 errors.add(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(respondentSolicitorEmail));
-            } else {
+            } else if (StringUtils.isNotBlank(respondentSolicitorEmail)) {
                 String orgId = getOrganisationId(caseData.getRespondentOrganisationPolicy());
                 if (!isEmailValidForOrganisation(validatePartiesService, respondentSolicitorEmail, orgId)) {
                     errors.add(EMAIL_NOT_IN_RESPONDENT_ORG_ERROR_MESSAGE.formatted(respondentSolicitorEmail));

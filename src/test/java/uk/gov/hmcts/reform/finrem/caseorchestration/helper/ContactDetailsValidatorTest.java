@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.MockedStatic;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -511,6 +512,25 @@ class ContactDetailsValidatorTest {
         assertThat(errors).contains("%s is not a valid Email address. ".formatted(TEST_SOLICITOR_EMAIL)
             + "The email address must be registered to access MyHMCTS");
         verify(validatePartiesService).isEmailRegisteredInOrg(TEST_SOLICITOR_EMAIL, TEST_ORG_ID);
+        verifyNoMoreInteractions(validatePartiesService);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void givenRespondentRepresentedInContested_whenEmailIsBlank_thenErrorPopulated(String respondentSolicitorEmail) {
+        ValidatePartiesService validatePartiesService = mock(ValidatePartiesService.class);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .respondentSolicitorEmail(respondentSolicitorEmail)
+                .build())
+            .build();
+
+        List<String> errors = ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService);
+
+        assertThat(errors).isEmpty();
         verifyNoMoreInteractions(validatePartiesService);
     }
 
