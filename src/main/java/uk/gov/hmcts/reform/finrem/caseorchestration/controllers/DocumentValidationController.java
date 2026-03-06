@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
 
 import java.util.Optional;
 
@@ -35,7 +34,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @Slf4j
 public class DocumentValidationController extends BaseController {
 
-    private final DocumentValidationService service;
     private final ConsentedApplicationHelper helper;
 
     @PostMapping(path = "/field/{field}/file-upload-check", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -55,7 +53,7 @@ public class DocumentValidationController extends BaseController {
         log.info("Received request for checkUploadedFileType for Case ID: {}", caseId);
 
         validateCaseData(callbackRequest);
-        if (Boolean.TRUE.equals(isConsentedApplication(callbackRequest.getCaseDetails()))) {
+        if (isConsentedApplication(callbackRequest.getCaseDetails())) {
             helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
         }
         return ResponseEntity.ok(
