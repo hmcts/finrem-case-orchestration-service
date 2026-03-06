@@ -315,7 +315,6 @@ public class StopRepresentingClientService {
         } else {
             finremCaseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
         }
-
         finremCaseData.setRespondentOrganisationPolicy(getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR));
     }
 
