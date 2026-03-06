@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,9 +33,13 @@ public class ValidatePartiesService {
      *         organisation; otherwise {@code false}
      */
     public boolean isEmailRegisteredInOrg(String email, String orgId) {
-        return organisationService.findUserByEmail(email)
-            .flatMap(organisationService::findOrganisationIdByUserId)
-            .map(orgId::equals)
-            .orElse(false);
+        try {
+            return organisationService.findUserByEmail(email)
+                .flatMap(organisationService::findOrganisationIdByUserId)
+                .map(orgId::equals)
+                .orElse(false);
+        } catch (FeignException.NotFound notFound) {
+            return false;
+        }
     }
 }
