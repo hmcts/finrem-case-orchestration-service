@@ -66,4 +66,5 @@ public class NotificationRequest {
     private String emailReplyToId;
     private String vacatedHearingDateTime;
     private String vacatedHearingType;
+    private String dateOfIssue;
 }
