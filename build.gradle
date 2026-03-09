@@ -24,7 +24,7 @@ def versions = [
         junit                : '4.13.2',
         lombok               : '1.18.42',
         mockito              : '5.21.0',
-        pact                 : '4.6.19',
+        pact                 : '4.6.20',
         pdfbox               : '3.0.6',
         reformLogging        : '8.0.0',
         serenity             : '4.3.4',
