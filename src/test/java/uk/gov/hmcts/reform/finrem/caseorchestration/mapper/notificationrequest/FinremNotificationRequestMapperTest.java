@@ -10,12 +10,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -29,12 +31,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionHighCourtFrc
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
@@ -49,24 +57,44 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_APP_BARRISTER_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_APP_BARRISTER_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_APP_BARRISTER_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV1_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV1_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV1_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV1_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV_BARRISTER_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV_BARRISTER_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV_BARRISTER_USER_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INTV_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_BARRISTER_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_BARRISTER_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_BARRISTER_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.barrister;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.barristers;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getContestedFinremCaseDetails;
@@ -386,7 +414,7 @@ class FinremNotificationRequestMapperTest {
         when(finremCaseData.getAppSolicitorName()).thenReturn(TEST_SOLICITOR_NAME);
 
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        when(caseDetails.getId()).thenReturn(CASE_ID_IN_LONG);
+        when(caseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
         when(caseDetails.getCaseType()).thenReturn(caseType);
         when(caseDetails.getData()).thenReturn(finremCaseData);
 
@@ -449,7 +477,7 @@ class FinremNotificationRequestMapperTest {
         when(finremCaseData.getAppSolicitorName()).thenReturn(TEST_SOLICITOR_NAME);
 
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        when(caseDetails.getId()).thenReturn(CASE_ID_IN_LONG);
+        when(caseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
         when(caseDetails.getCaseType()).thenReturn(caseType);
         when(caseDetails.getData()).thenReturn(finremCaseData);
 
@@ -508,6 +536,7 @@ class FinremNotificationRequestMapperTest {
 
     private FinremCaseData spiedFinremCaseData(HearingTypeDirection mockedHearingTypeDirection) {
         return spy(FinremCaseData.builder()
+            .ccdCaseId(CASE_ID)
             .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
             .generalApplicationWrapper(GeneralApplicationWrapper.builder()
                 .generalApplicationRejectReason("generalApplicationRejectReason")
@@ -680,6 +709,247 @@ class FinremNotificationRequestMapperTest {
         assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
         assertEquals("David Goodman", notificationRequest.getRespondentName());
         assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+    }
+
+    @Test
+    void givenCase_whenStopRepresentingEmailToApplicantSolicitor_thenBuildNotificationRequest() {
+        NotificationRequestBuilder builder = spy(new NotificationRequestBuilder(courtDetailsConfiguration, consentedApplicationHelper));
+        when(builderFactory.newInstance()).thenReturn(builder);
+
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
+        when(caseData.getContactDetailsWrapper()).thenReturn(contactDetailsWrapper);
+        when(contactDetailsWrapper.getSolicitorReference()).thenReturn(TEST_SOLICITOR_REFERENCE);
+        when(caseData.getAppSolicitorName()).thenReturn(TEST_SOLICITOR_NAME);
+        when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+
+        lenient().when(contactDetailsWrapper.getRespondentSolicitorReference())
+            .thenReturn(TEST_RESP_SOLICITOR_REFERENCE);
+
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        notificationRequestMapper
+            .getNotificationRequestForStopRepresentingClientEmail(caseDetails, CaseRole.APP_SOLICITOR);
+
+        verify(builder).withCaseDefaults(caseDetails);
+        ArgumentCaptor<SolicitorCaseDataKeysWrapper> captor = ArgumentCaptor.forClass(SolicitorCaseDataKeysWrapper.class);
+        verify(builder).withSolicitorCaseData(captor.capture());
+        verify(builder).withDateOfIssue();
+        verify(builder).withIntervener(isNull());
+        verify(builder).build();
+        verifyNoMoreInteractions(builder);
+
+        assertThat(captor.getValue())
+            .extracting(SolicitorCaseDataKeysWrapper::getSolicitorReferenceKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorEmailKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorNameKey)
+            .contains(TEST_SOLICITOR_REFERENCE, TEST_SOLICITOR_EMAIL, TEST_SOLICITOR_NAME);
+    }
+
+    @Test
+    void givenCase_whenStopRepresentingEmailToRespondentSolicitor_thenBuildNotificationRequest() {
+        NotificationRequestBuilder builder = spy(new NotificationRequestBuilder(courtDetailsConfiguration, consentedApplicationHelper));
+        when(builderFactory.newInstance()).thenReturn(builder);
+
+
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
+        when(caseData.getContactDetailsWrapper()).thenReturn(contactDetailsWrapper);
+        when(contactDetailsWrapper.getRespondentSolicitorReference()).thenReturn(TEST_RESP_SOLICITOR_REFERENCE);
+        when(caseData.getRespondentSolicitorName()).thenReturn(TEST_RESP_SOLICITOR_NAME);
+        when(contactDetailsWrapper.getRespondentSolicitorEmail()).thenReturn(TEST_RESP_SOLICITOR_EMAIL);
+
+        lenient().when(contactDetailsWrapper.getSolicitorReference())
+            .thenReturn(TEST_SOLICITOR_REFERENCE);
+
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        notificationRequestMapper
+            .getNotificationRequestForStopRepresentingClientEmail(caseDetails, CaseRole.RESP_SOLICITOR);
+
+        verify(builder).withCaseDefaults(caseDetails);
+        ArgumentCaptor<SolicitorCaseDataKeysWrapper> captor = ArgumentCaptor.forClass(SolicitorCaseDataKeysWrapper.class);
+        verify(builder).withSolicitorCaseData(captor.capture());
+        verify(builder).withDateOfIssue();
+        verify(builder).withIntervener(isNull());
+        verify(builder).build();
+        verifyNoMoreInteractions(builder);
+
+        assertThat(captor.getValue())
+            .extracting(SolicitorCaseDataKeysWrapper::getSolicitorReferenceKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorEmailKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorNameKey)
+            .contains(TEST_RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_NAME);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "INTVR_SOLICITOR_1, INTERVENER_ONE",
+        "INTVR_SOLICITOR_2, INTERVENER_TWO",
+        "INTVR_SOLICITOR_3, INTERVENER_THREE",
+        "INTVR_SOLICITOR_4, INTERVENER_FOUR"
+    })
+    void givenCase_whenStopRepresentingEmailToIntervenerSolicitor_thenBuildNotificationRequest(
+        CaseRole caseRole, IntervenerType intervenerType
+    ) {
+
+        NotificationRequestBuilder builder = spy(new NotificationRequestBuilder(courtDetailsConfiguration, consentedApplicationHelper));
+        when(builderFactory.newInstance()).thenReturn(builder);
+
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+
+        lenient().when(caseData.getIntervenerById(1)).thenReturn(IntervenerOne.builder()
+            .intervenerSolEmail(TEST_INTV_SOLICITOR_EMAIL)
+            .intervenerSolName(TEST_INTV_SOLICITOR_NAME)
+            .intervenerSolicitorReference(TEST_INTV_SOLICITOR_REFERENCE)
+            .build());
+        lenient().when(caseData.getIntervenerById(2)).thenReturn(IntervenerTwo.builder()
+            .intervenerSolEmail(TEST_INTV_SOLICITOR_EMAIL)
+            .intervenerSolName(TEST_INTV_SOLICITOR_NAME)
+            .intervenerSolicitorReference(TEST_INTV_SOLICITOR_REFERENCE)
+            .build());
+        lenient().when(caseData.getIntervenerById(3)).thenReturn(IntervenerThree.builder()
+            .intervenerSolEmail(TEST_INTV_SOLICITOR_EMAIL)
+            .intervenerSolName(TEST_INTV_SOLICITOR_NAME)
+            .intervenerSolicitorReference(TEST_INTV_SOLICITOR_REFERENCE)
+            .build());
+        lenient().when(caseData.getIntervenerById(4)).thenReturn(IntervenerFour.builder()
+            .intervenerSolEmail(TEST_INTV_SOLICITOR_EMAIL)
+            .intervenerSolName(TEST_INTV_SOLICITOR_NAME)
+            .intervenerSolicitorReference(TEST_INTV_SOLICITOR_REFERENCE)
+            .build());
+
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        notificationRequestMapper
+            .getNotificationRequestForStopRepresentingClientEmail(caseDetails, caseRole, intervenerType);
+
+        verify(builder).withCaseDefaults(caseDetails);
+        ArgumentCaptor<SolicitorCaseDataKeysWrapper> captor = ArgumentCaptor.forClass(SolicitorCaseDataKeysWrapper.class);
+        verify(builder).withSolicitorCaseData(captor.capture());
+        verify(builder).withDateOfIssue();
+        verify(builder).withIntervener(any(IntervenerDetails.class));
+        verify(builder).build();
+        verifyNoMoreInteractions(builder);
+
+        assertThat(captor.getValue())
+            .extracting(SolicitorCaseDataKeysWrapper::getSolicitorReferenceKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorEmailKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorNameKey)
+            .contains(TEST_INTV_SOLICITOR_REFERENCE, TEST_INTV_SOLICITOR_EMAIL, TEST_INTV_SOLICITOR_NAME);
+    }
+
+    @Test
+    void givenCase_whenStopRepresentingEmailToApplBarrister_thenBuildNotificationRequest() {
+        NotificationRequestBuilder builder = spy(new NotificationRequestBuilder(courtDetailsConfiguration, consentedApplicationHelper));
+        when(builderFactory.newInstance()).thenReturn(builder);
+
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
+        when(caseData.getContactDetailsWrapper()).thenReturn(contactDetailsWrapper);
+        when(contactDetailsWrapper.getSolicitorReference()).thenReturn(TEST_SOLICITOR_REFERENCE);
+        caseData.setBarristerCollectionWrapper(BarristerCollectionWrapper.builder()
+            .applicantBarristers(barristers(TEST_ORG_ID, TEST_APP_BARRISTER_USER_ID, TEST_APP_BARRISTER_NAME, TEST_APP_BARRISTER_EMAIL))
+            .build());
+
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        Barrister barrister = barrister(TEST_ORG_ID, TEST_APP_BARRISTER_USER_ID, TEST_APP_BARRISTER_NAME, TEST_APP_BARRISTER_EMAIL);
+        notificationRequestMapper
+            .getNotificationRequestForStopRepresentingClientEmail(caseDetails, barrister);
+
+        verify(builder).withCaseDefaults(caseDetails);
+        ArgumentCaptor<SolicitorCaseDataKeysWrapper> captor = ArgumentCaptor.forClass(SolicitorCaseDataKeysWrapper.class);
+        verify(builder).withSolicitorCaseData(captor.capture());
+        verify(builder).withDateOfIssue();
+        verify(builder).withIntervener(isNull());
+        verify(builder).build();
+        verifyNoMoreInteractions(builder);
+
+        assertThat(captor.getValue())
+            .extracting(SolicitorCaseDataKeysWrapper::getSolicitorReferenceKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorEmailKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorNameKey)
+            .contains(TEST_SOLICITOR_REFERENCE, TEST_APP_BARRISTER_EMAIL, TEST_APP_BARRISTER_NAME);
+    }
+
+    @Test
+    void givenCase_whenStopRepresentingEmailToRespBarrister_thenBuildNotificationRequest() {
+        NotificationRequestBuilder builder = spy(new NotificationRequestBuilder(courtDetailsConfiguration, consentedApplicationHelper));
+        when(builderFactory.newInstance()).thenReturn(builder);
+
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
+        when(caseData.getContactDetailsWrapper()).thenReturn(contactDetailsWrapper);
+        when(contactDetailsWrapper.getRespondentSolicitorReference()).thenReturn(TEST_RESP_SOLICITOR_REFERENCE);
+        caseData.setBarristerCollectionWrapper(BarristerCollectionWrapper.builder()
+            .respondentBarristers(barristers(TEST_ORG_ID, TEST_RESP_BARRISTER_USER_ID, TEST_RESP_BARRISTER_NAME, TEST_RESP_BARRISTER_EMAIL))
+            .build());
+
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        Barrister barrister = barrister(TEST_ORG_ID, TEST_RESP_BARRISTER_USER_ID, TEST_RESP_BARRISTER_NAME, TEST_RESP_BARRISTER_EMAIL);
+        notificationRequestMapper
+            .getNotificationRequestForStopRepresentingClientEmail(caseDetails, barrister);
+
+        verify(builder).withCaseDefaults(caseDetails);
+        ArgumentCaptor<SolicitorCaseDataKeysWrapper> captor = ArgumentCaptor.forClass(SolicitorCaseDataKeysWrapper.class);
+        verify(builder).withSolicitorCaseData(captor.capture());
+        verify(builder).withDateOfIssue();
+        verify(builder).withIntervener(isNull());
+        verify(builder).build();
+        verifyNoMoreInteractions(builder);
+
+        assertThat(captor.getValue())
+            .extracting(SolicitorCaseDataKeysWrapper::getSolicitorReferenceKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorEmailKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorNameKey)
+            .contains(TEST_RESP_SOLICITOR_REFERENCE, TEST_RESP_BARRISTER_EMAIL, TEST_RESP_BARRISTER_NAME);
+    }
+
+    @Test
+    void givenCase_whenStopRepresentingEmailToIntvBarrister_thenBuildNotificationRequest() {
+        NotificationRequestBuilder builder = spy(new NotificationRequestBuilder(courtDetailsConfiguration, consentedApplicationHelper));
+        when(builderFactory.newInstance()).thenReturn(builder);
+
+        FinremCaseData caseData = spy(FinremCaseData.builder().build());
+        ContactDetailsWrapper contactDetailsWrapper = mock(ContactDetailsWrapper.class);
+        when(caseData.getContactDetailsWrapper()).thenReturn(contactDetailsWrapper);
+        when(caseData.getIntervenerById(2)).thenReturn(IntervenerTwo.builder()
+            .intervenerSolEmail(TEST_INTV_SOLICITOR_EMAIL)
+            .intervenerSolName(TEST_INTV_SOLICITOR_NAME)
+            .intervenerSolicitorReference(TEST_INTV_SOLICITOR_REFERENCE)
+            .build());
+
+        caseData.setBarristerCollectionWrapper(BarristerCollectionWrapper.builder()
+            .intvr1Barristers(barristers(TEST_ORG_ID, TEST_INTV_BARRISTER_USER_ID, TEST_INTV_BARRISTER_NAME, TEST_INTV_BARRISTER_EMAIL))
+            .build());
+
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        Barrister barrister = barrister(TEST_ORG_ID, TEST_INTV_BARRISTER_USER_ID, TEST_INTV_BARRISTER_NAME, TEST_INTV_BARRISTER_EMAIL);
+        notificationRequestMapper
+            .getNotificationRequestForStopRepresentingClientEmail(caseDetails, barrister, IntervenerType.INTERVENER_TWO);
+
+        verify(builder).withCaseDefaults(caseDetails);
+        ArgumentCaptor<SolicitorCaseDataKeysWrapper> captor = ArgumentCaptor.forClass(SolicitorCaseDataKeysWrapper.class);
+        verify(builder).withSolicitorCaseData(captor.capture());
+        verify(builder).withDateOfIssue();
+        verify(builder).withIntervener(any(IntervenerDetails.class));
+        verify(builder).build();
+        verifyNoMoreInteractions(builder);
+
+        assertThat(captor.getValue())
+            .extracting(SolicitorCaseDataKeysWrapper::getSolicitorReferenceKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorEmailKey,
+                SolicitorCaseDataKeysWrapper::getSolicitorNameKey)
+            .contains(TEST_INTV_SOLICITOR_REFERENCE, TEST_INTV_BARRISTER_EMAIL, TEST_INTV_BARRISTER_NAME);
     }
 
     private void mockNotificationRequestBuilderFactory() {
