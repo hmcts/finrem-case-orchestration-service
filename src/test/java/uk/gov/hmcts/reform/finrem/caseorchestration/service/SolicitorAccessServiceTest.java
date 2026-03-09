@@ -2,26 +2,38 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 class SolicitorAccessServiceTest {
@@ -87,6 +99,199 @@ class SolicitorAccessServiceTest {
             verify(assignPartiesAccessService, never()).grantRespondentSolicitor(caseData);
             verify(assignPartiesAccessService, never()).revokeRespondentSolicitor(caseDataBefore);
         }
+    }
+
+    @SneakyThrows
+    @Test
+    void applicantSolicitorAccessIsGrantedOnlyWhenApplicantBecomesRepresented() {
+        List<String> errors = new ArrayList<>();
+        // previous applicant was not represented, now is represented
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.YES)
+            .applicantSolicitorEmail("new@email.com")
+            .contestedRespondentRepresented(YesOrNo.NO)
+            .build();
+        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.NO)
+            .applicantSolicitorEmail(null)
+            .contestedRespondentRepresented(YesOrNo.NO)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapper)
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
+            .build();
+        FinremCaseData caseDataBefore = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapperBefore)
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(null).build()).build())
+            .build();
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
+        verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
+        verify(assignPartiesAccessService, never()).revokeApplicantSolicitor(caseDataBefore);
+    }
+
+    @SneakyThrows
+    @Test
+    void applicantSolicitorAccessIsRevokedOnlyWhenApplicantNoLongerRepresented() {
+        List<String> errors = new ArrayList<>();
+        // previous applicant was represented, now is not represented
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.NO)
+            .applicantSolicitorEmail(null)
+            .contestedRespondentRepresented(YesOrNo.NO)
+            .build();
+        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.YES)
+            .applicantSolicitorEmail("old@email.com")
+            .contestedRespondentRepresented(YesOrNo.NO)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapper)
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(null).build()).build())
+            .build();
+        FinremCaseData caseDataBefore = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapperBefore)
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
+            .build();
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
+        verify(assignPartiesAccessService, never()).grantApplicantSolicitor(caseData);
+        verify(assignPartiesAccessService).revokeApplicantSolicitor(caseDataBefore);
+    }
+
+    @SneakyThrows
+    @Test
+    void respondentSolicitorAccessIsGrantedOnlyWhenRespondentBecomesRepresented() {
+        List<String> errors = new ArrayList<>();
+        // previous respondent was not represented, now is represented
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.NO)
+            .contestedRespondentRepresented(YesOrNo.YES)
+            .respondentSolicitorEmail("new@email.com")
+            .build();
+        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.NO)
+            .contestedRespondentRepresented(YesOrNo.NO)
+            .respondentSolicitorEmail(null)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapper)
+            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
+            .build();
+        FinremCaseData caseDataBefore = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapperBefore)
+            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(null).build()).build())
+            .build();
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
+        verify(assignPartiesAccessService).grantRespondentSolicitor(caseData);
+        verify(assignPartiesAccessService, never()).revokeRespondentSolicitor(caseDataBefore);
+    }
+
+    @SneakyThrows
+    @Test
+    void respondentSolicitorAccessIsRevokedOnlyWhenRespondentNoLongerRepresented() {
+        List<String> errors = new ArrayList<>();
+        // previous respondent was represented, now is not represented
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.NO)
+            .contestedRespondentRepresented(YesOrNo.NO)
+            .respondentSolicitorEmail(null)
+            .build();
+        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.NO)
+            .contestedRespondentRepresented(YesOrNo.YES)
+            .respondentSolicitorEmail("old@email.com")
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapper)
+            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(null).build()).build())
+            .build();
+        FinremCaseData caseDataBefore = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapperBefore)
+            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
+            .build();
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
+        verify(assignPartiesAccessService, never()).grantRespondentSolicitor(caseData);
+        verify(assignPartiesAccessService).revokeRespondentSolicitor(caseDataBefore);
+    }
+
+    @SneakyThrows
+    @Test
+    void sendNoticeOfChangeNotificationsCaseworker_sendsNotificationsWhenRequired() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseDetails caseDetailsBefore = mock(FinremCaseDetails.class);
+        NotificationService notificationService = mock(NotificationService.class);
+        NocLetterNotificationService nocLetterNotificationService = mock(NocLetterNotificationService.class);
+        FinremCaseDetailsMapper finremCaseDetailsMapper = mock(FinremCaseDetailsMapper.class);
+        AssignPartiesAccessService mockAssignPartiesAccessService = mock(AssignPartiesAccessService.class);
+
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .updateIncludesRepresentativeChange(YesOrNo.YES)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapper)
+            .build();
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        SolicitorAccessService service = new SolicitorAccessService(mockAssignPartiesAccessService, notificationService, nocLetterNotificationService, finremCaseDetailsMapper);
+        // Act
+        service.sendNoticeOfChangeNotificationsCaseworker(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        verify(notificationService, times(1)).sendNoticeOfChangeEmailCaseworker(any(FinremCaseDetails.class));
+        verify(nocLetterNotificationService, times(1)).sendNoticeOfChangeLetters(any(), any(), eq(AUTH_TOKEN));
+        assertNull(contactDetailsWrapper.getUpdateIncludesRepresentativeChange());
+        assertNull(contactDetailsWrapper.getNocParty());
+    }
+
+    @SneakyThrows
+    @Test
+    void sendNoticeOfChangeNotificationsCaseworker_doesNotSendNotificationsWhenNotRequired() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        NotificationService notificationService = mock(NotificationService.class);
+        NocLetterNotificationService nocLetterNotificationService = mock(NocLetterNotificationService.class);
+        FinremCaseDetailsMapper finremCaseDetailsMapper = mock(FinremCaseDetailsMapper.class);
+        AssignPartiesAccessService mockAssignPartiesAccessService = mock(AssignPartiesAccessService.class);
+
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .updateIncludesRepresentativeChange(YesOrNo.NO)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapper)
+            .build();
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        SolicitorAccessService service = new SolicitorAccessService(mockAssignPartiesAccessService, notificationService, nocLetterNotificationService, finremCaseDetailsMapper);
+        service.sendNoticeOfChangeNotificationsCaseworker(callbackRequest, "auth");
+
+        verify(notificationService, never()).sendNoticeOfChangeEmailCaseworker(any(CaseDetails.class));
+        verify(nocLetterNotificationService, never()).sendNoticeOfChangeLetters(any(), any(), any());
+        assertEquals(YesOrNo.NO, contactDetailsWrapper.getUpdateIncludesRepresentativeChange());
+    }
+
+    @SneakyThrows
+    @Test
+    void sendNoticeOfChangeNotificationsCaseworker_handlesNullContactDetailsWrapper() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        NotificationService notificationService = mock(NotificationService.class);
+        NocLetterNotificationService nocLetterNotificationService = mock(NocLetterNotificationService.class);
+        FinremCaseDetailsMapper finremCaseDetailsMapper = mock(FinremCaseDetailsMapper.class);
+        AssignPartiesAccessService mockAssignPartiesAccessService = mock(AssignPartiesAccessService.class);
+
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(null).build();
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        SolicitorAccessService service = new SolicitorAccessService(mockAssignPartiesAccessService, notificationService, nocLetterNotificationService, finremCaseDetailsMapper);
+        service.sendNoticeOfChangeNotificationsCaseworker(callbackRequest, AUTH_TOKEN);
+
+        verify(notificationService, never()).sendNoticeOfChangeEmailCaseworker(any(CaseDetails.class));
+        verify(nocLetterNotificationService, never()).sendNoticeOfChangeLetters(any(), any(), any());
     }
 
     private FinremCallbackRequest buildCallbackRequestApplicantSolicitor(String applicantSolicitorEmail, String applicantOrganisationId,
