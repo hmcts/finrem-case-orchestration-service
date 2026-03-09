@@ -20,9 +20,7 @@ import java.util.List;
 @Slf4j
 @Service
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
-
     private final SolicitorAccessService solicitorAccessService;
-
 
     public UpdateContactDetailsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                 SolicitorAccessService solicitorAccessService) {

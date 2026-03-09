@@ -57,9 +57,11 @@ class SolicitorAccessServiceTest {
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("applicantSolicitorScenarios")
-    void applicantSolicitorAccessIsGrantedOrRevoked(String currentEmail, String currentOrgId, String previousEmail, String previousOrgId, boolean shouldGrantRevoke) {
+    void applicantSolicitorAccessIsGrantedOrRevoked(String currentEmail, String currentOrgId, String previousEmail,
+                                                    String previousOrgId, boolean shouldGrantRevoke) {
         List<String> errors = new ArrayList<>();
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequestApplicantSolicitor(currentEmail, currentOrgId, previousEmail, previousOrgId);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequestApplicantSolicitor(currentEmail, currentOrgId,
+            previousEmail, previousOrgId);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
@@ -84,9 +86,11 @@ class SolicitorAccessServiceTest {
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("respondentSolicitorScenarios")
-    void respondentSolicitorAccessIsGrantedOrRevoked(String currentEmail, String currentOrgId, String previousEmail, String previousOrgId, boolean shouldGrantRevoke) {
+    void respondentSolicitorAccessIsGrantedOrRevoked(String currentEmail, String currentOrgId, String previousEmail,
+                                                     String previousOrgId, boolean shouldGrantRevoke) {
         List<String> errors = new ArrayList<>();
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequestRespondentSolicitor(currentEmail, currentOrgId, previousEmail, previousOrgId);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequestRespondentSolicitor(currentEmail,
+            currentOrgId, previousEmail, previousOrgId);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
@@ -118,11 +122,13 @@ class SolicitorAccessServiceTest {
             .build();
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapper)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID("org1").build()).build())
             .build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(null).build()).build())
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID(null).build()).build())
             .build();
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
         verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
@@ -146,11 +152,13 @@ class SolicitorAccessServiceTest {
             .build();
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapper)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(null).build()).build())
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID(null).build()).build())
             .build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID("org1").build()).build())
             .build();
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
         verify(assignPartiesAccessService, never()).grantApplicantSolicitor(caseData);
@@ -174,11 +182,13 @@ class SolicitorAccessServiceTest {
             .build();
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapper)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
+            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID("org1").build()).build())
             .build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(null).build()).build())
+            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID(null).build()).build())
             .build();
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
         verify(assignPartiesAccessService).grantRespondentSolicitor(caseData);
@@ -202,11 +212,13 @@ class SolicitorAccessServiceTest {
             .build();
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapper)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(null).build()).build())
+            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID(null).build()).build())
             .build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID("org1").build()).build())
+            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID("org1").build()).build())
             .build();
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
         verify(assignPartiesAccessService, never()).grantRespondentSolicitor(caseData);
@@ -235,7 +247,8 @@ class SolicitorAccessServiceTest {
         when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
         when(caseDetails.getData()).thenReturn(caseData);
 
-        SolicitorAccessService service = new SolicitorAccessService(mockAssignPartiesAccessService, notificationService, nocLetterNotificationService, finremCaseDetailsMapper);
+        SolicitorAccessService service = new SolicitorAccessService(mockAssignPartiesAccessService, notificationService,
+            nocLetterNotificationService, finremCaseDetailsMapper);
         // Act
         service.sendNoticeOfChangeNotificationsCaseworker(callbackRequest, AUTH_TOKEN);
 
@@ -265,7 +278,8 @@ class SolicitorAccessServiceTest {
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
         when(caseDetails.getData()).thenReturn(caseData);
 
-        SolicitorAccessService service = new SolicitorAccessService(mockAssignPartiesAccessService, notificationService, nocLetterNotificationService, finremCaseDetailsMapper);
+        SolicitorAccessService service = new SolicitorAccessService(mockAssignPartiesAccessService, notificationService,
+            nocLetterNotificationService, finremCaseDetailsMapper);
         service.sendNoticeOfChangeNotificationsCaseworker(callbackRequest, "auth");
 
         verify(notificationService, never()).sendNoticeOfChangeEmailCaseworker(any(CaseDetails.class));
@@ -287,15 +301,18 @@ class SolicitorAccessServiceTest {
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
         when(caseDetails.getData()).thenReturn(caseData);
 
-        SolicitorAccessService service = new SolicitorAccessService(mockAssignPartiesAccessService, notificationService, nocLetterNotificationService, finremCaseDetailsMapper);
+        SolicitorAccessService service = new SolicitorAccessService(mockAssignPartiesAccessService, notificationService,
+            nocLetterNotificationService, finremCaseDetailsMapper);
         service.sendNoticeOfChangeNotificationsCaseworker(callbackRequest, AUTH_TOKEN);
 
         verify(notificationService, never()).sendNoticeOfChangeEmailCaseworker(any(CaseDetails.class));
         verify(nocLetterNotificationService, never()).sendNoticeOfChangeLetters(any(), any(), any());
     }
 
-    private FinremCallbackRequest buildCallbackRequestApplicantSolicitor(String applicantSolicitorEmail, String applicantOrganisationId,
-                                                       String beforeApplicantSolicitorEmail, String beforeApplicantOrganisationId) {
+    private FinremCallbackRequest buildCallbackRequestApplicantSolicitor(String applicantSolicitorEmail,
+                                                                         String applicantOrganisationId,
+                                                                         String beforeApplicantSolicitorEmail,
+                                                                         String beforeApplicantOrganisationId) {
 
         ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
             .applicantRepresented(YesOrNo.YES)
@@ -311,12 +328,14 @@ class SolicitorAccessServiceTest {
 
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapper)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(applicantOrganisationId).build()).build())
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID(applicantOrganisationId).build()).build())
             .build();
 
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(beforeApplicantOrganisationId).build()).build())
+            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID(beforeApplicantOrganisationId).build()).build())
             .build();
 
         return FinremCallbackRequest.builder()
@@ -325,8 +344,10 @@ class SolicitorAccessServiceTest {
             .build();
     }
 
-    private FinremCallbackRequest buildCallbackRequestRespondentSolicitor(String respondentSolicitorEmail, String respondentOrganisationId,
-                                                       String beforeRespondentSolicitorEmail, String beforeRespondentOrganisationId) {
+    private FinremCallbackRequest buildCallbackRequestRespondentSolicitor(String respondentSolicitorEmail,
+                                                                          String respondentOrganisationId,
+                                                                          String beforeRespondentSolicitorEmail,
+                                                                          String beforeRespondentOrganisationId) {
 
         ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
             .applicantRepresented(YesOrNo.NO)
@@ -342,12 +363,14 @@ class SolicitorAccessServiceTest {
 
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapper)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(respondentOrganisationId).build()).build())
+            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID(respondentOrganisationId).build()).build())
             .build();
 
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(beforeRespondentOrganisationId).build()).build())
+            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
+                .organisationID(beforeRespondentOrganisationId).build()).build())
             .build();
 
         return FinremCallbackRequest.builder()
