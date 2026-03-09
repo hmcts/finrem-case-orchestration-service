@@ -24,6 +24,8 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
 
     protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    protected int defaultNumberOfAttempts = 3;
+
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
@@ -143,6 +145,11 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     }
 
     @FunctionalInterface
+    public interface ThrowingSupplier<T> {
+        T run() throws Exception;
+    }
+
+    @FunctionalInterface
     public interface ThrowingRunnable {
         void run() throws Exception;
     }
@@ -161,24 +168,24 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      * @param action       the operation to execute
      * @param caseId       identifier used for log traceability
      * @param actionName   human-readable name of the action being executed
-     * @param attemptsLeft number of attempts remaining (must be greater than 0)
+     * @param attempts     number of attempts remaining (must be greater than 0)
      *
      * @throws RuntimeException if all retry attempts fail
      */
-    protected void executeWithRetry(Logger log, ThrowingRunnable action, String caseId, String actionName, int attemptsLeft) {
+    protected <T> T executeWithRetry(Logger log, ThrowingSupplier<T>action, String caseId, String actionName, int attempts) {
         try {
-            action.run();
+            return action.run();
         } catch (Exception e) {
             log.error("{} - Failed {}. Attempts left: {}",
-                caseId, actionName, attemptsLeft - 1, e);
+                caseId, actionName, attempts - 1, e);
 
-            if (attemptsLeft > 1) {
-                executeWithRetry(
+            if (attempts > 1) {
+                return executeWithRetry(
                     log,
                     action,
                     caseId,
                     actionName,
-                    attemptsLeft - 1
+                    attempts - 1
                 );
             } else {
                 log.error("{} - All retry attempts exhausted while {}",
@@ -186,6 +193,33 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
                 throw new RuntimeException(e); // or rethrow if signature allows
             }
         }
+    }
+
+    protected void executeWithRetry(Logger log, ThrowingRunnable action, String caseId, String actionName, int attempts) {
+        try {
+            action.run();
+        } catch (Exception e) {
+            log.error("{} - Failed {}. Attempts left: {}",
+                caseId, actionName, attempts - 1, e);
+
+            if (attempts > 1) {
+                executeWithRetry(
+                    log,
+                    action,
+                    caseId,
+                    actionName,
+                    attempts - 1
+                );
+            } else {
+                log.error("{} - All retry attempts exhausted while {}",
+                    caseId, actionName);
+                throw new RuntimeException(e); // or rethrow if signature allows
+            }
+        }
+    }
+
+    protected <T> T executeWithRetrySafely(Logger log, ThrowingSupplier<T> action, String caseId, String actionName) {
+        return executeWithRetry(log, action, caseId, actionName, defaultNumberOfAttempts);
     }
 
     /**
@@ -205,6 +239,31 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      * @param actionName   human-readable name of the action being executed
      * @param attemptsLeft number of attempts remaining (must be greater than 0)
      */
+    protected <T> T executeWithRetrySafely(Logger log, ThrowingSupplier<T> action, String caseId, String actionName, int attemptsLeft) {
+        try {
+            return action.run();
+        } catch (Exception e) {
+            log.error("{} - Failed {}. Attempts left: {}", caseId, actionName, attemptsLeft - 1, e);
+
+            if (attemptsLeft > 1) {
+                return executeWithRetrySafely(
+                    log,
+                    action,
+                    caseId,
+                    actionName,
+                    attemptsLeft - 1
+                );
+            } else {
+                log.error("{} - All retry attempts exhausted while {}. Exceptions were suppressed", caseId, actionName);
+                return null;
+            }
+        }
+    }
+
+    protected void executeWithRetrySafely(Logger log, ThrowingRunnable action, String caseId, String actionName) {
+        executeWithRetrySafely(log, action, caseId, actionName, defaultNumberOfAttempts);
+    }
+
     protected void executeWithRetrySafely(Logger log, ThrowingRunnable action, String caseId, String actionName, int attemptsLeft) {
         try {
             action.run();

@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -40,11 +41,13 @@ class StopRepresentingClientSubmittedHandlerTest {
     private StopRepresentingClientService stopRepresentingClientService;
     @Mock
     private FeatureToggleService featureToggleService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @BeforeEach
     public void setup() {
         underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, stopRepresentingClientService,
-            featureToggleService);
+            featureToggleService, applicationEventPublisher);
         lenient().when(featureToggleService.isExui3990WorkaroundEnabled()).thenReturn(true);
     }
 

@@ -70,7 +70,10 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
         }
         try {
             executeWithRetry(log,
-                () -> assignPartiesAccessService.grantRespondentSolicitor(caseData),
+                () -> {
+                    assignPartiesAccessService.grantRespondentSolicitor(caseData);
+                    return null;
+                },
                 caseData.getCcdCaseId(),
                 "granting respondent solicitor",
                 3
@@ -84,7 +87,10 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
     private String sendCorrespondence(FinremCaseDetails caseDetails) {
         try {
             executeWithRetry(log,
-                () -> corresponder.sendCorrespondence(caseDetails),
+                () -> {
+                    corresponder.sendCorrespondence(caseDetails);
+                    return null;
+                },
                 caseDetails.getCaseIdAsString(),
                 "sending correspondence",
                 3
