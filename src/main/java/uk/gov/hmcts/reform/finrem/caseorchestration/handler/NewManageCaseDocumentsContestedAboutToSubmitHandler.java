@@ -87,9 +87,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
 
         calculateWarnings(caseData, warnings);
         moveInputManageCaseDocumentsToManagedCollections(caseData);
-        addDefaultsToAdministrativeDocuments(
-            emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
-        );
+        addDefaultsToAdministrativeDocuments(getInputCollections(caseData));
         replaceManagedDocumentsInCollectionType(caseData);
         addUploadDateToNewDocuments(caseData, caseDataBefore);
         clearLegacyCollections(caseData);
@@ -121,6 +119,10 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
             emptyIfNull(documentHandlers).forEach(documentHandler ->
                 documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, false));
         }
+    }
+
+    private List<UploadCaseDocumentCollection> getInputCollections(FinremCaseData caseData) {
+        return emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection());
     }
 
     private void clearActionSelection(FinremCaseData caseData) {
