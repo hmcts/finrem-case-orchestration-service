@@ -25,8 +25,8 @@ public class CloseCaseAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType) &&
-            (CaseType.CONSENTED.equals(caseType) || CaseType.CONTESTED.equals(caseType))
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+            && (CaseType.CONSENTED.equals(caseType) || CaseType.CONTESTED.equals(caseType))
             && EventType.CLOSE.equals(eventType);
     }
 
