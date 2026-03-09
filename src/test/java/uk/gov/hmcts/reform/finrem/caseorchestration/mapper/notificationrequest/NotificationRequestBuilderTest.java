@@ -8,6 +8,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
@@ -20,12 +22,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -39,6 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWales
 
 @ExtendWith(MockitoExtension.class)
 class NotificationRequestBuilderTest {
+    private static final LocalDate FIXED_DATE_NOW = LocalDate.of(2024, 11, 4);
 
     @InjectMocks
     private NotificationRequestBuilder builder;
@@ -69,6 +75,18 @@ class NotificationRequestBuilderTest {
         assertThat(notificationRequest.getPhoneOpeningHours()).isEqualTo(CTSC_OPENING_HOURS);
         assertThat(notificationRequest.getRespondentName()).isEqualTo("Davey Duck");
         assertThat(notificationRequest.getSelectedCourt()).isNull();
+    }
+
+    @Test
+    void givenAnyCase_whenWithDateOfIssue_thenDateOfIssuePopulated() {
+        try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
+            mockedLocalDate.when(LocalDate::now).thenReturn(FIXED_DATE_NOW);
+            NotificationRequest notificationRequest = builder
+                .withDateOfIssue()
+                .build();
+
+            assertThat(notificationRequest.getDateOfIssue()).isEqualTo("2024-11-04");
+        }
     }
 
     @Test
@@ -119,15 +137,20 @@ class NotificationRequestBuilderTest {
     }
 
     @Test
-    void givenContestedCaseWithoutDivorceCaseNumber_whenWithDefaults_thenCaseDetailsPopulated() {
-        mockCourtDetailsConfiguration();
-        FinremCaseDetails caseDetails = createContestedCase(true);
-
-        NotificationRequest notificationRequest = builder
-            .withCaseDefaults(caseDetails)
+    void givenAnyCase_whenWithIntervener_thenIntervenerDetailsPopulated() {
+        IntervenerDetails intervenerDetails = IntervenerOne.builder()
+            .intervenerName("Jack Jack")
+            .intervenerSolicitorFirm("Jack Solicitor & Co.")
+            .intervenerSolicitorReference("RX22598989")
             .build();
 
-        assertThat(notificationRequest.getDivorceCaseNumber()).isEqualTo("");
+        NotificationRequest notificationRequest = builder
+            .withIntervener(intervenerDetails)
+            .build();
+
+        assertThat(notificationRequest.getIntervenerFullName()).isEqualTo("Jack Jack");
+        assertThat(notificationRequest.getIntervenerSolicitorFirm()).isEqualTo("Jack Solicitor & Co.");
+        assertThat(notificationRequest.getIntervenerSolicitorReferenceNumber()).isEqualTo("RX22598989");
     }
 
     @Test
@@ -165,6 +188,7 @@ class NotificationRequestBuilderTest {
             .emailReplyToId("909cb736-eab0-46ac-a7f0-d28d89c8950c")
             .vacatedHearingDateTime("2025-06-02")
             .vacatedHearingType("FDA")
+            .dateOfIssue("2025-06-02")
             .build();
 
         // Assert all fields are non-null
