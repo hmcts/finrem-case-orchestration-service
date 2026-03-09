@@ -177,6 +177,14 @@ class StopRepresentingClientServiceTest {
                     .orgPolicyCaseAssignedRole(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
                     .build()
             );
+        assertThat(intervenerWrapper)
+            .extracting(
+                IntervenerOne::getIntervenerSolEmail,
+                IntervenerOne::getIntervenerSolicitorFirm,
+                IntervenerOne::getIntervenerSolicitorReference,
+                IntervenerOne::getIntervenerSolName,
+                IntervenerOne::getIntervenerSolPhone
+            ).containsOnlyNulls();
     }
 
     @ParameterizedTest
