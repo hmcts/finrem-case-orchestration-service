@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -16,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -32,66 +35,58 @@ class SolicitorAccessServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-
-    @SneakyThrows
-    @Test
-    void givenApplicantSolicitorEmailChanged_ShouldGrantAndRevokesAccess() {
-        List<String> errors = new ArrayList<>();
-        FinremCallbackRequest finremCallbackRequest =
-            buildCallbackRequestApplicantSolicitor("new@email.com", "org1", "old@email.com", "org2");
-        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
-
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
-
-        verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
-        verify(assignPartiesAccessService).revokeApplicantSolicitor(caseDataBefore);
+    static Stream<org.junit.jupiter.params.provider.Arguments> applicantSolicitorScenarios() {
+        return Stream.of(
+            Arguments.of("new@email.com", "org1", "old@email.com", "org2", true),
+            Arguments.of("same@email.com", "org1", "same@email.com", "org1", false)
+        );
     }
 
     @SneakyThrows
-    @Test
-    void givenApplicantSolicitorEmailNotChanged_ShouldGrantAndRevokesAccess_doesNotGrantOrRevoke() {
+    @ParameterizedTest
+    @MethodSource("applicantSolicitorScenarios")
+    void applicantSolicitorAccessIsGrantedOrRevoked(String currentEmail, String currentOrgId, String previousEmail, String previousOrgId, boolean shouldGrantRevoke) {
         List<String> errors = new ArrayList<>();
-        FinremCallbackRequest finremCallbackRequest =
-            buildCallbackRequestApplicantSolicitor("same@email.com", "org1", "same@email.com", "org1");
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequestApplicantSolicitor(currentEmail, currentOrgId, previousEmail, previousOrgId);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
 
-        verify(assignPartiesAccessService, never()).grantApplicantSolicitor(caseData);
-        verify(assignPartiesAccessService, never()).revokeApplicantSolicitor(caseDataBefore);
+        if (shouldGrantRevoke) {
+            verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
+            verify(assignPartiesAccessService).revokeApplicantSolicitor(caseDataBefore);
+        } else {
+            verify(assignPartiesAccessService, never()).grantApplicantSolicitor(caseData);
+            verify(assignPartiesAccessService, never()).revokeApplicantSolicitor(caseDataBefore);
+        }
+    }
+
+    static Stream<org.junit.jupiter.params.provider.Arguments> respondentSolicitorScenarios() {
+        return Stream.of(
+            Arguments.of("new@email.com", "org1", "old@email.com", "org2", true),
+            Arguments.of("same@email.com", "org1", "same@email.com", "org1", false)
+        );
     }
 
     @SneakyThrows
-    @Test
-    void givenRespondentSolicitorEmailChanged_ShouldGrantAndRevokesAccess() {
+    @ParameterizedTest
+    @MethodSource("respondentSolicitorScenarios")
+    void respondentSolicitorAccessIsGrantedOrRevoked(String currentEmail, String currentOrgId, String previousEmail, String previousOrgId, boolean shouldGrantRevoke) {
         List<String> errors = new ArrayList<>();
-        FinremCallbackRequest finremCallbackRequest =
-            buildCallbackRequestRespondentSolicitor("new@email.com", "org1", "old@email.com", "org2");
-        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
-        caseDataBefore.setCcdCaseId(finremCallbackRequest.getCaseDetails().getCaseIdAsString());
-
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
-
-        verify(assignPartiesAccessService).grantRespondentSolicitor(caseData);
-        verify(assignPartiesAccessService).revokeRespondentSolicitor(caseDataBefore);
-    }
-
-    @SneakyThrows
-    @Test
-    void givenRespondentSolicitorEmailNotChanged_ShouldNotGrantAndRevokesAccess() {
-        List<String> errors = new ArrayList<>();
-        FinremCallbackRequest finremCallbackRequest =
-            buildCallbackRequestRespondentSolicitor("same@email.com", "org1", "same@email.com", "org1");
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequestRespondentSolicitor(currentEmail, currentOrgId, previousEmail, previousOrgId);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
 
-        verify(assignPartiesAccessService, never()).grantRespondentSolicitor(caseData);
-        verify(assignPartiesAccessService, never()).revokeRespondentSolicitor(caseDataBefore);
+        if (shouldGrantRevoke) {
+            verify(assignPartiesAccessService).grantRespondentSolicitor(caseData);
+            verify(assignPartiesAccessService).revokeRespondentSolicitor(caseDataBefore);
+        } else {
+            verify(assignPartiesAccessService, never()).grantRespondentSolicitor(caseData);
+            verify(assignPartiesAccessService, never()).revokeRespondentSolicitor(caseDataBefore);
+        }
     }
 
     private FinremCallbackRequest buildCallbackRequestApplicantSolicitor(String applicantSolicitorEmail, String applicantOrganisationId,
