@@ -94,7 +94,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
         boolean showClientAddressForService = true;
         String label = null;
         String confidentialLabel = null;
-        if (representativeInContext.isApplicationRepresentative()) {
+        if (representativeInContext.isApplicantRepresentative()) {
             label = getApplicantClientAddressLabels()[0];
             confidentialLabel = getApplicantClientAddressLabels()[1];
         } else if (representativeInContext.isRespondentRepresentative()) {
@@ -148,7 +148,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private OrganisationPolicy getCurrentUserOrganisationPolicy(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
-        if (representativeInContext.isApplicationRepresentative()) {
+        if (representativeInContext.isApplicantRepresentative()) {
             return caseData.getApplicantOrganisationPolicy();
         }
         if (representativeInContext.isRespondentRepresentative()) {
