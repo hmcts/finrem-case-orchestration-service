@@ -11,6 +11,8 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -61,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -69,6 +72,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -1665,6 +1669,44 @@ class NotificationServiceTest {
         verify(emailService).sendConfirmationEmail(nr, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "true, true, true",
+        "true, false, false",
+        "false, true, false",
+        "false, false, false"
+    })
+    void returnsTrueOnlyWhenSolicitorIsPopulatedAndApplicantIsRepresented(boolean populated, boolean represented, boolean expected) {
+        FinremCaseData finremCaseData = mock(FinremCaseData.class);
+        when(finremCaseData.isApplicantSolicitorPopulated()).thenReturn(populated);
+        lenient().when(finremCaseData.isApplicantRepresentedByASolicitor()).thenReturn(represented);
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+
+        assertThat(notificationService.isApplicantSolicitorEmailPopulatedAndPresented(finremCaseDetails))
+            .isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "true, true, true",
+        "true, false, false",
+        "false, true, false",
+        "false, false, false"
+    })
+    void returnsTrueOnlyWhenSolicitorIsPopulatedAndRespondentIsRepresented(boolean populated, boolean represented, boolean expected) {
+        FinremCaseData finremCaseData = mock(FinremCaseData.class);
+        when(finremCaseData.isRespondentSolicitorPopulated()).thenReturn(populated);
+        lenient().when(finremCaseData.isRespondentRepresentedByASolicitor()).thenReturn(represented);
+
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+
+        assertThat(notificationService.isRespondentSolicitorEmailPopulatedAndPresented(finremCaseDetails))
+            .isEqualTo(expected);
+    }
+
     private FinremCaseData getFinremCaseData() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.getContactDetailsWrapper().setApplicantFmName("Victoria");
@@ -1854,5 +1896,4 @@ class NotificationServiceTest {
             throw new RuntimeException(e);
         }
     }
-
 }
