@@ -34,20 +34,6 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
                                                                                        String userAuthorisation);
 
-    private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
-        FinremCaseDetails finremCaseDetailsBefore = null;
-        if (callbackRequest.getCaseDetailsBefore() != null) {
-            finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
-        }
-        finremCaseDetails.getData().setCcdCaseId(finremCaseDetails.getCaseIdAsString());
-        return FinremCallbackRequest.builder()
-            .caseDetails(finremCaseDetails)
-            .caseDetailsBefore(finremCaseDetailsBefore)
-            .eventType(EventType.getEventType(callbackRequest.getEventId()))
-            .build();
-    }
-
     protected void validateCaseData(FinremCallbackRequest callbackRequest) {
         if (callbackRequest == null
             || callbackRequest.getCaseDetails() == null
@@ -77,7 +63,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      *
      * @param response the callback response containing case data to clean
      * @return a response with temporary fields removed, or the original response if
-     *         clearing is not needed
+     * clearing is not needed
      */
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> removeTemporaryFieldsAfterHandled(
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response) {
@@ -99,6 +85,38 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return response.toBuilder().data(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedCaseDetails.getData())).build();
     }
 
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData) {
+        return response(finremCaseData, null, null);
+    }
+
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData,
+                                                                                   List<String> warnings, List<String> errors) {
+        var builder = GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder();
+        builder.data(finremCaseData);
+        if (errors != null && !errors.isEmpty()) {
+            builder.errors(errors);
+        }
+        if (warnings != null && !warnings.isEmpty()) {
+            builder.warnings(warnings);
+        }
+        return builder.build();
+    }
+
+    private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
+        FinremCaseDetails finremCaseDetailsBefore = null;
+        if (callbackRequest.getCaseDetailsBefore() != null) {
+            finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
+        }
+        finremCaseDetails.getData().setCcdCaseId(finremCaseDetails.getCaseIdAsString());
+
+        return FinremCallbackRequest.builder()
+            .caseDetails(finremCaseDetails)
+            .caseDetailsBefore(finremCaseDetailsBefore)
+            .eventType(EventType.getEventType(callbackRequest.getEventId()))
+            .build();
+    }
+
     /**
      * Returns the list of classes that contain fields annotated with {@link TemporaryField}
      * and should have those temporary fields cleared during sanitisation.
@@ -111,22 +129,5 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      */
     private static List<Class> getClassesWithTemporaryFieldAnnotation() {
         return List.of(StopRepresentationWrapper.class, CaseDataMetricsWrapper.class);
-    }
-
-    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData) {
-        return response(finremCaseData, null, null);
-    }
-
-    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData,
-        List<String> warnings, List<String> errors) {
-        var builder = GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder();
-        builder.data(finremCaseData);
-        if (errors != null && !errors.isEmpty()) {
-            builder.errors(errors);
-        }
-        if (warnings != null && !warnings.isEmpty()) {
-            builder.warnings(warnings);
-        }
-        return builder.build();
     }
 }

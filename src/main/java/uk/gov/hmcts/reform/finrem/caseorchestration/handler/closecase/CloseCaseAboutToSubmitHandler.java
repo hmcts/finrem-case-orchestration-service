@@ -38,8 +38,6 @@ public class CloseCaseAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
 
         caseDataMetricsWrapper.getCaseMetrics().setCaseClosureDate(caseDataMetricsWrapper.getCaseClosureDateField());
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData)
-            .build();
+        return response(caseData);
     }
 }
