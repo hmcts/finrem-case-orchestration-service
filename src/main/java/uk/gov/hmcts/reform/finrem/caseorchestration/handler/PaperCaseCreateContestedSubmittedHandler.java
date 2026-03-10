@@ -58,8 +58,7 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
             executeWithRetry(log,
                 () -> createCaseService.setSupplementaryData(request, userAuthorisation),
                 request.getCaseDetails().getCaseIdAsString(),
-                "setting supplementary data",
-                3
+                "setting supplementary data"
             );
             return null;
         } catch (Exception ex) {
@@ -76,8 +75,7 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
             executeWithRetry(log,
                 () -> assignPartiesAccessService.grantApplicantSolicitor(request.getCaseDetails().getData()),
                 request.getCaseDetails().getCaseIdAsString(),
-                "granting applicant solicitor",
-                3
+                "granting applicant solicitor"
             );
             return null;
         } catch (Exception ex) {
