@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -244,30 +245,71 @@ public class StopRepresentingClientService {
     }
 
     /**
-     * Marks the applicant as unrepresented.
+     * Marks the applicant as unrepresented and removes any existing solicitor details.
      *
-     * <p>
-     * This sets the applicant represented flag to {@link YesOrNo#NO} and
-     * clears the organisation policy currently assigned to the applicant solicitor role.
+     * <p>This method:
+     * <ul>
+     *   <li>Sets the applicant represented flag to {@link YesOrNo#NO}</li>
+     *   <li>Clears all applicant solicitor contact and firm details</li>
+     *   <li>Resets the applicant solicitor organisation policy to the default value</li>
+     * </ul>
+     *
+     * <p>This ensures that any previously assigned solicitor information is removed
+     * when the applicant is no longer represented.
      *
      * @param finremCaseData the case data to update
      */
     public void setApplicantUnrepresented(FinremCaseData finremCaseData) {
-        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
+        contactDetailsWrapper.setApplicantRepresented(YesOrNo.NO);
+
+        // consented & contested
+        contactDetailsWrapper.setSolicitorReference(null);
+        // consented
+        contactDetailsWrapper.setSolicitorName(null);
+        contactDetailsWrapper.setSolicitorFirm(null);
+        contactDetailsWrapper.setSolicitorAddress(null);
+        contactDetailsWrapper.setSolicitorPhone(null);
+        contactDetailsWrapper.setSolicitorEmail(null);
+        contactDetailsWrapper.setSolicitorDxNumber(null);
+        contactDetailsWrapper.setSolicitorAgreeToReceiveEmails(null);
+        // contested
+        contactDetailsWrapper.setApplicantSolicitorName(null);
+        contactDetailsWrapper.setApplicantSolicitorFirm(null);
+        contactDetailsWrapper.setApplicantSolicitorAddress(null);
+        contactDetailsWrapper.setApplicantSolicitorPhone(null);
+        contactDetailsWrapper.setApplicantSolicitorEmail(null);
+        contactDetailsWrapper.setApplicantSolicitorDxNumber(null);
+        contactDetailsWrapper.setApplicantSolicitorConsentForEmails(null);
+
         finremCaseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(APP_SOLICITOR));
     }
 
     /**
      * Marks the respondent as unrepresented.
      *
-     * <p>
-     * For consented applications, the consented respondent represented flag is updated.
-     * For contested applications, the contested respondent represented flag is updated.
-     * In both cases, it clears the organisation policy currently assigned to the respondent solicitor role.
+     * <p>This method clears the respondent solicitor details and updates the
+     * respondent represented flag depending on the application type:
+     * <ul>
+     *   <li>For consented applications, {@code consentedRespondentRepresented} is set to {@link YesOrNo#NO}.</li>
+     *   <li>For contested applications, {@code contestedRespondentRepresented} is set to {@link YesOrNo#NO}.</li>
+     * </ul>
+     * It also resets the organisation policy assigned to the respondent solicitor role.
      *
      * @param finremCaseData the case data to update
      */
     public void setRespondentUnrepresented(FinremCaseData finremCaseData) {
+        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
+
+        // consented & contested
+        contactDetailsWrapper.setRespondentSolicitorName(null);
+        contactDetailsWrapper.setRespondentSolicitorFirm(null);
+        contactDetailsWrapper.setRespondentSolicitorReference(null);
+        contactDetailsWrapper.setRespondentSolicitorAddress(null);
+        contactDetailsWrapper.setRespondentSolicitorPhone(null);
+        contactDetailsWrapper.setRespondentSolicitorEmail(null);
+        contactDetailsWrapper.setRespondentSolicitorDxNumber(null);
+
         if (finremCaseData.isConsentedApplication()) {
             finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
         } else {
@@ -290,6 +332,12 @@ public class StopRepresentingClientService {
         intervenerWrapper.setIntervenerOrganisation(getDefaultOrganisationPolicy(
             intervenerWrapper.getIntervenerSolicitorCaseRole()
         ));
+
+        intervenerWrapper.setIntervenerSolEmail(null);
+        intervenerWrapper.setIntervenerSolicitorFirm(null);
+        intervenerWrapper.setIntervenerSolicitorReference(null);
+        intervenerWrapper.setIntervenerSolName(null);
+        intervenerWrapper.setIntervenerSolPhone(null);
     }
 
     private void handleApplicantOrRespondentRepresentativeRequest(StopRepresentingClientInfo info) {
