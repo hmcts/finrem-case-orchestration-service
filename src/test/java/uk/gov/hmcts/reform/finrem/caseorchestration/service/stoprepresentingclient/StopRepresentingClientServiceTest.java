@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
@@ -176,6 +177,14 @@ class StopRepresentingClientServiceTest {
                     .orgPolicyCaseAssignedRole(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
                     .build()
             );
+        assertThat(intervenerWrapper)
+            .extracting(
+                IntervenerOne::getIntervenerSolEmail,
+                IntervenerOne::getIntervenerSolicitorFirm,
+                IntervenerOne::getIntervenerSolicitorReference,
+                IntervenerOne::getIntervenerSolName,
+                IntervenerOne::getIntervenerSolPhone
+            ).containsOnlyNulls();
     }
 
     @ParameterizedTest
@@ -196,6 +205,16 @@ class StopRepresentingClientServiceTest {
             assertThat(caseData.getContactDetailsWrapper().getContestedRespondentRepresented())
                 .isEqualTo(YesOrNo.NO);
         }
+        assertThat(caseData.getContactDetailsWrapper())
+            .extracting(
+                ContactDetailsWrapper::getRespondentSolicitorName,
+                ContactDetailsWrapper::getRespondentSolicitorFirm,
+                ContactDetailsWrapper::getRespondentSolicitorReference,
+                ContactDetailsWrapper::getRespondentSolicitorAddress,
+                ContactDetailsWrapper::getRespondentSolicitorPhone,
+                ContactDetailsWrapper::getRespondentSolicitorEmail,
+                ContactDetailsWrapper::getRespondentSolicitorDxNumber
+            ).containsOnlyNulls();
 
         assertThat(caseData.getRespondentOrganisationPolicy())
             .isEqualTo(
@@ -216,6 +235,24 @@ class StopRepresentingClientServiceTest {
 
         assertThat(caseData.getContactDetailsWrapper().getApplicantRepresented())
             .isEqualTo(YesOrNo.NO);
+        assertThat(caseData.getContactDetailsWrapper())
+            .extracting(
+                ContactDetailsWrapper::getSolicitorName,
+                ContactDetailsWrapper::getSolicitorFirm,
+                ContactDetailsWrapper::getSolicitorAddress,
+                ContactDetailsWrapper::getSolicitorPhone,
+                ContactDetailsWrapper::getSolicitorEmail,
+                ContactDetailsWrapper::getSolicitorDxNumber,
+                ContactDetailsWrapper::getSolicitorAgreeToReceiveEmails,
+
+                ContactDetailsWrapper::getApplicantSolicitorName,
+                ContactDetailsWrapper::getApplicantSolicitorFirm,
+                ContactDetailsWrapper::getApplicantSolicitorAddress,
+                ContactDetailsWrapper::getApplicantSolicitorPhone,
+                ContactDetailsWrapper::getApplicantSolicitorEmail,
+                ContactDetailsWrapper::getApplicantSolicitorDxNumber,
+                ContactDetailsWrapper::getApplicantSolicitorConsentForEmails
+            ).containsOnlyNulls();
 
         assertThat(caseData.getApplicantOrganisationPolicy())
             .isEqualTo(
