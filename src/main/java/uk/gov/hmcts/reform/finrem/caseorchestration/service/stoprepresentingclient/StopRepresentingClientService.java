@@ -367,7 +367,6 @@ public class StopRepresentingClientService {
      */
     public List<SendCorrespondenceEventEnvelop> prepareLitigantNotifications(Revocation revocation,
                                                                              StopRepresentingClientInfo info) {
-
         final FinremCaseData finremCaseData = getFinremCaseData(info);
         final CaseType caseType = finremCaseData.getCcdCaseType();
         final long caseId = getCaseId(info);

@@ -146,12 +146,12 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
 
     @FunctionalInterface
     public interface ThrowingSupplier<T> {
-        T run() throws Exception;
+        T run();
     }
 
     @FunctionalInterface
     public interface ThrowingRunnable {
-        void run() throws Exception;
+        void run();
     }
 
     /**
@@ -175,7 +175,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     protected <T> T executeWithRetry(Logger log, ThrowingSupplier<T>action, String caseId, String actionName, int attempts) {
         try {
             return action.run();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("{} - Failed {}. Attempts left: {}",
                 caseId, actionName, attempts - 1, e);
 
@@ -198,7 +198,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     protected void executeWithRetry(Logger log, ThrowingRunnable action, String caseId, String actionName, int attempts) {
         try {
             action.run();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("{} - Failed {}. Attempts left: {}",
                 caseId, actionName, attempts - 1, e);
 
@@ -242,7 +242,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     protected <T> T executeWithRetrySafely(Logger log, ThrowingSupplier<T> action, String caseId, String actionName, int attemptsLeft) {
         try {
             return action.run();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("{} - Failed {}. Attempts left: {}", caseId, actionName, attemptsLeft - 1, e);
 
             if (attemptsLeft > 1) {
@@ -267,7 +267,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     protected void executeWithRetrySafely(Logger log, ThrowingRunnable action, String caseId, String actionName, int attemptsLeft) {
         try {
             action.run();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("{} - Failed {}. Attempts left: {}", caseId, actionName, attemptsLeft - 1, e);
 
             if (attemptsLeft > 1) {
