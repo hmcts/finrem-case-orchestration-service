@@ -82,7 +82,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifie
 @RequiredArgsConstructor
 public class StopRepresentingClientService {
 
-    private static final Revocation NO_NOC_INVOLVED = new Revocation(false, false);
+    private static final LitigantRevocation NO_NOC_INVOLVED = new LitigantRevocation(false, false);
 
     private final AssignCaseAccessService assignCaseAccessService;
 
@@ -359,28 +359,28 @@ public class StopRepresentingClientService {
      *     the respondent solicitor and the respondent.</li>
      * </ul>
      *
-     * @param revocation the revocation result indicating whether a revocation occurred
+     * @param litigantRevocation the revocation result indicating whether a revocation occurred
      *                   and which solicitor(s) were revoked
      * @param info the event information containing the case data
      * @return a list of {@link SendCorrespondenceEventEnvelop} objects representing
      *         the correspondence notifications to be sent
      */
-    public List<SendCorrespondenceEventEnvelop> prepareLitigantNotifications(Revocation revocation,
+    public List<SendCorrespondenceEventEnvelop> prepareLitigantNotifications(LitigantRevocation litigantRevocation,
                                                                              StopRepresentingClientInfo info) {
         final FinremCaseData finremCaseData = getFinremCaseData(info);
         final CaseType caseType = finremCaseData.getCcdCaseType();
         final long caseId = getCaseId(info);
 
         List<SendCorrespondenceEventEnvelop> notificationEnvelops = new ArrayList<>();
-        if (revocation.isRevoked()) {
+        if (litigantRevocation.isRevoked()) {
             // save a call if changeOrganisationRequestField is null
             clearChangeOrganisationRequestAfterThisEvent(caseType, caseId);
 
-            if (revocation.applicantSolicitorRevoked) {
+            if (litigantRevocation.applicantSolicitorRevoked) {
                 notificationEnvelops.add(notifyApplicantSolicitor(info));
                 notificationEnvelops.add(notifyApplicant(info));
             }
-            if (revocation.respondentSolicitorRevoked) {
+            if (litigantRevocation.respondentSolicitorRevoked) {
                 notificationEnvelops.add(notifyRespondentSolicitor(info));
                 notificationEnvelops.add(notifyRespondent(info));
             }
@@ -388,6 +388,7 @@ public class StopRepresentingClientService {
         return notificationEnvelops;
     }
 
+    // TODO SEPARATE INTO MULTIPLE UNIT REVOKE
     public List<SendCorrespondenceEventEnvelop> revokeIntervenerSolicitor(StopRepresentingClientInfo info) {
         final FinremCaseData finremCaseData = getFinremCaseData(info);
         final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
@@ -439,7 +440,7 @@ public class StopRepresentingClientService {
         return ret;
     }
 
-    public record Revocation(boolean applicantSolicitorRevoked, boolean respondentSolicitorRevoked) {
+    public record LitigantRevocation(boolean applicantSolicitorRevoked, boolean respondentSolicitorRevoked) {
 
         boolean isRevoked() {
             return applicantSolicitorRevoked || respondentSolicitorRevoked;
@@ -465,12 +466,12 @@ public class StopRepresentingClientService {
      * Case Assignment service.</p>
      *
      * @param info the event information containing the current and previous case data
-     * @return a {@link Revocation} object indicating which solicitor (applicant or respondent)
+     * @return a {@link LitigantRevocation} object indicating which solicitor (applicant or respondent)
      *         has been revoked, or {@link #NO_NOC_INVOLVED} if no organisation change was required
      * @throws IllegalStateException if the change organisation request is populated but the
      *         Notice of Change party cannot be determined
      */
-    public Revocation revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
+    public LitigantRevocation revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
         final FinremCaseData finremCaseData = getFinremCaseData(info);
         final FinremCaseData originalFinremCaseData = getFinremCaseDataBefore(info);
 
@@ -500,7 +501,7 @@ public class StopRepresentingClientService {
         if (shouldPerformNoc) {
             assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(),
                 buildCaseDetailsFromEventCaseData(info));
-            return new Revocation(isApplicantForRepresentationChange, !isApplicantForRepresentationChange);
+            return new LitigantRevocation(isApplicantForRepresentationChange, !isApplicantForRepresentationChange);
         }
         throw new IllegalStateException(format("%s - ChangeOrganisationRequest populated with unknown or null NOC Party : %s",
             finremCaseData.getContactDetailsWrapper().getNocParty(),

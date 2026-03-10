@@ -91,14 +91,14 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
-        StopRepresentingClientService.Revocation revocation = executeWithRetrySafely(log,
+        StopRepresentingClientService.LitigantRevocation litigantRevocation = executeWithRetrySafely(log,
             () -> stopRepresentingClientService.revokeApplicantSolicitorOrRespondentSolicitor(info),
             getCaseId(info), "revoking %s access".formatted(getLigtantPartyString(getFinremCaseData(info))));
-        if (revocation != null) {
+        if (litigantRevocation != null) {
             // - continue sending if revocation is not null
             // - null revocation means exception may occur
             return emptyIfNull(executeWithRetrySafely(log,
-                () -> stopRepresentingClientService.prepareLitigantNotifications(revocation, info),
+                () -> stopRepresentingClientService.prepareLitigantNotifications(litigantRevocation, info),
                 getCaseId(info), "preparing litigant notifications"));
         }
         return List.of();
