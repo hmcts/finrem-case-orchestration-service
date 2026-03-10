@@ -8,21 +8,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,18 +35,11 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private DocumentValidationService documentValidationService;
-
-    @MockitoBean
     private ConsentedApplicationHelper helper;
 
     @Test
     public void whenCaseIsContestedShouldReturnSuccessWhenFileUploadCheckButNotToSetLabelField() throws Exception {
         doRequestSetUp(AMEND_CONTESTED_CONSENT_ORDER_BY_SOL_JSON);
-        DocumentValidationResponse response = DocumentValidationResponse.builder()
-            .mimeType("application/pdf").build();
-        when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
-            .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
                 .post("/case-orchestration/field/consentOrder/file-upload-check")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -68,10 +55,6 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
     @Test
     public void whenCaseIsConsentedShouldReturnSuccessWhenFileUploadCheck() throws Exception {
         doRequestSetUp(AMEND_CONSENT_ORDER_BY_SOL_JSON);
-        DocumentValidationResponse response = DocumentValidationResponse.builder()
-            .mimeType("application/pdf").build();
-        when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
-            .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
                 .post("/case-orchestration/field/consentOrder/file-upload-check")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -87,11 +70,6 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnSuccessWhenFileUploadCheckForInvalidField() throws Exception {
         doRequestSetUp(AMEND_CONSENT_ORDER_BY_SOL_JSON);
-        DocumentValidationResponse response = DocumentValidationResponse.builder()
-            .mimeType("application/pdf")
-            .build();
-        when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
-            .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
                 .post("/case-orchestration/field/yyyyy/file-upload-check")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
