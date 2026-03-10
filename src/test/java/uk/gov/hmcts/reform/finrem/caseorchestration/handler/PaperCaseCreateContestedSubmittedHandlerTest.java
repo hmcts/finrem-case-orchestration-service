@@ -143,7 +143,7 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
                 GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
                 GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
             .containsExactly("# Paper Case Created with Errors",
-                "<ul><li><h2>There was a problem granting access to application solicitor %s</h2></li></ul>"
+                "<ul><li><h2>There was a problem granting access to applicant solicitor %s</h2></li></ul>"
                     .formatted(TEST_SOLICITOR_EMAIL));
         verify(createCaseService)
             .setSupplementaryData(request, AUTH_TOKEN);
@@ -176,7 +176,7 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
             .containsExactly("# Paper Case Created with Errors",
                 ("<ul>"
                     + "<li><h2>There was a problem setting supplementary data.</h2></li>"
-                    + "<li><h2>There was a problem granting access to application solicitor %s</h2></li>"
+                    + "<li><h2>There was a problem granting access to applicant solicitor %s</h2></li>"
                     + "</ul>")
                     .formatted(TEST_SOLICITOR_EMAIL));
         verify(createCaseService, times(3))
