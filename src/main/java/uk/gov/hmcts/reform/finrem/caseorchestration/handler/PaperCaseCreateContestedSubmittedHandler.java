@@ -76,12 +76,12 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
             executeWithRetry(log,
                 () -> assignPartiesAccessService.grantApplicantSolicitor(request.getCaseDetails().getData()),
                 request.getCaseDetails().getCaseIdAsString(),
-                "granting respondent solicitor",
+                "granting applicant solicitor",
                 3
             );
             return null;
         } catch (Exception ex) {
-            return "There was a problem granting access to application solicitor %s".formatted(appSolEmail);
+            return "There was a problem granting access to applicant solicitor %s".formatted(appSolEmail);
         }
     }
 }
