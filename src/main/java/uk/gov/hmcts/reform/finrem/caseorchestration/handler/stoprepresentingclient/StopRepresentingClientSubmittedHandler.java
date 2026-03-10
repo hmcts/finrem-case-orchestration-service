@@ -131,7 +131,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
     private String getLigtantPartyString(FinremCaseData finremCaseData) {
         String party = isApplicantForRepresentationChange(finremCaseData) ? "applicant" : "";
-        party = (isBlank(party) || isRespondentForRepresentationChange(finremCaseData)) ? "respondent" : "";
+        party = (isBlank(party) && isRespondentForRepresentationChange(finremCaseData)) ? "respondent" : party;
         return party;
     }
 
