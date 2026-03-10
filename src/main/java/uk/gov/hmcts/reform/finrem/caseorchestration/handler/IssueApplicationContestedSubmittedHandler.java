@@ -70,12 +70,10 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
         }
         try {
             executeWithRetry(log,
-                () -> {
-                    assignPartiesAccessService.grantRespondentSolicitor(caseData);
-                    return null;
-                },
+                () -> assignPartiesAccessService.grantRespondentSolicitor(caseData),
                 caseData.getCcdCaseId(),
-                "granting respondent solicitor"
+                "granting respondent solicitor",
+                3
             );
             return null;
         } catch (Exception ex) {
@@ -86,12 +84,10 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
     private String sendCorrespondence(FinremCaseDetails caseDetails) {
         try {
             executeWithRetry(log,
-                () -> {
-                    corresponder.sendCorrespondence(caseDetails);
-                    return null;
-                },
+                () -> corresponder.sendCorrespondence(caseDetails),
                 caseDetails.getCaseIdAsString(),
-                "sending correspondence"
+                "sending correspondence",
+                3
             );
             return null;
         } catch (Exception ex) {
