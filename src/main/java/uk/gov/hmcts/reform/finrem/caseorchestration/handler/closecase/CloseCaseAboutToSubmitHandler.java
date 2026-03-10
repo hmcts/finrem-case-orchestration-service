@@ -31,9 +31,9 @@ public class CloseCaseAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails, String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequestWithFinremCaseDetails));
-        FinremCaseData caseData = callbackRequestWithFinremCaseDetails.getCaseDetails().getData();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         CaseDataMetricsWrapper caseDataMetricsWrapper = caseData.getCaseDataMetricsWrapper();
 
         caseDataMetricsWrapper.getCaseMetrics().setCaseClosureDate(caseDataMetricsWrapper.getCaseClosureDateField());
