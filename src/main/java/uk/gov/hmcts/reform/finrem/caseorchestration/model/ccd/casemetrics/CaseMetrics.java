@@ -15,5 +15,4 @@ import java.time.LocalDate;
 @Slf4j
 public class CaseMetrics {
     private LocalDate caseClosureDate;
-    private LocalDate caseReopenDate;
 }
