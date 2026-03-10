@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -22,7 +23,25 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @RequiredArgsConstructor
 public abstract class FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
 
+    private static final String RETRYING_MESSAGE = "{} - Failed {}. Attempts left: {}";
+
+    private static final String RETRY_EXHAUSTING_MESSAGE = "{} - All retry attempts exhausted while {}";
+
+    @SuppressWarnings("java:S112")
+    @FunctionalInterface
+    public interface ThrowingSupplier<T> {
+        T get() throws Exception;
+    }
+
+    @SuppressWarnings("java:S112")
+    @FunctionalInterface
+    public interface ThrowingRunnable {
+        void run() throws Exception;
+    }
+
     protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    protected static final int DEFAULT_RETRY_ATTEMPTS = 3;
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
@@ -109,7 +128,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      *
      * @return a list of classes containing {@code @TemporaryField}-annotated fields
      */
-    private static List<Class> getClassesWithTemporaryFieldAnnotation() {
+    private static List<Class<?>> getClassesWithTemporaryFieldAnnotation() {
         return List.of(StopRepresentationWrapper.class);
     }
 
@@ -142,96 +161,137 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return builder.build();
     }
 
-    @FunctionalInterface
-    public interface ThrowingRunnable {
-        void run() throws Exception;
+    protected <T> T executeWithRetry(
+        Logger log,
+        ThrowingSupplier<T> action,
+        String caseId,
+        String actionName
+    ) {
+        return executeWithRetrySuppressingException(log, action, caseId, actionName, DEFAULT_RETRY_ATTEMPTS);
     }
 
-    /**
-     * Executes the given action with retry support.
-     *
-     * <p>If the action throws an exception, it will be retried until the number
-     * of attempts is exhausted. Each failure is logged together with the number
-     * of remaining attempts.</p>
-     *
-     * <p>When all retry attempts are exhausted, the exception is rethrown wrapped
-     * in a {@link RuntimeException}.</p>
-     *
-     * @param log          logger used to record retry attempts and failures
-     * @param action       the operation to execute
-     * @param caseId       identifier used for log traceability
-     * @param actionName   human-readable name of the action being executed
-     * @param attemptsLeft number of attempts remaining (must be greater than 0)
-     *
-     * @throws RuntimeException if all retry attempts fail
-     */
-    protected void executeWithRetry(Logger log, ThrowingRunnable action, String caseId, String actionName, int attemptsLeft) {
-        try {
-            action.run();
-        } catch (Exception e) {
-            log.error("{} - Failed {}. Attempts left: {}",
-                caseId, actionName, attemptsLeft - 1, e);
+    protected <T> T executeWithRetry(
+        Logger log,
+        ThrowingSupplier<T> action,
+        String caseId,
+        String actionName,
+        int attempts
+    ) {
 
-            if (attemptsLeft > 1) {
-                executeWithRetry(
-                    log,
-                    action,
-                    caseId,
-                    actionName,
-                    attemptsLeft - 1
-                );
-            } else {
-                log.error("{} - All retry attempts exhausted while {}",
-                    caseId, actionName);
-                throw new RuntimeException(e); // or rethrow if signature allows
+        int remainingAttempts = attempts;
+
+        while (remainingAttempts > 0) {
+            try {
+                return action.get();
+            } catch (Exception ex) {
+                remainingAttempts--;
+
+                if (remainingAttempts > 0) {
+                    log.warn(RETRYING_MESSAGE, caseId, actionName, remainingAttempts, ex);
+                } else {
+                    log.error(RETRY_EXHAUSTING_MESSAGE, caseId, actionName, ex);
+                    throw new RuntimeException(ex);
+                }
             }
         }
+
+        throw new IllegalStateException("Retry logic failure");
     }
 
-    /**
-     * Executes the given action with retry support but suppresses any final failure.
-     *
-     * <p>If the action throws an exception, it will be retried until the number
-     * of attempts is exhausted. Failures are logged, but unlike
-     * {@code executeWithRetry}, no exception is propagated to the caller when all
-     * retries fail.</p>
-     *
-     * <p>This method should be used for non-critical operations where failure
-     * should not interrupt the main workflow.</p>
-     *
-     * @param log          logger used to record retry attempts and failures
-     * @param action       the operation to execute
-     * @param caseId       identifier used for log traceability
-     * @param actionName   human-readable name of the action being executed
-     * @param attemptsLeft number of attempts remaining (must be greater than 0)
-     */
-    protected void executeWithRetrySafely(Logger log, ThrowingRunnable action, String caseId, String actionName, int attemptsLeft) {
-        try {
-            action.run();
-        } catch (Exception e) {
-            log.error("{} - Failed {}. Attempts left: {}", caseId, actionName, attemptsLeft - 1, e);
+    protected void executeWithRetry(
+        Logger log,
+        ThrowingRunnable action,
+        String caseId,
+        String actionName
+    ) {
+        executeWithRetry(log, action, caseId, actionName, DEFAULT_RETRY_ATTEMPTS);
+    }
 
-            if (attemptsLeft > 1) {
-                executeWithRetrySafely(
-                    log,
-                    action,
-                    caseId,
-                    actionName,
-                    attemptsLeft - 1
-                );
-            } else {
-                log.error("{} - All retry attempts exhausted while {}. Exceptions were suppressed", caseId, actionName);
+    protected void executeWithRetry(
+        Logger log,
+        ThrowingRunnable action,
+        String caseId,
+        String actionName,
+        int attempts
+    ) {
+        executeWithRetry(log, () -> {
+            action.run();
+            return null;
+        }, caseId, actionName, attempts);
+    }
+
+    protected <T> T executeWithRetrySuppressingException(
+        Logger log,
+        ThrowingSupplier<T> action,
+        String caseId,
+        String actionName
+    ) {
+        return executeWithRetrySuppressingException(log, action, caseId, actionName, DEFAULT_RETRY_ATTEMPTS);
+    }
+
+    protected <T> T executeWithRetrySuppressingException(
+        Logger log,
+        ThrowingSupplier<T> action,
+        String caseId,
+        String actionName,
+        int attempts
+    ) {
+        int remainingAttempts = attempts;
+
+        while (remainingAttempts > 0) {
+            try {
+                return action.get();
+            } catch (Exception ex) {
+                remainingAttempts--;
+
+                if (remainingAttempts > 0) {
+                    log.warn(RETRYING_MESSAGE, caseId, actionName, remainingAttempts, ex);
+                } else {
+                    log.error("{} - All retry attempts exhausted while {}. Exceptions were suppressed",
+                        caseId, actionName, ex);
+                    return null;
+                }
             }
         }
+
+        return null;
     }
 
-    protected String toConfirmationBody(String... errors) {
+    protected void executeWithRetrySuppressingException(
+        Logger log,
+        ThrowingRunnable action,
+        String caseId,
+        String actionName
+    ) {
+        executeWithRetrySuppressingException(log, action, caseId, actionName, DEFAULT_RETRY_ATTEMPTS);
+    }
+
+    protected void executeWithRetrySuppressingException(
+        Logger log,
+        ThrowingRunnable action,
+        String caseId,
+        String actionName,
+        int attempts
+    ) {
+        executeWithRetrySuppressingException(
+            log,
+            () -> {
+                action.run();
+                return null;
+            },
+            caseId,
+            actionName,
+            attempts
+        );
+    }
+
+    protected String toConfirmationBody(String... messages) {
         StringBuilder body = new StringBuilder("<ul>");
 
-        if (errors != null) {
-            for (String error : errors) {
+        if (messages != null) {
+            for (String error : messages) {
                 if (error != null && !error.isBlank()) {
-                    body.append("<li><h2>%s</h2></li>".formatted(error));
+                    body.append("<li><h2>%s</h2></li>".formatted(StringEscapeUtils.escapeHtml4(error)));
                 }
             }
         }
