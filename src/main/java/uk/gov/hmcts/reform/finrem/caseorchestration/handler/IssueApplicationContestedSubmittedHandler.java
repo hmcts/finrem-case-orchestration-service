@@ -75,8 +75,7 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
                     return null;
                 },
                 caseData.getCcdCaseId(),
-                "granting respondent solicitor",
-                3
+                "granting respondent solicitor"
             );
             return null;
         } catch (Exception ex) {
@@ -92,8 +91,7 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
                     return null;
                 },
                 caseDetails.getCaseIdAsString(),
-                "sending correspondence",
-                3
+                "sending correspondence"
             );
             return null;
         } catch (Exception ex) {
