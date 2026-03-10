@@ -212,7 +212,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             log.error("{} - Failed {}. Attempts left: {}", caseId, actionName, attemptsLeft - 1, e);
 
             if (attemptsLeft > 1) {
-                executeWithRetry(
+                executeWithRetrySafely(
                     log,
                     action,
                     caseId,
