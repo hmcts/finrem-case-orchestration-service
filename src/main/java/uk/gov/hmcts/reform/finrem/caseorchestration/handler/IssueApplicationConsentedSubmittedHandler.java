@@ -70,8 +70,7 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
             executeWithRetry(log,
                 () -> assignPartiesAccessService.grantRespondentSolicitor(caseData),
                 caseData.getCcdCaseId(),
-                "granting respondent solicitor",
-                3
+                "granting respondent solicitor"
             );
             return null;
         } catch (Exception ex) {
@@ -84,8 +83,7 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
             executeWithRetry(log,
                 () -> issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation),
                 caseDetails.getCaseIdAsString(),
-                "sending correspondence",
-                3
+                "sending correspondence"
             );
             return null;
         } catch (Exception ex) {
