@@ -91,13 +91,13 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
-        StopRepresentingClientService.LitigantRevocation litigantRevocation = executeWithRetrySafely(log,
+        StopRepresentingClientService.LitigantRevocation litigantRevocation = executeWithRetrySuppressingException(log,
             () -> stopRepresentingClientService.revokeApplicantSolicitorOrRespondentSolicitor(info),
             getCaseId(info), "revoking %s access".formatted(getLigtantPartyString(getFinremCaseData(info))));
         if (litigantRevocation != null) {
             // - continue sending if revocation is not null
             // - null revocation means exception may occur
-            return emptyIfNull(executeWithRetrySafely(log,
+            return emptyIfNull(executeWithRetrySuppressingException(log,
                 () -> stopRepresentingClientService.prepareLitigantNotifications(litigantRevocation, info),
                 getCaseId(info), "preparing litigant notifications"));
         }
@@ -105,13 +105,13 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeIntervenerSolicitor(StopRepresentingClientInfo info) {
-        return emptyIfNull(executeWithRetrySafely(log,
+        return emptyIfNull(executeWithRetrySuppressingException(log,
             () -> stopRepresentingClientService.revokeIntervenerSolicitor(info),
             getCaseId(info), "revoking intervener access"));
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeDifferentPartiesBarristers(StopRepresentingClientInfo info) {
-        return emptyIfNull(executeWithRetrySafely(log,
+        return emptyIfNull(executeWithRetrySuppressingException(log,
             () -> stopRepresentingClientService.revokeAllPartiesBarrister(info),
             getCaseId(info), "revoking different parties barristers' access"));
     }
@@ -124,7 +124,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
         // publish all notification
         envelops.forEach(envelop ->
-            executeWithRetrySafely(log, () -> applicationEventPublisher.publishEvent(envelop.getEvent()),
+            executeWithRetrySuppressingException(log, () -> applicationEventPublisher.publishEvent(envelop.getEvent()),
                 getCaseId(info), envelop.getDescription())
         );
     }
