@@ -105,15 +105,15 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeIntervenerSolicitor(StopRepresentingClientInfo info) {
-        return executeWithRetrySafely(log,
+        return emptyIfNull(executeWithRetrySafely(log,
             () -> stopRepresentingClientService.revokeIntervenerSolicitor(info),
-            getCaseId(info), "revoking intervener access");
+            getCaseId(info), "revoking intervener access"));
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeDifferentPartiesBarristers(StopRepresentingClientInfo info) {
-        return executeWithRetrySafely(log,
+        return emptyIfNull(executeWithRetrySafely(log,
             () -> stopRepresentingClientService.revokeAllPartiesBarrister(info),
-            getCaseId(info), "revoking different parties barristers' access");
+            getCaseId(info), "revoking different parties barristers' access"));
     }
 
     private void revokePartiesAccessAndNotifyParties(StopRepresentingClientInfo info) {
@@ -122,7 +122,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         envelops.addAll(revokeIntervenerSolicitor(info));
         envelops.addAll(revokeDifferentPartiesBarristers(info));
 
-        // push all notification
+        // publish all notification
         envelops.forEach(envelop ->
             executeWithRetrySafely(log, () -> applicationEventPublisher.publishEvent(envelop.getEvent()),
                 getCaseId(info), envelop.getDescription())
