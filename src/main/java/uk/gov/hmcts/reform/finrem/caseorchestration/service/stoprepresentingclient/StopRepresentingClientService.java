@@ -78,6 +78,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifie
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_TWO_SOLICITOR_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.EmailTemplateResolver.getNotifyApplicantRepresentativeTemplateName;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.EmailTemplateResolver.getNotifyIntervenerRepresentativeTemplateName;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.EmailTemplateResolver.getNotifyRespondentRepresentativeTemplateName;
 
 @Service
 @Slf4j
@@ -135,24 +138,6 @@ public class StopRepresentingClientService {
         Map<String, Object> map = new HashMap<>();
         map.put(CHANGE_ORGANISATION_REQUEST, null);
         return map;
-    }
-
-    private static EmailTemplateNames getNotifyApplicantRepresentativeTemplateName(FinremCaseData finremCaseData) {
-        return finremCaseData.isContestedApplication()
-            ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-            : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
-    }
-
-    private static EmailTemplateNames getNotifyRespondentRepresentativeTemplateName(FinremCaseData finremCaseData) {
-        return finremCaseData.isContestedApplication()
-            ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT
-            : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
-    }
-
-    private static EmailTemplateNames getNotifyIntervenerRepresentativeTemplateName(FinremCaseData finremCaseData) {
-        return finremCaseData.isContestedApplication()
-            ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER
-            : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
     }
 
     /**
