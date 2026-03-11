@@ -53,7 +53,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
@@ -192,10 +191,9 @@ public class StopRepresentingClientService {
             .filter(b -> b.getUserId().equals(representativeInContext.userId()))
             .findFirst().orElseThrow();
 
+        OrganisationPolicy policy = intervener.getIntervenerOrganisation();
         return isSameOrganisation(
-            ofNullable(intervener.getIntervenerOrganisation())
-                .map(OrganisationPolicy::getOrganisation)
-                .orElse(Organisation.builder().build()),
+            policy == null ? null : policy.getOrganisation(),
             barrister.getOrganisation()
         );
     }
@@ -898,15 +896,18 @@ public class StopRepresentingClientService {
      * the current intervener organisation with the original organisation
      * stored in case data.
      */
-    private boolean shouldRevokeIntervenerSolicitorAccess(IntervenerWrapper intervenerWrapper,
-                                                          IntervenerWrapper originalIntervenerWrapper) {
-        return !isSameOrganisation(
-            ofNullable(intervenerWrapper.getIntervenerOrganisation())
-                .map(OrganisationPolicy::getOrganisation)
-                .orElse(Organisation.builder().organisationID("SAME").build()),
-            ofNullable(originalIntervenerWrapper.getIntervenerOrganisation())
-                .map(OrganisationPolicy::getOrganisation)
-                .orElse(Organisation.builder().organisationID("SAME").build())
+    private boolean shouldRevokeIntervenerSolicitorAccess(
+        IntervenerWrapper newWrapper,
+        IntervenerWrapper oldWrapper) {
+
+        return !Objects.equals(
+            getOrganisationId(newWrapper),
+            getOrganisationId(oldWrapper)
         );
+    }
+
+    private String getOrganisationId(IntervenerWrapper wrapper) {
+        OrganisationPolicy policy = wrapper.getIntervenerOrganisation();
+        return policy == null ? null : policy.getOrganisation().getOrganisationID();
     }
 }
