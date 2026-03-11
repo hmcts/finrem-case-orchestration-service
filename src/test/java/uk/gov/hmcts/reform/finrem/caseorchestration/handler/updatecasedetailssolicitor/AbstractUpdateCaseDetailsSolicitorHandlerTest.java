@@ -78,6 +78,7 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
             .build();
 
         // PT todo - refactor into private func if poss - but do it after consented introduced, as @EnumSource could change.
+        // PT todo consented cases work the same, but coverage would be good.
         FinremCallbackRequest callbackRequest =
             FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR, caseData);
 
@@ -107,7 +108,7 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
     }
 
     /*
-     * Todo parameterise with respondent solicitor
+     * Todo parameterise with consented?
      * Test that applicant solicitor validation calls the right downstream methods with right params.
      * Then confirm representation service errors are shown in the response.
      */

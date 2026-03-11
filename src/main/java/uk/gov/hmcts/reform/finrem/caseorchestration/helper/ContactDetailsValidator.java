@@ -339,6 +339,7 @@ public class ContactDetailsValidator {
     }
 
     // PT Todo - you changed visibility - needs Javadoc
+    // field common to consented and contested
     public static boolean checkForRespondentSolicitorEmail(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()
             && !isValidEmailAddress(wrapper.getRespondentSolicitorEmail(), true)) {
