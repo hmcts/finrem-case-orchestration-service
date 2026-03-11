@@ -46,6 +46,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_CENTRAL_FRC_ADDRESS_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_CENTRAL_FRC_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
@@ -256,6 +258,8 @@ class CaseHearingFunctionsTest {
         assertEquals("Hearing Centre, 160-163 Friar Street, Reading, RG1 1HE", stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY));
         assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
         assertEquals("family.reading.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
+        assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
+        assertEquals("family.reading.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
     }
 
     @Test
@@ -269,6 +273,8 @@ class CaseHearingFunctionsTest {
         assertEquals("Home Gardens, Dartford, DA1 1DX", stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY));
         assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
         assertEquals("family.dartford.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
+        assertEquals("HMCTS Financial Remedy, PO Box 12746, HARLOW, CM20 9QZ", stringObjectMap.get(COURT_DETAILS_CENTRAL_FRC_ADDRESS_KEY));
+        assertEquals("FRCKSS@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_CENTRAL_FRC_EMAIL_KEY));
     }
 
     @Test
@@ -285,6 +291,8 @@ class CaseHearingFunctionsTest {
         assertEquals("Home Gardens, Dartford, DA1 1DX", stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY));
         assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
         assertEquals("family.dartford.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
+        assertEquals("HMCTS Financial Remedy, PO Box 12746, HARLOW, CM20 9QZ", stringObjectMap.get(COURT_DETAILS_CENTRAL_FRC_ADDRESS_KEY));
+        assertEquals("FRCKSS@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_CENTRAL_FRC_EMAIL_KEY));
     }
 
     @Test
@@ -301,6 +309,23 @@ class CaseHearingFunctionsTest {
         assertEquals("2nd Floor, The Courthouse, Cecil Square, Margate, Kent CT9 1RL", stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY));
         assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
         assertEquals("Family.canterbury.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
+        assertEquals("HMCTS Financial Remedy, PO Box 12746, HARLOW, CM20 9QZ", stringObjectMap.get(COURT_DETAILS_CENTRAL_FRC_ADDRESS_KEY));
+        assertEquals("FRCKSS@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_CENTRAL_FRC_EMAIL_KEY));
+    }
+
+    @Test
+    void shouldNotPopulateCentralCourtDetailsWhenNotKentFRC() {
+        Map<String, Object> caseData = Map.of(
+            REGION, NORTHEAST,
+            NORTHEAST_FRC_LIST, CLEVELAND,
+            CLEAVELAND_COURTLIST, "FR_cleaveland_hc_list_2");
+        Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
+        assertEquals("Durham Justice Centre", stringObjectMap.get(COURT_DETAILS_NAME_KEY));
+        assertEquals("Green Lane, Old Elvet, Durham, DH1 3RG", stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY));
+        assertEquals("0300 123 5577", stringObjectMap.get(COURT_DETAILS_PHONE_KEY));
+        assertEquals("Family.newcastle.countycourt@justice.gov.uk", stringObjectMap.get(COURT_DETAILS_EMAIL_KEY));
+        assertThat(stringObjectMap.get(COURT_DETAILS_CENTRAL_FRC_ADDRESS_KEY)).isNull();
+        assertThat(stringObjectMap.get(COURT_DETAILS_CENTRAL_FRC_EMAIL_KEY)).isNull();
     }
 
     @Test
