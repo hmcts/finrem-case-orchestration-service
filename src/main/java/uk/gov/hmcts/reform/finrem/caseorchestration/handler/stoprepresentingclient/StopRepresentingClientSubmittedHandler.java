@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventEnvelop;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
@@ -97,17 +100,27 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         if (litigantRevocation != null) {
             // - continue sending if revocation is not null
             // - null revocation means exception may occur
+            if (litigantRevocation.wasRevoked()) {
+                executeWithRetrySuppressingException(log,
+                    () -> stopRepresentingClientService.performCleanUpAfterNocWorkflow(info),
+                    getCaseId(info), "cleaning up after noc workflow ");
+            }
+
             return emptyIfNull(executeWithRetrySuppressingException(log,
-                () -> stopRepresentingClientService.prepareLitigantNotifications(litigantRevocation, info),
+                () -> stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(litigantRevocation, info),
                 getCaseId(info), "preparing litigant notifications"));
         }
         return List.of();
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeIntervenerSolicitor(StopRepresentingClientInfo info) {
-        return emptyIfNull(executeWithRetrySuppressingException(log,
-            () -> stopRepresentingClientService.revokeIntervenerSolicitor(info),
-            getCaseId(info), "revoking intervener access"));
+        List<IntervenerWrapper> intervenerWrappers = stopRepresentingClientService.getToBeRevokedIntervenerSolicitors(info);
+        return intervenerWrappers.stream().map(intervenerWrapper ->
+            executeWithRetrySuppressingException(log,
+                () -> stopRepresentingClientService.revokeIntervenerSolicitor(info, intervenerWrapper),
+                getCaseId(info), "revoking %s access".formatted(ofNullable(intervenerWrapper.getIntervenerType())
+                    .map(IntervenerType::getTypeValue).orElse("(intervener#unknown)")))
+        ).toList();
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeDifferentPartiesBarristers(StopRepresentingClientInfo info) {
