@@ -281,4 +281,70 @@ class CourtDetailsMapperTest {
         // Verifying the exception message
         assertEquals("No valid field found in the court list wrapper", exception.getMessage());
     }
+
+    @Test
+    void givenCourtDetailsWithCentralFRCFields_whenConvertToFrcCourtDetails_thenCentralFieldsAreSet() {
+        // Mocking the court details map with central FRC fields
+        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of(
+            "FR_s_CFCList_2", new CourtDetails(
+                "Croydon County Court And Family Court",
+                "Croydon County Court, Altyre Road, Croydon, CR9 5AB",
+                "0300 123 5577",
+                "FRCLondon@justice.gov.uk",
+                "42b18e70-18e8-4290-bb85-9c5254548345",
+                "Central FRC Address",
+                "centralfrc@justice.gov.uk"
+            )
+        ));
+
+        DefaultCourtListWrapper courtList = new DefaultCourtListWrapper();
+        courtList.setCfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT);
+
+        Court court = Court
+            .builder()
+            .londonList(RegionLondonFrc.LONDON)
+            .region(Region.LONDON)
+            .courtListWrapper(DefaultCourtListWrapper
+                .builder()
+                .cfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)
+                .build())
+            .build();
+
+        CourtDetails courtDetails = courtDetailsMapper.convertToFrcCourtDetails(court);
+
+        assertEquals("Central FRC Address", courtDetails.getCentralFRCCourtAddress());
+        assertEquals("centralfrc@justice.gov.uk", courtDetails.getCentralFRCCourtEmail());
+    }
+
+    @Test
+    void givenCourtDetailsWithoutCentralFRCFields_whenConvertToFrcCourtDetails_thenCentralFieldsAreNull() {
+        // Mocking the court details map without central FRC fields
+        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of(
+            "FR_s_CFCList_2", new CourtDetails(
+                "Croydon County Court And Family Court",
+                "Croydon County Court, Altyre Road, Croydon, CR9 5AB",
+                "0300 123 5577",
+                "FRCLondon@justice.gov.uk",
+                "42b18e70-18e8-4290-bb85-9c5254548345"
+            )
+        ));
+
+        DefaultCourtListWrapper courtList = new DefaultCourtListWrapper();
+        courtList.setCfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT);
+
+        Court court = Court
+            .builder()
+            .londonList(RegionLondonFrc.LONDON)
+            .region(Region.LONDON)
+            .courtListWrapper(DefaultCourtListWrapper
+                .builder()
+                .cfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)
+                .build())
+            .build();
+
+        CourtDetails courtDetails = courtDetailsMapper.convertToFrcCourtDetails(court);
+
+        assertNull(courtDetails.getCentralFRCCourtAddress());
+        assertNull(courtDetails.getCentralFRCCourtEmail());
+    }
 }
