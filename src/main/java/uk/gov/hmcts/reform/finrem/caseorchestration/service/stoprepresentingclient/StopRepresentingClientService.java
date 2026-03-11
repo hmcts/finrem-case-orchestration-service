@@ -59,6 +59,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
@@ -509,12 +511,10 @@ public class StopRepresentingClientService {
         boolean shouldPerformNoc = false;
         boolean isApplicantForRepresentationChange = isApplicantForRepresentationChange(finremCaseData);
         if (isApplicantForRepresentationChange) {
-            //finremCaseData.setApplicantOrganisationPolicy(originalFinremCaseData.getApplicantOrganisationPolicy());
-            clonedCaseDetails.getData().put("ApplicantOrganisationPolicy", originalFinremCaseData.getApplicantOrganisationPolicy());
+            clonedCaseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, originalFinremCaseData.getApplicantOrganisationPolicy());
             shouldPerformNoc = true;
         } else if (isRespondentForRepresentationChange(finremCaseData)) {
-            //finremCaseData.setRespondentOrganisationPolicy(originalFinremCaseData.getRespondentOrganisationPolicy());
-            clonedCaseDetails.getData().put("RespondentOrganisationPolicy", originalFinremCaseData.getRespondentOrganisationPolicy());
+            clonedCaseDetails.getData().put(ORGANISATION_POLICY_RESPONDENT, originalFinremCaseData.getRespondentOrganisationPolicy());
             shouldPerformNoc = true;
         }
 
