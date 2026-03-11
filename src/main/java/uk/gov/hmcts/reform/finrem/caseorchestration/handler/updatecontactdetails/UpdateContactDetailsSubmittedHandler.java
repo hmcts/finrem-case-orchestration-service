@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -39,19 +40,39 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        caseDetailsBefore.getData().setCcdCaseId(caseDetailsBefore.getCaseIdAsString());
-        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
-        List<String> errors = new ArrayList<>();
+        String checkAndAssignSolicitorAccessError = checkAndAssignSolicitorAccess(callbackRequest);
 
-        // Check for changes in solicitor details and update access accordingly
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
+        if (StringUtils.isAllBlank(checkAndAssignSolicitorAccessError)) {
+            return submittedResponse("# Updated Case Solicitor with Errors",
+                toConfirmationBody(checkAndAssignSolicitorAccessError));
+        }
 
         // Check if the update includes a representative change and send Notice of Change notifications if required
         solicitorAccessService.sendNoticeOfChangeNotificationsCaseworker(callbackRequest, userAuthorisation);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return submittedResponse();
     }
+
+    private String checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest) {
+
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        caseDetailsBefore.getData().setCcdCaseId(caseDetailsBefore.getCaseIdAsString());
+        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+        List<String> errors = new ArrayList<>();
+
+        try {
+            executeWithRetry(log,
+                () -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors),
+                callbackRequest.getCaseDetails().getCaseIdAsString(),
+                "Update Contact Details - Case Solicitor Change",
+                3
+            );
+            return null;
+        } catch (Exception ex) {
+            return errors.getFirst();
+        }
+    }
+
 }
