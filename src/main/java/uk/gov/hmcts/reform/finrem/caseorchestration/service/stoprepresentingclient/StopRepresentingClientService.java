@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -64,6 +63,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy.getDefaultOrganisationPolicy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_FOUR_BARRISTER_ONLY;
@@ -554,14 +554,6 @@ public class StopRepresentingClientService {
         // coreCaseDataService loads the case data again in the internal event call.
         coreCaseDataService.performPostSubmitCallback(caseType, info.getCaseId(),
             INTERNAL_CHANGE_UPDATE_CASE.getCcdType(), caseDetails -> clearChangeOrganisationRequestField());
-    }
-
-    private OrganisationPolicy getDefaultOrganisationPolicy(CaseRole role) {
-        return OrganisationPolicy.builder()
-            .organisation(Organisation.builder().organisationID(null).organisationName(null).build())
-            .orgPolicyReference(null)
-            .orgPolicyCaseAssignedRole(role.getCcdCode())
-            .build();
     }
 
     private SendCorrespondenceEventEnvelop prepareRepresentativeEmailNotificationEvent(String description,
