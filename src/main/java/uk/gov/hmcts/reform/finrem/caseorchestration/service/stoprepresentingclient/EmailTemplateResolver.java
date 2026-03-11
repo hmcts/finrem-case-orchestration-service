@@ -5,6 +5,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTe
 
 public class EmailTemplateResolver {
 
+    private EmailTemplateResolver() {
+    }
+
     public static EmailTemplateNames getNotifyApplicantRepresentativeTemplateName(FinremCaseData finremCaseData) {
         return finremCaseData.isContestedApplication()
             ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT

@@ -122,18 +122,6 @@ public class StopRepresentingClientService {
 
     private final LetterDetailsMapper letterDetailsMapper;
 
-    private static FinremCaseData getFinremCaseDataBefore(StopRepresentingClientInfo info) {
-        return info.getCaseDetailsBefore().getData();
-    }
-
-    private static FinremCaseData getFinremCaseData(StopRepresentingClientInfo info) {
-        return info.getCaseDetails().getData();
-    }
-
-    private static long getCaseId(StopRepresentingClientInfo info) {
-        return Long.parseLong(getFinremCaseData(info).getCcdCaseId());
-    }
-
     private static Map<String, Object> clearChangeOrganisationRequestField() {
         Map<String, Object> map = new HashMap<>();
         map.put(CHANGE_ORGANISATION_REQUEST, null);
@@ -383,8 +371,8 @@ public class StopRepresentingClientService {
      *         whose solicitor access should be revoked
      */
     public List<IntervenerWrapper> getToBeRevokedIntervenerSolicitors(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseData(info);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
+        final FinremCaseData finremCaseData = info.getFinremCaseData();
+        final FinremCaseData finremCaseDataBefore = info.getFinremCaseDataBefore();
 
         List<IntervenerWrapper> ret = new ArrayList<>();
 
@@ -418,7 +406,7 @@ public class StopRepresentingClientService {
      * @return a {@link BarristerChange} object containing the barristers to be revoked
      */
     public BarristerChange getToBeRevokedBarristers(StopRepresentingClientInfo info, BarristerParty barristerParty) {
-        FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
+        FinremCaseData finremCaseDataBefore = info.getFinremCaseDataBefore();
         return manageBarristerService.getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
     }
 
@@ -449,8 +437,8 @@ public class StopRepresentingClientService {
     public LitigantRevocation revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
         CaseDetails clonedCaseDetails = cloneCaseDetailsFromFinremCaseDetails(info);
 
-        FinremCaseData finremCaseData = getFinremCaseData(info);
-        FinremCaseData originalFinremCaseData = getFinremCaseDataBefore(info);
+        FinremCaseData finremCaseData = info.getFinremCaseData();
+        FinremCaseData originalFinremCaseData = info.getFinremCaseDataBefore();
 
         // to check if ChangeOrganisationRequest populated, otherwise skip it
         if (Optional.ofNullable(finremCaseData.getChangeOrganisationRequestField())
@@ -476,7 +464,7 @@ public class StopRepresentingClientService {
 
         // Going to apply decision
         if (shouldPerformNoc) {
-            log.info("{} - about to send a NOC request to case assignment API", getCaseId(info));
+            log.info("{} - about to send a NOC request to case assignment API", info.getCaseId());
             assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), clonedCaseDetails);
             return new LitigantRevocation(isApplicantForRepresentationChange, !isApplicantForRepresentationChange);
         }
@@ -501,7 +489,7 @@ public class StopRepresentingClientService {
      */
     public SendCorrespondenceEventEnvelop revokeIntervenerSolicitor(StopRepresentingClientInfo info,
                                                                     IntervenerWrapper intervenerWrapper) {
-        intervenerService.revokeIntervenerSolicitor(getCaseId(info), intervenerWrapper);
+        intervenerService.revokeIntervenerSolicitor(info.getCaseId(), intervenerWrapper);
         return prepareIntervenerSolicitorEmailNotificationEvent(info, intervenerWrapper.getIntervenerType());
     }
 
@@ -530,7 +518,7 @@ public class StopRepresentingClientService {
      *         to be sent for the revoked barristers; empty list if no barristers were removed
      */
     public List<SendCorrespondenceEventEnvelop> revokeBarristers(StopRepresentingClientInfo info, BarristerChange barristerChange) {
-        barristerChangeCaseAccessUpdater.executeBarristerChange(getCaseId(info), barristerChange);
+        barristerChangeCaseAccessUpdater.executeBarristerChange(info.getCaseId(), barristerChange);
 
         BarristerParty barristerParty = barristerChange.getBarristerParty();
         return SetUtils.emptyIfNull(barristerChange.getRemoved())
@@ -565,11 +553,11 @@ public class StopRepresentingClientService {
     public void performCleanUpAfterNocWorkflow(StopRepresentingClientInfo info) {
         final CaseType caseType = info.getCaseDetails().getCaseType();
 
-        log.info("{} - about to perform clean-up job after NOC workflow", getCaseId(info));
+        log.info("{} - about to perform clean-up job after NOC workflow", info.getCaseId());
 
         // to reset the targeted field by case id and case type only
         // coreCaseDataService loads the case data again in the internal event call.
-        coreCaseDataService.performPostSubmitCallback(caseType, getCaseId(info),
+        coreCaseDataService.performPostSubmitCallback(caseType, info.getCaseId(),
             INTERNAL_CHANGE_UPDATE_CASE.getCcdType(), caseDetails -> clearChangeOrganisationRequestField());
     }
 
@@ -629,7 +617,7 @@ public class StopRepresentingClientService {
             "notifying applicant solicitor",
             info,
             List.of(FORMER_APPLICANT_SOLICITOR_ONLY),
-            getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
+            getNotifyApplicantRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR)
         );
@@ -653,7 +641,7 @@ public class StopRepresentingClientService {
             "notifying applicant barrister",
             info,
             List.of(FORMER_APPLICANT_BARRISTER_ONLY),
-            getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
+            getNotifyApplicantRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
             barrister
@@ -680,7 +668,7 @@ public class StopRepresentingClientService {
             "notifying intervener %s solicitor".formatted(intervenerId),
             info,
             List.of(resolveIntervenerSolicitorNotificationParty(intervenerId)),
-            getNotifyIntervenerRepresentativeTemplateName(getFinremCaseData(info)),
+            getNotifyIntervenerRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(),
                     CaseRole.getIntervenerSolicitorByIndex(intervenerId), intervenerType)
@@ -713,7 +701,7 @@ public class StopRepresentingClientService {
             "notifying intervener barrister",
             info,
             List.of(resolveIntervenerBarristerNotificationParty(intervenerId)),
-            getNotifyIntervenerRepresentativeTemplateName(getFinremCaseData(info)),
+            getNotifyIntervenerRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister, intervenerType),
             barrister
@@ -808,7 +796,7 @@ public class StopRepresentingClientService {
             "notifying respondent solicitor",
             info,
             List.of(FORMER_RESPONDENT_SOLICITOR_ONLY),
-            getNotifyRespondentRepresentativeTemplateName(getFinremCaseData(info)),
+            getNotifyRespondentRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), RESP_SOLICITOR)
         );
@@ -833,7 +821,7 @@ public class StopRepresentingClientService {
             "notifying respondent barrister",
             info,
             List.of(FORMER_RESPONDENT_BARRISTER_ONLY),
-            getNotifyRespondentRepresentativeTemplateName(getFinremCaseData(info)),
+            getNotifyRespondentRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
             barrister
