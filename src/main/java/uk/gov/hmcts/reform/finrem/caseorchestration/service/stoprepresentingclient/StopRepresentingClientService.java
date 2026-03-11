@@ -40,12 +40,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -58,7 +58,6 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
@@ -78,6 +77,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifie
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_TWO_SOLICITOR_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils.clearChangeOrganisationRequestField;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.EmailTemplateResolver.getNotifyApplicantRepresentativeTemplateName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.EmailTemplateResolver.getNotifyIntervenerRepresentativeTemplateName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.EmailTemplateResolver.getNotifyRespondentRepresentativeTemplateName;
@@ -121,12 +121,6 @@ public class StopRepresentingClientService {
     private final DocumentConfiguration documentConfiguration;
 
     private final LetterDetailsMapper letterDetailsMapper;
-
-    private static Map<String, Object> clearChangeOrganisationRequestField() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(CHANGE_ORGANISATION_REQUEST, null);
-        return map;
-    }
 
     /**
      * Builds a {@link RepresentativeInContext} object indicating which parties
@@ -537,18 +531,21 @@ public class StopRepresentingClientService {
     }
 
     /**
-     * Performs cleanup of the 'Change Organisation Request' field after the
-     * Notice of Change (NOC) workflow has completed.
+     * Performs post–Notice of Change (NOC) cleanup for the specified case.
      *
-     * <p>This method triggers a post-submit callback on the {@link CoreCaseDataService}
-     * to reset the targeted field using only the case type and case ID. The callback
-     * reloads the case data internally and invokes
-     * {@link #clearChangeOrganisationRequestField()} to clear the field.</p>
+     * <p>This method resets the {@code Change Organisation Request} field after the
+     * NOC workflow has completed. It invokes a post-submit callback through
+     * {@link CoreCaseDataService}, using only the case type and case ID.</p>
      *
-     * <p>No notifications or other side effects are performed; this is purely a data
-     * cleanup operation.</p>
+     * <p>The {@link CoreCaseDataService} internally reloads the latest case data
+     * before executing the update event, ensuring the field is cleared using
+     * {@link NocUtils#clearChangeOrganisationRequestField()}.</p>
      *
-     * @param info the stop representing client event information, containing the case details
+     * <p>This operation performs a data cleanup only and does not trigger
+     * notifications or additional business processing.</p>
+     *
+     * @param info the stop representing client context containing the case details
+     *             and identifiers required to perform the cleanup
      */
     public void performCleanUpAfterNocWorkflow(StopRepresentingClientInfo info) {
         final CaseType caseType = info.getCaseDetails().getCaseType();
