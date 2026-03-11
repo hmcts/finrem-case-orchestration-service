@@ -573,6 +573,8 @@ public class StopRepresentingClientService {
     public void performCleanUpAfterNocWorkflow(StopRepresentingClientInfo info) {
         final CaseType caseType = info.getCaseDetails().getCaseType();
 
+        log.info("{} - about to perform clean-up job after NOC workflow", getCaseId(info));
+
         // to reset the targeted field by case id and case type only
         // coreCaseDataService loads the case data again in the internal event call.
         coreCaseDataService.performPostSubmitCallback(caseType, getCaseId(info),
