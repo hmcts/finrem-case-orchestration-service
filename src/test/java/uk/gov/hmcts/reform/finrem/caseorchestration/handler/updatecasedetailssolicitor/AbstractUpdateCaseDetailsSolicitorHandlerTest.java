@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CASE_DETAILS_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,28 +68,30 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
         underTest = new TestHandler(finremCaseDetailsMapper, updateRepresentationService);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = CaseRole.class, mode = EnumSource.Mode.EXCLUDE,  names = {"APP_SOLICITOR", "RESP_SOLICITOR"})
     /*
      All CaseRoles other that applicant and respondent solicitor should fail.
      */
+    @ParameterizedTest
+    @EnumSource(value = CaseRole.class, mode = EnumSource.Mode.EXCLUDE, names = {"APP_SOLICITOR", "RESP_SOLICITOR"})
     void when_caseRolePartyWrong_then_exceptionThrown(CaseRole caseRole) {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .currentUserCaseRole(caseRole)
             .build();
 
-        // PT todo - refactor into private func if poss - but do it after consented introduced, as @EnumSource could change.
-        // PT todo consented cases work the same, but coverage would be good.
-        FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR, caseData);
+        // Act and assert. Simpler to run test for each case type, rather than parameterise further.
+        ArrayList<CaseType> caseTypes = new ArrayList<>(List.of(CONTESTED, CONSENTED));
+        caseTypes.forEach( caseType -> {
 
-        // Act and assert
-        assertThat(assertThrows(IllegalArgumentException.class, () -> underTest.handle(callbackRequest, AUTH_TOKEN)).getMessage())
-            .isEqualTo(String.format(
-                "Update Contact Details: Current user is not applicant or respondent solicitor. Case reference:%s",
-                CASE_ID)
-            );
+            FinremCallbackRequest callbackRequest =
+                FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, UPDATE_CASE_DETAILS_SOLICITOR, caseData);
+
+            assertThat(assertThrows(IllegalArgumentException.class, () -> underTest.handle(callbackRequest, AUTH_TOKEN)).getMessage())
+                .isEqualTo(String.format(
+                    "Update Contact Details: Current user is not applicant or respondent solicitor. Case reference:%s",
+                    CASE_ID)
+                );
+        });
     }
 
     @Test
@@ -108,22 +112,26 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
     }
 
     /*
-     * Todo parameterise with consented?
      * Test that applicant solicitor validation calls the right downstream methods with right params.
      * Then confirm representation service errors are shown in the response.
      */
     @ParameterizedTest
-    @EnumSource(value = CaseRole.class, mode = EnumSource.Mode.INCLUDE,  names = {"APP_SOLICITOR", "RESP_SOLICITOR"})
-    void when_handle_thenCorrectValidationCalled(CaseRole caseRole) {
+    @CsvSource({
+        "[APPSOLICITOR],FinancialRemedyMVP2",
+        "[APPSOLICITOR],FinancialRemedyContested",
+        "[RESPSOLICITOR],FinancialRemedyMVP2",
+        "[RESPSOLICITOR],FinancialRemedyContested"
+    })
+    void when_handle_thenCorrectValidationCalled(String caseRoleString, String caseTypeString) {
         // Arrange
-        ContactDetailsWrapper wrapper = getContactDetailsWrapper(caseRole);
+        CaseRole caseRole = CaseRole.forValue(caseRoleString);
+        CaseType caseType = CaseType.forValue(caseTypeString);
+
+        ContactDetailsWrapper wrapper = getContactDetailsWrapper(caseRole, caseType);
 
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(wrapper)
             .build();
-
-        FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR, caseData);
 
         List<String> noErrors = new ArrayList<>();
         List<String> errors = new ArrayList<>(List.of("an error"));
@@ -131,6 +139,9 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
         when(updateRepresentationService.validateEmailActiveForOrganisation(VALID_EMAIL, CASE_ID, AUTH_TOKEN)).thenReturn(errors);
 
         // Act
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, UPDATE_CASE_DETAILS_SOLICITOR, caseData);
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert validation methods called with the correct params.
@@ -181,12 +192,23 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
         }
     }
 
-    private static ContactDetailsWrapper getContactDetailsWrapper(CaseRole caseRole) {
+    private static ContactDetailsWrapper getContactDetailsWrapper(CaseRole caseRole, CaseType caseType) {
         return switch (caseRole) {
-            case APP_SOLICITOR -> ContactDetailsWrapper.builder()
-                .applicantSolicitorEmail(VALID_EMAIL)
-                .currentUserIsApplicantSolicitor(YesOrNo.YES)
-                .build();
+            case APP_SOLICITOR -> {
+                if (CONSENTED.equals(caseType)) {
+                    yield ContactDetailsWrapper.builder()
+                        .solicitorEmail(VALID_EMAIL)
+                        .currentUserIsApplicantSolicitor(YesOrNo.YES)
+                        .build();
+                } else if (CONTESTED.equals(caseType)) {
+                    yield ContactDetailsWrapper.builder()
+                        .applicantSolicitorEmail(VALID_EMAIL)
+                        .currentUserIsApplicantSolicitor(YesOrNo.YES)
+                        .build();
+                } else {
+                    throw new IllegalArgumentException("Unsupported caseType: " + caseType);
+                }
+            }
 
             case RESP_SOLICITOR -> ContactDetailsWrapper.builder()
                 .respondentSolicitorEmail(VALID_EMAIL)
@@ -271,10 +293,13 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
         return errorScenarios("respondent");
     }
 
-    // PT Todo - needs more work to cover consented, which uses consentedRespondentRepresented
+    /*
+     * MethodSource for error scenarios.
+     * Case built as contested, with contestedRespondentRepresented set to YES.
+     */
     @ParameterizedTest
     @MethodSource("respondentSolicitorErrorScenarios")
-    void when_respondentSolicitorWithAddressErrors_then_handleErrors(Address address,
+    void when_respondentSolicitorWithAddressErrors_andContested_thenHandleErrors(Address address,
                                                                     String email,
                                                                     List<String> expectedErrors) {
 
@@ -289,6 +314,34 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
 
         FinremCallbackRequest callbackRequest =
             FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR, caseData);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors()).containsExactlyElementsOf(expectedErrors);
+    }
+
+    /*
+     * MethodSource for error scenarios.
+     * Case built as consented, with consentedRespondentRepresented set to YES.
+     */
+    @ParameterizedTest
+    @MethodSource("respondentSolicitorErrorScenarios")
+    void when_respondentSolicitorWithAddressErrors_andConsented_thenHandleErrors(Address address,
+                                                                                 String email,
+                                                                                 List<String> expectedErrors) {
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail(email)
+                .respondentSolicitorAddress(address)
+                .consentedRespondentRepresented(YesOrNo.YES)
+                .currentUserIsRespondentSolicitor(YesOrNo.YES)
+                .build())
+            .build();
+
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONSENTED, UPDATE_CASE_DETAILS_SOLICITOR, caseData);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             underTest.handle(callbackRequest, AUTH_TOKEN);
