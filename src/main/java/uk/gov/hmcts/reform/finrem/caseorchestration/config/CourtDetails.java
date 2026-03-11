@@ -15,4 +15,14 @@ public class CourtDetails {
     private String phoneNumber;
     private String email;
     private String emailReplyToId;
+    private String centralFRCCourtAddress;
+    private String centralFRCCourtEmail;
+
+    public CourtDetails(String courtName, String courtAddress, String phoneNumber, String email, String emailReplyToId) {
+        this.courtName = courtName;
+        this.courtAddress = courtAddress;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.emailReplyToId = emailReplyToId;
+    }
 }
