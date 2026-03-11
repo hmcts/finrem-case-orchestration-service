@@ -201,7 +201,7 @@ public class AssignPartiesAccessService {
         return userId;
     }
 
-    private Optional<String> revokeAccess(Long caseId, String email, String orgId, String caseRole)
+    private void revokeAccess(Long caseId, String email, String orgId, String caseRole)
         throws UserNotFoundInOrganisationApiException {
         Optional<String> userId = prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         userId.ifPresentOrElse(s -> assignCaseAccessService.removeCaseRoleToUser(caseId, s, caseRole, orgId),
@@ -210,6 +210,5 @@ public class AssignPartiesAccessService {
         if (userId.isEmpty()) {
             throw new UserNotFoundInOrganisationApiException();
         }
-        return userId;
     }
 }

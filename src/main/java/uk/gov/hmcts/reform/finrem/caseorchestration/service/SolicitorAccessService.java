@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
@@ -25,8 +26,12 @@ public class SolicitorAccessService {
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     /**
-     * Checks for changes in solicitor details and updates access accordingly.
+     * This method checks if there has been a change in the applicant or respondent solicitor details and updates their access accordingly.
+     * If there is an issue with updating access (e.g. user not found in Organisation API), it adds an error message to the provided list.
      *
+     * @param caseData the current case data
+     * @param caseDataBefore the case data before the update
+     * @param errors a list to collect any error messages that occur during access update
      */
     public void checkAndAssignSolicitorAccess(FinremCaseData caseData,
                                               FinremCaseData caseDataBefore,
@@ -112,11 +117,14 @@ public class SolicitorAccessService {
         Optional<ContactDetailsWrapper> beforeContact = Optional.ofNullable(caseDataBefore.getContactDetailsWrapper());
         String currentEmail = currentContact.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse("");
         String beforeEmail = beforeContact.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse("");
-        String currentOrgId = Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
-            .map(orgPolicy -> orgPolicy.getOrganisation() != null ? orgPolicy.getOrganisation().getOrganisationID() : "").orElse("");
-        String beforeOrgId = Optional.ofNullable(caseDataBefore.getApplicantOrganisationPolicy())
-            .map(orgPolicy -> orgPolicy.getOrganisation() != null ? orgPolicy.getOrganisation().getOrganisationID() : "").orElse("");
-        return !currentEmail.equals(beforeEmail) || !currentOrgId.equals(beforeOrgId);
+        Organisation currentOrg = Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
+            .map(policy -> policy.getOrganisation())
+            .orElse(null);
+        Organisation beforeOrg = Optional.ofNullable(caseDataBefore.getApplicantOrganisationPolicy())
+            .map(policy -> policy.getOrganisation())
+            .orElse(null);
+        boolean isSameOrganisation = Organisation.isSameOrganisation(currentOrg, beforeOrg);
+        return !currentEmail.equals(beforeEmail) || !isSameOrganisation;
     }
 
     private boolean hasRespondentSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
@@ -124,10 +132,13 @@ public class SolicitorAccessService {
         Optional<ContactDetailsWrapper> beforeContact = Optional.ofNullable(caseDataBefore.getContactDetailsWrapper());
         String currentEmail = currentContact.map(ContactDetailsWrapper::getRespondentSolicitorEmail).orElse("");
         String beforeEmail = beforeContact.map(ContactDetailsWrapper::getRespondentSolicitorEmail).orElse("");
-        String currentOrgId = Optional.ofNullable(caseData.getRespondentOrganisationPolicy())
-            .map(orgPolicy -> orgPolicy.getOrganisation() != null ? orgPolicy.getOrganisation().getOrganisationID() : "").orElse("");
-        String beforeOrgId = Optional.ofNullable(caseDataBefore.getRespondentOrganisationPolicy())
-            .map(orgPolicy -> orgPolicy.getOrganisation() != null ? orgPolicy.getOrganisation().getOrganisationID() : "").orElse("");
-        return !currentEmail.equals(beforeEmail) || !currentOrgId.equals(beforeOrgId);
+        Organisation currentOrg = Optional.ofNullable(caseData.getRespondentOrganisationPolicy())
+            .map(policy -> policy.getOrganisation())
+            .orElse(null);
+        Organisation beforeOrg = Optional.ofNullable(caseDataBefore.getRespondentOrganisationPolicy())
+            .map(policy -> policy.getOrganisation())
+            .orElse(null);
+        boolean isSameOrganisation = Organisation.isSameOrganisation(currentOrg, beforeOrg);
+        return !currentEmail.equals(beforeEmail) || !isSameOrganisation;
     }
 }
