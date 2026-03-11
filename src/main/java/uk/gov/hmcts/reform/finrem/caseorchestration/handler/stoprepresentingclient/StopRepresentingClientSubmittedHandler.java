@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.stoprepresentingclient;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -9,7 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogge
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -79,12 +82,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
             revokePartiesAccessAndNotifyParties(info);
         } else {
             CompletableFuture.runAsync(() ->
-                stopRepresentingClientService.revokePartiesAccessAndNotifyParties(
-                    StopRepresentingClientInfo.builder()
-                        .userAuthorisation(userAuthorisation)
-                        .caseDetails(callbackRequest.getCaseDetails())
-                        .caseDetailsBefore(callbackRequest.getCaseDetailsBefore())
-                        .build()),
+                revokePartiesAccessAndNotifyParties(info),
                 // Add a delay to prevent a fast response so the confirmation body is not shown
                 CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS)
             );
@@ -106,9 +104,14 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                     getCaseId(info), "cleaning up after noc workflow ");
             }
 
-            return emptyIfNull(executeWithRetrySuppressingException(log,
+            List<SendCorrespondenceEventEnvelop> ret = new ArrayList<>();
+            ret.addAll(emptyIfNull(executeWithRetrySuppressingException(log,
                 () -> stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(litigantRevocation, info),
-                getCaseId(info), "preparing litigant notifications"));
+                getCaseId(info), "preparing litigant notifications")));
+            ret.addAll(emptyIfNull(executeWithRetrySuppressingException(log,
+                () -> stopRepresentingClientService.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info),
+                getCaseId(info), "preparing litigant letter notifications")));
+            return ret;
         }
         return List.of();
     }
@@ -123,18 +126,36 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         ).toList();
     }
 
-    private List<SendCorrespondenceEventEnvelop> revokeDifferentPartiesBarristers(StopRepresentingClientInfo info) {
-        return emptyIfNull(executeWithRetrySuppressingException(log,
-            () -> stopRepresentingClientService.revokeAllPartiesBarrister(info),
-            getCaseId(info), "revoking different parties barristers' access"));
+    private List<SendCorrespondenceEventEnvelop> revokeBarristers(StopRepresentingClientInfo info) {
+        List<SendCorrespondenceEventEnvelop> ret = new ArrayList<>();
+
+        for (BarristerParty party : List.of(
+            BarristerParty.APPLICANT, BarristerParty.RESPONDENT,
+            BarristerParty.INTERVENER1, BarristerParty.INTERVENER2, BarristerParty.INTERVENER3, BarristerParty.INTERVENER4
+        )) {
+            BarristerChange change = stopRepresentingClientService.getToBeRevokedBarristers(info, party);
+            if (change != null && !CollectionUtils.isEmpty(change.getRemoved())) {
+                List<SendCorrespondenceEventEnvelop> events = executeWithRetrySuppressingException(
+                    log,
+                    () -> stopRepresentingClientService.revokeBarristers(info, change),
+                    getCaseId(info),
+                    "revoking " + party.name().toLowerCase() + " barrister access"
+                );
+                if (events != null) {
+                    ret.addAll(events);
+                }
+            }
+        }
+        return ret;
     }
 
     private void revokePartiesAccessAndNotifyParties(StopRepresentingClientInfo info) {
         List<SendCorrespondenceEventEnvelop> envelops = new ArrayList<>();
         envelops.addAll(revokeApplicantSolicitorOrRespondentSolicitor(info));
         envelops.addAll(revokeIntervenerSolicitor(info));
-        envelops.addAll(revokeDifferentPartiesBarristers(info));
+        envelops.addAll(revokeBarristers(info));
 
+        log.info("{} - about to send {} notifications to relevant parties", getCaseId(info), envelops.size());
         // publish all notification
         envelops.forEach(envelop ->
             executeWithRetrySuppressingException(log, () -> applicationEventPublisher.publishEvent(envelop.getEvent()),
