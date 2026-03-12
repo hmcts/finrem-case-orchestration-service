@@ -13,6 +13,7 @@ public class NocUtils {
 
     /**
      * Creates a map that clears the {@code CHANGE_ORGANISATION_REQUEST} field.
+     * 
      * <p>
      * This is typically used when updating case data to explicitly remove
      * any existing change organisation request by setting the field value to {@code null}.

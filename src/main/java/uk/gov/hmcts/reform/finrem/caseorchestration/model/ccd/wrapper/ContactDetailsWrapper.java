@@ -182,6 +182,7 @@ public class ContactDetailsWrapper {
      *     <li>Respondent solicitor email</li>
      *     <li>Respondent solicitor DX number</li>
      * </ul>
+     *
      * <p>
      * This is typically used when the respondent no longer has a solicitor,
      * or when resetting solicitor information is required for a case update.
@@ -209,6 +210,7 @@ public class ContactDetailsWrapper {
      *     <li><b>Contested case fields</b> – applicant solicitor name, firm, address,
      *     phone, email, DX number, and consent to receive emails</li>
      * </ul>
+     *
      * <p>
      * Typically used when the applicant solicitor representation is removed or reset.
      */
