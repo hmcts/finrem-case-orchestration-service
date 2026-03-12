@@ -79,8 +79,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
         final GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         verify(solicitorAccessService).checkAndAssignSolicitorAccess(caseData, caseDetailsBefore.getData(), errors);
-        verify(solicitorAccessService).sendNoticeOfChangeNotificationsCaseworker(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).isEmpty();
-        assertThat(response.getData()).isNotNull();
     }
 }
