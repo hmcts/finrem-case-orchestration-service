@@ -44,7 +44,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,16 +65,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisatio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy.getDefaultOrganisationPolicy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_FOUR_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_FOUR_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_ONE_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_ONE_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_THREE_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_THREE_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_TWO_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_TWO_SOLICITOR_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getFormerIntervenerBarrister;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getFormerIntervenerSolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils.clearChangeOrganisationRequestField;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.EmailTemplateResolver.getNotifyApplicantRepresentativeTemplateName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.EmailTemplateResolver.getNotifyIntervenerRepresentativeTemplateName;
@@ -489,10 +482,10 @@ public class StopRepresentingClientService {
             .map(b -> switch (barristerParty) {
                 case APPLICANT -> prepareApplicantBarristerEmailNotificationEvent(info, b);
                 case RESPONDENT -> prepareRespondentBarristerEmailNotificationEvent(info, b);
-                case INTERVENER1 -> prepareIntervenerBarristerEmailNotificationEvent(info, 1, b);
-                case INTERVENER2 -> prepareIntervenerBarristerEmailNotificationEvent(info, 2, b);
-                case INTERVENER3 -> prepareIntervenerBarristerEmailNotificationEvent(info, 3, b);
-                case INTERVENER4 -> prepareIntervenerBarristerEmailNotificationEvent(info, 4, b);
+                case INTERVENER1 -> prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_ONE, b);
+                case INTERVENER2 -> prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_TWO, b);
+                case INTERVENER3 -> prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_THREE, b);
+                case INTERVENER4 -> prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_FOUR, b);
                 default -> null;
             })
             .filter(Objects::nonNull)
@@ -621,15 +614,14 @@ public class StopRepresentingClientService {
      */
     private SendCorrespondenceEventEnvelop prepareIntervenerSolicitorEmailNotificationEvent(StopRepresentingClientInfo info,
                                                                                             IntervenerType intervenerType) {
-        int intervenerId = intervenerType.getIntervenerId();
         return prepareRepresentativeEmailNotificationEvent(
-            "notifying intervener %s solicitor".formatted(intervenerId),
+            "notifying %s solicitor".formatted(intervenerType.getTypeValue()),
             info,
-            List.of(resolveIntervenerSolicitorNotificationParty(intervenerId)),
+            List.of(getFormerIntervenerSolicitor(intervenerType)),
             getNotifyIntervenerRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(),
-                    CaseRole.getIntervenerSolicitorByIndex(intervenerId), intervenerType)
+                    CaseRole.getIntervenerSolicitorByIndex(intervenerType.getIntervenerId()), intervenerType)
         );
     }
 
@@ -643,22 +635,17 @@ public class StopRepresentingClientService {
      * later in the correspondence workflow to trigger the actual email notification.</p>
      *
      * @param info the stop representing client event information
-     * @param intervenerId the identifier of the intervener whose barrister should receive the notification
+     * @param intervenerType the intervener whose barrister should be notified
      * @param barrister the intervener barrister who should receive the notification
      * @return a populated {@link SendCorrespondenceEventEnvelop} for later email notification processing
      */
     private SendCorrespondenceEventEnvelop prepareIntervenerBarristerEmailNotificationEvent(StopRepresentingClientInfo info,
-                                                                                            int intervenerId,
+                                                                                            IntervenerType intervenerType,
                                                                                             Barrister barrister) {
-        IntervenerType intervenerType = Arrays.stream(IntervenerType.values())
-            .filter(d -> d.getIntervenerId() == intervenerId)
-            .findFirst()
-            .orElse(null);
-
         return prepareRepresentativeEmailNotificationEvent(
             "notifying intervener barrister",
             info,
-            List.of(resolveIntervenerBarristerNotificationParty(intervenerId)),
+            List.of(getFormerIntervenerBarrister(intervenerType)),
             getNotifyIntervenerRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister, intervenerType),
@@ -828,26 +815,6 @@ public class StopRepresentingClientService {
             "RespondentRepresentationRemovalNotice",
             documentConfiguration.getStopRepresentingLetterToRespondentTemplate()
         );
-    }
-
-    private NotificationParty resolveIntervenerBarristerNotificationParty(int index) {
-        return switch(index) {
-            case 1 -> FORMER_INTERVENER_ONE_BARRISTER_ONLY;
-            case 2 -> FORMER_INTERVENER_TWO_BARRISTER_ONLY;
-            case 3 -> FORMER_INTERVENER_THREE_BARRISTER_ONLY;
-            case 4 -> FORMER_INTERVENER_FOUR_BARRISTER_ONLY;
-            default -> throw new IllegalArgumentException("Invalid index " + index);
-        };
-    }
-
-    private NotificationParty resolveIntervenerSolicitorNotificationParty(int index) {
-        return switch(index) {
-            case 1 -> FORMER_INTERVENER_ONE_SOLICITOR_ONLY;
-            case 2 -> FORMER_INTERVENER_TWO_SOLICITOR_ONLY;
-            case 3 -> FORMER_INTERVENER_THREE_SOLICITOR_ONLY;
-            case 4 -> FORMER_INTERVENER_FOUR_SOLICITOR_ONLY;
-            default -> throw new IllegalArgumentException("Invalid index " + index);
-        };
     }
 
     private CaseDetails cloneCaseDetailsFromFinremCaseDetails(StopRepresentingClientInfo info) {
