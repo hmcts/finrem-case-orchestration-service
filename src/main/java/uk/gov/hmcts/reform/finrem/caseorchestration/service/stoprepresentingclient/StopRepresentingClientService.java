@@ -687,7 +687,8 @@ public class StopRepresentingClientService {
             "notifying applicant",
             info,
             NotificationParty.APPLICANT,
-            i -> generateStopRepresentingApplicantLetter(i.getCaseDetails(), i.getUserAuthorisation())
+            i -> stopRepresentingClientLetterService
+                .generateStopRepresentingApplicantLetter(i.getCaseDetails(), i.getUserAuthorisation())
         );
     }
 
@@ -707,7 +708,8 @@ public class StopRepresentingClientService {
             "notifying respondent",
             info,
             NotificationParty.RESPONDENT,
-            i -> generateStopRepresentingRespondentLetter(i.getCaseDetails(), i.getUserAuthorisation())
+            i -> stopRepresentingClientLetterService
+                .generateStopRepresentingRespondentLetter(i.getCaseDetails(), i.getUserAuthorisation())
         );
     }
 
@@ -758,14 +760,6 @@ public class StopRepresentingClientService {
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
             barrister
         );
-    }
-
-    private CaseDocument generateStopRepresentingApplicantLetter(FinremCaseDetails finremCaseDetails, String authorisationToken) {
-        return stopRepresentingClientLetterService.generateStopRepresentingApplicantLetter(finremCaseDetails, authorisationToken);
-    }
-
-    private CaseDocument generateStopRepresentingRespondentLetter(FinremCaseDetails finremCaseDetails, String authorisationToken) {
-        return stopRepresentingClientLetterService.generateStopRepresentingRespondentLetter(finremCaseDetails, authorisationToken);
     }
 
     private CaseDetails cloneCaseDetailsFromFinremCaseDetails(StopRepresentingClientInfo info) {
