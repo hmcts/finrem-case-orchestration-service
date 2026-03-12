@@ -1,4 +1,3 @@
-// src/test/java/uk/gov/hmcts/reform/finrem/caseorchestration/service/UpdateRepresentationServiceTest.java
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -52,6 +51,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -721,4 +721,49 @@ class UpdateRepresentationServiceTest {
                     .build()))).build();
     }
 
+    @Test
+    void validateEmailActiveForOrganisation_whenUserLinked_thenReturnNoErrors() {
+        String email = "valid@test.com";
+        String caseRef = "12345678";
+
+        when(organisationService.findUserByEmail(email, AUTH_TOKEN)).thenReturn(Optional.of("user-id-1"));
+
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
+
+        assertEquals(List.of(), errors);
+        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
+    }
+
+    @Test
+    void validateEmailActiveForOrganisation_whenUserNotLinked_thenReturnNotActiveUserError() {
+        String email = "missing@test.com";
+        String caseRef = "12345678";
+
+        when(organisationService.findUserByEmail(email, AUTH_TOKEN)).thenReturn(Optional.empty());
+
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
+
+        assertEquals(List.of("Email is not linked to an active User within a HMCTS organisation"), errors);
+        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
+    }
+
+    @Test
+    void validateEmailActiveForOrganisation_whenFindUserThrows_thenReturnGenericErrorWithCaseReference() {
+        String email = "error@test.com";
+        String caseRef = "12345678";
+
+        when(organisationService.findUserByEmail(email, AUTH_TOKEN))
+            .thenThrow(new RuntimeException("boom"));
+
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
+
+        assertEquals(
+            List.of("Email could not be linked to your organisation. Please check and try again Case reference: " + caseRef),
+            errors
+        );
+        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
+    }
 }

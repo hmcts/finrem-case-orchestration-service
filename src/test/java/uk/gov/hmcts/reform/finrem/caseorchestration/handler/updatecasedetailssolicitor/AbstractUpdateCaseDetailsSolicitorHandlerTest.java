@@ -81,7 +81,7 @@ class AbstractUpdateCaseDetailsSolicitorHandlerTest extends BaseServiceTest {
 
         // Act and assert. Simpler to run test for each case type, rather than parameterise further.
         ArrayList<CaseType> caseTypes = new ArrayList<>(List.of(CONTESTED, CONSENTED));
-        caseTypes.forEach( caseType -> {
+        caseTypes.forEach(caseType -> {
 
             FinremCallbackRequest callbackRequest =
                 FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, UPDATE_CASE_DETAILS_SOLICITOR, caseData);

@@ -251,8 +251,15 @@ public class ContactDetailsValidator {
         return errors;
     }
 
-    // PT todo - docs and test
-    // PT todo rename?
+    /*
+     * Validates the applicant solicitor's email address based on the case type and representation status.
+     * Returns true if the email address is valid or not required, and false if it is invalid. Any validation
+     * errors are added to the provided errors list.
+     * @param caseData the case data containing case type and solicitor representation info
+     * @param wrapper the wrapper containing solicitor email details
+     * @param errors the list to which error messages will be added if validation fails
+     * @return true if the applicant solicitor's email address is valid or not required; false if it is invalid
+     */
     public static boolean checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
                                                                  List<String> errors) {
         if (isContested(caseData)) {
@@ -270,8 +277,16 @@ public class ContactDetailsValidator {
         return true;
     }
 
-    // PT Todo - needs Javadoc may need test
-    // field common to consented and contested
+    /*
+     * Validates the respondent solicitor's email address based on the case type and representation status.
+     * Returns true if the email address is valid or not required, and false if it is invalid. Any validation
+     * errors are added to the provided errors list.
+     * For respondent solicitors, the email address is stored in the same field for both contested and consented cases.
+     * @param caseData the case data containing case type and solicitor representation info
+     * @param wrapper the wrapper containing solicitor email details
+     * @param errors the list to which error messages will be added if validation fails
+     * @return true if the respondent solicitor's email address is valid or not required; false if it is invalid
+     */
     public static boolean checkForRespondentSolicitorEmail(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()
             && !isValidEmailAddress(wrapper.getRespondentSolicitorEmail(), true)) {

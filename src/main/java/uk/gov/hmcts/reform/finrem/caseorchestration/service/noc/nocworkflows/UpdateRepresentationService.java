@@ -104,8 +104,14 @@ public class UpdateRepresentationService {
             removedSolicitor, changeRequest);
     }
 
-    // PT todo, docs and test
-    // emails sanitised from exceptions in findUserByEmail.
+    /*
+     * Checks if the email address provided is linked to an active user within a HMCTS organisation.
+     * Upon missing or invalid email address, an error message is added to the list.
+     * @param emailAddress the email address to validate
+     * @param caseReference the case reference to include in error messages for traceability
+     * @param userAuthorisation the user authorisation token to access the organisation service
+     * @return a list of error messages, empty if the email is valid and active
+     */
     public List<String> validateEmailActiveForOrganisation(String emailAddress, String caseReference, String userAuthorisation) {
         List<String> errors  = new ArrayList<>();
         try {

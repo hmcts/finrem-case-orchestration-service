@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -621,6 +622,162 @@ class ContactDetailsValidatorTest {
                         .respondentEmail(VALID_EMAIL)
                         .build())
                     .build(),
+                List.of()
+            )
+        );
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("applicantSolicitorEmailScenarios")
+    void shouldValidateApplicantSolicitorEmailAddress(
+        String description,
+        CaseType caseType,
+        YesOrNo represented,
+        String applicantSolicitorEmail,
+        String solicitorEmail,
+        boolean expectedResult,
+        List<String> expectedErrors
+    ) {
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .applicantRepresented(represented)
+            .applicantSolicitorEmail(applicantSolicitorEmail)
+            .solicitorEmail(solicitorEmail)
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseType(caseType)
+            .contactDetailsWrapper(wrapper)
+            .build();
+
+        List<String> errors = new ArrayList<>();
+
+        boolean result = ContactDetailsValidator
+            .checkForApplicantSolicitorEmailAddress(caseData, wrapper, errors);
+
+        assertThat(result).isEqualTo(expectedResult);
+        assertThat(errors).containsExactlyElementsOf(expectedErrors);
+    }
+
+    private static Stream<Arguments> applicantSolicitorEmailScenarios() {
+        return Stream.of(
+            Arguments.of(
+                "Contested + represented + invalid applicant solicitor email -> false + error",
+                CaseType.CONTESTED,
+                YesOrNo.YES,
+                INVALID_EMAIL,
+                null,
+                false,
+                List.of(String.format(ERROR_MSG, INVALID_EMAIL))
+            ),
+            Arguments.of(
+                "Contested + represented + valid applicant solicitor email -> true + no errors",
+                CaseType.CONTESTED,
+                YesOrNo.YES,
+                VALID_EMAIL,
+                null,
+                true,
+                List.of()
+            ),
+            Arguments.of(
+                "Contested + not represented + invalid applicant solicitor email -> true + no errors",
+                CaseType.CONTESTED,
+                YesOrNo.NO,
+                INVALID_EMAIL,
+                null,
+                true,
+                List.of()
+            ),
+            Arguments.of(
+                "Consented + represented + invalid solicitor email -> false + error",
+                CaseType.CONSENTED,
+                YesOrNo.YES,
+                null,
+                INVALID_EMAIL,
+                false,
+                List.of(String.format(ERROR_MSG, INVALID_EMAIL))
+            ),
+            Arguments.of(
+                "Consented + represented + valid solicitor email -> true + no errors",
+                CaseType.CONSENTED,
+                YesOrNo.YES,
+                null,
+                VALID_EMAIL,
+                true,
+                List.of()
+            ),
+            Arguments.of(
+                "Consented + represented + null solicitor email -> false + error",
+                CaseType.CONSENTED,
+                YesOrNo.YES,
+                null,
+                null,
+                false,
+                List.of(String.format(ERROR_MSG, (String) null))
+            )
+        );
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("respondentSolicitorEmailScenarios")
+    void shouldValidateRespondentSolicitorEmailAddress(
+        String description,
+        YesOrNo respondentRepresented,
+        String respondentSolicitorEmail,
+        boolean expectedResult,
+        List<String> expectedErrors
+    ) {
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .respondentSolicitorEmail(respondentSolicitorEmail)
+            .contestedRespondentRepresented(respondentRepresented)
+            .consentedRespondentRepresented(respondentRepresented)
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(wrapper)
+            .build();
+
+        List<String> errors = new ArrayList<>();
+
+        boolean result = ContactDetailsValidator
+            .checkForRespondentSolicitorEmail(caseData, wrapper, errors);
+
+        assertThat(result).isEqualTo(expectedResult);
+        assertThat(errors).containsExactlyElementsOf(expectedErrors);
+    }
+
+    /*
+     * Note that null respondent solicitor email can be null, and true is returned.
+     * This allows EXUI to permit blank email addresses (OPTIONAL).
+     * However, EXUI will generally stop where email address is MANDATORY.
+     */
+    private static Stream<Arguments> respondentSolicitorEmailScenarios() {
+        return Stream.of(
+            Arguments.of(
+                "Respondent represented + invalid solicitor email -> false + error",
+                YesOrNo.YES,
+                INVALID_EMAIL,
+                false,
+                List.of(String.format(ERROR_MSG, INVALID_EMAIL))
+            ),
+            Arguments.of(
+                "Respondent represented + valid solicitor email -> true + no errors",
+                YesOrNo.YES,
+                VALID_EMAIL,
+                true,
+                List.of()
+            ),
+            Arguments.of(
+                "Respondent represented + null solicitor email -> true + error",
+                YesOrNo.YES,
+                null,
+                true,
+                List.of()
+            ),
+            Arguments.of(
+                "Respondent not represented + invalid solicitor email -> true + no errors",
+                YesOrNo.NO,
+                INVALID_EMAIL,
+                true,
                 List.of()
             )
         );
