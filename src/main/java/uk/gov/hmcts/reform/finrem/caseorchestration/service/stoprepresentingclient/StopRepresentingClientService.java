@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.SetUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -32,7 +29,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventEnvelop;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
@@ -41,19 +37,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBar
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
 import static java.lang.String.format;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_RESPONDENT;
@@ -108,11 +99,7 @@ public class StopRepresentingClientService {
 
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
 
-    private final GenericDocumentService genericDocumentService;
-
-    private final DocumentConfiguration documentConfiguration;
-
-    private final LetterDetailsMapper letterDetailsMapper;
+    private final StopRepresentingClientLetterService stopRepresentingClientLetterService;
 
     /**
      * Builds a {@link RepresentativeInContext} object indicating which parties
@@ -773,48 +760,12 @@ public class StopRepresentingClientService {
         );
     }
 
-    private CaseDocument generateStopRepresentingLetter(FinremCaseDetails finremCaseDetails,
-                                                        String authorisationToken,
-                                                        DocumentHelper.PaperNotificationRecipient recipient,
-                                                        String filenamePrefix,
-                                                        String template) {
-        Map<String, Object> documentDataMap =
-            letterDetailsMapper.getLetterDetailsAsMap(finremCaseDetails, recipient);
-
-        String documentFilename = format("%s_%s.pdf",
-            filenamePrefix,
-            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
-        );
-
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(
-            authorisationToken,
-            documentDataMap,
-            template,
-            documentFilename,
-            finremCaseDetails.getCaseType()
-        );
+    private CaseDocument generateStopRepresentingApplicantLetter(FinremCaseDetails finremCaseDetails, String authorisationToken) {
+        return stopRepresentingClientLetterService.generateStopRepresentingApplicantLetter(finremCaseDetails, authorisationToken);
     }
 
-    private CaseDocument generateStopRepresentingApplicantLetter(FinremCaseDetails finremCaseDetails,
-                                                                 String authorisationToken) {
-        return generateStopRepresentingLetter(
-            finremCaseDetails,
-            authorisationToken,
-            APPLICANT,
-            "ApplicantRepresentationRemovalNotice",
-            documentConfiguration.getStopRepresentingLetterToApplicantTemplate()
-        );
-    }
-
-    private CaseDocument generateStopRepresentingRespondentLetter(FinremCaseDetails finremCaseDetails,
-                                                                  String authorisationToken) {
-        return generateStopRepresentingLetter(
-            finremCaseDetails,
-            authorisationToken,
-            RESPONDENT,
-            "RespondentRepresentationRemovalNotice",
-            documentConfiguration.getStopRepresentingLetterToRespondentTemplate()
-        );
+    private CaseDocument generateStopRepresentingRespondentLetter(FinremCaseDetails finremCaseDetails, String authorisationToken) {
+        return stopRepresentingClientLetterService.generateStopRepresentingRespondentLetter(finremCaseDetails, authorisationToken);
     }
 
     private CaseDetails cloneCaseDetailsFromFinremCaseDetails(StopRepresentingClientInfo info) {

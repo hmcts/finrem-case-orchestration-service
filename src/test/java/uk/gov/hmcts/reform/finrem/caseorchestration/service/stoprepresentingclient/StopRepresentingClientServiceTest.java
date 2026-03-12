@@ -9,10 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -35,7 +32,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
@@ -44,7 +40,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBar
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -53,8 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -65,8 +58,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisation;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.IntervenerRole.BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.IntervenerRole.SOLICITOR;
 
@@ -106,28 +97,18 @@ class StopRepresentingClientServiceTest {
     private FinremNotificationRequestMapper finremNotificationRequestMapper;
 
     @Mock
-    private GenericDocumentService genericDocumentService;
-
-    @Mock
-    private DocumentConfiguration documentConfiguration;
-
-    @Mock
-    private LetterDetailsMapper letterDetailsMapper;
+    private StopRepresentingClientLetterService stopRepresentingClientLetterService;
 
     @BeforeEach
     void setup() {
         underTest = spy(new StopRepresentingClientService(assignCaseAccessService, systemUserService, finremCaseDetailsMapper,
             manageBarristerService, barristerChangeCaseAccessUpdater, coreCaseDataService, intervenerService,
             caseRoleService, idamService, finremNotificationRequestMapper,
-            genericDocumentService, documentConfiguration, letterDetailsMapper));
+            stopRepresentingClientLetterService));
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
         lenient().when(manageBarristerService
                 .getBarristerChange(any(FinremCaseDetails.class), any(FinremCaseData.class), any(BarristerParty.class)))
             .thenReturn(BarristerChange.builder().build());
-        lenient().when(documentConfiguration.getStopRepresentingLetterToApplicantTemplate())
-            .thenReturn("getStopRepresentingLetterToApplicantTemplate");
-        lenient().when(documentConfiguration.getStopRepresentingLetterToRespondentTemplate())
-            .thenReturn("getStopRepresentingLetterToRespondentTemplate");
     }
 
     @Test
@@ -1153,32 +1134,5 @@ class StopRepresentingClientServiceTest {
                 AUTH_TOKEN,
                 notificationRequest
             );
-    }
-
-    private static EmailTemplateNames intervenerExpectedTemplateNames(CaseType caseType) {
-        return CONTESTED.equals(caseType)
-            ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER
-            : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
-    }
-
-    private CaseDocument mockGeneratePartyLetter(StopRepresentingClientInfo info,
-                                                 DocumentHelper.PaperNotificationRecipient recipient,
-                                                 String template, String filenamePrefix) {
-        Map<String, Object> documentData = mock(Map.class);
-        when(letterDetailsMapper.getLetterDetailsAsMap(info.getCaseDetails(), recipient))
-            .thenReturn(documentData);
-        CaseDocument generatedDocument = mock(CaseDocument.class);
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(AUTH_TOKEN, documentData, template,
-            filenamePrefix, info.getCaseDetails().getCaseType()))
-            .thenReturn(generatedDocument);
-        return generatedDocument;
-    }
-
-    private void mockGeneratePartyLetter() {
-        Map<String, Object> documentData = mock(Map.class);
-        when(letterDetailsMapper.getLetterDetailsAsMap(any(FinremCaseDetails.class),
-            any(DocumentHelper.PaperNotificationRecipient.class))).thenReturn(documentData);
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), eq(documentData), anyString(),
-            anyString(), any(CaseType.class))).thenReturn(mock(CaseDocument.class));
     }
 }
