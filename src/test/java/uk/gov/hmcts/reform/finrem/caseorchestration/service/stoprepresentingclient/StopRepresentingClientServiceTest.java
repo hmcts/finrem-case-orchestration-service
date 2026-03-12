@@ -58,6 +58,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
@@ -131,7 +132,7 @@ class StopRepresentingClientServiceTest {
 
     @Test
     void shouldSetIntervenerAsUnrepresentedAndPopulateDefaultOrganisationPolicy() {
-        IntervenerOne intervener = IntervenerOne.builder().build();
+        IntervenerOne intervener = spy(IntervenerOne.builder().build());
 
         underTest.setIntervenerUnrepresented(intervener);
 
@@ -145,15 +146,7 @@ class StopRepresentingClientServiceTest {
                 .usingRecursiveComparison()
                 .isEqualTo(expectedPolicy),
 
-            () -> assertThat(intervener)
-                .extracting(
-                    IntervenerOne::getIntervenerSolEmail,
-                    IntervenerOne::getIntervenerSolicitorFirm,
-                    IntervenerOne::getIntervenerSolicitorReference,
-                    IntervenerOne::getIntervenerSolName,
-                    IntervenerOne::getIntervenerSolPhone
-                )
-                .containsOnlyNulls()
+            () -> verify(intervener).clearIntervenerSolicitorFields()
         );
     }
 

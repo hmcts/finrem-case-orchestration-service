@@ -286,12 +286,7 @@ public class StopRepresentingClientService {
         intervenerWrapper.setIntervenerOrganisation(getDefaultOrganisationPolicy(
             intervenerWrapper.getIntervenerSolicitorCaseRole()
         ));
-
-        intervenerWrapper.setIntervenerSolEmail(null);
-        intervenerWrapper.setIntervenerSolicitorFirm(null);
-        intervenerWrapper.setIntervenerSolicitorReference(null);
-        intervenerWrapper.setIntervenerSolName(null);
-        intervenerWrapper.setIntervenerSolPhone(null);
+        intervenerWrapper.clearIntervenerSolicitorFields();
     }
 
     /**
