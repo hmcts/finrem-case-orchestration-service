@@ -184,39 +184,20 @@ class StopRepresentingClientServiceTest {
 
     @Test
     void shouldSetApplicantAsUnrepresentedAndPopulateDefaultOrganisationPolicy() {
+        ContactDetailsWrapper contactDetails = spy(new ContactDetailsWrapper());
         FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetails)
             .build();
 
         underTest.setApplicantUnrepresented(caseData);
 
-        ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
         OrganisationPolicy expectedPolicy =
             OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.APP_SOLICITOR);
 
         assertAll(
             () -> assertThat(contactDetails.getApplicantRepresented())
                 .isEqualTo(YesOrNo.NO),
-
-            () -> assertThat(contactDetails)
-                .extracting(
-                    ContactDetailsWrapper::getSolicitorName,
-                    ContactDetailsWrapper::getSolicitorFirm,
-                    ContactDetailsWrapper::getSolicitorAddress,
-                    ContactDetailsWrapper::getSolicitorPhone,
-                    ContactDetailsWrapper::getSolicitorEmail,
-                    ContactDetailsWrapper::getSolicitorDxNumber,
-                    ContactDetailsWrapper::getSolicitorAgreeToReceiveEmails,
-
-                    ContactDetailsWrapper::getApplicantSolicitorName,
-                    ContactDetailsWrapper::getApplicantSolicitorFirm,
-                    ContactDetailsWrapper::getApplicantSolicitorAddress,
-                    ContactDetailsWrapper::getApplicantSolicitorPhone,
-                    ContactDetailsWrapper::getApplicantSolicitorEmail,
-                    ContactDetailsWrapper::getApplicantSolicitorDxNumber,
-                    ContactDetailsWrapper::getApplicantSolicitorConsentForEmails
-                )
-                .containsOnlyNulls(),
-
+            () -> verify(contactDetails).clearApplicantSolicitorFields(),
             () -> assertThat(caseData.getApplicantOrganisationPolicy())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedPolicy)

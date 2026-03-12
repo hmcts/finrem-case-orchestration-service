@@ -195,4 +195,41 @@ public class ContactDetailsWrapper {
         setRespondentSolicitorEmail(null);
         setRespondentSolicitorDxNumber(null);
     }
+
+    /**
+     * Clears all applicant solicitor details from the case data.
+     *
+     * <p>
+     * This method resets solicitor-related fields used in both consented and contested
+     * case types by setting them to {@code null}.
+     * <ul>
+     *     <li><b>Common fields (consented & contested)</b> – solicitor reference</li>
+     *     <li><b>Consented case fields</b> – solicitor name, firm, address, phone, email,
+     *     DX number, and agreement to receive emails</li>
+     *     <li><b>Contested case fields</b> – applicant solicitor name, firm, address,
+     *     phone, email, DX number, and consent to receive emails</li>
+     * </ul>
+     * <p>
+     * Typically used when the applicant solicitor representation is removed or reset.
+     */
+    public void clearApplicantSolicitorFields() {
+        // consented & contested
+        setSolicitorReference(null);
+        // consented
+        setSolicitorName(null);
+        setSolicitorFirm(null);
+        setSolicitorAddress(null);
+        setSolicitorPhone(null);
+        setSolicitorEmail(null);
+        setSolicitorDxNumber(null);
+        setSolicitorAgreeToReceiveEmails(null);
+        // contested
+        setApplicantSolicitorName(null);
+        setApplicantSolicitorFirm(null);
+        setApplicantSolicitorAddress(null);
+        setApplicantSolicitorPhone(null);
+        setApplicantSolicitorEmail(null);
+        setApplicantSolicitorDxNumber(null);
+        setApplicantSolicitorConsentForEmails(null);
+    }
 }
