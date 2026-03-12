@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class ContactDetailsWrapperTest {
 
@@ -32,5 +34,31 @@ class ContactDetailsWrapperTest {
 
         assertThat(result.get("applicantSolicitorName"))
             .containsExactly("Alice", "Bob");
+    }
+
+    @Test
+    void shouldClearAllRespondentSolicitorFields() {
+        ContactDetailsWrapper contactDetails = new ContactDetailsWrapper();
+        contactDetails.setRespondentSolicitorName("John Doe");
+        contactDetails.setRespondentSolicitorFirm("Firm Ltd");
+        contactDetails.setRespondentSolicitorReference("REF123");
+        contactDetails.setRespondentSolicitorAddress(Address.builder().country("United Kingdom").build());
+        contactDetails.setRespondentSolicitorPhone("0123456789");
+        contactDetails.setRespondentSolicitorEmail("email@test.com");
+        contactDetails.setRespondentSolicitorDxNumber("DX456");
+
+        // Act
+        contactDetails.clearRespondentSolicitorFields();
+
+        // Assert all fields are null
+        assertAll("respondent solicitor fields",
+            () -> assertThat(contactDetails.getRespondentSolicitorName()).isNull(),
+            () -> assertThat(contactDetails.getRespondentSolicitorFirm()).isNull(),
+            () -> assertThat(contactDetails.getRespondentSolicitorReference()).isNull(),
+            () -> assertThat(contactDetails.getRespondentSolicitorAddress()).isNull(),
+            () -> assertThat(contactDetails.getRespondentSolicitorPhone()).isNull(),
+            () -> assertThat(contactDetails.getRespondentSolicitorEmail()).isNull(),
+            () -> assertThat(contactDetails.getRespondentSolicitorDxNumber()).isNull()
+        );
     }
 }

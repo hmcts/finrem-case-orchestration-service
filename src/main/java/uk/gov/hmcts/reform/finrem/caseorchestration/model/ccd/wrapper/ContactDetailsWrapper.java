@@ -168,4 +168,31 @@ public class ContactDetailsWrapper {
         return (value == null || value.isBlank()) ? null : value;
     }
 
+    /**
+     * Clears all stored information related to the respondent's solicitor.
+     *
+     * <p>
+     * This method sets the following fields to {@code null}:
+     * <ul>
+     *     <li>Respondent solicitor name</li>
+     *     <li>Respondent solicitor firm</li>
+     *     <li>Respondent solicitor reference</li>
+     *     <li>Respondent solicitor address</li>
+     *     <li>Respondent solicitor phone number</li>
+     *     <li>Respondent solicitor email</li>
+     *     <li>Respondent solicitor DX number</li>
+     * </ul>
+     * <p>
+     * This is typically used when the respondent no longer has a solicitor,
+     * or when resetting solicitor information is required for a case update.
+     */
+    public void clearRespondentSolicitorFields() {
+        setRespondentSolicitorName(null);
+        setRespondentSolicitorFirm(null);
+        setRespondentSolicitorReference(null);
+        setRespondentSolicitorAddress(null);
+        setRespondentSolicitorPhone(null);
+        setRespondentSolicitorEmail(null);
+        setRespondentSolicitorDxNumber(null);
+    }
 }

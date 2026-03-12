@@ -256,13 +256,7 @@ public class StopRepresentingClientService {
         ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
 
         // consented & contested
-        contactDetailsWrapper.setRespondentSolicitorName(null);
-        contactDetailsWrapper.setRespondentSolicitorFirm(null);
-        contactDetailsWrapper.setRespondentSolicitorReference(null);
-        contactDetailsWrapper.setRespondentSolicitorAddress(null);
-        contactDetailsWrapper.setRespondentSolicitorPhone(null);
-        contactDetailsWrapper.setRespondentSolicitorEmail(null);
-        contactDetailsWrapper.setRespondentSolicitorDxNumber(null);
+        contactDetailsWrapper.clearRespondentSolicitorFields();
 
         if (finremCaseData.isConsentedApplication()) {
             finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);

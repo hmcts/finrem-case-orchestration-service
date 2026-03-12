@@ -155,13 +155,14 @@ class StopRepresentingClientServiceTest {
     void shouldSetRespondentAsUnrepresentedAndPopulateDefaultOrganisationPolicy(
         boolean isConsentedApplication) {
 
+        ContactDetailsWrapper contactDetails = spy(new ContactDetailsWrapper());
         FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetails)
             .ccdCaseType(isConsentedApplication ? CaseType.CONSENTED : CONTESTED)
             .build();
 
         underTest.setRespondentUnrepresented(caseData);
 
-        ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
         OrganisationPolicy expectedPolicy =
             OrganisationPolicy.getDefaultOrganisationPolicy(CaseRole.RESP_SOLICITOR);
 
@@ -175,18 +176,7 @@ class StopRepresentingClientServiceTest {
                         .isEqualTo(YesOrNo.NO);
                 }
             },
-            () -> assertThat(contactDetails)
-                .extracting(
-                    ContactDetailsWrapper::getRespondentSolicitorName,
-                    ContactDetailsWrapper::getRespondentSolicitorFirm,
-                    ContactDetailsWrapper::getRespondentSolicitorReference,
-                    ContactDetailsWrapper::getRespondentSolicitorAddress,
-                    ContactDetailsWrapper::getRespondentSolicitorPhone,
-                    ContactDetailsWrapper::getRespondentSolicitorEmail,
-                    ContactDetailsWrapper::getRespondentSolicitorDxNumber
-                )
-                .containsOnlyNulls(),
-
+            () -> verify(contactDetails).clearRespondentSolicitorFields(),
             () -> assertThat(caseData.getRespondentOrganisationPolicy())
                 .isEqualTo(expectedPolicy)
         );
