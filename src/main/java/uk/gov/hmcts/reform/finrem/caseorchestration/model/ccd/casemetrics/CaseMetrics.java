@@ -1,18 +1,20 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.casemetrics;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@Slf4j
+@JsonInclude(NON_NULL)
 public class CaseMetrics {
     private LocalDate caseClosureDate;
 }

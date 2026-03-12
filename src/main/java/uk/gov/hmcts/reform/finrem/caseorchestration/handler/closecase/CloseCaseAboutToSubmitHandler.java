@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.casemetrics.CaseMetrics;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 
 @Slf4j
@@ -36,6 +37,9 @@ public class CloseCaseAboutToSubmitHandler extends FinremAboutToSubmitCallbackHa
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         CaseDataMetricsWrapper caseDataMetricsWrapper = caseData.getCaseDataMetricsWrapper();
 
+        if (caseDataMetricsWrapper.getCaseMetrics() == null) {
+            caseDataMetricsWrapper.setCaseMetrics(new CaseMetrics());
+        }
         caseDataMetricsWrapper.getCaseMetrics().setCaseClosureDate(caseDataMetricsWrapper.getCaseClosureDateField());
 
         return response(caseData);
