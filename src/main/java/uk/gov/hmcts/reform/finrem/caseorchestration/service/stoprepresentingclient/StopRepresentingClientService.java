@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -117,12 +116,12 @@ public class StopRepresentingClientService {
     public RepresentativeInContext buildRepresentation(FinremCaseData caseData, String userAuthorisation) {
         boolean isIntervenerRepresentative = caseRoleService.isIntervenerRepresentative(caseData, userAuthorisation);
 
-        Integer intervenerIndex = null;
+        IntervenerType intervenerType = null;
         IntervenerRole intervenerRole = null;
 
         if (isIntervenerRepresentative) {
-            intervenerIndex = caseRoleService
-                .getIntervenerIndex(caseData, userAuthorisation)
+            intervenerType = caseRoleService
+                .getIntervenerType(caseData, userAuthorisation)
                 .orElseThrow();
 
             intervenerRole = caseRoleService
@@ -136,7 +135,7 @@ public class StopRepresentingClientService {
             idamService.getIdamUserId(userAuthorisation),
             caseRoleService.isApplicantRepresentative(caseData, userAuthorisation),
             caseRoleService.isRespondentRepresentative(caseData, userAuthorisation),
-            intervenerIndex,
+            intervenerType,
             intervenerRole
         );
     }
@@ -162,7 +161,7 @@ public class StopRepresentingClientService {
         if (!representativeInContext.isIntervenerBarrister()) {
             return false;
         }
-        int index = representativeInContext.intervenerIndex();
+        int index = representativeInContext.intervenerType().getIntervenerId();
         IntervenerWrapper intervener = caseData.getIntervenerById(index);
         List<BarristerCollectionItem> intvBarristers = caseData.getBarristerCollectionWrapper()
             .getIntervenerBarristersByIndex(index);

@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
@@ -143,8 +144,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private int getIntervenerIndex(StopRepresentingRequest request) {
-        return of(request.representativeInContext.intervenerIndex()).orElseThrow(()
-            -> new IllegalStateException(format("%s - expecting intervener index exists", request.caseId)));
+        return of(request.representativeInContext.intervenerType()).map(IntervenerType::getIntervenerId)
+            .orElseThrow(() -> new IllegalStateException(format("%s - expecting intervener index exists", request.caseId)));
     }
 
     private boolean hasApplicantOrRespondentOrganisationPolicyChange(StopRepresentingRequest request) {

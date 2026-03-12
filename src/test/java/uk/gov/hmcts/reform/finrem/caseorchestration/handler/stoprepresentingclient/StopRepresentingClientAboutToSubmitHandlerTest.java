@@ -72,6 +72,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -125,13 +129,13 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @ParameterizedTest
         @MethodSource("provideAllLoggedInScenarios")
-        void givenServiceAddressMissing_whenHandled_throwsException(boolean isApplicantRepresentative, Integer intervenerIndex,
+        void givenServiceAddressMissing_whenHandled_throwsException(boolean isApplicantRepresentative, IntervenerType intervenerType,
                                                                     IntervenerRole intervenerRole) {
             boolean skipTest = IntervenerRole.BARRISTER.equals(intervenerRole);
             if (skipTest) {
                 return;
             }
-            stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
+            stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerType, intervenerRole);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(null))
@@ -145,17 +149,17 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         @ParameterizedTest
         @MethodSource("provideAllLoggedInScenarios")
         void givenIntervenerBarristerWithServiceAddressMissing_whenHandled_thenDoNotThrowException(
-            boolean isApplicantRepresentative, Integer intervenerIndex, IntervenerRole intervenerRole) {
+            boolean isApplicantRepresentative, IntervenerType intervenerType, IntervenerRole intervenerRole) {
 
             boolean skipTest = !IntervenerRole.BARRISTER.equals(intervenerRole);
             if (skipTest) {
                 return;
             }
-            stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerIndex, intervenerRole);
+            stubIsApplicantRepresentativeAndIntervenerIndex(isApplicantRepresentative, intervenerType, intervenerRole);
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(null))
-                .barristerCollectionWrapper(intervenerBarristerCollectionWrapper(intervenerIndex, TEST_ORG_ID, TEST_USER_ID))
+                .barristerCollectionWrapper(intervenerBarristerCollectionWrapper(intervenerType, TEST_ORG_ID, TEST_USER_ID))
                 .build();
 
             assertDoesNotThrow(() -> {
@@ -165,7 +169,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
         @Test
         void whenHandled_thenExtraServiceAddressesToIntervenersAndApplicant() {
-            stubIsRepresentingIntervener(2, IntervenerRole.SOLICITOR);
+            stubIsRepresentingIntervener(INTERVENER_TWO, IntervenerRole.SOLICITOR);
 
             Address serviceAddress = mock(Address.class);
             Address intervener1Addr = mock(Address.class);
@@ -283,7 +287,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .contains(respondentAddress, YesOrNo.forValue(confidentiality));
         }
 
-        private static void verifyIntervenerAddress(FinremCaseData caseData, int intervenerIndex,
+        private static void verifyIntervenerAddress(FinremCaseData caseData, IntervenerType intervenerType,
                                                     Address intervenerAddress, boolean confidentiality) {
             assertThat(caseData)
                 .extracting(intervenerWrapperExtractor(intervenerIndex))
@@ -786,7 +790,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             assertThat(captor.getValue().getIntervenerType())
                 .isEqualTo(
                     switch (index) {
-                        case 1 -> IntervenerType.INTERVENER_ONE;
+                        case 1 -> INTERVENER_ONE;
                         case 2 -> IntervenerType.INTERVENER_TWO;
                         case 3 -> IntervenerType.INTERVENER_THREE;
                         case 4 -> IntervenerType.INTERVENER_FOUR;
@@ -851,31 +855,31 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         return Stream.of(
             Arguments.of(true, null, null),
             Arguments.of(false, null, null),
-            Arguments.of(false, 1, IntervenerRole.SOLICITOR),
-            Arguments.of(false, 2, IntervenerRole.SOLICITOR),
-            Arguments.of(false, 3, IntervenerRole.SOLICITOR),
-            Arguments.of(false, 4, IntervenerRole.SOLICITOR),
-            Arguments.of(false, 1, IntervenerRole.BARRISTER),
-            Arguments.of(false, 2, IntervenerRole.BARRISTER),
-            Arguments.of(false, 3, IntervenerRole.BARRISTER),
-            Arguments.of(false, 4, IntervenerRole.BARRISTER)
+            Arguments.of(false, INTERVENER_ONE, IntervenerRole.SOLICITOR),
+            Arguments.of(false, INTERVENER_TWO, IntervenerRole.SOLICITOR),
+            Arguments.of(false, INTERVENER_THREE, IntervenerRole.SOLICITOR),
+            Arguments.of(false, INTERVENER_FOUR, IntervenerRole.SOLICITOR),
+            Arguments.of(false, INTERVENER_ONE, IntervenerRole.BARRISTER),
+            Arguments.of(false, INTERVENER_TWO, IntervenerRole.BARRISTER),
+            Arguments.of(false, INTERVENER_THREE, IntervenerRole.BARRISTER),
+            Arguments.of(false, INTERVENER_FOUR, IntervenerRole.BARRISTER)
         );
     }
 
     private void stubIsApplicantRepresentativeAndIntervenerIndex(boolean isApplicantRepresentative,
-                                                                 Integer intervenerIndex,
+                                                                 IntervenerType intervenerType,
                                                                  IntervenerRole intervenerRole) {
-        boolean isRepresentingApplicant = intervenerIndex == null && isApplicantRepresentative;
-        boolean isRepresentingRespondent = intervenerIndex == null && !isApplicantRepresentative;
+        boolean isRepresentingApplicant = intervenerType == null && isApplicantRepresentative;
+        boolean isRepresentingRespondent = intervenerType == null && !isApplicantRepresentative;
 
         when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
-            new RepresentativeInContext(TEST_USER_ID, isRepresentingApplicant, isRepresentingRespondent, intervenerIndex, intervenerRole)
+            new RepresentativeInContext(TEST_USER_ID, isRepresentingApplicant, isRepresentingRespondent, intervenerType, intervenerRole)
         );
     }
 
-    private void stubIsRepresentingIntervener(int index, IntervenerRole intervenerRole) {
+    private void stubIsRepresentingIntervener(IntervenerType intervenerType, IntervenerRole intervenerRole) {
         when(stopRepresentingClientService.buildRepresentation(any(FinremCaseData.class), eq(AUTH_TOKEN))).thenReturn(
-            new RepresentativeInContext(TEST_USER_ID, false, false, index, intervenerRole)
+            new RepresentativeInContext(TEST_USER_ID, false, false, intervenerType, intervenerRole)
         );
     }
 
@@ -886,30 +890,28 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
             .build();
     }
 
-    private static FinremCaseData.FinremCaseDataBuilder appendIntervenerOrganisationPolicy(int index, String orgId,
+    private static FinremCaseData.FinremCaseDataBuilder appendIntervenerOrganisationPolicy(IntervenerType intervenerType, String orgId,
         FinremCaseData.FinremCaseDataBuilder builder) {
 
-        switch (index) {
-            case 1 -> builder.intervenerOne(IntervenerOne.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
-            case 2 -> builder.intervenerTwo(IntervenerTwo.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
-            case 3 -> builder.intervenerThree(IntervenerThree.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
-            case 4 -> builder.intervenerFour(IntervenerFour.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
-            default -> throw new IllegalArgumentException("Unsupported intervener index: " + index);
+        switch (intervenerType) {
+            case INTERVENER_ONE -> builder.intervenerOne(IntervenerOne.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
+            case INTERVENER_TWO -> builder.intervenerTwo(IntervenerTwo.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
+            case INTERVENER_THREE-> builder.intervenerThree(IntervenerThree.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
+            case INTERVENER_FOUR -> builder.intervenerFour(IntervenerFour.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
         }
         return builder;
     }
 
-    private static BarristerCollectionWrapper intervenerBarristerCollectionWrapper(int index, String orgId) {
-        return intervenerBarristerCollectionWrapper(index, orgId, null);
+    private static BarristerCollectionWrapper intervenerBarristerCollectionWrapper(IntervenerType intervenerType, String orgId) {
+        return intervenerBarristerCollectionWrapper(intervenerType, orgId, null);
     }
 
-    private static BarristerCollectionWrapper intervenerBarristerCollectionWrapper(int index, String orgId, String userId) {
-        return switch (index) {
-            case 1 -> BarristerCollectionWrapper.builder().intvr1Barristers(barristers(orgId, userId)).build();
-            case 2 -> BarristerCollectionWrapper.builder().intvr2Barristers(barristers(orgId, userId)).build();
-            case 3 -> BarristerCollectionWrapper.builder().intvr3Barristers(barristers(orgId, userId)).build();
-            case 4 -> BarristerCollectionWrapper.builder().intvr4Barristers(barristers(orgId, userId)).build();
-            default -> throw new IllegalArgumentException("Unsupported intervener index: " + index);
+    private static BarristerCollectionWrapper intervenerBarristerCollectionWrapper(IntervenerType intervenerType, String orgId, String userId) {
+        return switch (intervenerType) {
+            case INTERVENER_ONE -> BarristerCollectionWrapper.builder().intvr1Barristers(barristers(orgId, userId)).build();
+            case INTERVENER_TWO -> BarristerCollectionWrapper.builder().intvr2Barristers(barristers(orgId, userId)).build();
+            case INTERVENER_THREE -> BarristerCollectionWrapper.builder().intvr3Barristers(barristers(orgId, userId)).build();
+            case INTERVENER_FOUR -> BarristerCollectionWrapper.builder().intvr4Barristers(barristers(orgId, userId)).build();
         };
     }
 
@@ -923,7 +925,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         };
     }
 
-    private static Function<FinremCaseData, IntervenerWrapper> intervenerWrapperExtractor(int index) {
+    private static Function<FinremCaseData, IntervenerWrapper> intervenerWrapperExtractor(IntervenerType intervenerType) {
         return data -> switch (index) {
             case 1 -> data.getIntervenerOne();
             case 2 -> data.getIntervenerTwo();
