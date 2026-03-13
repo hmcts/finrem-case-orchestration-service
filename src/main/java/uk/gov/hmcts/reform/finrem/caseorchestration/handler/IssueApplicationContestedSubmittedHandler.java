@@ -54,8 +54,10 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
         boolean isHavingErrors = !StringUtils.isAllBlank(assignRespondentSolicitorError, sendCorrespondenceError);
 
         if (isHavingErrors) {
-            return submittedResponse("# Application Issued with Errors",
-                toConfirmationBody(assignRespondentSolicitorError, sendCorrespondenceError));
+            return submittedResponse(
+                toConfirmationHeader("Application Issued with Errors"),
+                toConfirmationBody(assignRespondentSolicitorError, sendCorrespondenceError)
+            );
         } else {
             return submittedResponse();
         }
