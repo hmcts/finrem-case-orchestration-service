@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 @Slf4j
 @Service
@@ -20,12 +21,16 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
 
     private final AssignPartiesAccessService assignPartiesAccessService;
 
+    private final RetryExecutor retryExecutor;
+
     public PaperCaseCreateContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     CreateCaseService createCaseService,
-                                                    AssignPartiesAccessService assignPartiesAccessService) {
+                                                    AssignPartiesAccessService assignPartiesAccessService,
+                                                    RetryExecutor retryExecutor) {
         super(finremCaseDetailsMapper);
         this.createCaseService = createCaseService;
         this.assignPartiesAccessService = assignPartiesAccessService;
+        this.retryExecutor = retryExecutor;
     }
 
     @Override
@@ -46,7 +51,8 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
         boolean isHavingErrors = !StringUtils.isAllBlank(setSupplementaryDataError, assignApplicantSolicitorError);
 
         if (isHavingErrors) {
-            return submittedResponse("# Paper Case Created with Errors",
+            return submittedResponse(
+                toConfirmationHeader("Paper Case Created with Errors"),
                 toConfirmationBody(setSupplementaryDataError, assignApplicantSolicitorError));
         } else {
             return submittedResponse();
@@ -55,11 +61,8 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
 
     private String setSupplementaryData(FinremCallbackRequest request, String userAuthorisation) {
         try {
-            executeWithRetry(log,
-                () -> createCaseService.setSupplementaryData(request, userAuthorisation),
-                request.getCaseDetails().getCaseIdAsString(),
-                "setting supplementary data"
-            );
+            retryExecutor.runWithRetry(() -> createCaseService.setSupplementaryData(request, userAuthorisation),
+                "setting supplementary data", request.getCaseDetails().getCaseIdAsString());
             return null;
         } catch (Exception ex) {
             return "There was a problem setting supplementary data.";
@@ -72,14 +75,12 @@ public class PaperCaseCreateContestedSubmittedHandler extends FinremCallbackHand
             return null;
         }
         try {
-            executeWithRetry(log,
-                () -> assignPartiesAccessService.grantApplicantSolicitor(request.getCaseDetails().getData()),
-                request.getCaseDetails().getCaseIdAsString(),
-                "granting applicant solicitor"
+            retryExecutor.runWithRetry(() -> assignPartiesAccessService.grantApplicantSolicitor(request.getCaseDetails().getData()),
+                "granting applicant solicitor", request.getCaseDetails().getCaseIdAsString()
             );
             return null;
         } catch (Exception ex) {
-            return "There was a problem granting access to applicant solicitor %s".formatted(appSolEmail);
+            return "There was a problem granting access to applicant solicitor: %s".formatted(appSolEmail);
         }
     }
 }

@@ -2,27 +2,31 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UserNotFoundInOrganisationApiException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.NEW_PAPER_CASE;
@@ -34,154 +38,123 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
 
     @InjectMocks
     private PaperCaseCreateContestedSubmittedHandler handler;
-
     @Mock
     private CreateCaseService createCaseService;
-
     @Mock
     private AssignPartiesAccessService assignPartiesAccessService;
+    @Mock
+    private RetryExecutor retryExecutor;
 
     @Test
     void testCanHandle() {
         assertCanHandle(handler, SUBMITTED, CONTESTED, NEW_PAPER_CASE);
     }
 
-    @Test
-    void givenCase_whenHandled_thenSetSupplementaryData() {
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from();
+    @ParameterizedTest
+    @NullAndEmptySource
+    void shouldExecuteSetSupplementaryOnly_whenApplicantSolicitorEmailIsBlankOrEmpty(String email) throws Exception {
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.getAppSolicitorEmailIfRepresented()).thenReturn(email);
+        when(caseDetails.getData()).thenReturn(caseData);
 
-        assertThat(response)
-            .extracting(GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
-            .containsOnlyNulls();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(caseDetails).build();
+        handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(createCaseService).setSupplementaryData(request, AUTH_TOKEN);
-        verifyNoMoreInteractions(createCaseService);
+        verify(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
+        verifyNoMoreInteractions(retryExecutor);
     }
 
     @Test
-    void givenApplicantNotRepresented_whenHandled_thenShouldNotGrantApplicantSolicitor()
-        throws UserNotFoundInOrganisationApiException {
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from();
+    void shouldExecuteSetSupplementaryAndGrantApplicantSolicitor_whenApplicantSolicitorEmailProvided() throws Exception {
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(caseDetails.getData()).thenReturn(caseData);
 
-        assertThat(response)
-            .extracting(
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
-            .containsOnlyNulls();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(caseDetails).build();
+        handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(assignPartiesAccessService, never()).grantApplicantSolicitor(request.getCaseDetails().getData());
+        verify(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(), eq("granting applicant solicitor"), eq(CASE_ID));
+        verifyNoMoreInteractions(retryExecutor);
     }
 
     @Test
-    void givenApplicantRepresented_whenHandled_thenGrantApplicantSolicitor() throws UserNotFoundInOrganisationApiException {
-        FinremCaseData mockedCaseData = mock(FinremCaseData.class);
-        when(mockedCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+    void shouldReportError_whenSetSupplementaryDataThrowsAnyException() throws Exception {
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(mockedCaseData);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(caseDetails.getData()).thenReturn(caseData);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
+        doThrow(new RuntimeException("BOOM"))
+            .when(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
+        doAnswer(invocation -> {
+            ThrowingRunnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(retryExecutor).runWithRetry(any(), eq("granting applicant solicitor"), eq(CASE_ID));
 
-        assertThat(response)
-            .extracting(
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader)
-            .containsOnlyNulls();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(caseDetails).build();
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response).extracting(
+            GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
+            GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody
+        ).containsExactly(
+            "# Paper Case Created with Errors",
+            "<ul><li><h2>There was a problem setting supplementary data.</h2></li></ul>"
+        );
 
-        verify(assignPartiesAccessService).grantApplicantSolicitor(request.getCaseDetails().getData());
-        verifyNoMoreInteractions(assignPartiesAccessService);
+        verify(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(), eq("granting applicant solicitor"), eq(CASE_ID));
+        verifyNoMoreInteractions(retryExecutor);
+
+        verifyNoInteractions(createCaseService);
+        verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
     }
 
     @Test
-    void givenSupplementaryDataFailure_whenHandled_thenRetriesThreeTimesAndShowsError()
-        throws UserNotFoundInOrganisationApiException {
-        FinremCaseData mockedCaseData = mock(FinremCaseData.class);
-        when(mockedCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+    void shouldReportError_whenGrantApplicantSolicitorThrowsAnyException() throws Exception {
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(mockedCaseData);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(caseDetails.getData()).thenReturn(caseData);
 
-        // always fail
-        doThrow(new RuntimeException("boom"))
-            .when(createCaseService)
-            .setSupplementaryData(any(FinremCallbackRequest.class), eq(AUTH_TOKEN));
+        doThrow(new RuntimeException("BOOM"))
+            .when(retryExecutor).runWithRetry(any(), eq("granting applicant solicitor"), eq(CASE_ID));
+        doAnswer(invocation -> {
+            ThrowingRunnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =  handler.handle(request, AUTH_TOKEN);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(caseDetails).build();
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response).extracting(
+            GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
+            GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody
+        ).containsExactly(
+            "# Paper Case Created with Errors",
+            "<ul><li><h2>There was a problem granting access to applicant solicitor: %s</h2></li></ul>".formatted(TEST_SOLICITOR_EMAIL)
+        );
 
-        assertThat(response)
-            .extracting(
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
-            .containsExactly("# Paper Case Created with Errors",
-                "<ul><li><h2>There was a problem setting supplementary data.</h2></li></ul>");
-        verify(createCaseService, times(3))
-            .setSupplementaryData(any(FinremCallbackRequest.class), eq(AUTH_TOKEN));
-        verify(assignPartiesAccessService).grantApplicantSolicitor(request.getCaseDetails().getData());
-        verifyNoMoreInteractions(createCaseService, assignPartiesAccessService);
-    }
+        verify(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(), eq("granting applicant solicitor"), eq(CASE_ID));
+        verifyNoMoreInteractions(retryExecutor);
 
-    @Test
-    void givenAssignPartyAccessFailure_whenHandled_thenRetriesThreeTimesAndShowsError()
-        throws UserNotFoundInOrganisationApiException {
-        FinremCaseData mockedCaseData = mock(FinremCaseData.class);
-        when(mockedCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
-
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(mockedCaseData);
-
-        // always fail
-        doThrow(new RuntimeException("boom"))
-            .when(assignPartiesAccessService)
-            .grantApplicantSolicitor(request.getCaseDetails().getData());
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =  handler.handle(request, AUTH_TOKEN);
-
-        assertThat(response)
-            .extracting(
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
-            .containsExactly("# Paper Case Created with Errors",
-                "<ul><li><h2>There was a problem granting access to applicant solicitor %s</h2></li></ul>"
-                    .formatted(TEST_SOLICITOR_EMAIL));
-        verify(createCaseService)
-            .setSupplementaryData(request, AUTH_TOKEN);
-        verify(assignPartiesAccessService, times(3)).grantApplicantSolicitor(request.getCaseDetails().getData());
-        verifyNoMoreInteractions(createCaseService, assignPartiesAccessService);
-    }
-
-    @Test
-    void givenSetSupplementaryDataAndAssignPartyAccessFailure_whenHandled_thenRetriesThreeTimesAndShowsError()
-        throws UserNotFoundInOrganisationApiException {
-        FinremCaseData mockedCaseData = mock(FinremCaseData.class);
-        when(mockedCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
-
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(mockedCaseData);
-
-        // always fail
-        doThrow(new RuntimeException("boom"))
-            .when(assignPartiesAccessService)
-            .grantApplicantSolicitor(request.getCaseDetails().getData());
-        doThrow(new RuntimeException("boom"))
-            .when(createCaseService)
-            .setSupplementaryData(any(FinremCallbackRequest.class), eq(AUTH_TOKEN));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =  handler.handle(request, AUTH_TOKEN);
-
-        assertThat(response)
-            .extracting(
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
-                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
-            .containsExactly("# Paper Case Created with Errors",
-                ("<ul>"
-                    + "<li><h2>There was a problem setting supplementary data.</h2></li>"
-                    + "<li><h2>There was a problem granting access to applicant solicitor %s</h2></li>"
-                    + "</ul>")
-                    .formatted(TEST_SOLICITOR_EMAIL));
-        verify(createCaseService, times(3))
-            .setSupplementaryData(request, AUTH_TOKEN);
-        verify(assignPartiesAccessService, times(3)).grantApplicantSolicitor(request.getCaseDetails().getData());
-        verifyNoMoreInteractions(createCaseService, assignPartiesAccessService);
+        verify(createCaseService).setSupplementaryData(any(FinremCallbackRequest.class), eq(AUTH_TOKEN));
+        verifyNoInteractions(assignPartiesAccessService);
     }
 }
