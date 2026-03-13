@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.closecase;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -19,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMe
 @Service
 public class CloseCaseAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
-    @Autowired
     public CloseCaseAboutToSubmitHandler(FinremCaseDetailsMapper mapper) {
         super(mapper);
     }
