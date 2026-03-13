@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,9 @@ class UpdateContactDetailsContestedMidHandlerTest {
 
     @Mock
     private InternationalPostalService internationalPostalService;
+
+    @Mock
+    private ValidatePartiesService validatePartiesService;
 
     @Test
     void testCanHandle() {
@@ -83,7 +87,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
                 .thenReturn(new ArrayList<>(addressErrors));
-            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService))
                 .thenReturn(new ArrayList<>(emailErrors));
             when(internationalPostalService.validate(caseData))
                 .thenReturn(new ArrayList<>(postalErrors));
