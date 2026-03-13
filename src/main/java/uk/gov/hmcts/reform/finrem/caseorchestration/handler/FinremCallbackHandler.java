@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.StringEscapeUtils;
-import org.slf4j.Logger;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -23,25 +22,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @RequiredArgsConstructor
 public abstract class FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
 
-    private static final String RETRYING_MESSAGE = "{} - Failed {}. Attempts left: {}";
-
-    private static final String RETRY_EXHAUSTING_MESSAGE = "{} - All retry attempts exhausted while {}";
-
-    @SuppressWarnings("java:S112")
-    @FunctionalInterface
-    public interface ThrowingSupplier<T> {
-        T get() throws Exception;
-    }
-
-    @SuppressWarnings("java:S112")
-    @FunctionalInterface
-    public interface ThrowingRunnable {
-        void run() throws Exception;
-    }
-
     protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
-
-    protected static final int DEFAULT_RETRY_ATTEMPTS = 3;
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
@@ -161,128 +142,8 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return builder.build();
     }
 
-    protected <T> T executeWithRetry(
-        Logger log,
-        ThrowingSupplier<T> action,
-        String caseId,
-        String actionName
-    ) {
-        return executeWithRetrySuppressingException(log, action, caseId, actionName, DEFAULT_RETRY_ATTEMPTS);
-    }
-
-    protected <T> T executeWithRetry(
-        Logger log,
-        ThrowingSupplier<T> action,
-        String caseId,
-        String actionName,
-        int attempts
-    ) {
-
-        int remainingAttempts = attempts;
-
-        while (remainingAttempts > 0) {
-            try {
-                return action.get();
-            } catch (Exception ex) {
-                remainingAttempts--;
-
-                if (remainingAttempts > 0) {
-                    log.warn(RETRYING_MESSAGE, caseId, actionName, remainingAttempts, ex);
-                } else {
-                    log.error(RETRY_EXHAUSTING_MESSAGE, caseId, actionName, ex);
-                    throw new RuntimeException(ex);
-                }
-            }
-        }
-
-        throw new IllegalStateException("Retry logic failure");
-    }
-
-    protected void executeWithRetry(
-        Logger log,
-        ThrowingRunnable action,
-        String caseId,
-        String actionName
-    ) {
-        executeWithRetry(log, action, caseId, actionName, DEFAULT_RETRY_ATTEMPTS);
-    }
-
-    protected void executeWithRetry(
-        Logger log,
-        ThrowingRunnable action,
-        String caseId,
-        String actionName,
-        int attempts
-    ) {
-        executeWithRetry(log, () -> {
-            action.run();
-            return null;
-        }, caseId, actionName, attempts);
-    }
-
-    protected <T> T executeWithRetrySuppressingException(
-        Logger log,
-        ThrowingSupplier<T> action,
-        String caseId,
-        String actionName
-    ) {
-        return executeWithRetrySuppressingException(log, action, caseId, actionName, DEFAULT_RETRY_ATTEMPTS);
-    }
-
-    protected <T> T executeWithRetrySuppressingException(
-        Logger log,
-        ThrowingSupplier<T> action,
-        String caseId,
-        String actionName,
-        int attempts
-    ) {
-        int remainingAttempts = attempts;
-
-        while (remainingAttempts > 0) {
-            try {
-                return action.get();
-            } catch (Exception ex) {
-                remainingAttempts--;
-
-                if (remainingAttempts > 0) {
-                    log.warn(RETRYING_MESSAGE, caseId, actionName, remainingAttempts, ex);
-                } else {
-                    log.error("{} - All retry attempts exhausted while {}. Exceptions were suppressed",
-                        caseId, actionName, ex);
-                    return null;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    protected void executeWithRetrySuppressingException(
-        Logger log,
-        ThrowingRunnable action,
-        String caseId,
-        String actionName
-    ) {
-        executeWithRetrySuppressingException(log, action, caseId, actionName, DEFAULT_RETRY_ATTEMPTS);
-    }
-
-    protected void executeWithRetrySuppressingException(
-        Logger log,
-        ThrowingRunnable action,
-        String caseId,
-        String actionName,
-        int attempts
-    ) {
-        executeWithRetrySuppressingException(
-            log,
-            () -> {
-                action.run();
-                return null;
-            },
-            caseId,
-            actionName,
-            attempts
-        );
+    protected String toConfirmationHeader(String messages) {
+        return "# %s".formatted(messages);
     }
 
     protected String toConfirmationBody(String... messages) {

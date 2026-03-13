@@ -14,21 +14,26 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.issueapplication.IssueApplicationContestedEmailCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 @Slf4j
 @Service
 public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHandler {
 
-    private final IssueApplicationContestedEmailCorresponder corresponder;
-
     private final AssignPartiesAccessService assignPartiesAccessService;
 
+    private final IssueApplicationContestedEmailCorresponder corresponder;
+
+    private final RetryExecutor retryExecutor;
+
     public IssueApplicationContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                     AssignPartiesAccessService assignPartiesAccessService,
                                                      IssueApplicationContestedEmailCorresponder corresponder,
-                                                     AssignPartiesAccessService assignPartiesAccessService) {
+                                                     RetryExecutor retryExecutor) {
         super(finremCaseDetailsMapper);
-        this.corresponder = corresponder;
         this.assignPartiesAccessService = assignPartiesAccessService;
+        this.corresponder = corresponder;
+        this.retryExecutor = retryExecutor;
     }
 
     @Override
@@ -54,8 +59,10 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
         boolean isHavingErrors = !StringUtils.isAllBlank(assignRespondentSolicitorError, sendCorrespondenceError);
 
         if (isHavingErrors) {
-            return submittedResponse("# Application Issued with Errors",
-                toConfirmationBody(assignRespondentSolicitorError, sendCorrespondenceError));
+            return submittedResponse(
+                toConfirmationHeader("Application Issued with Errors"),
+                toConfirmationBody(assignRespondentSolicitorError, sendCorrespondenceError)
+            );
         } else {
             return submittedResponse();
         }
@@ -69,26 +76,23 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
             return null;
         }
         try {
-            executeWithRetry(log,
-                () -> assignPartiesAccessService.grantRespondentSolicitor(caseData),
-                caseData.getCcdCaseId(),
-                "granting respondent solicitor"
-            );
+            retryExecutor.runWithRetry(() -> assignPartiesAccessService.grantRespondentSolicitor(caseData),
+                "granting respondent solicitor", caseData.getCcdCaseId());
             return null;
         } catch (Exception ex) {
-            return "There was a problem granting access to respondent solicitor %s".formatted(respSolEmail);
+            log.error("Error granting respondent solicitor", ex);
+            return "There was a problem granting access to respondent solicitor: %s".formatted(respSolEmail);
         }
     }
 
     private String sendCorrespondence(FinremCaseDetails caseDetails) {
         try {
-            executeWithRetry(log,
-                () -> corresponder.sendCorrespondence(caseDetails),
-                caseDetails.getCaseIdAsString(),
-                "sending correspondence"
-            );
+            retryExecutor.runWithRetry(() -> corresponder.sendCorrespondence(caseDetails),
+                "sending correspondence", caseDetails.getCaseIdAsString());
+
             return null;
         } catch (Exception ex) {
+            log.error("Error granting sending correspondence", ex);
             return "There was a problem sending correspondence.";
         }
     }
