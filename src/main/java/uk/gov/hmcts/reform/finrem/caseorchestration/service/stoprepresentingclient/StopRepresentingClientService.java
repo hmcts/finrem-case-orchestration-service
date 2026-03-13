@@ -161,10 +161,9 @@ public class StopRepresentingClientService {
         if (!representativeInContext.isIntervenerBarrister()) {
             return false;
         }
-        int index = representativeInContext.intervenerType().getIntervenerId();
-        IntervenerWrapper intervener = caseData.getIntervenerById(index);
+        IntervenerWrapper intervener = caseData.getIntervenerById(representativeInContext.intervenerType().getIntervenerId());
         List<BarristerCollectionItem> intvBarristers = caseData.getBarristerCollectionWrapper()
-            .getIntervenerBarristersByIndex(index);
+            .getIntervenerBarristers(representativeInContext.intervenerType());
 
         Barrister barrister = emptyIfNull(intvBarristers).stream().map(BarristerCollectionItem::getValue)
             .filter(b -> b.getUserId().equals(representativeInContext.userId()))

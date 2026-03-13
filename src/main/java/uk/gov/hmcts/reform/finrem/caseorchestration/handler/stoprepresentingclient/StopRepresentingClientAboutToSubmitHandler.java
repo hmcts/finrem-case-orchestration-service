@@ -474,7 +474,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     private Barrister getIntervenerBarrister(StopRepresentingRequest request) {
         return emptyIfNull(
             request.finremCaseDetails.getData().getBarristerCollectionWrapper()
-                .getIntervenerBarristersByIndex(getIntervenerIndex(request))
+                .getIntervenerBarristers(request.representativeInContext().intervenerType())
         ).stream()
             .map(BarristerCollectionItem::getValue)
             .filter(d -> getUserId(request).equals(d.getUserId()))
