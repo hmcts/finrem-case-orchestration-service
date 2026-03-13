@@ -285,6 +285,10 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         );
     }
 
+    protected String toConfirmationHeader(String messages) {
+        return "# %s".formatted(messages);
+    }
+
     protected String toConfirmationBody(String... messages) {
         StringBuilder body = new StringBuilder("<ul>");
 
