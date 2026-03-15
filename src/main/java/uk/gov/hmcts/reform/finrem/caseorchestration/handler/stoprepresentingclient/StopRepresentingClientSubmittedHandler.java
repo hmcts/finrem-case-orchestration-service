@@ -26,11 +26,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
@@ -97,40 +97,55 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
-        StopRepresentingClientService.LitigantRevocation litigantRevocation = retryExecutor.runWithRetry(
-            () -> stopRepresentingClientService.revokeApplicantSolicitorOrRespondentSolicitor(info),
-            "revoking %s access".formatted(getLigtantPartyString(getFinremCaseData(info))),
-            getCaseId(info));
 
-        if (litigantRevocation != null) {
-            // - continue sending if revocation is not null
-            // - null revocation means exception may occur
+        Optional<StopRepresentingClientService.LitigantRevocation> litigantRevocationOptional =
+            retryExecutor.supplyWithRetrySuppressException(
+                () -> stopRepresentingClientService.revokeApplicantSolicitorOrRespondentSolicitor(info),
+                "revoking %s access".formatted(describeLigtantPartyString(info.getFinremCaseData())),
+                info.getCaseIdInString());
+
+        List<SendCorrespondenceEventEnvelop> ret = new ArrayList<>();
+
+        litigantRevocationOptional.ifPresent(litigantRevocation -> {
+
             if (litigantRevocation.wasRevoked()) {
-                executeWithRetrySuppressingException(log,
+                retryExecutor.runWithRetrySuppressException(
                     () -> stopRepresentingClientService.performCleanUpAfterNocWorkflow(info),
-                    getCaseId(info), "cleaning up after noc workflow ");
+                    "cleaning up after noc workflow",
+                    info.getCaseIdInString());
             }
 
-            List<SendCorrespondenceEventEnvelop> ret = new ArrayList<>();
-            ret.addAll(emptyIfNull(executeWithRetrySuppressingException(log,
-                () -> stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(litigantRevocation, info),
-                getCaseId(info), "preparing litigant notifications")));
-            ret.addAll(emptyIfNull(executeWithRetrySuppressingException(log,
-                () -> stopRepresentingClientService.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info),
-                getCaseId(info), "preparing litigant letter notifications")));
-            return ret;
-        }
-        return List.of();
+            ret.addAll(
+                retryExecutor.supplyWithRetrySuppressException(
+                    () -> stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(litigantRevocation, info),
+                    "preparing litigant notifications",
+                    info.getCaseIdInString()
+                ).orElse(List.of())
+            );
+
+            ret.addAll(
+                retryExecutor.supplyWithRetrySuppressException(
+                    () -> stopRepresentingClientService.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info),
+                    "preparing litigant letter notifications",
+                    info.getCaseIdInString()
+                ).orElse(List.of())
+            );
+        });
+
+        return ret;
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeIntervenerSolicitor(StopRepresentingClientInfo info) {
-        List<IntervenerWrapper> intervenerWrappers = stopRepresentingClientService.getToBeRevokedIntervenerSolicitors(info);
-        return intervenerWrappers.stream().map(intervenerWrapper ->
-            executeWithRetrySuppressingException(log,
-                () -> stopRepresentingClientService.revokeIntervenerSolicitor(info, intervenerWrapper),
-                getCaseId(info), "revoking %s access".formatted(ofNullable(intervenerWrapper.getIntervenerType())
-                    .map(IntervenerType::getTypeValue).orElse("(intervener#unknown)")))
-        ).toList();
+        return stopRepresentingClientService.getToBeRevokedIntervenerSolicitors(info)
+            .stream()
+            .flatMap(intervenerWrapper ->
+                retryExecutor.supplyWithRetrySuppressException(
+                    () -> stopRepresentingClientService.revokeIntervenerSolicitor(info, intervenerWrapper),
+                    "revoking %s access".formatted(describeIntervener(intervenerWrapper)),
+                    info.getCaseIdInString()
+                ).stream()
+            )
+            .toList();
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeBarristers(StopRepresentingClientInfo info) {
@@ -142,15 +157,11 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         )) {
             BarristerChange change = stopRepresentingClientService.getToBeRevokedBarristers(info, party);
             if (change != null && !CollectionUtils.isEmpty(change.getRemoved())) {
-                List<SendCorrespondenceEventEnvelop> events = executeWithRetrySuppressingException(
-                    log,
+                retryExecutor.supplyWithRetrySuppressException(
                     () -> stopRepresentingClientService.revokeBarristers(info, change),
-                    getCaseId(info),
-                    "revoking " + party.name().toLowerCase() + " barrister access"
-                );
-                if (events != null) {
-                    ret.addAll(events);
-                }
+                    "revoking " + party.name().toLowerCase() + " barrister access",
+                    info.getCaseIdInString()
+                ).ifPresent(ret::addAll);
             }
         }
         return ret;
@@ -162,25 +173,22 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         envelops.addAll(revokeIntervenerSolicitor(info));
         envelops.addAll(revokeBarristers(info));
 
-        log.info("{} - about to send {} notifications to relevant parties", getCaseId(info), envelops.size());
+        log.info("{} - about to send {} notifications to relevant parties", info.getCaseId(), envelops.size());
         // publish all notification
         envelops.forEach(envelop ->
-            executeWithRetrySuppressingException(log, () -> applicationEventPublisher.publishEvent(envelop.getEvent()),
-                getCaseId(info), envelop.getDescription())
+            retryExecutor.runWithRetrySuppressException(() -> applicationEventPublisher.publishEvent(envelop.getEvent()),
+                envelop.getDescription(), info.getCaseIdInString())
         );
     }
 
-    private String getLigtantPartyString(FinremCaseData finremCaseData) {
+    private String describeIntervener(IntervenerWrapper intervenerWrapper) {
+        return ofNullable(intervenerWrapper.getIntervenerType()).map(IntervenerType::getTypeValue)
+            .orElse("(intervener#unknown)");
+    }
+
+    private String describeLigtantPartyString(FinremCaseData finremCaseData) {
         String party = isApplicantForRepresentationChange(finremCaseData) ? "applicant" : "";
         party = (isBlank(party) && isRespondentForRepresentationChange(finremCaseData)) ? "respondent" : party;
         return party;
-    }
-
-    private String getCaseId(StopRepresentingClientInfo info) {
-        return info.getCaseDetails().getCaseIdAsString();
-    }
-
-    private FinremCaseData getFinremCaseData(StopRepresentingClientInfo info) {
-        return info.getCaseDetails().getData();
     }
 }

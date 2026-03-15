@@ -15,22 +15,28 @@ public class StopRepresentingClientInfo {
     FinremCaseDetails caseDetails;
     FinremCaseDetails caseDetailsBefore;
 
-    FinremCaseData getFinremCaseData() {
+    public FinremCaseData getFinremCaseData() {
         return ofNullable(getCaseDetails())
             .map(FinremCaseDetails::getData)
             .orElse(null);
     }
 
-    FinremCaseData getFinremCaseDataBefore() {
+    public FinremCaseData getFinremCaseDataBefore() {
         return ofNullable(getCaseDetailsBefore())
             .map(FinremCaseDetails::getData)
             .orElse(null);
     }
 
-    Long getCaseId() {
+    public Long getCaseId() {
         return ofNullable(getFinremCaseData())
             .map(FinremCaseData::getCcdCaseId)
             .map(Long::parseLong)
+            .orElse(null);
+    }
+
+    public String getCaseIdInString() {
+        return ofNullable(getFinremCaseData())
+            .map(FinremCaseData::getCcdCaseId)
             .orElse(null);
     }
 }
