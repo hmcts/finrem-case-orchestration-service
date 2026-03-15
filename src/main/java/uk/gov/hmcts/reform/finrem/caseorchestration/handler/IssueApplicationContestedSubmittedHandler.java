@@ -92,7 +92,7 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
 
             return null;
         } catch (Exception ex) {
-            log.error("Error granting sending correspondence", ex);
+            log.error("Error sending correspondence", ex);
             return "There was a problem sending correspondence.";
         }
     }
