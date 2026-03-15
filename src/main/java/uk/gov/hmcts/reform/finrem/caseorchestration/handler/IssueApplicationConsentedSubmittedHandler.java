@@ -75,13 +75,13 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
         try {
             retryExecutor.runWithRetry(() -> assignPartiesAccessService
                 .grantRespondentSolicitor(caseData),
-                caseData.getCcdCaseId(),
-                "granting respondent solicitor"
+                "granting respondent solicitor",
+                caseData.getCcdCaseId()
             );
             return null;
         } catch (Exception ex) {
             log.error("Error granting respondent solicitor", ex);
-            return "There was a problem granting access to respondent solicitor %s".formatted(respSolEmail);
+            return "There was a problem granting access to respondent solicitor: %s".formatted(respSolEmail);
         }
     }
 
@@ -89,8 +89,8 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
         try {
             retryExecutor.runWithRetry(() -> issueApplicationConsentCorresponder
                 .sendCorrespondence(caseDetails, userAuthorisation),
-                caseDetails.getCaseIdAsString(),
-                "sending correspondence"
+                "sending correspondence",
+                caseDetails.getCaseIdAsString()
             );
             return null;
         } catch (Exception ex) {
