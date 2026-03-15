@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,18 +47,20 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
     private final FeatureToggleService featureToggleService;
 
-    private static final String CONFIRMATION_HEADER = "# Notice of change request submitted";
-
     private final ApplicationEventPublisher applicationEventPublisher;
+
+    private final RetryExecutor retryExecutor;
 
     public StopRepresentingClientSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                   StopRepresentingClientService stopRepresentingClientService,
                                                   FeatureToggleService featureToggleService,
-                                                  ApplicationEventPublisher applicationEventPublisher) {
+                                                  ApplicationEventPublisher applicationEventPublisher,
+                                                  RetryExecutor retryExecutor) {
         super(finremCaseDetailsMapper);
         this.stopRepresentingClientService = stopRepresentingClientService;
         this.featureToggleService = featureToggleService;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.retryExecutor = retryExecutor;
     }
 
     @Override
@@ -88,13 +91,17 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
             );
         }
 
-        return submittedResponse(CONFIRMATION_HEADER, toConfirmationBody("Your changes will be applied shortly."));
+        return submittedResponse(
+            toConfirmationHeader("Notice of change request submitted"),
+            toConfirmationBody("Your changes will be applied shortly."));
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
-        StopRepresentingClientService.LitigantRevocation litigantRevocation = executeWithRetrySuppressingException(log,
+        StopRepresentingClientService.LitigantRevocation litigantRevocation = retryExecutor.runWithRetry(
             () -> stopRepresentingClientService.revokeApplicantSolicitorOrRespondentSolicitor(info),
-            getCaseId(info), "revoking %s access".formatted(getLigtantPartyString(getFinremCaseData(info))));
+            "revoking %s access".formatted(getLigtantPartyString(getFinremCaseData(info))),
+            getCaseId(info));
+
         if (litigantRevocation != null) {
             // - continue sending if revocation is not null
             // - null revocation means exception may occur
