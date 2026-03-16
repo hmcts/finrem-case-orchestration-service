@@ -122,7 +122,7 @@ public class ContactDetailsValidator {
      * @param errors the list to which error messages will be added if validation fails
      */
     public static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
-        // TODO Making use of caseData.getAppSolicitorAddress()
+        // DFR-4704 - to simplify the logic by FinremCaseData.getAppSolicitorAddress
         if (isContested(caseData)) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && postCodeIsInvalid(wrapper.getApplicantSolicitorAddress())) {
