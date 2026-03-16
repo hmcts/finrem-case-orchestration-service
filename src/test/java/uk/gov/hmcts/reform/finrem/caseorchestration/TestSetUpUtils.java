@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
+import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -591,5 +593,9 @@ public class TestSetUpUtils {
             .name(name)
             .email(email)
             .build();
+    }
+
+    public static ArgumentCaptor<ThrowingRunnable> getThrowingRunnableCaptor() {
+        return ArgumentCaptor.forClass(ThrowingRunnable.class);
     }
 }
