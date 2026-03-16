@@ -44,83 +44,83 @@ class IntervenerWrapperTest {
             () -> assertThat(intervener.getIntervenerSolPhone()).isNull()
         );
     }
-}
 
-class TestIntervenerWrapper extends IntervenerWrapper {
+    static class TestIntervenerWrapper extends IntervenerWrapper {
 
-    public TestIntervenerWrapper(String intervenerSolEmail, String intervenerSolFirm,
-                                 String intervenerSolReference, String intervenerSolName,
-                                 String intervenerSolPhone) {
-        super();
-        setIntervenerSolEmail(intervenerSolEmail);
-        setIntervenerSolicitorFirm(intervenerSolFirm);
-        setIntervenerSolicitorReference(intervenerSolReference);
-        setIntervenerSolName(intervenerSolName);
-        setIntervenerSolPhone(intervenerSolPhone);
-    }
+        public TestIntervenerWrapper(String intervenerSolEmail, String intervenerSolFirm,
+                                     String intervenerSolReference, String intervenerSolName,
+                                     String intervenerSolPhone) {
+            super();
+            setIntervenerSolEmail(intervenerSolEmail);
+            setIntervenerSolicitorFirm(intervenerSolFirm);
+            setIntervenerSolicitorReference(intervenerSolReference);
+            setIntervenerSolName(intervenerSolName);
+            setIntervenerSolPhone(intervenerSolPhone);
+        }
 
-    @Override
-    public String getIntervenerLabel() {
-        return "";
-    }
+        @Override
+        public String getIntervenerLabel() {
+            return "";
+        }
 
-    @Override
-    public IntervenerType getIntervenerType() {
-        return null;
-    }
+        @Override
+        public IntervenerType getIntervenerType() {
+            return null;
+        }
 
-    @Override
-    public String getAddIntervenerCode() {
-        return "";
-    }
+        @Override
+        public String getAddIntervenerCode() {
+            return "";
+        }
 
-    @Override
-    public String getAddIntervenerValue() {
-        return "";
-    }
+        @Override
+        public String getAddIntervenerValue() {
+            return "";
+        }
 
-    @Override
-    public String getDeleteIntervenerCode() {
-        return "";
-    }
+        @Override
+        public String getDeleteIntervenerCode() {
+            return "";
+        }
 
-    @Override
-    public String getDeleteIntervenerValue() {
-        return "";
-    }
+        @Override
+        public String getDeleteIntervenerValue() {
+            return "";
+        }
 
-    @Override
-    public String getUpdateIntervenerValue() {
-        return "";
-    }
+        @Override
+        public String getUpdateIntervenerValue() {
+            return "";
+        }
 
-    @Override
-    public CaseRole getIntervenerSolicitorCaseRole() {
-        return null;
-    }
+        @Override
+        public CaseRole getIntervenerSolicitorCaseRole() {
+            return null;
+        }
 
-    @Override
-    public List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseData caseData) {
-        return List.of();
-    }
+        @Override
+        public List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseData caseData) {
+            return List.of();
+        }
 
-    @Override
-    public IntervenerHearingNoticeCollectionName getIntervenerHearingNoticesCollectionName() {
-        return null;
-    }
+        @Override
+        public IntervenerHearingNoticeCollectionName getIntervenerHearingNoticesCollectionName() {
+            return null;
+        }
 
-    @Override
-    public DocumentHelper.PaperNotificationRecipient getPaperNotificationRecipient() {
-        return null;
-    }
+        @Override
+        public DocumentHelper.PaperNotificationRecipient getPaperNotificationRecipient() {
+            return null;
+        }
 
-    @Override
-    public IntervenerWrapper getIntervenerWrapperFromCaseData(FinremCaseData caseData) {
-        return null;
-    }
+        @Override
+        public IntervenerWrapper getIntervenerWrapperFromCaseData(FinremCaseData caseData) {
+            return null;
+        }
 
-    @Override
-    public void removeIntervenerWrapperFromCaseData(FinremCaseData caseData) {
-        // for testing
+        @Override
+        public void removeIntervenerWrapperFromCaseData(FinremCaseData caseData) {
+            // for testing
+        }
     }
 }
