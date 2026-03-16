@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.ISSUE_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -70,7 +72,9 @@ class IssueApplicationConsentedSubmittedHandlerTest {
             .caseDetails(caseDetails).build();
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(retryExecutor).runWithRetry(any(), eq("sending correspondence"), eq(CASE_ID));
+        ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
+        verify(retryExecutor).runWithRetry(captor.capture(), eq("sending correspondence"), eq(CASE_ID));
+        verifySendCorrespondenceRun(captor, caseDetails);
         verifyNoMoreInteractions(retryExecutor);
     }
 
@@ -92,8 +96,13 @@ class IssueApplicationConsentedSubmittedHandlerTest {
             .caseDetails(caseDetails).build();
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(retryExecutor).runWithRetry(any(), eq("sending correspondence"), eq(CASE_ID));
-        verify(retryExecutor).runWithRetry(any(), eq("granting respondent solicitor"), eq(CASE_ID));
+        ArgumentCaptor<ThrowingRunnable> sendingCorrespondenceCaptor = getThrowingRunnableCaptor();
+        verify(retryExecutor).runWithRetry(sendingCorrespondenceCaptor.capture(), eq("sending correspondence"), eq(CASE_ID));
+        verifySendCorrespondenceRun(sendingCorrespondenceCaptor, caseDetails);
+
+        ArgumentCaptor<ThrowingRunnable> grantingRespondentSolicitorCaptor = getThrowingRunnableCaptor();
+        verify(retryExecutor).runWithRetry(grantingRespondentSolicitorCaptor.capture(), eq("granting respondent solicitor"), eq(CASE_ID));
+        verifyGrantRespondentSolicitorRun(grantingRespondentSolicitorCaptor, caseData);
         verifyNoMoreInteractions(retryExecutor);
     }
 
@@ -112,12 +121,12 @@ class IssueApplicationConsentedSubmittedHandlerTest {
         when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
 
         doThrow(new RuntimeException("BOOM"))
-            .when(retryExecutor).runWithRetry(any(), eq("granting respondent solicitor"), eq(CASE_ID));
+            .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
         doAnswer(invocation -> {
             ThrowingRunnable runnable = invocation.getArgument(0);
             runnable.run();
             return null;
-        }).when(retryExecutor).runWithRetry(any(), eq("sending correspondence"), eq(CASE_ID));
+        }).when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(caseDetails).build();
@@ -130,8 +139,8 @@ class IssueApplicationConsentedSubmittedHandlerTest {
             "<ul><li><h2>There was a problem granting access to respondent solicitor: testSolicitor@email.com</h2></li></ul>"
         );
 
-        verify(retryExecutor).runWithRetry(any(), eq("sending correspondence"), eq(CASE_ID));
-        verify(retryExecutor).runWithRetry(any(), eq("granting respondent solicitor"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
         verify(issueApplicationConsentCorresponder).sendCorrespondence(caseDetails, AUTH_TOKEN);
         verifyNoInteractions(assignPartiesAccessService);
         verifyNoMoreInteractions(retryExecutor);
@@ -152,12 +161,12 @@ class IssueApplicationConsentedSubmittedHandlerTest {
         when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
 
         doThrow(new RuntimeException("BOOM"))
-            .when(retryExecutor).runWithRetry(any(), eq("sending correspondence"), eq(CASE_ID));
+            .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
         doAnswer(invocation -> {
             ThrowingRunnable runnable = invocation.getArgument(0);
             runnable.run();
             return null;
-        }).when(retryExecutor).runWithRetry(any(), eq("granting respondent solicitor"), eq(CASE_ID));
+        }).when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(caseDetails).build();
@@ -170,8 +179,8 @@ class IssueApplicationConsentedSubmittedHandlerTest {
             "<ul><li><h2>There was a problem sending correspondence.</h2></li></ul>"
         );
 
-        verify(retryExecutor).runWithRetry(any(), eq("sending correspondence"), eq(CASE_ID));
-        verify(retryExecutor).runWithRetry(any(), eq("granting respondent solicitor"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
         verifyNoInteractions(issueApplicationConsentCorresponder);
         verify(assignPartiesAccessService).grantRespondentSolicitor(caseData);
         verifyNoMoreInteractions(retryExecutor);
@@ -192,9 +201,9 @@ class IssueApplicationConsentedSubmittedHandlerTest {
         when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
 
         doThrow(new RuntimeException("BOOM"))
-            .when(retryExecutor).runWithRetry(any(), eq("sending correspondence"), eq(CASE_ID));
+            .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
         doThrow(new RuntimeException("BOOM"))
-            .when(retryExecutor).runWithRetry(any(), eq("granting respondent solicitor"), eq(CASE_ID));
+            .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(caseDetails).build();
@@ -210,9 +219,23 @@ class IssueApplicationConsentedSubmittedHandlerTest {
                 + "</ul>"
         );
 
-        verify(retryExecutor).runWithRetry(any(), eq("sending correspondence"), eq(CASE_ID));
-        verify(retryExecutor).runWithRetry(any(), eq("granting respondent solicitor"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
         verifyNoInteractions(issueApplicationConsentCorresponder, assignPartiesAccessService);
         verifyNoMoreInteractions(retryExecutor);
+    }
+
+    private void verifySendCorrespondenceRun(ArgumentCaptor<ThrowingRunnable> captor, FinremCaseDetails finremCaseDetails)
+        throws Exception {
+        captor.getValue().run();
+        verify(issueApplicationConsentCorresponder).sendCorrespondence(finremCaseDetails, AUTH_TOKEN);
+        verifyNoMoreInteractions(issueApplicationConsentCorresponder);
+    }
+
+    private void verifyGrantRespondentSolicitorRun(ArgumentCaptor<ThrowingRunnable> captor, FinremCaseData finremCaseData)
+        throws Exception {
+        captor.getValue().run();
+        verify(assignPartiesAccessService).grantRespondentSolicitor(finremCaseData);
+        verifyNoMoreInteractions(assignPartiesAccessService);
     }
 }
