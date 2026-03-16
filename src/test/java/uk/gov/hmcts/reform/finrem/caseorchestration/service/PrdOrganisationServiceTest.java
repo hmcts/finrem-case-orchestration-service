@@ -113,7 +113,7 @@ class PrdOrganisationServiceTest {
                 OrganisationContactInformation::getCounty,
                 OrganisationContactInformation::getPostcode,
                 OrganisationContactInformation::getTownCity)
-                .contains(addressLine1, addressLine2, addressLine3, country, county, townCity);
+            .containsExactly(addressLine1, addressLine2, addressLine3, country, county, postCode, townCity);
 
         verify(restService).restApiGetCall(AUTH_TOKEN, TEST_URL);
         verify(prdOrganisationConfiguration).getOrganisationsUrl();
