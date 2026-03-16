@@ -157,6 +157,10 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? miniFormHighCourtTemplate : miniFormTemplate;
     }
 
+    public String getMiniFormTemplate(FinremCaseDetails finremCaseDetails) {
+        return isHighCourtSelected(finremCaseDetails) ? miniFormHighCourtTemplate : miniFormTemplate;
+    }
+
     public String getRejectedOrderTemplate(FinremCaseDetails finremCaseDetails) {
         return isHighCourtSelected(finremCaseDetails) ? rejectedOrderHighCourtTemplate : rejectedOrderTemplate;
     }
@@ -173,16 +177,8 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? manageHearingFastTrackHighCourtFormCTemplate : manageHearingFastTrackFormCTemplate;
     }
 
-    public String getFormGTemplate(CaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? formGHighCourtTemplate : formGTemplate;
-    }
-
     public String getFormGTemplate(FinremCaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? formGHighCourtTemplate : formGTemplate;
-    }
-
-    public String getContestedMiniFormTemplate(CaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? contestedMiniFormHighCourtTemplate : contestedMiniFormTemplate;
     }
 
     public String getContestedMiniFormTemplate(FinremCaseDetails caseDetails) {
@@ -221,19 +217,9 @@ public class DocumentConfiguration {
             : contestedOrderApprovedCoverLetterTemplate;
     }
 
-    public String getGeneralApplicationHearingNoticeTemplate(CaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? generalApplicationHearingNoticeHighCourtTemplate
-            : generalApplicationHearingNoticeTemplate;
-    }
-
     public String getGeneralApplicationOrderTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? generalApplicationOrderHighCourtTemplate
             : generalApplicationOrderTemplate;
-    }
-
-    public String getGeneralApplicationInterimHearingNoticeTemplate(CaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? generalApplicationInterimHearingNoticeHighCourtTemplate
-            : generalApplicationInterimHearingNoticeTemplate;
     }
 
     public String getHearingNoticeConsentedTemplate(CaseDetails caseDetails) {
