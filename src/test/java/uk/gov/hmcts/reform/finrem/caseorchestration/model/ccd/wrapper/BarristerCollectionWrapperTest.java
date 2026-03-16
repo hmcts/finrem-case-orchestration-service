@@ -58,6 +58,8 @@ class BarristerCollectionWrapperTest {
             case INTERVENER_TWO -> assertThat(result).isEqualTo(list2);
             case INTERVENER_THREE -> assertThat(result).isEqualTo(list3);
             case INTERVENER_FOUR -> assertThat(result).isEqualTo(list4);
+            default ->
+                throw new IllegalStateException("Unexpected intervener type: " + intervenerType);
         }
     }
 }

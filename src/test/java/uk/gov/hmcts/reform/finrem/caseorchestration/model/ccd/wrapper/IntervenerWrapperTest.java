@@ -15,6 +15,37 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+class IntervenerWrapperTest {
+
+    private TestIntervenerWrapper intervener;
+
+    @BeforeEach
+    void setUp() {
+        intervener = new TestIntervenerWrapper(
+            "email@test.com",
+            "Firm Ltd",
+            "REF123",
+            "John Doe",
+            "0123456789"
+        );
+    }
+
+    @Test
+    void shouldClearAllIntervenerSolicitorFields() {
+        // Act
+        intervener.clearIntervenerSolicitorFields();
+
+        // Assert
+        assertAll("intervener solicitor fields",
+            () -> assertThat(intervener.getIntervenerSolEmail()).isNull(),
+            () -> assertThat(intervener.getIntervenerSolicitorFirm()).isNull(),
+            () -> assertThat(intervener.getIntervenerSolicitorReference()).isNull(),
+            () -> assertThat(intervener.getIntervenerSolName()).isNull(),
+            () -> assertThat(intervener.getIntervenerSolPhone()).isNull()
+        );
+    }
+}
+
 class TestIntervenerWrapper extends IntervenerWrapper {
 
     public TestIntervenerWrapper(String intervenerSolEmail, String intervenerSolFirm,
@@ -91,36 +122,5 @@ class TestIntervenerWrapper extends IntervenerWrapper {
     @Override
     public void removeIntervenerWrapperFromCaseData(FinremCaseData caseData) {
         // for testing
-    }
-}
-
-class IntervenerWrapperTest {
-
-    private TestIntervenerWrapper intervener;
-
-    @BeforeEach
-    void setUp() {
-        intervener = new TestIntervenerWrapper(
-            "email@test.com",
-            "Firm Ltd",
-            "REF123",
-            "John Doe",
-            "0123456789"
-        );
-    }
-
-    @Test
-    void shouldClearAllIntervenerSolicitorFields() {
-        // Act
-        intervener.clearIntervenerSolicitorFields();
-
-        // Assert
-        assertAll("intervener solicitor fields",
-            () -> assertThat(intervener.getIntervenerSolEmail()).isNull(),
-            () -> assertThat(intervener.getIntervenerSolicitorFirm()).isNull(),
-            () -> assertThat(intervener.getIntervenerSolicitorReference()).isNull(),
-            () -> assertThat(intervener.getIntervenerSolName()).isNull(),
-            () -> assertThat(intervener.getIntervenerSolPhone()).isNull()
-        );
     }
 }

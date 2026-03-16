@@ -56,6 +56,8 @@ class NotificationPartyTest {
             case INTERVENER_TWO -> assertThat(result).isEqualTo(NotificationParty.FORMER_INTERVENER_TWO_SOLICITOR_ONLY);
             case INTERVENER_THREE -> assertThat(result).isEqualTo(NotificationParty.FORMER_INTERVENER_THREE_SOLICITOR_ONLY);
             case INTERVENER_FOUR -> assertThat(result).isEqualTo(NotificationParty.FORMER_INTERVENER_FOUR_SOLICITOR_ONLY);
+            default ->
+                throw new IllegalStateException("Unexpected intervener type: " + intervenerType);
         }
     }
 
@@ -75,6 +77,8 @@ class NotificationPartyTest {
                 .isEqualTo(NotificationParty.FORMER_INTERVENER_THREE_BARRISTER_ONLY);
             case INTERVENER_FOUR -> assertThat(result)
                 .isEqualTo(NotificationParty.FORMER_INTERVENER_FOUR_BARRISTER_ONLY);
+            default ->
+                throw new IllegalStateException("Unexpected intervener type: " + intervenerType);
         }
     }
 

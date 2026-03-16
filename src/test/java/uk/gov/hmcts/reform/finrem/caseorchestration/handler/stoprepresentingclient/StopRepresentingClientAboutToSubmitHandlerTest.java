@@ -515,7 +515,8 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
             stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
-            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(intervenerType, MATCHING_ORG_ID, FinremCaseData.builder()
+            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(intervenerType,
+                MATCHING_ORG_ID, FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
             );
             if (isApplicantRepresentative) {
@@ -538,7 +539,8 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
             stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
-            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(INTERVENER_ONE, MATCHING_ORG_ID, FinremCaseData.builder()
+            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(INTERVENER_ONE,
+                MATCHING_ORG_ID, FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .barristerCollectionWrapper(
                     BarristerCollectionWrapper.builder()
@@ -603,7 +605,8 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
             stubIsRepresentingApplicantOrRespondent(isApplicantRepresentative);
 
-            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(intervenerType, TEST_ORG2_ID, FinremCaseData.builder()
+            FinremCaseData.FinremCaseDataBuilder caseDataBuilder = appendIntervenerOrganisationPolicy(intervenerType,
+                TEST_ORG2_ID, FinremCaseData.builder()
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .barristerCollectionWrapper(intervenerBarristerCollectionWrapper(intervenerType, MATCHING_ORG_ID))
             );
@@ -885,8 +888,10 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         switch (intervenerType) {
             case INTERVENER_ONE -> builder.intervenerOne(IntervenerOne.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
             case INTERVENER_TWO -> builder.intervenerTwo(IntervenerTwo.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
-            case INTERVENER_THREE-> builder.intervenerThree(IntervenerThree.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
+            case INTERVENER_THREE -> builder.intervenerThree(IntervenerThree.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
             case INTERVENER_FOUR -> builder.intervenerFour(IntervenerFour.builder().intervenerOrganisation(organisationPolicy(orgId)).build());
+            default ->
+                throw new IllegalStateException("Unexpected intervener type: " + intervenerType);
         }
         return builder;
     }
@@ -904,7 +909,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
         };
     }
 
-    private static Function<BarristerCollectionWrapper, List<BarristerCollectionItem>> intervenerBarristerCollectionWrapperExtractor(IntervenerType intervenerType) {
+    private static Function<BarristerCollectionWrapper, List<BarristerCollectionItem>> intervenerBarristerCollectionWrapperExtractor(
+        IntervenerType intervenerType) {
+
         return switch (intervenerType) {
             case INTERVENER_ONE -> BarristerCollectionWrapper::getIntvr1Barristers;
             case INTERVENER_TWO -> BarristerCollectionWrapper::getIntvr2Barristers;
