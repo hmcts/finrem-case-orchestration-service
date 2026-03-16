@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFact
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.miniformacontested.ContestedMiniFormADetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -95,6 +96,9 @@ class OnlineFormDocumentServiceTest {
     @Captor
     private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
     @BeforeEach
     void setUp() {
         optionIdToValueTranslator = spy(new OptionIdToValueTranslator("/options/options-id-value-transform.json",
@@ -104,7 +108,7 @@ class OnlineFormDocumentServiceTest {
     }
 
     @Test
-    void generateMiniFormA() {
+    void testDeprecatedGenerateMiniFormA() {
         // Arrange
         CaseDetails caseDetailsCopy = mock(CaseDetails.class);
         when(documentHelper.deepCopy(any(CaseDetails.class), eq(CaseDetails.class))).thenReturn(caseDetailsCopy);
@@ -121,6 +125,26 @@ class OnlineFormDocumentServiceTest {
         // Act & Verify
         assertCaseDocument(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, providedCaseDetails));
         verify(genericDocumentService).generateDocument(AUTH_TOKEN, caseDetailsCopy, "TEMPLATE", "FILE_NAME");
+    }
+
+    @Test
+    void testGenerateMiniFormA() {
+        // Arrange
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
+
+        String template = "TEMPLATE";
+        when(documentConfiguration.getMiniFormTemplate(finremCaseDetails)).thenReturn(template);
+        String filename = "FILE_NAME";
+        when(documentConfiguration.getMiniFormFileName()).thenReturn(filename);
+
+        when(genericDocumentService.generateDocument(AUTH_TOKEN, caseDetails, "TEMPLATE", "FILE_NAME"))
+            .thenReturn(caseDocument());
+
+        // Act & Verify
+        assertCaseDocument(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, finremCaseDetails));
+        verify(genericDocumentService).generateDocument(AUTH_TOKEN, caseDetails, "TEMPLATE", "FILE_NAME");
     }
 
     @Test
@@ -243,6 +267,7 @@ class OnlineFormDocumentServiceTest {
         assertCaseDocument(onlineFormDocumentService
             .generateConsentedInContestedMiniFormA(caseDetails, AUTH_TOKEN));
 
+        verify(consentedApplicationHelper).isVariationOrder(caseDetails.getData());
         verify(genericDocumentService).generateDocument(AUTH_TOKEN, caseDetailsArgumentCaptor.getValue(), "TEMPLATE", "FILE_NAME");
         verifyAdditionalFields(caseDetailsArgumentCaptor.getValue().getData());
     }
@@ -444,24 +469,24 @@ class OnlineFormDocumentServiceTest {
 
     private static void verifyAdditionalFields(Map<String, Object> data) {
         //Solicitor Details
-        assertThat(data.get(CONSENTED_SOLICITOR_NAME)).isEqualTo("Solicitor");
-        assertThat(data.get(CONSENTED_SOLICITOR_FIRM)).isEqualTo("Awesome Firm");
+        assertThat(data).containsEntry(CONSENTED_SOLICITOR_NAME, "Solicitor");
+        assertThat(data).containsEntry(CONSENTED_SOLICITOR_FIRM, "Awesome Firm");
 
         assertThat(data).containsKey(CONSENTED_SOLICITOR_ADDRESS);
         Map<String, Object> addressObject = convertToMap(data.get(CONSENTED_SOLICITOR_ADDRESS));
 
-        assertThat(addressObject.get("County").toString()).isEqualTo("County");
-        assertThat(addressObject.get("Country").toString()).isEqualTo("UK");
-        assertThat(addressObject.get("PostCode").toString()).isEqualTo("SW1A 1AA");
-        assertThat(addressObject.get("PostTown").toString()).isEqualTo("London");
-        assertThat(addressObject.get("AddressLine1").toString()).isEqualTo("Buckingham Palace");
-        assertThat(addressObject.get("AddressLine2").toString()).isEqualTo("null");
+        assertThat(addressObject.get("County")).hasToString("County");
+        assertThat(addressObject.get("Country")).hasToString("UK");
+        assertThat(addressObject.get("PostCode")).hasToString("SW1A 1AA");
+        assertThat(addressObject.get("PostTown")).hasToString("London");
+        assertThat(addressObject.get("AddressLine1")).hasToString("Buckingham Palace");
+        assertThat(addressObject.get("AddressLine2")).hasToString("null");
         assertNull(addressObject.get("AddressLine3"));
 
         //Respondent Details
-        assertThat(data.get(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME)).isEqualTo("john");
-        assertThat(data.get(CONSENTED_RESPONDENT_LAST_NAME)).isEqualTo("smith");
-        assertThat(data.get(CONSENTED_RESPONDENT_REPRESENTED)).isEqualTo("No");
+        assertThat(data).containsEntry(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "john");
+        assertThat(data).containsEntry(CONSENTED_RESPONDENT_LAST_NAME, "smith");
+        assertThat(data).containsEntry(CONSENTED_RESPONDENT_REPRESENTED, "No");
 
         //Checklist
         assertThat(data).containsKey(CONSENTED_NATURE_OF_APPLICATION);
@@ -469,21 +494,21 @@ class OnlineFormDocumentServiceTest {
             .extracting(Object::toString)
             .containsExactly("Periodical Payment Order", "Lump Sum Order", "Property Adjustment Order");
 
-        assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3A)).isEqualTo("test");
-        assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3B)).isEqualTo("test");
+        assertThat(data).containsEntry(CONSENTED_NATURE_OF_APPLICATION_3A, "test");
+        assertThat(data).containsEntry(CONSENTED_NATURE_OF_APPLICATION_3B, "test");
 
         //Order For Children Reasons
-        assertThat(data.get(CONSENTED_ORDER_FOR_CHILDREN)).isEqualTo("Yes");
-        assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_5)).isEqualTo("No");
+        assertThat(data).containsEntry(CONSENTED_ORDER_FOR_CHILDREN, "Yes");
+        assertThat(data).containsEntry(CONSENTED_NATURE_OF_APPLICATION_5, "No");
 
         assertThat(data).containsKey(CONSENTED_NATURE_OF_APPLICATION_6);
         assertThat((List<?>) data.get(CONSENTED_NATURE_OF_APPLICATION_6))
             .extracting(Object::toString)
             .containsExactly("item1", "item2");
 
-        assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_7)).isEqualTo("test");
+        assertThat(data).containsEntry(CONSENTED_NATURE_OF_APPLICATION_7, "test");
 
-        assertThat(data.get(CONSENTED_AUTHORISATION_FIRM)).isEqualTo("Authorised Firm");
+        assertThat(data).containsEntry(CONSENTED_AUTHORISATION_FIRM, "Authorised Firm");
     }
 
     protected static Map<String, Object> convertToMap(Object object) {
