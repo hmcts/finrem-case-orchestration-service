@@ -134,7 +134,9 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
                     .inputManageCaseDocumentCollection(List.of(
                         UploadCaseDocumentCollection.builder()
                             .uploadCaseDocument(UploadCaseDocument.builder()
-                                .caseDocumentParty(caseDocumentParty).build())
+                                .caseDocumentParty(caseDocumentParty)
+                                .caseDocumentType(TRIAL_BUNDLE)
+                                .build())
                             .build()
                     ))
                     .build())
@@ -168,11 +170,15 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
                     .inputManageCaseDocumentCollection(List.of(
                         UploadCaseDocumentCollection.builder()
                             .uploadCaseDocument(UploadCaseDocument.builder()
-                                .caseDocumentParty(INTERVENER_ONE).build())
+                                .caseDocumentParty(INTERVENER_ONE)
+                                .caseDocumentType(TRIAL_BUNDLE)
+                                .build())
                             .build(),
                         UploadCaseDocumentCollection.builder()
                             .uploadCaseDocument(UploadCaseDocument.builder()
-                                .caseDocumentParty(INTERVENER_THREE).build())
+                                .caseDocumentParty(INTERVENER_THREE)
+                                .caseDocumentType(TRIAL_BUNDLE)
+                                .build())
                             .build()
                     ))
                     .build())
@@ -205,7 +211,9 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
                 .inputManageCaseDocumentCollection(List.of(
                     UploadCaseDocumentCollection.builder()
                         .uploadCaseDocument(UploadCaseDocument.builder()
-                            .caseDocumentParty(caseDocumentParty).build())
+                            .caseDocumentParty(caseDocumentParty)
+                            .caseDocumentType(TRIAL_BUNDLE)
+                            .build())
                         .build()
                 ))
                 .build())
@@ -467,5 +475,66 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         assertThat(uploadCaseDocumentTwo.getCaseDocumentParty()).isEqualTo(caseDocumentPartyTwo);
         assertThat(uploadCaseDocumentTwo.getCaseDocumentConfidentiality()).isEqualTo(YesOrNo.YES);
         assertThat(uploadCaseDocumentTwo.getCaseDocumentFdr()).isEqualTo(YesOrNo.NO);
+    }
+
+    @Test
+    void givenAmendAction_whenHandle_thenInputManageCaseDocumentCollectionReplacesManageCaseDocumentCollection() {
+
+        UploadCaseDocumentCollection inputDocument = UploadCaseDocumentCollection.builder()
+            .uploadCaseDocument(UploadCaseDocument.builder()
+                .caseDocumentType(TRIAL_BUNDLE)
+                .caseDocumentParty(CASE)
+                .build())
+            .build();
+
+        List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection = List.of(inputDocument);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
+                .manageCaseDocumentsActionSelection(ManageCaseDocumentsAction.AMEND)
+                .inputManageCaseDocumentCollection(inputManageCaseDocumentCollection)
+                .manageCaseDocumentCollection(new ArrayList<>())
+                .build())
+            .build();
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
+        assertThat(response.getData().getManageCaseDocumentsWrapper().getManageCaseDocumentCollection())
+            .isEqualTo(inputManageCaseDocumentCollection);
+    }
+
+    @Test
+    void givenAmendAction_whenHandle_thenDocumentHandlersInvokedWithInputDocumentsAndAmendFlag() {
+        UploadCaseDocumentCollection inputDocumentOne = UploadCaseDocumentCollection.builder()
+            .uploadCaseDocument(UploadCaseDocument.builder()
+                .caseDocumentType(TRIAL_BUNDLE)
+                .caseDocumentParty(CASE)
+                .build())
+            .build();
+        UploadCaseDocumentCollection inputDocumentTwo = UploadCaseDocumentCollection.builder()
+            .uploadCaseDocument(UploadCaseDocument.builder()
+                .caseDocumentType(ES1)
+                .caseDocumentParty(CASE)
+                .build())
+            .build();
+
+        List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection =
+            List.of(inputDocumentOne, inputDocumentTwo);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
+                .manageCaseDocumentsActionSelection(ManageCaseDocumentsAction.AMEND)
+                .inputManageCaseDocumentCollection(inputManageCaseDocumentCollection)
+                .build())
+            .build();
+
+        underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
+        for (DocumentHandler documentHandler : allDocumentHandlers) {
+            verify(documentHandler).replaceManagedDocumentsInCollectionType(
+                caseData,
+                inputManageCaseDocumentCollection,
+                true
+            );
+        }
     }
 }
