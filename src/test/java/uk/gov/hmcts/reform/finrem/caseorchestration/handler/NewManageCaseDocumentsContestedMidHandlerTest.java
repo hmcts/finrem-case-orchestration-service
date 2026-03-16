@@ -11,6 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCaseDocumentsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -47,5 +50,26 @@ class NewManageCaseDocumentsContestedMidHandlerTest {
             .containsOnly(UploadCaseDocumentCollection.builder()
                 .uploadCaseDocument(UploadCaseDocument.builder().build())
                 .build());
+    }
+
+    @Test
+    void givenAmendSelected_whenHandle_thenPopulateEntry() {
+        List<UploadCaseDocumentCollection> documents = List.of(
+            UploadCaseDocumentCollection.builder().build()
+        );
+        FinremCaseData caseData = FinremCaseData.builder()
+            .uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder()
+                .uploadCaseDocument(documents)
+                .build())
+            .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
+                .manageCaseDocumentsActionSelection(ManageCaseDocumentsAction.AMEND)
+                .build())
+            .build();
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(NEW_MANAGE_CASE_DOCUMENTS,
+            FinremCaseDetails.builder().data(caseData));
+
+        FinremCaseData responseData = underTest.handle(request, AUTH_TOKEN).getData();
+        assertThat(responseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
+            .isEqualTo(documents);
     }
 }
