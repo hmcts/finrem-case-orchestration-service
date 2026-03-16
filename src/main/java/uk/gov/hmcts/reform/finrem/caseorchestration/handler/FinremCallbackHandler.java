@@ -34,20 +34,6 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
                                                                                        String userAuthorisation);
 
-    private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
-        FinremCaseDetails finremCaseDetailsBefore = null;
-        if (callbackRequest.getCaseDetailsBefore() != null) {
-            finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
-        }
-        finremCaseDetails.getData().setCcdCaseId(finremCaseDetails.getCaseIdAsString());
-        return FinremCallbackRequest.builder()
-            .caseDetails(finremCaseDetails)
-            .caseDetailsBefore(finremCaseDetailsBefore)
-            .eventType(EventType.getEventType(callbackRequest.getEventId()))
-            .build();
-    }
-
     protected void validateCaseData(FinremCallbackRequest callbackRequest) {
         if (callbackRequest == null
             || callbackRequest.getCaseDetails() == null
@@ -99,20 +85,6 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return response.toBuilder().data(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedCaseDetails.getData())).build();
     }
 
-    /**
-     * Returns the list of classes that contain fields annotated with {@link TemporaryField}
-     * and should have those temporary fields cleared during sanitisation.
-     *
-     * <p><strong>Developer note:</strong> If you introduce a new class that uses
-     * {@code @TemporaryField}, you must add it to this list so that its temporary
-     * fields are removed correctly.</p>
-     *
-     * @return a list of classes containing {@code @TemporaryField}-annotated fields
-     */
-    private static List<Class<?>> getClassesWithTemporaryFieldAnnotation() {
-        return List.of(StopRepresentationWrapper.class);
-    }
-
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submittedResponse() {
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().build();
     }
@@ -159,5 +131,33 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
 
         body.append("</ul>");
         return body.toString();
+    }
+
+    private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
+        FinremCaseDetails finremCaseDetailsBefore = null;
+        if (callbackRequest.getCaseDetailsBefore() != null) {
+            finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
+        }
+        finremCaseDetails.getData().setCcdCaseId(finremCaseDetails.getCaseIdAsString());
+        return FinremCallbackRequest.builder()
+            .caseDetails(finremCaseDetails)
+            .caseDetailsBefore(finremCaseDetailsBefore)
+            .eventType(EventType.getEventType(callbackRequest.getEventId()))
+            .build();
+    }
+
+    /**
+     * Returns the list of classes that contain fields annotated with {@link TemporaryField}
+     * and should have those temporary fields cleared during sanitisation.
+     *
+     * <p><strong>Developer note:</strong> If you introduce a new class that uses
+     * {@code @TemporaryField}, you must add it to this list so that its temporary
+     * fields are removed correctly.</p>
+     *
+     * @return a list of classes containing {@code @TemporaryField}-annotated fields
+     */
+    private static List<Class<?>> getClassesWithTemporaryFieldAnnotation() {
+        return List.of(StopRepresentationWrapper.class);
     }
 }
