@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogge
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -26,9 +25,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -109,20 +110,14 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         litigantRevocationOptional.ifPresent(litigantRevocation -> {
 
             if (litigantRevocation.wasRevoked()) {
+                // Call to internal service (coreCaseDataApi) to update the case data to clear ChangeOrganisationRequestField
                 retryExecutor.runWithRetrySuppressException(
                     () -> stopRepresentingClientService.performCleanUpAfterNocWorkflow(info),
                     "cleaning up after noc workflow",
                     info.getCaseIdInString());
             }
 
-            ret.addAll(
-                retryExecutor.supplyWithRetrySuppressException(
-                    () -> stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(litigantRevocation, info),
-                    "preparing litigant notifications",
-                    info.getCaseIdInString()
-                ).orElse(List.of())
-            );
-
+            ret.addAll(stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(litigantRevocation, info));
             ret.addAll(
                 retryExecutor.supplyWithRetrySuppressException(
                     () -> stopRepresentingClientService.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info),
@@ -149,22 +144,25 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeBarristers(StopRepresentingClientInfo info) {
-        List<SendCorrespondenceEventEnvelop> ret = new ArrayList<>();
-
-        for (BarristerParty party : List.of(
-            BarristerParty.APPLICANT, BarristerParty.RESPONDENT,
-            BarristerParty.INTERVENER1, BarristerParty.INTERVENER2, BarristerParty.INTERVENER3, BarristerParty.INTERVENER4
-        )) {
-            BarristerChange change = stopRepresentingClientService.getToBeRevokedBarristers(info, party);
-            if (change != null && !CollectionUtils.isEmpty(change.getRemoved())) {
+        return Stream.of(
+                BarristerParty.APPLICANT,
+                BarristerParty.RESPONDENT,
+                BarristerParty.INTERVENER1,
+                BarristerParty.INTERVENER2,
+                BarristerParty.INTERVENER3,
+                BarristerParty.INTERVENER4
+            )
+            .map(party -> Map.entry(party, stopRepresentingClientService.getToBeRevokedBarristers(info, party)))
+            .filter(entry -> entry.getValue() != null && !CollectionUtils.isEmpty(entry.getValue().getRemoved()))
+            .flatMap(entry ->
                 retryExecutor.supplyWithRetrySuppressException(
-                    () -> stopRepresentingClientService.revokeBarristers(info, change),
-                    "revoking " + party.name().toLowerCase() + " barrister access",
+                    () -> stopRepresentingClientService.revokeBarristers(info, entry.getValue()),
+                    "revoking " + entry.getKey().name().toLowerCase() + " barrister access",
                     info.getCaseIdInString()
-                ).ifPresent(ret::addAll);
-            }
-        }
-        return ret;
+                ).stream()
+            )
+            .flatMap(List::stream)
+            .toList();
     }
 
     private void revokePartiesAccessAndNotifyParties(StopRepresentingClientInfo info) {
