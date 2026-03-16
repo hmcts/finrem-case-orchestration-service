@@ -62,7 +62,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      *
      * @param response the callback response containing case data to clean
      * @return a response with temporary fields removed, or the original response if
-     * clearing is not needed
+     *         clearing is not needed
      */
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> removeTemporaryFieldsAfterHandled(
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response) {
