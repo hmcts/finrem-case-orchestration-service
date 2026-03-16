@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
@@ -326,7 +325,7 @@ class StopRepresentingClientServiceTest {
         void givenIntvOneBarristerRepresented_whenIntvOneSolOrganisationIsTheSame_thenReturnTrue() {
             RepresentativeInContext representativeInContext = mock(RepresentativeInContext.class);
             when(representativeInContext.userId()).thenReturn(TEST_USER_ID);
-            when(representativeInContext.intervenerType()).thenReturn(IntervenerType.INTERVENER_TWO);
+            when(representativeInContext.intervenerType()).thenReturn(INTERVENER_ONE);
             when(representativeInContext.isIntervenerBarrister()).thenReturn(true);
 
             FinremCaseData caseData = FinremCaseData.builder()
