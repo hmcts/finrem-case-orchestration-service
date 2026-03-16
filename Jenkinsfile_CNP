@@ -4,6 +4,20 @@ import uk.gov.hmcts.contino.GithubAPI
 
 @Library("Infrastructure")
 
+def githubApi = new GithubAPI(this)
+
+if (env.BRANCH_NAME?.startsWith("PR-")) {
+
+    def labels = githubApi.getLabelsbyPattern(env.BRANCH_NAME, "DO_NOT_BUILD")
+    println "DEBUG: Labels matching DO_NOT_BUILD = ${labels}"
+
+    if (labels && !labels.isEmpty()) {
+        println "DEBUG: DO_NOT_BUILD label detected. Aborting pipeline."
+        currentBuild.result = 'ABORTED'
+        error("Build aborted because PR contains DO_NOT_BUILD label")
+    }
+}
+
 def type = "java"
 def product = "finrem"
 def component = "cos"

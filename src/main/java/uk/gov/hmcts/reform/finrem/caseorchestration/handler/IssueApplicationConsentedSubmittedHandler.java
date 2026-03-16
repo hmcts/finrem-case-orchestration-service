@@ -37,8 +37,10 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
 
         issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
+
+        return response(caseData);
     }
 }
