@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.task.ScheduledTaskRu
 @EnableRetry
 @EnableScheduling
 @RequiredArgsConstructor
-public class CaseOrchestrationApplication  implements CommandLineRunner {
+public class CaseOrchestrationApplication implements CommandLineRunner {
 
     public static final String TASK_NAME = "TASK_NAME";
 
