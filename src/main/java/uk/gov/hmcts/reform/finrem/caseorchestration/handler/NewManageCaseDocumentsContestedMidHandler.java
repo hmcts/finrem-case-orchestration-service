@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction.ADD_NEW;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction.AMEND;
 
 @Slf4j
 @Service
@@ -43,6 +44,11 @@ public class NewManageCaseDocumentsContestedMidHandler extends FinremCallbackHan
                     .uploadCaseDocument(UploadCaseDocument.builder().build())
                     .build())
             );
+        } else if (AMEND.equals(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentsActionSelection())) {
+            caseData.getManageCaseDocumentsWrapper()
+                .setInputManageCaseDocumentCollection(
+                    caseData.getUploadCaseDocumentWrapper().getAllManageableCollections()
+                );
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
