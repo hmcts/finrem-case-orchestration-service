@@ -4,9 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -64,7 +66,9 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
             .caseDetails(caseDetails).build();
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
+        ArgumentCaptor<ThrowingRunnable> captor = TestSetUpUtils.getThrowingRunnableCaptor();
+        verify(retryExecutor).runWithRetry(captor.capture(), eq("setting supplementary data"), eq(CASE_ID));
+        verifySettingSupplementaryDataRun(captor, callbackRequest);
         verifyNoMoreInteractions(retryExecutor);
     }
 
@@ -81,8 +85,14 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
             .caseDetails(caseDetails).build();
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
-        verify(retryExecutor).runWithRetry(any(), eq("granting applicant solicitor"), eq(CASE_ID));
+        ArgumentCaptor<ThrowingRunnable> settingSupplementaryDataCaptor = TestSetUpUtils.getThrowingRunnableCaptor();
+        verify(retryExecutor).runWithRetry(settingSupplementaryDataCaptor.capture(), eq("setting supplementary data"), eq(CASE_ID));
+        verifySettingSupplementaryDataRun(settingSupplementaryDataCaptor, callbackRequest);
+
+        ArgumentCaptor<ThrowingRunnable> grantingApplicantSolicitorCaptor = TestSetUpUtils.getThrowingRunnableCaptor();
+        verify(retryExecutor).runWithRetry(grantingApplicantSolicitorCaptor.capture(), eq("granting applicant solicitor"), eq(CASE_ID));
+        verifyGrantingApplicantSolicitorRun(grantingApplicantSolicitorCaptor, caseData);
+
         verifyNoMoreInteractions(retryExecutor);
     }
 
@@ -96,12 +106,12 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
         when(caseDetails.getData()).thenReturn(caseData);
 
         doThrow(new RuntimeException("BOOM"))
-            .when(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
+            .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("setting supplementary data"), eq(CASE_ID));
         doAnswer(invocation -> {
             ThrowingRunnable runnable = invocation.getArgument(0);
             runnable.run();
             return null;
-        }).when(retryExecutor).runWithRetry(any(), eq("granting applicant solicitor"), eq(CASE_ID));
+        }).when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting applicant solicitor"), eq(CASE_ID));
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(caseDetails).build();
@@ -114,8 +124,8 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
             "<ul><li><h2>There was a problem setting supplementary data.</h2></li></ul>"
         );
 
-        verify(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
-        verify(retryExecutor).runWithRetry(any(), eq("granting applicant solicitor"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("setting supplementary data"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting applicant solicitor"), eq(CASE_ID));
         verifyNoMoreInteractions(retryExecutor);
 
         verifyNoInteractions(createCaseService);
@@ -132,12 +142,12 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
         when(caseDetails.getData()).thenReturn(caseData);
 
         doThrow(new RuntimeException("BOOM"))
-            .when(retryExecutor).runWithRetry(any(), eq("granting applicant solicitor"), eq(CASE_ID));
+            .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting applicant solicitor"), eq(CASE_ID));
         doAnswer(invocation -> {
             ThrowingRunnable runnable = invocation.getArgument(0);
             runnable.run();
             return null;
-        }).when(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
+        }).when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("setting supplementary data"), eq(CASE_ID));
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(caseDetails).build();
@@ -150,11 +160,25 @@ class PaperCaseCreateContestedSubmittedHandlerTest {
             "<ul><li><h2>There was a problem granting access to applicant solicitor: %s</h2></li></ul>".formatted(TEST_SOLICITOR_EMAIL)
         );
 
-        verify(retryExecutor).runWithRetry(any(), eq("setting supplementary data"), eq(CASE_ID));
-        verify(retryExecutor).runWithRetry(any(), eq("granting applicant solicitor"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("setting supplementary data"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting applicant solicitor"), eq(CASE_ID));
         verifyNoMoreInteractions(retryExecutor);
 
         verify(createCaseService).setSupplementaryData(any(FinremCallbackRequest.class), eq(AUTH_TOKEN));
         verifyNoInteractions(assignPartiesAccessService);
+    }
+
+    private void verifySettingSupplementaryDataRun(ArgumentCaptor<ThrowingRunnable> captor, FinremCallbackRequest request)
+        throws Exception {
+        captor.getValue().run();
+        verify(createCaseService).setSupplementaryData(request, AUTH_TOKEN);
+        verifyNoMoreInteractions(createCaseService);
+    }
+
+    private void verifyGrantingApplicantSolicitorRun(ArgumentCaptor<ThrowingRunnable> captor, FinremCaseData finremCaseData)
+        throws Exception {
+        captor.getValue().run();
+        verify(assignPartiesAccessService).grantApplicantSolicitor(finremCaseData);
+        verifyNoMoreInteractions(assignPartiesAccessService);
     }
 }
