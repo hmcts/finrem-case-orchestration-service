@@ -87,7 +87,7 @@ class ConsentOrderInContestedAboutToSubmitHandlerTest {
 
         when(finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetails())).thenReturn(caseDetails);
         when(caseDataService.isConsentedInContestedCase(finremCallbackRequest.getCaseDetails())).thenReturn(false);
-        when(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, caseDetails)).thenReturn(expectedMiniFormA);
+        when(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, finremCallbackRequest.getCaseDetails())).thenReturn(expectedMiniFormA);
         when(defaultsConfiguration.getAssignedToJudgeDefault()).thenReturn("new_application@mailinator.com");
 
         // Act
@@ -99,7 +99,7 @@ class ConsentOrderInContestedAboutToSubmitHandlerTest {
             .extracting(FinremCaseData::getMiniFormA, FinremCaseData::getAssignedToJudge)
             .containsExactly(expectedMiniFormA, "new_application@mailinator.com");
         assertThat(logs.getInfos()).contains(format("Defaulting AssignedToJudge fields for Case ID: %s", CASE_ID));
-        verify(onlineFormDocumentService).generateMiniFormA(AUTH_TOKEN, caseDetails);
+        verify(onlineFormDocumentService).generateMiniFormA(AUTH_TOKEN, finremCallbackRequest.getCaseDetails());
         verify(onlineFormDocumentService, never()).generateConsentedInContestedMiniFormA(caseDetails, AUTH_TOKEN);
     }
 
@@ -123,7 +123,7 @@ class ConsentOrderInContestedAboutToSubmitHandlerTest {
         assertThat(actualCaseData.getConsentOrderWrapper())
             .extracting(ConsentOrderWrapper::getConsentMiniFormA)
             .isEqualTo(expectedConsentedInContestedMiniFormA);
-        verify(onlineFormDocumentService, never()).generateMiniFormA(AUTH_TOKEN, caseDetails);
+        verify(onlineFormDocumentService, never()).generateMiniFormA(AUTH_TOKEN, finremCallbackRequest.getCaseDetails());
         verify(onlineFormDocumentService).generateConsentedInContestedMiniFormA(caseDetails, AUTH_TOKEN);
     }
 
