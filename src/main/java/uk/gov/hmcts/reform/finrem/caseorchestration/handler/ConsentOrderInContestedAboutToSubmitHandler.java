@@ -61,7 +61,7 @@ public class ConsentOrderInContestedAboutToSubmitHandler extends FinremCallbackH
 
         // Logic moving from MiniFormAController.java
         if (!caseDataService.isConsentedInContestedCase(finremCaseDetails)) {
-            CaseDocument miniFormA = onlineFormDocumentService.generateMiniFormA(userAuthorisation, caseDetails);
+            CaseDocument miniFormA = onlineFormDocumentService.generateMiniFormA(userAuthorisation, finremCaseDetails);
             caseData.setMiniFormA(miniFormA);
 
             log.info("Defaulting AssignedToJudge fields for Case ID: {}", caseId);
