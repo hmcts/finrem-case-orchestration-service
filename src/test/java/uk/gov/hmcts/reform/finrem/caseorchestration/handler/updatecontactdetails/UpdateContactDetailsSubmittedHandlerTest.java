@@ -11,15 +11,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,15 +65,15 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 .applicantRepresented(beforeApplicantRepresented)
                 .build()).build();
 
-        FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().caseType(CaseType.CONTESTED)
-            .data(caseDataBefore).build();
-
         FinremCallbackRequest callbackRequest =
             FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CONTACT_DETAILS, caseData, caseDataBefore);
-        List<String> errors = new ArrayList<>();
 
-        final GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(solicitorAccessService).checkAndAssignSolicitorAccess(caseData, caseDetailsBefore.getData(), errors);
-        assertThat(response.getErrors()).isEmpty();
+        try {
+            final GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+            verify(solicitorAccessService).sendNoticeOfChangeNotificationsCaseworker(callbackRequest, AUTH_TOKEN);
+            assertThat(response.getErrors()).isEmpty();
+        } catch (Exception e) {
+            throw new RuntimeException("Test failed due to exception: " + e.getMessage(), e);
+        }
     }
 }

@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,22 +26,19 @@ public class SolicitorAccessService {
 
     /**
      * This method checks if there has been a change in the applicant or respondent solicitor details and updates their access accordingly.
-     * If there is an issue with updating access (e.g. user not found in Organisation API), it adds an error message to the provided list.
+     * If there is an issue with updating access (e.g. user not found in Organisation API), it rethrows the exception with a descriptive message.
      *
      * @param caseData the current case data
      * @param caseDataBefore the case data before the update
-     * @param errors a list to collect any error messages that occur during access update
      */
     public void checkAndAssignSolicitorAccess(FinremCaseData caseData,
-                                              FinremCaseData caseDataBefore,
-                                              List<String> errors) {
-
+                                              FinremCaseData caseDataBefore) {
         // Applicant solicitor access update
         if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
             try {
                 updateApplicantSolicitor(caseData, caseDataBefore);
             } catch (UserNotFoundInOrganisationApiException e) {
-                errors.add("Unable to update Applicant Solicitor access for Case");
+                throw new RuntimeException("Unable to update Applicant Solicitor access for Case", e);
             }
         }
 
@@ -51,7 +47,7 @@ public class SolicitorAccessService {
             try {
                 updateRespondentSolicitor(caseData, caseDataBefore);
             } catch (UserNotFoundInOrganisationApiException e) {
-                errors.add("Unable to update Respondent Solicitor access for Case");
+                throw new RuntimeException("Unable to update Respondent Solicitor access for Case", e);
             }
         }
     }
@@ -118,10 +114,10 @@ public class SolicitorAccessService {
         String currentEmail = currentContact.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse("");
         String beforeEmail = beforeContact.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse("");
         Organisation currentOrg = Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
-            .map(policy -> policy.getOrganisation())
+            .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy::getOrganisation)
             .orElse(null);
         Organisation beforeOrg = Optional.ofNullable(caseDataBefore.getApplicantOrganisationPolicy())
-            .map(policy -> policy.getOrganisation())
+            .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy::getOrganisation)
             .orElse(null);
         boolean isSameOrganisation = Organisation.isSameOrganisation(currentOrg, beforeOrg);
         return !currentEmail.equals(beforeEmail) || !isSameOrganisation;
@@ -133,10 +129,10 @@ public class SolicitorAccessService {
         String currentEmail = currentContact.map(ContactDetailsWrapper::getRespondentSolicitorEmail).orElse("");
         String beforeEmail = beforeContact.map(ContactDetailsWrapper::getRespondentSolicitorEmail).orElse("");
         Organisation currentOrg = Optional.ofNullable(caseData.getRespondentOrganisationPolicy())
-            .map(policy -> policy.getOrganisation())
+            .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy::getOrganisation)
             .orElse(null);
         Organisation beforeOrg = Optional.ofNullable(caseDataBefore.getRespondentOrganisationPolicy())
-            .map(policy -> policy.getOrganisation())
+            .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy::getOrganisation)
             .orElse(null);
         boolean isSameOrganisation = Organisation.isSameOrganisation(currentOrg, beforeOrg);
         return !currentEmail.equals(beforeEmail) || !isSameOrganisation;

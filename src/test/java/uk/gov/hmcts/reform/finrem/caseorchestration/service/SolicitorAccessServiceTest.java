@@ -20,8 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,13 +57,12 @@ class SolicitorAccessServiceTest {
     @MethodSource("applicantSolicitorScenarios")
     void applicantSolicitorAccessIsGrantedOrRevoked(String currentEmail, String currentOrgId, String previousEmail,
                                                     String previousOrgId, boolean shouldGrantRevoke) {
-        List<String> errors = new ArrayList<>();
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequestApplicantSolicitor(currentEmail, currentOrgId,
             previousEmail, previousOrgId);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
 
         if (shouldGrantRevoke) {
             verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
@@ -88,13 +85,12 @@ class SolicitorAccessServiceTest {
     @MethodSource("respondentSolicitorScenarios")
     void respondentSolicitorAccessIsGrantedOrRevoked(String currentEmail, String currentOrgId, String previousEmail,
                                                      String previousOrgId, boolean shouldGrantRevoke) {
-        List<String> errors = new ArrayList<>();
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequestRespondentSolicitor(currentEmail,
             currentOrgId, previousEmail, previousOrgId);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
 
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
 
         if (shouldGrantRevoke) {
             verify(assignPartiesAccessService).grantRespondentSolicitor(caseData);
@@ -108,7 +104,6 @@ class SolicitorAccessServiceTest {
     @SneakyThrows
     @Test
     void applicantSolicitorAccessIsGrantedOnlyWhenApplicantBecomesRepresented() {
-        List<String> errors = new ArrayList<>();
         // previous applicant was not represented, now is represented
         ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
             .applicantRepresented(YesOrNo.YES)
@@ -130,7 +125,7 @@ class SolicitorAccessServiceTest {
             .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
                 .organisationID(null).build()).build())
             .build();
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
         verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
         verify(assignPartiesAccessService, never()).revokeApplicantSolicitor(caseDataBefore);
     }
@@ -138,7 +133,6 @@ class SolicitorAccessServiceTest {
     @SneakyThrows
     @Test
     void applicantSolicitorAccessIsRevokedOnlyWhenApplicantNoLongerRepresented() {
-        List<String> errors = new ArrayList<>();
         // previous applicant was represented, now is not represented
         ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
             .applicantRepresented(YesOrNo.NO)
@@ -160,7 +154,7 @@ class SolicitorAccessServiceTest {
             .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
                 .organisationID("org1").build()).build())
             .build();
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
         verify(assignPartiesAccessService, never()).grantApplicantSolicitor(caseData);
         verify(assignPartiesAccessService).revokeApplicantSolicitor(caseDataBefore);
     }
@@ -168,7 +162,6 @@ class SolicitorAccessServiceTest {
     @SneakyThrows
     @Test
     void respondentSolicitorAccessIsGrantedOnlyWhenRespondentBecomesRepresented() {
-        List<String> errors = new ArrayList<>();
         // previous respondent was not represented, now is represented
         ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
             .applicantRepresented(YesOrNo.NO)
@@ -190,7 +183,7 @@ class SolicitorAccessServiceTest {
             .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
                 .organisationID(null).build()).build())
             .build();
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
         verify(assignPartiesAccessService).grantRespondentSolicitor(caseData);
         verify(assignPartiesAccessService, never()).revokeRespondentSolicitor(caseDataBefore);
     }
@@ -198,7 +191,6 @@ class SolicitorAccessServiceTest {
     @SneakyThrows
     @Test
     void respondentSolicitorAccessIsRevokedOnlyWhenRespondentNoLongerRepresented() {
-        List<String> errors = new ArrayList<>();
         // previous respondent was represented, now is not represented
         ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
             .applicantRepresented(YesOrNo.NO)
@@ -220,7 +212,7 @@ class SolicitorAccessServiceTest {
             .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
                 .organisationID("org1").build()).build())
             .build();
-        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors);
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
         verify(assignPartiesAccessService, never()).grantRespondentSolicitor(caseData);
         verify(assignPartiesAccessService).revokeRespondentSolicitor(caseDataBefore);
     }

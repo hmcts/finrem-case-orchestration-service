@@ -14,19 +14,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
-
-import java.util.ArrayList;
-import java.util.List;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 @Slf4j
 @Service
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
     private final SolicitorAccessService solicitorAccessService;
+    private final RetryExecutor retryExecutor;
 
     public UpdateContactDetailsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                SolicitorAccessService solicitorAccessService) {
+                                                SolicitorAccessService solicitorAccessService, RetryExecutor retryExecutor) {
         super(finremCaseDetailsMapper);
         this.solicitorAccessService = solicitorAccessService;
+        this.retryExecutor = retryExecutor;
     }
 
     @Override
@@ -60,18 +60,15 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         caseDetailsBefore.getData().setCcdCaseId(caseDetailsBefore.getCaseIdAsString());
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
-        List<String> errors = new ArrayList<>();
 
         try {
-            executeWithRetry(log,
-                () -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors),
-                callbackRequest.getCaseDetails().getCaseIdAsString(),
+            retryExecutor.runWithRetry(() -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore),
                 "Update Contact Details - Case Solicitor Change",
-                3
+                callbackRequest.getCaseDetails().getCaseIdAsString()
             );
             return null;
         } catch (Exception ex) {
-            return errors.getFirst();
+            return "There was a problem setting supplementary data.";
         }
     }
 
