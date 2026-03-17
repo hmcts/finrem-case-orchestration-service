@@ -108,7 +108,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
         }
         finremCaseDetails.getData().setCcdCaseId(finremCaseDetails.getCaseIdAsString());
-
+      
         return FinremCallbackRequest.builder()
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
