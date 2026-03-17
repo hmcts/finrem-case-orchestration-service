@@ -517,9 +517,7 @@ class ContactDetailsValidatorTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    void givenRespondentRepresentedInContested_whenEmailIsBlank_thenErrorPopulated(String respondentSolicitorEmail) {
-        ValidatePartiesService validatePartiesService = mock(ValidatePartiesService.class);
-
+    void givenRespondentRepresentedInContested_whenEmailIsBlank_thenNoErrorPopulated(String respondentSolicitorEmail) {
         FinremCaseData caseData = FinremCaseData.builder()
             .respondentOrganisationPolicy(organisationPolicy(TEST_ORG_ID))
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
@@ -528,10 +526,11 @@ class ContactDetailsValidatorTest {
                 .build())
             .build();
 
-        List<String> errors = ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService);
-
-        assertThat(errors).isEmpty();
+        ValidatePartiesService validatePartiesService = mock(ValidatePartiesService.class);
+        assertThat(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService)).isEmpty();
         verifyNoMoreInteractions(validatePartiesService);
+
+        assertThat(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, null)).isEmpty();
     }
 
     @Test
