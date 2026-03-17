@@ -38,4 +38,3 @@ public class ValidatePartiesService {
             .orElse(false);
     }
 }
-
