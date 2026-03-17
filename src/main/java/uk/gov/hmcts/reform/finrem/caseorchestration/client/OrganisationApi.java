@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationUser;
@@ -32,9 +33,10 @@ public interface OrganisationApi {
         @RequestHeader("UserEmail") final String email
     );
 
-    @GetMapping("/refdata/external/v1/organisations")
-    OrganisationsResponse findUserOrganisation(
+    @GetMapping("/refdata/internal/v1/organisations/orgDetails/{userId}")
+    OrganisationsResponse findOrganisationDetailsByUser(
         @RequestHeader(AUTHORIZATION) String authorisation,
-        @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization
+        @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization,
+        @PathVariable(value = "userId") String userId
     );
 }
