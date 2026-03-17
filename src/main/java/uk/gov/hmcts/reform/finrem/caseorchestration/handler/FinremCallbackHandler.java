@@ -21,6 +21,8 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @RequiredArgsConstructor
 public abstract class FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
 
+    protected static final List<String> NO_WARNINGS = null;
+
     protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Override
