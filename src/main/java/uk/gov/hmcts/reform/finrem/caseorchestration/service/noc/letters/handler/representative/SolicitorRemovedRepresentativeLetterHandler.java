@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.SolicitorNocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorRemovedLetterDetailsGenerator;
@@ -19,11 +19,11 @@ public class SolicitorRemovedRepresentativeLetterHandler extends RepresentativeL
     public SolicitorRemovedRepresentativeLetterHandler(
         SolicitorRemovedLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
         SolicitorNocDocumentService solicitorNocDocumentService,
-        BulkPrintService bulkPrintService, CaseDataService caseDataService,
+        BulkPrintServiceAdapter bulkPrintServiceAdapter, CaseDataService caseDataService,
         CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService,
         CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService) {
         super(noticeOfChangeLetterDetailsGenerator, solicitorNocDocumentService,
-            bulkPrintService, caseDataService, NoticeType.REMOVE, checkApplicantSolicitorIsDigitalService,
+            bulkPrintServiceAdapter, caseDataService, NoticeType.REMOVE, checkApplicantSolicitorIsDigitalService,
             checkRespondentSolicitorIsDigitalService);
     }
 }

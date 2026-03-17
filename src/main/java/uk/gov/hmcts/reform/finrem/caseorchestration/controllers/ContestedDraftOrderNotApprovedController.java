@@ -20,9 +20,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 
 import java.util.Optional;
 
@@ -37,7 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class ContestedDraftOrderNotApprovedController extends BaseController {
 
     private final ContestedDraftOrderNotApprovedService contestedNotApprovedService;
-    private final BulkPrintService bulkPrintService;
+    private final BulkPrintServiceAdapter bulkPrintService;
     private final PaperNotificationService paperNotificationService;
     private final DocumentHelper documentHelper;
 

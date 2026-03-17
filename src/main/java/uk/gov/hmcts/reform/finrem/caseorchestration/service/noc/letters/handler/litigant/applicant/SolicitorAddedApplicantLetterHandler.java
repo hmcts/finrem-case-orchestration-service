@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.LitigantSolicitorAddedNocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorAddedLetterDetailsGenerator;
@@ -15,8 +15,8 @@ public class SolicitorAddedApplicantLetterHandler extends SolicitorChangedApplic
     @Autowired
     public SolicitorAddedApplicantLetterHandler(
         SolicitorAddedLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
-        LitigantSolicitorAddedNocDocumentService litigantSolicitorAddedNocDocumentService, BulkPrintService bulkPrintService) {
-        super(noticeOfChangeLetterDetailsGenerator, litigantSolicitorAddedNocDocumentService, bulkPrintService, NoticeType.ADD);
+        LitigantSolicitorAddedNocDocumentService litigantSolicitorAddedNocDocumentService, BulkPrintServiceAdapter bulkPrintServiceAdapter) {
+        super(noticeOfChangeLetterDetailsGenerator, litigantSolicitorAddedNocDocumentService, bulkPrintServiceAdapter, NoticeType.ADD);
     }
 
 }

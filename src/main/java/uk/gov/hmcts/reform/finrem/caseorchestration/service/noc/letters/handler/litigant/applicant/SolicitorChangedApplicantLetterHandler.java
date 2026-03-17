@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
@@ -17,9 +17,10 @@ public class SolicitorChangedApplicantLetterHandler extends AbstractLetterHandle
 
     public SolicitorChangedApplicantLetterHandler(
         AbstractLetterDetailsGenerator letterDetailsGenerator,
-        NocDocumentService nocDocumentService, BulkPrintService bulkPrintService,
+        NocDocumentService nocDocumentService,
+        BulkPrintServiceAdapter bulkPrintServiceAdapter,
         NoticeType noticeType) {
-        super(letterDetailsGenerator, nocDocumentService, bulkPrintService, noticeType, APPLICANT);
+        super(letterDetailsGenerator, nocDocumentService, bulkPrintServiceAdapter, noticeType, APPLICANT);
     }
 
     @Override
