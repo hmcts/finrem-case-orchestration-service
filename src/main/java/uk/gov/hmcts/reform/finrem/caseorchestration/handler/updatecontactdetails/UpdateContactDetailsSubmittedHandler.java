@@ -44,7 +44,7 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         String checkAndAssignSolicitorAccessError = checkAndAssignSolicitorAccess(callbackRequest);
 
         if (StringUtils.isAllBlank(checkAndAssignSolicitorAccessError)) {
-            return submittedResponse("# Updated Case Solicitor with Errors",
+            return submittedResponse(toConfirmationHeader("Updated Case Solicitor with Errors"),
                 toConfirmationBody(checkAndAssignSolicitorAccessError));
         }
 
@@ -71,5 +71,4 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
             return "There was a problem setting supplementary data.";
         }
     }
-
 }
