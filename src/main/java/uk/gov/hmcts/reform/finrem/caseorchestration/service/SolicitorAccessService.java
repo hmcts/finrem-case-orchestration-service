@@ -30,7 +30,7 @@ public class SolicitorAccessService {
      *
      * @param caseData       the current case data
      * @param caseDataBefore the case data before the update
-     * @return
+     * @return a descriptive error message if there was an issue updating solicitor access, or null if the update was successful
      */
     public String checkAndAssignSolicitorAccess(FinremCaseData caseData,
                                                 FinremCaseData caseDataBefore) {
@@ -42,7 +42,8 @@ public class SolicitorAccessService {
                 ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
                 String appSolEmail = YesOrNo.isYes(contactDetailsWrapper.getApplicantRepresented())
                     ? caseData.getAppSolicitorEmail() : null;
-                return "There was a problem updating access to respondent solicitor: %s".formatted(appSolEmail);            }
+                return "There was a problem updating access to respondent solicitor: %s".formatted(appSolEmail);
+            }
         }
 
         // Respondent solicitor access update
