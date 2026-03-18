@@ -15,7 +15,8 @@ public class SolicitorAddedApplicantLetterHandler extends SolicitorChangedApplic
     @Autowired
     public SolicitorAddedApplicantLetterHandler(
         SolicitorAddedLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
-        LitigantSolicitorAddedNocDocumentService litigantSolicitorAddedNocDocumentService, BulkPrintServiceAdapter bulkPrintServiceAdapter) {
+        LitigantSolicitorAddedNocDocumentService litigantSolicitorAddedNocDocumentService,
+        BulkPrintServiceAdapter bulkPrintServiceAdapter) {
         super(noticeOfChangeLetterDetailsGenerator, litigantSolicitorAddedNocDocumentService, bulkPrintServiceAdapter, NoticeType.ADD);
     }
 
