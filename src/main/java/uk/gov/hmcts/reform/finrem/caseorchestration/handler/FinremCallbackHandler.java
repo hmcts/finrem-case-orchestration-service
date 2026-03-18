@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.text.StringEscapeUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -21,6 +22,8 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @RequiredArgsConstructor
 public abstract class FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
 
+    protected static final List<String> NO_WARNINGS = null;
+
     protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Override
@@ -32,20 +35,6 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
 
     public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
                                                                                        String userAuthorisation);
-
-    private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
-        FinremCaseDetails finremCaseDetailsBefore = null;
-        if (callbackRequest.getCaseDetailsBefore() != null) {
-            finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
-        }
-        finremCaseDetails.getData().setCcdCaseId(finremCaseDetails.getCaseIdAsString());
-        return FinremCallbackRequest.builder()
-            .caseDetails(finremCaseDetails)
-            .caseDetailsBefore(finremCaseDetailsBefore)
-            .eventType(EventType.getEventType(callbackRequest.getEventId()))
-            .build();
-    }
 
     protected void validateCaseData(FinremCallbackRequest callbackRequest) {
         if (callbackRequest == null
@@ -98,6 +87,68 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return response.toBuilder().data(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedCaseDetails.getData())).build();
     }
 
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submittedResponse() {
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().build();
+    }
+
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submittedResponse(String confirmationHeader,
+                                                                                            String confirmationBody) {
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .confirmationHeader(confirmationHeader)
+            .confirmationBody(confirmationBody)
+            .build();
+    }
+
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData) {
+        return response(finremCaseData, null, null);
+    }
+
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData,
+                                                                                   List<String> warnings, List<String> errors) {
+        var builder = GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder();
+        builder.data(finremCaseData);
+        if (errors != null && !errors.isEmpty()) {
+            builder.errors(errors);
+        }
+        if (warnings != null && !warnings.isEmpty()) {
+            builder.warnings(warnings);
+        }
+        return builder.build();
+    }
+
+    protected String toConfirmationHeader(String messages) {
+        return "# %s".formatted(messages);
+    }
+
+    protected String toConfirmationBody(String... messages) {
+        StringBuilder body = new StringBuilder("<ul>");
+
+        if (messages != null) {
+            for (String error : messages) {
+                if (error != null && !error.isBlank()) {
+                    body.append("<li><h2>%s</h2></li>".formatted(StringEscapeUtils.escapeHtml4(error)));
+                }
+            }
+        }
+
+        body.append("</ul>");
+        return body.toString();
+    }
+
+    private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
+        FinremCaseDetails finremCaseDetailsBefore = null;
+        if (callbackRequest.getCaseDetailsBefore() != null) {
+            finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
+        }
+        finremCaseDetails.getData().setCcdCaseId(finremCaseDetails.getCaseIdAsString());
+        return FinremCallbackRequest.builder()
+            .caseDetails(finremCaseDetails)
+            .caseDetailsBefore(finremCaseDetailsBefore)
+            .eventType(EventType.getEventType(callbackRequest.getEventId()))
+            .build();
+    }
+
     /**
      * Returns the list of classes that contain fields annotated with {@link TemporaryField}
      * and should have those temporary fields cleared during sanitisation.
@@ -108,24 +159,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      *
      * @return a list of classes containing {@code @TemporaryField}-annotated fields
      */
-    private static List<Class> getClassesWithTemporaryFieldAnnotation() {
+    private static List<Class<?>> getClassesWithTemporaryFieldAnnotation() {
         return List.of(StopRepresentationWrapper.class);
-    }
-
-    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData) {
-        return response(finremCaseData, null, null);
-    }
-
-    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData,
-        List<String> warnings, List<String> errors) {
-        var builder = GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder();
-        builder.data(finremCaseData);
-        if (errors != null && !errors.isEmpty()) {
-            builder.errors(errors);
-        }
-        if (warnings != null && !warnings.isEmpty()) {
-            builder.warnings(warnings);
-        }
-        return builder.build();
     }
 }

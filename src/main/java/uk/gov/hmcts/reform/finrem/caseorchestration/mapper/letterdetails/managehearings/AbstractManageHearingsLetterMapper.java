@@ -86,6 +86,8 @@ public abstract class AbstractManageHearingsLetterMapper {
             .courtAddress(courtDetails.getCourtAddress())
             .phoneNumber(courtDetails.getPhoneNumber())
             .email(courtDetails.getEmail())
+            .centralFRCCourtAddress(courtDetails.getCentralFRCCourtAddress())
+            .centralFRCCourtEmail(courtDetails.getCentralFRCCourtEmail())
             .build();
     }
 
