@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -8,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,10 @@ public class ContactDetailsValidator {
     static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
     static final String INVALID_EMAIL_ADDRESS_ERROR_MESSAGE = "%s is not a valid Email address.";
+    static final String EMAIL_NOT_IN_APPLICANT_ORG_ERROR_MESSAGE = "%s is not a valid Email address. "
+        + "The email address must be registered to access MyHMCTS";
+    static final String EMAIL_NOT_IN_RESPONDENT_ORG_ERROR_MESSAGE = "%s is not a valid Email address. "
+        + "The email address must be registered to access MyHMCTS";
     static final String ORGANISATION_POLICY_ERROR = "Solicitor can only represent one party.";
     static final String INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE = "%s. Method validatePostcodesByRepresentation is only for "
         + "updating contact details on consented cases. Use validateCaseDataAddresses whenever possible.";
@@ -116,6 +122,7 @@ public class ContactDetailsValidator {
      * @param errors the list to which error messages will be added if validation fails
      */
     public static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
+        // DFR-4704 - to simplify the logic by FinremCaseData.getAppSolicitorAddress
         if (isContested(caseData)) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && postCodeIsInvalid(wrapper.getApplicantSolicitorAddress())) {
@@ -211,12 +218,37 @@ public class ContactDetailsValidator {
      * @return a list of error messages for invalid email addresses
      */
     public static List<String> validateCaseDataEmailAddresses(FinremCaseData caseData) {
+        return validateCaseDataEmailAddresses(caseData, null);
+    }
+
+    /**
+     * Validates the email addresses stored in the supplied {@link FinremCaseData}.
+     *
+     * <p>The following email fields are checked (where applicable based on representation status):</p>
+     * <ul>
+     *     <li>Applicant solicitor's email address</li>
+     *     <li>Applicant's email address</li>
+     *     <li>Respondent solicitor's email address</li>
+     *     <li>Respondent's email address</li>
+     * </ul>
+     *
+     * <p>Any validation failures (e.g. invalid format or missing required email address)
+     * are collected and returned as a list of error messages. If no issues are found,
+     * an empty list is returned.</p>
+     *
+     * @param caseData the case data containing contact details to be validated
+     * @param validatePartiesService an optional service used to perform additional
+     *                                party-related validation logic; may be {@code null}
+     * @return a list of validation error messages; never {@code null}
+     */
+    public static List<String> validateCaseDataEmailAddresses(FinremCaseData caseData,
+                                                              ValidatePartiesService validatePartiesService) {
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
-        checkForApplicantSolicitorEmailAddress(caseData, wrapper, errors);
+        checkForApplicantSolicitorEmailAddress(caseData, validatePartiesService, errors);
         checkForApplicantEmail(wrapper, errors);
-        checkForRespondentSolicitorEmail(caseData, wrapper, errors);
+        checkForRespondentSolicitorEmail(caseData, validatePartiesService, errors);
         checkForRespondentEmail(caseData, wrapper, errors);
 
         return errors;
@@ -278,6 +310,7 @@ public class ContactDetailsValidator {
     }
 
     /*
+     * PT TODO - MINE
      * Validates the respondent solicitor's email address based on the case type and representation status.
      * Returns true if the email address is valid or not required, and false if it is invalid. Any validation
      * errors are added to the provided errors list.
@@ -356,10 +389,52 @@ public class ContactDetailsValidator {
         return livesInUK && addressMissingRequiredPostcode;
     }
 
+    private static void checkForApplicantSolicitorEmailAddress(FinremCaseData caseData,
+                                                               ValidatePartiesService validatePartiesService,
+                                                               List<String> errors) {
+        String applicantSolicitorEmail = caseData.getAppSolicitorEmail();
+
+        if (caseData.isApplicantRepresentedByASolicitor()) {
+            if (!isValidEmailAddress(applicantSolicitorEmail)) {
+                errors.add(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(applicantSolicitorEmail));
+            } else {
+                String orgId = getOrganisationId(caseData.getApplicantOrganisationPolicy());
+                if (!isEmailValidForOrganisation(validatePartiesService, applicantSolicitorEmail, orgId)) {
+                    errors.add(EMAIL_NOT_IN_APPLICANT_ORG_ERROR_MESSAGE.formatted(applicantSolicitorEmail));
+                }
+            }
+        }
+    }
+
+    private static boolean isEmailValidForOrganisation(ValidatePartiesService validatePartiesService,
+                                                       String email, String orgId) {
+        if (validatePartiesService == null) {
+            return true;
+        }
+        return validatePartiesService.isEmailRegisteredInOrg(email, orgId);
+    }
+
     private static void checkForApplicantEmail(ContactDetailsWrapper wrapper, List<String> errors) {
         String applicantEmail = wrapper.getApplicantEmail();
         if (!isValidEmailAddress(applicantEmail, true)) {
             errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, applicantEmail));
+        }
+    }
+
+    // PT TODO - S099Y's
+    private static void checkForRespondentSolicitorEmail(FinremCaseData caseData, ValidatePartiesService validatePartiesService,
+                                                         List<String> errors) {
+        String respondentSolicitorEmail = caseData.getContactDetailsWrapper().getRespondentSolicitorEmail();
+
+        if (caseData.isRespondentRepresentedByASolicitor()) {
+            if (!isValidEmailAddress(respondentSolicitorEmail, true)) {
+                errors.add(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(respondentSolicitorEmail));
+            } else if (StringUtils.isNotBlank(respondentSolicitorEmail)) {
+                String orgId = getOrganisationId(caseData.getRespondentOrganisationPolicy());
+                if (!isEmailValidForOrganisation(validatePartiesService, respondentSolicitorEmail, orgId)) {
+                    errors.add(EMAIL_NOT_IN_RESPONDENT_ORG_ERROR_MESSAGE.formatted(respondentSolicitorEmail));
+                }
+            }
         }
     }
 
