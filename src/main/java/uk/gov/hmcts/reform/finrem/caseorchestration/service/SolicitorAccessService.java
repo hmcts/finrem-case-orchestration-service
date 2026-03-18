@@ -30,10 +30,9 @@ public class SolicitorAccessService {
      *
      * @param caseData       the current case data
      * @param caseDataBefore the case data before the update
-     * @return a descriptive error message if there was an issue updating solicitor access, or null if the update was successful
      */
-    public String checkAndAssignSolicitorAccess(FinremCaseData caseData,
-                                                FinremCaseData caseDataBefore) {
+    public void checkAndAssignSolicitorAccess(FinremCaseData caseData,
+                                                FinremCaseData caseDataBefore) throws UserNotFoundInOrganisationApiException {
         // Applicant solicitor access update
         if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
             try {
@@ -41,8 +40,9 @@ public class SolicitorAccessService {
             } catch (UserNotFoundInOrganisationApiException e) {
                 ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
                 String appSolEmail = YesOrNo.isYes(contactDetailsWrapper.getApplicantRepresented())
-                    ? caseData.getAppSolicitorEmail() : null;
-                return "There was a problem updating access to respondent solicitor: %s".formatted(appSolEmail);
+                    ? contactDetailsWrapper.getSolicitorEmail() : null;
+                log.info("There was a problem updating access to applicant solicitor: %s".formatted(appSolEmail));
+                throw new UserNotFoundInOrganisationApiException();
             }
         }
 
@@ -53,11 +53,11 @@ public class SolicitorAccessService {
             } catch (UserNotFoundInOrganisationApiException e) {
                 ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
                 String respSolEmail = YesOrNo.isYes(contactDetailsWrapper.getContestedRespondentRepresented())
-                    ? caseData.getRespondentSolicitorEmail() : null;
-                return "There was a problem updating access to respondent solicitor: %s".formatted(respSolEmail);
+                    ? contactDetailsWrapper.getRespondentSolicitorEmail() : null;
+                log.info("There was a problem updating access to respondent solicitor: %s".formatted(respSolEmail));
+                throw new UserNotFoundInOrganisationApiException();
             }
         }
-        return null;
     }
 
     /**
@@ -119,8 +119,8 @@ public class SolicitorAccessService {
     private boolean hasApplicantSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         Optional<ContactDetailsWrapper> currentContact = Optional.ofNullable(caseData.getContactDetailsWrapper());
         Optional<ContactDetailsWrapper> beforeContact = Optional.ofNullable(caseDataBefore.getContactDetailsWrapper());
-        String currentEmail = currentContact.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse("");
-        String beforeEmail = beforeContact.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse("");
+        String currentEmail = currentContact.map(ContactDetailsWrapper::getSolicitorEmail).orElse("");
+        String beforeEmail = beforeContact.map(ContactDetailsWrapper::getSolicitorEmail).orElse("");
         Organisation currentOrg = Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
             .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy::getOrganisation)
             .orElse(null);

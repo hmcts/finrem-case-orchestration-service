@@ -63,8 +63,8 @@ public class UpdateContactDetailsConsentedSubmittedHandler extends FinremCallbac
 
         try {
             retryExecutor.runWithRetry(()  -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore),
-                callbackRequest.getCaseDetails().getCaseIdAsString(),
-                "Update Case Solicitor Change"
+                "Update Contact Details - Case Solicitor Change",
+                callbackRequest.getCaseDetails().getCaseIdAsString()
             );
             return null;
         } catch (Exception ex) {
