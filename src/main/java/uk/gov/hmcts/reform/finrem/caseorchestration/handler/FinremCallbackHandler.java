@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 
 import java.lang.reflect.Field;
@@ -110,6 +111,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
         }
         finremCaseDetails.getData().setCcdCaseId(finremCaseDetails.getCaseIdAsString());
+
         return FinremCallbackRequest.builder()
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
@@ -128,7 +130,6 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      * @return a list of classes containing {@code @TemporaryField}-annotated fields
      */
     private static List<Class> getClassesWithTemporaryFieldAnnotation() {
-        return List.of(StopRepresentationWrapper.class);
+        return List.of(StopRepresentationWrapper.class, CaseDataMetricsWrapper.class);
     }
-
 }
