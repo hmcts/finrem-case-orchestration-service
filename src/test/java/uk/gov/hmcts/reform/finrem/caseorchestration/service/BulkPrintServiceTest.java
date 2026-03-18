@@ -82,13 +82,6 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         verifyBulkPrintRequest(bulkPrintRequest, RESPONDENT);
     }
 
-    //TODO: Move to Adapter
-//    @Test
-//    public void getRecipientInCamelCase() {
-//        String recipient = bulkPrintService.getRecipient("APPLICANT_CONFIDENTIAL_SOLICITOR");
-//        assertEquals("ApplicantConfidentialSolicitor", recipient);
-//    }
-
     @Test
     public void whenPrintingDocument_thenDocumentIsSentToPrintingFinrem() {
         FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
