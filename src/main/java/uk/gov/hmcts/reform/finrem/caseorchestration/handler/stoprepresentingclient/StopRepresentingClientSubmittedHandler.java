@@ -84,17 +84,17 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
         if (featureToggleService.isExui3990WorkaroundEnabled()) {
             revokePartiesAccessAndNotifyParties(info);
+            return submittedResponse();
         } else {
             CompletableFuture.runAsync(() ->
                 revokePartiesAccessAndNotifyParties(info),
                 // Add a delay to prevent a fast response so the confirmation body is not shown
                 CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS)
             );
+            return submittedResponse(
+                toConfirmationHeader("Notice of change request submitted"),
+                toConfirmationBody("Your changes will be applied shortly."));
         }
-
-        return submittedResponse(
-            toConfirmationHeader("Notice of change request submitted"),
-            toConfirmationBody("Your changes will be applied shortly."));
     }
 
     private List<SendCorrespondenceEventEnvelop> revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
@@ -165,7 +165,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
             .toList();
     }
 
-    private void revokePartiesAccessAndNotifyParties(StopRepresentingClientInfo info) {
+    protected void revokePartiesAccessAndNotifyParties(StopRepresentingClientInfo info) {
         List<SendCorrespondenceEventEnvelop> envelops = new ArrayList<>();
         envelops.addAll(revokeApplicantSolicitorOrRespondentSolicitor(info));
         envelops.addAll(revokeIntervenerSolicitor(info));

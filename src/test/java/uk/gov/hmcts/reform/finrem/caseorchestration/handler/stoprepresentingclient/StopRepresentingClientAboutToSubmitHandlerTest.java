@@ -47,7 +47,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -326,13 +325,13 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     "Are you sure you wish to stop representing your client? If you continue your access to this access will be removed"
                 );
             if (intervenerType != null) {
-                assertThat(logs.getInfos()).hasSize(2).contains(format(
-                    format("%s - %s representative stops representing a client with a client consent", CASE_ID,
-                        intervenerType)));
+                assertThat(logs.getInfos()).hasSize(2).contains(
+                    "%s - %s representative stops representing a client with a client consent"
+                        .formatted(CASE_ID, intervenerType.getTypeValue()));
             } else {
-                assertThat(logs.getInfos()).hasSize(2).contains(format(
-                    format("%s - %s representative stops representing a client with a client consent", CASE_ID,
-                        isApplicantRepresentative ? "applicant" : "respondent")));
+                assertThat(logs.getInfos()).hasSize(2).contains(
+                    "%s - %s representative stops representing a client with a client consent"
+                        .formatted(CASE_ID, isApplicantRepresentative ? "applicant" : "respondent"));
             }
 
             verifyBuildRepresentationCalled(caseData);
@@ -362,13 +361,13 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                     "Are you sure you wish to stop representing your client? If you continue your access to this access will be removed"
                 );
             if (intervenerType == null) {
-                assertThat(logs.getInfos()).hasSize(2).contains(format(
-                    format("%s - %s representative stops representing a client with a judicial approval", CASE_ID,
-                        isApplicantRepresentative ? "applicant" : "respondent")));
+                assertThat(logs.getInfos()).hasSize(2).contains(
+                    "%s - %s representative stops representing a client with a judicial approval"
+                        .formatted(CASE_ID, isApplicantRepresentative ? "applicant" : "respondent"));
             } else {
-                assertThat(logs.getInfos()).hasSize(2).contains(format(
-                    format("%s - %s representative stops representing a client with a judicial approval", CASE_ID,
-                        intervenerType)));
+                assertThat(logs.getInfos()).hasSize(2).contains(
+                    "%s - %s representative stops representing a client with a judicial approval"
+                        .formatted(CASE_ID, intervenerType.getTypeValue()));
             }
 
             verifyBuildRepresentationCalled(caseData);

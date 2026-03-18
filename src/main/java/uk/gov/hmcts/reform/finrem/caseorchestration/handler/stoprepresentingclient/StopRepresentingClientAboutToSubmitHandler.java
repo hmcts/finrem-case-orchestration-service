@@ -499,7 +499,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         } else if (isRepresentingApplicant(request)) {
             return "applicant";
         } else if (isRepresentingAnyInterveners(request)) {
-            return format("intervener %s", getIntervenerIndex(request));
+            return format("intervener%s", getIntervenerIndex(request));
         } else {
             throw new IllegalStateException(UNREACHABLE_MESSAGE);
         }

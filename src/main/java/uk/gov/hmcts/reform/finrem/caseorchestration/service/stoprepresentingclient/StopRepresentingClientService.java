@@ -376,8 +376,6 @@ public class StopRepresentingClientService {
      *         Notice of Change party cannot be determined
      */
     public LitigantRevocation revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
-        CaseDetails clonedCaseDetails = cloneCaseDetailsFromFinremCaseDetails(info);
-
         FinremCaseData finremCaseData = info.getFinremCaseData();
         FinremCaseData originalFinremCaseData = info.getFinremCaseDataBefore();
 
@@ -393,25 +391,26 @@ public class StopRepresentingClientService {
         // aac handles org policy modification based on the Change Organisation Request,
         // so we need to revert the org policies to their value before the event started
         // Refer to NoticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess
-        boolean shouldPerformNoc = false;
         boolean isApplicantForRepresentationChange = isApplicantForRepresentationChange(finremCaseData);
+        boolean isRespondentForRepresentationChange = isRespondentForRepresentationChange(finremCaseData);
+
+        if (!isApplicantForRepresentationChange && !isRespondentForRepresentationChange) {
+            throw new IllegalStateException(format("%s - ChangeOrganisationRequest populated with unknown or null NOC Party : %s",
+                finremCaseData.getContactDetailsWrapper().getNocParty(),
+                finremCaseData.getCcdCaseId()));
+        }
+
+        CaseDetails clonedCaseDetails = cloneCaseDetailsFromFinremCaseDetails(info);
         if (isApplicantForRepresentationChange) {
             clonedCaseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, originalFinremCaseData.getApplicantOrganisationPolicy());
-            shouldPerformNoc = true;
         } else if (isRespondentForRepresentationChange(finremCaseData)) {
             clonedCaseDetails.getData().put(ORGANISATION_POLICY_RESPONDENT, originalFinremCaseData.getRespondentOrganisationPolicy());
-            shouldPerformNoc = true;
         }
 
         // Going to apply decision
-        if (shouldPerformNoc) {
-            log.info("{} - about to send a NOC request to case assignment API", info.getCaseId());
-            assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), clonedCaseDetails);
-            return new LitigantRevocation(isApplicantForRepresentationChange, !isApplicantForRepresentationChange);
-        }
-        throw new IllegalStateException(format("%s - ChangeOrganisationRequest populated with unknown or null NOC Party : %s",
-            finremCaseData.getContactDetailsWrapper().getNocParty(),
-            finremCaseData.getCcdCaseId()));
+        log.info("{} - about to send a NOC request to case assignment API", info.getCaseId());
+        assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), clonedCaseDetails);
+        return new LitigantRevocation(isApplicantForRepresentationChange, !isApplicantForRepresentationChange);
     }
 
     /**

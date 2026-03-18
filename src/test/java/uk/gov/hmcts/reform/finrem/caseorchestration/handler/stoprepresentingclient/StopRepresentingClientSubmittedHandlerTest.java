@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclie
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +43,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -50,6 +52,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -125,11 +128,31 @@ class StopRepresentingClientSubmittedHandlerTest {
     }
 
     @Test
-    void givenAnyCase_whenHandled_thenReturnConfirmationMessages() {
+    void givenFeatureFlagDisabled_whenHandled_thenReturnConfirmationMessages() {
+        when(featureToggleService.isExui3990WorkaroundEnabled()).thenReturn(false);
         FinremCallbackRequest request = FinremCallbackRequestFactory.from();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(request, AUTH_TOKEN);
         assertThat(response.getConfirmationBody()).isEqualTo("<ul><li><h2>Your changes will be applied shortly.</h2></li></ul>");
         assertThat(response.getConfirmationHeader()).isEqualTo("# Notice of change request submitted");
+    }
+
+    @Test
+    void givenFeatureFlagDisabled_whenHandled_shouldDelegateToBusinessLogicAsync() {
+        // ---------- Given ----------
+        when(featureToggleService.isExui3990WorkaroundEnabled()).thenReturn(false);
+
+        StopRepresentingClientSubmittedHandler spyHandler = spy(underTest);
+
+        FinremCaseData caseData = buildFinremCaseData(NoticeOfChangeParty.APPLICANT);
+
+        // ---------- When ----------
+        spyHandler.handle(FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData), AUTH_TOKEN);
+
+        // ---------- Then ----------
+        await().atMost(Duration.ofSeconds(1))
+            .untilAsserted(() ->
+                verify(spyHandler)
+                    .revokePartiesAccessAndNotifyParties(any()));
     }
 
     @Nested
