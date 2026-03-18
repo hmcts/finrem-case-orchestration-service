@@ -14,19 +14,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
-
-import java.util.ArrayList;
-import java.util.List;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 @Slf4j
 @Service
 public class UpdateContactDetailsConsentedSubmittedHandler extends FinremCallbackHandler {
     private final SolicitorAccessService solicitorAccessService;
+    private final RetryExecutor retryExecutor;
 
     public UpdateContactDetailsConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         SolicitorAccessService solicitorAccessService) {
+                                                         SolicitorAccessService solicitorAccessService, RetryExecutor retryExecutor) {
         super(finremCaseDetailsMapper);
         this.solicitorAccessService = solicitorAccessService;
+        this.retryExecutor = retryExecutor;
     }
 
     @Override
@@ -43,8 +43,8 @@ public class UpdateContactDetailsConsentedSubmittedHandler extends FinremCallbac
 
         String checkAndAssignSolicitorAccessError = checkAndAssignSolicitorAccess(callbackRequest);
 
-        if (StringUtils.isAllBlank(checkAndAssignSolicitorAccessError)) {
-            return submittedResponse("# Updated Case Solicitor with Errors",
+        if (!StringUtils.isAllBlank(checkAndAssignSolicitorAccessError)) {
+            return submittedResponse(toConfirmationHeader("Updated Case Solicitor with Errors"),
                 toConfirmationBody(checkAndAssignSolicitorAccessError));
         }
 
@@ -60,18 +60,16 @@ public class UpdateContactDetailsConsentedSubmittedHandler extends FinremCallbac
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         caseDetailsBefore.getData().setCcdCaseId(caseDetailsBefore.getCaseIdAsString());
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
-        List<String> errors = new ArrayList<>();
 
         try {
-            executeWithRetry(log,
-                () -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore, errors),
+            retryExecutor.runWithRetry(()  -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore),
                 callbackRequest.getCaseDetails().getCaseIdAsString(),
-                "Update Contact Details - Case Solicitor Change",
-                3
+                "Update Case Solicitor Change"
             );
             return null;
         } catch (Exception ex) {
-            return errors.getFirst();
+            log.error("Error updating solicitor access to case", ex);
+            return "There was a problem updating solicitor access to case.";
         }
     }
 }
