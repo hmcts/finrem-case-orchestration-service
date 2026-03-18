@@ -28,12 +28,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateContactDetailsSubmittedHandlerTest {
+class UpdateContactDetailsContestedSubmittedHandlerTest {
 
     @Mock
     private SolicitorAccessService solicitorAccessService;
     @InjectMocks
-    private UpdateContactDetailsSubmittedHandler handler;
+    private UpdateContactDetailsContestedSubmittedHandler handler;
 
     @Test
     void testCanHandle() {

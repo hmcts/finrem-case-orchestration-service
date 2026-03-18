@@ -18,12 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 @Slf4j
 @Service
-public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
+public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbackHandler {
     private final SolicitorAccessService solicitorAccessService;
     private final RetryExecutor retryExecutor;
 
-    public UpdateContactDetailsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                SolicitorAccessService solicitorAccessService, RetryExecutor retryExecutor) {
+    public UpdateContactDetailsContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                         SolicitorAccessService solicitorAccessService, RetryExecutor retryExecutor) {
         super(finremCaseDetailsMapper);
         this.solicitorAccessService = solicitorAccessService;
         this.retryExecutor = retryExecutor;
@@ -68,7 +68,8 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
             );
             return null;
         } catch (Exception ex) {
-            return "There was a problem setting supplementary data.";
+            log.error("Error updating solicitor access to case", ex);
+            return "There was a problem updating solicitor access to case.";
         }
     }
 }
