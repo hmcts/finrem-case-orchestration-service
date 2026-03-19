@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
@@ -26,15 +27,18 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
     private final InternationalPostalService internationalPostalService;
     private final SelectedCourtService selectedCourtService;
     private final ExpressCaseService expressCaseService;
+    private final ValidatePartiesService validatePartiesService;
 
     public SolicitorCreateContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               InternationalPostalService internationalPostalService,
                                               SelectedCourtService selectedCourtService,
-                                              ExpressCaseService expressCaseService) {
+                                              ExpressCaseService expressCaseService,
+                                              ValidatePartiesService validatePartiesService) {
         super(finremCaseDetailsMapper);
         this.internationalPostalService = internationalPostalService;
         this.selectedCourtService = selectedCourtService;
         this.expressCaseService = expressCaseService;
+        this.validatePartiesService = validatePartiesService;
     }
 
     @Override
@@ -52,7 +56,7 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
         FinremCaseData caseData = caseDetails.getData();
 
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
-        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService));
 
         selectedCourtService.setSelectedCourtDetailsIfPresent(caseData);
 
