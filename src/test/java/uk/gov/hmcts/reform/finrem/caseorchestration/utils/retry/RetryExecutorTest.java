@@ -124,7 +124,7 @@ class RetryExecutorTest {
         }
 
         @Test
-        void shouldSuppressException_whenExceptionThrownAndNoHandlerProvided() throws Exception {
+        void shouldThrowIllegalStateException_whenNoHandlerProvided() throws Exception {
             ThrowingRunnable action = mock(ThrowingRunnable.class);
             Exception exception = new RuntimeException("boom");
 
@@ -132,13 +132,11 @@ class RetryExecutorTest {
                 .when(spyExecutor)
                 .runWithRetry(action, "testAction", CASE_ID);
 
-            spyExecutor.runWithRetryWithHandler(action, "testAction", CASE_ID);
-
-            assertAll(
-                () -> verify(spyExecutor).runWithRetry(action, "testAction", CASE_ID),
-                () -> assertThat(logs.getErrors()).containsExactly(("%s - unexpected exception when executing testAction in suppress mode. "
-                    + "This indicates a bug or retry exhausted in RetryExecutor.").formatted(CASE_ID))
-            );
+            assertThatThrownBy(() ->
+                spyExecutor.runWithRetryWithHandler(action, "testAction", CASE_ID)
+            )
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("no handler provided");
         }
 
         @Test
@@ -226,7 +224,7 @@ class RetryExecutorTest {
         }
 
         @Test
-        void shouldSuppressException_whenExceptionThrownAndNoHandlerProvided() throws Exception {
+        void shouldThrowIllegalStateException_whenNoHandlerProvided() throws Exception {
             ThrowingSupplier<?> action = mock(ThrowingSupplier.class);
             Exception exception = new RuntimeException("boom");
 
@@ -234,15 +232,11 @@ class RetryExecutorTest {
                 .when(spyExecutor)
                 .supplyWithRetry(action, "testAction", CASE_ID);
 
-            Optional<?> actual = spyExecutor.supplyWithRetryWithHandler(action, "testAction", CASE_ID);
-
-            assertAll(
-                () -> verify(spyExecutor).supplyWithRetry(action, "testAction", CASE_ID),
-                () -> assertThat(actual).isEmpty(),
-                () -> assertThat(logs.getErrors())
-                    .containsExactly(("%s - unexpected exception when executing testAction in suppress mode. "
-                        + "This indicates a bug or retry exhausted in RetryExecutor.").formatted(CASE_ID))
-            );
+            assertThatThrownBy(() ->
+                spyExecutor.supplyWithRetryWithHandler(action, "testAction", CASE_ID)
+            )
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("no handler provided");
         }
 
         @Test
