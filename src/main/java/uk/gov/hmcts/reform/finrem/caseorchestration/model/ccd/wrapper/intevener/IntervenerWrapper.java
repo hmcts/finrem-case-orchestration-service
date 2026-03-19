@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollectionName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
@@ -90,8 +89,6 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     public abstract CaseRole getIntervenerSolicitorCaseRole();
 
     public abstract List<IntervenerHearingNoticeCollection> getIntervenerHearingNoticesCollection(FinremCaseData caseData);
-
-    public abstract IntervenerHearingNoticeCollectionName getIntervenerHearingNoticesCollectionName();
 
     public abstract DocumentHelper.PaperNotificationRecipient getPaperNotificationRecipient();
 
