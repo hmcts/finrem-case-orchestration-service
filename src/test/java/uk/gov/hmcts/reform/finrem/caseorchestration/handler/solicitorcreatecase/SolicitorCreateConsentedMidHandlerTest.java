@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedR
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +55,8 @@ class SolicitorCreateConsentedMidHandlerTest {
     private ObjectMapper objectMapper;
     @Spy
     private ConsentedApplicationHelper consentedApplicationHelper;
+    @Mock
+    private ValidatePartiesService validatePartiesService;
 
     @Test
     void testCanHandle() {
@@ -101,7 +104,7 @@ class SolicitorCreateConsentedMidHandlerTest {
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
                 .thenReturn(new ArrayList<>(addressErrors));
-            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService))
                 .thenReturn(new ArrayList<>(emailErrors));
             when(consentOrderService.performCheck(any(CallbackRequest.class), eq(AUTH_TOKEN)))
                 .thenReturn(new ArrayList<>(consentErrors));
