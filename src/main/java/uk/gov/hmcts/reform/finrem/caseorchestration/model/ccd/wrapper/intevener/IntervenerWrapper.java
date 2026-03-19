@@ -103,4 +103,27 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     public boolean isIntervenerSolicitorPopulated() {
         return StringUtils.isNotEmpty(nullToEmpty(this.getIntervenerSolEmail()));
     }
+
+    /**
+     * Clears all solicitor-related fields for an intervener.
+     *
+     * <p>This method sets the following fields to {@code null}:
+     * <ul>
+     *     <li>Intervener solicitor email</li>
+     *     <li>Intervener solicitor firm</li>
+     *     <li>Intervener solicitor reference</li>
+     *     <li>Intervener solicitor name</li>
+     *     <li>Intervener solicitor phone</li>
+     * </ul>
+     *
+     * <p>Use this method when an intervener no longer has a solicitor assigned,
+     * to reset all solicitor contact information.</p>
+     */
+    public void clearIntervenerSolicitorFields() {
+        setIntervenerSolEmail(null);
+        setIntervenerSolicitorFirm(null);
+        setIntervenerSolicitorReference(null);
+        setIntervenerSolName(null);
+        setIntervenerSolPhone(null);
+    }
 }
