@@ -571,7 +571,7 @@ public class StopRepresentingClientService {
      * @param barrister the applicant barrister who should receive the notification
      * @return a populated {@link SendCorrespondenceEventEnvelop} for later email notification processing
      */
-    private SendCorrespondenceEventEnvelop prepareApplicantBarristerEmailNotificationEvent(StopRepresentingClientInfo info, Barrister barrister) {
+    protected SendCorrespondenceEventEnvelop prepareApplicantBarristerEmailNotificationEvent(StopRepresentingClientInfo info, Barrister barrister) {
         return prepareRepresentativeEmailNotificationEvent(
             "notifying applicant barrister",
             info,
@@ -623,7 +623,7 @@ public class StopRepresentingClientService {
      * @param barrister the intervener barrister who should receive the notification
      * @return a populated {@link SendCorrespondenceEventEnvelop} for later email notification processing
      */
-    private SendCorrespondenceEventEnvelop prepareIntervenerBarristerEmailNotificationEvent(StopRepresentingClientInfo info,
+    protected SendCorrespondenceEventEnvelop prepareIntervenerBarristerEmailNotificationEvent(StopRepresentingClientInfo info,
                                                                                             IntervenerType intervenerType,
                                                                                             Barrister barrister) {
         return prepareRepresentativeEmailNotificationEvent(
@@ -746,7 +746,7 @@ public class StopRepresentingClientService {
      * @param barrister the respondent barrister who should receive the notification
      * @return a populated {@link SendCorrespondenceEventEnvelop} for later email notification processing
      */
-    private SendCorrespondenceEventEnvelop prepareRespondentBarristerEmailNotificationEvent(StopRepresentingClientInfo info,
+    protected SendCorrespondenceEventEnvelop prepareRespondentBarristerEmailNotificationEvent(StopRepresentingClientInfo info,
                                                                                             Barrister barrister) {
         return prepareRepresentativeEmailNotificationEvent(
             "notifying respondent barrister",

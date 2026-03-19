@@ -52,8 +52,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataServ
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -309,6 +313,66 @@ class StopRepresentingClientServiceTest {
             finremCaseDataBefore,
             barristerParty
         );
+    }
+
+    @Nested
+    class RevokeBarristersTests {
+
+        @ParameterizedTest
+        @ValueSource(ints = {1, 5})
+        void shouldRevokeMultipleApplicantBarristersDynamically(int numBarristers) {
+            // ---------- Given ----------
+            FinremCaseData finremCaseData = mock(FinremCaseData.class);
+            when(finremCaseData.getCcdCaseId()).thenReturn(CASE_ID);
+
+            FinremCaseDetails infoCaseDetails = mock(FinremCaseDetails.class);
+            when(infoCaseDetails.getData()).thenReturn(finremCaseData);
+
+            FinremCaseDetails infoCaseDetailsBefore = mock(FinremCaseDetails.class);
+
+            StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
+                .userAuthorisation(AUTH_TOKEN)
+                .caseDetails(infoCaseDetails)
+                .caseDetailsBefore(infoCaseDetailsBefore)
+                .build();
+
+            // dynamically generate any number of barristers
+            Set<Barrister> removedBarristers = IntStream.rangeClosed(1, numBarristers)
+                .mapToObj(i -> mock(Barrister.class, "barrister" + i))
+                .collect(Collectors.toSet());
+
+            BarristerChange barristerChange = mock(BarristerChange.class);
+            when(barristerChange.getBarristerParty()).thenReturn(BarristerParty.APPLICANT);
+            when(barristerChange.getRemoved()).thenReturn(removedBarristers);
+
+            // stub email notifications for each barrister dynamically
+            Map<Barrister, SendCorrespondenceEventEnvelop> envelopes = removedBarristers.stream()
+                .collect(Collectors.toMap(
+                    b -> b,
+                    b -> {
+                        SendCorrespondenceEventEnvelop envelop = mock(SendCorrespondenceEventEnvelop.class);
+                        when(underTest.prepareApplicantBarristerEmailNotificationEvent(info, b))
+                            .thenReturn(envelop);
+                        return envelop;
+                    }
+                ));
+
+            // ---------- Act ----------
+            var result = underTest.revokeBarristers(info, barristerChange);
+
+            // ---------- Then ----------
+            assertAll(
+                () -> assertThat(result)
+                    .containsExactlyInAnyOrderElementsOf(envelopes.values()),
+
+                () -> removedBarristers.forEach(b ->
+                    verify(underTest).prepareApplicantBarristerEmailNotificationEvent(info, b)
+                ),
+
+                () -> verify(barristerChangeCaseAccessUpdater)
+                    .executeBarristerChange(CASE_ID_IN_LONG, barristerChange)
+            );
+        }
     }
 
     @Nested
