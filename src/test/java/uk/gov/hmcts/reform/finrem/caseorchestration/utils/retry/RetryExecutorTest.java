@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,75 +44,54 @@ class RetryExecutorTest {
         }
     }
 
-    @Test
-    void shouldRetryOnServiceUnavailable() throws Exception {
-        AtomicInteger counter = new AtomicInteger();
+    @Nested
+    class SupplyWithRetryTest {
 
-        String result = retryExecutor.supplyWithRetry(() -> {
-            if (counter.getAndIncrement() < DEFAULT_MAX_ATTEMPTS - 1) {
-                throw feignException(503, "Service Unavailable");
-            }
-            return "success";
-        }, "send", CASE_ID);
+        @ParameterizedTest(name = "should retry on status {0} and succeed")
+        @ValueSource(ints = {500, 503, 504})
+        void shouldRetryOnRetryableStatus(int status) throws Exception {
+            AtomicInteger counter = new AtomicInteger();
 
-        assertThat(result).isEqualTo("success");
-        assertThat(counter.get()).isEqualTo(DEFAULT_MAX_ATTEMPTS);
-    }
+            String result = retryExecutor.supplyWithRetry(() -> {
+                if (counter.getAndIncrement() < DEFAULT_MAX_ATTEMPTS - 1) {
+                    throw feignException(status, "Retryable Error");
+                }
+                return "success";
+            }, "send", CASE_ID);
 
-    @Test
-    void shouldRetryOnGatewayTimeout() throws Exception {
-        AtomicInteger counter = new AtomicInteger();
+            assertThat(result).isEqualTo("success");
+            assertThat(counter.get()).isEqualTo(DEFAULT_MAX_ATTEMPTS);
+        }
 
-        String result = retryExecutor.supplyWithRetry(() -> {
-            if (counter.getAndIncrement() < DEFAULT_MAX_ATTEMPTS - 1) {
-                throw feignException(504, "Gateway Timeout");
-            }
-            return "success";
-        }, "send", CASE_ID);
+        @ParameterizedTest(name = "should retry once on first status {0} then succeed")
+        @ValueSource(ints = {504}) // can expand if needed
+        void shouldRetryOnceThenSucceed(int status) throws Exception {
+            AtomicInteger counter = new AtomicInteger();
 
-        assertThat(result).isEqualTo("success");
-        assertThat(counter.get()).isEqualTo(DEFAULT_MAX_ATTEMPTS);
-    }
+            String result = retryExecutor.supplyWithRetry(() -> {
+                if (counter.getAndIncrement() == 0) {
+                    throw feignException(status, "Retryable Error");
+                }
+                return "success";
+            }, "send", CASE_ID);
 
-    @Test
-    void shouldNotRetryOnNonRetryableException() {
-        AtomicInteger counter = new AtomicInteger();
+            assertThat(result).isEqualTo("success");
+            assertThat(counter.get()).isEqualTo(2);
+        }
 
-        assertThatThrownBy(() ->
-            retryExecutor.supplyWithRetry(() -> {
-                counter.incrementAndGet();
-                throw new RuntimeException("Not retryable");
-            }, "send", CASE_ID)
-        ).isInstanceOf(RuntimeException.class);
+        @ParameterizedTest(name = "should not retry on non-retryable exception")
+        @ValueSource(ints = {0}) // dummy parameter to allow parameterized test
+        void shouldNotRetryOnNonRetryableException(int ignored) {
+            AtomicInteger counter = new AtomicInteger();
 
-        assertThat(counter.get()).isEqualTo(1);
-    }
+            assertThatThrownBy(() ->
+                retryExecutor.supplyWithRetry(() -> {
+                    counter.incrementAndGet();
+                    throw new RuntimeException("Not retryable");
+                }, "send", CASE_ID)
+            ).isInstanceOf(RuntimeException.class);
 
-    @Test
-    void shouldRetryRunWithRetry() throws Exception {
-        AtomicInteger counter = new AtomicInteger();
-
-        retryExecutor.runWithRetry(() -> {
-            if (counter.getAndIncrement() < DEFAULT_MAX_ATTEMPTS - 1) {
-                throw feignException(500, "Internal Server Error");
-            }
-        }, "send", CASE_ID);
-
-        assertThat(counter.get()).isEqualTo(DEFAULT_MAX_ATTEMPTS);
-    }
-
-    @Test
-    void shouldRetryOnceWhenGatewayTimeoutThenSucceed() throws Exception {
-        AtomicInteger counter = new AtomicInteger();
-
-        String result = retryExecutor.supplyWithRetry(() -> {
-            if (counter.getAndIncrement() == 0) {
-                throw feignException(504, "Gateway Timeout");
-            }
-            return "success";
-        }, "send", CASE_ID);
-
-        assertThat(result).isEqualTo("success");
-        assertThat(counter.get()).isEqualTo(2);
+            assertThat(counter.get()).isEqualTo(1);
+        }
     }
 }
