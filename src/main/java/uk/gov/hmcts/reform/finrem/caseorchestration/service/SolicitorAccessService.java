@@ -28,17 +28,21 @@ public class SolicitorAccessService {
      * This method checks if there has been a change in the applicant or respondent solicitor details and updates their access accordingly.
      * If there is an issue with updating access (e.g. user not found in Organisation API), it rethrows the exception with a descriptive message.
      *
-     * @param caseData the current case data
+     * @param caseData       the current case data
      * @param caseDataBefore the case data before the update
      */
     public void checkAndAssignSolicitorAccess(FinremCaseData caseData,
-                                              FinremCaseData caseDataBefore) {
+                                                FinremCaseData caseDataBefore) throws UserNotFoundInOrganisationApiException {
         // Applicant solicitor access update
         if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
             try {
                 updateApplicantSolicitor(caseData, caseDataBefore);
             } catch (UserNotFoundInOrganisationApiException e) {
-                throw new RuntimeException("Unable to update Applicant Solicitor access for Case", e);
+                ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+                String appSolEmail = YesOrNo.isYes(contactDetailsWrapper.getApplicantRepresented())
+                    ? contactDetailsWrapper.getApplicantSolicitorEmail() : null;
+                log.info("There was a problem updating access to applicant solicitor: %s".formatted(appSolEmail));
+                throw new UserNotFoundInOrganisationApiException();
             }
         }
 
@@ -47,7 +51,11 @@ public class SolicitorAccessService {
             try {
                 updateRespondentSolicitor(caseData, caseDataBefore);
             } catch (UserNotFoundInOrganisationApiException e) {
-                throw new RuntimeException("Unable to update Respondent Solicitor access for Case", e);
+                ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+                String respSolEmail = YesOrNo.isYes(contactDetailsWrapper.getContestedRespondentRepresented())
+                    ? contactDetailsWrapper.getRespondentSolicitorEmail() : null;
+                log.info("There was a problem updating access to respondent solicitor: %s".formatted(respSolEmail));
+                throw new UserNotFoundInOrganisationApiException();
             }
         }
     }
