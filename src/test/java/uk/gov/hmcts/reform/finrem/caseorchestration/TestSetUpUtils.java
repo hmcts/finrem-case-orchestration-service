@@ -619,4 +619,21 @@ public class TestSetUpUtils {
             throw new RuntimeException(e);
         }
     }
+
+    public static FeignException feignException(int status, String reason) {
+        return FeignException.errorStatus(
+            "test",
+            feign.Response.builder()
+                .status(status)
+                .reason(reason)
+                .request(feign.Request.create(
+                    feign.Request.HttpMethod.GET,
+                    "/test",
+                    Map.of(),
+                    null,
+                    null,
+                    null))
+                .build()
+        );
+    }
 }

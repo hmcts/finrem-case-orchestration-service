@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry;
 
-import feign.FeignException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +9,6 @@ import org.springframework.retry.RetryListener;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignException;
 
 @SpringJUnitConfig(RetryExecutorTest.Config.class)
 class RetryExecutorTest {
@@ -113,22 +112,5 @@ class RetryExecutorTest {
 
         assertThat(result).isEqualTo("success");
         assertThat(counter.get()).isEqualTo(2);
-    }
-
-    private FeignException feignException(int status, String reason) {
-        return FeignException.errorStatus(
-            "test",
-            feign.Response.builder()
-                .status(status)
-                .reason(reason)
-                .request(feign.Request.create(
-                    feign.Request.HttpMethod.GET,
-                    "/test",
-                    Map.of(),
-                    null,
-                    null,
-                    null))
-                .build()
-        );
     }
 }
