@@ -9,6 +9,11 @@ import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.stereotype.Component;
 import org.springframework.util.function.ThrowingSupplier;
 
+import java.util.Arrays;
+import java.util.Optional;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+
 /**
  * Utility component that executes actions with automatic retry support.
  *
@@ -25,6 +30,11 @@ import org.springframework.util.function.ThrowingSupplier;
 @Slf4j
 @Component
 public class RetryExecutor {
+
+    private static final RetryErrorHandler SUPPRESS_HANDLER = (ex, actionName, caseId) ->
+        log.error(
+            "{} - unexpected exception when executing {} in suppress mode. This indicates a bug or retry exhausted in RetryExecutor.",
+            caseId, actionName, ex);
 
     /**
      * Executes a supplier operation with retry support and returns its result.
@@ -88,5 +98,65 @@ public class RetryExecutor {
             context.setAttribute("caseId", caseId);
         }
         action.run();
+    }
+
+    public void runWithRetryWithHandler(
+        ThrowingRunnable action,
+        String actionName,
+        String caseId,
+        RetryErrorHandler... errorHandlers
+    ) {
+        try {
+            runWithRetry(action, actionName, caseId);
+        } catch (Exception ex) {
+            emptyIfNull(Arrays.asList(errorHandlers)).forEach(errorHandler ->
+                errorHandler.handle(ex, actionName, caseId));
+        }
+    }
+
+    public void runWithRetrySuppressException(
+        ThrowingRunnable action,
+        String actionName,
+        String caseId
+    ) {
+        try {
+            runWithRetry(action, actionName, caseId);
+        } catch (Exception ex) {
+            SUPPRESS_HANDLER.handle(ex, actionName, caseId);
+        }
+    }
+
+    public <T> Optional<T> supplyWithRetryWithHandler(
+        ThrowingSupplier<T> action,
+        String actionName,
+        String caseId,
+        RetryErrorHandler... errorHandlers
+    ) {
+        if (errorHandlers.length == 0) {
+            return supplyWithRetrySuppressException(action, actionName, caseId);
+        }
+        try {
+            return Optional.ofNullable(supplyWithRetry(action, actionName, caseId));
+        } catch (Exception ex) {
+            for (RetryErrorHandler handler : errorHandlers) {
+                handler.handle(ex, actionName, caseId);
+            }
+            return Optional.empty();
+        }
+    }
+
+    public <T> Optional<T> supplyWithRetrySuppressException(
+        ThrowingSupplier<T> action,
+        String actionName,
+        String caseId
+    ) {
+        try {
+            return Optional.ofNullable(
+                supplyWithRetry(action, actionName, caseId)
+            );
+        } catch (Exception ex) {
+            SUPPRESS_HANDLER.handle(ex, actionName, caseId);
+            return Optional.empty();
+        }
     }
 }
