@@ -101,19 +101,22 @@ public class RetryExecutor {
     }
 
     /**
-     * Executes a runnable action with retry support and invokes the provided error handlers
+     * Executes the given runnable action with retry support and invokes the provided error handlers
      * if all retry attempts fail.
      *
-     * <p>This method delegates to {@link #runWithRetry(ThrowingRunnable, String, String)}.
-     * If an exception is thrown after retries are exhausted, each provided
-     * {@link RetryErrorHandler} will be invoked in order.</p>
+     * <p>This method delegates to {@link #runWithRetry(ThrowingRunnable, String, String)}.</p>
      *
-     * <p>If no handlers are provided, no additional handling is performed.</p>
+     * <p>If all retry attempts are exhausted and an exception is thrown, each provided
+     * {@link RetryErrorHandler} is invoked in order with the exception, action name, and case ID.</p>
+     *
+     * <p>At least one {@link RetryErrorHandler} must be provided. If none are supplied,
+     * this method throws an {@link IllegalStateException}.</p>
      *
      * @param action the operation to execute
-     * @param actionName a descriptive name of the action being performed
+     * @param actionName a descriptive name of the action being performed (used for logging and error handling)
      * @param caseId the case identifier associated with the operation
-     * @param errorHandlers optional handlers to process the exception after retries are exhausted
+     * @param errorHandlers one or more handlers to process the exception after retries are exhausted
+     * @throws IllegalStateException if no {@code errorHandlers} are provided
      */
     public void runWithRetryWithHandler(
         ThrowingRunnable action,
@@ -122,8 +125,7 @@ public class RetryExecutor {
         RetryErrorHandler... errorHandlers
     ) {
         if (errorHandlers.length == 0) {
-            runWithRetrySuppressException(action, actionName, caseId);
-            return;
+            throw new IllegalStateException("no handler provided");
         }
         try {
             runWithRetry(action, actionName, caseId);
@@ -158,22 +160,26 @@ public class RetryExecutor {
     }
 
     /**
-     * Executes a supplier operation with retry support and invokes the provided error handlers
+     * Executes the given supplier with retry support and invokes the provided error handlers
      * if all retry attempts fail.
      *
-     * <p>If the operation succeeds, the result is wrapped in an {@link Optional}.
-     * If it fails after all retries, each provided {@link RetryErrorHandler}
-     * is invoked and {@link Optional#empty()} is returned.</p>
+     * <p>If the operation completes successfully, the result is wrapped in an {@link Optional}
+     * (which may be empty if the supplier returns {@code null}).</p>
      *
-     * <p>If no handlers are provided, this method falls back to
-     * {@link #supplyWithRetrySuppressException(ThrowingSupplier, String, String)}.</p>
+     * <p>If all retry attempts are exhausted and an exception is thrown, each provided
+     * {@link RetryErrorHandler} is invoked with the exception, action name, and case ID.
+     * In this case, {@link Optional#empty()} is returned.</p>
+     *
+     * <p>At least one {@link RetryErrorHandler} must be provided. If none are supplied,
+     * this method throws an {@link IllegalStateException}.</p>
      *
      * @param action the operation to execute
-     * @param actionName a descriptive name of the action being performed
+     * @param actionName a descriptive name of the action being performed (used for logging and error handling)
      * @param caseId the case identifier associated with the operation
-     * @param errorHandlers optional handlers to process the exception after retries are exhausted
+     * @param errorHandlers one or more handlers to process the exception after retries are exhausted
      * @param <T> the result type returned by the supplier
-     * @return an {@link Optional} containing the result if successful, otherwise empty
+     * @return an {@link Optional} containing the result if successful, otherwise {@link Optional#empty()}
+     * @throws IllegalStateException if no {@code errorHandlers} are provided
      */
     public <T> Optional<T> supplyWithRetryWithHandler(
         ThrowingSupplier<T> action,
@@ -182,7 +188,7 @@ public class RetryExecutor {
         RetryErrorHandler... errorHandlers
     ) {
         if (errorHandlers.length == 0) {
-            return supplyWithRetrySuppressException(action, actionName, caseId);
+            throw new IllegalStateException("no handler provided");
         }
         try {
             return Optional.ofNullable(supplyWithRetry(action, actionName, caseId));
