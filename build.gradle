@@ -408,6 +408,7 @@ dependencies {
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
     implementation group: 'org.springframework.retry', name: 'spring-retry', version: versions.retry
@@ -484,6 +485,7 @@ dependencies {
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
+    testImplementation 'org.aspectj:aspectjweaver'
 
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 

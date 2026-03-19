@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -35,18 +36,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_
 @ExtendWith(MockitoExtension.class)
 class FinremCallbackHandlerTest {
 
-    static class DefaultFinremCallbackHandler extends FinremCallbackHandler {
+    static class GeneralFinremCallbackHandler extends FinremCallbackHandler {
 
-        public DefaultFinremCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+        public GeneralFinremCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
             super(finremCaseDetailsMapper);
         }
 
         @Override
         public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
             FinremCallbackRequest callbackRequest, String userAuthorisation) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(callbackRequest.getCaseDetails().getData())
-                .build();
+            return response(callbackRequest.getCaseDetails().getData());
         }
 
         @Override
@@ -55,18 +54,35 @@ class FinremCallbackHandlerTest {
         }
     }
 
-    static class DefaultAboutToSubmitCallbackHandler extends FinremAboutToSubmitCallbackHandler {
+    static class GeneralAboutToSubmitCallbackHandler extends FinremAboutToSubmitCallbackHandler {
 
-        public DefaultAboutToSubmitCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+        public GeneralAboutToSubmitCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
             super(finremCaseDetailsMapper);
         }
 
         @Override
         public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
             FinremCallbackRequest callbackRequest, String userAuthorisation) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(callbackRequest.getCaseDetails().getData())
-                .build();
+            return response(callbackRequest.getCaseDetails().getData());
+        }
+
+        @Override
+        public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
+            return true;
+        }
+    }
+
+    static class GeneralSubmittedCallbackHandler extends FinremCallbackHandler {
+
+        public GeneralSubmittedCallbackHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+            super(finremCaseDetailsMapper);
+        }
+
+        @Override
+        public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
+            FinremCallbackRequest callbackRequest, String userAuthorisation) {
+            return submittedResponse(toConfirmationHeader("TEST"),
+                toConfirmationBody("Message One", "Message Two"));
         }
 
         @Override
@@ -78,8 +94,9 @@ class FinremCallbackHandlerTest {
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    private DefaultFinremCallbackHandler defaultFinremCallbackHandler;
-    private DefaultAboutToSubmitCallbackHandler defaultAboutToSubmitCallbackHandler;
+    private GeneralFinremCallbackHandler generalFinremCallbackHandler;
+    private GeneralAboutToSubmitCallbackHandler generalAboutToSubmitCallbackHandler;
+    private GeneralSubmittedCallbackHandler generalSubmittedCallbackHandler;
 
     private static final Map<String, Object> TESTING_DATA_IN_MAP = Map.of(
         "retained", YesOrNo.YES,
@@ -89,8 +106,9 @@ class FinremCallbackHandlerTest {
 
     @BeforeEach
     void setUp() {
-        defaultFinremCallbackHandler = spy(new DefaultFinremCallbackHandler(finremCaseDetailsMapper));
-        defaultAboutToSubmitCallbackHandler = spy(new DefaultAboutToSubmitCallbackHandler(finremCaseDetailsMapper));
+        generalFinremCallbackHandler = spy(new GeneralFinremCallbackHandler(finremCaseDetailsMapper));
+        generalAboutToSubmitCallbackHandler = spy(new GeneralAboutToSubmitCallbackHandler(finremCaseDetailsMapper));
+        generalSubmittedCallbackHandler = spy(new GeneralSubmittedCallbackHandler(finremCaseDetailsMapper));
     }
 
     @Test
@@ -114,18 +132,18 @@ class FinremCallbackHandlerTest {
         when(finremCaseDetailsMapper.mapToFinremCaseData(Map.of("retained", YesOrNo.YES)))
             .thenReturn(expectedResponseData);
 
-        assertThat(defaultAboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN).getData())
+        assertThat(generalAboutToSubmitCallbackHandler.handle(callbackRequest, AUTH_TOKEN).getData())
             .isEqualTo(expectedResponseData); // if expected properties are removed, it must return expectedResponseData
         verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(TESTING_DATA_IN_MAP);
 
         // to ensure callbackRequest is a copy i.e. callbackRequest.toBuilder() was invoked
         ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
-        verify(defaultAboutToSubmitCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
+        verify(generalAboutToSubmitCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
         assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
     }
 
     @Test
-    void givenDefaultFinremCallbackHandler_whenHandled_thenShouldNotRemoveTemporaryFieldsAfterHandledOrNot() {
+    void givenGeneralFinremCallbackHandler_whenHandled_thenShouldNotRemoveTemporaryFieldsAfterHandledOrNot() {
         CaseDetails originalCaseDetails = CaseDetails.builder().data(new HashMap<>(TESTING_DATA_IN_MAP)).build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .eventId(STOP_REPRESENTING_CLIENT.getCcdType())
@@ -138,12 +156,20 @@ class FinremCallbackHandlerTest {
             argThat(arg -> TESTING_DATA_IN_MAP.equals(arg.getData())))
         ).thenReturn(finremCaseDetailsWithExpectedFinremCaseData);
 
-        assertThat(defaultFinremCallbackHandler.handle(callbackRequest, AUTH_TOKEN).getData())
+        assertThat(generalFinremCallbackHandler.handle(callbackRequest, AUTH_TOKEN).getData())
             .isEqualTo(expectedFinremCaseData);
         verify(finremCaseDetailsMapper, never()).mapToFinremCaseData(Map.of("retained", YesOrNo.YES));
 
         ArgumentCaptor<FinremCallbackRequest> argumentCaptor = ArgumentCaptor.forClass(FinremCallbackRequest.class);
-        verify(defaultFinremCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
+        verify(generalFinremCallbackHandler).handle(argumentCaptor.capture(), eq(AUTH_TOKEN));
         assertThat(argumentCaptor.getValue().getEventType()).isEqualTo(STOP_REPRESENTING_CLIENT);
+    }
+
+    @Test
+    void givenGeneralSubmittedHandler_whenHandled_thenShouldPopulateConfirmationHeaderAndConfirmationBody() {
+        assertThat(generalSubmittedCallbackHandler.handle(FinremCallbackRequestFactory.from(), AUTH_TOKEN))
+            .extracting(GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
+                GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody)
+            .containsExactly("# TEST", "<ul><li><h2>Message One</h2></li><li><h2>Message Two</h2></li></ul>");
     }
 }

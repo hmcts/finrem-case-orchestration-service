@@ -48,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -92,9 +93,11 @@ class IntervenerServiceTest {
     @Mock
     private IdamService idamService;
     @InjectMocks
-    private IntervenerService service;
+    private IntervenerService intervenerService;
     @Mock
     private ChangeOfRepresentationService changeOfRepresentationService;
+    @Mock
+    private AssignPartiesAccessService assignPartiesAccessService;
 
     @Test
     void givenCase_whenRemoveOperationChosenForIntv1NotRepresented_thenRemoveIntervener() {
@@ -105,7 +108,7 @@ class IntervenerServiceTest {
             .builder().intervenerName("One name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
         finremCaseData.setIntervenerOne(oneWrapper);
         List<String> errors = new ArrayList<>();
-        service.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
+        intervenerService.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
         assertNull(finremCaseData.getIntervenerOne().getIntervenerName());
         assertNull(finremCaseData.getIntervenerOne().getIntervenerEmail());
@@ -135,7 +138,7 @@ class IntervenerServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
+        intervenerService.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
         assertNull(finremCaseData.getIntervenerOne().getIntervenerName());
         assertNull(finremCaseData.getIntervenerOne().getIntervenerEmail());
@@ -156,7 +159,7 @@ class IntervenerServiceTest {
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").intervenerRepresented(YesOrNo.NO).build();
         finremCaseData.setIntervenerTwo(twoWrapper);
         List<String> errors = new ArrayList<>();
-        service.removeIntervenerDetails(twoWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
+        intervenerService.removeIntervenerDetails(twoWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
         assertNull(finremCaseData.getIntervenerTwo().getIntervenerName());
         assertNull(finremCaseData.getIntervenerTwo().getIntervenerEmail());
@@ -188,7 +191,7 @@ class IntervenerServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.removeIntervenerDetails(twoWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
+        intervenerService.removeIntervenerDetails(twoWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
         assertNull(finremCaseData.getIntervenerTwo().getIntervenerName());
         assertNull(finremCaseData.getIntervenerTwo().getIntervenerEmail());
@@ -209,7 +212,7 @@ class IntervenerServiceTest {
         finremCaseData.setIntervenerThree(threeWrapper);
 
         List<String> errors = new ArrayList<>();
-        service.removeIntervenerDetails(threeWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
+        intervenerService.removeIntervenerDetails(threeWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
         assertNull(finremCaseData.getIntervenerThree().getIntervenerName());
         assertNull(finremCaseData.getIntervenerThree().getIntervenerEmail());
@@ -240,7 +243,7 @@ class IntervenerServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.removeIntervenerDetails(threeWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
+        intervenerService.removeIntervenerDetails(threeWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
         assertNull(finremCaseData.getIntervenerThree().getIntervenerName());
         assertNull(finremCaseData.getIntervenerThree().getIntervenerEmail());
@@ -261,7 +264,7 @@ class IntervenerServiceTest {
         finremCaseData.setIntervenerFour(fourWrapper);
 
         List<String> errors = new ArrayList<>();
-        service.removeIntervenerDetails(fourWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
+        intervenerService.removeIntervenerDetails(fourWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
         assertNull(finremCaseData.getIntervenerFour().getIntervenerName());
         assertNull(finremCaseData.getIntervenerFour().getIntervenerEmail());
@@ -291,7 +294,7 @@ class IntervenerServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.removeIntervenerDetails(fourWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
+        intervenerService.removeIntervenerDetails(fourWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
         assertNull(finremCaseData.getIntervenerFour().getIntervenerName());
         assertNull(finremCaseData.getIntervenerFour().getIntervenerEmail());
@@ -303,7 +306,8 @@ class IntervenerServiceTest {
     }
 
     @Test
-    void givenContestedCase_whenAddingIntervenerAndIntv1Represent_thenSetIntervenerDateAddedAndDefaultOrg() {
+    void givenContestedCase_whenAddingIntervenerAndIntv1Represent_thenSetIntervenerDateAddedAndDefaultOrg()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
@@ -325,19 +329,17 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(oneWrapper, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(oneWrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerOne().getIntervenerDateAdded());
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, oneWrapper);
         assertThat(errors).isEmpty();
     }
 
     @Test
-    void givenContestedCase_whenAddingIntervenerAndIntv1RepresentWithNullOrgId_thenSetIntervenerDateAddedAndDefaultOrg() {
+    void givenContestedCase_whenAddingIntervenerAndIntv1RepresentWithNullOrgId_thenSetIntervenerDateAddedAndDefaultOrg()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
@@ -359,14 +361,11 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(oneWrapper, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(oneWrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerOne().getIntervenerDateAdded());
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), null);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, oneWrapper);
         assertThat(errors).isEmpty();
     }
 
@@ -407,7 +406,7 @@ class IntervenerServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
         IntervenerOne intervenerOneWrapper = finremCaseData.getIntervenerOne();
 
@@ -461,7 +460,7 @@ class IntervenerServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
         IntervenerOne intervenerOne = finremCaseData.getIntervenerOne();
 
@@ -479,7 +478,8 @@ class IntervenerServiceTest {
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervener1AndChangedRepresentationSolEmailChanged_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervener1AndChangedRepresentationSolEmailChanged_thenHandle()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -521,9 +521,8 @@ class IntervenerServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL_CHANGE, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
         IntervenerOne intervenerOne = finremCaseData.getIntervenerOne();
         assertNotNull(intervenerOne.getIntervenerDateAdded());
@@ -535,15 +534,14 @@ class IntervenerServiceTest {
         assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, finremCaseData.getIntervenerOne());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
         assertThat(errors).isEmpty();
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervener1AndChangedRepresentationSolOrgChanged_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervener1AndChangedRepresentationSolOrgChanged_thenHandle() throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -589,7 +587,7 @@ class IntervenerServiceTest {
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
         IntervenerOne intervenerOne = finremCaseData.getIntervenerOne();
         assertNotNull(intervenerOne.getIntervenerDateAdded());
@@ -601,15 +599,15 @@ class IntervenerServiceTest {
         assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), CHANGE_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
             INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
         assertThat(errors).isEmpty();
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervener1AndChangedRepresentationNoToYes_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervener1AndChangedRepresentationNoToYes_thenHandle()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -644,11 +642,8 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(oneWrapper1, errors, finremCallbackRequest);
 
         IntervenerOne intervenerOne = finremCaseData.getIntervenerOne();
         assertNotNull(intervenerOne.getIntervenerSolEmail());
@@ -657,8 +652,7 @@ class IntervenerServiceTest {
         assertNotNull(intervenerOne.getIntervenerSolicitorReference());
         assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerOne.getIntervenerOrganisation().getOrganisation().getOrganisationName());
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_1.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
         assertThat(errors).isEmpty();
     }
 
@@ -684,7 +678,7 @@ class IntervenerServiceTest {
         finremCaseData.getIntervenersList().setValue(option1);
 
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(oneWrapper, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(oneWrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerOne().getIntervenerDateAdded());
         assertNotNull(finremCaseData.getIntervenerOne().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
@@ -713,7 +707,7 @@ class IntervenerServiceTest {
         finremCaseData.getIntervenersList().setValue(option1);
 
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerTwo().getIntervenerDateAdded());
         assertNotNull(finremCaseData.getIntervenerTwo().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
@@ -721,7 +715,8 @@ class IntervenerServiceTest {
     }
 
     @Test
-    void givenContestedCase_whenAddingIntervenerAndIntv2Represent_thenSetIntervenerDateAddedAndDefaultOrg() {
+    void givenContestedCase_whenAddingIntervenerAndIntv2Represent_thenSetIntervenerDateAddedAndDefaultOrg()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
@@ -743,14 +738,11 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerTwo().getIntervenerDateAdded());
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, wrapper);
         assertThat(errors).isEmpty();
     }
 
@@ -791,7 +783,7 @@ class IntervenerServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerTwo intervenerTwo = finremCaseData.getIntervenerTwo();
         assertNotNull(intervenerTwo.getIntervenerDateAdded());
@@ -808,7 +800,8 @@ class IntervenerServiceTest {
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervener2AndChangedRepresentationSolOrgChanged_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervener2AndChangedRepresentationSolOrgChanged_thenHandle()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -852,7 +845,7 @@ class IntervenerServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerTwo intervenerTwo = finremCaseData.getIntervenerTwo();
         assertNotNull(intervenerTwo.getIntervenerDateAdded());
@@ -864,15 +857,15 @@ class IntervenerServiceTest {
         assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), CHANGE_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
         assertThat(errors).isEmpty();
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervenerAndChangedRepresentationSolEmailChanged_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervenerAndChangedRepresentationSolEmailChanged_thenHandle()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -913,10 +906,9 @@ class IntervenerServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL_CHANGE, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerTwo intervenerTwo = finremCaseData.getIntervenerTwo();
         assertNotNull(intervenerTwo.getIntervenerDateAdded());
@@ -928,15 +920,15 @@ class IntervenerServiceTest {
         assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, current);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
             INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
         assertThat(errors).isEmpty();
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervener2AndChangedRepresentationNoToYes_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervener2AndChangedRepresentationNoToYes_thenHandle()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -969,10 +961,8 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerTwo intervenerTwo = finremCaseData.getIntervenerTwo();
         assertNotNull(intervenerTwo.getIntervenerSolEmail());
@@ -981,8 +971,7 @@ class IntervenerServiceTest {
         assertNotNull(intervenerTwo.getIntervenerSolicitorReference());
         assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerTwo.getIntervenerOrganisation().getOrganisation().getOrganisationName());
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_2.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
         assertThat(errors).isEmpty();
     }
 
@@ -1007,7 +996,7 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         finremCaseData.getIntervenersList().setValue(option1);
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerThree().getIntervenerDateAdded());
         assertNotNull(finremCaseData.getIntervenerThree().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
@@ -1015,7 +1004,8 @@ class IntervenerServiceTest {
     }
 
     @Test
-    void givenContestedCase_whenAddingIntervenerAndIntv3Represent_thenSetIntervenerDateAddedAndDefaultOrg() {
+    void givenContestedCase_whenAddingIntervenerAndIntv3Represent_thenSetIntervenerDateAddedAndDefaultOrg()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
@@ -1037,15 +1027,11 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerThree().getIntervenerDateAdded());
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, wrapper);
         assertThat(errors).isEmpty();
     }
 
@@ -1088,7 +1074,7 @@ class IntervenerServiceTest {
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerThree intervenerThree = finremCaseData.getIntervenerThree();
         assertNotNull(intervenerThree.getIntervenerDateAdded());
@@ -1105,7 +1091,8 @@ class IntervenerServiceTest {
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervener3AndChangedRepresentationSolEmailChanges_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervener3AndChangedRepresentationSolEmailChanges_thenHandle()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -1146,10 +1133,9 @@ class IntervenerServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL_CHANGE, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerThree intervenerThree = finremCaseData.getIntervenerThree();
         assertNotNull(intervenerThree.getIntervenerDateAdded());
@@ -1161,15 +1147,14 @@ class IntervenerServiceTest {
         assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, finremCaseData.getIntervenerThree());
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
         assertThat(errors).isEmpty();
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervenerAndChangedRepresentationSolOrgChanges_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervenerAndChangedRepresentationSolOrgChanges_thenHandle() throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -1214,7 +1199,7 @@ class IntervenerServiceTest {
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerThree intervenerThree = finremCaseData.getIntervenerThree();
         assertNotNull(intervenerThree.getIntervenerDateAdded());
@@ -1226,15 +1211,14 @@ class IntervenerServiceTest {
         assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), CHANGE_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerThree);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
             INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
         assertThat(errors).isEmpty();
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervener3AndChangedRepresentationNoToYes_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervener3AndChangedRepresentationNoToYes_thenHandle() throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -1267,11 +1251,8 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerThree intervenerThree = finremCaseData.getIntervenerThree();
         assertNotNull(intervenerThree.getIntervenerSolEmail());
@@ -1280,8 +1261,7 @@ class IntervenerServiceTest {
         assertNotNull(intervenerThree.getIntervenerSolicitorReference());
         assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerThree.getIntervenerOrganisation().getOrganisation().getOrganisationName());
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_3.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerThree);
         assertThat(errors).isEmpty();
     }
 
@@ -1307,7 +1287,7 @@ class IntervenerServiceTest {
         finremCaseData.getIntervenersList().setValue(option1);
 
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerFour().getIntervenerDateAdded());
         assertNotNull(finremCaseData.getIntervenerFour().getIntervenerOrganisation().getOrgPolicyCaseAssignedRole());
@@ -1315,7 +1295,8 @@ class IntervenerServiceTest {
     }
 
     @Test
-    void givenContestedCase_whenAddingIntervenerAndIntv4Represent_thenSetIntervenerDateAddedAndDefaultOrg() {
+    void givenContestedCase_whenAddingIntervenerAndIntv4Represent_thenSetIntervenerDateAddedAndDefaultOrg()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
@@ -1337,15 +1318,11 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(wrapper, errors, finremCallbackRequest);
 
         assertNotNull(finremCaseData.getIntervenerFour().getIntervenerDateAdded());
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, wrapper);
         assertThat(errors).isEmpty();
     }
 
@@ -1387,7 +1364,7 @@ class IntervenerServiceTest {
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerFour intervenerFour = finremCaseData.getIntervenerFour();
         assertNotNull(intervenerFour.getIntervenerDateAdded());
@@ -1405,7 +1382,7 @@ class IntervenerServiceTest {
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervenerAndChangedRepresentationNoToYes_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervenerAndChangedRepresentationNoToYes_thenHandle() throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -1438,10 +1415,8 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerFour intervenerFour = finremCaseData.getIntervenerFour();
         assertNotNull(intervenerFour.getIntervenerDateAdded());
@@ -1451,13 +1426,12 @@ class IntervenerServiceTest {
         assertNotNull(intervenerFour.getIntervenerSolicitorReference());
         assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationName());
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerFour);
         assertThat(errors).isEmpty();
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervenerAndChangedRepresentationSolEmailChanges_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervenerAndChangedRepresentationSolEmailChanges_thenHandle() throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -1498,10 +1472,9 @@ class IntervenerServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
-        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL_CHANGE, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerFour intervenerFour = finremCaseData.getIntervenerFour();
         assertNotNull(intervenerFour.getIntervenerDateAdded());
@@ -1513,15 +1486,15 @@ class IntervenerServiceTest {
         assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, intervenerFour);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
         assertThat(errors).isEmpty();
     }
 
     @Test
-    void givenContestedCase_whenUpdatingIntervenerAndChangedRepresentationSolOrgChanged_thenHandle() {
+    void givenContestedCase_whenUpdatingIntervenerAndChangedRepresentationSolOrgChanged_thenHandle()
+        throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData finremCaseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -1567,7 +1540,7 @@ class IntervenerServiceTest {
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(current, errors, finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
 
         IntervenerFour intervenerFour = finremCaseData.getIntervenerFour();
         assertNotNull(intervenerFour.getIntervenerDateAdded());
@@ -1579,15 +1552,14 @@ class IntervenerServiceTest {
         assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationID());
         assertNotNull(intervenerFour.getIntervenerOrganisation().getOrganisation().getOrganisationName());
 
-        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
-            INTVR_SOLICITOR_4.getCcdCode(), CHANGE_ORG_ID);
+        verify(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, current);
         verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, INTERVENER_USER_ID,
             INTVR_SOLICITOR_4.getCcdCode(), SOME_ORG_ID);
         assertThat(errors).isEmpty();
     }
 
     @Test
-    void givenContestedCase_whenAddingIntervenerWithNonRegisterEmail_thenHandlerThrowException() {
+    void givenContestedCase_whenAddingIntervenerWithNonRegisterEmail_thenHandlerThrowException() throws UserNotFoundInOrganisationApiException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
@@ -1607,9 +1579,11 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        doThrow(new UserNotFoundInOrganisationApiException())
+            .when(assignPartiesAccessService).grantIntervenerSolicitor(CASE_ID_IN_LONG, wrapper);
+
         List<String> errors = new ArrayList<>();
-        service.updateIntervenerDetails(wrapper, errors,  finremCallbackRequest);
+        intervenerService.updateIntervenerDetails(wrapper, errors,  finremCallbackRequest);
         assertThat(errors).contains("Could not find intervener with provided email");
     }
 
@@ -1619,7 +1593,7 @@ class IntervenerServiceTest {
             .intervenerName("Intervener One")
             .build();
 
-        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerOne);
+        IntervenerChangeDetails result = intervenerService.setIntervenerAddedChangeDetails(intervenerOne);
         assertEquals(IntervenerAction.ADDED.toString(), result.getIntervenerAction().toString());
         assertEquals(IntervenerType.INTERVENER_ONE.toString(), result.getIntervenerType().toString());
     }
@@ -1630,7 +1604,7 @@ class IntervenerServiceTest {
             .intervenerName("Intervener Two")
             .build();
 
-        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerTwo);
+        IntervenerChangeDetails result = intervenerService.setIntervenerAddedChangeDetails(intervenerTwo);
         assertEquals(IntervenerAction.ADDED.toString(), result.getIntervenerAction().toString());
         assertEquals(IntervenerType.INTERVENER_TWO.toString(), result.getIntervenerType().toString());
     }
@@ -1641,7 +1615,7 @@ class IntervenerServiceTest {
             .intervenerName("Intervener Three")
             .build();
 
-        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerThree);
+        IntervenerChangeDetails result = intervenerService.setIntervenerAddedChangeDetails(intervenerThree);
         assertEquals(IntervenerAction.ADDED.toString(), result.getIntervenerAction().toString());
         assertEquals(IntervenerType.INTERVENER_THREE.toString(), result.getIntervenerType().toString());
     }
@@ -1652,7 +1626,7 @@ class IntervenerServiceTest {
             .intervenerName("Intervener Four")
             .build();
 
-        IntervenerChangeDetails result = service.setIntervenerAddedChangeDetails(intervenerFour);
+        IntervenerChangeDetails result = intervenerService.setIntervenerAddedChangeDetails(intervenerFour);
         assertEquals(IntervenerAction.ADDED.toString(), result.getIntervenerAction().toString());
         assertEquals(IntervenerType.INTERVENER_FOUR.toString(), result.getIntervenerType().toString());
     }
@@ -1663,7 +1637,7 @@ class IntervenerServiceTest {
             .intervenerName("Intervener One")
             .build();
 
-        IntervenerChangeDetails result = service.setIntervenerRemovedChangeDetails(intervenerWrapper);
+        IntervenerChangeDetails result = intervenerService.setIntervenerRemovedChangeDetails(intervenerWrapper);
         assertEquals(IntervenerAction.REMOVED.toString(), result.getIntervenerAction().toString());
         assertEquals(IntervenerType.INTERVENER_ONE.toString(), result.getIntervenerType().toString());
     }
@@ -1680,7 +1654,7 @@ class IntervenerServiceTest {
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
             .intervenerOne(intervenerOneBefore)
             .build();
-        assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+        assertTrue(intervenerService.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
     }
 
     @Test
@@ -1695,7 +1669,7 @@ class IntervenerServiceTest {
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
             .intervenerTwo(intervenerTwoBefore)
             .build();
-        assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+        assertTrue(intervenerService.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
     }
 
     @Test
@@ -1710,7 +1684,7 @@ class IntervenerServiceTest {
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
             .intervenerThree(intervenerThreeBefore)
             .build();
-        assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+        assertTrue(intervenerService.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
     }
 
     @Test
@@ -1725,14 +1699,14 @@ class IntervenerServiceTest {
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
             .intervenerFour(intervenerFourBefore)
             .build();
-        assertTrue(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+        assertTrue(intervenerService.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
     }
 
     @Test
     void whenNoIntervenerSolicitorRemoved_ShouldReturnFalse() {
         FinremCaseData finremCaseData = FinremCaseData.builder().build();
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder().build();
-        assertFalse(service.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
+        assertFalse(intervenerService.checkIfAnyIntervenerSolicitorRemoved(finremCaseData, finremCaseDataBefore));
     }
 
     @Test
@@ -1774,7 +1748,7 @@ class IntervenerServiceTest {
         when(changeOfRepresentationService.generateRepresentationUpdateHistory(any(ChangeOfRepresentationRequest.class),
             eq(STOP_REPRESENTING_CLIENT))).thenReturn(history);
 
-        service.updateIntervenerSolicitorStopRepresentingHistory(finremCaseData, originalFinremCaseData, AUTH_TOKEN);
+        intervenerService.updateIntervenerSolicitorStopRepresentingHistory(finremCaseData, originalFinremCaseData, AUTH_TOKEN);
 
         verify(changeOfRepresentationService).generateRepresentationUpdateHistory(captor.capture(), eq(STOP_REPRESENTING_CLIENT));
         verify(idamService).getIdamFullName(AUTH_TOKEN);
@@ -1816,7 +1790,7 @@ class IntervenerServiceTest {
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN))
             .thenReturn(Optional.empty());
         List<String> errors = new ArrayList<>();
-        service.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
+        intervenerService.removeIntervenerDetails(oneWrapper, errors, finremCaseData, CASE_ID_IN_LONG);
 
         verify(systemUserService).getSysUserToken();
         verify(organisationService).findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN);
@@ -1840,7 +1814,7 @@ class IntervenerServiceTest {
             .solUserId(INTERVENER_USER_ID)
             .intervenerRepresented(YesOrNo.YES)
             .build();
-        service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper);
+        intervenerService.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper);
         verify(assignCaseAccessService).removeCaseRoleToUser(
             CASE_ID_IN_LONG,
             INTERVENER_USER_ID,
@@ -1848,7 +1822,7 @@ class IntervenerServiceTest {
             SOME_ORG_ID
         );
     }
-      
+
     @Nested
     class RevokeIntervenerSolicitorTests {
 
@@ -1860,7 +1834,7 @@ class IntervenerServiceTest {
                 .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(TEST_ORG_ID)).build())
                 .build();
 
-            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            intervenerService.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
             verifyNoInteractions(assignCaseAccessService);
             verifyNoInteractions(organisationService);
             verifyNoInteractions(systemUserService);
@@ -1872,7 +1846,7 @@ class IntervenerServiceTest {
                 .intervenerOrganisation(null)
                 .build();
 
-            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            intervenerService.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
             verifyNoInteractions(assignCaseAccessService);
             verifyNoInteractions(organisationService);
             verifyNoInteractions(systemUserService);
@@ -1886,7 +1860,7 @@ class IntervenerServiceTest {
                 .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(orgId)).build())
                 .build();
 
-            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            intervenerService.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
             verifyNoInteractions(assignCaseAccessService);
             verifyNoInteractions(organisationService);
             verifyNoInteractions(systemUserService);
@@ -1898,7 +1872,7 @@ class IntervenerServiceTest {
                 .intervenerOrganisation(OrganisationPolicy.builder().organisation(null).build())
                 .build();
 
-            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            intervenerService.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
             verifyNoInteractions(assignCaseAccessService);
             verifyNoInteractions(organisationService);
             verifyNoInteractions(systemUserService);
@@ -1913,7 +1887,7 @@ class IntervenerServiceTest {
                 .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(TEST_ORG_ID)).build())
                 .build();
 
-            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
+            intervenerService.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
             verify(systemUserService).getSysUserToken();
             verify(organisationService).findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN);
             verifyNoInteractions(assignCaseAccessService);
@@ -1928,7 +1902,7 @@ class IntervenerServiceTest {
                 .intervenerOrganisation(OrganisationPolicy.builder().organisation(organisation(TEST_ORG_ID)).build())
                 .build();
 
-            service.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
+            intervenerService.revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerTwo);
             verify(systemUserService).getSysUserToken();
             verify(organisationService).findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN);
             verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID,
