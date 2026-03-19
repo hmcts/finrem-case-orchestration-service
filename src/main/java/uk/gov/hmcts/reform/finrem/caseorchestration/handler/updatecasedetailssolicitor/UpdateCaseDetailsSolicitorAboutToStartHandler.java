@@ -86,7 +86,7 @@ public class UpdateCaseDetailsSolicitorAboutToStartHandler extends FinremCallbac
     }
 
     private String getCaseAssignedUserRole(FinremCaseDetails finremCaseDetails, String authToken) {
-        CaseAssignedUserRolesResource resource = caseAssignedRoleService.getCaseAssignedUserRole(finremCaseDetails.getId().toString(), authToken);
+        CaseAssignedUserRolesResource resource = caseAssignedRoleService.getCaseAssignedUserRole(finremCaseDetails.getCaseIdAsString(), authToken);
         return resource.getCaseAssignedUserRoles().getFirst().getCaseRole();
     }
 }
