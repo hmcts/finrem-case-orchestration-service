@@ -100,6 +100,21 @@ public class RetryExecutor {
         action.run();
     }
 
+    /**
+     * Executes a runnable action with retry support and invokes the provided error handlers
+     * if all retry attempts fail.
+     *
+     * <p>This method delegates to {@link #runWithRetry(ThrowingRunnable, String, String)}.
+     * If an exception is thrown after retries are exhausted, each provided
+     * {@link RetryErrorHandler} will be invoked in order.</p>
+     *
+     * <p>If no handlers are provided, no additional handling is performed.</p>
+     *
+     * @param action the operation to execute
+     * @param actionName a descriptive name of the action being performed
+     * @param caseId the case identifier associated with the operation
+     * @param errorHandlers optional handlers to process the exception after retries are exhausted
+     */
     public void runWithRetryWithHandler(
         ThrowingRunnable action,
         String actionName,
@@ -114,6 +129,18 @@ public class RetryExecutor {
         }
     }
 
+    /**
+     * Executes a runnable action with retry support and suppresses any exception
+     * after all retry attempts are exhausted.
+     *
+     * <p>This method delegates to {@link #runWithRetry(ThrowingRunnable, String, String)}.
+     * If an exception occurs, it is handled by an internal suppressing handler
+     * that logs the error without rethrowing it.</p>
+     *
+     * @param action the operation to execute
+     * @param actionName a descriptive name of the action being performed
+     * @param caseId the case identifier associated with the operation
+     */
     public void runWithRetrySuppressException(
         ThrowingRunnable action,
         String actionName,
@@ -126,6 +153,24 @@ public class RetryExecutor {
         }
     }
 
+    /**
+     * Executes a supplier operation with retry support and invokes the provided error handlers
+     * if all retry attempts fail.
+     *
+     * <p>If the operation succeeds, the result is wrapped in an {@link Optional}.
+     * If it fails after all retries, each provided {@link RetryErrorHandler}
+     * is invoked and {@link Optional#empty()} is returned.</p>
+     *
+     * <p>If no handlers are provided, this method falls back to
+     * {@link #supplyWithRetrySuppressException(ThrowingSupplier, String, String)}.</p>
+     *
+     * @param action the operation to execute
+     * @param actionName a descriptive name of the action being performed
+     * @param caseId the case identifier associated with the operation
+     * @param errorHandlers optional handlers to process the exception after retries are exhausted
+     * @param <T> the result type returned by the supplier
+     * @return an {@link Optional} containing the result if successful, otherwise empty
+     */
     public <T> Optional<T> supplyWithRetryWithHandler(
         ThrowingSupplier<T> action,
         String actionName,
@@ -145,6 +190,20 @@ public class RetryExecutor {
         }
     }
 
+    /**
+     * Executes a supplier operation with retry support and suppresses any exception
+     * after all retry attempts are exhausted.
+     *
+     * <p>If the operation succeeds, the result is wrapped in an {@link Optional}.
+     * If it fails, the exception is handled by an internal suppressing handler
+     * and {@link Optional#empty()} is returned.</p>
+     *
+     * @param action the operation to execute
+     * @param actionName a descriptive name of the action being performed
+     * @param caseId the case identifier associated with the operation
+     * @param <T> the result type returned by the supplier
+     * @return an {@link Optional} containing the result if successful, otherwise empty
+     */
     public <T> Optional<T> supplyWithRetrySuppressException(
         ThrowingSupplier<T> action,
         String actionName,
