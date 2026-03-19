@@ -13,7 +13,7 @@ from the pods running in AAT.
 The first time cftlib is run it needs to download Docker images from the Azure Registry. You must therefore login
 to Azure as follows:
 ```bash
-az acr login --name hmctspublic --subscription DCD-CNP-Prod
+az acr login --name hmctsprod --subscription DCD-CNP-Prod
 az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 ```
 
