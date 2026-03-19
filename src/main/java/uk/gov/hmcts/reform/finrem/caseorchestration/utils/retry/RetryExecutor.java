@@ -121,6 +121,10 @@ public class RetryExecutor {
         String caseId,
         RetryErrorHandler... errorHandlers
     ) {
+        if (errorHandlers.length == 0) {
+            runWithRetrySuppressException(action, actionName, caseId);
+            return;
+        }
         try {
             runWithRetry(action, actionName, caseId);
         } catch (Exception ex) {
