@@ -71,6 +71,7 @@ public class ContactDetailsWrapper {
     private String respondentEmail;
     @JsonProperty("respondentAddressConfidential")
     private YesOrNo respondentAddressHiddenFromApplicant;
+    // solicitorXXXX fields are for consented cases
     private String solicitorName;
     private String solicitorFirm;
     private Address solicitorAddress;
