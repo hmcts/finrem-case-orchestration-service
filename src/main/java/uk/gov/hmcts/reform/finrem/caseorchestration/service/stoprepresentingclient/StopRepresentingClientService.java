@@ -470,7 +470,6 @@ public class StopRepresentingClientService {
                 case INTERVENER2 -> prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_TWO, b);
                 case INTERVENER3 -> prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_THREE, b);
                 case INTERVENER4 -> prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_FOUR, b);
-                default -> null;
             })
             .filter(Objects::nonNull)
             .toList();
