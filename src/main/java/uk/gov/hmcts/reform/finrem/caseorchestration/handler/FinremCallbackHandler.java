@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.text.StringEscapeUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -87,6 +88,18 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return response.toBuilder().data(finremCaseDetailsMapper.mapToFinremCaseData(toBeSanitisedCaseDetails.getData())).build();
     }
 
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submittedResponse() {
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().build();
+    }
+
+    protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> submittedResponse(String confirmationHeader,
+                                                                                            String confirmationBody) {
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .confirmationHeader(confirmationHeader)
+            .confirmationBody(confirmationBody)
+            .build();
+    }
+
     protected GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response(FinremCaseData finremCaseData) {
         return response(finremCaseData, null, null);
     }
@@ -102,6 +115,25 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             builder.warnings(warnings);
         }
         return builder.build();
+    }
+
+    protected String toConfirmationHeader(String messages) {
+        return "# %s".formatted(messages);
+    }
+
+    protected String toConfirmationBody(String... messages) {
+        StringBuilder body = new StringBuilder("<ul>");
+
+        if (messages != null) {
+            for (String error : messages) {
+                if (error != null && !error.isBlank()) {
+                    body.append("<li><h2>%s</h2></li>".formatted(StringEscapeUtils.escapeHtml4(error)));
+                }
+            }
+        }
+
+        body.append("</ul>");
+        return body.toString();
     }
 
     private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
