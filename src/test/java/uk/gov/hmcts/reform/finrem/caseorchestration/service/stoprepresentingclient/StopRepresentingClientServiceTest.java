@@ -64,6 +64,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -186,9 +187,8 @@ class StopRepresentingClientServiceTest {
         );
 
         Map<String, Object> result = callbackCaptor.getValue().apply(mock(CaseDetails.class));
-
         assertThat(result)
-            .doesNotContainKey("changeOrganisationRequestField");
+            .contains(entry("changeOrganisationRequestField", null));
     }
 
     @Test
