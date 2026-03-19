@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -56,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -68,6 +70,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -155,6 +158,37 @@ class StopRepresentingClientServiceTest {
         lenient().when(manageBarristerService
                 .getBarristerChange(any(FinremCaseDetails.class), any(FinremCaseData.class), any(BarristerParty.class)))
             .thenReturn(BarristerChange.builder().build());
+    }
+
+    @Test
+    void shouldPerformCleanupAfterNocWorkflow() {
+        // given
+        CaseType caseType = mock(CaseType.class);
+        FinremCaseDetails caseDetailsWrapper = mock(FinremCaseDetails.class);
+        StopRepresentingClientInfo info = mock(StopRepresentingClientInfo.class);
+
+        when(caseDetailsWrapper.getCaseType()).thenReturn(caseType);
+        when(info.getCaseDetails()).thenReturn(caseDetailsWrapper);
+        when(info.getCaseId()).thenReturn(CASE_ID_IN_LONG);
+
+        ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> callbackCaptor =
+            ArgumentCaptor.forClass(Function.class);
+
+        // when
+        underTest.performCleanUpAfterNocWorkflow(info);
+
+        // then
+        verify(coreCaseDataService).performPostSubmitCallback(
+            eq(caseType),
+            eq(CASE_ID_IN_LONG),
+            eq("internal-change-UPDATE_CASE"),
+            callbackCaptor.capture()
+        );
+
+        Map<String, Object> result = callbackCaptor.getValue().apply(mock(CaseDetails.class));
+
+        assertThat(result)
+            .doesNotContainKey("changeOrganisationRequestField");
     }
 
     @Test
