@@ -40,7 +40,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventEnvelop;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -381,14 +381,14 @@ class StopRepresentingClientServiceTest {
             when(barristerChange.getRemoved()).thenReturn(removedBarristers);
 
             // stub email notifications for each barrister dynamically
-            Map<Barrister, SendCorrespondenceEventEnvelop> envelopes = removedBarristers.stream()
+            Map<Barrister, SendCorrespondenceEventWithDescription> eventsWithDesc = removedBarristers.stream()
                 .collect(Collectors.toMap(
                     b -> b,
                     b -> {
-                        SendCorrespondenceEventEnvelop envelop = mock(SendCorrespondenceEventEnvelop.class);
+                        SendCorrespondenceEventWithDescription eventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
                         when(underTest.prepareApplicantBarristerEmailNotificationEvent(info, b))
-                            .thenReturn(envelop);
-                        return envelop;
+                            .thenReturn(eventWithDesc);
+                        return eventWithDesc;
                     }
                 ));
 
@@ -398,7 +398,7 @@ class StopRepresentingClientServiceTest {
             // ---------- Then ----------
             assertAll(
                 () -> assertThat(result)
-                    .containsExactlyInAnyOrderElementsOf(envelopes.values()),
+                    .containsExactlyInAnyOrderElementsOf(eventsWithDesc.values()),
 
                 () -> removedBarristers.forEach(b ->
                     verify(underTest).prepareApplicantBarristerEmailNotificationEvent(info, b)
@@ -437,14 +437,14 @@ class StopRepresentingClientServiceTest {
             when(barristerChange.getRemoved()).thenReturn(removedBarristers);
 
             // stub email notifications for each barrister dynamically
-            Map<Barrister, SendCorrespondenceEventEnvelop> envelopes = removedBarristers.stream()
+            Map<Barrister, SendCorrespondenceEventWithDescription> eventsWithDesc = removedBarristers.stream()
                 .collect(Collectors.toMap(
                     b -> b,
                     b -> {
-                        SendCorrespondenceEventEnvelop envelop = mock(SendCorrespondenceEventEnvelop.class);
+                        SendCorrespondenceEventWithDescription eventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
                         when(underTest.prepareRespondentBarristerEmailNotificationEvent(info, b))
-                            .thenReturn(envelop);
-                        return envelop;
+                            .thenReturn(eventWithDesc);
+                        return eventWithDesc;
                     }
                 ));
 
@@ -454,7 +454,7 @@ class StopRepresentingClientServiceTest {
             // ---------- Then ----------
             assertAll(
                 () -> assertThat(result)
-                    .containsExactlyInAnyOrderElementsOf(envelopes.values()),
+                    .containsExactlyInAnyOrderElementsOf(eventsWithDesc.values()),
 
                 () -> removedBarristers.forEach(b ->
                     verify(underTest).prepareRespondentBarristerEmailNotificationEvent(info, b)
@@ -515,14 +515,14 @@ class StopRepresentingClientServiceTest {
             when(barristerChange.getRemoved()).thenReturn(removedBarristers);
 
             // stub email notifications for each barrister dynamically
-            Map<Barrister, SendCorrespondenceEventEnvelop> envelopes = removedBarristers.stream()
+            Map<Barrister, SendCorrespondenceEventWithDescription> eventWithDescriptionMap = removedBarristers.stream()
                 .collect(Collectors.toMap(
                     b -> b,
                     b -> {
-                        SendCorrespondenceEventEnvelop envelop = mock(SendCorrespondenceEventEnvelop.class);
+                        SendCorrespondenceEventWithDescription eventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
                         when(underTest.prepareIntervenerBarristerEmailNotificationEvent(info, intervenerType, b))
-                            .thenReturn(envelop);
-                        return envelop;
+                            .thenReturn(eventWithDesc);
+                        return eventWithDesc;
                     }
                 ));
 
@@ -532,7 +532,7 @@ class StopRepresentingClientServiceTest {
             // ---------- Then ----------
             assertAll(
                 () -> assertThat(result)
-                    .containsExactlyInAnyOrderElementsOf(envelopes.values()),
+                    .containsExactlyInAnyOrderElementsOf(eventWithDescriptionMap.values()),
 
                 () -> removedBarristers.forEach(b ->
                     verify(underTest).prepareIntervenerBarristerEmailNotificationEvent(info, intervenerType, b)
@@ -591,7 +591,7 @@ class StopRepresentingClientServiceTest {
         @MethodSource
         void shouldRevokeIntervenerSolicitor_andReturnNotificationEvent(boolean isContested,
                                                                         IntervenerWrapper intervenerWrapper,
-                                                                        String envelopDescription,
+                                                                        String description,
                                                                         CaseRole intevenerCaseRole,
                                                                         IntervenerType intervenerType,
                                                                         NotificationParty notificationParty) {
@@ -626,21 +626,21 @@ class StopRepresentingClientServiceTest {
             }
 
             // when
-            SendCorrespondenceEventEnvelop actual = underTest.revokeIntervenerSolicitor(info, intervenerWrapper);
+            SendCorrespondenceEventWithDescription actual = underTest.revokeIntervenerSolicitor(info, intervenerWrapper);
 
             // then
             verify(intervenerService).revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper);
 
-            var envelop = actual;
-            var event = envelop.getEvent();
+            var eventWithDesc = actual;
+            var event = eventWithDesc.getEvent();
 
             var expectedTemplate = isContested
                 ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER
                 : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
 
             assertAll(
-                () -> assertThat(envelop.getDescription())
-                    .isEqualTo(envelopDescription),
+                () -> assertThat(eventWithDesc.getDescription())
+                    .isEqualTo(description),
 
                 () -> assertThat(event.getNotificationParties())
                     .containsExactly(notificationParty),
@@ -800,7 +800,7 @@ class StopRepresentingClientServiceTest {
         void shouldReturnEmptyEmailNotification_whenLitigantSolicitorWasNotRevoked() {
             StopRepresentingClientService.LitigantRevocation litigantRevocation =
                 new StopRepresentingClientService.LitigantRevocation(false, false);
-            List<SendCorrespondenceEventEnvelop> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation,
+            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation,
                 mock(StopRepresentingClientInfo.class));
             assertThat(actual).isEmpty();
         }
@@ -809,7 +809,7 @@ class StopRepresentingClientServiceTest {
         void shouldReturnEmptyLetterNotification_whenLitigantSolicitorWasNotRevoked() {
             StopRepresentingClientService.LitigantRevocation litigantRevocation =
                 new StopRepresentingClientService.LitigantRevocation(false, false);
-            List<SendCorrespondenceEventEnvelop> actual = underTest.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation,
+            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation,
                 mock(StopRepresentingClientInfo.class));
             assertThat(actual).isEmpty();
         }
@@ -835,11 +835,11 @@ class StopRepresentingClientServiceTest {
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR))
                 .thenReturn(notificationRequest);
 
-            List<SendCorrespondenceEventEnvelop> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation, info);
-            var envelop = actual.getFirst();
-            var event = envelop.getEvent();
+            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation, info);
+            var eventWithDesc = actual.getFirst();
+            var event = eventWithDesc.getEvent();
 
-            assertThat(envelop.getDescription())
+            assertThat(eventWithDesc.getDescription())
                 .isEqualTo("notifying applicant solicitor");
 
             assertThat(event)
@@ -884,12 +884,12 @@ class StopRepresentingClientServiceTest {
             when(stopRepresentingClientLetterService.generateStopRepresentingApplicantLetter(info.getCaseDetails(), AUTH_TOKEN))
                 .thenReturn(generatedDocument);
 
-            List<SendCorrespondenceEventEnvelop> actual = underTest.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info);
-            var envelop = actual.getFirst();
-            var event = envelop.getEvent();
+            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info);
+            var eventWithDesc = actual.getFirst();
+            var event = eventWithDesc.getEvent();
 
             assertAll(
-                () -> assertThat(envelop.getDescription())
+                () -> assertThat(eventWithDesc.getDescription())
                     .isEqualTo("notifying applicant"),
 
                 () -> assertThat(event.getNotificationParties())
@@ -939,16 +939,16 @@ class StopRepresentingClientServiceTest {
             when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), RESP_SOLICITOR))
                 .thenReturn(notificationRequest);
 
-            List<SendCorrespondenceEventEnvelop> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation, info);
-            var envelop = actual.getFirst();
-            var event = envelop.getEvent();
+            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation, info);
+            var eventWithDesc = actual.getFirst();
+            var event = eventWithDesc.getEvent();
 
             var expectedTemplate = isContested
                 ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT
                 : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
 
             assertAll(
-                () -> assertThat(envelop.getDescription())
+                () -> assertThat(eventWithDesc.getDescription())
                     .isEqualTo("notifying respondent solicitor"),
 
                 () -> assertThat(event.getNotificationParties())
@@ -995,12 +995,12 @@ class StopRepresentingClientServiceTest {
             when(stopRepresentingClientLetterService.generateStopRepresentingRespondentLetter(info.getCaseDetails(), AUTH_TOKEN))
                 .thenReturn(generatedDocument);
 
-            List<SendCorrespondenceEventEnvelop> actual = underTest.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info);
-            var envelop = actual.getFirst();
-            var event = envelop.getEvent();
+            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info);
+            var eventWithDesc = actual.getFirst();
+            var event = eventWithDesc.getEvent();
 
             assertAll(
-                () -> assertThat(envelop.getDescription())
+                () -> assertThat(eventWithDesc.getDescription())
                     .isEqualTo("notifying respondent"),
 
                 () -> assertThat(event.getNotificationParties())

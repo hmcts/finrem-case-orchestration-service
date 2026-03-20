@@ -28,7 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventEnvelop;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
@@ -171,14 +171,14 @@ class StopRepresentingClientSubmittedHandlerTest {
             when(stopRepresentingClientService.getToBeRevokedBarristers(any(StopRepresentingClientInfo.class),
                 eq(barristerParty))).thenReturn(barristerChange);
 
-            SendCorrespondenceEventEnvelop eventEnvelop = mock(SendCorrespondenceEventEnvelop.class);
+            SendCorrespondenceEventWithDescription eventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
             SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
-            when(eventEnvelop.getEvent()).thenReturn(event);
-            when(eventEnvelop.getDescription()).thenReturn("whatever barrister notification");
+            when(eventWithDesc.getEvent()).thenReturn(event);
+            when(eventWithDesc.getDescription()).thenReturn("whatever barrister notification");
 
             when(retryExecutor.supplyWithRetrySuppressException(any(ThrowingSupplier.class),
                 eq("revoking %s barrister access".formatted(barristerParty.getValue())), eq(CASE_ID)))
-                .thenReturn(Optional.of(List.of(eventEnvelop)));
+                .thenReturn(Optional.of(List.of(eventWithDesc)));
 
             FinremCaseData caseData = buildFinremCaseData(NoticeOfChangeParty.APPLICANT);
 
@@ -191,7 +191,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
 
             // Verify revokeBarristers called
-            ArgumentCaptor<ThrowingSupplier<SendCorrespondenceEventEnvelop>> throwingSupplierCaptor = getThrowingSupplierCaptor();
+            ArgumentCaptor<ThrowingSupplier<SendCorrespondenceEventWithDescription>> throwingSupplierCaptor = getThrowingSupplierCaptor();
             verify(retryExecutor).supplyWithRetrySuppressException(throwingSupplierCaptor.capture(),
                 eq("revoking %s barrister access".formatted(barristerParty.getValue())), eq(CASE_ID));
             getSafely(throwingSupplierCaptor.getValue());
@@ -227,21 +227,21 @@ class StopRepresentingClientSubmittedHandlerTest {
             when(stopRepresentingClientService.getToBeRevokedBarristers(any(StopRepresentingClientInfo.class),
                 eq(BarristerParty.INTERVENER2))).thenReturn(intervenerTwoBarristerChange);
 
-            SendCorrespondenceEventEnvelop applicantBarristerEventEnvelop = mock(SendCorrespondenceEventEnvelop.class);
+            SendCorrespondenceEventWithDescription applicantBarristerEventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
             SendCorrespondenceEvent applicantBarristerEvent = mock(SendCorrespondenceEvent.class);
-            when(applicantBarristerEventEnvelop.getEvent()).thenReturn(applicantBarristerEvent);
-            when(applicantBarristerEventEnvelop.getDescription()).thenReturn("applicant barrister notification");
+            when(applicantBarristerEventWithDesc.getEvent()).thenReturn(applicantBarristerEvent);
+            when(applicantBarristerEventWithDesc.getDescription()).thenReturn("applicant barrister notification");
             when(retryExecutor.supplyWithRetrySuppressException(any(ThrowingSupplier.class),
                 eq("revoking applicant barrister access"), eq(CASE_ID)))
-                .thenReturn(Optional.of(List.of(applicantBarristerEventEnvelop)));
+                .thenReturn(Optional.of(List.of(applicantBarristerEventWithDesc)));
 
-            SendCorrespondenceEventEnvelop intvTwoBarristerEventEnvelop = mock(SendCorrespondenceEventEnvelop.class);
+            SendCorrespondenceEventWithDescription intvTwoBarristerEventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
             SendCorrespondenceEvent intvTwoBarristerEvent = mock(SendCorrespondenceEvent.class);
-            when(intvTwoBarristerEventEnvelop.getEvent()).thenReturn(intvTwoBarristerEvent);
-            when(intvTwoBarristerEventEnvelop.getDescription()).thenReturn("intervener2 barrister notification");
+            when(intvTwoBarristerEventWithDesc.getEvent()).thenReturn(intvTwoBarristerEvent);
+            when(intvTwoBarristerEventWithDesc.getDescription()).thenReturn("intervener2 barrister notification");
             when(retryExecutor.supplyWithRetrySuppressException(any(ThrowingSupplier.class),
                 eq("revoking intervener2 barrister access"), eq(CASE_ID)))
-                .thenReturn(Optional.of(List.of(intvTwoBarristerEventEnvelop)));
+                .thenReturn(Optional.of(List.of(intvTwoBarristerEventWithDesc)));
 
             FinremCaseData caseData = buildFinremCaseData(NoticeOfChangeParty.APPLICANT);
 
@@ -255,7 +255,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
 
             // Verify revokeBarristers called
-            ArgumentCaptor<ThrowingSupplier<SendCorrespondenceEventEnvelop>> throwingSupplierCaptor = getThrowingSupplierCaptor();
+            ArgumentCaptor<ThrowingSupplier<SendCorrespondenceEventWithDescription>> throwingSupplierCaptor = getThrowingSupplierCaptor();
             verify(retryExecutor, times(2)).supplyWithRetrySuppressException(throwingSupplierCaptor.capture(),
                 argThat(a -> List.of(
                     "revoking applicant barrister access",
@@ -298,15 +298,15 @@ class StopRepresentingClientSubmittedHandlerTest {
             mockPreparingLitigantRevocationLetterNotification();
 
             SendCorrespondenceEvent event1 = mock(SendCorrespondenceEvent.class);
-            SendCorrespondenceEventEnvelop intvOneEnvelop = mock(SendCorrespondenceEventEnvelop.class);
-            when(intvOneEnvelop.getEvent()).thenReturn(event1);
-            when(intvOneEnvelop.getDescription()).thenReturn("intvOne notification");
+            SendCorrespondenceEventWithDescription intvOneEvents = mock(SendCorrespondenceEventWithDescription.class);
+            when(intvOneEvents.getEvent()).thenReturn(event1);
+            when(intvOneEvents.getDescription()).thenReturn("intvOne notification");
 
             when(retryExecutor.supplyWithRetrySuppressException(
                 any(ThrowingSupplier.class),
                 eq("revoking intervener1 access"),
                 eq(CASE_ID)
-            )).thenReturn(Optional.of(intvOneEnvelop));
+            )).thenReturn(Optional.of(intvOneEvents));
 
             FinremCaseData caseData = buildFinremCaseData(NoticeOfChangeParty.APPLICANT);
 
@@ -319,7 +319,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
 
             // Verify revokeIntervenerSolicitor called
-            ArgumentCaptor<ThrowingSupplier<SendCorrespondenceEventEnvelop>> throwingSupplierCaptor = getThrowingSupplierCaptor();
+            ArgumentCaptor<ThrowingSupplier<SendCorrespondenceEventWithDescription>> throwingSupplierCaptor = getThrowingSupplierCaptor();
             verify(retryExecutor).supplyWithRetrySuppressException(throwingSupplierCaptor.capture(), eq("revoking intervener1 access"), eq(CASE_ID));
             getSafely(throwingSupplierCaptor.getValue());
             ArgumentCaptor<StopRepresentingClientInfo> infoCaptor2 = getStopRepresentingClientInfoCaptor();
@@ -352,22 +352,22 @@ class StopRepresentingClientSubmittedHandlerTest {
 
             SendCorrespondenceEvent event1 = mock(SendCorrespondenceEvent.class);
             SendCorrespondenceEvent event3 = mock(SendCorrespondenceEvent.class);
-            SendCorrespondenceEventEnvelop intvOneEnvelop = mock(SendCorrespondenceEventEnvelop.class);
-            when(intvOneEnvelop.getEvent()).thenReturn(event1);
-            when(intvOneEnvelop.getDescription()).thenReturn("intvOne notification");
-            SendCorrespondenceEventEnvelop intvThreeEnvelop = mock(SendCorrespondenceEventEnvelop.class);
-            when(intvThreeEnvelop.getEvent()).thenReturn(event3);
-            when(intvThreeEnvelop.getDescription()).thenReturn("intvThree notification");
+            SendCorrespondenceEventWithDescription intvOneEvents = mock(SendCorrespondenceEventWithDescription.class);
+            when(intvOneEvents.getEvent()).thenReturn(event1);
+            when(intvOneEvents.getDescription()).thenReturn("intvOne notification");
+            SendCorrespondenceEventWithDescription intvThreeEvents = mock(SendCorrespondenceEventWithDescription.class);
+            when(intvThreeEvents.getEvent()).thenReturn(event3);
+            when(intvThreeEvents.getDescription()).thenReturn("intvThree notification");
             when(retryExecutor.supplyWithRetrySuppressException(
                 any(ThrowingSupplier.class),
                 eq("revoking intervener1 access"),
                 eq(CASE_ID)
-            )).thenReturn(Optional.of(intvOneEnvelop));
+            )).thenReturn(Optional.of(intvOneEvents));
             when(retryExecutor.supplyWithRetrySuppressException(
                 any(ThrowingSupplier.class),
                 eq("revoking intervener3 access"),
                 eq(CASE_ID)
-            )).thenReturn(Optional.of(intvThreeEnvelop));
+            )).thenReturn(Optional.of(intvThreeEvents));
 
             FinremCaseData caseData = buildFinremCaseData(NoticeOfChangeParty.APPLICANT);
 
@@ -380,7 +380,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
 
             // Verify revokeIntervenerSolicitor called
-            ArgumentCaptor<ThrowingSupplier<SendCorrespondenceEventEnvelop>> throwingSupplierCaptor = getThrowingSupplierCaptor();
+            ArgumentCaptor<ThrowingSupplier<SendCorrespondenceEventWithDescription>> throwingSupplierCaptor = getThrowingSupplierCaptor();
             verify(retryExecutor).supplyWithRetrySuppressException(throwingSupplierCaptor.capture(), eq("revoking intervener1 access"), eq(CASE_ID));
             verify(retryExecutor).supplyWithRetrySuppressException(throwingSupplierCaptor.capture(), eq("revoking intervener3 access"), eq(CASE_ID));
             throwingSupplierCaptor.getAllValues().forEach(TestSetUpUtils::getSafely);
@@ -503,17 +503,17 @@ class StopRepresentingClientSubmittedHandlerTest {
                 eq(CASE_ID)
             )).thenReturn(Optional.of(revocation));
 
-            SendCorrespondenceEventEnvelop envelope = mock(SendCorrespondenceEventEnvelop.class);
+            SendCorrespondenceEventWithDescription eventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
             SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
 
-            when(envelope.getDescription()).thenReturn("litigant solicitor notification");
-            when(envelope.getEvent()).thenReturn(event);
+            when(eventWithDesc.getDescription()).thenReturn("litigant solicitor notification");
+            when(eventWithDesc.getEvent()).thenReturn(event);
 
             // Mock service to return notification event
             when(stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(
                 eq(revocation),
                 any(StopRepresentingClientInfo.class)
-            )).thenReturn(List.of(envelope));
+            )).thenReturn(List.of(eventWithDesc));
 
             FinremCaseData caseData = buildFinremCaseData(party);
 
@@ -625,12 +625,12 @@ class StopRepresentingClientSubmittedHandlerTest {
             StopRepresentingClientService.LitigantRevocation revocation =
                 mock(StopRepresentingClientService.LitigantRevocation.class);
 
-            List<SendCorrespondenceEventEnvelop> envelopes = events.stream()
+            List<SendCorrespondenceEventWithDescription> eventsWithDesc = events.stream()
                 .map(event -> {
-                    SendCorrespondenceEventEnvelop envelope = mock(SendCorrespondenceEventEnvelop.class);
-                    when(envelope.getDescription()).thenReturn("litigant letter notification");
-                    when(envelope.getEvent()).thenReturn(event);
-                    return envelope;
+                    SendCorrespondenceEventWithDescription eventsWithDesc = mock(SendCorrespondenceEventWithDescription.class);
+                    when(eventsWithDesc.getDescription()).thenReturn("litigant letter notification");
+                    when(eventsWithDesc.getEvent()).thenReturn(event);
+                    return eventsWithDesc;
                 })
                 .toList();
 
@@ -644,7 +644,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             doAnswer(invocation -> {
                 ThrowingSupplier<?> supplier = invocation.getArgument(0);
                 supplier.get();
-                return Optional.of(envelopes);
+                return Optional.of(eventsWithDesc);
             }).when(retryExecutor).supplyWithRetrySuppressException(
                 any(ThrowingSupplier.class),
                 eq("preparing litigant letter notifications"),

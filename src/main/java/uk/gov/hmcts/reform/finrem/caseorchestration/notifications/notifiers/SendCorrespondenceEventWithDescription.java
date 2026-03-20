@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder(toBuilder = true)
-public class SendCorrespondenceEventEnvelop {
+public class SendCorrespondenceEventWithDescription {
 
     String description;
     SendCorrespondenceEvent event;

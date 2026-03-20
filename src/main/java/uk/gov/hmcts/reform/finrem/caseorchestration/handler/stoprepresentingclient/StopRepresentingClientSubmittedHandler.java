@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventEnvelop;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
@@ -117,10 +117,10 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
      * <p>If revocation fails or no result is returned, an empty list is returned.
      *
      * @param info the {@link StopRepresentingClientInfo} containing case and party details
-     * @return a list of {@link SendCorrespondenceEventEnvelop} representing notification events;
+     * @return a list of {@link SendCorrespondenceEventWithDescription} representing notification events;
      *         may be empty if no actions were performed
      */
-    private List<SendCorrespondenceEventEnvelop> revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
+    private List<SendCorrespondenceEventWithDescription> revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
 
         Optional<StopRepresentingClientService.LitigantRevocation> litigantRevocationOptional =
             retryExecutor.supplyWithRetrySuppressException(
@@ -128,7 +128,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                 "revoking %s access".formatted(describeLigtantPartyString(info.getFinremCaseData())),
                 info.getCaseIdInString());
 
-        List<SendCorrespondenceEventEnvelop> ret = new ArrayList<>();
+        List<SendCorrespondenceEventWithDescription> ret = new ArrayList<>();
 
         litigantRevocationOptional.ifPresent(litigantRevocation -> {
 
@@ -153,7 +153,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         return ret;
     }
 
-    private List<SendCorrespondenceEventEnvelop> revokeIntervenerSolicitor(StopRepresentingClientInfo info) {
+    private List<SendCorrespondenceEventWithDescription> revokeIntervenerSolicitor(StopRepresentingClientInfo info) {
         return stopRepresentingClientService.getToBeRevokedIntervenerSolicitors(info)
             .stream()
             .flatMap(intervenerWrapper ->
@@ -166,7 +166,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
             .toList();
     }
 
-    private List<SendCorrespondenceEventEnvelop> revokeBarristers(StopRepresentingClientInfo info) {
+    private List<SendCorrespondenceEventWithDescription> revokeBarristers(StopRepresentingClientInfo info) {
         return Stream.of(
                 BarristerParty.APPLICANT,
                 BarristerParty.RESPONDENT,
@@ -189,16 +189,16 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
     }
 
     protected void revokePartiesAccessAndNotifyParties(StopRepresentingClientInfo info) {
-        List<SendCorrespondenceEventEnvelop> envelops = new ArrayList<>();
-        envelops.addAll(revokeApplicantSolicitorOrRespondentSolicitor(info));
-        envelops.addAll(revokeIntervenerSolicitor(info));
-        envelops.addAll(revokeBarristers(info));
+        List<SendCorrespondenceEventWithDescription> events = new ArrayList<>();
+        events.addAll(revokeApplicantSolicitorOrRespondentSolicitor(info));
+        events.addAll(revokeIntervenerSolicitor(info));
+        events.addAll(revokeBarristers(info));
 
-        log.info("{} - about to send {} notifications to relevant parties", info.getCaseId(), envelops.size());
+        log.info("{} - about to send {} notifications to relevant parties", info.getCaseId(), events.size());
         // publish all notification
-        envelops.forEach(envelop ->
-            retryExecutor.runWithRetrySuppressException(() -> applicationEventPublisher.publishEvent(envelop.getEvent()),
-                envelop.getDescription(), info.getCaseIdInString())
+        events.forEach(e ->
+            retryExecutor.runWithRetrySuppressException(() -> applicationEventPublisher.publishEvent(e.getEvent()),
+                e.getDescription(), info.getCaseIdInString())
         );
     }
 
