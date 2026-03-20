@@ -291,9 +291,8 @@ class RetryExecutorTest {
             assertThat(counter.get()).isEqualTo(2);
         }
 
-        @ParameterizedTest(name = "should not retry on non-retryable exception")
-        @ValueSource(ints = {0}) // dummy parameter to allow parameterized test
-        void shouldNotRetryOnNonRetryableException(int ignored) {
+        @Test
+        void shouldNotRetryOnNonRetryableException() {
             AtomicInteger counter = new AtomicInteger();
 
             assertThatThrownBy(() ->
@@ -342,9 +341,8 @@ class RetryExecutorTest {
             assertThat(counter.get()).isEqualTo(2);
         }
 
-        @ParameterizedTest(name = "should not retry on non-retryable exception")
-        @ValueSource(ints = {0}) // dummy parameter to allow parameterized test
-        void shouldNotRetryOnNonRetryableException(int ignored) {
+        @Test
+        void shouldNotRetryOnNonRetryableException() {
             AtomicInteger counter = new AtomicInteger();
 
             assertThatThrownBy(() ->
