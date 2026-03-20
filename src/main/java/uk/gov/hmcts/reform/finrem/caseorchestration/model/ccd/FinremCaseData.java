@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CfvMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderScannedDocWrapper;
@@ -72,11 +73,13 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @NoArgsConstructor
 public class FinremCaseData implements HasCaseDocument {
 
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private CaseDataMetricsWrapper caseDataMetricsWrapper;
     @JsonProperty(access = WRITE_ONLY)
     private String ccdCaseId;
     @JsonIgnore
     private CaseType ccdCaseType;
-
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;
@@ -442,6 +445,14 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private PaymentDetailsWrapper paymentDetailsWrapper;
+
+    @JsonIgnore
+    public CaseDataMetricsWrapper getCaseDataMetricsWrapper() {
+        if (caseDataMetricsWrapper == null) {
+            this.caseDataMetricsWrapper = new CaseDataMetricsWrapper();
+        }
+        return caseDataMetricsWrapper;
+    }
 
     @JsonIgnore
     public StopRepresentationWrapper getStopRepresentationWrapper() {

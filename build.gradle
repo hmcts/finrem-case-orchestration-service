@@ -22,7 +22,7 @@ def versions = [
         commonsLang3         : '3.20.0',
         hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
-        lombok               : '1.18.42',
+        lombok               : '1.18.44',
         mockito              : '5.21.0',
         pact                 : '4.6.20',
         pdfbox               : '3.0.6',
@@ -408,6 +408,7 @@ dependencies {
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
     implementation group: 'org.springframework.retry', name: 'spring-retry', version: versions.retry
