@@ -97,6 +97,29 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         }
     }
 
+    /**
+     * Revokes the applicant's or respondent's solicitor and prepares related correspondence events.
+     *
+     * <p>This method attempts to revoke solicitor access using
+     * {@link StopRepresentingClientService#revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo)}
+     * with retry support. Suppress mode is used for error handling, as third-party solicitors are unable
+     * to resolve such issues. Any errors that occur will alert the IT team via the dfr_prod_alerts Slack channel.
+     *
+     * <p>If the revocation is successful, it performs a clean-up operation to reset
+     * any organisation-related fields affected by the Notice of Change (NOC) workflow.
+     *
+     * <p>It then prepares and aggregates notification events, including:
+     * <ul>
+     *     <li>Standard litigant revocation notifications (to former representatives)</li>
+     *     <li>Letter-based notification events (retrieved with retry support)</li>
+     * </ul>
+     *
+     * <p>If revocation fails or no result is returned, an empty list is returned.
+     *
+     * @param info the {@link StopRepresentingClientInfo} containing case and party details
+     * @return a list of {@link SendCorrespondenceEventEnvelop} representing notification events;
+     *         may be empty if no actions were performed
+     */
     private List<SendCorrespondenceEventEnvelop> revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
 
         Optional<StopRepresentingClientService.LitigantRevocation> litigantRevocationOptional =
