@@ -627,10 +627,10 @@ class StopRepresentingClientSubmittedHandlerTest {
 
             List<SendCorrespondenceEventWithDescription> eventsWithDesc = events.stream()
                 .map(event -> {
-                    SendCorrespondenceEventWithDescription eventsWithDesc = mock(SendCorrespondenceEventWithDescription.class);
-                    when(eventsWithDesc.getDescription()).thenReturn("litigant letter notification");
-                    when(eventsWithDesc.getEvent()).thenReturn(event);
-                    return eventsWithDesc;
+                    SendCorrespondenceEventWithDescription envelope = mock(SendCorrespondenceEventWithDescription.class);
+                    when(envelope.getDescription()).thenReturn("litigant letter notification");
+                    when(envelope.getEvent()).thenReturn(event);
+                    return envelope;
                 })
                 .toList();
 

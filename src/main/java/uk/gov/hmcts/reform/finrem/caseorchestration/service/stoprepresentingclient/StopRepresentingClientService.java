@@ -570,7 +570,9 @@ public class StopRepresentingClientService {
      * @param barrister the applicant barrister who should receive the notification
      * @return a populated {@link SendCorrespondenceEventWithDescription} for later email notification processing
      */
-    protected SendCorrespondenceEventWithDescription prepareApplicantBarristerEmailNotificationEvent(StopRepresentingClientInfo info, Barrister barrister) {
+    protected SendCorrespondenceEventWithDescription prepareApplicantBarristerEmailNotificationEvent(
+        StopRepresentingClientInfo info, Barrister barrister) {
+
         return prepareRepresentativeEmailNotificationEvent(
             "notifying applicant barrister",
             info,
@@ -651,9 +653,11 @@ public class StopRepresentingClientService {
      * @param documentGenerator function used to generate the document to be posted
      * @return a populated {@link SendCorrespondenceEventWithDescription} for later processing
      */
-    private SendCorrespondenceEventWithDescription preparePartyLetterNotificationEvent(String description, StopRepresentingClientInfo info,
-                                                                                       NotificationParty notificationParty,
-                                                                                       Function<StopRepresentingClientInfo, CaseDocument> documentGenerator) {
+    private SendCorrespondenceEventWithDescription preparePartyLetterNotificationEvent(
+        String description, StopRepresentingClientInfo info,
+        NotificationParty notificationParty,
+        Function<StopRepresentingClientInfo, CaseDocument> documentGenerator) {
+
         return SendCorrespondenceEventWithDescription.builder()
             .description(description)
             .event(SendCorrespondenceEvent.builder()

@@ -884,7 +884,8 @@ class StopRepresentingClientServiceTest {
             when(stopRepresentingClientLetterService.generateStopRepresentingApplicantLetter(info.getCaseDetails(), AUTH_TOKEN))
                 .thenReturn(generatedDocument);
 
-            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info);
+            List<SendCorrespondenceEventWithDescription> actual = underTest
+                .prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info);
             var eventWithDesc = actual.getFirst();
             var event = eventWithDesc.getEvent();
 
@@ -995,7 +996,8 @@ class StopRepresentingClientServiceTest {
             when(stopRepresentingClientLetterService.generateStopRepresentingRespondentLetter(info.getCaseDetails(), AUTH_TOKEN))
                 .thenReturn(generatedDocument);
 
-            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info);
+            List<SendCorrespondenceEventWithDescription> actual = underTest
+                .prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info);
             var eventWithDesc = actual.getFirst();
             var event = eventWithDesc.getEvent();
 
