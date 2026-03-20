@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import static java.util.Optional.ofNullable;
+
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -45,5 +47,24 @@ public class OrganisationPolicy {
             .orgPolicyReference(null)
             .orgPolicyCaseAssignedRole(role.getCcdCode())
             .build();
+    }
+
+    /**
+     * Determines whether two {@link OrganisationPolicy} instances refer to the same organisation.
+     *
+     * <p>This method safely extracts the {@link Organisation} from each policy (handling {@code null}
+     * values) and delegates the comparison to {@link Organisation#isSameOrganisation(Organisation, Organisation)}.
+     *
+     * @param organisationPolicy1 the first organisation policy, may be {@code null}
+     * @param organisationPolicy2 the second organisation policy, may be {@code null}
+     * @return {@code true} if both policies reference the same organisation or are both {@code null};
+     *         {@code false} otherwise
+     */
+    public static boolean isSameOrganisation(OrganisationPolicy organisationPolicy1, OrganisationPolicy organisationPolicy2) {
+        return Organisation.isSameOrganisation(
+            ofNullable(organisationPolicy1)
+                .map(OrganisationPolicy::getOrganisation).orElse(null),
+            ofNullable(organisationPolicy2)
+                .map(OrganisationPolicy::getOrganisation).orElse(null));
     }
 }
