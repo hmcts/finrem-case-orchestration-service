@@ -14,7 +14,7 @@ The first time cftlib is run it needs to download Docker images from the Azure R
 to Azure as follows:
 ```bash
 az acr login --name hmctsprod --subscription DCD-CNP-Prod
-az acr login --name hmctsprivate --subscription DCD-CNP-Prod
+az acr login --name hmctssbox --subscription DCD-CNP-Prod
 ```
 
 ## Running
