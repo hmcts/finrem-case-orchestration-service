@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingSupplierCaptor;
 
 @SpringJUnitConfig(RetryExecutorTest.Config.class)
-@ExtendWith(MockitoExtension.class) // For @Mock/@Spy
+@ExtendWith(MockitoExtension.class)
 class RetryExecutorTest {
     @TestLogs
     private final TestLogger logs = new TestLogger(RetryExecutor.class);
