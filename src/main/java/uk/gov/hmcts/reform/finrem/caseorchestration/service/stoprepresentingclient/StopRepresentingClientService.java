@@ -420,7 +420,7 @@ public class StopRepresentingClientService {
      * <p>This method calls {@link IntervenerService#revokeIntervenerSolicitor(long, IntervenerWrapper)}
      * to revoke the solicitor’s access. It then constructs a {@link SendCorrespondenceEventWithDescription}
      * to notify the intervener's solicitor that representation has stopped. The email
-     * is not sent directly here; the returned event with description will be processed later in the
+     * is not sent directly here; the returned event will be processed later in the
      * correspondence workflow.</p>
      *
      * @param info the stop representing client event information
@@ -539,8 +539,8 @@ public class StopRepresentingClientService {
      * to the applicant's solicitor when representation has stopped.
      *
      * <p>This method does not send the email directly. Instead, it constructs a
-     * correspondence event with description containing the notification details and template
-     * required to notify the former applicant solicitor. The event with description will be processed
+     * correspondence event containing the notification details and template
+     * required to notify the former applicant solicitor. The event will be processed
      * later in the correspondence workflow to trigger the actual email notification.</p>
      *
      * @param info the stop representing client event information
@@ -562,8 +562,8 @@ public class StopRepresentingClientService {
      * to the applicant's barrister when representation has stopped.
      *
      * <p>This method does not send the email directly. Instead, it constructs a
-     * correspondence event with description containing the notification details and template
-     * required to notify the former applicant barrister. The event with description will be processed
+     * correspondence event containing the notification details and template
+     * required to notify the former applicant barrister. The event will be processed
      * later in the correspondence workflow to trigger the actual email notification.</p>
      *
      * @param info the stop representing client event information
@@ -615,8 +615,8 @@ public class StopRepresentingClientService {
      * to an intervener's barrister when representation has stopped.
      *
      * <p>This method does not send the email directly. Instead, it constructs a
-     * correspondence event with description containing the notification details and template
-     * required to notify the former intervener barrister. The event with description will be processed
+     * correspondence event containing the notification details and template
+     * required to notify the former intervener barrister. The event will be processed
      * later in the correspondence workflow to trigger the actual email notification.</p>
      *
      * @param info the stop representing client event information
@@ -718,8 +718,8 @@ public class StopRepresentingClientService {
      * to the respondent's solicitor when representation has stopped.
      *
      * <p>This method does not send the email directly. Instead, it constructs a
-     * correspondence event with description containing the notification details and template
-     * required to notify the former respondent solicitor. The event with description will be processed
+     * correspondence event containing the notification details and template
+     * required to notify the former respondent solicitor. The event will be processed
      * later in the correspondence workflow to trigger the actual email notification.</p>
      *
      * @param info the stop representing client event information
@@ -741,8 +741,8 @@ public class StopRepresentingClientService {
      * to the respondent's barrister when representation has stopped.
      *
      * <p>This method does not send the email directly. Instead, it constructs a
-     * correspondence event with description containing the notification details and template
-     * required to notify the former respondent barrister. The event with description will be processed
+     * correspondence event containing the notification details and template
+     * required to notify the former respondent barrister. The event will be processed
      * later in the correspondence workflow to trigger the actual email notification.</p>
      *
      * @param info the stop representing client event information
