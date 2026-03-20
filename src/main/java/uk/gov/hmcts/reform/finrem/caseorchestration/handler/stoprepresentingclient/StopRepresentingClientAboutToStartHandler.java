@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
@@ -38,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.Inte
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_TWO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy.isSameOrganisation;
 
 @Slf4j
 @Service
@@ -235,14 +235,6 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
 
     private IntervenerWrapper getIntervener(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
         return caseData.getIntervenerById(representativeInContext.intervenerType().getIntervenerId());
-    }
-
-    private boolean isSameOrganisation(OrganisationPolicy organisationPolicy1, OrganisationPolicy organisationPolicy2) {
-        return Organisation.isSameOrganisation(
-            ofNullable(organisationPolicy1)
-                .map(OrganisationPolicy::getOrganisation).orElse(null),
-            ofNullable(organisationPolicy2)
-                .map(OrganisationPolicy::getOrganisation).orElse(null));
     }
 
     private Barrister getIntervenerBarrister(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
