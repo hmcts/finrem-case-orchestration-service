@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -64,6 +65,42 @@ public enum NotificationParty {
             .filter(party -> party.getNotifyRepresented() == notifyRepresented)
             .filter(party -> party.getNotifyFormerParty() == formerParty)
             .findFirst();
+    }
+
+    /**
+     * Returns the {@link NotificationParty} representing the former barrister of a given intervener.
+     *
+     * <p>This is used when sending notifications to a barrister after their representation of
+     * the intervener has ended.</p>
+     *
+     * @param intervenerType the type of intervener whose former barrister is required
+     * @return the corresponding {@link NotificationParty} for the former intervener barrister
+     */
+    public static NotificationParty getFormerIntervenerBarrister(IntervenerType intervenerType) {
+        return switch(intervenerType) {
+            case INTERVENER_ONE -> FORMER_INTERVENER_ONE_BARRISTER_ONLY;
+            case INTERVENER_TWO -> FORMER_INTERVENER_TWO_BARRISTER_ONLY;
+            case INTERVENER_THREE -> FORMER_INTERVENER_THREE_BARRISTER_ONLY;
+            case INTERVENER_FOUR -> FORMER_INTERVENER_FOUR_BARRISTER_ONLY;
+        };
+    }
+
+    /**
+     * Returns the {@link NotificationParty} representing the former solicitor of a given intervener.
+     *
+     * <p>Used when sending notifications to a solicitor after they have stopped representing
+     * the intervener.</p>
+     *
+     * @param intervenerType the type of intervener whose former solicitor is required
+     * @return the corresponding {@link NotificationParty} for the former intervener solicitor
+     */
+    public static NotificationParty getFormerIntervenerSolicitor(IntervenerType intervenerType) {
+        return switch(intervenerType) {
+            case INTERVENER_ONE -> FORMER_INTERVENER_ONE_SOLICITOR_ONLY;
+            case INTERVENER_TWO -> FORMER_INTERVENER_TWO_SOLICITOR_ONLY;
+            case INTERVENER_THREE -> FORMER_INTERVENER_THREE_SOLICITOR_ONLY;
+            case INTERVENER_FOUR -> FORMER_INTERVENER_FOUR_SOLICITOR_ONLY;
+        };
     }
 
     boolean isNotifyRepresented() {
