@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.util.List;
 
@@ -40,6 +41,16 @@ public class BarristerCollectionWrapper {
             case 3 -> intvr3Barristers;
             case 4 -> intvr4Barristers;
             default -> null;
+        };
+    }
+
+    @JsonIgnore
+    public List<BarristerCollectionItem> getIntervenerBarristers(IntervenerType intervenerType) {
+        return switch (intervenerType) {
+            case INTERVENER_ONE -> intvr1Barristers;
+            case INTERVENER_TWO -> intvr2Barristers;
+            case INTERVENER_THREE -> intvr3Barristers;
+            case INTERVENER_FOUR -> intvr4Barristers;
         };
     }
 }
