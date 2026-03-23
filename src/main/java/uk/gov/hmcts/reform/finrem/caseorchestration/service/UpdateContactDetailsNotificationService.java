@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -13,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.Notificat
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,6 +34,10 @@ public class UpdateContactDetailsNotificationService {
 
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
 
+    private final NocLetterNotificationService nocLetterNotificationService;
+
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+
     /**
      * Determines whether Notice of Change notifications should be sent.
      *
@@ -46,7 +53,7 @@ public class UpdateContactDetailsNotificationService {
     }
 
     /**
-     * Sends a Notice of Change (NOC) email initiated by a caseworker to the relevant organisation.
+     * Sends a Notice of Change (NOC) email initiated by a caseworker to the relevant litigant solicitor.
      *
      * <p>This method determines the appropriate email template based on the provided
      * {@link FinremCaseDetails}, constructs a {@link NotificationRequest}, and prepares
@@ -59,21 +66,40 @@ public class UpdateContactDetailsNotificationService {
      *                    the notification request
      * @return a {@link SendCorrespondenceEvent} representing the prepared email notification event
      */
-    public SendCorrespondenceEvent sendNocEmailByCaseworker(FinremCaseDetails caseDetails) {
-        EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
-        return prepareSendEventForNocEmail(caseDetails, template);
+    public SendCorrespondenceEvent prepareNocEmailToLitigantSolicitor(FinremCaseDetails caseDetails) {
+        EmailTemplateNames template = getNocEmailTemplateToLitigantSolicitor(caseDetails);
+        return createNocEmailToLitigantSolicitorEvent(caseDetails, template);
     }
 
-    private EmailTemplateNames getNoticeOfChangeTemplateCaseworker(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isConsentedApplication()
-            ? FR_CONSENTED_NOC_CASEWORKER
-            : FR_CONTESTED_NOC_CASEWORKER;
-
+    /**
+     * Invokes all configured Notice of Change (NOC) letter handlers for the given case.
+     *
+     * <p>This method iterates through the registered {@code letterHandlers} and delegates
+     * the handling of NOC letter generation and sending to each handler. Each handler is
+     * responsible for determining whether a letter should be produced based on the
+     * provided case details and performing the appropriate action.
+     *
+     * <p><strong>Note:</strong> This implementation should be refactored in the future to
+     * use {@link SendCorrespondenceEvent} for consistency with the notification
+     * approach. (Related to DFR-4303)
+     *
+     * @param finremCaseDetails        the current case details
+     * @param finremCaseDetailsBefore  the previous case details, used to detect changes
+     * @param authToken                the authorisation token used for downstream service calls
+     */
+    public void sendNocLetterToLitigants(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
+                                         String authToken) {
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        CaseDetails caseDetailsBefore = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetailsBefore);
+        nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, authToken);
     }
 
-    private SendCorrespondenceEvent prepareSendEventForNocEmail(
-        FinremCaseDetails caseDetails,
-        EmailTemplateNames template) {
+    private EmailTemplateNames getNocEmailTemplateToLitigantSolicitor(FinremCaseDetails caseDetails) {
+        return caseDetails.isConsentedApplication() ? FR_CONSENTED_NOC_CASEWORKER : FR_CONTESTED_NOC_CASEWORKER;
+    }
+
+    private SendCorrespondenceEvent createNocEmailToLitigantSolicitorEvent(FinremCaseDetails caseDetails,
+                                                                           EmailTemplateNames template) {
 
         FinremCaseData finremCaseData = caseDetails.getData();
         boolean isRespondentSolicitorChanged = isRespondentSolicitorChangedOnLatestRepresentationUpdate(finremCaseData);
