@@ -70,7 +70,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT;
@@ -90,7 +89,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
@@ -747,48 +745,6 @@ class FinremNotificationServiceTest {
 
         verify(finremNotificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENTED_NOTICE_OF_CHANGE));
-    }
-
-    @Test
-    void givenContestedCase_whenSendNoCCaseworkerEmail_thenSendContestedEmail() {
-        NotificationRequest notificationRequest = NotificationRequest.builder().build();
-        notificationRequest.setName(TEST_SOLICITOR_NAME);
-        when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
-        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
-
-        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_NOC_CASEWORKER));
-    }
-
-    @Test
-    void givenConsentedCase_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
-        NotificationRequest notificationRequest = NotificationRequest.builder().build();
-        notificationRequest.setName(TEST_SOLICITOR_NAME);
-        when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
-        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails();
-
-        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENTED_NOC_CASEWORKER));
-    }
-
-    @Test
-    void givenContestedCaseAndNonDigitalSol_whenSendNocEmail_thenNotSendContestedEmailCaseworker() {
-        NotificationRequest notificationRequest = NotificationRequest.builder().build();
-        notificationRequest.setName(TEST_SOLICITOR_NAME);
-        when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(false);
-        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
-
-        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
-        verifyNoMoreInteractions(emailService);
     }
 
     @Test
