@@ -58,8 +58,8 @@ class FormerRespondentBarristerListenerTest extends BasePartyListenerTest {
             .build();
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
-            solicitorReferenceNumber, barrister);
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
+            caseDetailsBefore, emailTemplate, solicitorReferenceNumber, barrister);
 
         underTest.handleNotification(event);
 
@@ -78,7 +78,8 @@ class FormerRespondentBarristerListenerTest extends BasePartyListenerTest {
     void shouldNotSendEmailNotificationIfCaseDetailsBeforeIsAbsent() {
         FinremCaseDetails caseDetailsBefore = null;
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, mock(EmailTemplateNames.class));
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
+            caseDetailsBefore, mock(EmailTemplateNames.class));
 
         underTest.handleNotification(event);
 
