@@ -32,7 +32,7 @@ public class SolicitorAccessService {
      * @param caseDataBefore the case data before the update
      */
     public void checkAndAssignSolicitorAccess(FinremCaseData caseData,
-                                                FinremCaseData caseDataBefore) throws UserNotFoundInOrganisationApiException {
+                                              FinremCaseData caseDataBefore) throws UserNotFoundInOrganisationApiException {
         // Applicant solicitor access update
         if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
             try {
