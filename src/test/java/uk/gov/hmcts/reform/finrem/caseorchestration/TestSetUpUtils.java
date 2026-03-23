@@ -7,6 +7,7 @@ import feign.Request;
 import feign.Response;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.function.ThrowingSupplier;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -597,5 +598,42 @@ public class TestSetUpUtils {
 
     public static ArgumentCaptor<ThrowingRunnable> getThrowingRunnableCaptor() {
         return ArgumentCaptor.forClass(ThrowingRunnable.class);
+    }
+
+    public static <T> ArgumentCaptor<ThrowingSupplier<T>> getThrowingSupplierCaptor() {
+        return ArgumentCaptor.forClass(ThrowingSupplier.class);
+    }
+
+    public static void runSafely(ThrowingRunnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T getSafely(ThrowingSupplier<T> supplier) {
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static FeignException feignException(int status, String reason) {
+        return FeignException.errorStatus(
+            "test",
+            feign.Response.builder()
+                .status(status)
+                .reason(reason)
+                .request(feign.Request.create(
+                    feign.Request.HttpMethod.GET,
+                    "/test",
+                    Map.of(),
+                    null,
+                    null,
+                    null))
+                .build()
+        );
     }
 }
