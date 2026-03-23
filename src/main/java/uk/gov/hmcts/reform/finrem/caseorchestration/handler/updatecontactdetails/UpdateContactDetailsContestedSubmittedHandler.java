@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -12,20 +11,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 @Slf4j
 @Service
 public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbackHandler {
-    private final SolicitorAccessService solicitorAccessService;
+    private final UpdateContactDetailsNotificationService updateContactDetailsNotificationService;
     private final RetryExecutor retryExecutor;
 
     public UpdateContactDetailsContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         SolicitorAccessService solicitorAccessService, RetryExecutor retryExecutor) {
+                                                         UpdateContactDetailsNotificationService updateContactDetailsNotificationService,
+                                                         RetryExecutor retryExecutor) {
         super(finremCaseDetailsMapper);
-        this.solicitorAccessService = solicitorAccessService;
+        this.updateContactDetailsNotificationService = updateContactDetailsNotificationService;
         this.retryExecutor = retryExecutor;
     }
 
@@ -41,35 +40,27 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
+        FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
+
+        /*
+        DFR-4589
         String checkAndAssignSolicitorAccessError = checkAndAssignSolicitorAccess(callbackRequest);
 
         if (StringUtils.isNotBlank(checkAndAssignSolicitorAccessError)) {
             return submittedResponse(toConfirmationHeader("Update contact details with Errors"),
                 toConfirmationBody(checkAndAssignSolicitorAccessError));
         }
+        */
 
-        // Check if the update includes a representative change and send Notice of Change notifications if required
-        solicitorAccessService.sendNoticeOfChangeNotificationsCaseworker(callbackRequest, userAuthorisation);
+        if (requiresNotifications(finremCaseData)) {
+
+        }
 
         return submittedResponse();
     }
 
-    private String checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest) {
-
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        caseDetailsBefore.getData().setCcdCaseId(caseDetailsBefore.getCaseIdAsString());
-        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
-
-        try {
-            retryExecutor.runWithRetry(() -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore),
-                "Update Contact Details - Case Solicitor Change",
-                caseData.getCcdCaseId()
-            );
-            return null;
-        } catch (Exception ex) {
-            log.error("Error updating solicitor access to case", ex);
-            return "There was a problem updating solicitor access to case.";
-        }
+    private boolean requiresNotifications(FinremCaseData finremCaseData) {
+        return updateContactDetailsNotificationService.requiresNotifications(finremCaseData);
     }
+
 }

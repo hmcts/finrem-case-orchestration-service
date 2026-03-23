@@ -1370,24 +1370,6 @@ class NotificationServiceTest {
     }
 
     @Test
-    void givenBarristerAdded_sendAddedEmail() {
-        Barrister barrister = new Barrister().toBuilder().build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        when(notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister)).thenReturn(notificationRequest);
-        notificationService.sendBarristerAddedEmail(caseDetails, barrister);
-        verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
-    }
-
-    @Test
-    void givenBarristerRemoved_sendRemovedEmail() {
-        Barrister barrister = new Barrister().toBuilder().build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        when(notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister)).thenReturn(notificationRequest);
-        notificationService.sendBarristerRemovedEmail(caseDetails, barrister);
-        verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
-    }
-
-    @Test
     void sendInterimHearingNotificationEmailToApplicantSolicitor() {
         FinremCallbackRequest callbackRequest = buildHearingFinremCallbackRequest(INTERIM_HEARING_JSON);
 

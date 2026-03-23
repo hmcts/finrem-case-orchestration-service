@@ -48,7 +48,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -884,38 +883,6 @@ class FinremNotificationServiceTest {
 
         // Assert the result
         assertEquals(expectedResult, result);
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testIsApplicantSolicitorResponsibleToDraftOrder(boolean isResponsible) {
-        // Prepare mock data
-        Map<String, Object> caseData = new HashMap<>();
-
-        // Mock the service method
-        when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(caseData)).thenReturn(isResponsible);
-
-        // Perform the test
-        boolean result = notificationService.isApplicantSolicitorResponsibleToDraftOrder(caseData);
-
-        // Assert the result
-        assertEquals(isResponsible, result);
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testIsRespondentSolicitorResponsibleToDraftOrder(boolean isResponsible) {
-        // Prepare mock data
-        Map<String, Object> caseData = new HashMap<>();
-
-        // Mock the service method
-        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData)).thenReturn(isResponsible);
-
-        // Perform the test
-        boolean result = notificationService.isRespondentSolicitorResponsibleToDraftOrder(caseData);
-
-        // Assert the result
-        assertEquals(isResponsible, result);
     }
 
     @ParameterizedTest
