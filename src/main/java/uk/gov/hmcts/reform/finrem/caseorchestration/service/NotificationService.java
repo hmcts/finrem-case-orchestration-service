@@ -1640,14 +1640,6 @@ public class NotificationService {
         sendNocEmail(notificationRequest, template);
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
-    public void sendNoticeOfChangeEmailCaseworker(CaseDetails caseDetails) {
-        EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
-        NotificationRequest notificationRequest = notificationRequestMapper
-            .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendNocEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
-    }
-
     public boolean isContestedApplication(CaseDetails caseDetails) {
         return caseDataService.isContestedApplication(caseDetails);
     }
@@ -1660,54 +1652,6 @@ public class NotificationService {
         NotificationRequest notificationRequest,
         EmailTemplateNames template) {
         if (StringUtils.hasText(notificationRequest.getNotificationEmail())) {
-            sendNotificationEmail(notificationRequest, template);
-        }
-    }
-
-    /**
-     * Return String Object for given Case with the given indentation used.
-     *
-     * @param caseDetails         instance of CaseDetails
-     * @param notificationRequest instance of NotificationRequest
-     * @param template            instance of EmailTemplateNames
-     * @deprecated Use {@link CaseDetails caseDetails, NotificationRequest notificationRequest, EmailTemplateNames template}
-     */
-    @Deprecated(since = "15-june-2023")
-    private void sendNocEmailIfSolicitorIsDigital(
-        CaseDetails caseDetails,
-        NotificationRequest notificationRequest,
-        EmailTemplateNames template) {
-
-        sendNocEmailIfSolicitorIsDigitalInternal(
-            caseDetails.getId().toString(),
-            notificationRequest,
-            template,
-            () -> checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString()),
-            () -> checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString()),
-            () -> (String) caseDetails.getData().get(getSolicitorNameKey(caseDetails))
-        );
-    }
-
-    private void sendNocEmailIfSolicitorIsDigitalInternal(
-        String caseId,
-        NotificationRequest notificationRequest,
-        EmailTemplateNames template,
-        BooleanSupplier isApplicantSolicitorDigitalSupplier,
-        BooleanSupplier isRespondentSolicitorDigitalSupplier,
-        Supplier<String> nameSupplier) {
-
-        if (isApplicantNoticeOfChangeRequest(notificationRequest, nameSupplier)) {
-            log.info("{} - isApplicantNoticeOfChangeRequest = true", caseId);
-            boolean isApplicantSolicitorDigital = isApplicantSolicitorDigitalSupplier.getAsBoolean();
-            log.info("{} - isApplicantSolicitorDigital = {}}", caseId, isApplicantSolicitorDigital);
-            if (isApplicantSolicitorDigital) {
-                sendNotificationEmail(notificationRequest, template);
-            }
-            return;
-        }
-        boolean isRespondentSolicitorDigital = isRespondentSolicitorDigitalSupplier.getAsBoolean();
-        log.info("{} - isRespondentSolicitorDigital = {}}", caseId, isRespondentSolicitorDigital);
-        if (isRespondentSolicitorDigital) {
             sendNotificationEmail(notificationRequest, template);
         }
     }
@@ -1732,40 +1676,6 @@ public class NotificationService {
         return caseDetails.getData().isConsentedApplication()
             ? FR_CONSENTED_NOTICE_OF_CHANGE
             : FR_CONTESTED_NOTICE_OF_CHANGE;
-    }
-
-    /**
-     * Return String Object for given Case with the given indentation used.
-     *
-     * @param caseDetails instance of CaseDetails
-     * @return EmailTemplateNames Object
-     * @deprecated Use {@link FinremCaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
-    private EmailTemplateNames getNoticeOfChangeTemplateCaseworker(CaseDetails caseDetails) {
-        return caseDataService.isConsentedApplication(caseDetails)
-            ? FR_CONSENTED_NOC_CASEWORKER
-            : FR_CONTESTED_NOC_CASEWORKER;
-
-    }
-
-    private EmailTemplateNames getNoticeOfChangeTemplateCaseworker(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isConsentedApplication()
-            ? FR_CONSENTED_NOC_CASEWORKER
-            : FR_CONTESTED_NOC_CASEWORKER;
-
-    }
-
-    private boolean isApplicantNoticeOfChangeRequest(NotificationRequest notificationRequest,
-                                                     Supplier<String> nameSupplier) {
-        return notificationRequest.getName().equalsIgnoreCase(
-            nullToEmpty(nameSupplier.get()));
-    }
-
-    private String getSolicitorNameKey(CaseDetails caseDetails) {
-        return caseDataService.isConsentedApplication(caseDetails)
-            ? CONSENTED_SOLICITOR_NAME
-            : CONTESTED_SOLICITOR_NAME;
     }
 
     /**
