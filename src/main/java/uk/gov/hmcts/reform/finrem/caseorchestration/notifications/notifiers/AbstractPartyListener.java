@@ -77,9 +77,6 @@ public abstract class AbstractPartyListener {
 
     @EventListener
     public void handleNotification(SendCorrespondenceEvent event) {
-        if (event.getNotificationParties() == null) {
-            throw new IllegalStateException("Notification parties cannot be null");
-        }
         if (isRelevantParty(event)) {
             log.info("Notification event received for party {} on case {}", getNotificationParty(), event.getCaseId());
             sendNotification(event);
