@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,15 +23,11 @@ import java.util.List;
 public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandler {
 
     private final InternationalPostalService internationalPostalService;
-    private final ValidatePartiesService validatePartiesService;
 
     public UpdateContactDetailsContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                   InternationalPostalService internationalPostalService,
-                                                   ValidatePartiesService validatePartiesService
-    ) {
+                                                   InternationalPostalService internationalPostalService) {
         super(finremCaseDetailsMapper);
         this.internationalPostalService = internationalPostalService;
-        this.validatePartiesService = validatePartiesService;
     }
 
     @Override
@@ -52,7 +47,7 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
         List<String> errors = new ArrayList<>();
         errors.addAll(internationalPostalService.validate(finremCaseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseData));
-        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData, validatePartiesService));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).errors(errors).build();
