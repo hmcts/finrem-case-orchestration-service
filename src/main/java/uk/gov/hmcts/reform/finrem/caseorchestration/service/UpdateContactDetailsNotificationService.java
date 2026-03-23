@@ -61,10 +61,7 @@ public class UpdateContactDetailsNotificationService {
      */
     public SendCorrespondenceEvent sendNocEmailByCaseworker(FinremCaseDetails caseDetails) {
         EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
-
-        return prepareSendEventForNocEmail(caseDetails,
-            finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(caseDetails),
-            template);
+        return prepareSendEventForNocEmail(caseDetails, template);
     }
 
     private EmailTemplateNames getNoticeOfChangeTemplateCaseworker(FinremCaseDetails caseDetails) {
@@ -76,21 +73,22 @@ public class UpdateContactDetailsNotificationService {
 
     private SendCorrespondenceEvent prepareSendEventForNocEmail(
         FinremCaseDetails caseDetails,
-        NotificationRequest notificationRequest,
         EmailTemplateNames template) {
 
         FinremCaseData finremCaseData = caseDetails.getData();
+        boolean isRespondentSolicitorChanged = isRespondentSolicitorChangedOnLatestRepresentationUpdate(finremCaseData);
 
         return SendCorrespondenceEvent.builder()
             .caseDetails(caseDetails)
-            .emailNotificationRequest(notificationRequest)
-            .notificationParties(List.of(getNocNotificationParty(finremCaseData)))
+            .emailNotificationRequest(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(caseDetails,
+                isRespondentSolicitorChanged))
+            .notificationParties(List.of(getNocNotificationParty(isRespondentSolicitorChanged)))
             .emailTemplate(template)
             .build();
     }
 
-    private NotificationParty getNocNotificationParty(FinremCaseData finremCaseData) {
-        return isRespondentSolicitorChangedOnLatestRepresentationUpdate(finremCaseData)
+    private NotificationParty getNocNotificationParty(boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate) {
+        return isRespondentSolicitorChangedOnLatestRepresentationUpdate
             ? NotificationParty.RESPONDENT_SOLICITOR_ONLY
             : NotificationParty.APPLICANT_SOLICITOR_ONLY;
     }
