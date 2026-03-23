@@ -117,10 +117,8 @@ public class SolicitorAccessService {
     }
 
     private boolean hasApplicantSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        Optional<ContactDetailsWrapper> currentContact = Optional.ofNullable(caseData.getContactDetailsWrapper());
-        Optional<ContactDetailsWrapper> beforeContact = Optional.ofNullable(caseDataBefore.getContactDetailsWrapper());
-        String currentEmail = currentContact.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse("");
-        String beforeEmail = beforeContact.map(ContactDetailsWrapper::getApplicantSolicitorEmail).orElse("");
+        String currentEmail = Optional.ofNullable(caseData.getAppSolicitorEmail()).orElse("");
+        String beforeEmail = Optional.ofNullable(caseDataBefore.getAppSolicitorEmail()).orElse("");
         Organisation currentOrg = Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
             .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy::getOrganisation)
             .orElse(null);
