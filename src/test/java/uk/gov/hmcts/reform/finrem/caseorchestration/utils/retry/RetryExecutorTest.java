@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingSupplierCaptor;
 
 @SpringJUnitConfig(RetryExecutorTest.Config.class)
-@ExtendWith(MockitoExtension.class) // For @Mock/@Spy
+@ExtendWith(MockitoExtension.class)
 class RetryExecutorTest {
     @TestLogs
     private final TestLogger logs = new TestLogger(RetryExecutor.class);
@@ -291,9 +291,8 @@ class RetryExecutorTest {
             assertThat(counter.get()).isEqualTo(2);
         }
 
-        @ParameterizedTest(name = "should not retry on non-retryable exception")
-        @ValueSource(ints = {0}) // dummy parameter to allow parameterized test
-        void shouldNotRetryOnNonRetryableException(int ignored) {
+        @Test
+        void shouldNotRetryOnNonRetryableException() {
             AtomicInteger counter = new AtomicInteger();
 
             assertThatThrownBy(() ->
@@ -342,9 +341,8 @@ class RetryExecutorTest {
             assertThat(counter.get()).isEqualTo(2);
         }
 
-        @ParameterizedTest(name = "should not retry on non-retryable exception")
-        @ValueSource(ints = {0}) // dummy parameter to allow parameterized test
-        void shouldNotRetryOnNonRetryableException(int ignored) {
+        @Test
+        void shouldNotRetryOnNonRetryableException() {
             AtomicInteger counter = new AtomicInteger();
 
             assertThatThrownBy(() ->
