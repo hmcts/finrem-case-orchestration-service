@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
@@ -32,15 +33,13 @@ public class SolicitorAccessService {
      * @param caseDataBefore the case data before the update
      */
     public void checkAndAssignSolicitorAccess(FinremCaseData caseData,
-                                                FinremCaseData caseDataBefore) throws UserNotFoundInOrganisationApiException {
+                                              FinremCaseData caseDataBefore) throws UserNotFoundInOrganisationApiException {
         // Applicant solicitor access update
         if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
             try {
                 updateApplicantSolicitor(caseData, caseDataBefore);
             } catch (UserNotFoundInOrganisationApiException e) {
-                ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
-                String appSolEmail = YesOrNo.isYes(contactDetailsWrapper.getApplicantRepresented())
-                    ? contactDetailsWrapper.getApplicantSolicitorEmail() : null;
+                String appSolEmail = caseData.getAppSolicitorEmailIfRepresented();
                 log.info("There was a problem updating access to applicant solicitor: %s".formatted(appSolEmail));
                 throw new UserNotFoundInOrganisationApiException();
             }
@@ -51,9 +50,7 @@ public class SolicitorAccessService {
             try {
                 updateRespondentSolicitor(caseData, caseDataBefore);
             } catch (UserNotFoundInOrganisationApiException e) {
-                ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
-                String respSolEmail = YesOrNo.isYes(contactDetailsWrapper.getContestedRespondentRepresented())
-                    ? contactDetailsWrapper.getRespondentSolicitorEmail() : null;
+                String respSolEmail = caseData.getRespondentSolicitorEmailIfRepresented();
                 log.info("There was a problem updating access to respondent solicitor: %s".formatted(respSolEmail));
                 throw new UserNotFoundInOrganisationApiException();
             }
@@ -117,30 +114,28 @@ public class SolicitorAccessService {
     }
 
     private boolean hasApplicantSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        String currentEmail = Optional.ofNullable(caseData.getAppSolicitorEmail()).orElse("");
-        String beforeEmail = Optional.ofNullable(caseDataBefore.getAppSolicitorEmail()).orElse("");
+        String currentEmail = caseData.getAppSolicitorEmail();
+        String beforeEmail = caseDataBefore.getAppSolicitorEmail();
         Organisation currentOrg = Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
-            .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy::getOrganisation)
+            .map(OrganisationPolicy::getOrganisation)
             .orElse(null);
         Organisation beforeOrg = Optional.ofNullable(caseDataBefore.getApplicantOrganisationPolicy())
-            .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy::getOrganisation)
+            .map(OrganisationPolicy::getOrganisation)
             .orElse(null);
         boolean isSameOrganisation = Organisation.isSameOrganisation(currentOrg, beforeOrg);
-        return !currentEmail.equals(beforeEmail) || !isSameOrganisation;
+        return currentEmail != null && !currentEmail.equals(beforeEmail) || !isSameOrganisation;
     }
 
     private boolean hasRespondentSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        Optional<ContactDetailsWrapper> currentContact = Optional.ofNullable(caseData.getContactDetailsWrapper());
-        Optional<ContactDetailsWrapper> beforeContact = Optional.ofNullable(caseDataBefore.getContactDetailsWrapper());
-        String currentEmail = currentContact.map(ContactDetailsWrapper::getRespondentSolicitorEmail).orElse("");
-        String beforeEmail = beforeContact.map(ContactDetailsWrapper::getRespondentSolicitorEmail).orElse("");
+        String currentEmail = caseData.getRespondentSolicitorEmail();
+        String beforeEmail = caseDataBefore.getRespondentSolicitorEmail();
         Organisation currentOrg = Optional.ofNullable(caseData.getRespondentOrganisationPolicy())
-            .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy::getOrganisation)
+            .map(OrganisationPolicy::getOrganisation)
             .orElse(null);
         Organisation beforeOrg = Optional.ofNullable(caseDataBefore.getRespondentOrganisationPolicy())
-            .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy::getOrganisation)
+            .map(OrganisationPolicy::getOrganisation)
             .orElse(null);
         boolean isSameOrganisation = Organisation.isSameOrganisation(currentOrg, beforeOrg);
-        return !currentEmail.equals(beforeEmail) || !isSameOrganisation;
+        return currentEmail != null && !currentEmail.equals(beforeEmail) || !isSameOrganisation;
     }
 }

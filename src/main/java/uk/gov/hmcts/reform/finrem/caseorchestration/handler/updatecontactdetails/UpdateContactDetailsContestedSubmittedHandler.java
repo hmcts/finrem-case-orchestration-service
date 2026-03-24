@@ -43,8 +43,8 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
 
         String checkAndAssignSolicitorAccessError = checkAndAssignSolicitorAccess(callbackRequest);
 
-        if (!StringUtils.isAllBlank(checkAndAssignSolicitorAccessError)) {
-            return submittedResponse(toConfirmationHeader("Updated Case Solicitor with Errors"),
+        if (StringUtils.isNotBlank(checkAndAssignSolicitorAccessError)) {
+            return submittedResponse(toConfirmationHeader("Update contact details with Errors"),
                 toConfirmationBody(checkAndAssignSolicitorAccessError));
         }
 
@@ -64,7 +64,7 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
         try {
             retryExecutor.runWithRetry(() -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore),
                 "Update Contact Details - Case Solicitor Change",
-                callbackRequest.getCaseDetails().getCaseIdAsString()
+                caseData.getCcdCaseId()
             );
             return null;
         } catch (Exception ex) {
