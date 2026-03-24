@@ -266,7 +266,6 @@ public class NotificationService {
         log.info("Received request for notification email for consent order not approved, Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED);
-
     }
 
     /**
@@ -1680,31 +1679,6 @@ public class NotificationService {
         sendNocEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
     }
 
-    /**
-     * Sends a Notice of Change (NOC) email to solicitors, initiated by a caseworker.
-     *
-     * <p>This method determines the appropriate email template based on the given
-     * {@link FinremCaseDetails}, constructs a {@link NotificationRequest}, and
-     * sends the email only if the solicitor is a digital user.
-     *
-     * @param caseDetails the case details used to determine the template and populate
-     *                    the notification request
-     */
-    public void sendNoticeOfChangeEmailCaseworker(FinremCaseDetails caseDetails) {
-        EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
-        NotificationRequest notificationRequest = finremNotificationRequestMapper
-            .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendNocEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
-    }
-
-    public boolean isApplicantSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {
-        return caseDataService.isApplicantSolicitorResponsibleToDraftOrder(caseData);
-    }
-
-    public boolean isRespondentSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {
-        return caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData);
-    }
-
     public boolean isContestedApplication(CaseDetails caseDetails) {
         return caseDataService.isContestedApplication(caseDetails);
     }
@@ -1744,22 +1718,6 @@ public class NotificationService {
             () -> checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString()),
             () -> checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString()),
             () -> (String) caseDetails.getData().get(getSolicitorNameKey(caseDetails))
-        );
-    }
-
-    private void sendNocEmailIfSolicitorIsDigital(
-        FinremCaseDetails caseDetails,
-        NotificationRequest notificationRequest,
-        EmailTemplateNames template) {
-
-        sendNocEmailIfSolicitorIsDigitalInternal(
-            caseDetails.getId().toString(),
-            notificationRequest,
-            template,
-            () -> checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString()),
-            () -> checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString()),
-            () -> caseDetails.getData().isConsentedApplication() ? caseDetails.getData().getContactDetailsWrapper().getSolicitorName()
-                : caseDetails.getData().getContactDetailsWrapper().getApplicantSolicitorName()
         );
     }
 
@@ -1819,13 +1777,6 @@ public class NotificationService {
     @Deprecated(since = "15-june-2023")
     private EmailTemplateNames getNoticeOfChangeTemplateCaseworker(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
-            ? FR_CONSENTED_NOC_CASEWORKER
-            : FR_CONTESTED_NOC_CASEWORKER;
-
-    }
-
-    private EmailTemplateNames getNoticeOfChangeTemplateCaseworker(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().isConsentedApplication()
             ? FR_CONSENTED_NOC_CASEWORKER
             : FR_CONTESTED_NOC_CASEWORKER;
 
