@@ -6,10 +6,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -31,10 +33,13 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest.APPLICANT_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest.RESPONDENT_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOC_CASEWORKER;
@@ -81,7 +86,7 @@ class UpdateContactDetailsNotificationServiceTest {
         assertFalse(result);
     }
 
-    static Stream<Arguments> shouldUseConsentedNocTemplate_whenLastRepresentationUpdateIsRespondent() {
+    static Stream<Arguments> shouldUseConsentedNocTemplate_whenLastRepresentationUpdate() {
         return Stream.of(
             // Respondent changed, consented application
             Arguments.of(RESPONDENT_PARTY, NotificationParty.RESPONDENT_SOLICITOR_ONLY, true, true, FR_CONSENTED_NOC_CASEWORKER),
@@ -100,11 +105,9 @@ class UpdateContactDetailsNotificationServiceTest {
 
     @ParameterizedTest
     @MethodSource
-    void shouldUseConsentedNocTemplate_whenLastRepresentationUpdateIsRespondent(String party,
-                                                                                NotificationParty notificationParty,
-                                                                                boolean isRespondentSolicitorChanged,
-                                                                                boolean isConsented,
-                                                                                EmailTemplateNames emailTemplateNames) {
+    void shouldUseConsentedNocTemplate_whenLastRepresentationUpdate(String party, NotificationParty notificationParty,
+                                                                    boolean isRespondentSolicitorChanged, boolean isConsented,
+                                                                    EmailTemplateNames emailTemplateNames) {
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
         FinremCaseData caseData = mock(FinremCaseData.class);
 
@@ -146,5 +149,56 @@ class UpdateContactDetailsNotificationServiceTest {
                     SendCorrespondenceEvent::getNotificationParties)
                 .containsExactly(emailTemplateNames, caseDetails, mockRequest, List.of(notificationParty))
         );
+    }
+
+    static Stream<Arguments> shouldThrowException_whenLatest_whenLastRepresentationUpdateIsMissing() {
+        return Stream.of(
+            Arguments.of(List.of(
+                RepresentationUpdateHistoryCollection.builder()
+                    .value(RepresentationUpdate.builder().build())
+                    .build()
+            )),
+            Arguments.of(List.of(RepresentationUpdateHistoryCollection.builder().build()))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    @NullAndEmptySource
+    void shouldThrowException_whenLatest_whenLastRepresentationUpdateIsMissing(
+        List<RepresentationUpdateHistoryCollection> representationUpdateHistory) {
+
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+
+        when(caseData.getRepresentationUpdateHistory()).thenReturn(representationUpdateHistory);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        // stub internal logic if needed (see note below)
+
+        assertThrows(IllegalStateException.class, () ->
+            updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(caseDetails));
+    }
+
+    @Test
+    void shouldSendNocLetterToLitigants() {
+        // Arrange
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
+
+        CaseDetails mappedCaseDetails = mock(CaseDetails.class);
+        CaseDetails mappedCaseDetailsBefore = mock(CaseDetails.class);
+
+        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(mappedCaseDetails);
+        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetailsBefore)).thenReturn(mappedCaseDetailsBefore);
+
+        // Act
+        updateContactDetailsNotificationService.sendNocLetterToLitigants(
+            finremCaseDetails, finremCaseDetailsBefore, AUTH_TOKEN
+        );
+
+        // Assert
+        verify(nocLetterNotificationService)
+            .sendNoticeOfChangeLetters(mappedCaseDetails, mappedCaseDetailsBefore, AUTH_TOKEN);
     }
 }
