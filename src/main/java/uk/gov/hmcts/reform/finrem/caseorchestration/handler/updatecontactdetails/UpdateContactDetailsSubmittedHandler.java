@@ -31,6 +31,7 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public UpdateContactDetailsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                UpdateContactDetailsNotificationService updateContactDetailsNotificationService,
                                                 SolicitorAccessService solicitorAccessService,
                                                 RetryExecutor retryExecutor,
                                                 ApplicationEventPublisher applicationEventPublisher) {
