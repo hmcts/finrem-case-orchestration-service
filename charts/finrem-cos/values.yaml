@@ -2,7 +2,7 @@ java:
   aadIdentityName: finrem
   ingressHost: "finrem-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
   applicationPort: '9000'
-  image: 'hmctspublic.azurecr.io/finrem-cos:latest'
+  image: 'hmctsprod.azurecr.io/finrem-cos:latest'
   memoryRequests: '1536Mi'
   memoryLimits: '2048Mi'
   cpuRequests: '250m'
