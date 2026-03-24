@@ -1434,10 +1434,42 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_REJECT_GENERAL_APPLICATION);
     }
 
+    /**
+     * No Return.
+     *
+     * <p>Please use @{@link #sendBarristerRemovedEmail(FinremCaseDetails, Barrister)}</p>
+     *
+     * @param caseDetails instance of CaseDetails
+     * @param barrister   instance of Barrister
+     * @deprecated Use {@link CaseDetails caseDetails, Barrister barrister}
+     */
+    @Deprecated(since = "15-june-2023")
+    public void sendBarristerAddedEmail(CaseDetails caseDetails, Barrister barrister) {
+        NotificationRequest notificationRequest = notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister);
+        log.info(BARRISTER_ACCESS_LOG, notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_BARRISTER_ACCESS_ADDED);
+    }
+
     public void sendBarristerAddedEmail(FinremCaseDetails caseDetails, Barrister barrister) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
         log.info(BARRISTER_ACCESS_LOG, notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_BARRISTER_ACCESS_ADDED);
+    }
+
+    /**
+     * No Return.
+     *
+     * <p>Please use @{@link #sendBarristerRemovedEmail(FinremCaseDetails, Barrister)}</p>
+     *
+     * @param caseDetails instance of CaseDetails
+     * @param barrister   instance of Barrister
+     * @deprecated Use {@link CaseDetails caseDetails, Barrister barrister}
+     */
+    @Deprecated(since = "15-june-2023")
+    public void sendBarristerRemovedEmail(CaseDetails caseDetails, Barrister barrister) {
+        NotificationRequest notificationRequest = notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister);
+        log.info(BARRISTER_ACCESS_LOG, notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_BARRISTER_ACCESS_REMOVED);
     }
 
     public void sendBarristerRemovedEmail(FinremCaseDetails caseDetails, Barrister barrister) {
@@ -1648,6 +1680,31 @@ public class NotificationService {
         sendNocEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
     }
 
+    /**
+     * Sends a Notice of Change (NOC) email to solicitors, initiated by a caseworker.
+     *
+     * <p>This method determines the appropriate email template based on the given
+     * {@link FinremCaseDetails}, constructs a {@link NotificationRequest}, and
+     * sends the email only if the solicitor is a digital user.
+     *
+     * @param caseDetails the case details used to determine the template and populate
+     *                    the notification request
+     */
+    public void sendNoticeOfChangeEmailCaseworker(FinremCaseDetails caseDetails) {
+        EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
+        NotificationRequest notificationRequest = finremNotificationRequestMapper
+            .getNotificationRequestForNoticeOfChange(caseDetails);
+        sendNocEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
+    }
+
+    public boolean isApplicantSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {
+        return caseDataService.isApplicantSolicitorResponsibleToDraftOrder(caseData);
+    }
+
+    public boolean isRespondentSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {
+        return caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData);
+    }
+
     public boolean isContestedApplication(CaseDetails caseDetails) {
         return caseDataService.isContestedApplication(caseDetails);
     }
@@ -1667,6 +1724,8 @@ public class NotificationService {
     /**
      * Return String Object for given Case with the given indentation used.
      *
+     * <p>Please use @{@link #sendNocEmailIfSolicitorIsDigital(FinremCaseDetails, NotificationRequest, EmailTemplateNames)}</p>
+     *
      * @param caseDetails         instance of CaseDetails
      * @param notificationRequest instance of NotificationRequest
      * @param template            instance of EmailTemplateNames
@@ -1685,6 +1744,22 @@ public class NotificationService {
             () -> checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString()),
             () -> checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString()),
             () -> (String) caseDetails.getData().get(getSolicitorNameKey(caseDetails))
+        );
+    }
+
+    private void sendNocEmailIfSolicitorIsDigital(
+        FinremCaseDetails caseDetails,
+        NotificationRequest notificationRequest,
+        EmailTemplateNames template) {
+
+        sendNocEmailIfSolicitorIsDigitalInternal(
+            caseDetails.getId().toString(),
+            notificationRequest,
+            template,
+            () -> checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString()),
+            () -> checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString()),
+            () -> caseDetails.getData().isConsentedApplication() ? caseDetails.getData().getContactDetailsWrapper().getSolicitorName()
+                : caseDetails.getData().getContactDetailsWrapper().getApplicantSolicitorName()
         );
     }
 
