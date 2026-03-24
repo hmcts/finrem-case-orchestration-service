@@ -130,6 +130,7 @@ public class RetryExecutor {
         try {
             runWithRetry(action, actionName, caseId);
         } catch (Exception ex) {
+            log.error("{} - Exception caught when {}", caseId, actionName, ex);
             emptyIfNull(Arrays.asList(errorHandlers)).forEach(errorHandler ->
                 errorHandler.handle(ex, actionName, caseId));
         }
@@ -193,6 +194,7 @@ public class RetryExecutor {
         try {
             return Optional.ofNullable(supplyWithRetry(action, actionName, caseId));
         } catch (Exception ex) {
+            log.error("{} - Exception caught when {}", caseId, actionName, ex);
             for (RetryErrorHandler handler : errorHandlers) {
                 handler.handle(ex, actionName, caseId);
             }
