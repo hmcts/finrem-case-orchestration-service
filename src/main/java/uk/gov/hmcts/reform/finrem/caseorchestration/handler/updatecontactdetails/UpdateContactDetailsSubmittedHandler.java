@@ -64,8 +64,10 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         String checkAndAssignSolicitorAccessError = checkAndAssignSolicitorAccess(callbackRequest);
 
         if (StringUtils.isNotBlank(checkAndAssignSolicitorAccessError)) {
-            return submittedResponse(toConfirmationHeader("Update contact details with Errors"),
-                toConfirmationBody(checkAndAssignSolicitorAccessError));
+            return submittedResponse(
+                toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
+                toConfirmationBody(checkAndAssignSolicitorAccessError)
+            );
         }
 
         if (requiresNotifications(finremCaseData)) {
