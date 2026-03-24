@@ -46,8 +46,8 @@ class FormerRespondentSolicitorListenerTest extends BasePartyListenerTest {
         FinremCaseDetails caseDetailsBefore = mock(FinremCaseDetails.class);
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
-            solicitorReferenceNumber);
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
+            caseDetailsBefore, emailTemplate, solicitorReferenceNumber);
         when(notificationService.isRespondentSolicitorEmailPopulatedAndPresented(caseDetailsBefore)).thenReturn(true);
 
         underTest.handleNotification(event);
@@ -67,7 +67,8 @@ class FormerRespondentSolicitorListenerTest extends BasePartyListenerTest {
     void shouldNotSendEmailNotificationIfRespondentSolicitorEmailIsNotPresent() {
         FinremCaseDetails caseDetailsBefore = mock(FinremCaseDetails.class);
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, mock(EmailTemplateNames.class));
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
+            caseDetailsBefore, mock(EmailTemplateNames.class));
         when(notificationService.isRespondentSolicitorEmailPopulatedAndPresented(caseDetailsBefore)).thenReturn(false);
 
         underTest.handleNotification(event);
@@ -80,7 +81,8 @@ class FormerRespondentSolicitorListenerTest extends BasePartyListenerTest {
     void shouldNotSendEmailNotificationIfCaseDetailsBeforeIsAbsent() {
         FinremCaseDetails caseDetailsBefore = null;
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, mock(EmailTemplateNames.class));
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
+            caseDetailsBefore, mock(EmailTemplateNames.class));
 
         underTest.handleNotification(event);
 
