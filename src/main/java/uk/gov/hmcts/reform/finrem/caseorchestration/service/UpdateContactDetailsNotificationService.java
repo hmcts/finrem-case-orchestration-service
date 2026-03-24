@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotific
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -125,13 +126,10 @@ public class UpdateContactDetailsNotificationService {
     }
 
     private Optional<RepresentationUpdate> getLastRepresentationUpdate(FinremCaseData finremCaseData) {
-        List<RepresentationUpdate> representationUpdates =
-            emptyIfNull(finremCaseData.getRepresentationUpdateHistory())
-                .stream()
-                .map(RepresentationUpdateHistoryCollection::getValue)
-                .toList();
-
-        return representationUpdates.stream()
-            .max(Comparator.comparing(RepresentationUpdate::getDate));
+        return emptyIfNull(finremCaseData.getRepresentationUpdateHistory())
+            .stream()
+            .map(RepresentationUpdateHistoryCollection::getValue)
+            .filter(Objects::nonNull)
+            .max(Comparator.comparing(RepresentationUpdate::getDate, Comparator.nullsLast(Comparator.naturalOrder())));
     }
 }
