@@ -18,12 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 @Slf4j
 @Service
-public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbackHandler {
+public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
     private final SolicitorAccessService solicitorAccessService;
     private final RetryExecutor retryExecutor;
 
-    public UpdateContactDetailsContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         SolicitorAccessService solicitorAccessService, RetryExecutor retryExecutor) {
+    public UpdateContactDetailsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                SolicitorAccessService solicitorAccessService, RetryExecutor retryExecutor) {
         super(finremCaseDetailsMapper);
         this.solicitorAccessService = solicitorAccessService;
         this.retryExecutor = retryExecutor;
