@@ -55,7 +55,7 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         FinremCaseData finremCaseData = caseDetails.getData();
 
         /*
-        DFR-4589
+        DFR-4589 AUto assigning applicant solicitor logic here
         */
 
         if (requiresNotifications(finremCaseData)) {
