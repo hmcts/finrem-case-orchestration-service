@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
@@ -132,7 +133,6 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
             userAuthorisation);
     }
 
-
     private String checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest) {
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
@@ -140,15 +140,16 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         caseDetailsBefore.getData().setCcdCaseId(caseDetailsBefore.getCaseIdAsString());
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
-        try {
-            retryExecutor.runWithRetry(() -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore),
-                "Update Contact Details - Case Solicitor Change",
-                caseData.getCcdCaseId()
-            );
-            return null;
-        } catch (Exception ex) {
-            log.error("Error updating solicitor access to case", ex);
-            return "There was a problem updating solicitor access to case.";
-        }
+        AtomicReference<String> error = new AtomicReference<>();
+
+        retryExecutor.runWithRetryWithHandler(
+            () -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore),
+            "Update Contact Details - Case Solicitor Change",
+            caseData.getCcdCaseId(),
+            (exception, actionName, caseId) ->
+                error.set("There was a problem updating solicitor access to case.")
+        );
+
+        return error.get();
     }
 }
