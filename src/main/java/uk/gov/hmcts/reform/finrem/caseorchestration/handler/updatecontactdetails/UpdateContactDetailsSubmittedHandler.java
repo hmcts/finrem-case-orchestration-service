@@ -74,6 +74,30 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         return submittedResponse();
     }
 
+    protected void sendNocEmailToLitigantSolicitorWithRetry(List<SendCorrespondenceEvent> events, List<String> errors) {
+        events.forEach(event ->
+            retryExecutor.runWithRetryWithHandler(
+                () -> sendNocEmailToLitigantSolicitor(event),
+                "Sending NOC email to litigant solicitor",
+                event.getCaseId(),
+                (exception, actionName, caseId1) ->
+                    errors.add("Fail to send notice of change email to litigant solicitor.")
+            )
+        );
+    }
+
+    protected void sendNocLetterToLitigantsWithRetry(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
+                                                     String userAuthorisation, List<String> errors) {
+        retryExecutor.runWithRetryWithHandler(
+            () -> sendNocLetterToLitigants(finremCaseDetails, finremCaseDetailsBefore,
+                userAuthorisation),
+            "Sending NOC letter",
+            finremCaseDetails.getCaseIdAsString(),
+            (exception, actionName, caseId1) ->
+                errors.add("Fail to send NOC letter to litigants.")
+        );
+    }
+
     private boolean requiresNotifications(FinremCaseData finremCaseData) {
         return updateContactDetailsNotificationService.requiresNotifications(finremCaseData);
     }
@@ -89,33 +113,9 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         applicationEventPublisher.publishEvent(event);
     }
 
-    private void sendNocEmailToLitigantSolicitorWithRetry(List<SendCorrespondenceEvent> events, List<String> errors) {
-        events.forEach(event ->
-            retryExecutor.runWithRetryWithHandler(
-                () -> sendNocEmailToLitigantSolicitor(event),
-                "Sending NOC email to litigant solicitor",
-                event.getCaseId(),
-                (exception, actionName, caseId1) ->
-                    errors.add("Fail to send notice of change email to litigant solicitor")
-            )
-        );
-    }
-
     private void sendNocLetterToLitigants(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
                                           String userAuthorisation) {
         updateContactDetailsNotificationService.sendNocLetterToLitigants(finremCaseDetails, finremCaseDetailsBefore,
             userAuthorisation);
-    }
-
-    private void sendNocLetterToLitigantsWithRetry(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
-                                                   String userAuthorisation, List<String> errors) {
-        retryExecutor.runWithRetryWithHandler(
-            () -> sendNocLetterToLitigants(finremCaseDetails, finremCaseDetailsBefore,
-                userAuthorisation),
-            "Sending NOC letter",
-            finremCaseDetails.getCaseIdAsString(),
-            (exception, actionName, caseId1) ->
-                errors.add("Fail to send NOC letter to litigants.")
-        );
     }
 }
