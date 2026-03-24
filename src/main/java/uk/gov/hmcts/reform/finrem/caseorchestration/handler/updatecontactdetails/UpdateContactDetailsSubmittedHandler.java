@@ -65,9 +65,6 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
                 toConfirmationBody(checkAndAssignSolicitorAccessError));
         }
 
-        // Check if the update includes a representative change and send Notice of Change notifications if required
-        solicitorAccessService.sendNoticeOfChangeNotificationsCaseworker(callbackRequest, userAuthorisation);
-
         if (requiresNotifications(finremCaseData)) {
             List<String> errors = new ArrayList<>();
 
