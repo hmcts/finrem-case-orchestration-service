@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -121,7 +120,8 @@ public class UpdateContactDetailsNotificationService {
 
     private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(FinremCaseData finremCaseData) {
         Optional<RepresentationUpdate> latest = getLastRepresentationUpdate(finremCaseData);
-        return RESPONDENT_PARTY.equalsIgnoreCase(latest.map(RepresentationUpdate::getParty).orElse(null));
+        return RESPONDENT_PARTY.equalsIgnoreCase(latest.map(RepresentationUpdate::getParty).orElseThrow(()
+            -> new IllegalStateException("No latest representation update found for case")));
     }
 
     private Optional<RepresentationUpdate> getLastRepresentationUpdate(FinremCaseData finremCaseData) {
@@ -131,8 +131,7 @@ public class UpdateContactDetailsNotificationService {
                 .map(RepresentationUpdateHistoryCollection::getValue)
                 .toList();
 
-        return Optional.ofNullable(
-            Collections.max(representationUpdates, Comparator.comparing(RepresentationUpdate::getDate))
-        );
+        return representationUpdates.stream()
+            .max(Comparator.comparing(RepresentationUpdate::getDate));
     }
 }
