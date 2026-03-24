@@ -130,18 +130,6 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
             userAuthorisation);
     }
 
-    private void sendNocLetterToLitigantsWithRetry(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
-                                                   String userAuthorisation, List<String> errors) {
-        retryExecutor.runWithRetryWithHandler(
-            () -> sendNocLetterToLitigants(finremCaseDetails, finremCaseDetailsBefore,
-                userAuthorisation),
-            "Sending NOC letter",
-            finremCaseDetails.getCaseIdAsString(),
-            (exception, actionName, caseId1) ->
-                errors.add("Fail to send NOC letter to litigants.")
-        );
-    }
-
 
     private String checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest) {
 
