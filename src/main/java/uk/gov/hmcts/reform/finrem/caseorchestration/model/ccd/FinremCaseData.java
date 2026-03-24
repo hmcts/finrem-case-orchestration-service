@@ -856,6 +856,22 @@ public class FinremCaseData implements HasCaseDocument {
         return nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail());
     }
 
+    @JsonIgnore
+    public String getRespondentSolicitorEmailIfRepresented() {
+        var contactWrapper = getContactDetailsWrapper();
+        if (contactWrapper == null
+            || isConsentedApplication() && !isYes(contactWrapper.getConsentedRespondentRepresented())
+            || isContestedApplication() && !isYes(contactWrapper.getContestedRespondentRepresented())) {
+            return null;
+        }
+
+        if (isConsentedApplication()) {
+            return contactWrapper.getSolicitorEmail();
+        } else {
+            return contactWrapper.getRespondentEmail();
+        }
+    }
+
     /**
      * If caseAllocatedTo is present, then the fastTrackDecision value is not relevant.
      * This suits cases where caseAllocatedTo can be null.
