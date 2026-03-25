@@ -95,7 +95,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
         clearTemporaryField(caseData);
         clearActionSelection(caseData);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).warnings(warnings).build();
+        return response(caseData, warnings, null);
     }
 
     private void addUploadDateToNewDocuments(FinremCaseData caseData, FinremCaseData caseDataBefore) {
