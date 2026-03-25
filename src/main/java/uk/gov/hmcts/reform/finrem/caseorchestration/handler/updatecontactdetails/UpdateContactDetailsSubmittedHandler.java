@@ -23,6 +23,9 @@ import java.util.List;
 @Slf4j
 @Service
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
+
+    private static final String CONFIRMATION_HEADER_WITH_ERROR = "Contact details updated with Errors";
+
     private final UpdateContactDetailsNotificationService updateContactDetailsNotificationService;
     private final RetryExecutor retryExecutor;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -66,7 +69,7 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
 
             if (!errors.isEmpty()) {
                 return submittedResponse(
-                    toConfirmationHeader("Contact details updated with Errors"),
+                    toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
                     toConfirmationBody(errors.toArray(new String[0]))
                 );
             }
