@@ -863,12 +863,8 @@ public class FinremCaseData implements HasCaseDocument {
             || isConsentedApplication() && !isYes(contactWrapper.getConsentedRespondentRepresented())
             || isContestedApplication() && !isYes(contactWrapper.getContestedRespondentRepresented())) {
             return null;
-        }
-
-        if (isConsentedApplication()) {
-            return contactWrapper.getSolicitorEmail();
         } else {
-            return contactWrapper.getRespondentEmail();
+            return contactWrapper.getRespondentSolicitorEmail();
         }
     }
 
