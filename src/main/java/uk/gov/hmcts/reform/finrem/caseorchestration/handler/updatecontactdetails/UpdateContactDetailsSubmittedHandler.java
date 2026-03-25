@@ -21,10 +21,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
+
+    private static final String CONFIRMATION_HEADER_WITH_ERROR = "Contact details updated with Errors";
     private final UpdateContactDetailsNotificationService updateContactDetailsNotificationService;
     private final SolicitorAccessService solicitorAccessService;
     private final RetryExecutor retryExecutor;
@@ -61,8 +64,10 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         String checkAndAssignSolicitorAccessError = checkAndAssignSolicitorAccess(callbackRequest);
 
         if (StringUtils.isNotBlank(checkAndAssignSolicitorAccessError)) {
-            return submittedResponse(toConfirmationHeader("Update contact details with Errors"),
-                toConfirmationBody(checkAndAssignSolicitorAccessError));
+            return submittedResponse(
+                toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
+                toConfirmationBody(checkAndAssignSolicitorAccessError)
+            );
         }
 
         if (requiresNotifications(finremCaseData)) {
@@ -74,12 +79,36 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
 
             if (!errors.isEmpty()) {
                 return submittedResponse(
-                    toConfirmationHeader("Contact details updated with Errors"),
+                    toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
                     toConfirmationBody(errors.toArray(new String[0]))
                 );
             }
         }
         return submittedResponse();
+    }
+
+    protected void sendNocEmailToLitigantSolicitorWithRetry(List<SendCorrespondenceEvent> events, List<String> errors) {
+        events.forEach(event ->
+            retryExecutor.runWithRetryWithHandler(
+                () -> sendNocEmailToLitigantSolicitor(event),
+                "Sending NOC email to litigant solicitor",
+                event.getCaseId(),
+                (exception, actionName, caseId1) ->
+                    errors.add("Fail to send notice of change email to litigant solicitor.")
+            )
+        );
+    }
+
+    protected void sendNocLetterToLitigantsWithRetry(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
+                                                     String userAuthorisation, List<String> errors) {
+        retryExecutor.runWithRetryWithHandler(
+            () -> sendNocLetterToLitigants(finremCaseDetails, finremCaseDetailsBefore,
+                userAuthorisation),
+            "Sending NOC letter",
+            finremCaseDetails.getCaseIdAsString(),
+            (exception, actionName, caseId1) ->
+                errors.add("Fail to send NOC letter to litigants.")
+        );
     }
 
     private boolean requiresNotifications(FinremCaseData finremCaseData) {
@@ -97,34 +126,10 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         applicationEventPublisher.publishEvent(event);
     }
 
-    private void sendNocEmailToLitigantSolicitorWithRetry(List<SendCorrespondenceEvent> events, List<String> errors) {
-        events.forEach(event ->
-            retryExecutor.runWithRetryWithHandler(
-                () -> sendNocEmailToLitigantSolicitor(event),
-                "Sending NOC email to litigant solicitor",
-                event.getCaseId(),
-                (exception, actionName, caseId1) ->
-                    errors.add("Fail to send notice of change email to litigant solicitor")
-            )
-        );
-    }
-
     private void sendNocLetterToLitigants(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
                                           String userAuthorisation) {
         updateContactDetailsNotificationService.sendNocLetterToLitigants(finremCaseDetails, finremCaseDetailsBefore,
             userAuthorisation);
-    }
-
-    private void sendNocLetterToLitigantsWithRetry(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
-                                                   String userAuthorisation, List<String> errors) {
-        retryExecutor.runWithRetryWithHandler(
-            () -> sendNocLetterToLitigants(finremCaseDetails, finremCaseDetailsBefore,
-                userAuthorisation),
-            "Sending NOC letter",
-            finremCaseDetails.getCaseIdAsString(),
-            (exception, actionName, caseId1) ->
-                errors.add("Fail to send NOC letter to litigants.")
-        );
     }
 
     private String checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest) {
@@ -134,15 +139,16 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         caseDetailsBefore.getData().setCcdCaseId(caseDetailsBefore.getCaseIdAsString());
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
-        try {
-            retryExecutor.runWithRetry(() -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore),
-                "Update Contact Details - Case Solicitor Change",
-                caseData.getCcdCaseId()
-            );
-            return null;
-        } catch (Exception ex) {
-            log.error("Error updating solicitor access to case", ex);
-            return "There was a problem updating solicitor access to case.";
-        }
+        AtomicReference<String> error = new AtomicReference<>();
+
+        retryExecutor.runWithRetryWithHandler(
+            () -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore),
+            "Update Contact Details - Case Solicitor Change",
+            caseData.getCcdCaseId(),
+            (exception, actionName, caseId) ->
+                error.set("There was a problem updating solicitor access to case.")
+        );
+
+        return error.get();
     }
 }

@@ -17,9 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Noti
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -121,18 +121,15 @@ public class UpdateContactDetailsNotificationService {
 
     private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(FinremCaseData finremCaseData) {
         Optional<RepresentationUpdate> latest = getLastRepresentationUpdate(finremCaseData);
-        return RESPONDENT_PARTY.equalsIgnoreCase(latest.map(RepresentationUpdate::getParty).orElse(null));
+        return RESPONDENT_PARTY.equalsIgnoreCase(latest.map(RepresentationUpdate::getParty).orElseThrow(()
+            -> new IllegalStateException("No latest representation update found for case")));
     }
 
     private Optional<RepresentationUpdate> getLastRepresentationUpdate(FinremCaseData finremCaseData) {
-        List<RepresentationUpdate> representationUpdates =
-            emptyIfNull(finremCaseData.getRepresentationUpdateHistory())
-                .stream()
-                .map(RepresentationUpdateHistoryCollection::getValue)
-                .toList();
-
-        return Optional.ofNullable(
-            Collections.max(representationUpdates, Comparator.comparing(RepresentationUpdate::getDate))
-        );
+        return emptyIfNull(finremCaseData.getRepresentationUpdateHistory())
+            .stream()
+            .map(RepresentationUpdateHistoryCollection::getValue)
+            .filter(Objects::nonNull)
+            .max(Comparator.comparing(RepresentationUpdate::getDate, Comparator.nullsLast(Comparator.naturalOrder())));
     }
 }
