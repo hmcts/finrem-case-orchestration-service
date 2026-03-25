@@ -43,7 +43,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
     private static final String INTERVENER_3 = "Intervener 3 ";
     private static final String INTERVENER_4 = "Intervener 4 ";
 
-    private static final List<CaseDocumentType> administrativeCaseDocumentTypes = List.of(
+    private static final List<CaseDocumentType> ADMINISTRATIVE_CASE_DOCUMENT_TYPES = List.of(
         CaseDocumentType.ATTENDANCE_SHEETS,
         CaseDocumentType.JUDICIAL_NOTES,
         CaseDocumentType.JUDGMENT,
@@ -233,7 +233,7 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
 
     private void setDefaultsForDocumentTypes(UploadCaseDocumentCollection document) {
         UploadCaseDocument uploadCaseDocument = document.getUploadCaseDocument();
-        if (administrativeCaseDocumentTypes.contains(uploadCaseDocument.getCaseDocumentType())) {
+        if (ADMINISTRATIVE_CASE_DOCUMENT_TYPES.contains(uploadCaseDocument.getCaseDocumentType())) {
             uploadCaseDocument.setCaseDocumentParty(CaseDocumentParty.CASE);
             uploadCaseDocument.setCaseDocumentFdr(YesOrNo.NO);
         } else if (CaseDocumentType.WITHOUT_PREJUDICE_OFFERS.equals(uploadCaseDocument.getCaseDocumentType())) {
