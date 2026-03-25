@@ -2,12 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
-
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -50,51 +48,37 @@ public class SolicitorAccessService {
 
     private void updateApplicantSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore)
         throws UserNotFoundInOrganisationApiException {
-        if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
-            if (caseData.isApplicantRepresentedByASolicitor()) {
-                assignPartiesAccessService.grantApplicantSolicitor(caseData);
-            }
-            if (caseDataBefore.isApplicantRepresentedByASolicitor()) {
-                assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore);
-            }
+        if (caseData.isApplicantRepresentedByASolicitor()) {
+            assignPartiesAccessService.grantApplicantSolicitor(caseData);
+        }
+        if (caseDataBefore.isApplicantRepresentedByASolicitor()) {
+            assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore);
         }
     }
 
     private void updateRespondentSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore)
         throws UserNotFoundInOrganisationApiException {
-        if (hasRespondentSolicitorChanged(caseData, caseDataBefore)) {
             if (caseData.isRespondentRepresentedByASolicitor()) {
                 assignPartiesAccessService.grantRespondentSolicitor(caseData);
             }
             if (caseDataBefore.isRespondentRepresentedByASolicitor()) {
                 assignPartiesAccessService.revokeRespondentSolicitor(caseDataBefore);
             }
-        }
     }
 
     private boolean hasApplicantSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         String currentEmail = caseData.getAppSolicitorEmail();
         String beforeEmail = caseDataBefore.getAppSolicitorEmail();
-        Organisation currentOrg = Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
-            .map(OrganisationPolicy::getOrganisation)
-            .orElse(null);
-        Organisation beforeOrg = Optional.ofNullable(caseDataBefore.getApplicantOrganisationPolicy())
-            .map(OrganisationPolicy::getOrganisation)
-            .orElse(null);
-        boolean isSameOrganisation = Organisation.isSameOrganisation(currentOrg, beforeOrg);
-        return currentEmail != null && !currentEmail.equals(beforeEmail) || !isSameOrganisation;
+        boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(caseData.getApplicantOrganisationPolicy(), caseDataBefore.getApplicantOrganisationPolicy());
+        boolean emailChanged = currentEmail != null && !StringUtils.equalsIgnoreCase(beforeEmail, currentEmail);
+        return emailChanged || !isSameOrganisation;
     }
 
     private boolean hasRespondentSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         String currentEmail = caseData.getRespondentSolicitorEmail();
         String beforeEmail = caseDataBefore.getRespondentSolicitorEmail();
-        Organisation currentOrg = Optional.ofNullable(caseData.getRespondentOrganisationPolicy())
-            .map(OrganisationPolicy::getOrganisation)
-            .orElse(null);
-        Organisation beforeOrg = Optional.ofNullable(caseDataBefore.getRespondentOrganisationPolicy())
-            .map(OrganisationPolicy::getOrganisation)
-            .orElse(null);
-        boolean isSameOrganisation = Organisation.isSameOrganisation(currentOrg, beforeOrg);
-        return currentEmail != null && !currentEmail.equals(beforeEmail) || !isSameOrganisation;
+        boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(caseData.getRespondentOrganisationPolicy(), caseDataBefore.getRespondentOrganisationPolicy());
+        boolean emailChanged = currentEmail != null && !StringUtils.equalsIgnoreCase(beforeEmail, currentEmail);
+        return emailChanged || !isSameOrganisation;
     }
 }
