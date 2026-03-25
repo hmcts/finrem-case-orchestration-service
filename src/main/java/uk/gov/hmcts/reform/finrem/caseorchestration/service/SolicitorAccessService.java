@@ -3,15 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
 import java.util.Optional;
 

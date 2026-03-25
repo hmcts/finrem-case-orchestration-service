@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
 
     private static final String CONFIRMATION_HEADER_WITH_ERROR = "Contact details updated with Errors";
-
     private final UpdateContactDetailsNotificationService updateContactDetailsNotificationService;
     private final SolicitorAccessService solicitorAccessService;
     private final RetryExecutor retryExecutor;
