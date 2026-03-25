@@ -34,6 +34,21 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
+/**
+ * Handles the "about to submit" callback for managing case documents
+ * in contested financial remedy cases.
+ *
+ * <p>This handler contains logic migrated from
+ * {@link ManageCaseDocumentsContestedAboutToSubmitHandler}, which is
+ * scheduled for removal. It preserves the existing behaviour while
+ * aligning with the updated handler structure.
+ *
+ * <p>Responsible for processing document-related updates prior to
+ * submission, ensuring case data is correctly prepared and validated.
+ *
+ * <p><strong>Note:</strong> This class supersedes the legacy handler and
+ * should be used for all contested case document management flows.
+ */
 @Slf4j
 @Service
 public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
