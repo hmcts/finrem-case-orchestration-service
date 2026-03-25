@@ -21,9 +21,6 @@ import java.util.Optional;
 public class SolicitorAccessService {
 
     private final AssignPartiesAccessService assignPartiesAccessService;
-    private final NotificationService notificationService;
-    private final NocLetterNotificationService nocLetterNotificationService;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     /**
      * This method checks if there has been a change in the applicant or respondent solicitor details and updates their access accordingly.
@@ -55,38 +52,6 @@ public class SolicitorAccessService {
                 throw new UserNotFoundInOrganisationApiException();
             }
         }
-    }
-
-    /**
-     * This method checks if the contact details update includes a representative change and sends Notice of Change
-     * notifications to the caseworker if required.
-     *
-     */
-    public void sendNoticeOfChangeNotificationsCaseworker(FinremCallbackRequest callbackRequest,
-                                                          String userAuthorisation) {
-
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Optional<ContactDetailsWrapper> contactDetailsWrapper = Optional.ofNullable(caseDetails.getData().getContactDetailsWrapper());
-        boolean requiresNotifications = contactDetailsWrapper
-            .map(ContactDetailsWrapper::getUpdateIncludesRepresentativeChange)
-            .filter(YesOrNo.YES::equals)
-            .isPresent();
-        if (!requiresNotifications) {
-            return;
-        }
-
-        log.info("Received request to send Notice of Change email and letter for Case ID: {}", caseDetails.getId());
-        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
-
-        log.info("Call the noc letter service");
-        nocLetterNotificationService.sendNoticeOfChangeLetters(
-            finremCaseDetailsMapper.mapToCaseDetails(caseDetails),
-            finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetailsBefore()), userAuthorisation);
-
-        contactDetailsWrapper.ifPresent(wrapper -> {
-            wrapper.setUpdateIncludesRepresentativeChange(null);
-            wrapper.setNocParty(null);
-        });
     }
 
     private void updateApplicantSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore)
