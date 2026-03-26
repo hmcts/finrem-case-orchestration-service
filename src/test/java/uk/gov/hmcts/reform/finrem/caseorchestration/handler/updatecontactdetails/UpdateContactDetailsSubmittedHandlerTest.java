@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails;
 
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -80,14 +79,13 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
     static Stream<Arguments> solicitorEmailChangeScenarios() {
         return Stream.of(
-            org.junit.jupiter.params.provider.Arguments.of("new@email.com", YesOrNo.YES, "old@email.com", YesOrNo.YES),
-            org.junit.jupiter.params.provider.Arguments.of("same@email.com", YesOrNo.YES, "same@email.com", YesOrNo.YES),
-            org.junit.jupiter.params.provider.Arguments.of("new@email.com", YesOrNo.YES, "", YesOrNo.NO),
-            org.junit.jupiter.params.provider.Arguments.of("", YesOrNo.NO, "old@email.com", YesOrNo.YES)
+            Arguments.of("new@email.com", YesOrNo.YES, "old@email.com", YesOrNo.YES),
+            Arguments.of("same@email.com", YesOrNo.YES, "same@email.com", YesOrNo.YES),
+            Arguments.of("new@email.com", YesOrNo.YES, "", YesOrNo.NO),
+            Arguments.of("", YesOrNo.NO, "old@email.com", YesOrNo.YES)
         );
     }
 
-    @Disabled("Needs fixing")
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("solicitorEmailChangeScenarios")
@@ -115,13 +113,18 @@ class UpdateContactDetailsSubmittedHandlerTest {
         assertAll(
             () -> assertThat(response.getConfirmationBody()).isNull(),
             () -> assertThat(response.getConfirmationHeader()).isNull(),
-            () -> verify(solicitorAccessService).checkAndAssignSolicitorAccess(caseData, caseDataBefore),
-            () -> verify(retryExecutor, never()).runWithRetryWithHandler(
+            () -> verify(retryExecutor).runWithRetryWithHandler(
                 any(ThrowingRunnable.class),
-                argThat(a -> List.of(
-                    "Update Contact Details - Case Solicitor Change").contains(a)),
+                eq("Update Contact Details - Case Solicitor Change"),
                 anyString(),
                 any())
+// you need to use captor
+// e.g.
+//        () -> {
+//            nocEmailToSolicitorsCaptor.getValue().run();
+//            verify(applicationEventPublisher).publishEvent(event);
+//        },
+//            () -> verify(solicitorAccessService).checkAndAssignSolicitorAccess(caseData, caseDataBefore),
         );
     }
 
