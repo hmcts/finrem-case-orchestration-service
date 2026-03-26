@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclie
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
@@ -83,7 +84,8 @@ public class StopRepresentingClientMidHandler extends FinremCallbackHandler {
         StopRepresentationWrapper wrapper = finremCaseData.getStopRepresentationWrapper();
         List<String> errors = new ArrayList<>();
         if (isPostcodeMissingInMasterServiceAddress(wrapper)) {
-            errors.add(POSTCODE_FIELD_IS_REQUIRED.formatted(resolveMasterParty(representativeInContext)));
+            errors.add(POSTCODE_FIELD_IS_REQUIRED.formatted(resolveMasterParty(representativeInContext)
+                .orElseThrow()));
         }
         check(isPostcodeMissingInExtraAddress1(wrapper), wrapper.getExtraClientAddr1Id(), errors);
         check(isPostcodeMissingInExtraAddress2(wrapper), wrapper.getExtraClientAddr2Id(), errors);
@@ -132,16 +134,18 @@ public class StopRepresentingClientMidHandler extends FinremCallbackHandler {
         return isPostcodeMissing(address);
     }
 
-    private String resolveMasterParty(RepresentativeInContext representativeInContext) {
+    private Optional<String> resolveMasterParty(RepresentativeInContext representativeInContext) {
         if (representativeInContext.isApplicantRepresentative()) {
-            return "Applicant";
+            return Optional.of("Applicant");
         }
         if (representativeInContext.isRespondentRepresentative()) {
-            return "Respondent";
+            return Optional.of("Respondent");
         }
         if (representativeInContext.isIntervenerRepresentative()) {
-            return "Intervener %s".formatted(representativeInContext.intervenerIndex());
+            return Optional.of("Intervener %s".formatted(
+                Optional.ofNullable(representativeInContext.intervenerIndex()).orElseThrow()
+            ));
         }
-        return null;
+        return Optional.empty();
     }
 }
