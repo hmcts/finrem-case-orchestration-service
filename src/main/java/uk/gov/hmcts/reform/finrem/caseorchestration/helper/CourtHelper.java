@@ -325,7 +325,7 @@ public class CourtHelper {
     private static final Map<String, String> lancashireMap = ImmutableMap.<String, String>builder()
         .put(PRESTON, "Preston Designated Family Court")
         .put(BLACKBURN, "Blackburn Family Court")
-        .put(BLACKPOOL, "Blackpool Tribunal Centre")
+        .put(BLACKPOOL, "Blackpool Family Court")
         .put(LANCASTER, "Lancaster Courthouse")
         .put(LEYLAND, "Leyland Family Hearing Centre")
         .put(REEDLEY, "Reedley Family Hearing Centre")
