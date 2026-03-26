@@ -147,9 +147,132 @@ class StopRepresentingClientMidHandlerTest {
         );
     }
 
+    static Stream<Arguments> extraClientScenarios() {
+        return Stream.of(
+            Arguments.of(createEmptyPostcodeAddress(), ExtraAddrType.INTERVENER1),
+            Arguments.of(createEmptyPostcodeAddress(), ExtraAddrType.INTERVENER2),
+            Arguments.of(createEmptyPostcodeAddress(), ExtraAddrType.INTERVENER3),
+            Arguments.of(createEmptyPostcodeAddress(), ExtraAddrType.INTERVENER4),
+            Arguments.of(createEmptyPostcodeAddress(), ExtraAddrType.APPLICANT),
+            Arguments.of(createEmptyPostcodeAddress(), ExtraAddrType.RESPONDENT)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("extraClientScenarios")
+    void givenPostcodeMissingInExtraClientAddress1_whenHandled_thenErrorPopulated(Address extraClientAddress,
+                                                                                  ExtraAddrType extraAddrType) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .clientAddressForService(createValidAddress())
+                .extraClientAddr1(extraClientAddress)
+                .extraClientAddr1Id(extraAddrType.getId())
+                .build())
+            .build();
+
+        when(stopRepresentingClientService.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
+            mock(RepresentativeInContext.class));
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getErrors()).containsExactly(
+            "%s's postcode field is required".formatted(ExtraAddrType.describe(extraAddrType.getId()).orElseThrow())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("extraClientScenarios")
+    void givenPostcodeMissingInExtraClientAddress2_whenHandled_thenErrorPopulated(Address extraClientAddress,
+                                                                                  ExtraAddrType extraAddrType) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .clientAddressForService(createValidAddress())
+                .extraClientAddr2(extraClientAddress)
+                .extraClientAddr2Id(extraAddrType.getId())
+                .build())
+            .build();
+
+        when(stopRepresentingClientService.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
+            mock(RepresentativeInContext.class));
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getErrors()).containsExactly(
+            "%s's postcode field is required".formatted(ExtraAddrType.describe(extraAddrType.getId()).orElseThrow())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("extraClientScenarios")
+    void givenPostcodeMissingInExtraClientAddress3_whenHandled_thenErrorPopulated(Address extraClientAddress,
+                                                                                  ExtraAddrType extraAddrType) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .clientAddressForService(createValidAddress())
+                .extraClientAddr3(extraClientAddress)
+                .extraClientAddr3Id(extraAddrType.getId())
+                .build())
+            .build();
+
+        when(stopRepresentingClientService.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
+            mock(RepresentativeInContext.class));
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getErrors()).containsExactly(
+            "%s's postcode field is required".formatted(ExtraAddrType.describe(extraAddrType.getId()).orElseThrow())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("extraClientScenarios")
+    void givenPostcodeMissingInExtraClientAddress4_whenHandled_thenErrorPopulated(Address extraClientAddress,
+                                                                                  ExtraAddrType extraAddrType) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .clientAddressForService(createValidAddress())
+                .extraClientAddr4(extraClientAddress)
+                .extraClientAddr4Id(extraAddrType.getId())
+                .build())
+            .build();
+
+        when(stopRepresentingClientService.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
+            mock(RepresentativeInContext.class));
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getErrors()).containsExactly(
+            "%s's postcode field is required".formatted(ExtraAddrType.describe(extraAddrType.getId()).orElseThrow())
+        );
+    }
+
+    @Test
+    void givenMultiplePostcodesAreMissing_whenHandled_thenErrorsPopulated() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .stopRepresentationWrapper(StopRepresentationWrapper.builder()
+                .stopRepClientConsent(YesOrNo.YES)
+                .clientAddressForService(createNullPostcodeAddress())
+                .extraClientAddr1(createEmptyPostcodeAddress())
+                .extraClientAddr1Id(ExtraAddrType.INTERVENER1.getId())
+                .extraClientAddr2(createEmptyPostcodeAddress())
+                .extraClientAddr2Id(ExtraAddrType.INTERVENER2.getId())
+                .build())
+            .build();
+
+        when(stopRepresentingClientService.buildRepresentation(caseData, AUTH_TOKEN)).thenReturn(
+            createApplicantRepresentativeInContext());
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(caseData);
+        assertThat(underTest.handle(request, AUTH_TOKEN).getErrors()).containsExactly(
+            "%s's postcode field is required".formatted(ExtraAddrType.describe(ExtraAddrType.APPLICANT.getId()).orElseThrow()),
+            "%s's postcode field is required".formatted(ExtraAddrType.describe(ExtraAddrType.INTERVENER1.getId()).orElseThrow()),
+            "%s's postcode field is required".formatted(ExtraAddrType.describe(ExtraAddrType.INTERVENER2.getId()).orElseThrow())
+        );
+    }
+
     private static Address createValidAddress() {
         Address address = mock(Address.class);
-        when(address.getPostCode()).thenReturn("AB1 DDE");
+        when(address.getPostCode()).thenReturn("PO53C 0D3");
         return address;
     }
 
@@ -172,5 +295,4 @@ class StopRepresentingClientMidHandlerTest {
     private static RepresentativeInContext createRespondentRepresentativeInContext() {
         return new RepresentativeInContext(TEST_USER_ID, false, true, null, null);
     }
-
 }
