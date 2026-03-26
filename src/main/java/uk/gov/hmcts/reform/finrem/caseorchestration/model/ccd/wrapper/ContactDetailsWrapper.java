@@ -168,4 +168,70 @@ public class ContactDetailsWrapper {
         return (value == null || value.isBlank()) ? null : value;
     }
 
+    /**
+     * Clears all stored information related to the respondent's solicitor.
+     *
+     * <p>
+     * This method sets the following fields to {@code null}:
+     * <ul>
+     *     <li>Respondent solicitor name</li>
+     *     <li>Respondent solicitor firm</li>
+     *     <li>Respondent solicitor reference</li>
+     *     <li>Respondent solicitor address</li>
+     *     <li>Respondent solicitor phone number</li>
+     *     <li>Respondent solicitor email</li>
+     *     <li>Respondent solicitor DX number</li>
+     * </ul>
+     *
+     * <p>
+     * This is typically used when the respondent no longer has a solicitor,
+     * or when resetting solicitor information is required for a case update.
+     */
+    public void clearRespondentSolicitorFields() {
+        setRespondentSolicitorName(null);
+        setRespondentSolicitorFirm(null);
+        setRespondentSolicitorReference(null);
+        setRespondentSolicitorAddress(null);
+        setRespondentSolicitorPhone(null);
+        setRespondentSolicitorEmail(null);
+        setRespondentSolicitorDxNumber(null);
+    }
+
+    /**
+     * Clears all applicant solicitor details from the case data.
+     *
+     * <p>
+     * This method resets solicitor-related fields used in both consented and contested
+     * case types by setting them to {@code null}.
+     * <ul>
+     *     <li><b>Common fields (consented & contested)</b> – solicitor reference</li>
+     *     <li><b>Consented case fields</b> – solicitor name, firm, address, phone, email,
+     *     DX number, and agreement to receive emails</li>
+     *     <li><b>Contested case fields</b> – applicant solicitor name, firm, address,
+     *     phone, email, DX number, and consent to receive emails</li>
+     * </ul>
+     *
+     * <p>
+     * Typically used when the applicant solicitor representation is removed or reset.
+     */
+    public void clearApplicantSolicitorFields() {
+        // consented & contested
+        setSolicitorReference(null);
+        // consented
+        setSolicitorName(null);
+        setSolicitorFirm(null);
+        setSolicitorAddress(null);
+        setSolicitorPhone(null);
+        setSolicitorEmail(null);
+        setSolicitorDxNumber(null);
+        setSolicitorAgreeToReceiveEmails(null);
+        // contested
+        setApplicantSolicitorName(null);
+        setApplicantSolicitorFirm(null);
+        setApplicantSolicitorAddress(null);
+        setApplicantSolicitorPhone(null);
+        setApplicantSolicitorEmail(null);
+        setApplicantSolicitorDxNumber(null);
+        setApplicantSolicitorConsentForEmails(null);
+    }
 }
