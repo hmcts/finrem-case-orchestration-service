@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerHearingNoticeCollectionName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
@@ -73,12 +72,6 @@ public class IntervenerOne extends IntervenerWrapper {
             caseData.setIntv1HearingNoticesCollection(new ArrayList<>());
         }
         return caseData.getIntv1HearingNoticesCollection();
-    }
-
-    @Override
-    @JsonIgnore
-    public IntervenerHearingNoticeCollectionName getIntervenerHearingNoticesCollectionName() {
-        return IntervenerHearingNoticeCollectionName.INTV_1;
     }
 
     @Override
