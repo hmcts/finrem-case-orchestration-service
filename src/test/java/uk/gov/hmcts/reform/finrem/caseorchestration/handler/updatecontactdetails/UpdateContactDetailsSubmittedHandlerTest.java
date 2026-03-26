@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails;
 
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -58,8 +56,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class UpdateContactDetailsSubmittedHandlerTest {
 
     @Mock
-    private SolicitorAccessService solicitorAccessService;
-    @Mock
     private UpdateContactDetailsNotificationService updateContactDetailsNotificationService;
     @Mock
     private RetryExecutor retryExecutor;
@@ -86,7 +82,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
         );
     }
 
-    @SneakyThrows
     @ParameterizedTest
     @MethodSource("solicitorEmailChangeScenarios")
     void handleSolicitorEmailChangeScenarios(String applicantSolicitorEmail, YesOrNo applicantRepresented,
@@ -110,21 +105,17 @@ class UpdateContactDetailsSubmittedHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         // Verify
+        ArgumentCaptor<ThrowingRunnable> checkAndAssignSolicitorAccessCaptor = getThrowingRunnableCaptor();
+
+        // Verify
         assertAll(
             () -> assertThat(response.getConfirmationBody()).isNull(),
             () -> assertThat(response.getConfirmationHeader()).isNull(),
             () -> verify(retryExecutor).runWithRetryWithHandler(
-                any(ThrowingRunnable.class),
+                checkAndAssignSolicitorAccessCaptor.capture(),
                 eq("Update Contact Details - Case Solicitor Change"),
-                anyString(),
-                any())
-// you need to use captor
-// e.g.
-//        () -> {
-//            nocEmailToSolicitorsCaptor.getValue().run();
-//            verify(applicationEventPublisher).publishEvent(event);
-//        },
-//            () -> verify(solicitorAccessService).checkAndAssignSolicitorAccess(caseData, caseDataBefore),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class))
         );
     }
 
