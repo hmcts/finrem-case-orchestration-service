@@ -107,7 +107,6 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
         addUploadDateToNewDocuments(caseData, caseDataBefore);
         clearLegacyCollections(caseData);
         deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
-        clearTemporaryField(caseData);
         clearActionSelection(caseData);
 
         return response(caseData, warnings, null);
@@ -122,14 +121,14 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
 
         if (ManageCaseDocumentsAction.AMEND.equals(action)) {
             List<UploadCaseDocumentCollection> inputDocuments =
-                new ArrayList<>(emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection()));
+                caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection();
 
             emptyIfNull(documentHandlers).forEach(documentHandler ->
                 documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, true));
 
         } else if (ManageCaseDocumentsAction.ADD_NEW.equals(action)) {
             List<UploadCaseDocumentCollection> inputDocuments =
-                new ArrayList<>(emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection()));
+                caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection();
 
             emptyIfNull(documentHandlers).forEach(documentHandler ->
                 documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, false));
@@ -168,10 +167,6 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
 
     private FinremCaseData getFinremCaseDataBefore(FinremCallbackRequest callbackRequest) {
         return callbackRequest.getCaseDetailsBefore().getData();
-    }
-
-    private void clearTemporaryField(FinremCaseData caseData) {
-        caseData.getManageCaseDocumentsWrapper().setInputManageCaseDocumentCollection(null);
     }
 
     private void clearLegacyCollections(FinremCaseData caseData) {

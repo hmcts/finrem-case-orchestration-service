@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction;
@@ -27,5 +28,6 @@ public class ManageCaseDocumentsWrapper implements HasCaseDocument {
     private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
 
     // it's used for capturing user's input in FR_newManageCaseDocuments event.
+    @TemporaryField
     private List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection;
 }
