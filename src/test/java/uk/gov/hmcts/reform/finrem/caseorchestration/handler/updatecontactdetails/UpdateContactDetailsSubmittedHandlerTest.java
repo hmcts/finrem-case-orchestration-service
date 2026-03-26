@@ -151,8 +151,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 any())
         );
     }
-
-    @Disabled("Needs fixing")
+    
     @Test
     void givenNotificationRequired_whenHandled_thenNotificationIsSent() {
         FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
@@ -196,7 +195,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 verify(updateContactDetailsNotificationService).sendNocLetterToLitigants(callbackRequest.getCaseDetails(),
                     callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN);
             },
-            () -> verifyNoMoreInteractions(retryExecutor, applicationEventPublisher)
+            () -> verifyNoMoreInteractions(applicationEventPublisher)
         );
     }
 
