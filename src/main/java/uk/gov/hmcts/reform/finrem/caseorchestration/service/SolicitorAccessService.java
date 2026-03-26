@@ -22,6 +22,7 @@ public class SolicitorAccessService {
      */
     public void checkAndAssignSolicitorAccess(FinremCaseData caseData,
                                               FinremCaseData caseDataBefore) throws UserNotFoundInOrganisationApiException {
+        log.info("Check and Auto Assign Solicitor Access for Case ID: {}", caseData.getCcdCaseId());
         // Applicant solicitor access update
         if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
             try {
@@ -47,6 +48,7 @@ public class SolicitorAccessService {
 
     private void updateApplicantSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore)
         throws UserNotFoundInOrganisationApiException {
+        log.info("Updating Applicant Solicitor Access for Case ID: {}", caseData.getCcdCaseId());
         if (caseData.isApplicantRepresentedByASolicitor()) {
             assignPartiesAccessService.grantApplicantSolicitor(caseData);
         }
@@ -57,6 +59,7 @@ public class SolicitorAccessService {
 
     private void updateRespondentSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore)
         throws UserNotFoundInOrganisationApiException {
+        log.info("Updating Respondent Solicitor Access for Case ID: {}", caseData.getCcdCaseId());
         if (caseData.isRespondentRepresentedByASolicitor()) {
             assignPartiesAccessService.grantRespondentSolicitor(caseData);
         }
