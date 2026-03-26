@@ -73,7 +73,10 @@ public class SolicitorAccessService {
         String beforeEmail = caseDataBefore.getAppSolicitorEmail();
         boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(caseData.getApplicantOrganisationPolicy(),
             caseDataBefore.getApplicantOrganisationPolicy());
-        boolean emailChanged = currentEmail != null && !currentEmail.equalsIgnoreCase(beforeEmail);
+        boolean emailChanged = !java.util.Objects.equals(
+            currentEmail == null ? null : currentEmail.toLowerCase(),
+            beforeEmail == null ? null : beforeEmail.toLowerCase()
+        );
         return emailChanged || !isSameOrganisation;
     }
 
@@ -82,7 +85,10 @@ public class SolicitorAccessService {
         String beforeEmail = caseDataBefore.getRespondentSolicitorEmail();
         boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(caseData.getRespondentOrganisationPolicy(),
             caseDataBefore.getRespondentOrganisationPolicy());
-        boolean emailChanged = currentEmail != null && !currentEmail.equalsIgnoreCase(beforeEmail);
+        boolean emailChanged = !java.util.Objects.equals(
+            currentEmail == null ? null : currentEmail.toLowerCase(),
+            beforeEmail == null ? null : beforeEmail.toLowerCase()
+        );
         return emailChanged || !isSameOrganisation;
     }
 }
