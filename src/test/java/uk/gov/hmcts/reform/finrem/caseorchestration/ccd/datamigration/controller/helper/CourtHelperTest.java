@@ -357,7 +357,7 @@ class CourtHelperTest {
             BLACKBURN, "Blackburn Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
-            BLACKPOOL, "Blackpool Tribunal Centre");
+            BLACKPOOL, "Blackpool Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
             LANCASTER, "Lancaster Courthouse");
