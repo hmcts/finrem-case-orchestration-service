@@ -77,8 +77,11 @@ public class HearingCourtWrapper implements CourtListWrapper {
     private HighCourt hearingHighCourtList;
 
     //This is only required for the consented side and should not be used elsewhere.
+    @JsonIgnore
     @Override
-    public LondonCourt getLondonCourt() { return null; }
+    public LondonCourt getLondonCourt() {
+        return null;
+    }
 
     @JsonIgnore
     @Override
