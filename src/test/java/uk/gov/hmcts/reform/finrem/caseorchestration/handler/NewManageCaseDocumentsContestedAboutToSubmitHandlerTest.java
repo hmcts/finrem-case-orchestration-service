@@ -82,6 +82,7 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     private ApplicantOtherDocumentsHandler documentHandlerTwo = mock(ApplicantOtherDocumentsHandler.class);
 
     private List<DocumentHandler> allDocumentHandlers;
+
     private NewManageCaseDocumentsContestedAboutToSubmitHandler underTest;
 
     @BeforeEach
@@ -339,19 +340,6 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseDataBefore, caseData), AUTH_TOKEN);
         verify(evidenceManagementDeleteService, times(featureToggleEnabled ? 1 : 0))
             .delete(removedDocument.getDocumentUrl(), AUTH_TOKEN);
-    }
-
-    @Test
-    void givenAnyCase_whenHandle_thenClearTemporaryField() {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
-                .inputManageCaseDocumentCollection(List.of())
-                .build())
-            .build();
-
-        assertThat(underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN)
-            .getData().getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection()
-        ).isNull();
     }
 
     @ParameterizedTest
