@@ -43,7 +43,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -82,6 +81,7 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
     private ApplicantOtherDocumentsHandler documentHandlerTwo = mock(ApplicantOtherDocumentsHandler.class);
 
     private List<DocumentHandler> allDocumentHandlers;
+
     private NewManageCaseDocumentsContestedAboutToSubmitHandler underTest;
 
     @BeforeEach
@@ -144,8 +144,8 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
             GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest
                 .handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
-            assertThat(response.getWarnings()).containsExactly(format("%s not present on the case, do you want to continue?",
-                intervenerIdentifier));
+            assertThat(response.getWarnings()).containsExactly("%s not present on the case, do you want to continue?"
+                .formatted(intervenerIdentifier));
         }
     }
 
@@ -226,9 +226,8 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenSingleCaseDocumentUploaded_whenHandleAddNewAction_thenDocumentHandlersInvoked() {
-        UploadCaseDocumentCollection singleCaseDocumentUploaded = null;
         List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection = List.of(
-            singleCaseDocumentUploaded = UploadCaseDocumentCollection.builder()
+            UploadCaseDocumentCollection.builder()
                 .uploadCaseDocument(UploadCaseDocument.builder()
                     .caseDocumentType(mock(CaseDocumentType.class))
                     .caseDocumentParty(mock(CaseDocumentParty.class))
@@ -246,24 +245,21 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
 
         for (DocumentHandler documentHandler : allDocumentHandlers) {
-            verify(documentHandler).replaceManagedDocumentsInCollectionType(caseData, List.of(singleCaseDocumentUploaded),
+            verify(documentHandler).replaceManagedDocumentsInCollectionType(caseData, inputManageCaseDocumentCollection,
                 false);
         }
     }
 
     @Test
     void givenMultipleCaseDocumentsUploaded_whenHandleAddNewAction_thenDocumentHandlersInvoked() {
-        UploadCaseDocumentCollection caseDocumentUploadedOne = null;
-        UploadCaseDocumentCollection caseDocumentUploadedTwo = null;
-
         List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection = List.of(
-            caseDocumentUploadedOne = UploadCaseDocumentCollection.builder()
+            UploadCaseDocumentCollection.builder()
                 .uploadCaseDocument(UploadCaseDocument.builder()
                     .caseDocumentType(mock(CaseDocumentType.class))
                     .caseDocumentParty(mock(CaseDocumentParty.class))
                     .build())
                 .build(),
-            caseDocumentUploadedTwo = UploadCaseDocumentCollection.builder()
+            UploadCaseDocumentCollection.builder()
                 .uploadCaseDocument(UploadCaseDocument.builder()
                     .caseDocumentType(mock(CaseDocumentType.class))
                     .caseDocumentParty(mock(CaseDocumentParty.class))
@@ -281,8 +277,7 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
 
         for (DocumentHandler documentHandler : allDocumentHandlers) {
-            verify(documentHandler).replaceManagedDocumentsInCollectionType(caseData, List.of(caseDocumentUploadedOne,
-                caseDocumentUploadedTwo),false);
+            verify(documentHandler).replaceManagedDocumentsInCollectionType(caseData, inputManageCaseDocumentCollection,false);
         }
     }
 
@@ -339,19 +334,6 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         underTest.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseDataBefore, caseData), AUTH_TOKEN);
         verify(evidenceManagementDeleteService, times(featureToggleEnabled ? 1 : 0))
             .delete(removedDocument.getDocumentUrl(), AUTH_TOKEN);
-    }
-
-    @Test
-    void givenAnyCase_whenHandle_thenClearTemporaryField() {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
-                .inputManageCaseDocumentCollection(List.of())
-                .build())
-            .build();
-
-        assertThat(underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN)
-            .getData().getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection()
-        ).isNull();
     }
 
     @ParameterizedTest
