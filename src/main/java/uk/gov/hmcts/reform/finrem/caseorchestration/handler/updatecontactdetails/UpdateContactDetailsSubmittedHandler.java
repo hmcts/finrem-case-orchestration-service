@@ -135,7 +135,6 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        caseDetailsBefore.getData().setCcdCaseId(caseDetailsBefore.getCaseIdAsString());
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
         AtomicReference<String> error = new AtomicReference<>();

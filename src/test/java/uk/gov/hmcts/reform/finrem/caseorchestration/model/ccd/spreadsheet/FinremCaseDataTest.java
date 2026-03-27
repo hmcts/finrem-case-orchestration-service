@@ -388,4 +388,107 @@ class FinremCaseDataTest {
         // then
         assertEquals(TEST_SOLICITOR_EMAIL, result);
     }
+
+    @Test
+    void shouldReturnNull_whenRespondentNotRepresented() {
+        // given
+        FinremCaseData caseData = spy(new FinremCaseData());
+        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+
+        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
+        when(wrapper.getContestedRespondentRepresented()).thenReturn(YesOrNo.NO);
+        when(wrapper.getConsentedRespondentRepresented()).thenReturn(YesOrNo.NO);
+
+        // when
+        String result = caseData.getRespondentSolicitorEmailIfRepresented();
+
+        // then
+        assertNull(result);
+    }
+
+    @Test
+    void shouldReturnRespondentSolicitorEmail_whenRepresentedAndConsentedApplication() {
+        // given
+        FinremCaseData caseData = spy(new FinremCaseData());
+        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+
+        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
+        when(wrapper.getConsentedRespondentRepresented()).thenReturn(YesOrNo.YES);
+        when(wrapper.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+
+        doReturn(true).when(caseData).isConsentedApplication();
+
+        // when
+        String result = caseData.getRespondentSolicitorEmailIfRepresented();
+
+        // then
+        assertEquals(TEST_SOLICITOR_EMAIL, result);
+    }
+
+    @Test
+    void shouldReturnRespondentSolicitorEmail_whenRepresentedAndNotConsentedApplication() {
+        // given
+        FinremCaseData caseData = spy(new FinremCaseData());
+        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+
+        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
+        when(wrapper.getConsentedRespondentRepresented()).thenReturn(YesOrNo.NO);
+        when(wrapper.getRespondentSolicitorEmail())
+            .thenReturn(TEST_SOLICITOR_EMAIL);
+
+        doReturn(false).when(caseData).isConsentedApplication();
+
+        // when
+        String result = caseData.getRespondentSolicitorEmailIfRepresented();
+
+        // then
+        assertEquals(TEST_SOLICITOR_EMAIL, result);
+    }
+
+    @Test
+    void shouldReturnNull_whenRepresentedButSolicitorEmailIsNull() {
+        FinremCaseData caseData = spy(new FinremCaseData());
+        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
+        when(wrapper.getConsentedRespondentRepresented()).thenReturn(YesOrNo.YES);
+        when(wrapper.getRespondentSolicitorEmail()).thenReturn(null);
+        doReturn(true).when(caseData).isConsentedApplication();
+        assertNull(caseData.getRespondentSolicitorEmailIfRepresented());
+    }
+
+    @Test
+    void shouldReturnNull_whenConsentedAndContestedRepresentedFlagsAreNull() {
+        FinremCaseData caseData = spy(new FinremCaseData());
+        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
+        when(wrapper.getConsentedRespondentRepresented()).thenReturn(null);
+        when(wrapper.getContestedRespondentRepresented()).thenReturn(null);
+        doReturn(true).when(caseData).isConsentedApplication();
+        doReturn(false).when(caseData).isContestedApplication();
+        assertNull(caseData.getRespondentSolicitorEmailIfRepresented());
+    }
+
+    @Test
+    void shouldReturnEmail_whenContestedApplicationAndRepresented() {
+        FinremCaseData caseData = spy(new FinremCaseData());
+        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
+        when(wrapper.getContestedRespondentRepresented()).thenReturn(YesOrNo.YES);
+        when(wrapper.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+        doReturn(false).when(caseData).isConsentedApplication();
+        doReturn(true).when(caseData).isContestedApplication();
+        assertEquals(TEST_SOLICITOR_EMAIL, caseData.getRespondentSolicitorEmailIfRepresented());
+    }
+
+    @Test
+    void shouldReturnNull_whenContestedApplicationAndNotRepresented() {
+        FinremCaseData caseData = spy(new FinremCaseData());
+        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
+        when(wrapper.getContestedRespondentRepresented()).thenReturn(YesOrNo.NO);
+        doReturn(false).when(caseData).isConsentedApplication();
+        doReturn(true).when(caseData).isContestedApplication();
+        assertNull(caseData.getRespondentSolicitorEmailIfRepresented());
+    }
+
 }
