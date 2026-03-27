@@ -107,7 +107,6 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
         addUploadDateToNewDocuments(caseData, caseDataBefore);
         clearLegacyCollections(caseData);
         deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
-        clearActionSelection(caseData);
 
         return response(caseData, warnings, null);
     }
@@ -137,10 +136,6 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
 
     private List<UploadCaseDocumentCollection> getInputCollections(FinremCaseData caseData) {
         return emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection());
-    }
-
-    private void clearActionSelection(FinremCaseData caseData) {
-        caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentsActionSelection(null);
     }
 
     private void moveInputManageCaseDocumentsToManagedCollections(FinremCaseData caseData) {

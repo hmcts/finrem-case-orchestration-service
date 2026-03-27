@@ -21,6 +21,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManageCaseDocumentsWrapper implements HasCaseDocument {
 
+    @TemporaryField
     private ManageCaseDocumentsAction manageCaseDocumentsActionSelection;
 
     // It was used for capturing user input in the old event.
