@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDa
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -41,7 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @Slf4j
 public class ConsentHearingService {
 
-    private final BulkPrintService bulkPrintService;
+    private final BulkPrintServiceAdapter bulkPrintServiceAdapter;
     private final DocumentConfiguration documentConfiguration;
     private final GenericDocumentService genericDocumentService;
     private final CaseDataService caseDataService;
@@ -59,7 +60,6 @@ public class ConsentHearingService {
             List<ConsentedHearingDataWrapper> listForHearingsBefore =
                 Optional.ofNullable(caseDetailsBefore.getData().getListForHearings()).orElse(new ArrayList<>());
             List<ConsentedHearingDataWrapper> hearingList = listForHearings;
-
 
             List<String> hearingIdsToProcess =
                 getNewOrDateTimeModifiedHearingIdsList(listForHearings,
@@ -83,7 +83,6 @@ public class ConsentHearingService {
         }
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void submitHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
         log.info("In submit Hearing for Case ID: {}", caseDetails.getId());
 
@@ -106,18 +105,17 @@ public class ConsentHearingService {
         sendToBulkPrint(caseDetails, caseData, authorisationToken, documents);
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
     private void sendToBulkPrint(CaseDetails caseDetails, Map<String, Object> caseData, String authorisationToken,
                                  List<BulkPrintDocument> documents) {
 
         if (helper.isPaperApplication(caseData) || !helper.isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending hearing documents to applicant - bulk print for Case ID: {}", caseDetails.getId());
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
+            bulkPrintServiceAdapter.printApplicantDocuments(caseDetails, authorisationToken, documents);
             log.info("Sent hearing documents to applicant - bulk print for Case ID: {}", caseDetails.getId());
         }
         if (helper.isPaperApplication(caseData) || !helper.isRespondentSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending hearing documents to respondent - bulk print for Case ID: {}", caseDetails.getId());
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
+            bulkPrintServiceAdapter.printRespondentDocuments(caseDetails, authorisationToken, documents);
             log.info("Sent hearing documents to respondent - bulk print for Case ID: {}", caseDetails.getId());
         }
     }
