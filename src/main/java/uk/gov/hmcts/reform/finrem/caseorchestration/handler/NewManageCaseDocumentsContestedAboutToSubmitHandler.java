@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -229,7 +230,11 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
     }
 
     private String getDocumentUrl(UploadCaseDocumentCollection documentCollection) {
-        return documentCollection.getUploadCaseDocument().getCaseDocuments().getDocumentUrl();
+        return ofNullable(documentCollection)
+            .map(UploadCaseDocumentCollection::getUploadCaseDocument)
+            .map(UploadCaseDocument::getCaseDocuments)
+            .map(CaseDocument::getDocumentUrl)
+            .orElseThrow(() -> new IllegalStateException("Document URL is missing"));
     }
 
     private void addDefaultsToAdministrativeDocuments(List<UploadCaseDocumentCollection> managedCollections) {
