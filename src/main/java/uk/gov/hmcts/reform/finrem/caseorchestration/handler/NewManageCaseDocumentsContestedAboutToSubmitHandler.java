@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -53,11 +54,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullI
 @Slf4j
 @Service
 public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
-    private static final String CHOOSE_A_DIFFERENT_PARTY = "not present on the case, do you want to continue?";
-    private static final String INTERVENER_1 = "Intervener 1 ";
-    private static final String INTERVENER_2 = "Intervener 2 ";
-    private static final String INTERVENER_3 = "Intervener 3 ";
-    private static final String INTERVENER_4 = "Intervener 4 ";
+    private static final String CHOOSE_A_DIFFERENT_PARTY = "%s not present on the case, do you want to continue?";
+    private static final String INTERVENER_1 = "Intervener 1";
+    private static final String INTERVENER_2 = "Intervener 2";
+    private static final String INTERVENER_3 = "Intervener 3";
+    private static final String INTERVENER_4 = "Intervener 4";
 
     private static final List<CaseDocumentType> ADMINISTRATIVE_CASE_DOCUMENT_TYPES = List.of(
         CaseDocumentType.ATTENDANCE_SHEETS,
@@ -98,8 +99,8 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
         final List<String> warnings = new ArrayList<>();
-        final FinremCaseData caseData = getFinremCaseData(callbackRequest);
-        final FinremCaseData caseDataBefore = getFinremCaseDataBefore(callbackRequest);
+        final FinremCaseData caseData = callbackRequest.getFinremCaseData();
+        final FinremCaseData caseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
         calculateWarnings(caseData, warnings);
         moveInputManageCaseDocumentsToManagedCollections(caseData);
@@ -157,14 +158,6 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
         }
     }
 
-    private FinremCaseData getFinremCaseData(FinremCallbackRequest callbackRequest) {
-        return callbackRequest.getCaseDetails().getData();
-    }
-
-    private FinremCaseData getFinremCaseDataBefore(FinremCallbackRequest callbackRequest) {
-        return callbackRequest.getCaseDetailsBefore().getData();
-    }
-
     private void clearLegacyCollections(FinremCaseData caseData) {
         // clear legacy confidentialDocumentsUploaded
         ofNullable(caseData.getConfidentialDocumentsUploaded()).ifPresent(List::clear);
@@ -198,9 +191,8 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
                 default -> null;
             };
 
-            if (StringUtils.isBlank(intervenerName)
-                && isIntervenerPartySelected(party, manageCaseDocumentCollection)) {
-                warnings.add(namePrefix + CHOOSE_A_DIFFERENT_PARTY);
+            if (StringUtils.isBlank(intervenerName) && isIntervenerPartySelected(party, manageCaseDocumentCollection)) {
+                warnings.add(CHOOSE_A_DIFFERENT_PARTY.formatted(namePrefix));
             }
         });
         // sort warnings
@@ -208,13 +200,11 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremC
     }
 
     private boolean isIntervenerPartySelected(CaseDocumentParty caseDocumentParty,
-                                              List<UploadCaseDocumentCollection> manageCaseDocumentCollection) {
-        return manageCaseDocumentCollection.stream().anyMatch(documentCollection -> {
-            if (documentCollection.getUploadCaseDocument().getCaseDocumentParty() != null) {
-                return caseDocumentParty.equals(documentCollection.getUploadCaseDocument().getCaseDocumentParty());
-            }
-            return false;
-        });
+                                              List<UploadCaseDocumentCollection> documents) {
+        return documents.stream()
+            .map(UploadCaseDocumentCollection::getUploadCaseDocument)
+            .filter(Objects::nonNull)
+            .anyMatch(doc -> caseDocumentParty.equals(doc.getCaseDocumentParty()));
     }
 
     private void deleteRemovedDocuments(FinremCaseData caseData,
