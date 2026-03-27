@@ -53,7 +53,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullI
  */
 @Slf4j
 @Service
-public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
     private static final String CHOOSE_A_DIFFERENT_PARTY = "%s not present on the case, do you want to continue?";
     private static final String INTERVENER_1 = "Intervener 1";
     private static final String INTERVENER_2 = "Intervener 2";
