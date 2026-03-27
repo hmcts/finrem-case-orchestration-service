@@ -226,9 +226,8 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenSingleCaseDocumentUploaded_whenHandleAddNewAction_thenDocumentHandlersInvoked() {
-        UploadCaseDocumentCollection singleCaseDocumentUploaded;
         List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection = List.of(
-            singleCaseDocumentUploaded = UploadCaseDocumentCollection.builder()
+            UploadCaseDocumentCollection.builder()
                 .uploadCaseDocument(UploadCaseDocument.builder()
                     .caseDocumentType(mock(CaseDocumentType.class))
                     .caseDocumentParty(mock(CaseDocumentParty.class))
@@ -246,24 +245,21 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
 
         for (DocumentHandler documentHandler : allDocumentHandlers) {
-            verify(documentHandler).replaceManagedDocumentsInCollectionType(caseData, List.of(singleCaseDocumentUploaded),
+            verify(documentHandler).replaceManagedDocumentsInCollectionType(caseData, inputManageCaseDocumentCollection,
                 false);
         }
     }
 
     @Test
     void givenMultipleCaseDocumentsUploaded_whenHandleAddNewAction_thenDocumentHandlersInvoked() {
-        UploadCaseDocumentCollection caseDocumentUploadedOne;
-        UploadCaseDocumentCollection caseDocumentUploadedTwo;
-
         List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection = List.of(
-            caseDocumentUploadedOne = UploadCaseDocumentCollection.builder()
+            UploadCaseDocumentCollection.builder()
                 .uploadCaseDocument(UploadCaseDocument.builder()
                     .caseDocumentType(mock(CaseDocumentType.class))
                     .caseDocumentParty(mock(CaseDocumentParty.class))
                     .build())
                 .build(),
-            caseDocumentUploadedTwo = UploadCaseDocumentCollection.builder()
+            UploadCaseDocumentCollection.builder()
                 .uploadCaseDocument(UploadCaseDocument.builder()
                     .caseDocumentType(mock(CaseDocumentType.class))
                     .caseDocumentParty(mock(CaseDocumentParty.class))
@@ -281,8 +277,7 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
 
         for (DocumentHandler documentHandler : allDocumentHandlers) {
-            verify(documentHandler).replaceManagedDocumentsInCollectionType(caseData, List.of(caseDocumentUploadedOne,
-                caseDocumentUploadedTwo),false);
+            verify(documentHandler).replaceManagedDocumentsInCollectionType(caseData, inputManageCaseDocumentCollection,false);
         }
     }
 
