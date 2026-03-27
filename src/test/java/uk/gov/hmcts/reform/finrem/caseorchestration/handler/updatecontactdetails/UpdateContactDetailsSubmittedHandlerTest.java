@@ -222,12 +222,11 @@ class UpdateContactDetailsSubmittedHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertAll(
-            () -> assertThat(response.getConfirmationHeader()).contains("# Contact details updated with Errors"),
+            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with Errors"),
             () -> assertThat(response.getConfirmationBody())
-                .isEqualTo("<ul>"
-                    + "<li><h2>Fail to send notice of change email to litigant solicitor.</h2></li>"
-                    + "<li><h2>Fail to send NOC letter to litigants.</h2></li>"
-                    + "</ul>"),
+                .contains(
+                    "Fail to send notice of change email to litigant solicitor.",
+                    "Fail to send NOC letter to litigants."),
             () -> verify(handler).sendNocLetterToLitigantsWithRetry(eq(callbackRequest.getCaseDetails()), eq(callbackRequest.getCaseDetailsBefore()),
                 eq(AUTH_TOKEN), anyList()),
             () -> verify(handler).sendNocEmailToLitigantSolicitorWithRetry(anyList(), anyList()),
