@@ -281,4 +281,29 @@ class UpdateContactDetailsSubmittedHandlerTest {
         // then
         assertThat(errors).containsExactly("Fail to send NOC letter to litigants.");
     }
+
+    @Test
+    void shouldReturnErrorConfirmationWhenCheckAndAssignSolicitorAccessFails() {
+        // Arrange
+        FinremCaseData finremCaseData = FinremCaseData.builder().build();
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder().build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, finremCaseDataBefore, finremCaseData);
+
+        // Simulate error in checkAndAssignSolicitorAccess by making retryExecutor set the error
+        doAnswer(invocation -> {
+            // No cast needed, just get the error handler and call it
+            String actionName = invocation.getArgument(1);
+            String caseId = invocation.getArgument(2);
+            RetryErrorHandler errorHandler = invocation.getArgument(3);
+            errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
+            return null;
+        }).when(retryExecutor).runWithRetryWithHandler(any(), any(), any(), any());
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertThat(response.getConfirmationHeader()).contains("Contact details updated with Errors");
+        assertThat(response.getConfirmationBody()).contains("There was a problem updating solicitor access to case.");
+    }
 }
