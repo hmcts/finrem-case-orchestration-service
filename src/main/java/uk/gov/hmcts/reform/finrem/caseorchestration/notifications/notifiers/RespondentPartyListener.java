@@ -11,6 +11,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import static com.google.common.base.Strings.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
+/**
+ * Listener responsible for handling correspondence notifications for the respondent.
+ *
+ * <p>This implementation extends {@link AbstractPartyListener} and provides
+ * respondent-specific logic to:
+ *
+ * <ul>
+ *     <li>Identify when the respondent is the intended notification party</li>
+ *     <li>Determine if email notification criteria are satisfied</li>
+ *     <li>Populate respondent-specific contact details for notifications</li>
+ *     <li>Retrieve the appropriate coversheet for bulk print</li>
+ *     <li>Determine whether the respondent resides outside the UK for postal handling</li>
+ * </ul>
+ *
+ * <p>Email notifications are sent only when the respondent's solicitor is marked as
+ * digital and a valid email address is available in the case details.
+ */
 @Component
 public class RespondentPartyListener extends AbstractPartyListener {
 
