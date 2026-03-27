@@ -158,7 +158,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      *
      * <p><strong>Developer note:</strong> If you introduce a new class that uses
      * {@code @TemporaryField}, you must add it to this list so that its temporary
-     * fields are removed correctly.</p>
+     * fields are removed correctly. In addition, make sure shouldClearTemporaryFields returns true</p>
      *
      * @return a list of classes containing {@code @TemporaryField}-annotated fields
      */
