@@ -3,13 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingcli
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.SetUtils;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -20,8 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -31,57 +25,58 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.Notificat
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 
 import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy.getDefaultOrganisationPolicy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_FOUR_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_FOUR_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_ONE_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_ONE_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_THREE_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_THREE_SOLICITOR_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_TWO_BARRISTER_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_INTERVENER_TWO_SOLICITOR_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getFormerIntervenerBarrister;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.getFormerIntervenerSolicitor;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils.clearChangeOrganisationRequestField;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.EmailTemplateResolver.getNotifyApplicantRepresentativeTemplateName;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.EmailTemplateResolver.getNotifyIntervenerRepresentativeTemplateName;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.EmailTemplateResolver.getNotifyRespondentRepresentativeTemplateName;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class StopRepresentingClientService {
 
-    private static final Revocation NO_NOC_INVOLVED = new Revocation(false, false);
+    public record LitigantRevocation(boolean applicantSolicitorRevoked, boolean respondentSolicitorRevoked) {
+
+        public boolean wasRevoked() {
+            return applicantSolicitorRevoked || respondentSolicitorRevoked;
+        }
+    }
+
+    private static final LitigantRevocation NO_NOC_INVOLVED = new LitigantRevocation(false, false);
 
     private final AssignCaseAccessService assignCaseAccessService;
 
@@ -103,68 +98,7 @@ public class StopRepresentingClientService {
 
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
-
-    private final GenericDocumentService genericDocumentService;
-
-    private final DocumentConfiguration documentConfiguration;
-
-    private final LetterDetailsMapper letterDetailsMapper;
-
-    private static FinremCaseData getFinremCaseDataBefore(StopRepresentingClientInfo info) {
-        return info.getCaseDetailsBefore().getData();
-    }
-
-    private static FinremCaseData getFinremCaseData(StopRepresentingClientInfo info) {
-        return info.getCaseDetails().getData();
-    }
-
-    private static long getCaseId(StopRepresentingClientInfo info) {
-        return Long.parseLong(getFinremCaseData(info).getCcdCaseId());
-    }
-
-    private static Map<String, Object> clearChangeOrganisationRequestField() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(CHANGE_ORGANISATION_REQUEST, null);
-        return map;
-    }
-
-    private static EmailTemplateNames getNotifyApplicantRepresentativeTemplateName(FinremCaseData finremCaseData) {
-        return finremCaseData.isContestedApplication()
-            ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-            : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
-    }
-
-    private static EmailTemplateNames getNotifyRespondentRepresentativeTemplateName(FinremCaseData finremCaseData) {
-        return finremCaseData.isContestedApplication()
-            ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT
-            : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
-    }
-
-    private static EmailTemplateNames getNotifyIntervenerRepresentativeTemplateName(FinremCaseData finremCaseData) {
-        return finremCaseData.isContestedApplication()
-            ? EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER
-            : EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_INTERVENER;
-    }
-
-    /**
-     * Revoke the case assess and send notifications to affected parties.
-     *
-     * <p>This method:
-     * <ul>
-     *   <li>Handles requests for intervener representatives</li>
-     *   <li>Handles requests for applicant or respondent representatives</li>
-     *   <li>Handles requests for any barrister representation changes</li>
-     *   <li>Sends notification to parties like applicant, respondent and the parties being revoked</li>
-     * </ul>
-     *
-     * @param info the stop-representing context containing case details and user authorisation
-     */
-    public void revokePartiesAccessAndNotifyParties(StopRepresentingClientInfo info) {
-        handleIntervenerRepresentativeRequest(info);
-        handleApplicantOrRespondentRepresentativeRequest(info);
-        sendAllBarristerChangeToCaseAssignmentService(info);
-    }
+    private final StopRepresentingClientLetterService stopRepresentingClientLetterService;
 
     /**
      * Builds a {@link RepresentativeInContext} object indicating which parties
@@ -182,12 +116,12 @@ public class StopRepresentingClientService {
     public RepresentativeInContext buildRepresentation(FinremCaseData caseData, String userAuthorisation) {
         boolean isIntervenerRepresentative = caseRoleService.isIntervenerRepresentative(caseData, userAuthorisation);
 
-        Integer intervenerIndex = null;
+        IntervenerType intervenerType = null;
         IntervenerRole intervenerRole = null;
 
         if (isIntervenerRepresentative) {
-            intervenerIndex = caseRoleService
-                .getIntervenerIndex(caseData, userAuthorisation)
+            intervenerType = caseRoleService
+                .getIntervenerType(caseData, userAuthorisation)
                 .orElseThrow();
 
             intervenerRole = caseRoleService
@@ -201,7 +135,7 @@ public class StopRepresentingClientService {
             idamService.getIdamUserId(userAuthorisation),
             caseRoleService.isApplicantRepresentative(caseData, userAuthorisation),
             caseRoleService.isRespondentRepresentative(caseData, userAuthorisation),
-            intervenerIndex,
+            intervenerType,
             intervenerRole
         );
     }
@@ -227,19 +161,17 @@ public class StopRepresentingClientService {
         if (!representativeInContext.isIntervenerBarrister()) {
             return false;
         }
-        int index = representativeInContext.intervenerIndex();
-        IntervenerWrapper intervener = caseData.getIntervenerById(index);
+        IntervenerWrapper intervener = caseData.getIntervenerById(representativeInContext.intervenerType().getIntervenerId());
         List<BarristerCollectionItem> intvBarristers = caseData.getBarristerCollectionWrapper()
-            .getIntervenerBarristersByIndex(index);
+            .getIntervenerBarristers(representativeInContext.intervenerType());
 
         Barrister barrister = emptyIfNull(intvBarristers).stream().map(BarristerCollectionItem::getValue)
             .filter(b -> b.getUserId().equals(representativeInContext.userId()))
             .findFirst().orElseThrow();
 
+        OrganisationPolicy policy = intervener.getIntervenerOrganisation();
         return isSameOrganisation(
-            ofNullable(intervener.getIntervenerOrganisation())
-                .map(OrganisationPolicy::getOrganisation)
-                .orElse(Organisation.builder().build()),
+            policy == null ? null : policy.getOrganisation(),
             barrister.getOrganisation()
         );
     }
@@ -262,25 +194,7 @@ public class StopRepresentingClientService {
     public void setApplicantUnrepresented(FinremCaseData finremCaseData) {
         ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
         contactDetailsWrapper.setApplicantRepresented(YesOrNo.NO);
-
-        // consented & contested
-        contactDetailsWrapper.setSolicitorReference(null);
-        // consented
-        contactDetailsWrapper.setSolicitorName(null);
-        contactDetailsWrapper.setSolicitorFirm(null);
-        contactDetailsWrapper.setSolicitorAddress(null);
-        contactDetailsWrapper.setSolicitorPhone(null);
-        contactDetailsWrapper.setSolicitorEmail(null);
-        contactDetailsWrapper.setSolicitorDxNumber(null);
-        contactDetailsWrapper.setSolicitorAgreeToReceiveEmails(null);
-        // contested
-        contactDetailsWrapper.setApplicantSolicitorName(null);
-        contactDetailsWrapper.setApplicantSolicitorFirm(null);
-        contactDetailsWrapper.setApplicantSolicitorAddress(null);
-        contactDetailsWrapper.setApplicantSolicitorPhone(null);
-        contactDetailsWrapper.setApplicantSolicitorEmail(null);
-        contactDetailsWrapper.setApplicantSolicitorDxNumber(null);
-        contactDetailsWrapper.setApplicantSolicitorConsentForEmails(null);
+        contactDetailsWrapper.clearApplicantSolicitorFields();
 
         finremCaseData.setApplicantOrganisationPolicy(getDefaultOrganisationPolicy(APP_SOLICITOR));
     }
@@ -302,13 +216,7 @@ public class StopRepresentingClientService {
         ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
 
         // consented & contested
-        contactDetailsWrapper.setRespondentSolicitorName(null);
-        contactDetailsWrapper.setRespondentSolicitorFirm(null);
-        contactDetailsWrapper.setRespondentSolicitorReference(null);
-        contactDetailsWrapper.setRespondentSolicitorAddress(null);
-        contactDetailsWrapper.setRespondentSolicitorPhone(null);
-        contactDetailsWrapper.setRespondentSolicitorEmail(null);
-        contactDetailsWrapper.setRespondentSolicitorDxNumber(null);
+        contactDetailsWrapper.clearRespondentSolicitorFields();
 
         if (finremCaseData.isConsentedApplication()) {
             finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
@@ -332,56 +240,82 @@ public class StopRepresentingClientService {
         intervenerWrapper.setIntervenerOrganisation(getDefaultOrganisationPolicy(
             intervenerWrapper.getIntervenerSolicitorCaseRole()
         ));
-
-        intervenerWrapper.setIntervenerSolEmail(null);
-        intervenerWrapper.setIntervenerSolicitorFirm(null);
-        intervenerWrapper.setIntervenerSolicitorReference(null);
-        intervenerWrapper.setIntervenerSolName(null);
-        intervenerWrapper.setIntervenerSolPhone(null);
-    }
-
-    private void handleApplicantOrRespondentRepresentativeRequest(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseData(info);
-        final CaseType caseType = finremCaseData.getCcdCaseType();
-        final long caseId = getCaseId(info);
-
-        Revocation revocation = revokeApplicantSolicitorOrRespondentSolicitor(info);
-
-        if (revocation.isRevoked()) {
-            // save a call if changeOrganisationRequestField is null
-            clearChangeOrganisationRequestAfterThisEvent(caseType, caseId);
-
-            if (revocation.applicantSolicitorRevoked) {
-                notifyApplicantSolicitor(info);
-                notifyApplicant(info);
-            }
-            if (revocation.respondentSolicitorRevoked) {
-                notifyRespondentSolicitor(info);
-                notifyRespondent(info);
-            }
-        }
+        intervenerWrapper.clearIntervenerSolicitorFields();
     }
 
     /**
-     * Determines whether intervener access should be revoked by comparing
-     * the current intervener organisation with the original organisation
-     * stored in case data.
+     * Prepares a list of {@link SendCorrespondenceEventWithDescription} for notifying litigants
+     * (applicant or respondent) whose representation has been revoked.
+     *
+     * <p>This method does not send the notifications directly. It constructs the
+     * correspondence events (email and letter) which will be processed later
+     * in the workflow to trigger the actual notifications.</p>
+     *
+     * @param litigantRevocation flags indicating which litigants' representation was revoked
+     * @param info the stop representing client event information
+     * @return a list of {@link SendCorrespondenceEventWithDescription} for later notification processing
      */
-    private boolean shouldRevokeIntervenerAccess(IntervenerWrapper intervenerWrapper,
-                                                 IntervenerWrapper originalIntervenerWrapper) {
-        return !isSameOrganisation(
-            ofNullable(intervenerWrapper.getIntervenerOrganisation())
-                .map(OrganisationPolicy::getOrganisation)
-                .orElse(Organisation.builder().organisationID("SAME").build()),
-            ofNullable(originalIntervenerWrapper.getIntervenerOrganisation())
-                .map(OrganisationPolicy::getOrganisation)
-                .orElse(Organisation.builder().organisationID("SAME").build())
-        );
+    public List<SendCorrespondenceEventWithDescription> prepareLitigantRevocationNotificationEvents(LitigantRevocation litigantRevocation,
+                                                                                                    StopRepresentingClientInfo info) {
+        List<SendCorrespondenceEventWithDescription> eventsWithDesc = new ArrayList<>();
+        if (litigantRevocation.wasRevoked()) {
+            if (litigantRevocation.applicantSolicitorRevoked) {
+                eventsWithDesc.add(prepareApplicantSolicitorEmailNotificationEvent(info));
+            }
+            if (litigantRevocation.respondentSolicitorRevoked) {
+                eventsWithDesc.add(prepareRespondentSolicitorEmailNotificationEvent(info));
+            }
+        }
+        return eventsWithDesc;
     }
 
-    private void handleIntervenerRepresentativeRequest(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseData(info);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
+    /**
+     * Prepares a list of {@link SendCorrespondenceEventWithDescription} for sending letter
+     * notifications to litigants (applicant or respondent) whose representation has been revoked.
+     *
+     * <p>This method only constructs the correspondence events with description for letter
+     * notifications. The letters are not sent directly; the events with description will be processed
+     * later in the workflow to trigger the actual notifications.</p>
+     *
+     * @param litigantRevocation flags indicating which litigants' representation was revoked
+     * @param info the stop representing client event information
+     * @return a list of {@link SendCorrespondenceEventWithDescription} for later letter notification processing
+     */
+    public List<SendCorrespondenceEventWithDescription> prepareLitigantRevocationLetterNotificationEvents(LitigantRevocation litigantRevocation,
+                                                                                                          StopRepresentingClientInfo info) {
+        List<SendCorrespondenceEventWithDescription> events = new ArrayList<>();
+        if (litigantRevocation.wasRevoked()) {
+            if (litigantRevocation.applicantSolicitorRevoked) {
+                events.add(prepareApplicantLetterNotificationEvent(info));
+            }
+            if (litigantRevocation.respondentSolicitorRevoked) {
+                events.add(prepareRespondentLetterNotificationEvent(info));
+            }
+        }
+        return events;
+    }
+
+    /**
+     * Identifies the intervener solicitors whose access should be revoked based on
+     * changes in the case data.
+     *
+     * <p>This method compares the current {@link FinremCaseData} with the previous
+     * case data to detect any interveners whose solicitor access needs to be revoked.
+     * For each intervener present in both snapshots, it evaluates whether revocation
+     * is required using {@link #shouldRevokeIntervenerSolicitorAccess(IntervenerWrapper, IntervenerWrapper)}.</p>
+     *
+     * <p>No changes are made to the case data or notifications sent; this method
+     * only returns the list of interveners for whom revocation should be applied.</p>
+     *
+     * @param info the stop representing client event information
+     * @return a list of {@link IntervenerWrapper} objects representing interveners
+     *         whose solicitor access should be revoked
+     */
+    public List<IntervenerWrapper> getToBeRevokedIntervenerSolicitors(StopRepresentingClientInfo info) {
+        final FinremCaseData finremCaseData = info.getFinremCaseData();
+        final FinremCaseData finremCaseDataBefore = info.getFinremCaseDataBefore();
+
+        List<IntervenerWrapper> ret = new ArrayList<>();
 
         // compare all interveners
         finremCaseDataBefore.getInterveners().forEach(originalWrapper -> {
@@ -391,56 +325,59 @@ public class StopRepresentingClientService {
                     .filter(wrapper -> it.equals(wrapper.getIntervenerType()))
                     .findAny()
                     .ifPresent(wrapper -> {
-                        if (shouldRevokeIntervenerAccess(wrapper, originalWrapper)) {
-                            intervenerService.revokeIntervenerSolicitor(info.getCaseDetails().getId(), originalWrapper);
-                            notifyIntervenerSolicitor(info, it);
+                        if (shouldRevokeIntervenerSolicitorAccess(wrapper, originalWrapper)) {
+                            ret.add(originalWrapper);
                         }
                     });
             }
         });
+        return ret;
     }
 
-    private void sendAllBarristerChangeToCaseAssignmentService(StopRepresentingClientInfo info) {
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.APPLICANT);
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.RESPONDENT);
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER1);
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER2);
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER3);
-        sendBarristerChangesToCaseAssignmentService(info, BarristerParty.INTERVENER4);
+    /**
+     * Determines which barristers should have their access revoked for a given litigant party.
+     *
+     * <p>This method compares the current case data with the previous snapshot to identify
+     * barristers associated with the specified {@link BarristerParty} whose access should be revoked.
+     * The actual revocation is not performed here; this is a calculation step that returns
+     * the changes to be applied.</p>
+     *
+     * @param info the stop representing client event information containing case details
+     * @param barristerParty the party (applicant or respondent) whose barristers are being checked
+     * @return a {@link BarristerChange} object containing the barristers to be revoked
+     */
+    public BarristerChange getToBeRevokedBarristers(StopRepresentingClientInfo info, BarristerParty barristerParty) {
+        FinremCaseData finremCaseDataBefore = info.getFinremCaseDataBefore();
+        return manageBarristerService.getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
     }
 
-    private void sendBarristerChangesToCaseAssignmentService(StopRepresentingClientInfo info, BarristerParty barristerParty) {
-        final long caseId = getCaseId(info);
-        final FinremCaseData finremCaseDataBefore = getFinremCaseDataBefore(info);
-
-        BarristerChange barristerChange = manageBarristerService
-            .getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
-        barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, barristerChange);
-        SetUtils.emptyIfNull(barristerChange.getRemoved()).forEach(b -> {
-            if (BarristerParty.APPLICANT.equals(barristerParty)) {
-                notifyApplicantBarrister(info, b);
-            }
-            if (BarristerParty.RESPONDENT.equals(barristerParty)) {
-                notifyRespondentBarrister(info, b);
-            }
-            IntStream.range(1, 5).forEach(i -> {
-                if (BarristerParty.getIntervenerBarristerByIndex(i).equals(barristerParty)) {
-                    notifyIntervenerBarrister(info, i, b);
-                }
-            });
-        });
-    }
-
-    private record Revocation(boolean applicantSolicitorRevoked, boolean respondentSolicitorRevoked) {
-
-        boolean isRevoked() {
-            return applicantSolicitorRevoked || respondentSolicitorRevoked;
-        }
-    }
-
-    private Revocation revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
-        final FinremCaseData finremCaseData = getFinremCaseData(info);
-        final FinremCaseData originalFinremCaseData = getFinremCaseDataBefore(info);
+    /**
+     * Revokes the applicant or respondent solicitor when a "Stop Representing Client" event is triggered.
+     *
+     * <p>This method determines whether a Notice of Change (NoC) operation should be performed based on
+     * the {@link ChangeOrganisationRequest} present in the case data.</p>
+     *
+     * <p>If no organisation change is requested (i.e. the change organisation request is null or
+     * contains no organisations to add or remove), no action is taken and {@link #NO_NOC_INVOLVED}
+     * is returned.</p>
+     *
+     * <p>When a representation change is detected, the organisation policy for the affected party
+     * (applicant or respondent) is restored to its original value before the event started. This is
+     * required because the Access and Assignment Controller (AAC) modifies organisation policies
+     * based on the change organisation request.</p>
+     *
+     * <p>After restoring the original organisation policy, the decision is applied via the
+     * Case Assignment service.</p>
+     *
+     * @param info the event information containing the current and previous case data
+     * @return a {@link LitigantRevocation} object indicating which solicitor (applicant or respondent)
+     *         has been revoked, or {@link #NO_NOC_INVOLVED} if no organisation change was required
+     * @throws IllegalStateException if the change organisation request is populated but the
+     *         Notice of Change party cannot be determined
+     */
+    public LitigantRevocation revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
+        FinremCaseData finremCaseData = info.getFinremCaseData();
+        FinremCaseData originalFinremCaseData = info.getFinremCaseDataBefore();
 
         // to check if ChangeOrganisationRequest populated, otherwise skip it
         if (Optional.ofNullable(finremCaseData.getChangeOrganisationRequestField())
@@ -454,233 +391,398 @@ public class StopRepresentingClientService {
         // aac handles org policy modification based on the Change Organisation Request,
         // so we need to revert the org policies to their value before the event started
         // Refer to NoticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess
-        boolean shouldPerformNoc = false;
         boolean isApplicantForRepresentationChange = isApplicantForRepresentationChange(finremCaseData);
+        boolean isRespondentForRepresentationChange = isRespondentForRepresentationChange(finremCaseData);
+
+        if (!isApplicantForRepresentationChange && !isRespondentForRepresentationChange) {
+            throw new IllegalStateException(format("%s - ChangeOrganisationRequest populated with unknown or null NOC Party : %s",
+                finremCaseData.getContactDetailsWrapper().getNocParty(),
+                finremCaseData.getCcdCaseId()));
+        }
+
+        CaseDetails clonedCaseDetails = cloneCaseDetailsFromFinremCaseDetails(info);
         if (isApplicantForRepresentationChange) {
-            finremCaseData.setApplicantOrganisationPolicy(originalFinremCaseData.getApplicantOrganisationPolicy());
-            shouldPerformNoc = true;
+            clonedCaseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, originalFinremCaseData.getApplicantOrganisationPolicy());
         } else if (isRespondentForRepresentationChange(finremCaseData)) {
-            finremCaseData.setRespondentOrganisationPolicy(originalFinremCaseData.getRespondentOrganisationPolicy());
-            shouldPerformNoc = true;
+            clonedCaseDetails.getData().put(ORGANISATION_POLICY_RESPONDENT, originalFinremCaseData.getRespondentOrganisationPolicy());
         }
 
         // Going to apply decision
-        if (shouldPerformNoc) {
-            assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(),
-                buildCaseDetailsFromEventCaseData(info));
-            return new Revocation(isApplicantForRepresentationChange, !isApplicantForRepresentationChange);
-        }
-        throw new IllegalStateException(format("%s - ChangeOrganisationRequest populated with unknown or null NOC Party : %s",
-            finremCaseData.getContactDetailsWrapper().getNocParty(),
-            finremCaseData.getCcdCaseId()));
+        log.info("{} - about to send a NOC request to case assignment API", info.getCaseId());
+        assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), clonedCaseDetails);
+        return new LitigantRevocation(isApplicantForRepresentationChange, !isApplicantForRepresentationChange);
     }
 
-    private CaseDetails buildCaseDetailsFromEventCaseData(StopRepresentingClientInfo info) {
-        return finremCaseDetailsMapper.mapToCaseDetails(info.getCaseDetails());
+    /**
+     * Revokes the solicitor for a given intervener and prepares the corresponding
+     * email notification event.
+     *
+     * <p>This method calls {@link IntervenerService#revokeIntervenerSolicitor(long, IntervenerWrapper)}
+     * to revoke the solicitor’s access. It then constructs a {@link SendCorrespondenceEventWithDescription}
+     * to notify the intervener's solicitor that representation has stopped. The email
+     * is not sent directly here; the returned event will be processed later in the
+     * correspondence workflow.</p>
+     *
+     * @param info the stop representing client event information
+     * @param intervenerWrapper wrapper containing the intervener details
+     * @return a populated {@link SendCorrespondenceEventWithDescription} for later email notification processing
+     */
+    public SendCorrespondenceEventWithDescription revokeIntervenerSolicitor(StopRepresentingClientInfo info,
+                                                                            IntervenerWrapper intervenerWrapper) {
+        intervenerService.revokeIntervenerSolicitor(info.getCaseId(), intervenerWrapper);
+        return prepareIntervenerSolicitorEmailNotificationEvent(info, intervenerWrapper.getIntervenerType());
     }
 
-    private void clearChangeOrganisationRequestAfterThisEvent(CaseType caseType, long caseId) {
+    /**
+     * Revokes the representation of barristers for a given case and generates
+     * corresponding email notification events for the removed barristers.
+     *
+     * <p>
+     * The method performs the following steps:
+     * <ol>
+     *     <li>Updates case access for the barristers being removed via {@code barristerChangeCaseAccessUpdater}.</li>
+     *     <li>Iterates over the list of removed barristers and generates the appropriate email notification
+     *         event depending on the {@link BarristerParty} type:
+     *         <ul>
+     *             <li>Applicant barristers</li>
+     *             <li>Respondent barristers</li>
+     *             <li>Intervener barristers (up to 4 interveners)</li>
+     *         </ul>
+     *     </li>
+     *     <li>Filters out any null notifications and returns a list of {@link SendCorrespondenceEventWithDescription}.</li>
+     * </ol>
+     *
+     * @param info           the information about the client whose barristers are being revoked
+     * @param barristerChange the details of the barrister change, including which barristers are removed
+     * @return a list of {@link SendCorrespondenceEventWithDescription} representing email notifications
+     *         to be sent for the revoked barristers; empty list if no barristers were removed
+     */
+    public List<SendCorrespondenceEventWithDescription> revokeBarristers(StopRepresentingClientInfo info, BarristerChange barristerChange) {
+        barristerChangeCaseAccessUpdater.executeBarristerChange(info.getCaseId(), barristerChange);
+
+        BarristerParty barristerParty = barristerChange.getBarristerParty();
+        return SetUtils.emptyIfNull(barristerChange.getRemoved())
+            .stream()
+            .map(b -> switch (barristerParty) {
+                case APPLICANT -> prepareApplicantBarristerEmailNotificationEvent(info, b);
+                case RESPONDENT -> prepareRespondentBarristerEmailNotificationEvent(info, b);
+                case INTERVENER1 -> prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_ONE, b);
+                case INTERVENER2 -> prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_TWO, b);
+                case INTERVENER3 -> prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_THREE, b);
+                case INTERVENER4 -> prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_FOUR, b);
+            })
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+    /**
+     * Performs post–Notice of Change (NOC) cleanup for the specified case.
+     *
+     * <p>This method resets the {@code Change Organisation Request} field after the
+     * NOC workflow has completed. It invokes a post-submit callback through
+     * {@link CoreCaseDataService}, using only the case type and case ID.</p>
+     *
+     * <p>The {@link CoreCaseDataService} internally reloads the latest case data
+     * before executing the update event, ensuring the field is cleared using
+     * {@link NocUtils#clearChangeOrganisationRequestField()}.</p>
+     *
+     * <p>This operation performs a data cleanup only and does not trigger
+     * notifications or additional business processing.</p>
+     *
+     * @param info the stop representing client context containing the case details
+     *             and identifiers required to perform the cleanup
+     */
+    public void performCleanUpAfterNocWorkflow(StopRepresentingClientInfo info) {
+        final CaseType caseType = info.getCaseDetails().getCaseType();
+
+        log.info("{} - about to perform clean-up job after NOC workflow", info.getCaseId());
+
         // to reset the targeted field by case id and case type only
         // coreCaseDataService loads the case data again in the internal event call.
-        coreCaseDataService.performPostSubmitCallback(caseType, caseId,
+        coreCaseDataService.performPostSubmitCallback(caseType, info.getCaseId(),
             INTERNAL_CHANGE_UPDATE_CASE.getCcdType(), caseDetails -> clearChangeOrganisationRequestField());
     }
 
-    private OrganisationPolicy getDefaultOrganisationPolicy(CaseRole role) {
-        return OrganisationPolicy.builder()
-            .organisation(Organisation.builder().organisationID(null).organisationName(null).build())
-            .orgPolicyReference(null)
-            .orgPolicyCaseAssignedRole(role.getCcdCode())
+    private SendCorrespondenceEventWithDescription prepareRepresentativeEmailNotificationEvent(String description,
+                                                                                               StopRepresentingClientInfo info,
+                                                                                               List<NotificationParty> parties,
+                                                                                               EmailTemplateNames emailTemplate,
+                                                                                               NotificationRequest notificationRequest) {
+        return prepareRepresentativeEmailNotificationEvent(description, info, parties, emailTemplate, notificationRequest, null);
+    }
+
+    private SendCorrespondenceEventWithDescription prepareRepresentativeEmailNotificationEvent(String description,
+                                                                                               StopRepresentingClientInfo info,
+                                                                                               List<NotificationParty> parties,
+                                                                                               EmailTemplateNames emailTemplate,
+                                                                                               NotificationRequest notificationRequest,
+                                                                                               Barrister barrister) {
+        String userAuthorisation = info.getUserAuthorisation();
+
+        return SendCorrespondenceEventWithDescription.builder()
+            .description(description)
+            .event(SendCorrespondenceEvent.builder()
+                .notificationParties(parties)
+                .emailNotificationRequest(notificationRequest)
+                .emailTemplate(emailTemplate)
+                .caseDetails(info.getCaseDetails())
+                .caseDetailsBefore(info.getCaseDetailsBefore())
+                .authToken(userAuthorisation)
+                .barrister(barrister)
+                .build()
+            )
             .build();
     }
 
-    private void sendRepresentativeNotification(
-        StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
-        NotificationRequest notificationRequest) {
-        sendRepresentativeNotification(info, parties, emailTemplate, notificationRequest, null);
-    }
-
-    private void sendRepresentativeNotification(
-        StopRepresentingClientInfo info, List<NotificationParty> parties, EmailTemplateNames emailTemplate,
-        NotificationRequest notificationRequest, Barrister barrister) {
-        String userAuthorisation = info.getUserAuthorisation();
-
-        applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
-            .notificationParties(parties)
-            .emailNotificationRequest(notificationRequest)
-            .emailTemplate(emailTemplate)
-            .caseDetails(info.getCaseDetails())
-            .caseDetailsBefore(info.getCaseDetailsBefore())
-            .authToken(userAuthorisation)
-            .barrister(barrister)
-            .build()
-        );
-    }
-
-    private void notifyApplicantBarrister(StopRepresentingClientInfo info, Barrister barrister) {
-        sendRepresentativeNotification(
-            info,
-            List.of(FORMER_APPLICANT_BARRISTER_ONLY),
-            getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
-            finremNotificationRequestMapper
-                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
-            barrister
-        );
-    }
-
-    private void notifyApplicantSolicitor(StopRepresentingClientInfo info) {
-        sendRepresentativeNotification(
+    /**
+     * Prepares a {@link SendCorrespondenceEventWithDescription} for sending an email notification
+     * to the applicant's solicitor when representation has stopped.
+     *
+     * <p>This method does not send the email directly. Instead, it constructs a
+     * correspondence event containing the notification details and template
+     * required to notify the former applicant solicitor. The event will be processed
+     * later in the correspondence workflow to trigger the actual email notification.</p>
+     *
+     * @param info the stop representing client event information
+     * @return a populated {@link SendCorrespondenceEventWithDescription} for later email notification processing
+     */
+    private SendCorrespondenceEventWithDescription prepareApplicantSolicitorEmailNotificationEvent(StopRepresentingClientInfo info) {
+        return prepareRepresentativeEmailNotificationEvent(
+            "notifying applicant solicitor",
             info,
             List.of(FORMER_APPLICANT_SOLICITOR_ONLY),
-            getNotifyApplicantRepresentativeTemplateName(getFinremCaseData(info)),
+            getNotifyApplicantRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR)
         );
     }
 
-    private void notifyRespondentBarrister(StopRepresentingClientInfo info, Barrister barrister) {
-        sendRepresentativeNotification(
+    /**
+     * Prepares a {@link SendCorrespondenceEventWithDescription} for sending an email notification
+     * to the applicant's barrister when representation has stopped.
+     *
+     * <p>This method does not send the email directly. Instead, it constructs a
+     * correspondence event containing the notification details and template
+     * required to notify the former applicant barrister. The event will be processed
+     * later in the correspondence workflow to trigger the actual email notification.</p>
+     *
+     * @param info the stop representing client event information
+     * @param barrister the applicant barrister who should receive the notification
+     * @return a populated {@link SendCorrespondenceEventWithDescription} for later email notification processing
+     */
+    protected SendCorrespondenceEventWithDescription prepareApplicantBarristerEmailNotificationEvent(
+        StopRepresentingClientInfo info, Barrister barrister) {
+
+        return prepareRepresentativeEmailNotificationEvent(
+            "notifying applicant barrister",
             info,
-            List.of(FORMER_RESPONDENT_BARRISTER_ONLY),
-            getNotifyRespondentRepresentativeTemplateName(getFinremCaseData(info)),
+            List.of(FORMER_APPLICANT_BARRISTER_ONLY),
+            getNotifyApplicantRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
             barrister
         );
     }
 
-    private void notifyRespondentSolicitor(StopRepresentingClientInfo info) {
-        sendRepresentativeNotification(
+    /**
+     * Prepares a {@link SendCorrespondenceEventWithDescription} for sending an email notification
+     * to an intervener's solicitor when representation has stopped.
+     *
+     * <p>This method does not send the email directly. Instead, it constructs a
+     * correspondence event with description containing the required notification details.
+     * The event with description will be processed later in the correspondence workflow to trigger
+     * the actual email notification.</p>
+     *
+     * @param info the stop representing client event information
+     * @param intervenerType the intervener whose solicitor should receive the notification
+     * @return a populated {@link SendCorrespondenceEventWithDescription} for later email notification processing
+     */
+    private SendCorrespondenceEventWithDescription prepareIntervenerSolicitorEmailNotificationEvent(StopRepresentingClientInfo info,
+                                                                                                    IntervenerType intervenerType) {
+        return prepareRepresentativeEmailNotificationEvent(
+            "notifying %s solicitor".formatted(intervenerType.getTypeValue()),
             info,
-            List.of(FORMER_RESPONDENT_SOLICITOR_ONLY),
-            getNotifyRespondentRepresentativeTemplateName(getFinremCaseData(info)),
+            List.of(getFormerIntervenerSolicitor(intervenerType)),
+            getNotifyIntervenerRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
-                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), RESP_SOLICITOR)
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(),
+                    CaseRole.getIntervenerSolicitorByIndex(intervenerType.getIntervenerId()), intervenerType)
         );
     }
 
-    private void notifyIntervenerBarrister(StopRepresentingClientInfo info, int intervenerId, Barrister barrister) {
-        IntervenerType intervenerType = Arrays.stream(IntervenerType.values())
-            .filter(d -> d.getIntervenerId() == intervenerId)
-            .findFirst()
-            .orElse(null);
-
-        sendRepresentativeNotification(
+    /**
+     * Prepares a {@link SendCorrespondenceEventWithDescription} for sending an email notification
+     * to an intervener's barrister when representation has stopped.
+     *
+     * <p>This method does not send the email directly. Instead, it constructs a
+     * correspondence event containing the notification details and template
+     * required to notify the former intervener barrister. The event will be processed
+     * later in the correspondence workflow to trigger the actual email notification.</p>
+     *
+     * @param info the stop representing client event information
+     * @param intervenerType the intervener whose barrister should be notified
+     * @param barrister the intervener barrister who should receive the notification
+     * @return a populated {@link SendCorrespondenceEventWithDescription} for later email notification processing
+     */
+    protected SendCorrespondenceEventWithDescription prepareIntervenerBarristerEmailNotificationEvent(StopRepresentingClientInfo info,
+                                                                                                      IntervenerType intervenerType,
+                                                                                                      Barrister barrister) {
+        return prepareRepresentativeEmailNotificationEvent(
+            "notifying intervener barrister",
             info,
-            List.of(resolveIntervenerBarristerNotificationParty(intervenerId)),
-            getNotifyIntervenerRepresentativeTemplateName(getFinremCaseData(info)),
+            List.of(getFormerIntervenerBarrister(intervenerType)),
+            getNotifyIntervenerRepresentativeTemplateName(info.getFinremCaseData()),
             finremNotificationRequestMapper
                 .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister, intervenerType),
             barrister
         );
     }
 
-    private void notifyIntervenerSolicitor(StopRepresentingClientInfo info, IntervenerType intervenerType) {
-        int intervenerId = intervenerType.getIntervenerId();
-        sendRepresentativeNotification(
-            info,
-            List.of(resolveIntervenerSolicitorNotificationParty(intervenerId)),
-            getNotifyIntervenerRepresentativeTemplateName(getFinremCaseData(info)),
-            finremNotificationRequestMapper
-                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(),
-                    CaseRole.getIntervenerSolicitorByIndex(intervenerId), intervenerType)
-        );
+    /**
+     * Prepares a {@link SendCorrespondenceEventWithDescription} for generating a letter notification
+     * to a specific party when representation has stopped.
+     *
+     * <p>This method does not send the notification directly. Instead, it constructs the
+     * correspondence event with description containing the party, case details, and generated
+     * document to be posted. The event with description will be processed later in the correspondence
+     * workflow to trigger the actual letter notification.</p>
+     *
+     * @param description a description of the correspondence event
+     * @param info the stop representing client event information containing case details and authorisation
+     * @param notificationParty the party who should receive the notification
+     * @param documentGenerator function used to generate the document to be posted
+     * @return a populated {@link SendCorrespondenceEventWithDescription} for later processing
+     */
+    private SendCorrespondenceEventWithDescription preparePartyLetterNotificationEvent(
+        String description, StopRepresentingClientInfo info,
+        NotificationParty notificationParty,
+        Function<StopRepresentingClientInfo, CaseDocument> documentGenerator) {
+
+        return SendCorrespondenceEventWithDescription.builder()
+            .description(description)
+            .event(SendCorrespondenceEvent.builder()
+                .letterNotificationOnly(true)
+                .notificationParties(List.of(notificationParty))
+                .caseDetails(info.getCaseDetails())
+                .caseDetailsBefore(info.getCaseDetailsBefore())
+                .authToken(info.getUserAuthorisation())
+                .documentsToPost(List.of(documentGenerator.apply(info)))
+                .build()
+            ).build();
     }
 
-    private void notifyParty(StopRepresentingClientInfo info,
-                             NotificationParty notificationParty,
-                             Function<StopRepresentingClientInfo, CaseDocument> documentGenerator) {
-
-        String userAuthorisation = info.getUserAuthorisation();
-
-        applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
-            .letterNotificationOnly(true)
-            .notificationParties(List.of(notificationParty))
-            .caseDetails(info.getCaseDetails())
-            .caseDetailsBefore(info.getCaseDetailsBefore())
-            .authToken(userAuthorisation)
-            .documentsToPost(List.of(documentGenerator.apply(info)))
-            .build()
-        );
-    }
-
-    private void notifyApplicant(StopRepresentingClientInfo info) {
-        notifyParty(
+    /**
+     * Prepares a {@link SendCorrespondenceEventWithDescription} for sending a stop representing
+     * letter notification to the applicant.
+     *
+     * <p>The generated event with description includes the applicant as the notification party and
+     * attaches the stop representing applicant letter. The correspondence event will
+     * be processed later in the workflow to generate and send the letter.</p>
+     *
+     * @param info the stop representing client event information
+     * @return a populated {@link SendCorrespondenceEventWithDescription} for applicant notification
+     */
+    private SendCorrespondenceEventWithDescription prepareApplicantLetterNotificationEvent(StopRepresentingClientInfo info) {
+        return preparePartyLetterNotificationEvent(
+            "notifying applicant",
             info,
             NotificationParty.APPLICANT,
-            i -> generateStopRepresentingApplicantLetter(i.getCaseDetails(), i.getUserAuthorisation())
+            i -> stopRepresentingClientLetterService
+                .generateStopRepresentingApplicantLetter(i.getCaseDetails(), i.getUserAuthorisation())
         );
     }
 
-    private void notifyRespondent(StopRepresentingClientInfo info) {
-        notifyParty(
+    /**
+     * Prepares a {@link SendCorrespondenceEventWithDescription} for sending a stop representing
+     * letter notification to the respondent.
+     *
+     * <p>The generated event with description includes the respondent as the notification party and
+     * attaches the stop representing respondent letter. The correspondence event will
+     * be processed later in the workflow to generate and send the letter.</p>
+     *
+     * @param info the stop representing client event information
+     * @return a populated {@link SendCorrespondenceEventWithDescription} for respondent notification
+     */
+    private SendCorrespondenceEventWithDescription prepareRespondentLetterNotificationEvent(StopRepresentingClientInfo info) {
+        return preparePartyLetterNotificationEvent(
+            "notifying respondent",
             info,
             NotificationParty.RESPONDENT,
-            i -> generateStopRepresentingRespondentLetter(i.getCaseDetails(), i.getUserAuthorisation())
+            i -> stopRepresentingClientLetterService
+                .generateStopRepresentingRespondentLetter(i.getCaseDetails(), i.getUserAuthorisation())
         );
     }
 
-    private CaseDocument generateStopRepresentingLetter(FinremCaseDetails finremCaseDetails,
-                                                        String authorisationToken,
-                                                        DocumentHelper.PaperNotificationRecipient recipient,
-                                                        String filenamePrefix,
-                                                        String template) {
-        Map<String, Object> documentDataMap =
-            letterDetailsMapper.getLetterDetailsAsMap(finremCaseDetails, recipient);
-
-        String documentFilename = format("%s_%s.pdf",
-            filenamePrefix,
-            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
-        );
-
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(
-            authorisationToken,
-            documentDataMap,
-            template,
-            documentFilename,
-            finremCaseDetails.getCaseType()
-        );
-    }
-
-    private CaseDocument generateStopRepresentingApplicantLetter(FinremCaseDetails finremCaseDetails,
-                                                                 String authorisationToken) {
-        return generateStopRepresentingLetter(
-            finremCaseDetails,
-            authorisationToken,
-            APPLICANT,
-            "ApplicantRepresentationRemovalNotice",
-            documentConfiguration.getStopRepresentingLetterToApplicantTemplate()
+    /**
+     * Prepares a {@link SendCorrespondenceEventWithDescription} for sending an email notification
+     * to the respondent's solicitor when representation has stopped.
+     *
+     * <p>This method does not send the email directly. Instead, it constructs a
+     * correspondence event containing the notification details and template
+     * required to notify the former respondent solicitor. The event will be processed
+     * later in the correspondence workflow to trigger the actual email notification.</p>
+     *
+     * @param info the stop representing client event information
+     * @return a populated {@link SendCorrespondenceEventWithDescription} for later email notification processing
+     */
+    private SendCorrespondenceEventWithDescription prepareRespondentSolicitorEmailNotificationEvent(StopRepresentingClientInfo info) {
+        return prepareRepresentativeEmailNotificationEvent(
+            "notifying respondent solicitor",
+            info,
+            List.of(FORMER_RESPONDENT_SOLICITOR_ONLY),
+            getNotifyRespondentRepresentativeTemplateName(info.getFinremCaseData()),
+            finremNotificationRequestMapper
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), RESP_SOLICITOR)
         );
     }
 
-    private CaseDocument generateStopRepresentingRespondentLetter(FinremCaseDetails finremCaseDetails,
-                                                                  String authorisationToken) {
-        return generateStopRepresentingLetter(
-            finremCaseDetails,
-            authorisationToken,
-            RESPONDENT,
-            "RespondentRepresentationRemovalNotice",
-            documentConfiguration.getStopRepresentingLetterToRespondentTemplate()
+    /**
+     * Prepares a {@link SendCorrespondenceEventWithDescription} for sending an email notification
+     * to the respondent's barrister when representation has stopped.
+     *
+     * <p>This method does not send the email directly. Instead, it constructs a
+     * correspondence event containing the notification details and template
+     * required to notify the former respondent barrister. The event will be processed
+     * later in the correspondence workflow to trigger the actual email notification.</p>
+     *
+     * @param info the stop representing client event information
+     * @param barrister the respondent barrister who should receive the notification
+     * @return a populated {@link SendCorrespondenceEventWithDescription} for later email notification processing
+     */
+    protected SendCorrespondenceEventWithDescription prepareRespondentBarristerEmailNotificationEvent(StopRepresentingClientInfo info,
+                                                                                                      Barrister barrister) {
+        return prepareRepresentativeEmailNotificationEvent(
+            "notifying respondent barrister",
+            info,
+            List.of(FORMER_RESPONDENT_BARRISTER_ONLY),
+            getNotifyRespondentRepresentativeTemplateName(info.getFinremCaseData()),
+            finremNotificationRequestMapper
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister),
+            barrister
         );
     }
 
-    private NotificationParty resolveIntervenerBarristerNotificationParty(int index) {
-        return switch(index) {
-            case 1 -> FORMER_INTERVENER_ONE_BARRISTER_ONLY;
-            case 2 -> FORMER_INTERVENER_TWO_BARRISTER_ONLY;
-            case 3 -> FORMER_INTERVENER_THREE_BARRISTER_ONLY;
-            case 4 -> FORMER_INTERVENER_FOUR_BARRISTER_ONLY;
-            default -> throw new IllegalArgumentException("Invalid index " + index);
-        };
+    private CaseDetails cloneCaseDetailsFromFinremCaseDetails(StopRepresentingClientInfo info) {
+        return finremCaseDetailsMapper.mapToCaseDetails(info.getCaseDetails());
     }
 
-    private NotificationParty resolveIntervenerSolicitorNotificationParty(int index) {
-        return switch(index) {
-            case 1 -> FORMER_INTERVENER_ONE_SOLICITOR_ONLY;
-            case 2 -> FORMER_INTERVENER_TWO_SOLICITOR_ONLY;
-            case 3 -> FORMER_INTERVENER_THREE_SOLICITOR_ONLY;
-            case 4 -> FORMER_INTERVENER_FOUR_SOLICITOR_ONLY;
-            default -> throw new IllegalArgumentException("Invalid index " + index);
-        };
+    /**
+     * Determines whether intervener access should be revoked by comparing
+     * the current intervener organisation with the original organisation
+     * stored in case data.
+     */
+    private boolean shouldRevokeIntervenerSolicitorAccess(
+        IntervenerWrapper newWrapper,
+        IntervenerWrapper oldWrapper) {
+
+        return !Objects.equals(
+            getOrganisationId(newWrapper),
+            getOrganisationId(oldWrapper)
+        );
+    }
+
+    private String getOrganisationId(IntervenerWrapper wrapper) {
+        OrganisationPolicy policy = wrapper.getIntervenerOrganisation();
+        return policy == null ? null : policy.getOrganisation().getOrganisationID();
     }
 }
