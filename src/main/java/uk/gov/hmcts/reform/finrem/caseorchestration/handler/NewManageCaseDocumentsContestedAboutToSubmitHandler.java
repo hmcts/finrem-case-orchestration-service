@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -27,13 +26,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Docume
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 /**
@@ -54,7 +53,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullI
 @Slf4j
 @Service
 public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
-    private static final String CHOOSE_A_DIFFERENT_PARTY = "%s not present on the case, do you want to continue?";
+    private static final String PARTY_NOT_PRESENT_ERROR_MESSAGE = "%s not present on the case, do you want to continue?";
     private static final String INTERVENER_1 = "Intervener 1";
     private static final String INTERVENER_2 = "Intervener 2";
     private static final String INTERVENER_3 = "Intervener 3";
@@ -98,11 +97,10 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
-        final List<String> warnings = new ArrayList<>();
         final FinremCaseData caseData = callbackRequest.getFinremCaseData();
         final FinremCaseData caseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
-        calculateWarnings(caseData, warnings);
+        final List<String> warnings = new ArrayList<>(buildSelectedPartyNotPresentWarnings(caseData));
         moveInputManageCaseDocumentsToManagedCollections(caseData);
         addDefaultsToAdministrativeDocuments(getInputCollections(caseData));
         replaceManagedDocumentsInCollectionType(caseData);
@@ -163,19 +161,18 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
         ofNullable(caseData.getConfidentialDocumentsUploaded()).ifPresent(List::clear);
     }
 
-    private void calculateWarnings(FinremCaseData caseData, List<String> warnings) {
+    private List<String> buildSelectedPartyNotPresentWarnings(FinremCaseData caseData) {
+        List<String> ret = new ArrayList<>();
         List<UploadCaseDocumentCollection> manageCaseDocumentCollection = emptyIfNull(
             caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection());
 
-        Map<CaseDocumentParty, String> interveners = Map.of(
+        Map.of(
             CaseDocumentParty.INTERVENER_ONE, INTERVENER_1,
             CaseDocumentParty.INTERVENER_TWO, INTERVENER_2,
             CaseDocumentParty.INTERVENER_THREE, INTERVENER_3,
             CaseDocumentParty.INTERVENER_FOUR, INTERVENER_4
-        );
-
-        interveners.forEach((party, namePrefix) -> {
-            String intervenerName = switch (party) {
+        ).forEach((intervenerParty, namePrefix) -> {
+            String intervenerName = switch (intervenerParty) {
                 case INTERVENER_ONE -> ofNullable(caseData.getIntervenerOne())
                     .map(IntervenerOne::getIntervenerName)
                     .orElse(null);
@@ -188,19 +185,18 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
                 case INTERVENER_FOUR -> ofNullable(caseData.getIntervenerFour())
                     .map(IntervenerFour::getIntervenerName)
                     .orElse(null);
-                default -> null;
+                default -> throw new IllegalStateException("Unexpected value: " + intervenerParty);
             };
 
-            if (StringUtils.isBlank(intervenerName) && isIntervenerPartySelected(party, manageCaseDocumentCollection)) {
-                warnings.add(CHOOSE_A_DIFFERENT_PARTY.formatted(namePrefix));
+            if (isBlank(intervenerName) && anySelectedDocumentsMatchIntervenerParty(intervenerParty, manageCaseDocumentCollection)) {
+                ret.add(PARTY_NOT_PRESENT_ERROR_MESSAGE.formatted(namePrefix));
             }
         });
-        // sort warnings
-        Collections.sort(warnings);
+        return ret;
     }
 
-    private boolean isIntervenerPartySelected(CaseDocumentParty caseDocumentParty,
-                                              List<UploadCaseDocumentCollection> documents) {
+    private boolean anySelectedDocumentsMatchIntervenerParty(CaseDocumentParty caseDocumentParty,
+                                                             List<UploadCaseDocumentCollection> documents) {
         return documents.stream()
             .map(UploadCaseDocumentCollection::getUploadCaseDocument)
             .filter(Objects::nonNull)

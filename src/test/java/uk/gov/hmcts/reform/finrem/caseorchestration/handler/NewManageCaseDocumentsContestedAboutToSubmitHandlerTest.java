@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -100,62 +101,70 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         assertCanHandle(underTest, ABOUT_TO_SUBMIT, CONTESTED, NEW_MANAGE_CASE_DOCUMENTS);
     }
 
-    @NullAndEmptySource
-    @ParameterizedTest
-    void givenInputManageCaseDocumentCollectionMissing_whenHandle_thenNoWarningsPopulated(
-        List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection
-    ) {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
-                .inputManageCaseDocumentCollection(inputManageCaseDocumentCollection)
-                .build())
-            .build();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest
-            .handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
-        assertThat(response.getWarnings()).isEmpty();
-    }
+    @Nested
+    class WarningsPopulatedTests {
 
-    @ParameterizedTest
-    @MethodSource
-    void givenIntervenerPartySelectedAndIntervenerNameMissing_whenHandle_thenWarningPopulated(
-        CaseDocumentParty caseDocumentParty,
-        String intervenerIdentifier) {
-        for (String intervenerName : Arrays.asList("", null)) {
+        @NullAndEmptySource
+        @ParameterizedTest
+        void givenNoInputDocuments_whenHandle_thenNoWarnings(
+            List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection
+        ) {
             FinremCaseData caseData = FinremCaseData.builder()
-                .intervenerOne(INTERVENER_ONE == caseDocumentParty
-                    ? IntervenerOne.builder().intervenerName(intervenerName).build() : null)
-                .intervenerTwo(INTERVENER_TWO == caseDocumentParty
-                    ? IntervenerTwo.builder().intervenerName(intervenerName).build() : null)
-                .intervenerThree(INTERVENER_THREE == caseDocumentParty
-                    ? IntervenerThree.builder().intervenerName(intervenerName).build() : null)
-                .intervenerFour(INTERVENER_FOUR == caseDocumentParty
-                    ? IntervenerFour.builder().intervenerName(intervenerName).build() : null)
                 .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
-                    .inputManageCaseDocumentCollection(List.of(
-                        UploadCaseDocumentCollection.builder()
-                            .uploadCaseDocument(UploadCaseDocument.builder()
-                                .caseDocumentParty(caseDocumentParty)
-                                .caseDocumentType(TRIAL_BUNDLE)
-                                .build())
-                            .build()
-                    ))
+                    .inputManageCaseDocumentCollection(inputManageCaseDocumentCollection)
                     .build())
                 .build();
 
+            // Act
             GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest
                 .handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
-            assertThat(response.getWarnings()).containsExactly("%s not present on the case, do you want to continue?"
-                .formatted(intervenerIdentifier));
-        }
-    }
 
-    static Stream<Arguments> givenIntervenerPartySelectedAndIntervenerNameMissing_whenHandle_thenWarningPopulated() {
-        return Stream.of(
-            Arguments.of(INTERVENER_ONE, "Intervener 1"),
-            Arguments.of(INTERVENER_TWO, "Intervener 2"),
-            Arguments.of(INTERVENER_THREE, "Intervener 3"),
-            Arguments.of(INTERVENER_FOUR, "Intervener 4")
-        );
+            // Verify
+            assertThat(response.getWarnings()).isEmpty();
+        }
+
+        static Stream<Arguments> givenIntervenerSelectedAndNameMissing_whenHandle_thenWarningAdded() {
+            return Stream.of(
+                Arguments.of(INTERVENER_ONE, "Intervener 1"),
+                Arguments.of(INTERVENER_TWO, "Intervener 2"),
+                Arguments.of(INTERVENER_THREE, "Intervener 3"),
+                Arguments.of(INTERVENER_FOUR, "Intervener 4")
+            );
+        }
+
+        @ParameterizedTest
+        @MethodSource
+        void givenIntervenerSelectedAndNameMissing_whenHandle_thenWarningAdded(
+            CaseDocumentParty caseDocumentParty,
+            String intervenerIdentifier) {
+            for (String nullOfEmptyIntervenerName : Arrays.asList("", null)) {
+                FinremCaseData caseData = FinremCaseData.builder()
+                    .intervenerOne(INTERVENER_ONE == caseDocumentParty
+                        ? IntervenerOne.builder().intervenerName(nullOfEmptyIntervenerName).build() : null)
+                    .intervenerTwo(INTERVENER_TWO == caseDocumentParty
+                        ? IntervenerTwo.builder().intervenerName(nullOfEmptyIntervenerName).build() : null)
+                    .intervenerThree(INTERVENER_THREE == caseDocumentParty
+                        ? IntervenerThree.builder().intervenerName(nullOfEmptyIntervenerName).build() : null)
+                    .intervenerFour(INTERVENER_FOUR == caseDocumentParty
+                        ? IntervenerFour.builder().intervenerName(nullOfEmptyIntervenerName).build() : null)
+                    .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
+                        .inputManageCaseDocumentCollection(List.of(
+                            UploadCaseDocumentCollection.builder()
+                                .uploadCaseDocument(UploadCaseDocument.builder()
+                                    .caseDocumentParty(caseDocumentParty)
+                                    .caseDocumentType(TRIAL_BUNDLE)
+                                    .build())
+                                .build()
+                        ))
+                        .build())
+                    .build();
+
+                GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest
+                    .handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
+                assertThat(response.getWarnings()).containsExactly("%s not present on the case, do you want to continue?"
+                    .formatted(intervenerIdentifier));
+            }
+        }
     }
 
     @Test
