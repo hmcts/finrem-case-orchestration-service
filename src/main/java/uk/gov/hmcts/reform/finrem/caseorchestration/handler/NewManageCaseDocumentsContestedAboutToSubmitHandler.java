@@ -33,7 +33,6 @@ import java.util.Objects;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 /**
  * Handles the "about to submit" callback for managing case documents
@@ -102,7 +101,6 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
 
         final List<String> warnings = new ArrayList<>(buildSelectedPartyNotPresentWarnings(caseData));
         moveInputManageCaseDocumentsToManagedCollections(caseData);
-        addDefaultsToAdministrativeDocuments(getInputCollections(caseData));
         replaceManagedDocumentsInCollectionType(caseData);
         addUploadDateToNewDocuments(caseData, caseDataBefore);
         clearLegacyCollections(caseData);
@@ -118,42 +116,28 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
     private void replaceManagedDocumentsInCollectionType(FinremCaseData caseData) {
         final ManageCaseDocumentsAction action = caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentsActionSelection();
 
-        if (ManageCaseDocumentsAction.AMEND.equals(action)) {
+//        if (ManageCaseDocumentsAction.AMEND.equals(action)) {
             List<UploadCaseDocumentCollection> inputDocuments =
                 caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection();
 
             emptyIfNull(documentHandlers).forEach(documentHandler ->
                 documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, true));
 
-        } else if (ManageCaseDocumentsAction.ADD_NEW.equals(action)) {
-            List<UploadCaseDocumentCollection> inputDocuments =
-                caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection();
-
-            emptyIfNull(documentHandlers).forEach(documentHandler ->
-                documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, false));
-        }
-    }
-
-    private List<UploadCaseDocumentCollection> getInputCollections(FinremCaseData caseData) {
-        return emptyIfNull(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection());
+//        } else if (ManageCaseDocumentsAction.ADD_NEW.equals(action)) {
+//            List<UploadCaseDocumentCollection> inputDocuments =
+//                caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection();
+//
+//            emptyIfNull(documentHandlers).forEach(documentHandler ->
+//                documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, false));
+//        }
     }
 
     private void moveInputManageCaseDocumentsToManagedCollections(FinremCaseData caseData) {
-        final ManageCaseDocumentsAction action = caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentsActionSelection();
-        if (ManageCaseDocumentsAction.ADD_NEW.equals(action)) {
-            List<UploadCaseDocumentCollection> newManageCaseDocumentCollection =
-                ofNullable(caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection())
-                    .orElse(new ArrayList<>());
-            newManageCaseDocumentCollection.addAll(
-                nullIfEmpty(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
-            );
-            caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(newManageCaseDocumentCollection);
-        } else if (ManageCaseDocumentsAction.AMEND.equals(action)) {
-            List<UploadCaseDocumentCollection> amendedCollection =
-                ofNullable(caseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
-                    .orElse(new ArrayList<>());
-            caseData.getManageCaseDocumentsWrapper().setManageCaseDocumentCollection(new ArrayList<>(amendedCollection));
-        }
+        var wrapper = caseData.getManageCaseDocumentsWrapper();
+        var documents = ofNullable(wrapper.getManageCaseDocumentCollection()).orElseGet(ArrayList::new);
+        documents.addAll(emptyIfNull(wrapper.getInputManageCaseDocumentCollection()));
+        addDefaultsToAdministrativeDocuments(documents);
+        wrapper.setManageCaseDocumentCollection(documents);
     }
 
     private void clearLegacyCollections(FinremCaseData caseData) {
@@ -229,10 +213,11 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
 
     private void setDefaultsForDocumentTypes(UploadCaseDocumentCollection document) {
         UploadCaseDocument uploadCaseDocument = document.getUploadCaseDocument();
-        if (ADMINISTRATIVE_CASE_DOCUMENT_TYPES.contains(uploadCaseDocument.getCaseDocumentType())) {
+        CaseDocumentType documentType = uploadCaseDocument.getCaseDocumentType();
+        if (documentType != null && ADMINISTRATIVE_CASE_DOCUMENT_TYPES.contains(documentType)) {
             uploadCaseDocument.setCaseDocumentParty(CaseDocumentParty.CASE);
             uploadCaseDocument.setCaseDocumentFdr(YesOrNo.NO);
-        } else if (CaseDocumentType.WITHOUT_PREJUDICE_OFFERS.equals(uploadCaseDocument.getCaseDocumentType())) {
+        } else if (CaseDocumentType.WITHOUT_PREJUDICE_OFFERS.equals(documentType)) {
             uploadCaseDocument.setCaseDocumentConfidentiality(YesOrNo.NO);
             uploadCaseDocument.setCaseDocumentFdr(YesOrNo.YES);
         }
