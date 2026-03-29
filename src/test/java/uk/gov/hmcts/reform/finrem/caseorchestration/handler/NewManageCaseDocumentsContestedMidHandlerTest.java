@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction;
@@ -16,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCase
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.NEW_MANAGE_CASE_DOCUMENTS;
@@ -41,10 +42,8 @@ class NewManageCaseDocumentsContestedMidHandlerTest {
                 .build())
             .build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(NEW_MANAGE_CASE_DOCUMENTS,
-            FinremCaseDetails.builder().data(caseData));
-
-        FinremCaseData responseData = underTest.handle(request, AUTH_TOKEN).getData();
+        FinremCaseData responseData = underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN)
+            .getData();
 
         assertThat(responseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
             .containsOnly(UploadCaseDocumentCollection.builder()
@@ -53,23 +52,21 @@ class NewManageCaseDocumentsContestedMidHandlerTest {
     }
 
     @Test
-    void givenAmendSelected_whenHandle_thenPopulateEntry() {
-        List<UploadCaseDocumentCollection> documents = List.of(
-            UploadCaseDocumentCollection.builder().build()
-        );
+    void givenAmendSelected_whenHandle_thenPopulateExistingDocuments() {
+        var expectedDocuments = mock(List.class);
+        UploadCaseDocumentWrapper uploadCaseDocumentWrapper = mock(UploadCaseDocumentWrapper.class);
+        when(uploadCaseDocumentWrapper.getAllManageableCollections()).thenReturn(expectedDocuments);
+
         FinremCaseData caseData = FinremCaseData.builder()
-            .uploadCaseDocumentWrapper(UploadCaseDocumentWrapper.builder()
-                .uploadCaseDocument(documents)
-                .build())
+            .uploadCaseDocumentWrapper(uploadCaseDocumentWrapper)
             .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
                 .manageCaseDocumentsActionSelection(ManageCaseDocumentsAction.AMEND)
                 .build())
             .build();
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(NEW_MANAGE_CASE_DOCUMENTS,
-            FinremCaseDetails.builder().data(caseData));
 
-        FinremCaseData responseData = underTest.handle(request, AUTH_TOKEN).getData();
+        FinremCaseData responseData = underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN)
+            .getData();
         assertThat(responseData.getManageCaseDocumentsWrapper().getInputManageCaseDocumentCollection())
-            .isEqualTo(documents);
+            .isEqualTo(expectedDocuments);
     }
 }

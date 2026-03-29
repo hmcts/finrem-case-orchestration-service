@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCaseDocumentsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentHandler;
@@ -33,6 +34,7 @@ import java.util.Objects;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction.AMEND;
 
 /**
  * Handles the "about to submit" callback for managing case documents
@@ -114,22 +116,13 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
     }
 
     private void replaceManagedDocumentsInCollectionType(FinremCaseData caseData) {
-        final ManageCaseDocumentsAction action = caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentsActionSelection();
+        ManageCaseDocumentsWrapper wrapper = caseData.getManageCaseDocumentsWrapper();
+        final ManageCaseDocumentsAction action = wrapper.getManageCaseDocumentsActionSelection();
 
-//        if (ManageCaseDocumentsAction.AMEND.equals(action)) {
-            List<UploadCaseDocumentCollection> inputDocuments =
-                caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection();
+        List<UploadCaseDocumentCollection> inputDocuments = wrapper.getManageCaseDocumentCollection();
 
-            emptyIfNull(documentHandlers).forEach(documentHandler ->
-                documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, true));
-
-//        } else if (ManageCaseDocumentsAction.ADD_NEW.equals(action)) {
-//            List<UploadCaseDocumentCollection> inputDocuments =
-//                caseData.getManageCaseDocumentsWrapper().getManageCaseDocumentCollection();
-//
-//            emptyIfNull(documentHandlers).forEach(documentHandler ->
-//                documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, false));
-//        }
+        emptyIfNull(documentHandlers).forEach(documentHandler ->
+            documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, AMEND.equals(action)));
     }
 
     private void moveInputManageCaseDocumentsToManagedCollections(FinremCaseData caseData) {
