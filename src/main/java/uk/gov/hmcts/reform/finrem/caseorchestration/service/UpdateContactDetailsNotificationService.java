@@ -55,8 +55,7 @@ public class UpdateContactDetailsNotificationService {
      * Sends a Notice of Change (NOC) email initiated by a caseworker to the relevant litigant solicitor.
      *
      * <p>This method determines the appropriate email template based on the provided
-     * {@link FinremCaseDetails} and prepares
-     * a {@link SendCorrespondenceEvent} to trigger the email notification.
+     * {@link FinremCaseDetails} and prepares a {@link SendCorrespondenceEvent} to trigger the email notification.
      *
      * <p>The email informs the recipient that a Notice of Change request has been completed
      * and that the case has been added to the organisation’s unassigned case list.
