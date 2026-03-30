@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
 import static org.mockito.Mockito.verify;
@@ -24,7 +24,7 @@ public class UpdateFrcEmailAllLitigantsCorresponderTest {
     @Mock
     FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
-    BulkPrintService bulkPrintService;
+    BulkPrintServiceAdapter bulkPrintServiceAdapter;
     @Mock
     UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
 
@@ -35,7 +35,7 @@ public class UpdateFrcEmailAllLitigantsCorresponderTest {
     @Before
     public void setUp() throws Exception {
         updateFrcEmailAllLitigantsCorresponder =
-            new UpdateFrcLetterOrEmailAllSolicitorsCorresponder(notificationService, bulkPrintService,
+            new UpdateFrcLetterOrEmailAllSolicitorsCorresponder(notificationService, bulkPrintServiceAdapter,
                 finremCaseDetailsMapper, updateFrcInfoRespondentDocumentService);
         caseDetails = CaseDetails.builder().build();
     }

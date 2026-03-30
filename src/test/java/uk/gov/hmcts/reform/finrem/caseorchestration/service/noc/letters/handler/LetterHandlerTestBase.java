@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
@@ -34,7 +34,7 @@ public abstract class LetterHandlerTestBase {
     private final DocumentHelper.PaperNotificationRecipient recipient;
 
     @Mock
-    BulkPrintService bulkPrintService;
+    BulkPrintServiceAdapter bulkPrintServiceAdapter;
 
     @Captor
     ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
@@ -77,8 +77,8 @@ public abstract class LetterHandlerTestBase {
         }
 
         verify(nocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails, caseType);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocumentApplicant, caseDetails,
-            bulkPrintService.getRecipient(recipient.toString()), AUTH_TOKEN);
+        verify(bulkPrintServiceAdapter).sendDocumentForPrint(caseDocumentApplicant, caseDetails,
+            bulkPrintServiceAdapter.getRecipient(recipient.toString()), AUTH_TOKEN);
     }
 
     protected void shouldNotSendLetter(String caseDetailsPath, String caseDetailsBeforePath) {
@@ -90,7 +90,7 @@ public abstract class LetterHandlerTestBase {
 
         getLetterHandler().handle(caseDetails, caseDetailsBefore, AUTH_TOKEN);
         verifyNoInteractions(nocDocumentService);
-        verifyNoInteractions(bulkPrintService);
+        verifyNoInteractions(bulkPrintServiceAdapter);
     }
 
     protected CaseDocument setUpCaseDocumentInteraction(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
