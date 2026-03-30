@@ -9,8 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder extends EmailAndLettersCorresponderBase<CaseDetails> {
 
     protected final NotificationService notificationService;
-    protected final BulkPrintService bulkPrintService;
+    protected final BulkPrintServiceAdapter bulkPrintServiceAdapter;
     protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public void sendCorrespondence(CaseDetails caseDetails, String authToken) {
@@ -34,28 +34,26 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
         }
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void sendApplicantCorrespondence(CaseDetails caseDetails, String authorisationToken) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to applicant for Case ID: {}", caseDetails.getId());
-            bulkPrintService.sendDocumentForPrint(
+            bulkPrintServiceAdapter.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails,
                     authorisationToken,
                     DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, APPLICANT, authorisationToken);
         }
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void sendRespondentCorrespondence(CaseDetails caseDetails, String authorisationToken) {
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to respondent for Case ID: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to respondent for Case ID: {}", caseDetails.getId());
-            bulkPrintService.sendDocumentForPrint(
+            bulkPrintServiceAdapter.sendDocumentForPrint(
                 getDocumentToPrint(
                     caseDetails,
                     authorisationToken,
@@ -76,7 +74,7 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
                 log.info("Sending letter correspondence to {} for Case ID: {}",
                     intervenerWrapper.getIntervenerType().getTypeValue(),
                     caseDetails.getId());
-                bulkPrintService.sendDocumentForPrint(
+                bulkPrintServiceAdapter.sendDocumentForPrint(
                     getDocumentToPrint(
                         caseDetails,
                         authorisationToken,

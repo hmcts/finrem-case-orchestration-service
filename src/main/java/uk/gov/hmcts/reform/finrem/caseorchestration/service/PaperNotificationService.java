@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -23,9 +24,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @RequiredArgsConstructor
 public class PaperNotificationService {
 
-    private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     private final RejectGeneralApplicationDocumentService rejectGeneralApplicationDocumentService;
-    private final BulkPrintService bulkPrintService;
+    private final BulkPrintServiceAdapter bulkPrintServiceAdapter;
     private final CaseDataService caseDataService;
 
     /**
@@ -102,29 +102,22 @@ public class PaperNotificationService {
             || YES != caseDetails.getData().getRespSolNotificationsEmailConsent();
     }
 
-    private boolean shouldPrintNotificationForRespondentSolicitor(CaseDetails caseDetails) {
-        return caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
-            && !YES_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
-    }
-
-    @SuppressWarnings("java:S1874")
     public void printApplicantRejectionGeneralApplication(CaseDetails caseDetails, String authToken) {
         CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
             caseDetails, authToken, APPLICANT);
-        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, CCDConfigConstant.APPLICANT, authToken);
+        bulkPrintServiceAdapter.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, CCDConfigConstant.APPLICANT, authToken);
     }
 
-    @SuppressWarnings("java:S1874")
     public void printRespondentRejectionGeneralApplication(CaseDetails caseDetails, String authToken) {
         CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
             caseDetails, authToken, RESPONDENT);
-        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, CCDConfigConstant.RESPONDENT, authToken);
+        bulkPrintServiceAdapter.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, CCDConfigConstant.RESPONDENT, authToken);
     }
 
     public void printIntervenerRejectionGeneralApplication(CaseDetails caseDetails, IntervenerWrapper intervenerWrapper, String authToken) {
         CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
             caseDetails, authToken, DocumentHelper.getIntervenerPaperNotificationRecipient(intervenerWrapper));
-        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails,
+        bulkPrintServiceAdapter.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails,
             intervenerWrapper.getIntervenerType().getTypeValue(), authToken);
     }
 }
