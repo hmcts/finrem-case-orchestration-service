@@ -78,7 +78,10 @@ class UpdateContactDetailsSubmittedHandlerTest {
             Arguments.of("new@email.com", YesOrNo.YES, "old@email.com", YesOrNo.YES),
             Arguments.of("same@email.com", YesOrNo.YES, "same@email.com", YesOrNo.YES),
             Arguments.of("new@email.com", YesOrNo.YES, "", YesOrNo.NO),
-            Arguments.of("", YesOrNo.NO, "old@email.com", YesOrNo.YES)
+            Arguments.of("", YesOrNo.NO, "old@email.com", YesOrNo.YES),
+            Arguments.of(null, YesOrNo.NO, "old@email.com", YesOrNo.YES),
+            Arguments.of("new@email.com", YesOrNo.YES, null, YesOrNo.NO),
+            Arguments.of(null, YesOrNo.NO, null, YesOrNo.NO)
         );
     }
 
