@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
@@ -56,14 +55,13 @@ public class UpdateContactDetailsNotificationService {
      * Sends a Notice of Change (NOC) email initiated by a caseworker to the relevant litigant solicitor.
      *
      * <p>This method determines the appropriate email template based on the provided
-     * {@link FinremCaseDetails}, constructs a {@link NotificationRequest}, and prepares
-     * a {@link SendCorrespondenceEvent} to trigger the email notification.
+     * {@link FinremCaseDetails} and prepares a {@link SendCorrespondenceEvent} to trigger the email notification.
      *
      * <p>The email informs the recipient that a Notice of Change request has been completed
      * and that the case has been added to the organisation’s unassigned case list.
      *
-     * @param caseDetails the case details used to determine the email template and populate
-     *                    the notification request
+     * @param caseDetails the case details used to determine the email template and
+     *     populate the notification content
      * @return a {@link SendCorrespondenceEvent} representing the prepared email notification event
      */
     public SendCorrespondenceEvent prepareNocEmailToLitigantSolicitor(FinremCaseDetails caseDetails) {
@@ -122,7 +120,8 @@ public class UpdateContactDetailsNotificationService {
     private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(FinremCaseData finremCaseData) {
         Optional<RepresentationUpdate> latest = getLastRepresentationUpdate(finremCaseData);
         return RESPONDENT_PARTY.equalsIgnoreCase(latest.map(RepresentationUpdate::getParty).orElseThrow(()
-            -> new IllegalStateException("No latest representation update found for case")));
+            -> new IllegalStateException("No latest representation update found for case: %s"
+            .formatted(finremCaseData.getCcdCaseId()))));
     }
 
     private Optional<RepresentationUpdate> getLastRepresentationUpdate(FinremCaseData finremCaseData) {
