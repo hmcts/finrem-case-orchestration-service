@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelpe
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 
 import java.io.InputStream;
 import java.util.List;
@@ -37,7 +38,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
     @Autowired
     private ConsentHearingService service;
     @MockitoBean
-    private BulkPrintService bulkPrintService;
+    private BulkPrintServiceAdapter bulkPrintServiceAdapter;
     @MockitoBean
     private GenericDocumentService genericDocumentService;
     @MockitoBean
@@ -74,8 +75,8 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseDetails.getData());
         assertEquals("2012-05-19", hearings.get(0).getValue().getHearingDate());
@@ -92,8 +93,8 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseDetails.getData());
         assertEquals("2012-05-19", hearings.get(0).getValue().getHearingDate());
@@ -111,8 +112,8 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseDetails.getData());
         assertEquals("2012-05-19", hearings.get(0).getValue().getHearingDate());
