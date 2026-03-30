@@ -13,8 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.MultiLetterOrEmailAllPartiesCorresponder;
 
 import java.util.Map;
@@ -31,7 +31,7 @@ public abstract class HearingCorrespondenceBaseTest {
     @Mock
     NotificationService notificationService;
     @Mock
-    BulkPrintService bulkPrintService;
+    BulkPrintServiceAdapter bulkPrintServiceAdapter;
     @Mock
     FinremCaseDetailsMapper finremCaseDetailsMapper;
 
@@ -50,7 +50,7 @@ public abstract class HearingCorrespondenceBaseTest {
 
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
-        verifyNoInteractions(bulkPrintService);
+        verifyNoInteractions(bulkPrintServiceAdapter);
     }
 
     @Test
@@ -61,7 +61,7 @@ public abstract class HearingCorrespondenceBaseTest {
 
         applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
 
-        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), anyString(), anyList());
+        verify(bulkPrintServiceAdapter).printRespondentDocuments(any(CaseDetails.class), anyString(), anyList());
     }
 
     @Test
@@ -72,7 +72,7 @@ public abstract class HearingCorrespondenceBaseTest {
 
         applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
 
-        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), anyString(), anyList());
+        verify(bulkPrintServiceAdapter).printApplicantDocuments(any(CaseDetails.class), anyString(), anyList());
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
     }
 
@@ -84,7 +84,7 @@ public abstract class HearingCorrespondenceBaseTest {
 
         applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
 
-        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), anyString(), anyList());
+        verify(bulkPrintServiceAdapter).printRespondentDocuments(any(CaseDetails.class), anyString(), anyList());
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
     }
 
