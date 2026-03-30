@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -158,8 +159,9 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         }
     }
 
-    @Test
-    void shouldReplaceManagedDocumentsInCollectionType_whenHandled() {
+    @ParameterizedTest
+    @EnumSource(value = ManageCaseDocumentsAction.class)
+    void shouldReplaceManagedDocumentsInCollectionType_whenHandled(ManageCaseDocumentsAction action) {
         var inputFile1 = uploadDocument();
         var inputFile2 = uploadDocument();
         var inputs = List.of(inputFile1, inputFile2);
@@ -169,6 +171,7 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
             .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
                 .inputManageCaseDocumentCollection(inputs)
                 .manageCaseDocumentCollection(originalManageCaseDocumentCollection)
+                .manageCaseDocumentsActionSelection(action)
                 .build())
             .build();
 
@@ -176,10 +179,11 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
 
         // Verify
+        boolean expectedClearExistingCollection = ManageCaseDocumentsAction.AMEND.equals(action);
         verify(documentHandlerOne).replaceManagedDocumentsInCollectionType(eq(caseData),
-            same(originalManageCaseDocumentCollection), eq(true));
+            same(originalManageCaseDocumentCollection), eq(expectedClearExistingCollection));
         verify(documentHandlerTwo).replaceManagedDocumentsInCollectionType(eq(caseData),
-            same(originalManageCaseDocumentCollection), eq(true));
+            same(originalManageCaseDocumentCollection), eq(expectedClearExistingCollection));
         verifyNoMoreInteractions(documentHandlerOne, documentHandlerTwo);
         assertThat(originalManageCaseDocumentCollection).contains(inputFile1, inputFile2);
     }

@@ -119,10 +119,12 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
         ManageCaseDocumentsWrapper wrapper = caseData.getManageCaseDocumentsWrapper();
         final ManageCaseDocumentsAction action = wrapper.getManageCaseDocumentsActionSelection();
 
-        List<UploadCaseDocumentCollection> inputDocuments = wrapper.getManageCaseDocumentCollection();
+        // manageCaseDocumentCollection is used for compatibility with the existing logic
+        List<UploadCaseDocumentCollection> manageCaseDocumentCollection = wrapper.getManageCaseDocumentCollection();
 
         emptyIfNull(documentHandlers).forEach(documentHandler ->
-            documentHandler.replaceManagedDocumentsInCollectionType(caseData, inputDocuments, AMEND.equals(action)));
+            documentHandler.replaceManagedDocumentsInCollectionType(caseData, manageCaseDocumentCollection,
+                AMEND.equals(action)));
     }
 
     private void moveInputManageCaseDocumentsToManagedCollections(FinremCaseData caseData) {
@@ -134,7 +136,6 @@ public class NewManageCaseDocumentsContestedAboutToSubmitHandler extends FinremA
     }
 
     private void clearLegacyCollections(FinremCaseData caseData) {
-        // clear legacy confidentialDocumentsUploaded
         ofNullable(caseData.getConfidentialDocumentsUploaded()).ifPresent(List::clear);
     }
 
