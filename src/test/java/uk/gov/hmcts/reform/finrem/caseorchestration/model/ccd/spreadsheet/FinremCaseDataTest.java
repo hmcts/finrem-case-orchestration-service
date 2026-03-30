@@ -37,9 +37,14 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 
 @Slf4j
 class FinremCaseDataTest {
@@ -233,11 +238,11 @@ class FinremCaseDataTest {
     void testGetRespondentSolicitorEmail() {
 
         FinremCaseData finremCaseData = new FinremCaseData();
-        assertThat(finremCaseData.getRespondentSolicitorEmailForContested()).isEmpty();
+        assertThat(finremCaseData.getRespondentSolicitorEmail()).isEmpty();
 
         ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder().respondentSolicitorEmail("respondent@testemail.com").build();
         finremCaseData.setContactDetailsWrapper(wrapper);
-        assertThat(finremCaseData.getRespondentSolicitorEmailForContested()).isEqualTo("respondent@testemail.com");
+        assertThat(finremCaseData.getRespondentSolicitorEmail()).isEqualTo("respondent@testemail.com");
     }
 
     @Test
@@ -327,5 +332,60 @@ class FinremCaseDataTest {
             clazz = superClass;
         }
         return false;
+    }
+
+    @Test
+    void shouldReturnNull_whenApplicantNotRepresented() {
+        // given
+        FinremCaseData caseData = spy(new FinremCaseData());
+        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+
+        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
+        when(wrapper.getApplicantRepresented()).thenReturn(YesOrNo.NO);
+
+        // when
+        String result = caseData.getAppSolicitorEmailIfRepresented();
+
+        // then
+        assertNull(result);
+    }
+
+    @Test
+    void shouldReturnSolicitorEmail_whenRepresentedAndConsentedApplication() {
+        // given
+        FinremCaseData caseData = spy(new FinremCaseData());
+        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+
+        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
+        when(wrapper.getApplicantRepresented()).thenReturn(YesOrNo.YES);
+        when(wrapper.getSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+
+        doReturn(true).when(caseData).isConsentedApplication();
+
+        // when
+        String result = caseData.getAppSolicitorEmailIfRepresented();
+
+        // then
+        assertEquals(TEST_SOLICITOR_EMAIL, result);
+    }
+
+    @Test
+    void shouldReturnApplicantSolicitorEmail_whenRepresentedAndNotConsentedApplication() {
+        // given
+        FinremCaseData caseData = spy(new FinremCaseData());
+        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+
+        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
+        when(wrapper.getApplicantRepresented()).thenReturn(YesOrNo.YES);
+        when(wrapper.getApplicantSolicitorEmail())
+            .thenReturn(TEST_SOLICITOR_EMAIL);
+
+        doReturn(false).when(caseData).isConsentedApplication();
+
+        // when
+        String result = caseData.getAppSolicitorEmailIfRepresented();
+
+        // then
+        assertEquals(TEST_SOLICITOR_EMAIL, result);
     }
 }

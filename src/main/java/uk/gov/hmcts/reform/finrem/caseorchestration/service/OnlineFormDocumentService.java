@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.miniformacontested.ContestedMiniFormADetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -67,13 +68,24 @@ public class OnlineFormDocumentService {
     private final DocumentHelper documentHelper;
     private final ConsentedApplicationHelper consentedApplicationHelper;
     private final ContestedMiniFormADetailsMapper contestedMiniFormADetailsMapper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    public CaseDocument generateMiniFormA(String authorisationToken, CaseDetails caseDetails) {
-
-        log.info("Generating Consented Mini Form A for Case ID : {}", caseDetails.getId());
-        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getMiniFormTemplate(caseDetails),
+    /**
+     * Generates a Mini Form A document for the provided case details.
+     *
+     * <p>The method maps {@link FinremCaseDetails} to {@link CaseDetails},
+     * determines the appropriate template and file name from the document
+     * configuration, and delegates document generation to the
+     * {@code genericDocumentService}.
+     *
+     * @param authorisationToken the authorisation token used to authenticate the request
+     * @param finremCaseDetails  the financial remedy case details used to populate the document
+     * @return the generated {@link CaseDocument} representing the Mini Form A
+     */
+    public CaseDocument generateMiniFormA(String authorisationToken, FinremCaseDetails finremCaseDetails) {
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        return genericDocumentService.generateDocument(authorisationToken, caseDetails,
+            documentConfiguration.getMiniFormTemplate(finremCaseDetails),
             documentConfiguration.getMiniFormFileName());
     }
 

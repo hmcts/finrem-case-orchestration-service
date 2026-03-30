@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.68'
     id 'au.com.dius.pact' version '4.6.20'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.2017'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.2050'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -22,7 +22,7 @@ def versions = [
         commonsLang3         : '3.20.0',
         hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
-        lombok               : '1.18.42',
+        lombok               : '1.18.44',
         mockito              : '5.21.0',
         pact                 : '4.6.20',
         pdfbox               : '3.0.6',
@@ -224,6 +224,7 @@ sonarqube {
         property "sonar.exclusions", sonarExclusions.join(', ')
         property "sonar.dynamicAnalysis", "reuseReports"
         property "sonar.java.coveragePlugin", "jacoco"
+        property "sonar.tests", "src/test/java,src/functionalTests,src/contractTests"
         property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.outputLocation.get()}"
         property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
         property "sonar.issue.ignore.multicriteria", "e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13"
@@ -407,6 +408,7 @@ dependencies {
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
     implementation group: 'org.springframework.retry', name: 'spring-retry', version: versions.retry
@@ -483,6 +485,7 @@ dependencies {
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
+    testImplementation 'org.aspectj:aspectjweaver'
 
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 

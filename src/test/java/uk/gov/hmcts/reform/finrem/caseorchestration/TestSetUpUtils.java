@@ -5,7 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
+import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.function.ThrowingSupplier;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -42,6 +44,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -591,5 +594,46 @@ public class TestSetUpUtils {
             .name(name)
             .email(email)
             .build();
+    }
+
+    public static ArgumentCaptor<ThrowingRunnable> getThrowingRunnableCaptor() {
+        return ArgumentCaptor.forClass(ThrowingRunnable.class);
+    }
+
+    public static <T> ArgumentCaptor<ThrowingSupplier<T>> getThrowingSupplierCaptor() {
+        return ArgumentCaptor.forClass(ThrowingSupplier.class);
+    }
+
+    public static void runSafely(ThrowingRunnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T getSafely(ThrowingSupplier<T> supplier) {
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static FeignException feignException(int status, String reason) {
+        return FeignException.errorStatus(
+            "test",
+            feign.Response.builder()
+                .status(status)
+                .reason(reason)
+                .request(feign.Request.create(
+                    feign.Request.HttpMethod.GET,
+                    "/test",
+                    Map.of(),
+                    null,
+                    null,
+                    null))
+                .build()
+        );
     }
 }

@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +50,7 @@ class PaperNotificationServiceTest {
     @Mock
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     @Mock
-    private BulkPrintService bulkPrintService;
+    private BulkPrintServiceAdapter bulkPrintServiceAdapter;
     @Mock
     private CaseDataService caseDataService;
     @Mock
@@ -121,7 +122,7 @@ class PaperNotificationServiceTest {
         when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(APPLICANT)))
             .thenReturn(caseDocument);
         paperNotificationService.printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
+        verify(bulkPrintServiceAdapter).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
     }
 
     @Test
@@ -135,7 +136,7 @@ class PaperNotificationServiceTest {
         when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(RESPONDENT)))
             .thenReturn(caseDocument);
         paperNotificationService.printRespondentRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        verify(bulkPrintServiceAdapter).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
     }
 
     @Test
@@ -149,7 +150,7 @@ class PaperNotificationServiceTest {
         when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(INTERVENER_ONE)))
             .thenReturn(caseDocument);
         paperNotificationService.printIntervenerRejectionGeneralApplication(caseDetails, intervenerWrapper, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails,
+        verify(bulkPrintServiceAdapter).sendDocumentForPrint(caseDocument, caseDetails,
             intervenerWrapper.getIntervenerType().getTypeValue(), AUTH_TOKEN);
     }
 
