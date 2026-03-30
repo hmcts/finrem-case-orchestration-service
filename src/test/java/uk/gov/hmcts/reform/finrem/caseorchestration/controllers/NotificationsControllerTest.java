@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
@@ -118,6 +119,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private FeatureToggleService featureToggleService;
     @MockitoBean
     private BulkPrintService bulkPrintService;
+    @MockitoBean
+    private BulkPrintServiceAdapter bulkPrintServiceAdapter;
     @MockitoBean
     private GenericDocumentService genericDocumentService;
     @MockitoBean
