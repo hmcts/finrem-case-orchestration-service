@@ -76,7 +76,7 @@ public class NewManageCaseDocumentsContestedMidHandler extends FinremCallbackHan
         }
     }
 
-    private void populateMissingConfidentialFlag(ManageCaseDocumentsWrapper wrapper ) {
+    private void populateMissingConfidentialFlag(ManageCaseDocumentsWrapper wrapper) {
         wrapper.getInputManageCaseDocumentCollection().stream()
             .filter(this::isConfidentialFlagMissing).forEach(documentCollection ->
                 documentCollection.getUploadCaseDocument().setCaseDocumentConfidentiality(YesOrNo.NO));
