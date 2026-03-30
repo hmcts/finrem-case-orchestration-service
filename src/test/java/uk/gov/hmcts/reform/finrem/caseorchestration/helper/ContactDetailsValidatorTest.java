@@ -263,7 +263,7 @@ class ContactDetailsValidatorTest {
     @Test
     void shouldNotReturnErrorWhenApplicantAddressIsEmpty() {
         FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null);
-        caseData.getContactDetailsWrapper().setApplicantAddress(new Address()); // Empty address object
+        caseData.getContactDetailsWrapper().setApplicantAddress(new Address());
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
@@ -271,7 +271,7 @@ class ContactDetailsValidatorTest {
     @Test
     void shouldNotReturnErrorWhenRespondentAddressIsEmpty() {
         FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null);
-        caseData.getContactDetailsWrapper().setRespondentAddress(new Address()); // Empty address object
+        caseData.getContactDetailsWrapper().setRespondentAddress(new Address());
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
@@ -279,7 +279,7 @@ class ContactDetailsValidatorTest {
     @Test
     void shouldNotReturnErrorWhenApplicantAddressIsNull() {
         FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null);
-        caseData.getContactDetailsWrapper().setApplicantAddress(null); // Null address object
+        caseData.getContactDetailsWrapper().setApplicantAddress(null);
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
@@ -287,7 +287,7 @@ class ContactDetailsValidatorTest {
     @Test
     void shouldNotReturnErrorWhenRespondentAddressIsNull() {
         FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null);
-        caseData.getContactDetailsWrapper().setRespondentAddress(null); // Null address object
+        caseData.getContactDetailsWrapper().setRespondentAddress(null);
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
