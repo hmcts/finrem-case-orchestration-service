@@ -122,7 +122,8 @@ public class UpdateContactDetailsNotificationService {
     private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(FinremCaseData finremCaseData) {
         Optional<RepresentationUpdate> latest = getLastRepresentationUpdate(finremCaseData);
         return RESPONDENT_PARTY.equalsIgnoreCase(latest.map(RepresentationUpdate::getParty).orElseThrow(()
-            -> new IllegalStateException("No latest representation update found for case")));
+            -> new IllegalStateException("No latest representation update found for case: %s"
+            .formatted(finremCaseData.getCcdCaseId()))));
     }
 
     private Optional<RepresentationUpdate> getLastRepresentationUpdate(FinremCaseData finremCaseData) {
