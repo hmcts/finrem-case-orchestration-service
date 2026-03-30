@@ -59,17 +59,11 @@ public class ContactDetailsValidator {
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
-        if (caseData.isApplicantRepresentedByASolicitor()) {
-            checkForEmptyApplicantSolicitorPostcode(caseData, wrapper, errors);
-        } else {
-            checkForEmptyApplicantPostcode(wrapper, errors);
-        }
+        checkForEmptyApplicantSolicitorPostcode(caseData, wrapper, errors);
+        checkForEmptyApplicantPostcode(wrapper, errors);
+        checkForEmptyRespondentSolicitorPostcode(caseData, wrapper, errors);
+        checkForEmptyRespondentPostcode(wrapper, errors);
 
-        if (caseData.isRespondentRepresentedByASolicitor()) {
-            checkForEmptyRespondentSolicitorPostcode(caseData, wrapper, errors);
-        } else {
-            checkForEmptyRespondentPostcode(wrapper, errors);
-        }
         return errors;
     }
 
