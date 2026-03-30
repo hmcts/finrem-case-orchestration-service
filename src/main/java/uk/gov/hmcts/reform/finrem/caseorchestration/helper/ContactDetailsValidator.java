@@ -84,29 +84,21 @@ public class ContactDetailsValidator {
      * @return a list of validation error messages for any missing or invalid postcode fields
      */
     public static List<String> validatePostcodesByRepresentation(FinremCaseDetails finremCaseDetails) {
-
-        if (CaseType.CONTESTED.equals(finremCaseDetails.getCaseType())) {
-            throw new IllegalArgumentException(
-                format(INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE, finremCaseDetails.getCaseIdAsString()));
-        }
-
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
-
         List<String> errors = new ArrayList<>();
-        ContactDetailsWrapper wrapper = finremCaseData.getContactDetailsWrapper();
+        FinremCaseData caseData = finremCaseDetails.getData();
+        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
-        if (YesOrNo.YES.equals(wrapper.getApplicantRepresented())) {
-            ContactDetailsValidator.checkForEmptyApplicantSolicitorPostcode(finremCaseData, wrapper, errors);
+        if (caseData.isApplicantRepresentedByASolicitor()) {
+            checkForEmptyApplicantSolicitorPostcode(caseData, wrapper, errors);
         } else {
-            ContactDetailsValidator.checkForEmptyApplicantPostcode(wrapper, errors);
+            checkForEmptyApplicantPostcode(wrapper, errors);
         }
 
-        if (YesOrNo.YES.equals(wrapper.getConsentedRespondentRepresented())) {
-            ContactDetailsValidator.checkForEmptyRespondentSolicitorPostcode(finremCaseData, wrapper, errors);
+        if (caseData.isRespondentRepresentedByASolicitor()) {
+            checkForEmptyRespondentSolicitorPostcode(caseData, wrapper, errors);
         } else {
-            ContactDetailsValidator.checkForEmptyRespondentPostcode(wrapper, errors);
+            checkForEmptyRespondentPostcode(wrapper, errors);
         }
-
         return errors;
     }
 
