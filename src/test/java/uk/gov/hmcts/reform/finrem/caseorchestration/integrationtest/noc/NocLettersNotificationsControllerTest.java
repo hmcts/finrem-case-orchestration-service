@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -85,6 +86,8 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     private NotificationService notificationService;
     @MockitoBean
     private BulkPrintService bulkPrintService;
+    @MockitoBean
+    private BulkPrintServiceAdapter bulkPrintServiceAdapter;
     @MockitoBean
     GenericDocumentService genericDocumentServiceMock;
     @MockitoBean
@@ -147,7 +150,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldCallNotificationsServiceCorrectly() {
-        when(bulkPrintService.getRecipient(DocumentHelper.PaperNotificationRecipient.APPLICANT.toString())).thenReturn(APPLICANT);
+        when(bulkPrintServiceAdapter.getRecipient(DocumentHelper.PaperNotificationRecipient.APPLICANT.toString())).thenReturn(APPLICANT);
         CaseDocument litigantSolicitorAddedCaseDocument = CaseDocument.builder().documentFilename("docFileNameAdded").build();
         when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(anyString(), anyMap(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedTemplate()),
@@ -175,15 +178,15 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedTemplate()),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()), eq(CONTESTED));
 
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails, APPLICANT, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, caseDetails, APPLICANT, AUTH_TOKEN);
+        verify(bulkPrintServiceAdapter).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails, APPLICANT, AUTH_TOKEN);
+        verify(bulkPrintServiceAdapter).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, caseDetails, APPLICANT, AUTH_TOKEN);
         verify(postalService).isApplicantResideOutsideOfUK(caseDetails.getData());
     }
 
     @Test
     public void shouldCallNotificationServiceCorrectlyNonDigitalSolicitorRemoved() {
         CaseDocument litigantSolicitorAddedCaseDocument = CaseDocument.builder().documentFilename("docFileNameAdded").build();
-        when(bulkPrintService.getRecipient(DocumentHelper.PaperNotificationRecipient.APPLICANT.toString())).thenReturn(APPLICANT);
+        when(bulkPrintServiceAdapter.getRecipient(DocumentHelper.PaperNotificationRecipient.APPLICANT.toString())).thenReturn(APPLICANT);
         when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(anyString(), anyMap(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedTemplate()),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()), eq(CONTESTED))).thenReturn(
@@ -200,7 +203,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
         assertNotificationLetterDetails(letterAddedDetailsMap);
 
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails, APPLICANT, AUTH_TOKEN);
+        verify(bulkPrintServiceAdapter).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails, APPLICANT, AUTH_TOKEN);
     }
 
     @Override

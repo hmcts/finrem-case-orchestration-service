@@ -13,9 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerLetterTuple;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.barristers.BarristerLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 
 import java.util.Map;
 import java.util.Optional;
@@ -31,21 +31,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class BarristerLetterService {
 
     private final BarristerLetterDetailsGenerator barristerLetterDetailsGenerator;
-    private final BulkPrintService bulkPrintService;
+    private final BulkPrintServiceAdapter bulkPrintServiceAdapter;
     private final CaseDataService caseDataService;
     private final DocumentConfiguration documentConfiguration;
     private final GenericDocumentService genericDocumentService;
     private final ObjectMapper objectMapper;
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void sendBarristerLetter(CaseDetails caseDetails,
                                     Barrister barrister,
                                     BarristerLetterTuple barristerLetterTuple,
                                     String authToken) {
         log.info("About to start sending barrister access letter for Case ID: {}", caseDetails.getId());
         Optional<CaseDocument> barristerLetter = getBarristerLetter(caseDetails, barrister, barristerLetterTuple);
-        barristerLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails,
-            bulkPrintService.getRecipient(barristerLetterTuple.getRecipient().toString()), authToken));
+        barristerLetter.ifPresent(letter -> bulkPrintServiceAdapter.sendDocumentForPrint(letter, caseDetails,
+            bulkPrintServiceAdapter.getRecipient(barristerLetterTuple.getRecipient().toString()), authToken));
     }
 
     private Optional<CaseDocument> getBarristerLetter(CaseDetails caseDetails,
