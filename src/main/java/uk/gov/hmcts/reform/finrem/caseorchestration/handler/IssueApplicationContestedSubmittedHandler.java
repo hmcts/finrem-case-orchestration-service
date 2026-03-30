@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.issueapplication.IssueApplicationContestedEmailCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -21,18 +22,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHandler {
 
     private final AssignPartiesAccessService assignPartiesAccessService;
-
     private final IssueApplicationContestedEmailCorresponder corresponder;
-
+    private final GenerateCoverSheetService generateCoverSheetService;
     private final RetryExecutor retryExecutor;
 
     public IssueApplicationContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      AssignPartiesAccessService assignPartiesAccessService,
                                                      IssueApplicationContestedEmailCorresponder corresponder,
+                                                     GenerateCoverSheetService generateCoverSheetService,
                                                      RetryExecutor retryExecutor) {
         super(finremCaseDetailsMapper);
         this.assignPartiesAccessService = assignPartiesAccessService;
         this.corresponder = corresponder;
+        this.generateCoverSheetService = generateCoverSheetService;
         this.retryExecutor = retryExecutor;
     }
 
@@ -53,9 +55,10 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
+        generateCoverSheets(caseDetails, userAuthorisation);
+
         String assignRespondentSolicitorError = grantRespondentSolicitor(caseData);
         String sendCorrespondenceError = sendCorrespondence(caseDetails);
-
         boolean isHavingErrors = !StringUtils.isAllBlank(assignRespondentSolicitorError, sendCorrespondenceError);
 
         if (isHavingErrors) {
@@ -94,6 +97,21 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
         } catch (Exception ex) {
             log.error("Error sending correspondence", ex);
             return "There was a problem sending correspondence.";
+        }
+    }
+
+    private void generateCoverSheets(FinremCaseDetails caseDetails, String userAuthorisation) {
+        try {
+            retryExecutor.runWithRetry(() -> generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, userAuthorisation),
+                "Case Issued - generating applicant cover sheet",
+                caseDetails.getCaseIdAsString()
+            );
+            retryExecutor.runWithRetry(() -> generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, userAuthorisation),
+                "Case Issued - generating respondent cover sheet",
+                caseDetails.getCaseIdAsString()
+            );
+        } catch (Exception ex) {
+            log.error("Error generating cover sheets", ex);
         }
     }
 }

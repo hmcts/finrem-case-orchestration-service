@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
@@ -47,6 +48,8 @@ class IssueApplicationConsentedSubmittedHandlerTest {
     @Mock
     private AssignPartiesAccessService assignPartiesAccessService;
     @Mock
+    private GenerateCoverSheetService generateCoverSheetService;
+    @Mock
     private RetryExecutor retryExecutor;
 
     @Test
@@ -74,6 +77,9 @@ class IssueApplicationConsentedSubmittedHandlerTest {
 
         ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
         verify(retryExecutor).runWithRetry(captor.capture(), eq("sending correspondence"), eq(CASE_ID));
+
+        verifyCoversheetGenerationRun(caseDetails);
+
         verifySendCorrespondenceRun(captor, caseDetails);
         verifyNoMoreInteractions(retryExecutor);
     }
@@ -100,6 +106,8 @@ class IssueApplicationConsentedSubmittedHandlerTest {
         verify(retryExecutor).runWithRetry(sendingCorrespondenceCaptor.capture(), eq("sending correspondence"), eq(CASE_ID));
         verifySendCorrespondenceRun(sendingCorrespondenceCaptor, caseDetails);
 
+        verifyCoversheetGenerationRun(caseDetails);
+
         ArgumentCaptor<ThrowingRunnable> grantingRespondentSolicitorCaptor = getThrowingRunnableCaptor();
         verify(retryExecutor).runWithRetry(grantingRespondentSolicitorCaptor.capture(), eq("granting respondent solicitor"), eq(CASE_ID));
         verifyGrantRespondentSolicitorRun(grantingRespondentSolicitorCaptor, caseData);
@@ -120,8 +128,21 @@ class IssueApplicationConsentedSubmittedHandlerTest {
         when(caseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
         when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
 
+        doAnswer(invocation -> {
+            ThrowingRunnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("Case Issued - generating applicant cover sheet"), eq(CASE_ID));
+
+        doAnswer(invocation -> {
+            ThrowingRunnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("Case Issued - generating respondent cover sheet"), eq(CASE_ID));
+
         doThrow(new RuntimeException("BOOM"))
             .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
+
         doAnswer(invocation -> {
             ThrowingRunnable runnable = invocation.getArgument(0);
             runnable.run();
@@ -130,7 +151,9 @@ class IssueApplicationConsentedSubmittedHandlerTest {
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(caseDetails).build();
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
         assertThat(response).extracting(
             GenericAboutToStartOrSubmitCallbackResponse::getConfirmationHeader,
             GenericAboutToStartOrSubmitCallbackResponse::getConfirmationBody
@@ -139,6 +162,8 @@ class IssueApplicationConsentedSubmittedHandlerTest {
             "<ul><li><h2>There was a problem granting access to respondent solicitor: testSolicitor@email.com</h2></li></ul>"
         );
 
+        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
         verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
         verify(issueApplicationConsentCorresponder).sendCorrespondence(caseDetails, AUTH_TOKEN);
@@ -160,8 +185,21 @@ class IssueApplicationConsentedSubmittedHandlerTest {
         when(caseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
         when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
 
+        doAnswer(invocation -> {
+            ThrowingRunnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("Case Issued - generating applicant cover sheet"), eq(CASE_ID));
+
+        doAnswer(invocation -> {
+            ThrowingRunnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("Case Issued - generating respondent cover sheet"), eq(CASE_ID));
+
         doThrow(new RuntimeException("BOOM"))
             .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
+
         doAnswer(invocation -> {
             ThrowingRunnable runnable = invocation.getArgument(0);
             runnable.run();
@@ -179,6 +217,8 @@ class IssueApplicationConsentedSubmittedHandlerTest {
             "<ul><li><h2>There was a problem sending correspondence.</h2></li></ul>"
         );
 
+        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
         verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
         verifyNoInteractions(issueApplicationConsentCorresponder);
@@ -200,8 +240,21 @@ class IssueApplicationConsentedSubmittedHandlerTest {
         when(caseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
         when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
 
+        doAnswer(invocation -> {
+            ThrowingRunnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("Case Issued - generating applicant cover sheet"), eq(CASE_ID));
+
+        doAnswer(invocation -> {
+            ThrowingRunnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("Case Issued - generating respondent cover sheet"), eq(CASE_ID));
+
         doThrow(new RuntimeException("BOOM"))
             .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
+
         doThrow(new RuntimeException("BOOM"))
             .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
 
@@ -219,10 +272,30 @@ class IssueApplicationConsentedSubmittedHandlerTest {
                 + "</ul>"
         );
 
+        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
         verify(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
         verifyNoInteractions(issueApplicationConsentCorresponder, assignPartiesAccessService);
         verifyNoMoreInteractions(retryExecutor);
+    }
+
+    private void verifyCoversheetGenerationRun(FinremCaseDetails finremCaseDetails)
+        throws Exception {
+
+        ArgumentCaptor<ThrowingRunnable> applicantCaptor = getThrowingRunnableCaptor();
+        ArgumentCaptor<ThrowingRunnable> respondentCaptor = getThrowingRunnableCaptor();
+
+        verify(retryExecutor).runWithRetry(applicantCaptor.capture(),
+            eq("Case Issued - generating applicant cover sheet"), eq(CASE_ID));
+        verify(retryExecutor).runWithRetry(respondentCaptor.capture(),
+            eq("Case Issued - generating respondent cover sheet"), eq(CASE_ID));
+
+        applicantCaptor.getValue().run();
+        respondentCaptor.getValue().run();
+        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(finremCaseDetails, AUTH_TOKEN);
+        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(finremCaseDetails, AUTH_TOKEN);
+        verifyNoMoreInteractions(generateCoverSheetService);
     }
 
     private void verifySendCorrespondenceRun(ArgumentCaptor<ThrowingRunnable> captor, FinremCaseDetails finremCaseDetails)
