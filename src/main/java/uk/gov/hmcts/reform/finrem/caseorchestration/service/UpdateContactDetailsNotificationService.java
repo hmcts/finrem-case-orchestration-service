@@ -61,7 +61,7 @@ public class UpdateContactDetailsNotificationService {
      * and that the case has been added to the organisation’s unassigned case list.
      *
      * @param caseDetails the case details used to determine the email template and
-     *  *                 populate the notification content
+     *     populate the notification content
      * @return a {@link SendCorrespondenceEvent} representing the prepared email notification event
      */
     public SendCorrespondenceEvent prepareNocEmailToLitigantSolicitor(FinremCaseDetails caseDetails) {
