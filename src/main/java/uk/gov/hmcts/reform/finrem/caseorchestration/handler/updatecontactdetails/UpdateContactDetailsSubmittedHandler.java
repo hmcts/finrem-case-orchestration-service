@@ -106,7 +106,6 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
     }
 
     private List<SendCorrespondenceEvent> prepareNocEmailToLitigantSolicitor(FinremCaseDetails caseDetails) {
-        // Returning a list here is for future development, as it appears that an email notification to former solicitors is required.
         return List.of(
             updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(caseDetails)
         );
