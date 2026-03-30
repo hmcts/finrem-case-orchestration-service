@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +63,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumen
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.INTERVENER_TWO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType.TRIAL_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -117,45 +117,61 @@ class NewManageCaseDocumentsContestedAboutToSubmitHandlerTest {
         assertThat(response.getWarnings()).isEmpty();
     }
 
-    static Stream<Arguments> givenIntervenerSelectedAndNameMissing_whenHandle_thenWarningAdded() {
-        return Stream.of(
-            Arguments.of(INTERVENER_ONE, "Intervener 1"),
-            Arguments.of(INTERVENER_TWO, "Intervener 2"),
-            Arguments.of(INTERVENER_THREE, "Intervener 3"),
-            Arguments.of(INTERVENER_FOUR, "Intervener 4")
-        );
+    static Stream<Arguments> intervenerNameTestCases() {
+        Object[] interveners = {INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR};
+        String[] emptyValues = {null, ""};
+        String[] validNames = {"John Doe", "Jane Smith"};
+
+        // Stream for null/empty → should produce warning
+        Stream<Arguments> warnings = IntStream.range(0, interveners.length)
+            .boxed()
+            .flatMap(i -> Arrays.stream(emptyValues)
+                .map(val -> Arguments.of(interveners[i], "Intervener " + (i + 1), val, true))
+            );
+
+        // Stream for valid names → no warning
+        Stream<Arguments> noWarnings = IntStream.range(0, interveners.length)
+            .boxed()
+            .flatMap(i -> Arrays.stream(validNames)
+                .map(val -> Arguments.of(interveners[i], "Intervener " + (i + 1), val, false))
+            );
+
+        return Stream.concat(warnings, noWarnings);
     }
 
     @ParameterizedTest
-    @MethodSource
-    void givenIntervenerSelectedAndNameMissing_whenHandle_thenWarningAdded(CaseDocumentParty caseDocumentParty,
-        String intervenerIdentifier) {
-        for (String nullOfEmptyIntervenerName : Arrays.asList("", null)) {
-            FinremCaseData caseData = FinremCaseData.builder()
-                .intervenerOne(INTERVENER_ONE == caseDocumentParty
-                    ? IntervenerOne.builder().intervenerName(nullOfEmptyIntervenerName).build() : null)
-                .intervenerTwo(INTERVENER_TWO == caseDocumentParty
-                    ? IntervenerTwo.builder().intervenerName(nullOfEmptyIntervenerName).build() : null)
-                .intervenerThree(INTERVENER_THREE == caseDocumentParty
-                    ? IntervenerThree.builder().intervenerName(nullOfEmptyIntervenerName).build() : null)
-                .intervenerFour(INTERVENER_FOUR == caseDocumentParty
-                    ? IntervenerFour.builder().intervenerName(nullOfEmptyIntervenerName).build() : null)
-                .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
-                    .inputManageCaseDocumentCollection(List.of(
-                        UploadCaseDocumentCollection.builder()
-                            .uploadCaseDocument(UploadCaseDocument.builder()
-                                .caseDocumentParty(caseDocumentParty)
-                                .caseDocumentType(TRIAL_BUNDLE)
-                                .build())
-                            .build()
-                    ))
-                    .build())
-                .build();
+    @MethodSource("intervenerNameTestCases")
+    void givenIntervenerSelected_whenHandle_thenWarningsConditionallyAdded(
+        CaseDocumentParty caseDocumentParty,
+        String intervenerIdentifier,
+        String intervenerName,
+        boolean shouldHaveWarning
+    ) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .intervenerOne(INTERVENER_ONE == caseDocumentParty ? IntervenerOne.builder().intervenerName(intervenerName).build() : null)
+            .intervenerTwo(INTERVENER_TWO == caseDocumentParty ? IntervenerTwo.builder().intervenerName(intervenerName).build() : null)
+            .intervenerThree(INTERVENER_THREE == caseDocumentParty ? IntervenerThree.builder().intervenerName(intervenerName).build() : null)
+            .intervenerFour(INTERVENER_FOUR == caseDocumentParty ? IntervenerFour.builder().intervenerName(intervenerName).build() : null)
+            .manageCaseDocumentsWrapper(ManageCaseDocumentsWrapper.builder()
+                .inputManageCaseDocumentCollection(List.of(
+                    UploadCaseDocumentCollection.builder()
+                        .uploadCaseDocument(UploadCaseDocument.builder()
+                            .caseDocumentParty(caseDocumentParty)
+                            .caseDocumentType(mock(CaseDocumentType.class))
+                            .build())
+                        .build()
+                ))
+                .build())
+            .build();
 
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest
-                .handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
-            assertThat(response.getWarnings()).containsExactly("%s not present on the case, do you want to continue?"
-                .formatted(intervenerIdentifier));
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest
+            .handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
+
+        if (shouldHaveWarning) {
+            assertThat(response.getWarnings())
+                .containsExactly("%s not present on the case, do you want to continue?".formatted(intervenerIdentifier));
+        } else {
+            assertThat(response.getWarnings()).isEmpty();
         }
     }
 
