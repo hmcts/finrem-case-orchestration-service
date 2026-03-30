@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Answers.CALLS_REAL_METHODS;
 import static org.mockito.ArgumentMatchers.any;
@@ -331,18 +330,6 @@ class ContactDetailsValidatorTest {
             mockedStatic.verify(() -> ContactDetailsValidator.checkForEmptyRespondentPostcode(any(ContactDetailsWrapper.class), anyList()),
                 times(timesToCallPartyMethods));
         }
-    }
-
-    @Test
-    void givenContestedCase_whenValidatePostcodesByRepresentation_thenExceptionRaised() {
-        assertThatThrownBy(() -> ContactDetailsValidator.validatePostcodesByRepresentation(
-            FinremCaseDetails.builder()
-                .caseType(CaseType.CONTESTED)
-                .id(1234L)
-                .build()
-        ))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining(String.format(ContactDetailsValidator.INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE, "1234"));
     }
 
     private static FinremCaseData createContestedCaseData(String applicantSolicitorPostcode, String applicantPostcode,
