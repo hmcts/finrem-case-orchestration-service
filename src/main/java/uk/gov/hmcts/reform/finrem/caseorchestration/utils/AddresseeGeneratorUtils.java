@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
+package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -13,132 +13,153 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Slf4j
-public class AddresseeGeneratorHelper {
+public class AddresseeGeneratorUtils {
 
     public static final String ADDRESS_MAP = "addressMap";
     public static final String NAME_MAP = "nameMap";
 
-    private AddresseeGeneratorHelper() {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final List<String> ADDRESS_FIELDS = List.of(
+        "AddressLine1",
+        "AddressLine2",
+        "AddressLine3",
+        "County",
+        "PostTown",
+        "PostCode"
+    );
+
+    private AddresseeGeneratorUtils() {
     }
 
     public static Addressee generateAddressee(FinremCaseDetails caseDetails,
                                               DocumentHelper.PaperNotificationRecipient recipient) {
-
         return getAddressee(caseDetails.getData(), recipient);
     }
 
     private static Addressee getAddressee(FinremCaseData caseData,
                                           DocumentHelper.PaperNotificationRecipient recipient) {
-        if (recipient == DocumentHelper.PaperNotificationRecipient.APPLICANT) {
-            return getApplicantAddressee(caseData);
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.RESPONDENT) {
-            return getRespondentAddressee(caseData);
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE) {
-            return getIntervenerAddressee(caseData.getIntervenerOne());
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO) {
-            return getIntervenerAddressee(caseData.getIntervenerTwo());
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE) {
-            return getIntervenerAddressee(caseData.getIntervenerThree());
-        } else if (recipient == DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR) {
-            return getIntervenerAddressee(caseData.getIntervenerFour());
-        } else {
+
+        if (caseData == null || recipient == null) {
             return null;
         }
+
+        return switch (recipient) {
+            case APPLICANT -> buildAddressee(
+                getApplicantName(caseData),
+                getApplicantAddress(caseData),
+                isApplicantResideOutsideOfUK(caseData)
+            );
+            case RESPONDENT -> buildAddressee(
+                getRespondentName(caseData),
+                getRespondentAddress(caseData),
+                isRespondentResideOutsideOfUK(caseData)
+            );
+            case INTERVENER_ONE -> buildAddressee(
+                caseData.getIntervenerOne().getIntervenerName(),
+                caseData.getIntervenerOne().getIntervenerAddress(),
+                isIntervenerResideOutsideOfUK(caseData.getIntervenerOne())
+            );
+            case INTERVENER_TWO -> buildAddressee(
+                caseData.getIntervenerTwo().getIntervenerName(),
+                caseData.getIntervenerTwo().getIntervenerAddress(),
+                isIntervenerResideOutsideOfUK(caseData.getIntervenerTwo())
+            );
+            case INTERVENER_THREE -> buildAddressee(
+                caseData.getIntervenerThree().getIntervenerName(),
+                caseData.getIntervenerThree().getIntervenerAddress(),
+                isIntervenerResideOutsideOfUK(caseData.getIntervenerThree())
+            );
+            case INTERVENER_FOUR -> buildAddressee(
+                caseData.getIntervenerFour().getIntervenerName(),
+                caseData.getIntervenerFour().getIntervenerAddress(),
+                isIntervenerResideOutsideOfUK(caseData.getIntervenerFour())
+            );
+            default -> null;
+        };
     }
 
-    private static Addressee getApplicantAddressee(FinremCaseData caseData) {
+    private static Addressee buildAddressee(String name, Address address, boolean outsideUK) {
         return Addressee.builder()
-            .name(getAppName(caseData))
-            .formattedAddress(formatAddressForLetterPrinting(getAppAddress(caseData),
-                isApplicantResideOutsideOfUK(caseData)))
+            .name(name)
+            .formattedAddress(formatAddressForLetterPrinting(address, outsideUK))
             .build();
     }
 
-    private static String getAppName(FinremCaseData caseData) {
+    private static String getApplicantName(FinremCaseData caseData) {
         return caseData.isApplicantRepresentedByASolicitor()
             ? caseData.getAppSolicitorName()
             : caseData.getFullApplicantName();
     }
 
-    private static Address getAppAddress(FinremCaseData caseData) {
+    private static Address getApplicantAddress(FinremCaseData caseData) {
         return caseData.isApplicantRepresentedByASolicitor()
             ? caseData.getAppSolicitorAddress()
             : caseData.getContactDetailsWrapper().getApplicantAddress();
-
     }
 
-    private static Addressee getRespondentAddressee(FinremCaseData caseData) {
-        return Addressee.builder()
-            .name(getRespName(caseData))
-            .formattedAddress(formatAddressForLetterPrinting(getRespAddress(caseData),
-                isRespondentResideOutsideOfUK(caseData)))
-            .build();
-    }
-
-    private static String getRespName(FinremCaseData caseData) {
+    private static String getRespondentName(FinremCaseData caseData) {
         return caseData.isRespondentRepresentedByASolicitor()
             ? caseData.getRespondentSolicitorName()
             : caseData.getRespondentFullName();
     }
 
-    private static Address getRespAddress(FinremCaseData caseData) {
+    private static Address getRespondentAddress(FinremCaseData caseData) {
         return caseData.isRespondentRepresentedByASolicitor()
             ? caseData.getContactDetailsWrapper().getRespondentSolicitorAddress()
             : caseData.getContactDetailsWrapper().getRespondentAddress();
     }
 
-    private static Addressee getIntervenerAddressee(IntervenerWrapper intervenerWrapper) {
-        return Addressee.builder()
-            .name(intervenerWrapper.getIntervenerName())
-            .formattedAddress(formatAddressForLetterPrinting(intervenerWrapper.getIntervenerAddress(),
-                isIntervenerResideOutsideOfUK(intervenerWrapper)))
-            .build();
-    }
-
     public static String formatAddressForLetterPrinting(Address address, boolean recipientResideOutsideOfUK) {
-        return formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class), recipientResideOutsideOfUK);
+        Map<String, Object> addressMap = OBJECT_MAPPER.convertValue(
+            address,
+            OBJECT_MAPPER.getTypeFactory().constructMapType(Map.class, String.class, Object.class)
+        );
+
+        return formatAddressForLetterPrinting(addressMap, recipientResideOutsideOfUK);
     }
 
     private static String formatAddressForLetterPrinting(Map<String, Object> address, boolean isInternational) {
-        if (address != null) {
-            Stream<String> addressLines = Stream.of("AddressLine1", "AddressLine2", "AddressLine3",
-                "County", "PostTown", "PostCode", isInternational ? "Country" : "");
-            return addressLines.map(address::get)
-                .filter(Objects::nonNull)
-                .map(Object::toString)
-                .filter(StringUtils::isNotEmpty)
-                .filter(s -> !s.equals("null"))
-                .collect(Collectors.joining("\n"));
+        if (address == null) {
+            return "";
         }
-        return "";
+
+        return ADDRESS_FIELDS.stream()
+            .map(address::get)
+            .filter(Objects::nonNull)
+            .map(Object::toString)
+            .filter(StringUtils::isNotEmpty)
+            .filter(value -> !"null".equals(value))
+            .collect(Collectors.joining("\n"));
     }
 
-    @SuppressWarnings("java:S1452")
     public static Map<String, Map<GeneralLetterAddressToType, ?>> getAddressToCaseDataMapping(FinremCaseData data) {
-        Map<GeneralLetterAddressToType, Address> generalLetterAddressToValueToAddress = Map.of(
+        Map<GeneralLetterAddressToType, Address> addressMap = Map.of(
             GeneralLetterAddressToType.APPLICANT_SOLICITOR, getAddressOrNew(data.getAppSolicitorAddress()),
             GeneralLetterAddressToType.RESPONDENT_SOLICITOR, getAddressOrNew(data.getContactDetailsWrapper().getRespondentSolicitorAddress()),
             GeneralLetterAddressToType.RESPONDENT, getAddressOrNew(data.getContactDetailsWrapper().getRespondentAddress()),
-            GeneralLetterAddressToType.OTHER, getAddressOrNew(data.getGeneralLetterWrapper().getGeneralLetterRecipientAddress()));
+            GeneralLetterAddressToType.OTHER, getAddressOrNew(data.getGeneralLetterWrapper().getGeneralLetterRecipientAddress())
+        );
 
-        Map<GeneralLetterAddressToType, String> generalLetterAddressToName = Map.of(
+        Map<GeneralLetterAddressToType, String> nameMap = Map.of(
             GeneralLetterAddressToType.APPLICANT_SOLICITOR, nullToEmpty(data.getAppSolicitorName()),
             GeneralLetterAddressToType.RESPONDENT_SOLICITOR, nullToEmpty(data.getRespondentSolicitorName()),
             GeneralLetterAddressToType.RESPONDENT, nullToEmpty(data.getRespondentFullName()),
-            GeneralLetterAddressToType.OTHER, nullToEmpty(data.getGeneralLetterWrapper().getGeneralLetterRecipient()));
+            GeneralLetterAddressToType.OTHER, nullToEmpty(data.getGeneralLetterWrapper().getGeneralLetterRecipient())
+        );
 
         return Map.of(
-            ADDRESS_MAP, generalLetterAddressToValueToAddress,
-            NAME_MAP, generalLetterAddressToName);
+            ADDRESS_MAP, addressMap,
+            NAME_MAP, nameMap
+        );
     }
 
     public static Address getAddressOrNew(Address address) {
@@ -147,18 +168,15 @@ public class AddresseeGeneratorHelper {
 
     private static boolean isApplicantResideOutsideOfUK(FinremCaseData caseData) {
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
-        YesOrNo applicantResideOutsideUK = wrapper.getApplicantResideOutsideUK();
-        return YesOrNo.YES.equals(applicantResideOutsideUK);
+        return YesOrNo.YES.equals(wrapper.getApplicantResideOutsideUK());
     }
 
     private static boolean isRespondentResideOutsideOfUK(FinremCaseData caseData) {
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
-        YesOrNo respondentResideOutsideUK = wrapper.getRespondentResideOutsideUK();
-        return YesOrNo.YES.equals(respondentResideOutsideUK);
+        return YesOrNo.YES.equals(wrapper.getRespondentResideOutsideUK());
     }
 
     private static boolean isIntervenerResideOutsideOfUK(IntervenerWrapper intervenerWrapper) {
-        YesOrNo intervenerResideOutsideUK = intervenerWrapper.getIntervenerResideOutsideUK();
-        return YesOrNo.YES.equals(intervenerResideOutsideUK);
+        return YesOrNo.YES.equals(intervenerWrapper.getIntervenerResideOutsideUK());
     }
 }

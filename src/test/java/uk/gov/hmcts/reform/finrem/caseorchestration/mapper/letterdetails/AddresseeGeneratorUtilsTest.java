@@ -13,20 +13,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddresseeGeneratorUtils;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.ADDRESS_MAP;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.NAME_MAP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddresseeGeneratorUtils.ADDRESS_MAP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddresseeGeneratorUtils.NAME_MAP;
 
-class AddresseeGeneratorHelperTest {
+class AddresseeGeneratorUtilsTest {
 
     @Test
     void givenUnknownRecipient_whenGetAddressee_thenReturnNull() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).build();
-        assertNull(AddresseeGeneratorHelper.generateAddressee(caseDetails, null));
+        assertNull(AddresseeGeneratorUtils.generateAddressee(caseDetails, null));
     }
 
     @Test
@@ -41,7 +42,7 @@ class AddresseeGeneratorHelperTest {
             .build());
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
 
-        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+        Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
 
         assertEquals("Applicant Name", addressee.getName());
@@ -60,7 +61,7 @@ class AddresseeGeneratorHelperTest {
             .build());
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
 
-        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+        Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
 
         assertEquals("AppSolName", addressee.getName());
@@ -79,7 +80,7 @@ class AddresseeGeneratorHelperTest {
             .build());
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
 
-        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+        Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
 
         assertEquals("Respondent Name", addressee.getName());
@@ -98,7 +99,7 @@ class AddresseeGeneratorHelperTest {
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
 
-        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+        Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO);
 
         assertEquals("Intervener Name", addressee.getName());
@@ -117,7 +118,7 @@ class AddresseeGeneratorHelperTest {
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
 
-        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+        Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
 
         assertEquals("Intervener Name", addressee.getName());
@@ -136,7 +137,7 @@ class AddresseeGeneratorHelperTest {
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
 
-        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+        Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE);
 
         assertEquals("Intervener Name", addressee.getName());
@@ -155,7 +156,7 @@ class AddresseeGeneratorHelperTest {
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
 
-        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+        Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR);
 
         assertEquals("Intervener Name", addressee.getName());
@@ -174,7 +175,7 @@ class AddresseeGeneratorHelperTest {
             .build());
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
 
-        Addressee addressee = AddresseeGeneratorHelper.generateAddressee(caseDetails,
+        Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
 
         assertEquals("RespSol Name", addressee.getName());
@@ -194,7 +195,7 @@ class AddresseeGeneratorHelperTest {
             Line2
             County""";
 
-        assertEquals(expectedFormattedAddress, AddresseeGeneratorHelper.formatAddressForLetterPrinting(toFormat, false));
+        assertEquals(expectedFormattedAddress, AddresseeGeneratorUtils.formatAddressForLetterPrinting(toFormat, false));
     }
 
     @Test
@@ -207,7 +208,7 @@ class AddresseeGeneratorHelperTest {
         caseData.getContactDetailsWrapper().setApplicantSolicitorName("AppSolName");
         caseData.getContactDetailsWrapper().setRespondentSolicitorName("RespSolName");
         Map<String, Map<GeneralLetterAddressToType, ?>> addressToCaseDataMapping =
-            AddresseeGeneratorHelper.getAddressToCaseDataMapping(caseData);
+            AddresseeGeneratorUtils.getAddressToCaseDataMapping(caseData);
 
         Map<GeneralLetterAddressToType, Address> addressMap =
             (Map<GeneralLetterAddressToType, Address>) addressToCaseDataMapping.get(ADDRESS_MAP);
@@ -216,7 +217,7 @@ class AddresseeGeneratorHelperTest {
             addressMap.get(GeneralLetterAddressToType.APPLICANT_SOLICITOR).getAddressLine1());
         assertEquals("50 Resp Sol Street",
             addressMap.get(GeneralLetterAddressToType.RESPONDENT_SOLICITOR).getAddressLine1());
-        assertEquals(addressMap.get(GeneralLetterAddressToType.RESPONDENT), new Address());
+        assertEquals(new Address(), addressMap.get(GeneralLetterAddressToType.RESPONDENT));
 
         Map<GeneralLetterAddressToType, String> nameMap =
             (Map<GeneralLetterAddressToType, String>) addressToCaseDataMapping.get(NAME_MAP);

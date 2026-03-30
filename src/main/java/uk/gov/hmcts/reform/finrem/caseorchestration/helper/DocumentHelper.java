@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddresseeGeneratorUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
@@ -491,7 +491,7 @@ public class DocumentHelper {
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo, recipientResideOutsideOfUK)) {
             Addressee addressee = Addressee.builder()
                 .name(addresseeName)
-                .formattedAddress(AddresseeGeneratorHelper.formatAddressForLetterPrinting(addressToSendTo, recipientResideOutsideOfUK))
+                .formattedAddress(AddresseeGeneratorUtils.formatAddressForLetterPrinting(addressToSendTo, recipientResideOutsideOfUK))
                 .build();
 
             caseData.put(CASE_NUMBER, ccdNumber);
