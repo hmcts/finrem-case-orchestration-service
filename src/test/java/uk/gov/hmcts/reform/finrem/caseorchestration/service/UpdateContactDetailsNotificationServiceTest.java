@@ -99,7 +99,6 @@ class UpdateContactDetailsNotificationServiceTest {
 
             // Applicant changed, contested application
             Arguments.of(APPLICANT_PARTY, NotificationParty.APPLICANT_SOLICITOR_ONLY, false, false, FR_CONTESTED_NOC_CASEWORKER)
-
         );
     }
 
