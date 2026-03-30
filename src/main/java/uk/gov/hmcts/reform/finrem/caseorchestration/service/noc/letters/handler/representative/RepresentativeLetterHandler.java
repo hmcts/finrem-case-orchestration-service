@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.SolicitorNocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
@@ -27,11 +27,11 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
     public RepresentativeLetterHandler(
         AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
         SolicitorNocDocumentService solicitorNocDocumentService,
-        BulkPrintService bulkPrintService,
+        BulkPrintServiceAdapter bulkPrintServiceAdapter,
         CaseDataService caseDataService, NoticeType noticeType,
         CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService,
         CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService) {
-        super(noticeOfChangeLetterDetailsGenerator, solicitorNocDocumentService, bulkPrintService, noticeType, SOLICITOR);
+        super(noticeOfChangeLetterDetailsGenerator, solicitorNocDocumentService, bulkPrintServiceAdapter, noticeType, SOLICITOR);
         this.caseDataService = caseDataService;
         this.checkApplicantSolicitorIsDigitalService = checkApplicantSolicitorIsDigitalService;
         this.checkRespondentSolicitorIsDigitalService = checkRespondentSolicitorIsDigitalService;

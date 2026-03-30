@@ -6,10 +6,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @MockitoBean
     private ContestedDraftOrderNotApprovedService contestedDraftOrderNotApprovedService;
     @MockitoBean
-    private BulkPrintService bulkPrintService;
+    private BulkPrintServiceAdapter bulkPrintServiceAdapter;
     @MockitoBean
     private PaperNotificationService paperNotificationService;
     @MockitoBean
@@ -51,8 +51,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService).getLatestRefusalReason(any());
-        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter).printRespondentDocuments(any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -67,8 +67,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService).getLatestRefusalReason(any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService).getLatestRefusalReason(any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
     }
 }

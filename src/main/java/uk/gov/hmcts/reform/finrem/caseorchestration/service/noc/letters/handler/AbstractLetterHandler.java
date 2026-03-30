@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
@@ -38,17 +38,17 @@ public abstract class AbstractLetterHandler implements LetterHandler {
     public static final String COR_RESPONDENT = "Respondent";
     protected final AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
     protected final NocDocumentService nocDocumentService;
-    protected final BulkPrintService bulkPrintService;
+    protected final BulkPrintServiceAdapter bulkPrintServiceAdapter;
     private final NoticeType noticeType;
     private final DocumentHelper.PaperNotificationRecipient recipient;
 
     protected AbstractLetterHandler(
         AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator, NocDocumentService nocDocumentService,
-        BulkPrintService bulkPrintService,
+        BulkPrintServiceAdapter bulkPrintServiceAdapter,
         NoticeType noticeType, DocumentHelper.PaperNotificationRecipient recipient) {
 
         this.noticeOfChangeLetterDetailsGenerator = noticeOfChangeLetterDetailsGenerator;
-        this.bulkPrintService = bulkPrintService;
+        this.bulkPrintServiceAdapter = bulkPrintServiceAdapter;
         this.noticeType = noticeType;
         this.recipient = recipient;
         this.nocDocumentService = nocDocumentService;
@@ -64,8 +64,8 @@ public abstract class AbstractLetterHandler implements LetterHandler {
             CaseDocument caseDocument = nocDocumentService.generateNoticeOfChangeLetter(authToken, letter,
                 CaseType.forValue(caseDetails.getCaseTypeId()));
             log.info("Generated the case document now send to bulk print");
-            UUID uuid = bulkPrintService.sendDocumentForPrint(caseDocument, caseDetails,
-                bulkPrintService.getRecipient(recipient.toString()), authToken);
+            UUID uuid = bulkPrintServiceAdapter.sendDocumentForPrint(caseDocument, caseDetails,
+                bulkPrintServiceAdapter.getRecipient(recipient.toString()), authToken);
             log.info("Document sent to bulkprint with UUID {}", uuid);
         });
     }
