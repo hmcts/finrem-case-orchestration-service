@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -26,14 +25,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,6 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -68,7 +66,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
     @Test
     void testCanHandle() {
         assertCanHandle(handler,
-            Arguments.of(CallbackType.SUBMITTED, CaseType.CONSENTED, UPDATE_CONTACT_DETAILS),
+            Arguments.of(CallbackType.SUBMITTED, CONSENTED, UPDATE_CONTACT_DETAILS),
             Arguments.of(CallbackType.SUBMITTED, CONTESTED, UPDATE_CONTACT_DETAILS)
         );
     }
@@ -148,7 +146,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 any())
         );
     }
-    
+
     @Test
     void givenNotificationRequired_whenHandled_thenNotificationIsSent() {
         FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
@@ -197,7 +195,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
     }
 
     @Test
-    void givenExceptionsThrow_whenHandled_thenPopulateErrorToConfirmationBody() {
+    void givenMultipleExceptionsThrow_whenHandled_thenPopulateErrorToConfirmationBody() {
         FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
         FinremCaseData finremCaseDataBefore = spy(FinremCaseData.builder().build());
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, finremCaseDataBefore,
@@ -209,17 +207,22 @@ class UpdateContactDetailsSubmittedHandlerTest {
             .thenReturn(event);
 
         doAnswer(invocation -> {
-            List<String> errors = invocation.getArgument(1);
-            errors.add("Fail to send notice of change email to litigant solicitor.");
+            // No cast needed, just get the error handler and call it
+            String actionName = invocation.getArgument(1);
+            String caseId = invocation.getArgument(2);
+            RetryErrorHandler errorHandler = invocation.getArgument(3);
+            errorHandler.handle(new RuntimeException(), actionName, caseId);
             return null;
-        }).when(handler).sendNocEmailToLitigantSolicitorWithRetry(anyList(), anyList());
+        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
 
         doAnswer(invocation -> {
-            List<String> errors = invocation.getArgument(3);
-            errors.add("Fail to send NOC letter to litigants.");
+            // No cast needed, just get the error handler and call it
+            String actionName = invocation.getArgument(1);
+            String caseId = invocation.getArgument(2);
+            RetryErrorHandler errorHandler = invocation.getArgument(3);
+            errorHandler.handle(new RuntimeException(), actionName, caseId);
             return null;
-        }).when(handler).sendNocLetterToLitigantsWithRetry(eq(callbackRequest.getCaseDetails()), eq(callbackRequest.getCaseDetailsBefore()),
-            eq(AUTH_TOKEN), anyList());
+        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC letter"), any(), any());
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -230,58 +233,89 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 .contains(
                     "Fail to send notice of change email to litigant solicitor.",
                     "Fail to send NOC letter to litigants."),
-            () -> verify(handler).sendNocLetterToLitigantsWithRetry(eq(callbackRequest.getCaseDetails()), eq(callbackRequest.getCaseDetailsBefore()),
-                eq(AUTH_TOKEN), anyList()),
-            () -> verify(handler).sendNocEmailToLitigantSolicitorWithRetry(anyList(), anyList()),
             () -> verify(updateContactDetailsNotificationService).requiresNotifications(finremCaseData),
             () -> verify(updateContactDetailsNotificationService).prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails())
         );
     }
 
     @Test
-    void givenNocEmailExceptionThrown_shouldAddError() {
-        // given
-        List<SendCorrespondenceEvent> events = List.of(mock(SendCorrespondenceEvent.class));
-        List<String> errors = new ArrayList<>();
+    void givenExceptionThrown_whenSendingNocEmail_thenPopulateErrorToConfirmationBody() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
+        FinremCaseData finremCaseDataBefore = spy(FinremCaseData.builder().build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, finremCaseDataBefore,
+            finremCaseData);
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
 
-        SendCorrespondenceEvent event = events.getFirst();
-        when(event.getCaseId()).thenReturn(CASE_ID);
+        when(updateContactDetailsNotificationService.requiresNotifications(finremCaseData)).thenReturn(true);
+        when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
+            .thenReturn(event);
 
         // Simulate retryExecutor calling the handler with an exception
         doAnswer(invocation -> {
+            // No cast needed, just get the error handler and call it
+            String actionName = invocation.getArgument(1);
+            String caseId = invocation.getArgument(2);
             RetryErrorHandler errorHandler = invocation.getArgument(3);
-
-            // simulate failure
-            errorHandler.handle(mock(Exception.class), "action", CASE_ID);
+            errorHandler.handle(new RuntimeException(), actionName, caseId);
             return null;
-        }).when(retryExecutor).runWithRetryWithHandler(any(), any(), any(), any());
+        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
+        doAnswer(invocation -> {
+            // Nothing happened
+            return null;
+        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC letter"), any(), any());
 
-        // when
-        handler.sendNocEmailToLitigantSolicitorWithRetry(events, errors);
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         // then
-        assertThat(errors).containsExactly("Fail to send notice of change email to litigant solicitor.");
+        assertAll(
+            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with Errors"),
+            () -> assertThat(response.getConfirmationBody())
+                .contains("Fail to send notice of change email to litigant solicitor.")
+                .doesNotContain("Fail to send NOC letter to litigants."),
+            () -> verify(updateContactDetailsNotificationService).requiresNotifications(finremCaseData),
+            () -> verify(updateContactDetailsNotificationService).prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails())
+        );
     }
 
     @Test
-    void givenSendingNocLetterExceptionThrown_shouldAddError() {
-        // given
-        List<String> errors = new ArrayList<>();
+    void givenExceptionThrown_whenSendingNocLetter_thenPopulateErrorToConfirmationBody() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
+        FinremCaseData finremCaseDataBefore = spy(FinremCaseData.builder().build());
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, finremCaseDataBefore,
+            finremCaseData);
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
 
+        when(updateContactDetailsNotificationService.requiresNotifications(finremCaseData)).thenReturn(true);
+        when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
+            .thenReturn(event);
+
+        // Simulate retryExecutor calling the handler with an exception
         doAnswer(invocation -> {
-            RetryErrorHandler errorHandler = invocation.getArgument(3);
-
-            // simulate failure
-            errorHandler.handle(mock(Exception.class), "action", CASE_ID);
+            // Nothing happened
             return null;
-        }).when(retryExecutor).runWithRetryWithHandler(any(), any(), any(), any());
+        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
+        doAnswer(invocation -> {
+            // No cast needed, just get the error handler and call it
+            String actionName = invocation.getArgument(1);
+            String caseId = invocation.getArgument(2);
+            RetryErrorHandler errorHandler = invocation.getArgument(3);
+            errorHandler.handle(new RuntimeException(), actionName, caseId);
+            return null;
+        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC letter"), any(), any());
 
-        // when
-        handler.sendNocLetterToLitigantsWithRetry(mock(FinremCaseDetails.class), mock(FinremCaseDetails.class),
-            AUTH_TOKEN, errors);
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         // then
-        assertThat(errors).containsExactly("Fail to send NOC letter to litigants.");
+        assertAll(
+            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with Errors"),
+            () -> assertThat(response.getConfirmationBody())
+                .contains("Fail to send NOC letter to litigants.")
+                .doesNotContain("Fail to send notice of change email to litigant solicitor."),
+            () -> verify(updateContactDetailsNotificationService).requiresNotifications(finremCaseData),
+            () -> verify(updateContactDetailsNotificationService).prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails())
+        );
     }
 
     @Test
