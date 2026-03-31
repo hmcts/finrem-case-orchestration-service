@@ -86,7 +86,7 @@ class AssignPartiesAccessServiceTest {
             when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
             when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
 
-            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(
                 Optional.of(TEST_USER_ID)
             );
 
@@ -119,7 +119,7 @@ class AssignPartiesAccessServiceTest {
             when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
             when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
 
-            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(
                 Optional.empty()
             );
 
@@ -163,7 +163,7 @@ class AssignPartiesAccessServiceTest {
             when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
             when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
 
-            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(
                 Optional.of(TEST_USER_ID)
             );
 
@@ -196,7 +196,7 @@ class AssignPartiesAccessServiceTest {
             when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
             when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
 
-            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(
                 Optional.empty()
             );
 
@@ -272,7 +272,7 @@ class AssignPartiesAccessServiceTest {
             when(caseRole.getCcdCode()).thenReturn(TEST_CASE_ROLE);
             when(intervenerWrapper.getIntervenerSolicitorCaseRole()).thenReturn(caseRole);
 
-            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL, TEST_SYSTEM_TOKEN)).thenReturn(
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(
                 Optional.of(TEST_USER_ID)
             );
 
