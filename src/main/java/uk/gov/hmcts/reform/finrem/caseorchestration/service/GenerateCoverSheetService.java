@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -41,7 +42,7 @@ public class GenerateCoverSheetService {
      * @param authorisationToken the authorization token used to access and store the generated document
      */
     public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
-        FinremCaseData caseData = getCaseData(caseDetails);
+        FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(APPLICANT, caseDetails.getCaseIdAsString());
 
         replaceAndStoreCoverSheet(
@@ -69,7 +70,7 @@ public class GenerateCoverSheetService {
      * @param authorisationToken the authorization token used to access and store the generated document
      */
     public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
-        FinremCaseData caseData = getCaseData(caseDetails);
+        FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(RESPONDENT, caseDetails.getCaseIdAsString());
 
         replaceAndStoreCoverSheet(
@@ -98,11 +99,14 @@ public class GenerateCoverSheetService {
                                            Consumer<CaseDocument> publicSetter,
                                            Consumer<CaseDocument> confidentialSetter) {
         boolean isHiddenFromPublic = YesOrNo.isYes(hiddenFlag);
-        CaseDocument oldCoverSheet = isHiddenFromPublic
+        Optional<CaseDocument> oldCoverSheet = Optional.ofNullable(isHiddenFromPublic
             ? oldCoverSheetConfidentialSupplier.get()
-            : oldCoverSheetSupplier.get();
+            : oldCoverSheetSupplier.get());
 
-        deleteOldCoversheet(oldCoverSheet, authToken);
+        oldCoverSheet.ifPresent(cs -> {
+            log.info("Deleting old cover sheet with url: {}", cs.getDocumentUrl());
+            genericDocumentService.deleteDocument(cs.getDocumentUrl(), authToken);
+        });
 
         publicSetter.accept(isHiddenFromPublic ? null : coverSheet);
         confidentialSetter.accept(isHiddenFromPublic ? coverSheet : null);
@@ -136,15 +140,5 @@ public class GenerateCoverSheetService {
         log.info("Generating and storing {} Bulkprint cover sheet on Case ID: {}",
             recipient,
             caseId);
-    }
-
-    private FinremCaseData getCaseData(FinremCaseDetails caseDetails) {
-        return caseDetails.getData();
-    }
-
-    private void deleteOldCoversheet(CaseDocument coverSheet, String authToken) {
-        if (coverSheet != null) {
-            genericDocumentService.deleteDocument(coverSheet.getDocumentUrl(), authToken);
-        }
     }
 }
