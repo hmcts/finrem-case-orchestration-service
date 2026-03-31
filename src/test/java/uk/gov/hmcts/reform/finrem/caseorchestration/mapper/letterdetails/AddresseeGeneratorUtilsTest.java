@@ -18,16 +18,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddresseeGeneratorUtil
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddresseeGeneratorUtils.ADDRESS_MAP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddresseeGeneratorUtils.NAME_MAP;
 
 class AddresseeGeneratorUtilsTest {
 
     @Test
-    void givenUnknownRecipient_whenGetAddressee_thenReturnNull() {
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).build();
-        assertNull(AddresseeGeneratorUtils.generateAddressee(caseDetails, null));
+    void givenNullRecipient_whenGetAddressee_thenThrowException() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CaseType.CONTESTED).build();
+        assertThrows(IllegalArgumentException.class, () -> AddresseeGeneratorUtils.generateAddressee(caseDetails, null));
+    }
+
+    @Test
+    void givenNullCaseDetails_whenGetAddressee_thenThrowException() {
+        assertThrows(IllegalArgumentException.class, () ->
+            AddresseeGeneratorUtils.generateAddressee(null, DocumentHelper.PaperNotificationRecipient.APPLICANT));
     }
 
     @Test

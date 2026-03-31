@@ -42,16 +42,15 @@ public class AddresseeGeneratorUtils {
 
     public static Addressee generateAddressee(FinremCaseDetails caseDetails,
                                               DocumentHelper.PaperNotificationRecipient recipient) {
+        if (caseDetails == null || recipient == null) {
+            throw new IllegalArgumentException("Case data and recipient cannot be null");
+        }
+
         return getAddressee(caseDetails.getData(), recipient);
     }
 
     private static Addressee getAddressee(FinremCaseData caseData,
                                           DocumentHelper.PaperNotificationRecipient recipient) {
-
-        if (caseData == null || recipient == null) {
-            return null;
-        }
-
         return switch (recipient) {
             case APPLICANT -> buildAddressee(
                 getApplicantName(caseData),
@@ -83,7 +82,7 @@ public class AddresseeGeneratorUtils {
                 caseData.getIntervenerFour().getIntervenerAddress(),
                 isIntervenerResideOutsideOfUK(caseData.getIntervenerFour())
             );
-            default -> null;
+            default -> throw new IllegalStateException("Unsupported recipient type: " + recipient);
         };
     }
 
