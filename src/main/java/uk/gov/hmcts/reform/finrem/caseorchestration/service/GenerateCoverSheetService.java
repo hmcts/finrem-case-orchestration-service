@@ -15,15 +15,13 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class GenerateCoverSheetService {
-
-    private static final DocumentHelper.PaperNotificationRecipient APPLICANT =
-        DocumentHelper.PaperNotificationRecipient.APPLICANT;
-    private static final DocumentHelper.PaperNotificationRecipient RESPONDENT =
-        DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
@@ -39,8 +37,8 @@ public class GenerateCoverSheetService {
      * based on the applicant's address visibility settings, and stores the generated cover sheet
      * accordingly in the case data.
      *
-     * @param caseDetails         the {@link FinremCaseDetails} object containing the case information
-     * @param authorisationToken  the authorization token used to access and store the generated document
+     * @param caseDetails        the {@link FinremCaseDetails} object containing the case information
+     * @param authorisationToken the authorization token used to access and store the generated document
      */
     public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
         FinremCaseData caseData = getCaseData(caseDetails);
@@ -67,8 +65,8 @@ public class GenerateCoverSheetService {
      * based on the respondent's address visibility settings, and updates the case data with
      * the appropriate cover sheet.
      *
-     * @param caseDetails         the {@link FinremCaseDetails} object containing the case information
-     * @param authorisationToken  the authorization token used to access and store the generated document
+     * @param caseDetails        the {@link FinremCaseDetails} object containing the case information
+     * @param authorisationToken the authorization token used to access and store the generated document
      */
     public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
         FinremCaseData caseData = getCaseData(caseDetails);
@@ -129,13 +127,13 @@ public class GenerateCoverSheetService {
     }
 
     private void logCoverSheetGeneration(DocumentHelper.PaperNotificationRecipient recipient, String caseId) {
-        log.info("Generating {} bulkprint cover sheet on Case ID: {}",
+        log.info("Generating {} Bulkprint cover sheet on Case ID: {}",
             recipient,
             caseId);
     }
 
     private void logCoverSheetGenerationAndStorage(DocumentHelper.PaperNotificationRecipient recipient, String caseId) {
-        log.info("Generating and storing {} bulkprint cover sheet on Case ID: {}",
+        log.info("Generating and storing {} Bulkprint cover sheet on Case ID: {}",
             recipient,
             caseId);
     }
