@@ -50,16 +50,17 @@ class IssueApplicationContestedAboutToSubmitHandlerTest {
         when(service.generateContestedMiniForm(AUTH_TOKEN, callbackRequest.getCaseDetails())).thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        FinremCaseData data = response.getData();
 
-        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN);
-        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN);
-        verifyNoMoreInteractions(generateCoverSheetService);
+        FinremCaseData data = response.getData();
 
         assertEquals("123", data.getDivorceCaseNumber());
         assertEquals(TypeOfApplication.MATRIMONIAL_CIVILPARTNERSHIP.getTypeOfApplication(),
             data.getScheduleOneWrapper().getTypeOfApplication().getValue());
         assertEquals(caseDocument(), data.getMiniFormA());
+
+        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verifyNoMoreInteractions(generateCoverSheetService);
     }
 
     @Test
