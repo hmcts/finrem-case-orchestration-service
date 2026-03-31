@@ -77,7 +77,7 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         return submittedResponse();
     }
 
-    protected void sendNocEmailToLitigantSolicitorWithRetry(List<SendCorrespondenceEvent> events, List<String> errors) {
+    private void sendNocEmailToLitigantSolicitorWithRetry(List<SendCorrespondenceEvent> events, List<String> errors) {
         events.forEach(event ->
             retryExecutor.runWithRetryWithHandler(
                 () -> sendNocEmailToLitigantSolicitor(event),
@@ -89,7 +89,7 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         );
     }
 
-    protected void sendNocLetterToLitigantsWithRetry(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
+    private void sendNocLetterToLitigantsWithRetry(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
                                                      String userAuthorisation, List<String> errors) {
         retryExecutor.runWithRetryWithHandler(
             () -> sendNocLetterToLitigants(finremCaseDetails, finremCaseDetailsBefore,
@@ -106,7 +106,6 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
     }
 
     private List<SendCorrespondenceEvent> prepareNocEmailToLitigantSolicitor(FinremCaseDetails caseDetails) {
-        // Returning a list here is for future development, as it appears that an email notification to former solicitors is required.
         return List.of(
             updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(caseDetails)
         );

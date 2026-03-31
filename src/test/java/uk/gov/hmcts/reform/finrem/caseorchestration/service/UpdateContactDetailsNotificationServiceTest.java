@@ -99,7 +99,6 @@ class UpdateContactDetailsNotificationServiceTest {
 
             // Applicant changed, contested application
             Arguments.of(APPLICANT_PARTY, NotificationParty.APPLICANT_SOLICITOR_ONLY, false, false, FR_CONTESTED_NOC_CASEWORKER)
-
         );
     }
 
@@ -132,8 +131,6 @@ class UpdateContactDetailsNotificationServiceTest {
         NotificationRequest mockRequest = mock(NotificationRequest.class);
         when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(caseDetails, isRespondentSolicitorChanged))
             .thenReturn(mockRequest);
-
-        // stub internal logic if needed (see note below)
 
         SendCorrespondenceEvent result =
             updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(caseDetails);
@@ -173,8 +170,6 @@ class UpdateContactDetailsNotificationServiceTest {
 
         when(caseData.getRepresentationUpdateHistory()).thenReturn(representationUpdateHistory);
         when(caseDetails.getData()).thenReturn(caseData);
-
-        // stub internal logic if needed (see note below)
 
         assertThrows(IllegalStateException.class, () ->
             updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(caseDetails));
