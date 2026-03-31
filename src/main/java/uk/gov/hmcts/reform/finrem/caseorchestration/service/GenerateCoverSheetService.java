@@ -28,7 +28,7 @@ public class GenerateCoverSheetService {
     private final DocumentConfiguration documentConfiguration;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
 
-    public CaseDocument generateApplicantCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
+    public CaseDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         logCoverSheetGeneration(APPLICANT, caseDetails.getCaseIdAsString());
         return generateCoverSheet(caseDetails, authorisationToken, APPLICANT);
     }
@@ -41,7 +41,7 @@ public class GenerateCoverSheetService {
      * @param caseDetails        the {@link FinremCaseDetails} object containing the case information
      * @param authorisationToken the authorization token used to access and store the generated document
      */
-    public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
+    public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(APPLICANT, caseDetails.getCaseIdAsString());
 
@@ -56,7 +56,7 @@ public class GenerateCoverSheetService {
         );
     }
 
-    public CaseDocument generateRespondentCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
+    public CaseDocument generateRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         logCoverSheetGeneration(RESPONDENT, caseDetails.getCaseIdAsString());
         return generateCoverSheet(caseDetails, authorisationToken, RESPONDENT);
     }
@@ -69,7 +69,7 @@ public class GenerateCoverSheetService {
      * @param caseDetails        the {@link FinremCaseDetails} object containing the case information
      * @param authorisationToken the authorization token used to access and store the generated document
      */
-    public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
+    public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         FinremCaseData caseData = caseDetails.getData();
         logCoverSheetGenerationAndStorage(RESPONDENT, caseDetails.getCaseIdAsString());
 
@@ -84,8 +84,8 @@ public class GenerateCoverSheetService {
         );
     }
 
-    public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
-                                                     final String authorisationToken,
+    public CaseDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails,
+                                                     String authorisationToken,
                                                      DocumentHelper.PaperNotificationRecipient intervenerRecipient) {
         logCoverSheetGeneration(intervenerRecipient, caseDetails.getCaseIdAsString());
         return generateCoverSheet(caseDetails, authorisationToken, intervenerRecipient);
