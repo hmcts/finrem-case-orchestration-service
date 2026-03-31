@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -33,15 +34,25 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, APPLICANT);
     }
 
+    /**
+     * Generates an applicant's cover sheet, determines whether it should be public or confidential
+     * based on the applicant's address visibility settings, and stores the generated cover sheet
+     * accordingly in the case data.
+     *
+     * @param caseDetails         the {@link FinremCaseDetails} object containing the case information
+     * @param authorisationToken  the authorization token used to access and store the generated document
+     */
     public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
-        FinremCaseData caseData = getCaseDaa(caseDetails);
-        storeCoverSheet(
-            caseDetails,
+        FinremCaseData caseData = getCaseData(caseDetails);
+
+        replaceAndStoreCoverSheet(
             generateApplicantCoverSheet(caseDetails, authorisationToken),
             caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent(),
+            authorisationToken,
+            caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetApp,
+            caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetAppConfidential,
             caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetApp,
-            caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetAppConfidential,
-            APPLICANT
+            caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetAppConfidential
         );
     }
 
@@ -50,16 +61,25 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, RESPONDENT);
     }
 
+    /**
+     * Generates a respondent's cover sheet, determines if it should be public or confidential
+     * based on the respondent's address visibility settings, and updates the case data with
+     * the appropriate cover sheet.
+     *
+     * @param caseDetails         the {@link FinremCaseDetails} object containing the case information
+     * @param authorisationToken  the authorization token used to access and store the generated document
+     */
     public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
-        FinremCaseData caseData = getCaseDaa(caseDetails);
+        FinremCaseData caseData = getCaseData(caseDetails);
 
-        storeCoverSheet(
-            caseDetails,
+        replaceAndStoreCoverSheet(
             generateRespondentCoverSheet(caseDetails, authorisationToken),
             caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant(),
+            authorisationToken,
+            caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetRes,
+            caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetResConfidential,
             caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetRes,
-            caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetResConfidential,
-            RESPONDENT
+            caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetResConfidential
         );
     }
 
@@ -70,20 +90,22 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, intervenerRecipient);
     }
 
-    private void storeCoverSheet(FinremCaseDetails caseDetails,
-                                 CaseDocument coverSheet,
-                                 YesOrNo hiddenFlag,
-                                 Consumer<CaseDocument> publicSetter,
-                                 Consumer<CaseDocument> confidentialSetter,
-                                 DocumentHelper.PaperNotificationRecipient recipient) {
-        if (YesOrNo.isYes(hiddenFlag)) {
-            log.info("{} has been marked as confidential, adding coversheet to confidential field for caseId {}",
-                recipient, caseDetails.getId());
-            publicSetter.accept(null);
-            confidentialSetter.accept(coverSheet);
-        } else {
-            publicSetter.accept(coverSheet);
-        }
+    private void replaceAndStoreCoverSheet(CaseDocument coverSheet,
+                                           YesOrNo hiddenFlag,
+                                           String authToken,
+                                           Supplier<CaseDocument> oldCoverSheetSupplier,
+                                           Supplier<CaseDocument> oldCoverSheetConfidentialSupplier,
+                                           Consumer<CaseDocument> publicSetter,
+                                           Consumer<CaseDocument> confidentialSetter) {
+        boolean isHiddenFromPublic = YesOrNo.isYes(hiddenFlag);
+        CaseDocument oldCoverSheet = isHiddenFromPublic
+            ? oldCoverSheetConfidentialSupplier.get()
+            : oldCoverSheetSupplier.get();
+
+        deleteOldCoversheet(oldCoverSheet, authToken);
+
+        publicSetter.accept(isHiddenFromPublic ? null : coverSheet);
+        confidentialSetter.accept(isHiddenFromPublic ? coverSheet : null);
     }
 
     private CaseDocument generateCoverSheet(FinremCaseDetails caseDetails,
@@ -111,7 +133,13 @@ public class GenerateCoverSheetService {
             documentConfiguration.getBulkPrintTemplate());
     }
 
-    private FinremCaseData getCaseDaa(FinremCaseDetails caseDetails) {
+    private FinremCaseData getCaseData(FinremCaseDetails caseDetails) {
         return caseDetails.getData();
+    }
+
+    private void deleteOldCoversheet(CaseDocument coverSheet, String authToken) {
+        if (coverSheet != null) {
+            genericDocumentService.deleteDocument(coverSheet.getDocumentUrl(), authToken);
+        }
     }
 }
