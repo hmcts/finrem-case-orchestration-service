@@ -48,6 +48,8 @@ class GenerateCoverSheetServiceTest {
     private BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
     @InjectMocks
     private GenerateCoverSheetService generateCoverSheetService;
+    @Mock
+    private CaseType caseType;
 
     @BeforeEach
     void setUp() {
@@ -62,7 +64,7 @@ class GenerateCoverSheetServiceTest {
             any(),
             eq(BULK_PRINT_TEMPLATE),
             eq(BULK_PRINT_FILE_NAME),
-            eq(CaseType.CONSENTED)
+            eq(caseType)
         )).thenReturn(CaseDocument.builder()
             .documentBinaryUrl(TEST_DOCUMENT_BINARY_URL)
             .documentUrl(TEST_DOCUMENT_URL)
@@ -82,7 +84,7 @@ class GenerateCoverSheetServiceTest {
             any(),
             eq(BULK_PRINT_TEMPLATE),
             eq(BULK_PRINT_FILE_NAME),
-            eq(CaseType.CONSENTED)
+            eq(caseType)
         );
         verify(bulkPrintCoverLetterDetailsMapper).getLetterDetailsAsMap(caseDetails, APPLICANT,
             caseDetails.getData().getRegionWrapper().getDefaultCourtList());
@@ -187,7 +189,7 @@ class GenerateCoverSheetServiceTest {
     private FinremCaseDetails getCaseDetails(YesOrNo applicantAddressHiddenFromRespondent,
                                              YesOrNo respondentAddressHiddenFromApplicant) {
         FinremCaseData caseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONSENTED)
+            .ccdCaseType(caseType)
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
                 .applicantAddressHiddenFromRespondent(applicantAddressHiddenFromRespondent)
                 .respondentAddressHiddenFromApplicant(respondentAddressHiddenFromApplicant)
@@ -198,7 +200,7 @@ class GenerateCoverSheetServiceTest {
 
         return FinremCaseDetails.builder()
             .id(CASE_ID_IN_LONG)
-            .caseType(CaseType.CONSENTED)
+            .caseType(caseType)
             .data(caseData)
             .build();
     }
