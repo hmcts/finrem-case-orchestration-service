@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -52,6 +53,8 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
     @Mock
     private UpdateContactDetailsNotificationService updateContactDetailsNotificationService;
+    @Mock
+    private SolicitorAccessService solicitorAccessService;
     @Mock
     private RetryExecutor retryExecutor;
     @Mock
@@ -134,7 +137,11 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 checkAndAssignSolicitorAccessCaptor.capture(),
                 eq("Update Contact Details - Case Solicitor Change"),
                 eq(CASE_ID),
-                any(RetryErrorHandler.class))
+                any(RetryErrorHandler.class)),
+            () -> {
+                checkAndAssignSolicitorAccessCaptor.getValue().run();
+                verify(solicitorAccessService).checkAndAssignSolicitorAccess(caseData, caseDataBefore);
+            }
         );
     }
 
