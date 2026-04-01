@@ -2,9 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetail
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -26,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -71,32 +68,88 @@ class UpdateContactDetailsSubmittedHandlerTest {
         );
     }
 
-    static Stream<Arguments> solicitorEmailChangeScenarios() {
-        return Stream.of(
-            Arguments.of("new@email.com", YesOrNo.YES, "old@email.com", YesOrNo.YES),
-            Arguments.of("same@email.com", YesOrNo.YES, "same@email.com", YesOrNo.YES),
-            Arguments.of("new@email.com", YesOrNo.YES, "", YesOrNo.NO),
-            Arguments.of("", YesOrNo.NO, "old@email.com", YesOrNo.YES),
-            Arguments.of(null, YesOrNo.NO, "old@email.com", YesOrNo.YES),
-            Arguments.of("new@email.com", YesOrNo.YES, null, YesOrNo.NO),
-            Arguments.of(null, YesOrNo.NO, null, YesOrNo.NO)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("solicitorEmailChangeScenarios")
-    void handleSolicitorEmailChangeScenarios(String applicantSolicitorEmail, YesOrNo applicantRepresented,
-                                             String beforeApplicantSolicitorEmail, YesOrNo beforeApplicantRepresented) {
+    @Test
+    void givenUpdateContactDetails_WhenApplicantSolicitorEmailChangeThenCheckAndAssignSolicitorToCase() {
         FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder()
-                .applicantSolicitorEmail(applicantSolicitorEmail)
-                .applicantRepresented(applicantRepresented)
+                .applicantSolicitorEmail("new@email.com")
+                .applicantRepresented(YesOrNo.YES)
                 .build()).build();
 
         FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder()
-                .applicantSolicitorEmail(beforeApplicantSolicitorEmail)
-                .applicantRepresented(beforeApplicantRepresented)
+                .applicantSolicitorEmail("old@email.com")
+                .applicantRepresented(YesOrNo.YES)
+                .build()).build();
+
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, caseDataBefore);
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Verify
+        ArgumentCaptor<ThrowingRunnable> checkAndAssignSolicitorAccessCaptor = getThrowingRunnableCaptor();
+
+        // Verify
+        assertAll(
+            () -> assertThat(response.getConfirmationBody()).isNull(),
+            () -> assertThat(response.getConfirmationHeader()).isNull(),
+            () -> verify(retryExecutor).runWithRetryWithHandler(
+                checkAndAssignSolicitorAccessCaptor.capture(),
+                eq("Update Contact Details - Case Solicitor Change"),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class))
+        );
+    }
+
+    @Test
+    void givenUpdateContactDetails_WhenRespondentSolicitorEmailChangeThenCheckAndAssignSolicitorToContestedCase() {
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail("new@email.com")
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .build()).build();
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail("old@email.com")
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .build()).build();
+
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, caseDataBefore);
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Verify
+        ArgumentCaptor<ThrowingRunnable> checkAndAssignSolicitorAccessCaptor = getThrowingRunnableCaptor();
+
+        // Verify
+        assertAll(
+            () -> assertThat(response.getConfirmationBody()).isNull(),
+            () -> assertThat(response.getConfirmationHeader()).isNull(),
+            () -> verify(retryExecutor).runWithRetryWithHandler(
+                checkAndAssignSolicitorAccessCaptor.capture(),
+                eq("Update Contact Details - Case Solicitor Change"),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class))
+        );
+    }
+
+    @Test
+    void givenUpdateContactDetails_WhenRespondentSolicitorEmailChangeThenCheckAndAssignSolicitorToConsentedCase() {
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail("new@email.com")
+                .consentedRespondentRepresented(YesOrNo.YES)
+                .build()).build();
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail("old@email.com")
+                .consentedRespondentRepresented(YesOrNo.YES)
                 .build()).build();
 
         FinremCallbackRequest callbackRequest =
