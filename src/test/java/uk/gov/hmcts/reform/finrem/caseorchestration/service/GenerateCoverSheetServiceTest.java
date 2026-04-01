@@ -31,6 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DOCUMENT_BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DOCUMENT_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 
 @ExtendWith(MockitoExtension.class)
@@ -94,7 +95,7 @@ class GenerateCoverSheetServiceTest {
     void shouldGenerateAndSetApplicantCoverSheet_whenAddressNotHidden() {
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(
-            CaseDocument.builder().documentUrl(OLD_COVERESHEET_URL).build()
+            caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
         );
 
         generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
@@ -121,7 +122,7 @@ class GenerateCoverSheetServiceTest {
     void shouldStoreApplicantCoverSheetInConfidentialField_whenApplicantAddressHiddenFromRespondent() {
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.YES, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(
-            CaseDocument.builder().documentUrl(OLD_COVERESHEET_URL).build()
+            caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
         );
 
         generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
@@ -136,7 +137,7 @@ class GenerateCoverSheetServiceTest {
     void shouldGenerateAndSetRespondentCoverSheet_whenAddressNotHidden() {
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(
-            CaseDocument.builder().documentUrl(OLD_COVERESHEET_URL).build()
+            caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
         );
 
         generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
@@ -151,7 +152,7 @@ class GenerateCoverSheetServiceTest {
     void shouldStoreRespondentCoverSheetInConfidentialField_whenRespondentAddressHiddenFromApplicant() {
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.YES);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(
-            CaseDocument.builder().documentUrl(OLD_COVERESHEET_URL).build()
+            caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
         );
 
         generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
