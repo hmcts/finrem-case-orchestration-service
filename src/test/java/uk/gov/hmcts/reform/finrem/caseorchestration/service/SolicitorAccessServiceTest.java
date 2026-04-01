@@ -17,8 +17,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -36,18 +39,40 @@ class SolicitorAccessServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    static Stream<org.junit.jupiter.params.provider.Arguments> applicantSolicitorScenarios() {
+    static Stream<Arguments> applicantSolicitorScenarios() {
         return Stream.of(
             Arguments.of("new@email.com", "org1", "old@email.com", "org2", true),
-            Arguments.of("same@email.com", "org1", "same@email.com", "org1", false)
+            Arguments.of("same@email.com", "org1", "same@email.com", "org1", false),
+            Arguments.of("same@email.com", "org1", "same@email.com", "org2", true),
+            Arguments.of(null, "org1", null, "org1", false),
+            Arguments.of(null, "org1", "old@email.com", "org1", true),
+            Arguments.of("new@email.com", "org1", null, "org1", true)
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("applicantSolicitorScenarios")
+    void testHasApplicantSolicitorChangedGivenScenarios(String currentEmail, String currentOrgId, String previousEmail,
+                                                        String previousOrgId, boolean expectedSolicitorChanged)
+        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequestApplicantSolicitor(currentEmail, currentOrgId,
+            previousEmail, previousOrgId);
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+
+        // Act, call performAddHearingIfNecessary using reflection
+        Method method = SolicitorAccessService.class.getDeclaredMethod(
+            "hasApplicantSolicitorChanged", FinremCaseData.class, FinremCaseData.class);
+        method.setAccessible(true);
+        boolean hasChanged = (boolean) method.invoke(solicitorAccessService, caseData, caseDataBefore);
+        assertEquals(expectedSolicitorChanged, hasChanged);
     }
 
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("applicantSolicitorScenarios")
-    void applicantSolicitorAccessIsGrantedOrRevoked(String currentEmail, String currentOrgId, String previousEmail,
-                                                    String previousOrgId, boolean shouldGrantRevoke) {
+    void testApplicantSolicitorAccessIsGrantedOrRevokedGivenScenarios(String currentEmail, String currentOrgId, String previousEmail,
+                                                                      String previousOrgId, boolean expectedShouldGrantRevoke) {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequestApplicantSolicitor(currentEmail, currentOrgId,
             previousEmail, previousOrgId);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
@@ -55,7 +80,7 @@ class SolicitorAccessServiceTest {
 
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
 
-        if (shouldGrantRevoke) {
+        if (expectedShouldGrantRevoke) {
             verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
             verify(assignPartiesAccessService).revokeApplicantSolicitor(caseDataBefore);
         } else {
@@ -64,18 +89,40 @@ class SolicitorAccessServiceTest {
         }
     }
 
-    static Stream<org.junit.jupiter.params.provider.Arguments> respondentSolicitorScenarios() {
+    static Stream<Arguments> respondentSolicitorScenarios() {
         return Stream.of(
             Arguments.of("new@email.com", "org1", "old@email.com", "org2", true),
-            Arguments.of("same@email.com", "org1", "same@email.com", "org1", false)
+            Arguments.of("same@email.com", "org1", "same@email.com", "org1", false),
+            Arguments.of("same@email.com", "org1", "same@email.com", "org2", true),
+            Arguments.of(null, "org1", null, "org1", false),
+            Arguments.of(null, "org1", "old@email.com", "org1", true),
+            Arguments.of("new@email.com", "org1", null, "org1", true)
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("respondentSolicitorScenarios")
+    void testHasRespondentSolicitorChangedGivenScenarios(String currentEmail, String currentOrgId, String previousEmail,
+                                                         String previousOrgId, boolean expectedSolicitorChanged)
+        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequestRespondentSolicitor(currentEmail, currentOrgId,
+            previousEmail, previousOrgId);
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+
+        // Act, call performAddHearingIfNecessary using reflection
+        Method method = SolicitorAccessService.class.getDeclaredMethod(
+            "hasRespondentSolicitorChanged", FinremCaseData.class, FinremCaseData.class);
+        method.setAccessible(true);
+        boolean hasChanged = (boolean) method.invoke(solicitorAccessService, caseData, caseDataBefore);
+        assertEquals(expectedSolicitorChanged, hasChanged);
     }
 
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("respondentSolicitorScenarios")
-    void respondentSolicitorAccessIsGrantedOrRevoked(String currentEmail, String currentOrgId, String previousEmail,
-                                                     String previousOrgId, boolean shouldGrantRevoke) {
+    void testRespondentSolicitorAccessIsGrantedOrRevokedGivenScenarios(String currentEmail, String currentOrgId, String previousEmail,
+                                                                       String previousOrgId, boolean shouldGrantRevoke) {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequestRespondentSolicitor(currentEmail,
             currentOrgId, previousEmail, previousOrgId);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
@@ -308,8 +355,8 @@ class SolicitorAccessServiceTest {
             .build();
 
         return FinremCallbackRequest.builder()
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseData).build())
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseDataBefore).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseData).build())
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseDataBefore).build())
             .build();
     }
 
@@ -343,8 +390,8 @@ class SolicitorAccessServiceTest {
             .build();
 
         return FinremCallbackRequest.builder()
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseData).build())
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseDataBefore).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseData).build())
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseDataBefore).build())
             .build();
     }
 }

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
@@ -15,31 +14,24 @@ public class SolicitorAccessService {
     private final AssignPartiesAccessService assignPartiesAccessService;
 
     /**
-     * This method checks if there has been a change in the applicant or respondent solicitor details and updates their access accordingly.
-     * If there is an issue with updating access (e.g. user not found in Organisation API), it rethrows the exception with a descriptive message.
+     * Checks if the solicitor access has changed for both applicant and respondent, and grants or revokes access accordingly.
      *
-     * @param caseData       the current case data
+     * @param caseData       the current case data after the update
      * @param caseDataBefore the case data before the update
+     * @throws UserNotFoundInOrganisationApiException if the solicitor email is not found in the Organisation API
+     *                                                when trying to grant access
      */
     public void checkAndAssignSolicitorAccess(FinremCaseData caseData,
                                               FinremCaseData caseDataBefore) throws UserNotFoundInOrganisationApiException {
         log.info("Check and Auto Assign Solicitor Access for Case ID: {}", caseData.getCcdCaseId());
         // Applicant solicitor access update
         if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
-            try {
-                updateApplicantSolicitor(caseData, caseDataBefore);
-            } catch (UserNotFoundInOrganisationApiException e) {
-                throw new UserNotFoundInOrganisationApiException();
-            }
+            updateApplicantSolicitor(caseData, caseDataBefore);
         }
 
         // Respondent solicitor access update
         if (hasRespondentSolicitorChanged(caseData, caseDataBefore)) {
-            try {
-                updateRespondentSolicitor(caseData, caseDataBefore);
-            } catch (UserNotFoundInOrganisationApiException e) {
-                throw new UserNotFoundInOrganisationApiException();
-            }
+            updateRespondentSolicitor(caseData, caseDataBefore);
         }
     }
 
@@ -69,19 +61,24 @@ public class SolicitorAccessService {
 
     private boolean hasApplicantSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         String currentEmail = caseData.getAppSolicitorEmail();
-        String beforeEmail = caseDataBefore.getAppSolicitorEmail();
+        String previousEmail = caseDataBefore.getAppSolicitorEmail();
         boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(caseData.getApplicantOrganisationPolicy(),
             caseDataBefore.getApplicantOrganisationPolicy());
-        boolean emailChanged = StringUtils.equalsIgnoreCase(currentEmail, beforeEmail);
-        return emailChanged || !isSameOrganisation;
+        return hasSolicitorEmailChanged(currentEmail, previousEmail) || !isSameOrganisation;
     }
 
     private boolean hasRespondentSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         String currentEmail = caseData.getRespondentSolicitorEmail();
-        String beforeEmail = caseDataBefore.getRespondentSolicitorEmail();
+        String previousEmail = caseDataBefore.getRespondentSolicitorEmail();
         boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(caseData.getRespondentOrganisationPolicy(),
             caseDataBefore.getRespondentOrganisationPolicy());
-        boolean emailChanged = StringUtils.equalsIgnoreCase(currentEmail, beforeEmail);
-        return emailChanged || !isSameOrganisation;
+        return hasSolicitorEmailChanged(currentEmail, previousEmail) || !isSameOrganisation;
+    }
+
+    private static boolean hasSolicitorEmailChanged(String currentEmail, String previousEmail) {
+        if (currentEmail == null || previousEmail == null) {
+            return currentEmail != previousEmail;
+        }
+        return !currentEmail.equals(previousEmail);
     }
 }

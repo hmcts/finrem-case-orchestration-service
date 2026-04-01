@@ -866,8 +866,7 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     public String getRespondentSolicitorEmailIfRepresented() {
         var contactWrapper = getContactDetailsWrapper();
-        if (contactWrapper == null
-            || isConsentedApplication() && !isYes(contactWrapper.getConsentedRespondentRepresented())
+        if (isConsentedApplication() && !isYes(contactWrapper.getConsentedRespondentRepresented())
             || isContestedApplication() && !isYes(contactWrapper.getContestedRespondentRepresented())) {
             return null;
         }

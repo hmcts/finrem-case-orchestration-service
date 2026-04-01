@@ -20,7 +20,6 @@ public class AssignPartiesAccessService {
 
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService prdOrganisationService;
-    private final SystemUserService systemUserService;
 
     /**
      * Grants case access to the applicant's solicitor when representation

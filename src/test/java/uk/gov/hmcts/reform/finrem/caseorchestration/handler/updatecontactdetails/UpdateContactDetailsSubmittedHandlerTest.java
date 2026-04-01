@@ -100,7 +100,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 .build()).build();
 
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONTESTED, UPDATE_CONTACT_DETAILS, caseData, caseDataBefore);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, caseDataBefore);
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -172,18 +172,18 @@ class UpdateContactDetailsSubmittedHandlerTest {
             () -> verify(updateContactDetailsNotificationService).requiresNotifications(finremCaseData),
             () -> verify(updateContactDetailsNotificationService).prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()),
             () -> verify(retryExecutor).runWithRetryWithHandler(
-                    nocEmailToSolicitorsCaptor.capture(),
-                    eq("Sending NOC email to litigant solicitor"),
-                    eq(CASE_ID),
-                    any(RetryErrorHandler.class)),
+                nocEmailToSolicitorsCaptor.capture(),
+                eq("Sending NOC email to litigant solicitor"),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)),
             () -> {
                 nocEmailToSolicitorsCaptor.getValue().run();
                 verify(applicationEventPublisher).publishEvent(event);
             },
             () -> verify(retryExecutor).runWithRetryWithHandler(
-                    nocEmailToSolicitorsCaptor.capture(),
-                    eq("Sending NOC letter"),
-                    eq(CASE_ID),
+                nocEmailToSolicitorsCaptor.capture(),
+                eq("Sending NOC letter"),
+                eq(CASE_ID),
                 any(RetryErrorHandler.class)),
             () -> {
                 nocEmailToSolicitorsCaptor.getValue().run();
@@ -333,13 +333,17 @@ class UpdateContactDetailsSubmittedHandlerTest {
             RetryErrorHandler errorHandler = invocation.getArgument(3);
             errorHandler.handle(new RuntimeException("fail"), actionName, caseId);
             return null;
-        }).when(retryExecutor).runWithRetryWithHandler(any(), any(), any(), any());
+        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Update Contact Details - Case Solicitor Change"), any(), any());
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
-        assertThat(response.getConfirmationHeader()).contains("Contact details updated with Errors");
-        assertThat(response.getConfirmationBody()).contains("There was a problem updating solicitor access to case.");
+        assertAll(
+            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with Errors"),
+            () -> assertThat(response.getConfirmationBody())
+                .contains("There was a problem updating solicitor access to case.")
+                .doesNotContain("Fail to send notice of change email to litigant solicitor.")
+        );
     }
 }
