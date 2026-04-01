@@ -102,7 +102,11 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 checkAndAssignSolicitorAccessCaptor.capture(),
                 eq("Update Contact Details - Case Solicitor Change"),
                 eq(CASE_ID),
-                any(RetryErrorHandler.class))
+                any(RetryErrorHandler.class)),
+            () -> {
+                checkAndAssignSolicitorAccessCaptor.getValue().run();
+                verify(solicitorAccessService).checkAndAssignSolicitorAccess(caseData, caseDataBefore);
+            }
         );
     }
 
@@ -176,7 +180,11 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 checkAndAssignSolicitorAccessCaptor.capture(),
                 eq("Update Contact Details - Case Solicitor Change"),
                 eq(CASE_ID),
-                any(RetryErrorHandler.class))
+                any(RetryErrorHandler.class)),
+            () -> {
+                checkAndAssignSolicitorAccessCaptor.getValue().run();
+                verify(solicitorAccessService).checkAndAssignSolicitorAccess(caseData, caseDataBefore);
+            }
         );
     }
 
