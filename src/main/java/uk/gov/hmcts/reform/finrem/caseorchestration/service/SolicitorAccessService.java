@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 
+import java.util.Objects;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -77,8 +79,8 @@ public class SolicitorAccessService {
 
     private static boolean hasSolicitorEmailChanged(String currentEmail, String previousEmail) {
         if (currentEmail == null || previousEmail == null) {
-            return currentEmail != previousEmail;
+            return !Objects.equals(currentEmail, previousEmail);
         }
-        return !currentEmail.equals(previousEmail);
+        return !currentEmail.equalsIgnoreCase(previousEmail);
     }
 }
