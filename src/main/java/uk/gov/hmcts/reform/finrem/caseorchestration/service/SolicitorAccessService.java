@@ -26,16 +26,16 @@ public class SolicitorAccessService {
         log.info("Check and Auto Assign Solicitor Access for Case ID: {}", caseData.getCcdCaseId());
         // Applicant solicitor access update
         if (hasApplicantSolicitorChanged(caseData, caseDataBefore)) {
-            updateApplicantSolicitor(caseData, caseDataBefore);
+            grantOrRevokeApplicantSolicitorAccess(caseData, caseDataBefore);
         }
 
         // Respondent solicitor access update
         if (hasRespondentSolicitorChanged(caseData, caseDataBefore)) {
-            updateRespondentSolicitor(caseData, caseDataBefore);
+            grantOrRevokeRespondentSolicitorAccess(caseData, caseDataBefore);
         }
     }
 
-    private void updateApplicantSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore)
+    private void grantOrRevokeApplicantSolicitorAccess(FinremCaseData caseData, FinremCaseData caseDataBefore)
         throws UserNotFoundInOrganisationApiException {
         if (caseData.isApplicantRepresentedByASolicitor()) {
             log.info("Grant New Applicant Solicitor Access for Case ID: {}", caseData.getCcdCaseId());
@@ -47,7 +47,7 @@ public class SolicitorAccessService {
         }
     }
 
-    private void updateRespondentSolicitor(FinremCaseData caseData, FinremCaseData caseDataBefore)
+    private void grantOrRevokeRespondentSolicitorAccess(FinremCaseData caseData, FinremCaseData caseDataBefore)
         throws UserNotFoundInOrganisationApiException {
         if (caseData.isRespondentRepresentedByASolicitor()) {
             log.info("Grant New Respondent Solicitor Access for Case ID: {}", caseData.getCcdCaseId());
