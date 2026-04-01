@@ -41,7 +41,6 @@ class AddresseeGeneratorUtilsTest {
     @Test
     void givenApplicantRecipientIsNotInternation_whenGetAddressee_thenReturnApplicantAddresseeWithoutCountry() {
         FinremCaseData caseData = new FinremCaseData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.getContactDetailsWrapper().setApplicantFmName("Applicant");
         caseData.getContactDetailsWrapper().setApplicantLname("Name");
         caseData.getContactDetailsWrapper().setApplicantAddress(Address.builder()
@@ -51,7 +50,7 @@ class AddresseeGeneratorUtilsTest {
             .country("Country")
             .postCode("SW1 1AA")
             .build());
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().data(caseData).build();
 
         Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
@@ -67,7 +66,6 @@ class AddresseeGeneratorUtilsTest {
     @Test
     void givenApplicantRecipientIsInternation_whenGetAddressee_thenReturnApplicantAddresseeWithCountry() {
         FinremCaseData caseData = new FinremCaseData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
 
         contactDetailsWrapper.setApplicantResideOutsideUK(YesOrNo.YES);
@@ -80,7 +78,7 @@ class AddresseeGeneratorUtilsTest {
             .country("France")
             .postCode("123 FRA")
             .build());
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().data(caseData).build();
 
         Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
@@ -97,7 +95,6 @@ class AddresseeGeneratorUtilsTest {
     @Test
     void givenApplicantSolicitorRecipient_whenGetAddressee_thenReturnApplicantSolicitorAddressee() {
         FinremCaseData caseData = new FinremCaseData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.getContactDetailsWrapper().setApplicantSolicitorName("AppSolName");
         caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         caseData.getContactDetailsWrapper().setApplicantSolicitorAddress(Address.builder()
