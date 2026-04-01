@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,14 +29,6 @@ public class AddresseeGeneratorUtils {
     public static final String NAME_MAP = "nameMap";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final List<String> ADDRESS_FIELDS = List.of(
-        "AddressLine1",
-        "AddressLine2",
-        "AddressLine3",
-        "County",
-        "PostTown",
-        "PostCode"
-    );
 
     private AddresseeGeneratorUtils() {
     }
@@ -127,11 +120,25 @@ public class AddresseeGeneratorUtils {
     }
 
     private static String formatAddressForLetterPrinting(Map<String, Object> address, boolean isInternational) {
-        if (address == null) {
-            return "";
+        if (address == null || address.isEmpty()) {
+           throw new IllegalArgumentException("Address cannot be empty or null");
         }
 
-        return ADDRESS_FIELDS.stream()
+        List<String> addressFields = new ArrayList<>(List.of(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "PostTown",
+            "PostCode",
+            "Country"
+        ));
+
+        if (!isInternational) {
+            addressFields.remove("Country");
+        }
+
+        return addressFields.stream()
             .map(address::get)
             .filter(Objects::nonNull)
             .map(Object::toString)

@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -38,7 +39,7 @@ class AddresseeGeneratorUtilsTest {
     }
 
     @Test
-    void givenApplicantRecipient_whenGetAddressee_thenReturnApplicantAddressee() {
+    void givenApplicantRecipientIsNotInternation_whenGetAddressee_thenReturnApplicantAddresseeWithoutCountry() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         caseData.getContactDetailsWrapper().setApplicantFmName("Applicant");
@@ -46,6 +47,9 @@ class AddresseeGeneratorUtilsTest {
         caseData.getContactDetailsWrapper().setApplicantAddress(Address.builder()
             .addressLine1("1 Applicant Street")
             .addressLine2("Address Line 2")
+            .county("County")
+            .country("Country")
+            .postCode("SW1 1AA")
             .build());
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
 
@@ -53,7 +57,41 @@ class AddresseeGeneratorUtilsTest {
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
 
         assertEquals("Applicant Name", addressee.getName());
-        assertEquals("1 Applicant Street\nAddress Line 2", addressee.getFormattedAddress());
+        assertEquals("""
+            1 Applicant Street
+            Address Line 2
+            County
+            SW1 1AA""", addressee.getFormattedAddress());
+    }
+
+    @Test
+    void givenApplicantRecipientIsInternation_whenGetAddressee_thenReturnApplicantAddresseeWithCountry() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setCcdCaseType(CaseType.CONTESTED);
+        ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+
+        contactDetailsWrapper.setApplicantResideOutsideUK(YesOrNo.YES);
+        contactDetailsWrapper.setApplicantFmName("Applicant");
+        contactDetailsWrapper.setApplicantLname("Name");
+        contactDetailsWrapper.setApplicantAddress(Address.builder()
+            .addressLine1("1 International Street")
+            .addressLine2("Address Line 2")
+            .county("Paris")
+            .country("France")
+            .postCode("123 FRA")
+            .build());
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
+
+        Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT);
+
+        assertEquals("Applicant Name", addressee.getName());
+        assertEquals("""
+            1 International Street
+            Address Line 2
+            Paris
+            123 FRA
+            France""", addressee.getFormattedAddress());
     }
 
     @Test
