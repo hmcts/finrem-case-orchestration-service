@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -155,13 +156,11 @@ class SolicitorAccessServiceTest {
             .build();
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapper)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID("org1").build()).build())
+            .applicantOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID(null).build()).build())
+            .applicantOrganisationPolicy(TestSetUpUtils.organisationPolicy(null))
             .build();
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
         verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
