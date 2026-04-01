@@ -28,7 +28,7 @@ class AddresseeGeneratorUtilsTest {
 
     @Test
     void givenNullRecipient_whenGetAddressee_thenThrowException() {
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CaseType.CONTESTED).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().build();
         assertThrows(IllegalArgumentException.class, () -> AddresseeGeneratorUtils.generateAddressee(caseDetails, null));
     }
 
@@ -110,7 +110,6 @@ class AddresseeGeneratorUtilsTest {
         assertEquals("1 ApplicantSolicitor Street\nAddress Line 2", addressee.getFormattedAddress());
     }
 
-    @Test
     void givenRespondentRecipient_whenGetAddressee_thenReturnRespondentAddressee() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setCcdCaseType(CaseType.CONTESTED);
@@ -120,7 +119,7 @@ class AddresseeGeneratorUtilsTest {
             .addressLine1("1 Respondent Street")
             .addressLine2("Address Line 2")
             .build());
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(CASE_ID_IN_LONG).caseType(CaseType.CONTESTED).data(caseData).build();
 
         Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
@@ -203,6 +202,31 @@ class AddresseeGeneratorUtilsTest {
 
         assertEquals("Intervener Name", addressee.getName());
         assertEquals("4 Intervener Street\nAddress Line 2\nSW1 1AA", addressee.getFormattedAddress());
+    }
+
+    @Test
+    void givenRespondentRecipientIsNotInternation_whenGetAddressee_thenReturnRespondentAddresseeWithoutCountry() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.getContactDetailsWrapper().setAppRespondentFmName("Respondent");
+        caseData.getContactDetailsWrapper().setAppRespondentLName("Name");
+        caseData.getContactDetailsWrapper().setRespondentAddress(Address.builder()
+            .addressLine1("1 Applicant Street")
+            .addressLine2("Address Line 2")
+            .county("County")
+            .country("Country")
+            .postCode("SW1 1AA")
+            .build());
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().data(caseData).build();
+
+        Addressee addressee = AddresseeGeneratorUtils.generateAddressee(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+
+        assertEquals("Respondent Name", addressee.getName());
+        assertEquals("""
+            1 Applicant Street
+            Address Line 2
+            County
+            SW1 1AA""", addressee.getFormattedAddress());
     }
 
     @Test

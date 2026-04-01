@@ -57,14 +57,11 @@
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
         "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
       },
-      "solicitorAddress": {
-        "County": "test",
-        "Country": "United Kingdom",
-        "PostCode": "b1 1ab",
-        "PostTown": "SRIKALAHASTI",
-        "AddressLine1": "House no: 6-354-2, Gandhi Street",
-        "AddressLine2": "Srikalahasti, Chittor District",
-        "AddressLine3": "test"
+      "applicantSolicitorAddress": {
+        "AddressLine1": "3rd Floor, 65-68 Leadenhall St",
+        "County": "Greater London",
+        "PostTown": "London",
+        "PostCode": "EC3A 2AD"
       },
       "authorisationFirm": "test",
       "authorisationName": "test",
@@ -106,6 +103,7 @@
       "solicitorDXnumber": null,
       "appRespondentLName": "Korivi",
       "solicitorReference": "LL01",
+      "applicantRepresented": "Yes",
       "appRespondentFMName": "test",
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
