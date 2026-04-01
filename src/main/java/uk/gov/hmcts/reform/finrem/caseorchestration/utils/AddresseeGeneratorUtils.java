@@ -33,6 +33,16 @@ public class AddresseeGeneratorUtils {
     private AddresseeGeneratorUtils() {
     }
 
+    /**
+     * Generates an {@code Addressee} object based on the provided case details and recipient information.
+     *
+     * @param caseDetails the case details containing relevant data for generating the addressee;
+     *                    must not be null
+     * @param recipient   the recipient type specifying whether the addressee is for the applicant,
+     *                    respondent, or another party; must not be null
+     * @return an {@code Addressee} object representing the recipient and their associated information
+     * @throws IllegalArgumentException if either {@code caseDetails} or {@code recipient} is null
+     */
     public static Addressee generateAddressee(FinremCaseDetails caseDetails,
                                               DocumentHelper.PaperNotificationRecipient recipient) {
         if (caseDetails == null || recipient == null) {
@@ -121,7 +131,7 @@ public class AddresseeGeneratorUtils {
 
     private static String formatAddressForLetterPrinting(Map<String, Object> address, boolean isInternational) {
         if (address == null || address.isEmpty()) {
-           throw new IllegalArgumentException("Address cannot be empty or null");
+            throw new IllegalArgumentException("Address cannot be empty or null");
         }
 
         List<String> addressFields = new ArrayList<>(List.of(

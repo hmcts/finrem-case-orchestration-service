@@ -3,8 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -47,18 +46,11 @@ class GenerateCoverSheetServiceTest {
     private DocumentConfiguration documentConfiguration;
     @Mock
     private BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
-    @Captor
-    private ArgumentCaptor<Map<String, Object>> placeholdersCaptor;
+    @InjectMocks
     private GenerateCoverSheetService generateCoverSheetService;
 
     @BeforeEach
     void setUp() {
-        generateCoverSheetService = new GenerateCoverSheetService(
-            genericDocumentService,
-            documentConfiguration,
-            bulkPrintCoverLetterDetailsMapper
-        );
-
         when(documentConfiguration.getBulkPrintTemplate()).thenReturn(BULK_PRINT_TEMPLATE);
         when(documentConfiguration.getBulkPrintFileName()).thenReturn(BULK_PRINT_FILE_NAME);
 
@@ -80,7 +72,7 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldGenerateApplicantCoverSheet() {
-        FinremCaseDetails caseDetails = caseDetails(YesOrNo.NO, YesOrNo.NO);
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
 
         CaseDocument result = generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
@@ -98,7 +90,7 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldGenerateAndSetApplicantCoverSheet_whenAddressNotHidden() {
-        FinremCaseDetails caseDetails = caseDetails(YesOrNo.NO, YesOrNo.NO);
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(
             CaseDocument.builder().documentUrl(OLD_COVERESHEET_URL).build()
         );
@@ -113,7 +105,7 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldNotDeleteDocument_whenOldCoverSheetIsNull() {
-        FinremCaseDetails caseDetails = caseDetails(YesOrNo.NO, YesOrNo.NO);
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
 
         generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
@@ -125,7 +117,7 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldStoreApplicantCoverSheetInConfidentialField_whenApplicantAddressHiddenFromRespondent() {
-        FinremCaseDetails caseDetails = caseDetails(YesOrNo.YES, YesOrNo.NO);
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.YES, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(
             CaseDocument.builder().documentUrl(OLD_COVERESHEET_URL).build()
         );
@@ -140,7 +132,7 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldGenerateAndSetRespondentCoverSheet_whenAddressNotHidden() {
-        FinremCaseDetails caseDetails = caseDetails(YesOrNo.NO, YesOrNo.NO);
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(
             CaseDocument.builder().documentUrl(OLD_COVERESHEET_URL).build()
         );
@@ -155,7 +147,7 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldStoreRespondentCoverSheetInConfidentialField_whenRespondentAddressHiddenFromApplicant() {
-        FinremCaseDetails caseDetails = caseDetails(YesOrNo.NO, YesOrNo.YES);
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.YES);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(
             CaseDocument.builder().documentUrl(OLD_COVERESHEET_URL).build()
         );
@@ -170,7 +162,7 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldGenerateIntervenerCoverSheet() {
-        FinremCaseDetails caseDetails = caseDetails(YesOrNo.NO, YesOrNo.NO);
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
 
         CaseDocument result = generateCoverSheetService.generateIntervenerCoverSheet(
             caseDetails,
@@ -192,8 +184,8 @@ class GenerateCoverSheetServiceTest {
         assertEquals(TEST_DOCUMENT_FILENAME, result.getDocumentFilename());
     }
 
-    private FinremCaseDetails caseDetails(YesOrNo applicantAddressHiddenFromRespondent,
-                                          YesOrNo respondentAddressHiddenFromApplicant) {
+    private FinremCaseDetails getCaseDetails(YesOrNo applicantAddressHiddenFromRespondent,
+                                             YesOrNo respondentAddressHiddenFromApplicant) {
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONSENTED)
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
