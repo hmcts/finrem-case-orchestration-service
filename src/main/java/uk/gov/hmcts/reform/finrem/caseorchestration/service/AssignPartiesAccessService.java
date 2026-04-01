@@ -193,7 +193,7 @@ public class AssignPartiesAccessService {
         Optional<String> userId = StringUtils.isBlank(email) ? Optional.empty() :
             prdOrganisationService.findUserByEmail(email);
         userId.ifPresentOrElse(s -> assignCaseAccessService.grantCaseRoleToUser(caseId, s, caseRole, orgId),
-            () -> log.info("{} - Attempting to grant role {} but unable to find user with email {}", caseId, caseRole, email));
+            () -> log.info("{} - Attempting to grant role {} but unable to find user", caseId, caseRole));
         if (userId.isEmpty()) {
             throw new UserNotFoundInOrganisationApiException();
         }
@@ -204,8 +204,7 @@ public class AssignPartiesAccessService {
         throws UserNotFoundInOrganisationApiException {
         Optional<String> userId = prdOrganisationService.findUserByEmail(email);
         userId.ifPresentOrElse(s -> assignCaseAccessService.removeCaseRoleToUser(caseId, s, caseRole, orgId),
-            () -> log.info("{} - Attempting to revoke role {} but system is unable find any user with email address {} ", caseId,
-                email, caseRole));
+            () -> log.info("{} - Attempting to revoke role {} but system is unable find any user", caseId, caseRole));
         if (userId.isEmpty()) {
             throw new UserNotFoundInOrganisationApiException();
         }
