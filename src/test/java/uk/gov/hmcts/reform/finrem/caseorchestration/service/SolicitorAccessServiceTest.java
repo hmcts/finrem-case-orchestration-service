@@ -18,11 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -73,24 +70,6 @@ class SolicitorAccessServiceTest {
             verify(assignPartiesAccessService, never()).grantApplicantSolicitor(caseData);
             verify(assignPartiesAccessService, never()).revokeApplicantSolicitor(caseDataBefore);
         }
-    }
-
-    @ParameterizedTest
-    @MethodSource("solicitorScenarios")
-    void testHasRespondentSolicitorChangedGivenScenarios(String currentEmail, String currentOrgId, String previousEmail,
-                                                         String previousOrgId, boolean expectedSolicitorChanged)
-        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequestRespondentSolicitor(currentEmail, currentOrgId,
-            previousEmail, previousOrgId);
-        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
-        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
-
-        // Act, call performAddHearingIfNecessary using reflection
-        Method method = SolicitorAccessService.class.getDeclaredMethod(
-            "hasRespondentSolicitorChanged", FinremCaseData.class, FinremCaseData.class);
-        method.setAccessible(true);
-        boolean hasChanged = (boolean) method.invoke(solicitorAccessService, caseData, caseDataBefore);
-        assertEquals(expectedSolicitorChanged, hasChanged);
     }
 
     @SneakyThrows

@@ -5,8 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
-
-import java.util.Objects;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.EmailUtils;
 
 @Service
 @Slf4j
@@ -64,23 +63,20 @@ public class SolicitorAccessService {
     private boolean hasApplicantSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         String currentEmail = caseData.getAppSolicitorEmail();
         String previousEmail = caseDataBefore.getAppSolicitorEmail();
-        boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(caseData.getApplicantOrganisationPolicy(),
+        boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(
+            caseData.getApplicantOrganisationPolicy(),
             caseDataBefore.getApplicantOrganisationPolicy());
-        return hasSolicitorEmailChanged(currentEmail, previousEmail) || !isSameOrganisation;
+        return EmailUtils.hasSolicitorEmailChanged(currentEmail, previousEmail)
+            || !isSameOrganisation;
     }
 
     private boolean hasRespondentSolicitorChanged(FinremCaseData caseData, FinremCaseData caseDataBefore) {
         String currentEmail = caseData.getRespondentSolicitorEmail();
         String previousEmail = caseDataBefore.getRespondentSolicitorEmail();
-        boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(caseData.getRespondentOrganisationPolicy(),
+        boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(
+            caseData.getRespondentOrganisationPolicy(),
             caseDataBefore.getRespondentOrganisationPolicy());
-        return hasSolicitorEmailChanged(currentEmail, previousEmail) || !isSameOrganisation;
-    }
-
-    private static boolean hasSolicitorEmailChanged(String currentEmail, String previousEmail) {
-        if (currentEmail == null || previousEmail == null) {
-            return !Objects.equals(currentEmail, previousEmail);
-        }
-        return !currentEmail.equalsIgnoreCase(previousEmail);
+        return EmailUtils.hasSolicitorEmailChanged(currentEmail, previousEmail)
+            || !isSameOrganisation;
     }
 }
