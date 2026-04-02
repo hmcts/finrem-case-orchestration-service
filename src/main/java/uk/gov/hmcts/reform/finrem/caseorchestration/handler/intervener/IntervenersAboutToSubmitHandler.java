@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerCoversheetService;
@@ -60,7 +61,8 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         Long caseId = callbackRequest.getCaseDetails().getId();
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
 
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
 
@@ -81,7 +83,7 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
         }
 
-        intervenerCoversheetService.updateInterveneCoversheet(intervenerChangeDetails, userAuthorisation);
+        intervenerCoversheetService.updateInterveneCoversheet(caseDetails, intervenerChangeDetails, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
