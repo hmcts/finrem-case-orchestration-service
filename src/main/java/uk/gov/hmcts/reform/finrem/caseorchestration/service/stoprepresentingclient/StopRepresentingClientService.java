@@ -315,7 +315,7 @@ public class StopRepresentingClientService {
         final FinremCaseData finremCaseData = info.getFinremCaseData();
         final FinremCaseData finremCaseDataBefore = info.getFinremCaseDataBefore();
 
-        List<IntervenerWrapper> ret = new ArrayList<>();
+        List<IntervenerWrapper> intervenerWrappers = new ArrayList<>();
 
         // compare all interveners
         finremCaseDataBefore.getInterveners().forEach(originalWrapper -> {
@@ -326,12 +326,12 @@ public class StopRepresentingClientService {
                     .findAny()
                     .ifPresent(wrapper -> {
                         if (shouldRevokeIntervenerSolicitorAccess(wrapper, originalWrapper)) {
-                            ret.add(originalWrapper);
+                            intervenerWrappers.add(originalWrapper);
                         }
                     });
             }
         });
-        return ret;
+        return intervenerWrappers;
     }
 
     /**
