@@ -48,8 +48,10 @@ class SolicitorAccessServiceTest {
             Arguments.of(null, "org1", null, "org1", false),
             Arguments.of(null, "org1", "old@email.com", "org1", true),
             Arguments.of("new@email.com", "org1", null, "org1", true),
-            Arguments.of("", "org1", "", "org1", false)
-        );
+            Arguments.of("", "org1", "", "org1", false),
+            Arguments.of("SAME@EMAIL.com", "org1", "same@email.com", "org1", false),
+            Arguments.of("SAME@EMAIL.com", "org1", "same@email.com", "org2", true)
+            );
     }
 
     @SneakyThrows
