@@ -316,7 +316,6 @@ class StopRepresentingClientCorresponderTest {
                     .generateStopRepresentingRespondentLetter(info.getCaseDetails(), AUTH_TOKEN)
             );
         }
-
     }
 
     @Test
