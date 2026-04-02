@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +29,12 @@ public class GenerateCoverSheetService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
+
+    private record IntervenerCoverSheetMapping(
+        DocumentHelper.PaperNotificationRecipient recipient,
+        Supplier<CaseDocument> oldCoverSheetSupplier,
+        Consumer<CaseDocument> setter
+    ) {}
 
     public CaseDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         logCoverSheetGeneration(APPLICANT, caseDetails.getCaseIdAsString());
@@ -89,6 +97,64 @@ public class GenerateCoverSheetService {
                                                      DocumentHelper.PaperNotificationRecipient intervenerRecipient) {
         logCoverSheetGeneration(intervenerRecipient, caseDetails.getCaseIdAsString());
         return generateCoverSheet(caseDetails, authorisationToken, intervenerRecipient);
+    }
+
+    public void generateAndStoreIntervenerCoversheet(FinremCaseDetails caseDetails,
+                                                     IntervenerType intervenerType,
+                                                     String authorisationToken) {
+        FinremCaseData caseData = caseDetails.getData();
+        BulkPrintCoversheetWrapper wrapper = caseData.getBulkPrintCoversheetWrapper();
+
+        IntervenerCoverSheetMapping mapping = resolveIntervenerCoverSheetMapping(wrapper, intervenerType);
+
+        logCoverSheetGenerationAndStorage(mapping.recipient(), caseDetails.getCaseIdAsString());
+        replaceAndStoreIntervenerCoverSheet(
+            generateIntervenerCoverSheet(caseDetails, authorisationToken, mapping.recipient()),
+            authorisationToken,
+            mapping.oldCoverSheetSupplier(),
+            mapping.setter()
+        );
+    }
+
+    private IntervenerCoverSheetMapping resolveIntervenerCoverSheetMapping(BulkPrintCoversheetWrapper wrapper,
+                                                                           IntervenerType intervenerType) {
+        if (IntervenerType.INTERVENER_ONE.equals(intervenerType)) {
+            return new IntervenerCoverSheetMapping(
+                DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE,
+                wrapper::getBulkPrintCoverSheetIntv1,
+                wrapper::setBulkPrintCoverSheetIntv1
+            );
+        }
+        if (IntervenerType.INTERVENER_TWO.equals(intervenerType)) {
+            return new IntervenerCoverSheetMapping(
+                DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO,
+                wrapper::getBulkPrintCoverSheetIntv2,
+                wrapper::setBulkPrintCoverSheetIntv2
+            );
+        }
+        if (IntervenerType.INTERVENER_THREE.equals(intervenerType)) {
+            return new IntervenerCoverSheetMapping(
+                DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE,
+                wrapper::getBulkPrintCoverSheetIntv3,
+                wrapper::setBulkPrintCoverSheetIntv3
+            );
+        }
+        if (IntervenerType.INTERVENER_FOUR.equals(intervenerType)) {
+            return new IntervenerCoverSheetMapping(
+                DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR,
+                wrapper::getBulkPrintCoverSheetIntv4,
+                wrapper::setBulkPrintCoverSheetIntv4
+            );
+        }
+
+        throw new IllegalArgumentException("Invalid intervener type: " + intervenerType);
+    }
+
+    private void replaceAndStoreIntervenerCoverSheet(CaseDocument coverSheet,
+                                           String authToken,
+                                           Supplier<CaseDocument> oldCoverSheetSupplier,
+                                           Consumer<CaseDocument> publicSetter) {
+        replaceAndStoreCoverSheet(coverSheet, null, authToken, oldCoverSheetSupplier, () -> null, publicSetter, caseDocument -> {});
     }
 
     private void replaceAndStoreCoverSheet(CaseDocument coverSheet,

@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerService;
 
 import java.util.ArrayList;
 
@@ -250,7 +250,6 @@ class IntervenersAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
-
         IntervenerFour fourWrapper = IntervenerFour
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
 
@@ -318,7 +317,6 @@ class IntervenersAboutToSubmitHandlerTest {
         handleResp.getData().getIntervenersList().setValue(option4);
 
         midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
-
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(INTERVENER_INVALID).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
