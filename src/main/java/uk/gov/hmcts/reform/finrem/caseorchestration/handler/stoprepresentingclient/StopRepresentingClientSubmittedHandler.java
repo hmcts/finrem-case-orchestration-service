@@ -10,7 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogge
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -25,11 +27,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -167,25 +168,32 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
     }
 
     private List<SendCorrespondenceEventWithDescription> revokeBarristers(StopRepresentingClientInfo info) {
-        return Stream.of(
-                BarristerParty.APPLICANT,
-                BarristerParty.RESPONDENT,
-                BarristerParty.INTERVENER1,
-                BarristerParty.INTERVENER2,
-                BarristerParty.INTERVENER3,
-                BarristerParty.INTERVENER4
-            )
-            .map(party -> Map.entry(party, stopRepresentingClientService.getToBeRevokedBarristers(info, party)))
-            .filter(entry -> entry.getValue() != null && !CollectionUtils.isEmpty(entry.getValue().getRemoved()))
-            .flatMap(entry ->
+        List<SendCorrespondenceEventWithDescription> events = new ArrayList<>();
+
+        for (BarristerParty party : BarristerParty.values()) {
+
+            BarristerChange barristerChange = stopRepresentingClientService.getToBeRevokedBarristers(info, party);
+            Set<Barrister> removed = Optional.ofNullable(barristerChange)
+                .orElseThrow(() -> new IllegalStateException("barristerChange must not be null"))
+                .getRemoved();
+
+            if (CollectionUtils.isEmpty(removed)) {
+                continue;
+            }
+
+            String description = "revoking " + party.name().toLowerCase() + " barrister access";
+
+            Optional<List<SendCorrespondenceEventWithDescription>> maybeResult =
                 retryExecutor.supplyWithRetrySuppressException(
-                    () -> stopRepresentingClientService.revokeBarristers(info, entry.getValue()),
-                    "revoking " + entry.getKey().name().toLowerCase() + " barrister access",
+                    () -> stopRepresentingClientService.revokeBarristers(info, barristerChange),
+                    description,
                     info.getCaseIdInString()
-                ).stream()
-            )
-            .flatMap(List::stream)
-            .toList();
+                );
+
+            maybeResult.ifPresent(events::addAll);
+        }
+
+        return events;
     }
 
     protected void revokePartiesAccessAndNotifyParties(StopRepresentingClientInfo info) {
