@@ -248,7 +248,7 @@ public class StopRepresentingClientService {
      * (applicant or respondent) whose representation has been revoked.
      *
      * <p>This method does not send the notifications directly. It constructs the
-     * correspondence events (email and letter) which will be processed later
+     * correspondence events which will be processed later
      * in the workflow to trigger the actual notifications.</p>
      *
      * @param litigantRevocation flags indicating which litigants' representation was revoked
