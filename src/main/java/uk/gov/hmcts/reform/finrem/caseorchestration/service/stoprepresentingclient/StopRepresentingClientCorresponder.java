@@ -434,7 +434,7 @@ public class StopRepresentingClientCorresponder {
      * @param barrister the respondent barrister who should receive the notification
      * @return a populated {@link SendCorrespondenceEventWithDescription} for later email notification processing
      */
-    protected SendCorrespondenceEventWithDescription prepareRespondentBarristerEmailNotificationEvent(StopRepresentingClientInfo info,
+    private SendCorrespondenceEventWithDescription prepareRespondentBarristerEmailNotificationEvent(StopRepresentingClientInfo info,
                                                                                                       Barrister barrister) {
         return prepareRepresentativeEmailNotificationEvent(
             "notifying respondent barrister",
