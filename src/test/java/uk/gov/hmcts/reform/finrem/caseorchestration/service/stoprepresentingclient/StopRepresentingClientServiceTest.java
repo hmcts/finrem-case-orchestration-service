@@ -968,13 +968,8 @@ class StopRepresentingClientServiceTest {
     }
 
     private static BarristerCollectionItem buildBarristerCollectionItem(String userId, String orgId) {
-        return buildBarristerCollectionItem(userId, orgId, null);
-    }
-
-    private static BarristerCollectionItem buildBarristerCollectionItem(String userId, String orgId, String email) {
         return BarristerCollectionItem.builder()
             .value(Barrister.builder()
-                .email(email)
                 .userId(userId)
                 .organisation(organisation(orgId))
                 .build())
