@@ -51,7 +51,7 @@ class SolicitorAccessServiceTest {
             Arguments.of("", "org1", "", "org1", false),
             Arguments.of("SAME@EMAIL.com", "org1", "same@email.com", "org1", false),
             Arguments.of("SAME@EMAIL.com", "org1", "same@email.com", "org2", true)
-            );
+        );
     }
 
     @SneakyThrows
@@ -118,24 +118,24 @@ class SolicitorAccessServiceTest {
     @Test
     void applicantSolicitorAccessIsGrantedOnlyWhenApplicantBecomesRepresented() {
         // previous applicant was not represented, now is represented
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.YES)
-            .applicantSolicitorEmail("new@email.com")
-            .contestedRespondentRepresented(YesOrNo.NO)
-            .build();
-        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.NO)
-            .applicantSolicitorEmail(null)
-            .contestedRespondentRepresented(YesOrNo.NO)
-            .build();
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapper)
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.YES)
+                    .applicantSolicitorEmail("new@email.com")
+                    .contestedRespondentRepresented(YesOrNo.NO)
+                    .build())
             .applicantOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
-        FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapperBefore)
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .applicantSolicitorEmail(null)
+                    .contestedRespondentRepresented(YesOrNo.NO)
+                    .build())
             .applicantOrganisationPolicy(TestSetUpUtils.organisationPolicy(null))
             .build();
+
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
         verify(assignPartiesAccessService).grantApplicantSolicitor(caseData);
         verify(assignPartiesAccessService, never()).revokeApplicantSolicitor(caseDataBefore);
@@ -145,26 +145,24 @@ class SolicitorAccessServiceTest {
     @Test
     void applicantSolicitorAccessIsRevokedOnlyWhenApplicantNoLongerRepresented() {
         // previous applicant was represented, now is not represented
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.NO)
-            .applicantSolicitorEmail(null)
-            .contestedRespondentRepresented(YesOrNo.NO)
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .applicantSolicitorEmail(null)
+                    .contestedRespondentRepresented(YesOrNo.NO)
+                    .build())
+            .applicantOrganisationPolicy(TestSetUpUtils.organisationPolicy(null))
             .build();
-        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.YES)
-            .applicantSolicitorEmail("old@email.com")
-            .contestedRespondentRepresented(YesOrNo.NO)
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.YES)
+                    .applicantSolicitorEmail("old@email.com")
+                    .contestedRespondentRepresented(YesOrNo.NO)
+                    .build())
+            .applicantOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapper)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID(null).build()).build())
-            .build();
-        FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID("org1").build()).build())
-            .build();
+
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
         verify(assignPartiesAccessService, never()).grantApplicantSolicitor(caseData);
         verify(assignPartiesAccessService).revokeApplicantSolicitor(caseDataBefore);
@@ -174,26 +172,24 @@ class SolicitorAccessServiceTest {
     @Test
     void respondentSolicitorAccessIsGrantedOnlyWhenRespondentBecomesRepresented() {
         // previous respondent was not represented, now is represented
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.NO)
-            .contestedRespondentRepresented(YesOrNo.YES)
-            .respondentSolicitorEmail("new@email.com")
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .contestedRespondentRepresented(YesOrNo.YES)
+                    .respondentSolicitorEmail("new@email.com")
+                    .build())
+            .respondentOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
-        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.NO)
-            .contestedRespondentRepresented(YesOrNo.NO)
-            .respondentSolicitorEmail(null)
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .contestedRespondentRepresented(YesOrNo.NO)
+                    .respondentSolicitorEmail(null)
+                    .build())
+            .respondentOrganisationPolicy(TestSetUpUtils.organisationPolicy(null))
             .build();
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapper)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID("org1").build()).build())
-            .build();
-        FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID(null).build()).build())
-            .build();
+
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
         verify(assignPartiesAccessService).grantRespondentSolicitor(caseData);
         verify(assignPartiesAccessService, never()).revokeRespondentSolicitor(caseDataBefore);
@@ -201,28 +197,53 @@ class SolicitorAccessServiceTest {
 
     @SneakyThrows
     @Test
-    void respondentSolicitorAccessIsRevokedOnlyWhenRespondentNoLongerRepresented() {
+    void respondentSolicitorAccessIsRevokedOnlyWhenRespondentNoLongerRepresentedForContestedCase() {
         // previous respondent was represented, now is not represented
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.NO)
-            .contestedRespondentRepresented(YesOrNo.NO)
-            .respondentSolicitorEmail(null)
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .contestedRespondentRepresented(YesOrNo.NO)
+                    .respondentSolicitorEmail(null)
+                    .build())
+            .respondentOrganisationPolicy(TestSetUpUtils.organisationPolicy(null))
             .build();
-        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.NO)
-            .contestedRespondentRepresented(YesOrNo.YES)
-            .respondentSolicitorEmail("old@email.com")
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .contestedRespondentRepresented(YesOrNo.YES)
+                    .respondentSolicitorEmail("old@email.com")
+                    .build())
+            .respondentOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapper)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID(null).build()).build())
+
+        solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
+        verify(assignPartiesAccessService, never()).grantRespondentSolicitor(caseData);
+        verify(assignPartiesAccessService).revokeRespondentSolicitor(caseDataBefore);
+    }
+
+    @SneakyThrows
+    @Test
+    void respondentSolicitorAccessIsRevokedOnlyWhenRespondentNoLongerRepresentedForConsentedCase() {
+        // previous respondent was represented, now is not represented
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .consentedRespondentRepresented(YesOrNo.NO)
+                    .respondentSolicitorEmail(null)
+                    .build())
+            .respondentOrganisationPolicy(TestSetUpUtils.organisationPolicy(null))
             .build();
-        FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID("org1").build()).build())
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .consentedRespondentRepresented(YesOrNo.YES)
+                    .respondentSolicitorEmail("old@email.com")
+                    .build())
+            .respondentOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
+
         solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore);
         verify(assignPartiesAccessService, never()).grantRespondentSolicitor(caseData);
         verify(assignPartiesAccessService).revokeRespondentSolicitor(caseDataBefore);
@@ -231,25 +252,22 @@ class SolicitorAccessServiceTest {
     @Test
     void shouldThrowUserNotFoundInOrganisationApiExceptionWhenGrantApplicantSolicitorFails() throws Exception {
         // Arrange
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.YES)
-            .applicantSolicitorEmail("applicant@email.com")
-            .contestedRespondentRepresented(YesOrNo.NO)
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.YES)
+                    .applicantSolicitorEmail("applicant@email.com")
+                    .contestedRespondentRepresented(YesOrNo.NO)
+                    .build())
+            .applicantOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
-        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.YES)
-            .applicantSolicitorEmail("old@email.com")
-            .contestedRespondentRepresented(YesOrNo.NO)
-            .build();
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapper)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID("org1").build()).build())
-            .build();
-        FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID("org2").build()).build())
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.YES)
+                    .applicantSolicitorEmail("old@email.com")
+                    .contestedRespondentRepresented(YesOrNo.NO)
+                    .build())
+            .applicantOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
 
         // Mock exception
@@ -264,27 +282,56 @@ class SolicitorAccessServiceTest {
     }
 
     @Test
-    void shouldThrowUserNotFoundInOrganisationApiExceptionWhenGrantRespondentSolicitorFails() throws Exception {
+    void shouldThrowUserNotFoundInOrganisationApiExceptionWhenGrantRespondentSolicitorFailsForContestedCase() throws Exception {
         // Arrange
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.NO)
-            .contestedRespondentRepresented(YesOrNo.YES)
-            .respondentSolicitorEmail("respondent@email.com")
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .contestedRespondentRepresented(YesOrNo.YES)
+                    .respondentSolicitorEmail("respondent@email.com")
+                    .build())
+            .respondentOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
-        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.NO)
-            .contestedRespondentRepresented(YesOrNo.YES)
-            .respondentSolicitorEmail("old@email.com")
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .contestedRespondentRepresented(YesOrNo.YES)
+                    .respondentSolicitorEmail("old@email.com")
+                    .build())
+            .respondentOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapper)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID("org1").build()).build())
+
+        // Mock exception
+        doThrow(new UserNotFoundInOrganisationApiException())
+            .when(assignPartiesAccessService).grantRespondentSolicitor(caseData);
+
+        // Act & Assert
+        assertThrows(
+            UserNotFoundInOrganisationApiException.class,
+            () -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore)
+        );
+    }
+
+    @Test
+    void shouldThrowUserNotFoundInOrganisationApiExceptionWhenGrantRespondentSolicitorFailsForConsentedCase() throws Exception {
+        // Arrange
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .consentedRespondentRepresented(YesOrNo.YES)
+                    .respondentSolicitorEmail("respondent@email.com")
+                    .build())
+            .respondentOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
-        FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapperBefore)
-            .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
-                .organisationID("org2").build()).build())
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .applicantRepresented(YesOrNo.NO)
+                    .consentedRespondentRepresented(YesOrNo.YES)
+                    .respondentSolicitorEmail("old@email.com")
+                    .build())
+            .respondentOrganisationPolicy(TestSetUpUtils.organisationPolicy("org1"))
             .build();
 
         // Mock exception
