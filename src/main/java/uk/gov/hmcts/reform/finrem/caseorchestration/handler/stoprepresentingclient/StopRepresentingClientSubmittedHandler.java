@@ -128,7 +128,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                 "revoking %s access".formatted(describeLigtantPartyString(info.getFinremCaseData())),
                 info.getCaseIdInString());
 
-        List<SendCorrespondenceEventWithDescription> ret = new ArrayList<>();
+        List<SendCorrespondenceEventWithDescription> events = new ArrayList<>();
 
         litigantRevocationOptional.ifPresent(litigantRevocation -> {
 
@@ -140,8 +140,8 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                     info.getCaseIdInString());
             }
 
-            ret.addAll(stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(litigantRevocation, info));
-            ret.addAll(
+            events.addAll(stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(litigantRevocation, info));
+            events.addAll(
                 retryExecutor.supplyWithRetrySuppressException(
                     () -> stopRepresentingClientService.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info),
                     "preparing litigant letter notifications",
@@ -150,7 +150,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
             );
         });
 
-        return ret;
+        return events;
     }
 
     private List<SendCorrespondenceEventWithDescription> revokeIntervenerSolicitor(StopRepresentingClientInfo info) {
