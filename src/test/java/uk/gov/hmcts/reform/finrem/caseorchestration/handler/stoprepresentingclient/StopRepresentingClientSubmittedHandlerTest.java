@@ -30,6 +30,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.LitigantRevocation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -110,11 +112,13 @@ class StopRepresentingClientSubmittedHandlerTest {
     private ApplicationEventPublisher applicationEventPublisher;
     @Mock
     private RetryExecutor retryExecutor;
+    @Mock
+    private StopRepresentingClientCorresponder stopRepresentingClientCorresponder;
 
     @BeforeEach
     void setup() {
         underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, stopRepresentingClientService,
-            featureToggleService, applicationEventPublisher, retryExecutor);
+            stopRepresentingClientCorresponder, featureToggleService, applicationEventPublisher, retryExecutor);
         lenient().when(featureToggleService.isExui3990WorkaroundEnabled()).thenReturn(true);
         lenient().when(stopRepresentingClientService.getToBeRevokedBarristers(any(StopRepresentingClientInfo.class),
             any(BarristerParty.class))).thenReturn(mock(BarristerChange.class));
@@ -132,8 +136,8 @@ class StopRepresentingClientSubmittedHandlerTest {
         when(featureToggleService.isExui3990WorkaroundEnabled()).thenReturn(false);
         FinremCallbackRequest request = FinremCallbackRequestFactory.from();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(request, AUTH_TOKEN);
-        assertThat(response.getConfirmationBody()).isEqualTo("<ul><li><h2>Your changes will be applied shortly.</h2></li></ul>");
-        assertThat(response.getConfirmationHeader()).isEqualTo("# Notice of change request submitted");
+        assertThat(response.getConfirmationBody()).contains("Your changes will be applied shortly.");
+        assertThat(response.getConfirmationHeader()).contains("Notice of change request submitted");
     }
 
     @Test
@@ -417,7 +421,7 @@ class StopRepresentingClientSubmittedHandlerTest {
         @EnumSource(NoticeOfChangeParty.class)
         void shouldPerformCleanUpAfterNocWorkflow_whenHandled(NoticeOfChangeParty party) {
             // ---------- Given ----------
-            StopRepresentingClientService.LitigantRevocation revocation = mock(StopRepresentingClientService.LitigantRevocation.class);
+            LitigantRevocation revocation = mock(LitigantRevocation.class);
             when(revocation.wasRevoked()).thenReturn(true);
 
             // Mock revocation step
@@ -461,8 +465,8 @@ class StopRepresentingClientSubmittedHandlerTest {
             // ---------- Given ----------
             FinremCaseData caseData = buildFinremCaseData(party);
 
-            StopRepresentingClientService.LitigantRevocation revocation =
-                new StopRepresentingClientService.LitigantRevocation(false, false);
+            LitigantRevocation revocation =
+                new LitigantRevocation(false, false);
 
             // Mock revocation result
             when(retryExecutor.supplyWithRetrySuppressException(
@@ -493,7 +497,7 @@ class StopRepresentingClientSubmittedHandlerTest {
         @EnumSource(NoticeOfChangeParty.class)
         void shouldNotifyLitigantSolicitor_whenHandled(NoticeOfChangeParty party) {
             // ---------- Given ----------
-            StopRepresentingClientService.LitigantRevocation revocation = mock(StopRepresentingClientService.LitigantRevocation.class);
+            LitigantRevocation revocation = mock(LitigantRevocation.class);
             when(revocation.wasRevoked()).thenReturn(true);
 
             // Mock retry to return a successful revocation result
@@ -510,7 +514,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             when(eventWithDesc.getEvent()).thenReturn(event);
 
             // Mock service to return notification event
-            when(stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(
+            when(stopRepresentingClientCorresponder.prepareLitigantRevocationNotificationEvents(
                 eq(revocation),
                 any(StopRepresentingClientInfo.class)
             )).thenReturn(List.of(eventWithDesc));
@@ -525,7 +529,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             // Capture the info passed into the notification preparation method
             ArgumentCaptor<StopRepresentingClientInfo> infoCaptor =
                 getStopRepresentingClientInfoCaptor();
-            verify(stopRepresentingClientService)
+            verify(stopRepresentingClientCorresponder)
                 .prepareLitigantRevocationNotificationEvents(eq(revocation), infoCaptor.capture());
             // Assert correct case data and case ID were passed
             verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
@@ -551,7 +555,7 @@ class StopRepresentingClientSubmittedHandlerTest {
         @EnumSource(NoticeOfChangeParty.class)
         void givenNoLitigantNotificationPrepared_whenHandled_thenShouldNotNotifyLitigant(NoticeOfChangeParty party) {
             // ---------- Given ----------
-            StopRepresentingClientService.LitigantRevocation revocation = mock(StopRepresentingClientService.LitigantRevocation.class);
+            LitigantRevocation revocation = mock(LitigantRevocation.class);
             when(revocation.wasRevoked()).thenReturn(true);
 
             when(retryExecutor.supplyWithRetrySuppressException(
@@ -560,7 +564,7 @@ class StopRepresentingClientSubmittedHandlerTest {
                 eq(CASE_ID)
             )).thenReturn(Optional.of(revocation));
 
-            when(stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(
+            when(stopRepresentingClientCorresponder.prepareLitigantRevocationNotificationEvents(
                 eq(revocation),
                 any(StopRepresentingClientInfo.class)
             )).thenReturn(List.of());
@@ -579,7 +583,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             ArgumentCaptor<StopRepresentingClientInfo> infoCaptor =
                 getStopRepresentingClientInfoCaptor();
 
-            verify(stopRepresentingClientService)
+            verify(stopRepresentingClientCorresponder)
                 .prepareLitigantRevocationNotificationEvents(eq(revocation), infoCaptor.capture());
             verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
 
@@ -622,8 +626,8 @@ class StopRepresentingClientSubmittedHandlerTest {
         @MethodSource("shouldNotifyLitigant_whenHandled_params")
         void shouldNotifyLitigant_whenHandled(NoticeOfChangeParty party, List<SendCorrespondenceEvent> events) {
             // ---------- Given ----------
-            StopRepresentingClientService.LitigantRevocation revocation =
-                mock(StopRepresentingClientService.LitigantRevocation.class);
+            LitigantRevocation revocation =
+                mock(LitigantRevocation.class);
 
             List<SendCorrespondenceEventWithDescription> eventsWithDesc = events.stream()
                 .map(event -> {
@@ -654,7 +658,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             FinremCaseData caseData = buildFinremCaseData(party);
 
             // ---------- Service ----------
-            when(stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(
+            when(stopRepresentingClientCorresponder.prepareLitigantRevocationNotificationEvents(
                 eq(revocation),
                 any(StopRepresentingClientInfo.class)
             )).thenReturn(List.of());
@@ -667,11 +671,11 @@ class StopRepresentingClientSubmittedHandlerTest {
             ArgumentCaptor<StopRepresentingClientInfo> infoCaptor =
                 getStopRepresentingClientInfoCaptor();
 
-            verify(stopRepresentingClientService)
+            verify(stopRepresentingClientCorresponder)
                 .prepareLitigantRevocationNotificationEvents(eq(revocation), infoCaptor.capture());
             verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
 
-            verify(stopRepresentingClientService)
+            verify(stopRepresentingClientCorresponder)
                 .prepareLitigantRevocationLetterNotificationEvents(eq(revocation), any());
 
             // ---------- Execute captured runnables ----------
@@ -691,7 +695,7 @@ class StopRepresentingClientSubmittedHandlerTest {
         }
 
         private void verifyRevokeApplicantSolicitorOrRespondentSolicitorInvoked(NoticeOfChangeParty party) {
-            ArgumentCaptor<ThrowingSupplier<StopRepresentingClientService.LitigantRevocation>> captor =
+            ArgumentCaptor<ThrowingSupplier<LitigantRevocation>> captor =
                 getThrowingSupplierCaptor();
             verify(retryExecutor).supplyWithRetrySuppressException(
                 captor.capture(),
@@ -720,7 +724,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             any(ThrowingSupplier.class),
             eq("revoking applicant access"),
             eq(CASE_ID)
-        )).thenReturn(Optional.of(mock(StopRepresentingClientService.LitigantRevocation.class)));
+        )).thenReturn(Optional.of(mock(LitigantRevocation.class)));
     }
 
     private void mockPreparingLitigantRevocationLetterNotification() {

@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.LitigantRevocation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
@@ -47,6 +49,8 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
     private final StopRepresentingClientService stopRepresentingClientService;
 
+    private final StopRepresentingClientCorresponder stopRepresentingClientCorresponder;
+
     private final FeatureToggleService featureToggleService;
 
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -55,6 +59,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
     public StopRepresentingClientSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                   StopRepresentingClientService stopRepresentingClientService,
+                                                  StopRepresentingClientCorresponder stopRepresentingClientCorresponder,
                                                   FeatureToggleService featureToggleService,
                                                   ApplicationEventPublisher applicationEventPublisher,
                                                   RetryExecutor retryExecutor) {
@@ -63,6 +68,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         this.featureToggleService = featureToggleService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.retryExecutor = retryExecutor;
+        this.stopRepresentingClientCorresponder = stopRepresentingClientCorresponder;
     }
 
     @Override
@@ -123,7 +129,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
      */
     private List<SendCorrespondenceEventWithDescription> revokeApplicantSolicitorOrRespondentSolicitor(StopRepresentingClientInfo info) {
 
-        Optional<StopRepresentingClientService.LitigantRevocation> litigantRevocationOptional =
+        Optional<LitigantRevocation> litigantRevocationOptional =
             retryExecutor.supplyWithRetrySuppressException(
                 () -> stopRepresentingClientService.revokeApplicantSolicitorOrRespondentSolicitor(info),
                 "revoking %s access".formatted(describeLigtantPartyString(info.getFinremCaseData())),
@@ -141,10 +147,10 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                     info.getCaseIdInString());
             }
 
-            events.addAll(stopRepresentingClientService.prepareLitigantRevocationNotificationEvents(litigantRevocation, info));
+            events.addAll(stopRepresentingClientCorresponder.prepareLitigantRevocationNotificationEvents(litigantRevocation, info));
             events.addAll(
                 retryExecutor.supplyWithRetrySuppressException(
-                    () -> stopRepresentingClientService.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info),
+                    () -> stopRepresentingClientCorresponder.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info),
                     "preparing litigant letter notifications",
                     info.getCaseIdInString()
                 ).orElse(List.of())
