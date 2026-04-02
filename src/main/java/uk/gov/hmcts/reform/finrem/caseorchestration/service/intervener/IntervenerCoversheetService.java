@@ -13,15 +13,16 @@ public class IntervenerCoversheetService {
 
     private final GenerateCoverSheetService generateCoverSheetService;
 
-    public void updateInterveneCoversheet(FinremCaseDetails finremCaseDetails, IntervenerChangeDetails intervenerChangeDetails, String authorisationToken) {
+    public void updateIntervenerCoversheet(FinremCaseDetails finremCaseDetails, IntervenerChangeDetails intervenerChangeDetails, String authorisationToken) {
         if (IntervenerAction.ADDED.equals(intervenerChangeDetails.getIntervenerAction())) {
             generateCoverSheetService.generateAndStoreIntervenerCoversheet(
                 finremCaseDetails,
                 intervenerChangeDetails.getIntervenerType(),
                 authorisationToken);
-        } else if (IntervenerAction.REMOVED.equals(intervenerChangeDetails.getIntervenerAction())) {
-            // TODO: Remove coversheet
         }
 
+        if (IntervenerAction.REMOVED.equals(intervenerChangeDetails.getIntervenerAction())) {
+            generateCoverSheetService.removeIntervenerCoverSheet(finremCaseDetails, intervenerChangeDetails, authorisationToken);
+        }
     }
 }

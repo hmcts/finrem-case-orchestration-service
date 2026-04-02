@@ -41,6 +41,8 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         ADD_INTERVENER_THREE_CODE, ADD_INTERVENER_FOUR_CODE);
     private static final List<String> DELETE_OPERATION_CODES = List.of(DEL_INTERVENER_ONE_CODE, DEL_INTERVENER_TWO_CODE,
         DEL_INTERVENER_THREE_CODE, DEL_INTERVENER_FOUR_CODE);
+    private static final String INTERVENER_POSTCODE_REQUIRED_MESSAGE =
+        "Postcode field is required for the intervener.";
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                            IntervenerService intervenerService, IntervenerCoversheetService intervenerCoversheetService) {
@@ -69,24 +71,25 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         List<String> errors = new ArrayList<>();
         IntervenerWrapper intervener = getIntervenerWrapper(caseData, selectedOperationCode);
 
-        IntervenerChangeDetails intervenerChangeDetails = null;
+        IntervenerChangeDetails intervenerChangeDetails;
 
-        if (ADD_OPERATION_CODES.contains(selectedOperationCode)) {
-            if (isIntervenerPostCodeMissing(intervener)) {
-                errors.add("Postcode field is required for the intervener.");
-            } else {
-                intervenerChangeDetails = intervenerService.updateIntervenerDetails(intervener, errors, callbackRequest);
-            }
-        } else if (DELETE_OPERATION_CODES.contains(selectedOperationCode)) {
-            intervenerChangeDetails = intervenerService.removeIntervenerDetails(intervener, errors, caseData, caseId);
-        } else {
+        if (!ADD_OPERATION_CODES.contains(selectedOperationCode) && !DELETE_OPERATION_CODES.contains(selectedOperationCode)) {
             throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
         }
 
-        intervenerCoversheetService.updateInterveneCoversheet(caseDetails, intervenerChangeDetails, userAuthorisation);
+        if (ADD_OPERATION_CODES.contains(selectedOperationCode)) {
+            if (isIntervenerPostCodeMissing(intervener)) {
+                errors.add(INTERVENER_POSTCODE_REQUIRED_MESSAGE);
+            } else {
+                intervenerChangeDetails = intervenerService.updateIntervenerDetails(intervener, errors, callbackRequest);
+                intervenerCoversheetService.updateIntervenerCoversheet(caseDetails, intervenerChangeDetails, userAuthorisation);
+            }
+        } else {
+            intervenerChangeDetails = intervenerService.removeIntervenerDetails(intervener, errors, caseData, caseId);
+            intervenerCoversheetService.updateIntervenerCoversheet(caseDetails, intervenerChangeDetails, userAuthorisation);
+        }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).errors(errors).build();
+        return response(caseData, null, errors);
     }
 
     private boolean isIntervenerPostCodeMissing(IntervenerWrapper intervener) {

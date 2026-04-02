@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.util.Map;
@@ -92,6 +93,14 @@ public class GenerateCoverSheetService {
         );
     }
 
+    /**
+     * Generates a cover sheet document for the specified intervener.
+     *
+     * @param caseDetails the {@link FinremCaseDetails} object containing the case information
+     * @param authorisationToken the authorisation token used to authenticate the request
+     * @param intervenerRecipient the recipient information for the intervener, specifying the paper notification details
+     * @return the generated cover sheet document as a {@code CaseDocument}
+     */
     public CaseDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails,
                                                      String authorisationToken,
                                                      DocumentHelper.PaperNotificationRecipient intervenerRecipient) {
@@ -99,6 +108,13 @@ public class GenerateCoverSheetService {
         return generateCoverSheet(caseDetails, authorisationToken, intervenerRecipient);
     }
 
+    /**
+     * Generates and stores an intervener coversheet for a specified case and intervener type.
+     *
+     * @param caseDetails         the {@link FinremCaseDetails} object containing the case information
+     * @param intervenerType       the type of the intervener for whom the coversheet is being generated
+     * @param authorisationToken   the authorization token to be used for generating and storing the coversheet
+     */
     public void generateAndStoreIntervenerCoversheet(FinremCaseDetails caseDetails,
                                                      IntervenerType intervenerType,
                                                      String authorisationToken) {
@@ -114,6 +130,19 @@ public class GenerateCoverSheetService {
             mapping.oldCoverSheetSupplier(),
             mapping.setter()
         );
+    }
+
+    /**
+     * Removes the intervener cover sheet with specified intervener change details.
+     *
+     * @param finremCaseDetails      the {@link FinremCaseDetails} object containing the case information
+     * @param intervenerChangeDetails The details of the intervener change, including the type of intervener.
+     * @param authorisationToken     The authorisation token required to authenticate the operation.
+     */
+    public void removeIntervenerCoverSheet(FinremCaseDetails finremCaseDetails, IntervenerChangeDetails intervenerChangeDetails, String authorisationToken) {
+        IntervenerCoverSheetMapping mapping = resolveIntervenerCoverSheetMapping(finremCaseDetails.getData().getBulkPrintCoversheetWrapper(), intervenerChangeDetails.getIntervenerType());
+        deleteCoverSheet(mapping.oldCoverSheetSupplier().get().getDocumentUrl(), authorisationToken);
+        mapping.setter().accept(null);
     }
 
     private IntervenerCoverSheetMapping resolveIntervenerCoverSheetMapping(BulkPrintCoversheetWrapper wrapper,
@@ -171,11 +200,15 @@ public class GenerateCoverSheetService {
 
         oldCoverSheet.ifPresent(cs -> {
             log.info("Deleting old cover sheet with url: {}", cs.getDocumentUrl());
-            genericDocumentService.deleteDocument(cs.getDocumentUrl(), authToken);
+            deleteCoverSheet(cs.getDocumentUrl(), authToken);
         });
 
         publicSetter.accept(isHiddenFromPublic ? null : coverSheet);
         confidentialSetter.accept(isHiddenFromPublic ? coverSheet : null);
+    }
+
+    private void deleteCoverSheet(String coverSheetUrl, String authToken) {
+        genericDocumentService.deleteDocument(coverSheetUrl, authToken);
     }
 
     private CaseDocument generateCoverSheet(FinremCaseDetails caseDetails,
