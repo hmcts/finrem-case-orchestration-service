@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient;
 
+import org.apache.commons.lang3.function.TriFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -17,11 +20,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -29,13 +35,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -47,7 +56,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_RESPONDENT_SOLICITOR_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.RESPONDENT;
 
@@ -74,9 +85,103 @@ class StopRepresentingClientCorresponderTest {
 
     private FinremCaseDetails caseDetails;
 
+    private FinremCaseData finremCaseData = mock(FinremCaseData.class);
+
     @BeforeEach
     void setUp() {
         caseDetails = mock(FinremCaseDetails.class);
+    }
+
+    @Nested
+    class PrepareBarristerEmailNotificationEvent {
+        static Stream<Arguments> shouldPrepareLitigantBarristerEmailNotification() {
+            return Stream.of(
+                Arguments.of(
+                    (MockedStatic.Verification) () ->
+                        EmailTemplateResolver.getNotifyApplicantRepresentativeTemplateName(any(FinremCaseData.class)),
+                    "notifying applicant barrister",
+                    List.of(FORMER_APPLICANT_BARRISTER_ONLY),
+                    (TriFunction<
+                        StopRepresentingClientCorresponder,
+                        StopRepresentingClientInfo,
+                        Barrister,
+                        SendCorrespondenceEventWithDescription
+                        >) StopRepresentingClientCorresponder::prepareApplicantBarristerEmailNotificationEvent
+                ),
+
+                Arguments.of(
+                    (MockedStatic.Verification) () ->
+                        EmailTemplateResolver.getNotifyRespondentRepresentativeTemplateName(any(FinremCaseData.class)),
+                    "notifying respondent barrister",
+                    List.of(FORMER_RESPONDENT_BARRISTER_ONLY),
+                    (TriFunction<
+                        StopRepresentingClientCorresponder,
+                        StopRepresentingClientInfo,
+                        Barrister,
+                        SendCorrespondenceEventWithDescription
+                        >) StopRepresentingClientCorresponder::prepareRespondentBarristerEmailNotificationEvent
+                )
+            );
+        }
+
+        @ParameterizedTest
+        @MethodSource
+        void shouldPrepareLitigantBarristerEmailNotification(
+            MockedStatic.Verification verification, String description, List<NotificationParty> notifying,
+            TriFunction<StopRepresentingClientCorresponder, StopRepresentingClientInfo, Barrister,
+                SendCorrespondenceEventWithDescription> function) {
+
+            try (MockedStatic<EmailTemplateResolver> emailTemplateResolver = mockStatic(EmailTemplateResolver.class)) {
+                EmailTemplateNames emailTemplateNames = mock(EmailTemplateNames.class);
+                emailTemplateResolver.when(verification)
+                    .thenReturn(emailTemplateNames);
+
+                FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+                FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
+                StopRepresentingClientInfo info = mock(StopRepresentingClientInfo.class);
+                when(info.getFinremCaseData()).thenReturn(finremCaseData);
+                when(info.getCaseDetails()).thenReturn(finremCaseDetails);
+                when(info.getCaseDetailsBefore()).thenReturn(finremCaseDetailsBefore);
+                when(info.getUserAuthorisation()).thenReturn(AUTH_TOKEN);
+                Barrister barrister = mock(Barrister.class);
+
+                NotificationRequest notificationRequest = mock(NotificationRequest.class);
+                when(finremNotificationRequestMapper
+                    .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister))
+                    .thenReturn(notificationRequest);
+
+                SendCorrespondenceEventWithDescription actual = function.apply(underTest, info, barrister);
+
+                assertAll(
+                    () -> assertThat(actual)
+                        .extracting(SendCorrespondenceEventWithDescription::getDescription)
+                        .isEqualTo(description),
+
+                    () -> assertThat(actual)
+                        .extracting(SendCorrespondenceEventWithDescription::getEvent)
+                        .extracting(
+                            SendCorrespondenceEvent::getNotificationParties,
+                            SendCorrespondenceEvent::getEmailNotificationRequest,
+                            SendCorrespondenceEvent::getEmailTemplate,
+                            SendCorrespondenceEvent::getCaseDetails,
+                            SendCorrespondenceEvent::getCaseDetailsBefore,
+                            SendCorrespondenceEvent::getAuthToken,
+                            SendCorrespondenceEvent::getBarrister
+                        )
+                        .containsExactly(
+                            notifying,
+                            notificationRequest,
+                            emailTemplateNames,
+                            finremCaseDetails,
+                            finremCaseDetailsBefore,
+                            AUTH_TOKEN,
+                            barrister
+                        ),
+                    () -> verify(finremNotificationRequestMapper).getNotificationRequestForStopRepresentingClientEmail(finremCaseDetailsBefore,
+                        barrister)
+                );
+            }
+        }
     }
 
     @Nested
