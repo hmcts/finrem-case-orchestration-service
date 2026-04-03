@@ -37,43 +37,56 @@ public class UpdateCaseDetailsSolicitorAboutToStartHandler extends FinremCallbac
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+    public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
+        return CallbackType.ABOUT_TO_START.equals(callbackType)
+            && (CaseType.CONTESTED.equals(caseType) || CaseType.CONSENTED.equals(caseType))
+            && EventType.UPDATE_CASE_DETAILS_SOLICITOR.equals(eventType);
+    }
 
+    @Override
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
+
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        setCaseAssignedUserRole(caseDetails, userAuthorisation);
-        CaseRole caseRole = caseData.getCurrentUserCaseRole();
-        caseData.setCurrentUserCaseRoleLabel(caseRole.getCcdCode().replace("[", "").replace("]",""));
+        String solicitorCaseRole = getCaseAssignedUserRole(caseDetails, userAuthorisation);
+
+        updateRepresentationFields(caseDetails, solicitorCaseRole);
+        setFieldShowConditions(caseData, solicitorCaseRole);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData)
             .build();
     }
 
-    private void setCaseAssignedUserRole(FinremCaseDetails finremCaseDetails,
-                                                  String authToken) {
-        CaseAssignedUserRolesResource resource = caseAssignedRoleService.getCaseAssignedUserRole(finremCaseDetails.getId().toString(), authToken);
-        String caseRole = resource.getCaseAssignedUserRoles().getFirst().getCaseRole();
-
-        if (caseRole.equals(APP_SOLICITOR_POLICY)) {
+    private void updateRepresentationFields(FinremCaseDetails finremCaseDetails,
+                                                  String solicitorCaseRole) {
+        if (APP_SOLICITOR_POLICY.equals(solicitorCaseRole)) {
             finremCaseDetails.getData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-            finremCaseDetails.getData().setCurrentUserCaseRole(CaseRole.APP_SOLICITOR);
-        } else if (caseRole.equals(RESP_SOLICITOR_POLICY)) {
+        } else if (RESP_SOLICITOR_POLICY.equals(solicitorCaseRole)) {
             boolean isConsented = caseDataService.isConsentedApplication(finremCaseDetails);
             if (isConsented) {
                 finremCaseDetails.getData().getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
             } else {
                 finremCaseDetails.getData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
             }
-            finremCaseDetails.getData().setCurrentUserCaseRole(CaseRole.RESP_SOLICITOR);
         }
     }
 
-    @Override
-    public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_START.equals(callbackType)
-            && (CaseType.CONTESTED.equals(caseType) || CaseType.CONSENTED.equals(caseType))
-            && EventType.UPDATE_CASE_DETAILS_SOLICITOR.equals(eventType);
+    /*
+     * The EXUI journey for Update Contact Details uses page 1 for Applicant Solicitor and page 2 for Respondent Solicitor.
+     * CCD requires a unique event/field ID for every field. So this sets two field show conditions, one for each page.
+     */
+    private void setFieldShowConditions(FinremCaseData finremCaseData, String solicitorCaseRole) {
+        if (CaseRole.APP_SOLICITOR.getCcdCode().equals(solicitorCaseRole)) {
+            finremCaseData.getContactDetailsWrapper().setCurrentUserIsApplicantSolicitor(YesOrNo.YES);
+        } else if (CaseRole.RESP_SOLICITOR.getCcdCode().equals(solicitorCaseRole)) {
+            finremCaseData.getContactDetailsWrapper().setCurrentUserIsRespondentSolicitor(YesOrNo.YES);
+        }
+    }
+
+    private String getCaseAssignedUserRole(FinremCaseDetails finremCaseDetails, String authToken) {
+        CaseAssignedUserRolesResource resource = caseAssignedRoleService.getCaseAssignedUserRole(finremCaseDetails.getCaseIdAsString(), authToken);
+        return resource.getCaseAssignedUserRoles().getFirst().getCaseRole();
     }
 }
