@@ -250,7 +250,7 @@ public class StopRepresentingClientCorresponder {
                                                                                                    IntervenerType intervenerType,
                                                                                                    Barrister barrister) {
         return prepareRepresentativeEmailNotificationEvent(
-            "notifying intervener barrister",
+            "notifying %s barrister".formatted(intervenerType.getTypeValue()),
             info,
             List.of(getFormerIntervenerBarrister(intervenerType)),
             getNotifyIntervenerRepresentativeTemplateName(info.getFinremCaseData()),

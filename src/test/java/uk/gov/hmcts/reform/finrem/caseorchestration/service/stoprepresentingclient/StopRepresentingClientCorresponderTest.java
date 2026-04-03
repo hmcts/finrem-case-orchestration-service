@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
@@ -179,6 +180,67 @@ class StopRepresentingClientCorresponderTest {
                         ),
                     () -> verify(finremNotificationRequestMapper).getNotificationRequestForStopRepresentingClientEmail(finremCaseDetailsBefore,
                         barrister)
+                );
+            }
+        }
+
+        @Test
+        void shouldPrepareIntervenerBarristerEmailNotification() {
+
+            try (
+                MockedStatic<EmailTemplateResolver> emailTemplateResolver = mockStatic(EmailTemplateResolver.class);
+                MockedStatic<NotificationParty> notificationPartyStatic = mockStatic(NotificationParty.class)) {
+                EmailTemplateNames emailTemplateNames = mock(EmailTemplateNames.class);
+                emailTemplateResolver.when(() -> EmailTemplateResolver.getNotifyIntervenerRepresentativeTemplateName(any(FinremCaseData.class)))
+                    .thenReturn(emailTemplateNames);
+                NotificationParty notificationParty = mock(NotificationParty.class);
+                notificationPartyStatic.when(() -> NotificationParty.getFormerIntervenerBarrister(IntervenerType.INTERVENER_ONE))
+                    .thenReturn(notificationParty);
+
+                FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+                FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
+                StopRepresentingClientInfo info = mock(StopRepresentingClientInfo.class);
+                when(info.getFinremCaseData()).thenReturn(finremCaseData);
+                when(info.getCaseDetails()).thenReturn(finremCaseDetails);
+                when(info.getCaseDetailsBefore()).thenReturn(finremCaseDetailsBefore);
+                when(info.getUserAuthorisation()).thenReturn(AUTH_TOKEN);
+                Barrister barrister = mock(Barrister.class);
+
+                NotificationRequest notificationRequest = mock(NotificationRequest.class);
+                when(finremNotificationRequestMapper
+                    .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), barrister, IntervenerType.INTERVENER_ONE))
+                    .thenReturn(notificationRequest);
+
+                SendCorrespondenceEventWithDescription actual = underTest.prepareIntervenerBarristerEmailNotificationEvent(info,
+                    IntervenerType.INTERVENER_ONE, barrister);
+
+                assertAll(
+                    () -> assertThat(actual)
+                        .extracting(SendCorrespondenceEventWithDescription::getDescription)
+                        .isEqualTo("notifying intervener1 barrister"),
+
+                    () -> assertThat(actual)
+                        .extracting(SendCorrespondenceEventWithDescription::getEvent)
+                        .extracting(
+                            SendCorrespondenceEvent::getNotificationParties,
+                            SendCorrespondenceEvent::getEmailNotificationRequest,
+                            SendCorrespondenceEvent::getEmailTemplate,
+                            SendCorrespondenceEvent::getCaseDetails,
+                            SendCorrespondenceEvent::getCaseDetailsBefore,
+                            SendCorrespondenceEvent::getAuthToken,
+                            SendCorrespondenceEvent::getBarrister
+                        )
+                        .containsExactly(
+                            List.of(notificationParty),
+                            notificationRequest,
+                            emailTemplateNames,
+                            finremCaseDetails,
+                            finremCaseDetailsBefore,
+                            AUTH_TOKEN,
+                            barrister
+                        ),
+                    () -> verify(finremNotificationRequestMapper).getNotificationRequestForStopRepresentingClientEmail(finremCaseDetailsBefore,
+                        barrister, IntervenerType.INTERVENER_ONE)
                 );
             }
         }
