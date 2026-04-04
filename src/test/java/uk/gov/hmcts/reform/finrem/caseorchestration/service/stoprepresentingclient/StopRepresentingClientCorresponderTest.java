@@ -8,7 +8,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterD
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -52,10 +52,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_BARRISTER_ONLY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty.FORMER_APPLICANT_SOLICITOR_ONLY;
@@ -263,52 +259,56 @@ class StopRepresentingClientCorresponderTest {
             assertThat(actual).isEmpty();
         }
 
-        @ParameterizedTest
-        @ValueSource(booleans = {true, false})
-        void shouldPrepareApplicantSolicitorEmailNotification_whenApplicantSolicitorRevoked(boolean isContested) {
-            LitigantRevocation litigantRevocation =
-                new LitigantRevocation(true, false);
+        @Test
+        void shouldPrepareApplicantSolicitorEmailNotification_whenApplicantSolicitorRevoked() {
+            try (
+                MockedStatic<EmailTemplateResolver> emailTemplateResolver = mockStatic(EmailTemplateResolver.class)) {
+                EmailTemplateNames emailTemplateNames = mock(EmailTemplateNames.class);
+                emailTemplateResolver.when(() -> EmailTemplateResolver.getNotifyApplicantRepresentativeTemplateName(any(FinremCaseData.class)))
+                    .thenReturn(emailTemplateNames);
 
-            when(finremCaseData.isContestedApplication()).thenReturn(isContested);
-            when(finremCaseDetails.getData()).thenReturn(finremCaseData);
-            StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
-                .userAuthorisation(AUTH_TOKEN)
-                .caseDetails(finremCaseDetails)
-                .caseDetailsBefore(finremCaseDetailsBefore)
-                .build();
+                LitigantRevocation litigantRevocation =
+                    new LitigantRevocation(true, false);
 
-            NotificationRequest notificationRequest = mock(NotificationRequest.class);
-            when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR))
-                .thenReturn(notificationRequest);
+                when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+                StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
+                    .userAuthorisation(AUTH_TOKEN)
+                    .caseDetails(finremCaseDetails)
+                    .caseDetailsBefore(finremCaseDetailsBefore)
+                    .build();
 
-            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation, info);
-            var eventWithDesc = actual.getFirst();
-            var event = eventWithDesc.getEvent();
+                NotificationRequest notificationRequest = mock(NotificationRequest.class);
+                when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR))
+                    .thenReturn(notificationRequest);
 
-            assertThat(eventWithDesc.getDescription())
-                .isEqualTo("notifying applicant solicitor");
+                List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation, info);
+                var eventWithDesc = actual.getFirst();
+                var event = eventWithDesc.getEvent();
 
-            assertThat(event)
-                .extracting(
-                    SendCorrespondenceEvent::getNotificationParties,
-                    SendCorrespondenceEvent::getCaseData,
-                    SendCorrespondenceEvent::getEmailTemplate,
-                    SendCorrespondenceEvent::getCaseDetails,
-                    SendCorrespondenceEvent::getCaseDetailsBefore,
-                    SendCorrespondenceEvent::getAuthToken
-                )
-                .containsExactly(
-                    List.of(FORMER_APPLICANT_SOLICITOR_ONLY),
-                    finremCaseData,
-                    isContested ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT
-                        : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_APPLICANT,
-                    finremCaseDetails,
-                    finremCaseDetailsBefore,
-                    AUTH_TOKEN
-                );
+                assertThat(eventWithDesc.getDescription())
+                    .isEqualTo("notifying applicant solicitor");
 
-            verify(finremNotificationRequestMapper)
-                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR);
+                assertThat(event)
+                    .extracting(
+                        SendCorrespondenceEvent::getNotificationParties,
+                        SendCorrespondenceEvent::getCaseData,
+                        SendCorrespondenceEvent::getEmailTemplate,
+                        SendCorrespondenceEvent::getCaseDetails,
+                        SendCorrespondenceEvent::getCaseDetailsBefore,
+                        SendCorrespondenceEvent::getAuthToken
+                    )
+                    .containsExactly(
+                        List.of(FORMER_APPLICANT_SOLICITOR_ONLY),
+                        finremCaseData,
+                        emailTemplateNames,
+                        finremCaseDetails,
+                        finremCaseDetailsBefore,
+                        AUTH_TOKEN
+                    );
+
+                verify(finremNotificationRequestMapper)
+                    .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR);
+            }
         }
 
         @Test
@@ -362,59 +362,60 @@ class StopRepresentingClientCorresponderTest {
             );
         }
 
-        @ParameterizedTest
-        @ValueSource(booleans = {true, false})
-        void shouldPrepareRespondentSolicitorEmailNotification_whenRespondentSolicitorRevoked(boolean isContested) {
-            LitigantRevocation litigantRevocation =
-                new LitigantRevocation(false, true);
-            
-            when(finremCaseData.isContestedApplication()).thenReturn(isContested);
-            when(finremCaseDetails.getData()).thenReturn(finremCaseData);
-            StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
-                .userAuthorisation(AUTH_TOKEN)
-                .caseDetails(finremCaseDetails)
-                .caseDetailsBefore(finremCaseDetailsBefore)
-                .build();
+        @Test
+        void shouldPrepareRespondentSolicitorEmailNotification_whenRespondentSolicitorRevoked() {
+            try (
+                MockedStatic<EmailTemplateResolver> emailTemplateResolver = mockStatic(EmailTemplateResolver.class)) {
+                EmailTemplateNames emailTemplateNames = mock(EmailTemplateNames.class);
+                emailTemplateResolver.when(() -> EmailTemplateResolver.getNotifyRespondentRepresentativeTemplateName(any(FinremCaseData.class)))
+                    .thenReturn(emailTemplateNames);
 
-            NotificationRequest notificationRequest = mock(NotificationRequest.class);
-            when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), RESP_SOLICITOR))
-                .thenReturn(notificationRequest);
+                LitigantRevocation litigantRevocation =
+                    new LitigantRevocation(false, true);
 
-            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation, info);
-            var eventWithDesc = actual.getFirst();
-            var event = eventWithDesc.getEvent();
+                when(finremCaseDetails.getData()).thenReturn(finremCaseData);
+                StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
+                    .userAuthorisation(AUTH_TOKEN)
+                    .caseDetails(finremCaseDetails)
+                    .caseDetailsBefore(finremCaseDetailsBefore)
+                    .build();
 
-            var expectedTemplate = isContested
-                ? FR_CONTESTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT
-                : FR_CONSENTED_REPRESENTATIVE_STOP_REPRESENTING_RESPONDENT;
+                NotificationRequest notificationRequest = mock(NotificationRequest.class);
+                when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(),
+                    RESP_SOLICITOR)).thenReturn(notificationRequest);
 
-            assertAll(
-                () -> assertThat(eventWithDesc.getDescription())
-                    .isEqualTo("notifying respondent solicitor"),
+                List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation, info);
+                var eventWithDesc = actual.getFirst();
+                var event = eventWithDesc.getEvent();
 
-                () -> assertThat(event.getNotificationParties())
-                    .containsExactly(FORMER_RESPONDENT_SOLICITOR_ONLY),
+                assertAll(
+                    () -> assertThat(eventWithDesc.getDescription())
+                        .isEqualTo("notifying respondent solicitor"),
 
-                () -> assertThat(event.getCaseData())
-                    .isEqualTo(finremCaseData),
+                    () -> assertThat(event.getNotificationParties())
+                        .containsExactly(FORMER_RESPONDENT_SOLICITOR_ONLY),
 
-                () -> assertThat(event.getEmailTemplate())
-                    .isEqualTo(expectedTemplate),
+                    () -> assertThat(event.getCaseData())
+                        .isEqualTo(finremCaseData),
 
-                () -> assertThat(event.getCaseDetails())
-                    .isEqualTo(finremCaseDetails),
+                    () -> assertThat(event.getEmailTemplate())
+                        .isEqualTo(emailTemplateNames),
 
-                () -> assertThat(event.getCaseDetailsBefore())
-                    .isEqualTo(finremCaseDetailsBefore),
+                    () -> assertThat(event.getCaseDetails())
+                        .isEqualTo(finremCaseDetails),
 
-                () -> assertThat(event.getAuthToken())
-                    .isEqualTo(AUTH_TOKEN),
+                    () -> assertThat(event.getCaseDetailsBefore())
+                        .isEqualTo(finremCaseDetailsBefore),
 
-                () -> verify(finremNotificationRequestMapper)
-                    .getNotificationRequestForStopRepresentingClientEmail(
-                        info.getCaseDetailsBefore(), RESP_SOLICITOR
-                    )
-            );
+                    () -> assertThat(event.getAuthToken())
+                        .isEqualTo(AUTH_TOKEN),
+
+                    () -> verify(finremNotificationRequestMapper)
+                        .getNotificationRequestForStopRepresentingClientEmail(
+                            info.getCaseDetailsBefore(), RESP_SOLICITOR
+                        )
+                );
+            }
         }
 
         @Test
@@ -465,6 +466,63 @@ class StopRepresentingClientCorresponderTest {
 
                 () -> verify(underTest)
                     .generateStopRepresentingRespondentLetter(info.getCaseDetails(), AUTH_TOKEN)
+            );
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = IntervenerType.class)
+    void shouldPrepareIntervenerSolicitorEmailNotification(IntervenerType intervenerType) {
+        try (
+            MockedStatic<EmailTemplateResolver> emailTemplateResolver = mockStatic(EmailTemplateResolver.class);
+            MockedStatic<NotificationParty> notificationPartyStatic = mockStatic(NotificationParty.class)) {
+            EmailTemplateNames emailTemplateNames = mock(EmailTemplateNames.class);
+            emailTemplateResolver.when(() -> EmailTemplateResolver.getNotifyIntervenerRepresentativeTemplateName(any(FinremCaseData.class)))
+                .thenReturn(emailTemplateNames);
+            NotificationParty notificationParty = mock(NotificationParty.class);
+            notificationPartyStatic.when(() -> NotificationParty.getFormerIntervenerSolicitor(intervenerType))
+                .thenReturn(notificationParty);
+
+            StopRepresentingClientInfo info = mock(StopRepresentingClientInfo.class);
+            when(info.getFinremCaseData()).thenReturn(finremCaseData);
+            when(info.getCaseDetails()).thenReturn(finremCaseDetails);
+            when(info.getCaseDetailsBefore()).thenReturn(finremCaseDetailsBefore);
+            when(info.getUserAuthorisation()).thenReturn(AUTH_TOKEN);
+
+            NotificationRequest notificationRequest = mock(NotificationRequest.class);
+            when(finremNotificationRequestMapper
+                .getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(),
+                    CaseRole.getIntervenerSolicitorByIndex(intervenerType.getIntervenerId()), intervenerType))
+                .thenReturn(notificationRequest);
+
+            SendCorrespondenceEventWithDescription actual = underTest.prepareIntervenerSolicitorEmailNotificationEvent(info,
+                intervenerType);
+
+            assertAll(
+                () -> assertThat(actual)
+                    .extracting(SendCorrespondenceEventWithDescription::getDescription)
+                    .isEqualTo("notifying %s solicitor".formatted(intervenerType.getTypeValue())),
+
+                () -> assertThat(actual)
+                    .extracting(SendCorrespondenceEventWithDescription::getEvent)
+                    .extracting(
+                        SendCorrespondenceEvent::getNotificationParties,
+                        SendCorrespondenceEvent::getEmailNotificationRequest,
+                        SendCorrespondenceEvent::getEmailTemplate,
+                        SendCorrespondenceEvent::getCaseDetails,
+                        SendCorrespondenceEvent::getCaseDetailsBefore,
+                        SendCorrespondenceEvent::getAuthToken
+                    )
+                    .containsExactly(
+                        List.of(notificationParty),
+                        notificationRequest,
+                        emailTemplateNames,
+                        finremCaseDetails,
+                        finremCaseDetailsBefore,
+                        AUTH_TOKEN
+                    ),
+                () -> verify(finremNotificationRequestMapper).getNotificationRequestForStopRepresentingClientEmail(finremCaseDetailsBefore,
+                    CaseRole.getIntervenerSolicitorByIndex(intervenerType.getIntervenerId()), intervenerType)
             );
         }
     }
