@@ -860,6 +860,20 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     /**
+     * Checks if the respondent solicitor email is present and the respondent is represented by a solicitor.
+     * @return the respondent solicitor email if the respondent is represented by a solicitor, null otherwise.
+     */
+    @JsonIgnore
+    public String getRespondentSolicitorEmailIfRepresented() {
+        var contactWrapper = getContactDetailsWrapper();
+        if (isConsentedApplication() && !isYes(contactWrapper.getConsentedRespondentRepresented())
+            || isContestedApplication() && !isYes(contactWrapper.getContestedRespondentRepresented())) {
+            return null;
+        }
+        return contactWrapper.getRespondentSolicitorEmail();
+    }
+
+    /**
      * If caseAllocatedTo is present, then the fastTrackDecision value is not relevant.
      * This suits cases where caseAllocatedTo can be null.
      * caseAllocatedTo may be an older version of an attribute that has been replaced by fastTrackDecision.
