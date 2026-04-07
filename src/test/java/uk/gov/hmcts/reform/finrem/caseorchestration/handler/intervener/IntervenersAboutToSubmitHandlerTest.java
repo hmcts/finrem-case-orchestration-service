@@ -106,7 +106,6 @@ class IntervenersAboutToSubmitHandlerTest {
     @Test
     void givenContestedCase_whenSelectionMadeToRemoveIntervener1_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        finremCallbackRequest.getCaseDetails().setId(CASE_ID_IN_LONG);
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
         IntervenerOne oneWrapper = IntervenerOne
@@ -169,7 +168,6 @@ class IntervenersAboutToSubmitHandlerTest {
     void givenContestedCase_whenSelectionMadeToRemoveIntervener2_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        finremCallbackRequest.getCaseDetails().setId(CASE_ID_IN_LONG);
 
         IntervenerTwo twoWrapper = IntervenerTwo
             .builder().intervenerName("Two name").intervenerEmail("test@test.com").build();
@@ -229,7 +227,6 @@ class IntervenersAboutToSubmitHandlerTest {
     void givenContestedCase_whenSelectionMadeToRemoveIntervener3_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        finremCallbackRequest.getCaseDetails().setId(CASE_ID_IN_LONG);
 
         IntervenerThree threeWrapper = IntervenerThree
             .builder().intervenerName("Three name").intervenerEmail("test@test.com").build();
@@ -290,7 +287,6 @@ class IntervenersAboutToSubmitHandlerTest {
     void givenContestedCase_whenSelectionMadeToRemoveIntervener4_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        finremCallbackRequest.getCaseDetails().setId(CASE_ID_IN_LONG);
 
         IntervenerFour fourWrapper = IntervenerFour
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
@@ -402,6 +398,6 @@ class IntervenersAboutToSubmitHandlerTest {
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequestFactory.from();
+        return FinremCallbackRequestFactory.fromId(CASE_ID_IN_LONG);
     }
 }
