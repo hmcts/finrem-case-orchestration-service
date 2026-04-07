@@ -20,9 +20,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerAddedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerRemovedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerService;
 
 import java.util.List;
 

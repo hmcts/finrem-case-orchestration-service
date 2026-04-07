@@ -35,7 +35,8 @@ public class GenerateCoverSheetService {
         DocumentHelper.PaperNotificationRecipient recipient,
         Supplier<CaseDocument> oldCoverSheetSupplier,
         Consumer<CaseDocument> setter
-    ) {}
+    ) {
+    }
 
     public CaseDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         logCoverSheetGeneration(APPLICANT, caseDetails.getCaseIdAsString());
@@ -96,8 +97,8 @@ public class GenerateCoverSheetService {
     /**
      * Generates a cover sheet document for the specified intervener.
      *
-     * @param caseDetails the {@link FinremCaseDetails} object containing the case information
-     * @param authorisationToken the authorisation token used to authenticate the request
+     * @param caseDetails         the {@link FinremCaseDetails} object containing the case information
+     * @param authorisationToken  the authorisation token used to authenticate the request
      * @param intervenerRecipient the recipient information for the intervener, specifying the paper notification details
      * @return the generated cover sheet document as a {@code CaseDocument}
      */
@@ -111,9 +112,9 @@ public class GenerateCoverSheetService {
     /**
      * Generates and stores an intervener coversheet for a specified case and intervener type.
      *
-     * @param caseDetails         the {@link FinremCaseDetails} object containing the case information
-     * @param intervenerType       the type of the intervener for whom the coversheet is being generated
-     * @param authorisationToken   the authorization token to be used for generating and storing the coversheet
+     * @param caseDetails        the {@link FinremCaseDetails} object containing the case information
+     * @param intervenerType     the type of the intervener for whom the coversheet is being generated
+     * @param authorisationToken the authorization token to be used for generating and storing the coversheet
      */
     public void generateAndStoreIntervenerCoversheet(FinremCaseDetails caseDetails,
                                                      IntervenerType intervenerType,
@@ -135,12 +136,19 @@ public class GenerateCoverSheetService {
     /**
      * Removes the intervener cover sheet with specified intervener change details.
      *
-     * @param finremCaseDetails      the {@link FinremCaseDetails} object containing the case information
+     * @param finremCaseDetails       the {@link FinremCaseDetails} object containing the case information
      * @param intervenerChangeDetails The details of the intervener change, including the type of intervener.
-     * @param authorisationToken     The authorisation token required to authenticate the operation.
+     * @param authorisationToken      The authorisation token required to authenticate the operation.
      */
-    public void removeIntervenerCoverSheet(FinremCaseDetails finremCaseDetails, IntervenerChangeDetails intervenerChangeDetails, String authorisationToken) {
-        IntervenerCoverSheetMapping mapping = resolveIntervenerCoverSheetMapping(finremCaseDetails.getData().getBulkPrintCoversheetWrapper(), intervenerChangeDetails.getIntervenerType());
+    public void removeIntervenerCoverSheet(FinremCaseDetails finremCaseDetails,
+                                           IntervenerChangeDetails intervenerChangeDetails,
+                                           String authorisationToken) {
+        IntervenerCoverSheetMapping mapping =
+            resolveIntervenerCoverSheetMapping(
+                finremCaseDetails.getData().getBulkPrintCoversheetWrapper(),
+                intervenerChangeDetails.getIntervenerType()
+            );
+
         deleteCoverSheet(mapping.oldCoverSheetSupplier().get().getDocumentUrl(), authorisationToken);
         mapping.setter().accept(null);
     }
@@ -180,10 +188,11 @@ public class GenerateCoverSheetService {
     }
 
     private void replaceAndStoreIntervenerCoverSheet(CaseDocument coverSheet,
-                                           String authToken,
-                                           Supplier<CaseDocument> oldCoverSheetSupplier,
-                                           Consumer<CaseDocument> publicSetter) {
-        replaceAndStoreCoverSheet(coverSheet, null, authToken, oldCoverSheetSupplier, () -> null, publicSetter, caseDocument -> {});
+                                                     String authToken,
+                                                     Supplier<CaseDocument> oldCoverSheetSupplier,
+                                                     Consumer<CaseDocument> publicSetter) {
+        replaceAndStoreCoverSheet(coverSheet, null, authToken, oldCoverSheetSupplier, () -> null, publicSetter, caseDocument -> {
+        });
     }
 
     private void replaceAndStoreCoverSheet(CaseDocument coverSheet,

@@ -335,7 +335,9 @@ class IntervenersAboutToSubmitHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code("INVALID_OPERATION").build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        assertThrows(IllegalArgumentException.class, () -> aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN), "Invalid operation code: INVALID_OPERATION");
+        assertThrows(IllegalArgumentException.class,
+            () -> aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN),
+            "Invalid operation code: INVALID_OPERATION");
         verifyNoInteractions(intervenerService, intervenerCoversheetService);
     }
 

@@ -13,7 +13,19 @@ public class IntervenerCoversheetService {
 
     private final GenerateCoverSheetService generateCoverSheetService;
 
-    public void updateIntervenerCoversheet(FinremCaseDetails finremCaseDetails, IntervenerChangeDetails intervenerChangeDetails, String authorisationToken) {
+    /**
+     * Updates the intervener coversheet based on the specified action.
+     * This method either generates and stores a new intervener coversheet
+     * for the "ADDED" action or removes the existing intervener coversheet
+     * for the "REMOVED" action.
+     *
+     * @param finremCaseDetails    the details of the financial remedy case to update the coversheet for
+     * @param intervenerChangeDetails details of the change made to the intervener, including the action to perform and type of intervener
+     * @param authorisationToken   the token used for authorisation in the coversheet update process
+     */
+    public void updateIntervenerCoversheet(FinremCaseDetails finremCaseDetails,
+                                           IntervenerChangeDetails intervenerChangeDetails,
+                                           String authorisationToken) {
         if (IntervenerAction.ADDED.equals(intervenerChangeDetails.getIntervenerAction())) {
             generateCoverSheetService.generateAndStoreIntervenerCoversheet(
                 finremCaseDetails,

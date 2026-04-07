@@ -36,7 +36,8 @@ class IntervenerCoversheetServiceTest {
 
         intervenerCoversheetService.updateIntervenerCoversheet(caseDetails, changeDetails, AUTH_TOKEN);
 
-        verify(generateCoverSheetService).generateAndStoreIntervenerCoversheet(caseDetails, changeDetails.getIntervenerType(), AUTH_TOKEN);
+        verify(generateCoverSheetService).generateAndStoreIntervenerCoversheet(caseDetails,
+            changeDetails.getIntervenerType(), AUTH_TOKEN);
     }
 
     @Test
