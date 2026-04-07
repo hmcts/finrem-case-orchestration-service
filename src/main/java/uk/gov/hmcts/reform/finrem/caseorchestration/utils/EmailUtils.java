@@ -35,7 +35,7 @@ public class EmailUtils {
      * @param previousEmail the previous email address
      * @return true if the emails are different (case-insensitive), false if they are the same or both null/empty
      */
-    public static boolean hasSolicitorEmailChanged(String currentEmail, String previousEmail) {
+    public static boolean hasChange(String currentEmail, String previousEmail) {
         if (currentEmail == null || previousEmail == null) {
             return !Objects.equals(currentEmail, previousEmail);
         }

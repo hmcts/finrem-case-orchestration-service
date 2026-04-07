@@ -87,8 +87,8 @@ class EmailUtilsTest {
 
     @ParameterizedTest
     @MethodSource("emailChangeScenarios")
-    void testHasSolicitorEmailChanged(String currentEmail, String previousEmail, boolean expectedChanged) {
-        boolean result = EmailUtils.hasSolicitorEmailChanged(currentEmail, previousEmail);
+    void testHasChange(String currentEmail, String previousEmail, boolean expectedChanged) {
+        boolean result = EmailUtils.hasChange(currentEmail, previousEmail);
         assertEquals(expectedChanged, result);
     }
 

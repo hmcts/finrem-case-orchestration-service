@@ -66,7 +66,7 @@ public class SolicitorAccessService {
         boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(
             caseData.getApplicantOrganisationPolicy(),
             caseDataBefore.getApplicantOrganisationPolicy());
-        return EmailUtils.hasSolicitorEmailChanged(currentEmail, previousEmail)
+        return EmailUtils.hasChange(currentEmail, previousEmail)
             || !isSameOrganisation;
     }
 
@@ -76,7 +76,7 @@ public class SolicitorAccessService {
         boolean isSameOrganisation = OrganisationPolicy.isSameOrganisation(
             caseData.getRespondentOrganisationPolicy(),
             caseDataBefore.getRespondentOrganisationPolicy());
-        return EmailUtils.hasSolicitorEmailChanged(currentEmail, previousEmail)
+        return EmailUtils.hasChange(currentEmail, previousEmail)
             || !isSameOrganisation;
     }
 }
