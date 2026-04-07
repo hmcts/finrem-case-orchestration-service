@@ -64,7 +64,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.Organisat
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
@@ -78,6 +77,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BarristerLetterServiceAdapter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
@@ -159,7 +159,7 @@ public class ManageBarristersITest implements IntegrationTest {
     @MockitoBean
     private SystemUserService systemUserService;
     @MockitoBean
-    private BulkPrintService bulkPrintService;
+    private BulkPrintServiceAdapter bulkPrintServiceAdapter;
     @MockitoBean
     private GenericDocumentService genericDocumentService;
     @MockitoBean
@@ -384,9 +384,8 @@ public class ManageBarristersITest implements IntegrationTest {
 
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
 
-        verify(bulkPrintService).sendDocumentForPrint(eq(addedDocument), any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter).sendDocumentForPrint(eq(addedDocument), any(CaseDetails.class), any(), any());
         verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED));
-
 
         NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
         assertEquals(APP_BARR_ORG_ID, notificationRequest.getBarristerReferenceNumber());
@@ -411,7 +410,7 @@ public class ManageBarristersITest implements IntegrationTest {
 
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
 
-        verify(bulkPrintService).sendDocumentForPrint(eq(removedDocument), any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter).sendDocumentForPrint(eq(removedDocument), any(CaseDetails.class), any(), any());
         verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED));
 
         NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
@@ -434,9 +433,8 @@ public class ManageBarristersITest implements IntegrationTest {
 
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
 
-        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class), any(), any());
+        verify(bulkPrintServiceAdapter, never()).sendDocumentForPrint(any(), any(CaseDetails.class), any(), any());
         verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED));
-
 
         NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
         assertEquals(APP_BARR_ORG_ID, notificationRequest.getBarristerReferenceNumber());

@@ -8,8 +8,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.BulkPrintServiceAdapter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsSingleLetterOrEmailAllPartiesCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
@@ -20,10 +20,11 @@ public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends CaseDetails
     private final UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
 
     @Autowired
-    public UpdateFrcLetterOrEmailAllSolicitorsCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
+    public UpdateFrcLetterOrEmailAllSolicitorsCorresponder(NotificationService notificationService,
+                                                           BulkPrintServiceAdapter bulkPrintServiceAdapter,
                                                            FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService) {
-        super(notificationService, bulkPrintService, finremCaseDetailsMapper);
+        super(notificationService, bulkPrintServiceAdapter, finremCaseDetailsMapper);
         this.updateFrcInfoRespondentDocumentService = updateFrcInfoRespondentDocumentService;
     }
 
