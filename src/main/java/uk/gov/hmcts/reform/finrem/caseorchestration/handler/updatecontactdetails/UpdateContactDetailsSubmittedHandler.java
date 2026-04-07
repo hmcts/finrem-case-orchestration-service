@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 
+import java.util.Map;
+
 @Slf4j
 @Service
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
@@ -54,7 +56,8 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
     }
 
     private boolean hasChange(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
-        return !ContactDetailsWrapper.diff(finremCaseDetails.getData().getContactDetailsWrapper(),
-            finremCaseDetailsBefore.getData().getContactDetailsWrapper()).isEmpty();
+        Map<String, Object[]> fieldsChanged = ContactDetailsWrapper.diff(finremCaseDetails.getData().getContactDetailsWrapper(),
+            finremCaseDetailsBefore.getData().getContactDetailsWrapper());
+        return !fieldsChanged.isEmpty();
     }
 }
