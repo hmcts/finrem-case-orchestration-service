@@ -72,7 +72,15 @@ public class IdamUtils {
         String token = response.getBody().path("access_token");
 
         assert HttpStatus.valueOf(response.getStatusCode()) == HttpStatus.OK
-            : String.format("Token generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
+            : String.format("Token generation failed with code: %d, body: %s, login %s, idamsecret %s, "
+            + "idamredirecturi %s, idams2sauthurl %s ",
+            response.getStatusCode(),
+            response.getBody().prettyPrint(),
+            userLoginDetails,
+            idamSecret,
+            idamRedirectUri,
+            idamS2sAuthUrl
+        );
 
         return token;
     }
