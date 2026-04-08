@@ -15,7 +15,9 @@ import uk.gov.hmcts.reform.finrem.functional.model.UserGroup;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -39,11 +41,18 @@ public class IdamUtils {
     @Value("${idam.api.secret}")
     private String idamSecret;
 
+    private final Map<String, String> userTokenCache = new ConcurrentHashMap<>();
+
     List<UserDetails> createdUsers = new ArrayList<>();
 
     public String generateUserTokenWithNoRoles(String username, String password) {
+        String cacheKey = username + ":" + password;
+        return userTokenCache.computeIfAbsent(cacheKey, key -> fetchUserToken(username, password));
+    }
+
+    private String fetchUserToken(String username, String password) {
         String userLoginDetails = String.join(":", username, password);
-        final String authHeader = "Basic " + new String(Base64.getEncoder().encode(userLoginDetails.getBytes()));
+        final String authHeader = "Basic " + Base64.getEncoder().encodeToString(userLoginDetails.getBytes());
 
         int retryCount = 0;
         Response response;
@@ -65,12 +74,10 @@ public class IdamUtils {
             .relaxedHTTPSValidation()
             .post(idamTokenUrl(code));
 
-        String token = response.getBody().path("access_token");
-
         assert HttpStatus.valueOf(response.getStatusCode()) == HttpStatus.OK
             : String.format("Token generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
 
-        return token;
+        return response.getBody().path("access_token");
     }
 
     public String generateServiceTokenWithValidMicroservice(String microserviceName) {
@@ -185,7 +192,7 @@ public class IdamUtils {
     }
 
     private String idamTokenUrl(String code) {
-        String myUrl = idamUserBaseUrl + "/oauth2/token"
+        String myUrl = idamUserBaseUrl + "/o/token"
             + "?code=" + code
             + "&client_id=finrem"
             + "&client_secret=" + idamSecret
