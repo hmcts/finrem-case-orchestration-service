@@ -60,6 +60,11 @@ public class IdamUtils {
 
         String code = response.getBody().path("code");
 
+        log.info("Username and password used: " + userLoginDetails);
+        log.info("Idam secret used: " + idamSecret);
+        log.info("Idam redirectUri used: " + idamRedirectUri);
+        log.info("Idam s2s-auth url used: " + idamS2sAuthUrl);
+
         response = RestAssured.given()
             .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .relaxedHTTPSValidation()
