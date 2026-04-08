@@ -58,6 +58,10 @@ public class IdamUtils {
         assert response.getStatusCode() < 300
             : String.format("Code generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
 
+        log.info("Username and password used: " + userLoginDetails);
+        log.info("Idam secret used: " + idamSecret);
+        log.info("Idam redirectUri used: " + idamRedirectUri);
+        log.info("Idam s2s-auth url used: " + idamS2sAuthUrl);
         String code = response.getBody().path("code");
 
         response = RestAssured.given()
@@ -68,7 +72,15 @@ public class IdamUtils {
         String token = response.getBody().path("access_token");
 
         assert HttpStatus.valueOf(response.getStatusCode()) == HttpStatus.OK
-            : String.format("Token generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
+            : String.format("Token generation failed with code: %d, body: %s, login %s, idamsecret %s, "
+            + "idamredirecturi %s, idams2sauthurl %s ",
+            response.getStatusCode(),
+            response.getBody().prettyPrint(),
+            userLoginDetails,
+            idamSecret,
+            idamRedirectUri,
+            idamS2sAuthUrl
+        );
 
         return token;
     }
