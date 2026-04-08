@@ -58,12 +58,11 @@ public class IdamUtils {
         assert response.getStatusCode() < 300
             : String.format("Code generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
 
-        String code = response.getBody().path("code");
-
         log.info("Username and password used: " + userLoginDetails);
         log.info("Idam secret used: " + idamSecret);
         log.info("Idam redirectUri used: " + idamRedirectUri);
         log.info("Idam s2s-auth url used: " + idamS2sAuthUrl);
+        String code = response.getBody().path("code");
 
         response = RestAssured.given()
             .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
