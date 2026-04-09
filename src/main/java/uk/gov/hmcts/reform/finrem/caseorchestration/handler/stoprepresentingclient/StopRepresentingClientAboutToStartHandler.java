@@ -82,13 +82,15 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         RepresentativeInContext representativeInContext = stopRepresentingClientService.buildRepresentation(caseData, userAuthorisation);
-        prepareStopRepresentationWrapper(caseData, representativeInContext);
+        String error = prepareStopRepresentationWrapper(caseData, representativeInContext);
+        if (error != null) {
+            return response(caseData, null, List.of(error));
+        }
         prepareExtraClientAddresses(caseData, representativeInContext);
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return response(caseData, null, null);
     }
 
-    private void prepareStopRepresentationWrapper(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
+    private String prepareStopRepresentationWrapper(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
         StopRepresentationWrapper wrapper = caseData.getStopRepresentationWrapper();
 
         boolean showClientAddressForService = true;
@@ -111,13 +113,14 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
                 confidentialLabel = getIntervenerClientAddressLabels(index)[1];
             }
         } else {
-            throw new UnsupportedOperationException(format("%s - It supports applicant/respondent representatives only",
-                caseData.getCcdCaseId()));
+            return String.format("%s - It supports applicant/respondent representatives only",
+                caseData.getCcdCaseId());
         }
 
         wrapper.setClientAddressForServiceConfidentialLabel(confidentialLabel);
         wrapper.setClientAddressForServiceLabel(label);
         wrapper.setShowClientAddressForService(YesOrNo.forValue(showClientAddressForService));
+        return null;
     }
 
     private void prepareExtraClientAddresses(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
