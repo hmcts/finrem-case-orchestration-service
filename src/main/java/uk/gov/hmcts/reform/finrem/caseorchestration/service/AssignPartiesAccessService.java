@@ -202,11 +202,10 @@ public class AssignPartiesAccessService {
 
     private void revokeAccess(Long caseId, String email, String orgId, String caseRole)
         throws UserNotFoundInOrganisationApiException {
-        Optional<String> userId = prdOrganisationService.findUserByEmail(email);
-        userId.ifPresentOrElse(s -> assignCaseAccessService.removeCaseRoleToUser(caseId, s, caseRole, orgId),
-            () -> log.info("{} - Attempting to revoke role {} but system is unable find any user", caseId, caseRole));
-        if (userId.isEmpty()) {
-            throw new UserNotFoundInOrganisationApiException();
-        }
+        String userId = prdOrganisationService.findUserByEmail(email)
+            .orElseThrow(() -> new UserNotFoundInOrganisationApiException(
+                String.format("CaseID %s - Attempting to revoke role {} but system is unable to find user with role %s", caseId, caseRole)
+            ));
+        assignCaseAccessService.removeCaseRoleToUser(caseId, userId, caseRole, orgId);
     }
 }

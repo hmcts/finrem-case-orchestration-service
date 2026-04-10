@@ -9,10 +9,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 
 class SolicitorAccessServiceTest {
     @Mock
@@ -353,10 +353,8 @@ class SolicitorAccessServiceTest {
                 .organisationID(beforeApplicantOrganisationId).build()).build())
             .build();
 
-        return FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseData).build())
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseDataBefore).build())
-            .build();
+        return FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData,
+            caseDataBefore);
     }
 
     private FinremCallbackRequest buildCallbackRequestRespondentSolicitor(String respondentSolicitorEmail,
@@ -364,33 +362,27 @@ class SolicitorAccessServiceTest {
                                                                           String beforeRespondentSolicitorEmail,
                                                                           String beforeRespondentOrganisationId) {
 
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.NO)
-            .contestedRespondentRepresented(YesOrNo.YES)
-            .respondentSolicitorEmail(respondentSolicitorEmail)
-            .build();
-
-        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.NO)
-            .contestedRespondentRepresented(YesOrNo.YES)
-            .respondentSolicitorEmail(beforeRespondentSolicitorEmail)
-            .build();
-
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapper)
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder()
+                .applicantRepresented(YesOrNo.NO)
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .respondentSolicitorEmail(respondentSolicitorEmail)
+                .build())
             .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
                 .organisationID(respondentOrganisationId).build()).build())
             .build();
 
         FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapperBefore)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantRepresented(YesOrNo.NO)
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .respondentSolicitorEmail(beforeRespondentSolicitorEmail)
+                .build())
             .respondentOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
                 .organisationID(beforeRespondentOrganisationId).build()).build())
             .build();
 
-        return FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseData).build())
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(caseDataBefore).build())
-            .build();
+        return FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData,
+            caseDataBefore);
     }
 }
