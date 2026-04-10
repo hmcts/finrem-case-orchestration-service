@@ -138,14 +138,22 @@ public class AssignPartiesAccessService {
      */
     public void revokeApplicantSolicitor(FinremCaseData finremCaseData) throws UserNotFoundInOrganisationApiException {
         String caseId = finremCaseData.getCcdCaseId();
-        if (finremCaseData.isApplicantRepresentedByASolicitor()
-            && isOrgIdExists(finremCaseData.getApplicantOrganisationPolicy())) {
-            String appSolicitorEmail = finremCaseData.getAppSolicitorEmailIfRepresented();
-            String appOrgId = finremCaseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID();
-            revokeAccess(Long.valueOf(caseId), appSolicitorEmail, appOrgId, CaseRole.APP_SOLICITOR.getCcdCode());
-        } else {
-            log.info("{} - Revoke access failed - No applicant represented by a solicitor or organisation policy missing", caseId);
+        String applicantSolicitorEmail = finremCaseData.getAppSolicitorEmail();
+        OrganisationPolicy applicantOrganisationPolicy = finremCaseData.getApplicantOrganisationPolicy();
+        String applicantOrganisationId = applicantOrganisationPolicy.getOrganisation().getOrganisationID();
+
+        if (!finremCaseData.isApplicantRepresentedByASolicitor() || !isOrgIdExists(applicantOrganisationPolicy)) {
+            throw new IllegalStateException(
+                "Unable to revoke applicant solicitor access: applicant is not represented by a solicitor or organisation policy is missing"
+            );
         }
+
+        revokeAccess(
+            Long.valueOf(caseId),
+            applicantSolicitorEmail,
+            applicantOrganisationId,
+            CaseRole.APP_SOLICITOR.getCcdCode()
+        );
     }
 
     /**
@@ -166,14 +174,21 @@ public class AssignPartiesAccessService {
      */
     public void revokeRespondentSolicitor(FinremCaseData finremCaseData) throws UserNotFoundInOrganisationApiException {
         String caseId = finremCaseData.getCcdCaseId();
-        if (finremCaseData.isRespondentRepresentedByASolicitor()
-            && isOrgIdExists(finremCaseData.getRespondentOrganisationPolicy())) {
-            String respondentSolicitorEmail = finremCaseData.getRespondentSolicitorEmailIfRepresented();
-            String respOrgId = finremCaseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID();
-            revokeAccess(Long.valueOf(caseId), respondentSolicitorEmail, respOrgId, CaseRole.RESP_SOLICITOR.getCcdCode());
-        } else {
-            log.info("{} - Revoke access failed - No respondent represented by a solicitor or organisation policy missing", caseId);
+        String respondentSolicitorEmail = finremCaseData.getRespondentSolicitorEmail();
+        OrganisationPolicy respondentOrganisationPolicy = finremCaseData.getApplicantOrganisationPolicy();
+        String respOrgId = finremCaseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID();
+        if (!finremCaseData.isApplicantRepresentedByASolicitor() || !isOrgIdExists(respondentOrganisationPolicy)) {
+            throw new IllegalStateException(
+                "Unable to revoke respondent solicitor access: respondent is not represented by a solicitor or organisation policy is missing"
+            );
         }
+
+        revokeAccess(
+            Long.valueOf(caseId),
+            respondentSolicitorEmail,
+            respOrgId,
+            CaseRole.RESP_SOLICITOR.getCcdCode()
+        );
     }
 
     private boolean isRepresented(IntervenerWrapper intervenerWrapper) {
