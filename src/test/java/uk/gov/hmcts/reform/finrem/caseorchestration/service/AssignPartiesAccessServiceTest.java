@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -285,6 +286,107 @@ class AssignPartiesAccessServiceTest {
                 TEST_ORG_ID);
             verifyNoMoreInteractions(assignCaseAccessService);
         }
+    }
+
+    @Nested
+    class RevokeApplicantSolicitorTests {
+        @Test
+        void givenUnrepresentedApplicant_thenThrowsException() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(false);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+            assertThrows(IllegalStateException.class, () -> assignPartiesAccessService.revokeApplicantSolicitor(caseData));
+        }
+
+        @Test
+        void givenMissingOrgId_thenThrowsException() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(null));
+            assertThrows(IllegalStateException.class, () -> assignPartiesAccessService.revokeApplicantSolicitor(caseData));
+        }
+
+        @Test
+        void givenUserFound_thenRevokeAccess() throws Exception {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(Optional.of(TEST_USER_ID));
+            assignPartiesAccessService.revokeApplicantSolicitor(caseData);
+            verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID, CaseRole.APP_SOLICITOR.getCcdCode(), TEST_ORG_ID);
+        }
+
+        @Test
+        void givenUserNotFound_thenThrowWithMessage() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getAppSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isApplicantRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(Optional.empty());
+            UserNotFoundInOrganisationApiException ex = assertThrows(UserNotFoundInOrganisationApiException.class,
+                () -> assignPartiesAccessService.revokeApplicantSolicitor(caseData));
+            String message = ex.getMessage();
+            assert message != null : "Exception message should not be null";
+            assert message.contains(CASE_ID) : "Missing case id in message: " + message;
+            assert message.contains(CaseRole.APP_SOLICITOR.getCcdCode()) : "Missing case role in message: " + message;
+        }
+    }
+
+    @Nested
+    class RevokeRespondentSolicitorTests {
+        @Test
+        void givenUnrepresentedRespondent_thenThrowsException() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(false);
+            when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+            assertThrows(IllegalStateException.class, () -> assignPartiesAccessService.revokeRespondentSolicitor(caseData));
+        }
+
+        @Test
+        void givenMissingOrgId_thenThrowsException() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getRespondentOrganisationPolicy()).thenReturn(null);
+            assertThrows(IllegalStateException.class, () -> assignPartiesAccessService.revokeRespondentSolicitor(caseData));
+        }
+
+        @Test
+        void givenUserFound_thenRevokeAccess() throws Exception {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(Optional.of(TEST_USER_ID));
+            assignPartiesAccessService.revokeRespondentSolicitor(caseData);
+            verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID, CaseRole.RESP_SOLICITOR.getCcdCode(), TEST_ORG_ID);
+        }
+
+        @Test
+        void givenUserNotFound_thenThrowWithMessage() {
+            FinremCaseData caseData = mock(FinremCaseData.class);
+            when(caseData.getRespondentSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(caseData.getCcdCaseId()).thenReturn(CASE_ID);
+            when(caseData.isRespondentRepresentedByASolicitor()).thenReturn(true);
+            when(caseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+            when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(Optional.empty());
+            UserNotFoundInOrganisationApiException ex = assertThrows(UserNotFoundInOrganisationApiException.class,
+                () -> assignPartiesAccessService.revokeRespondentSolicitor(caseData));
+            String message = ex.getMessage();
+            assert message != null : "Exception message should not be null";
+            assert message.contains(CASE_ID) : "Missing case id in message: " + message;
+            assert message.contains(CaseRole.RESP_SOLICITOR.getCcdCode()) : "Missing case role in message: " + message;
+        }
+    }
+
+    @Test
+    void userNotFoundInOrganisationApiException_messageConstructor() {
+        String msg = "Custom error message";
+        UserNotFoundInOrganisationApiException ex = new UserNotFoundInOrganisationApiException(msg);
+        assertEquals(msg, ex.getMessage());
     }
 
     private void verifyNotGrantingCaseRoleToUser() {

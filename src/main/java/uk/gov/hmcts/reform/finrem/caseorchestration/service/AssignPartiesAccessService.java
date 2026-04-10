@@ -140,7 +140,6 @@ public class AssignPartiesAccessService {
         String caseId = finremCaseData.getCcdCaseId();
         String applicantSolicitorEmail = finremCaseData.getAppSolicitorEmail();
         OrganisationPolicy applicantOrganisationPolicy = finremCaseData.getApplicantOrganisationPolicy();
-        String applicantOrganisationId = applicantOrganisationPolicy.getOrganisation().getOrganisationID();
 
         if (!finremCaseData.isApplicantRepresentedByASolicitor() || !isOrgIdExists(applicantOrganisationPolicy)) {
             throw new IllegalStateException(
@@ -151,7 +150,7 @@ public class AssignPartiesAccessService {
         revokeAccess(
             Long.valueOf(caseId),
             applicantSolicitorEmail,
-            applicantOrganisationId,
+            applicantOrganisationPolicy.getOrganisation().getOrganisationID(),
             CaseRole.APP_SOLICITOR.getCcdCode()
         );
     }
@@ -175,9 +174,9 @@ public class AssignPartiesAccessService {
     public void revokeRespondentSolicitor(FinremCaseData finremCaseData) throws UserNotFoundInOrganisationApiException {
         String caseId = finremCaseData.getCcdCaseId();
         String respondentSolicitorEmail = finremCaseData.getRespondentSolicitorEmail();
-        OrganisationPolicy respondentOrganisationPolicy = finremCaseData.getApplicantOrganisationPolicy();
-        String respOrgId = finremCaseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID();
-        if (!finremCaseData.isApplicantRepresentedByASolicitor() || !isOrgIdExists(respondentOrganisationPolicy)) {
+        OrganisationPolicy respondentOrganisationPolicy = finremCaseData.getRespondentOrganisationPolicy();
+
+        if (!finremCaseData.isRespondentRepresentedByASolicitor() || !isOrgIdExists(respondentOrganisationPolicy)) {
             throw new IllegalStateException(
                 "Unable to revoke respondent solicitor access: respondent is not represented by a solicitor or organisation policy is missing"
             );
@@ -186,7 +185,7 @@ public class AssignPartiesAccessService {
         revokeAccess(
             Long.valueOf(caseId),
             respondentSolicitorEmail,
-            respOrgId,
+            respondentOrganisationPolicy.getOrganisation().getOrganisationID(),
             CaseRole.RESP_SOLICITOR.getCcdCode()
         );
     }
@@ -219,7 +218,7 @@ public class AssignPartiesAccessService {
         throws UserNotFoundInOrganisationApiException {
         String userId = prdOrganisationService.findUserByEmail(email)
             .orElseThrow(() -> new UserNotFoundInOrganisationApiException(
-                String.format("CaseID %s - Attempting to revoke role {} but system is unable to find user with role %s", caseId, caseRole)
+                String.format("CaseID %s - Attempting to revoke role %s but system is unable to find user", caseId, caseRole)
             ));
         assignCaseAccessService.removeCaseRoleToUser(caseId, userId, caseRole, orgId);
     }

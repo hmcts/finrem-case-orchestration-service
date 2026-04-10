@@ -328,27 +328,22 @@ class SolicitorAccessServiceTest {
                                                                          String applicantOrganisationId,
                                                                          String beforeApplicantSolicitorEmail,
                                                                          String beforeApplicantOrganisationId) {
-
-        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.YES)
-            .applicantSolicitorEmail(applicantSolicitorEmail)
-            .contestedRespondentRepresented(YesOrNo.NO)
-            .build();
-
-        ContactDetailsWrapper contactDetailsWrapperBefore = ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.YES)
-            .applicantSolicitorEmail(beforeApplicantSolicitorEmail)
-            .contestedRespondentRepresented(YesOrNo.NO)
-            .build();
-
-        FinremCaseData caseData = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapper)
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                .applicantRepresented(YesOrNo.YES)
+                .applicantSolicitorEmail(applicantSolicitorEmail)
+                .contestedRespondentRepresented(YesOrNo.NO)
+                .build())
             .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
                 .organisationID(applicantOrganisationId).build()).build())
             .build();
 
-        FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(contactDetailsWrapperBefore)
+        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder()
+                .applicantRepresented(YesOrNo.YES)
+                .applicantSolicitorEmail(beforeApplicantSolicitorEmail)
+                .contestedRespondentRepresented(YesOrNo.NO)
+                .build())
             .applicantOrganisationPolicy(OrganisationPolicy.builder().organisation(Organisation.builder()
                 .organisationID(beforeApplicantOrganisationId).build()).build())
             .build();
@@ -361,7 +356,6 @@ class SolicitorAccessServiceTest {
                                                                           String respondentOrganisationId,
                                                                           String beforeRespondentSolicitorEmail,
                                                                           String beforeRespondentOrganisationId) {
-
         FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder()
                 .applicantRepresented(YesOrNo.NO)
