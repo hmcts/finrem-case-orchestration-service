@@ -140,7 +140,7 @@ public class AssignPartiesAccessService {
         String caseId = finremCaseData.getCcdCaseId();
         if (finremCaseData.isApplicantRepresentedByASolicitor()
             && isOrgIdExists(finremCaseData.getApplicantOrganisationPolicy())) {
-            String appSolicitorEmail = finremCaseData.getAppSolicitorEmail();
+            String appSolicitorEmail = finremCaseData.getAppSolicitorEmailIfRepresented();
             String appOrgId = finremCaseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID();
             revokeAccess(Long.valueOf(caseId), appSolicitorEmail, appOrgId, CaseRole.APP_SOLICITOR.getCcdCode());
         } else {
@@ -168,7 +168,7 @@ public class AssignPartiesAccessService {
         String caseId = finremCaseData.getCcdCaseId();
         if (finremCaseData.isRespondentRepresentedByASolicitor()
             && isOrgIdExists(finremCaseData.getRespondentOrganisationPolicy())) {
-            String respondentSolicitorEmail = finremCaseData.getRespondentSolicitorEmail();
+            String respondentSolicitorEmail = finremCaseData.getRespondentSolicitorEmailIfRepresented();
             String respOrgId = finremCaseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID();
             revokeAccess(Long.valueOf(caseId), respondentSolicitorEmail, respOrgId, CaseRole.RESP_SOLICITOR.getCcdCode());
         } else {
