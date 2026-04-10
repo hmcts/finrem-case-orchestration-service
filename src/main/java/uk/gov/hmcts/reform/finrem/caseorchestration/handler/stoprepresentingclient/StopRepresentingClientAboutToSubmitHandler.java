@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
@@ -61,6 +62,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private final StopRepresentingClientService stopRepresentingClientService;
 
+    private final GenerateCoverSheetService generateCoverSheetService;
+
     record StopRepresentingRequest(long caseId, FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
                                    RepresentativeInContext representativeInContext) {}
 
@@ -93,13 +96,14 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
                                                       ManageBarristerService manageBarristerService,
                                                       BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater,
                                                       IntervenerService intervenerService,
-                                                      StopRepresentingClientService stopRepresentingClientService) {
+                                                      StopRepresentingClientService stopRepresentingClientService, GenerateCoverSheetService generateCoverSheetService) {
         super(finremCaseDetailsMapper);
         this.nocWorkflowService = nocWorkflowService;
         this.manageBarristerService = manageBarristerService;
         this.barristerChangeCaseAccessUpdater = barristerChangeCaseAccessUpdater;
         this.intervenerService = intervenerService;
         this.stopRepresentingClientService = stopRepresentingClientService;
+        this.generateCoverSheetService = generateCoverSheetService;
     }
 
     @Override
@@ -120,7 +124,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         StopRepresentingRequest request = buildStopRepresentingRequest(callbackRequest, userAuthorisation);
         logStopRepresentingRequest(request);
 
-        processRequest(request);
+        processRequest(request, userAuthorisation);
 
         // Populating entered service address
         populateServiceAddressToParty(request);
@@ -347,7 +351,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         removeIntervenerBarristerOrganisationsMatchingOrgId(finremCaseData, targetOrg);
     }
 
-    private void processRequest(StopRepresentingRequest request) {
+    private void processRequest(StopRepresentingRequest request, String userAuthorisation) {
         FinremCaseData finremCaseData = request.finremCaseDetails.getData();
 
         // reset noc party
@@ -355,9 +359,12 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
         if (isRepresentingApplicant(request)) {
             stopRepresentingByApplicantRepresentative(finremCaseData);
+            generateCoverSheetService.generateAndSetApplicantCoverSheet(request.finremCaseDetails, userAuthorisation);
         } else if (isRepresentingRespondent(request)) {
             stopRepresentingByRespondentRepresentative(finremCaseData);
+            generateCoverSheetService.generateAndSetRespondentCoverSheet(request.finremCaseDetails, userAuthorisation);
         } else if (isRepresentingAnyInterveners(request)) {
+            // NOTE: Intervener coversheet only reflects the party address, so is unchanged when representation changes.
             if (isRepresentingAnyIntervenerBarristers(request)) {
                 stopRepresentingByIntervenerBarrister(finremCaseData, getIntervenerBarrister(request));
             } else {

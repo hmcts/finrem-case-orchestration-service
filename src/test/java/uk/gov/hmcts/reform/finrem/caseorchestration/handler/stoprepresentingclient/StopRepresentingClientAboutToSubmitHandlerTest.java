@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.stoprepresentingclient;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
@@ -80,6 +81,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     @TestLogs
     private final TestLogger logs = new TestLogger(StopRepresentingClientAboutToSubmitHandler.class);
 
+    @InjectMocks
     private StopRepresentingClientAboutToSubmitHandler underTest;
 
     @Mock
@@ -98,6 +100,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     private IntervenerService intervenerService;
 
     @Mock
+    private GenerateCoverSheetService generateCoverSheetService;
+
+    @Mock
     private StopRepresentingClientService stopRepresentingClientService;
 
     private static final String APPLICANT_ORG_ID = "APPLICANT_ORG_ID";
@@ -106,12 +111,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     private static final String INTERVENER2_ORG_ID = "INTERVENER2_ORG_ID";
     private static final String INTERVENER4_ORG_ID = "INTERVENER4_ORG_ID";
     private static final String MATCHING_ORG_ID = "MATCHING_ORG_ID";
-
-    @BeforeEach
-    void setup() {
-        underTest = new StopRepresentingClientAboutToSubmitHandler(finremCaseDetailsMapper, nocWorkflowService,
-            manageBarristerService, barristerChangeCaseAccessUpdater, intervenerService, stopRepresentingClientService);
-    }
 
     @Test
     void testCanHandle() {
