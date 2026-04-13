@@ -27,10 +27,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangePart
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.LitigantRevocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientCorresponder;
@@ -72,6 +72,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.Callback
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -118,12 +122,14 @@ class StopRepresentingClientSubmittedHandlerTest {
     private StopRepresentingClientCorresponder stopRepresentingClientCorresponder;
     @Mock
     private ManageBarristerService manageBarristerService;
+    @Mock
+    private IntervenerService intervenerService;
 
     @BeforeEach
     void setup() {
         underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, stopRepresentingClientService,
             stopRepresentingClientCorresponder, featureToggleService, applicationEventPublisher, retryExecutor,
-            manageBarristerService);
+            manageBarristerService, intervenerService);
         lenient().when(featureToggleService.isExui3990WorkaroundEnabled()).thenReturn(true);
         lenient().when(manageBarristerService.getBarristerChange(any(FinremCaseDetails.class),
             any(FinremCaseData.class), any(BarristerParty.class))).thenReturn(mock(BarristerChange.class));
@@ -176,7 +182,9 @@ class StopRepresentingClientSubmittedHandlerTest {
             mockPreparingLitigantRevocationLetterNotification();
 
             BarristerChange barristerChange = mock(BarristerChange.class);
-            when(barristerChange.getRemoved()).thenReturn(Set.of(mock(Barrister.class)));
+            when(barristerChange.getBarristerParty()).thenReturn(barristerParty);
+            Barrister barrister = mock(Barrister.class);
+            when(barristerChange.getRemoved()).thenReturn(Set.of(barrister));
             when(manageBarristerService.getBarristerChange(any(FinremCaseDetails.class),
                 any(FinremCaseData.class), eq(barristerParty))).thenReturn(barristerChange);
 
@@ -204,7 +212,29 @@ class StopRepresentingClientSubmittedHandlerTest {
                 eq("revoking %s barrister access".formatted(barristerParty.getValue())), eq(CASE_ID));
             getSafely(throwingSupplierCaptor.getValue());
             ArgumentCaptor<StopRepresentingClientInfo> infoCaptor2 = getStopRepresentingClientInfoCaptor();
-            verify(stopRepresentingClientService).revokeBarristers(infoCaptor2.capture(), eq(barristerChange));
+            verify(manageBarristerService).executeBarristerChange(CASE_ID_IN_LONG, barristerChange);
+            switch (barristerParty) {
+                case APPLICANT ->
+                    verify(stopRepresentingClientCorresponder).prepareApplicantBarristerEmailNotificationEvent(infoCaptor2.capture(),
+                        eq(barrister));
+                case RESPONDENT ->
+                    verify(stopRepresentingClientCorresponder).prepareRespondentBarristerEmailNotificationEvent(infoCaptor2.capture(),
+                        eq(barrister));
+                case INTERVENER1 ->
+                    verify(stopRepresentingClientCorresponder).prepareIntervenerBarristerEmailNotificationEvent(infoCaptor2.capture(),
+                        eq(INTERVENER_ONE), eq(barrister));
+                case INTERVENER2 ->
+                    verify(stopRepresentingClientCorresponder).prepareIntervenerBarristerEmailNotificationEvent(infoCaptor2.capture(),
+                        eq(INTERVENER_TWO), eq(barrister));
+                case INTERVENER3 ->
+                    verify(stopRepresentingClientCorresponder).prepareIntervenerBarristerEmailNotificationEvent(infoCaptor2.capture(),
+                        eq(INTERVENER_THREE), eq(barrister));
+                case INTERVENER4 ->
+                    verify(stopRepresentingClientCorresponder).prepareIntervenerBarristerEmailNotificationEvent(infoCaptor2.capture(),
+                        eq(INTERVENER_FOUR), eq(barrister));
+                default ->
+                    throw new IllegalStateException("Unexpected value: " + barristerParty);
+            }
             verifyStopRepresentingClientInfoCaptured(infoCaptor2, caseData);
 
             // Verify notification event was published correctly
@@ -227,11 +257,15 @@ class StopRepresentingClientSubmittedHandlerTest {
             mockPreparingLitigantRevocationLetterNotification();
 
             BarristerChange applicantBarristerChange = mock(BarristerChange.class);
-            when(applicantBarristerChange.getRemoved()).thenReturn(Set.of(mock(Barrister.class)));
+            Barrister applicantBarrister = mock(Barrister.class);
+            when(applicantBarristerChange.getBarristerParty()).thenReturn(BarristerParty.APPLICANT);
+            when(applicantBarristerChange.getRemoved()).thenReturn(Set.of(applicantBarrister));
             when(manageBarristerService.getBarristerChange(any(FinremCaseDetails.class),
                 any(FinremCaseData.class), eq(BarristerParty.APPLICANT))).thenReturn(applicantBarristerChange);
             BarristerChange intervenerTwoBarristerChange = mock(BarristerChange.class);
-            when(intervenerTwoBarristerChange.getRemoved()).thenReturn(Set.of(mock(Barrister.class), mock(Barrister.class)));
+            Barrister intv2Barrister = mock(Barrister.class);
+            when(intervenerTwoBarristerChange.getBarristerParty()).thenReturn(BarristerParty.INTERVENER2);
+            when(intervenerTwoBarristerChange.getRemoved()).thenReturn(Set.of(mock(Barrister.class), intv2Barrister));
             when(manageBarristerService.getBarristerChange(any(FinremCaseDetails.class),
                 any(FinremCaseData.class), eq(BarristerParty.INTERVENER2))).thenReturn(intervenerTwoBarristerChange);
 
@@ -271,8 +305,12 @@ class StopRepresentingClientSubmittedHandlerTest {
                 ).contains(a)), eq(CASE_ID));
             throwingSupplierCaptor.getAllValues().forEach(TestSetUpUtils::getSafely);
             ArgumentCaptor<StopRepresentingClientInfo> infoCaptor2 = getStopRepresentingClientInfoCaptor();
-            verify(stopRepresentingClientService).revokeBarristers(infoCaptor2.capture(), eq(applicantBarristerChange));
-            verify(stopRepresentingClientService).revokeBarristers(infoCaptor2.capture(), eq(intervenerTwoBarristerChange));
+            verify(manageBarristerService).executeBarristerChange(CASE_ID_IN_LONG, applicantBarristerChange);
+            verify(stopRepresentingClientCorresponder).prepareApplicantBarristerEmailNotificationEvent(infoCaptor2.capture(),
+                eq(applicantBarrister));
+            verify(manageBarristerService).executeBarristerChange(CASE_ID_IN_LONG, intervenerTwoBarristerChange);
+            verify(stopRepresentingClientCorresponder).prepareIntervenerBarristerEmailNotificationEvent(infoCaptor2.capture(),
+                eq(INTERVENER_TWO), eq(intv2Barrister));
             verifyStopRepresentingClientInfoCaptured(infoCaptor2, caseData);
 
             // Verify notification event was published correctly
@@ -331,7 +369,9 @@ class StopRepresentingClientSubmittedHandlerTest {
             verify(retryExecutor).supplyWithRetrySuppressException(throwingSupplierCaptor.capture(), eq("revoking intervener1 access"), eq(CASE_ID));
             getSafely(throwingSupplierCaptor.getValue());
             ArgumentCaptor<StopRepresentingClientInfo> infoCaptor2 = getStopRepresentingClientInfoCaptor();
-            verify(stopRepresentingClientService).revokeIntervenerSolicitor(infoCaptor2.capture(), eq(intervenerOne));
+            verify(intervenerService).revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerOne);
+            verify(stopRepresentingClientCorresponder).prepareIntervenerSolicitorEmailNotificationEvent(infoCaptor2.capture(),
+                eq(INTERVENER_ONE));
             verifyStopRepresentingClientInfoCaptured(infoCaptor2, caseData);
 
             // Verify notification event was published correctly
@@ -393,10 +433,14 @@ class StopRepresentingClientSubmittedHandlerTest {
             verify(retryExecutor).supplyWithRetrySuppressException(throwingSupplierCaptor.capture(), eq("revoking intervener3 access"), eq(CASE_ID));
             throwingSupplierCaptor.getAllValues().forEach(TestSetUpUtils::getSafely);
             ArgumentCaptor<StopRepresentingClientInfo> infoCaptor2 = getStopRepresentingClientInfoCaptor();
-            verify(stopRepresentingClientService).revokeIntervenerSolicitor(infoCaptor2.capture(), argThat(i
-                -> IntervenerType.INTERVENER_ONE.equals(i.getIntervenerType())));
-            verify(stopRepresentingClientService).revokeIntervenerSolicitor(infoCaptor2.capture(), argThat(i
-                -> IntervenerType.INTERVENER_THREE.equals(i.getIntervenerType())));
+            verify(intervenerService).revokeIntervenerSolicitor(eq(CASE_ID_IN_LONG), argThat(i
+                -> INTERVENER_ONE.equals(i.getIntervenerType())));
+            verify(stopRepresentingClientCorresponder).prepareIntervenerSolicitorEmailNotificationEvent(infoCaptor2.capture(),
+                eq(INTERVENER_ONE));
+            verify(intervenerService).revokeIntervenerSolicitor(eq(CASE_ID_IN_LONG), argThat(i
+                -> INTERVENER_THREE.equals(i.getIntervenerType())));
+            verify(stopRepresentingClientCorresponder).prepareIntervenerSolicitorEmailNotificationEvent(infoCaptor2.capture(),
+                eq(INTERVENER_THREE));
             verifyStopRepresentingClientInfoCaptured(infoCaptor2, caseData);
 
             // Verify notification events were published correctly

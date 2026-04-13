@@ -2,14 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingcli
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.SetUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -19,13 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils;
 
@@ -59,17 +53,11 @@ public class StopRepresentingClientService {
 
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    private final BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
-
     private final CoreCaseDataService coreCaseDataService;
-
-    private final IntervenerService intervenerService;
 
     private final CaseRoleService caseRoleService;
 
     private final IdamService idamService;
-
-    private final StopRepresentingClientCorresponder stopRepresentingClientCorresponder;
 
     /**
      * Builds a {@link RepresentativeInContext} object indicating which parties
@@ -313,75 +301,6 @@ public class StopRepresentingClientService {
         log.info("{} - about to send a NOC request to case assignment API", info.getCaseId());
         assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), clonedCaseDetails);
         return new LitigantRevocation(isApplicantForRepresentationChange, !isApplicantForRepresentationChange);
-    }
-
-    /**
-     * Revokes the solicitor for a given intervener and prepares the corresponding
-     * email notification event.
-     *
-     * <p>This method calls {@link IntervenerService#revokeIntervenerSolicitor(long, IntervenerWrapper)}
-     * to revoke the solicitor’s access. It then constructs a {@link SendCorrespondenceEventWithDescription}
-     * to notify the intervener's solicitor that representation has stopped. The email
-     * is not sent directly here; the returned event will be processed later in the
-     * correspondence workflow.</p>
-     *
-     * @param info the stop representing client event information
-     * @param intervenerWrapper wrapper containing the intervener details
-     * @return a populated {@link SendCorrespondenceEventWithDescription} for later email notification processing
-     */
-    public SendCorrespondenceEventWithDescription revokeIntervenerSolicitor(StopRepresentingClientInfo info,
-                                                                            IntervenerWrapper intervenerWrapper) {
-        intervenerService.revokeIntervenerSolicitor(info.getCaseId(), intervenerWrapper);
-        return stopRepresentingClientCorresponder
-            .prepareIntervenerSolicitorEmailNotificationEvent(info, intervenerWrapper.getIntervenerType());
-    }
-
-    /**
-     * Revokes the representation of barristers for a given case and generates
-     * corresponding email notification events for the removed barristers.
-     *
-     * <p>
-     * The method performs the following steps:
-     * <ol>
-     *     <li>Updates case access for the barristers being removed via {@code barristerChangeCaseAccessUpdater}.</li>
-     *     <li>Iterates over the list of removed barristers and generates the appropriate email notification
-     *         event depending on the {@link BarristerParty} type:
-     *         <ul>
-     *             <li>Applicant barristers</li>
-     *             <li>Respondent barristers</li>
-     *             <li>Intervener barristers (up to 4 interveners)</li>
-     *         </ul>
-     *     </li>
-     *     <li>Filters out any null notifications and returns a list of {@link SendCorrespondenceEventWithDescription}.</li>
-     * </ol>
-     *
-     * @param info           the information about the client whose barristers are being revoked
-     * @param barristerChange the details of the barrister change, including which barristers are removed
-     * @return a list of {@link SendCorrespondenceEventWithDescription} representing email notifications
-     *         to be sent for the revoked barristers; empty list if no barristers were removed
-     */
-    public List<SendCorrespondenceEventWithDescription> revokeBarristers(StopRepresentingClientInfo info, BarristerChange barristerChange) {
-        barristerChangeCaseAccessUpdater.executeBarristerChange(info.getCaseId(), barristerChange);
-
-        BarristerParty barristerParty = barristerChange.getBarristerParty();
-        return SetUtils.emptyIfNull(barristerChange.getRemoved())
-            .stream()
-            .map(b -> switch (barristerParty) {
-                case APPLICANT -> stopRepresentingClientCorresponder
-                    .prepareApplicantBarristerEmailNotificationEvent(info, b);
-                case RESPONDENT -> stopRepresentingClientCorresponder
-                    .prepareRespondentBarristerEmailNotificationEvent(info, b);
-                case INTERVENER1 -> stopRepresentingClientCorresponder
-                    .prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_ONE, b);
-                case INTERVENER2 -> stopRepresentingClientCorresponder
-                    .prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_TWO, b);
-                case INTERVENER3 -> stopRepresentingClientCorresponder
-                    .prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_THREE, b);
-                case INTERVENER4 -> stopRepresentingClientCorresponder
-                    .prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_FOUR, b);
-            })
-            .filter(Objects::nonNull)
-            .toList();
     }
 
     /**

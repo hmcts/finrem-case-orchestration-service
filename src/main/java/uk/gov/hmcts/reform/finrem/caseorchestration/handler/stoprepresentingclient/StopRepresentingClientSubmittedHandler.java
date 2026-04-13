@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.stoprepresentingcli
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.LitigantRevocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientCorresponder;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -60,13 +63,16 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
     private final RetryExecutor retryExecutor;
 
+    private final IntervenerService intervenerService;
+
     public StopRepresentingClientSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                   StopRepresentingClientService stopRepresentingClientService,
                                                   StopRepresentingClientCorresponder stopRepresentingClientCorresponder,
                                                   FeatureToggleService featureToggleService,
                                                   ApplicationEventPublisher applicationEventPublisher,
                                                   RetryExecutor retryExecutor,
-                                                  ManageBarristerService manageBarristerService) {
+                                                  ManageBarristerService manageBarristerService,
+                                                  IntervenerService intervenerService) {
         super(finremCaseDetailsMapper);
         this.stopRepresentingClientService = stopRepresentingClientService;
         this.featureToggleService = featureToggleService;
@@ -74,6 +80,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         this.retryExecutor = retryExecutor;
         this.stopRepresentingClientCorresponder = stopRepresentingClientCorresponder;
         this.manageBarristerService = manageBarristerService;
+        this.intervenerService = intervenerService;
     }
 
     @Override
@@ -170,41 +177,16 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
             .stream()
             .flatMap(intervenerWrapper ->
                 retryExecutor.supplyWithRetrySuppressException(
-                    () -> stopRepresentingClientService.revokeIntervenerSolicitor(info, intervenerWrapper),
+                    () -> {
+                        intervenerService.revokeIntervenerSolicitor(info.getCaseId(), intervenerWrapper);
+                        return stopRepresentingClientCorresponder
+                            .prepareIntervenerSolicitorEmailNotificationEvent(info, intervenerWrapper.getIntervenerType());
+                    },
                     "revoking %s access".formatted(describeIntervener(intervenerWrapper)),
                     info.getCaseIdInString()
                 ).stream()
             )
             .toList();
-    }
-
-    private List<SendCorrespondenceEventWithDescription> revokeBarristers(StopRepresentingClientInfo info) {
-        List<SendCorrespondenceEventWithDescription> events = new ArrayList<>();
-
-        for (BarristerParty party : BarristerParty.values()) {
-
-            BarristerChange barristerChange = getToBeRevokedBarristers(info, party);
-            Set<Barrister> removed = Optional.ofNullable(barristerChange)
-                .orElseThrow(() -> new IllegalStateException("barristerChange must not be null"))
-                .getRemoved();
-
-            if (CollectionUtils.isEmpty(removed)) {
-                continue;
-            }
-
-            String description = "revoking " + party.name().toLowerCase() + " barrister access";
-
-            Optional<List<SendCorrespondenceEventWithDescription>> maybeResult =
-                retryExecutor.supplyWithRetrySuppressException(
-                    () -> stopRepresentingClientService.revokeBarristers(info, barristerChange),
-                    description,
-                    info.getCaseIdInString()
-                );
-
-            maybeResult.ifPresent(events::addAll);
-        }
-
-        return events;
     }
 
     protected void revokePartiesAccessAndNotifyParties(StopRepresentingClientInfo info) {
@@ -214,9 +196,9 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         events.addAll(revokeBarristers(info));
 
         log.info("{} - about to send {} notifications to relevant parties", info.getCaseId(), events.size());
-        events.forEach(e ->
-            retryExecutor.runWithRetrySuppressException(() -> applicationEventPublisher.publishEvent(e.getEvent()),
-                e.getDescription(), info.getCaseIdInString())
+        events.forEach(event ->
+            retryExecutor.runWithRetrySuppressException(() -> applicationEventPublisher.publishEvent(event.getEvent()),
+                event.getDescription(), info.getCaseIdInString())
         );
     }
 
@@ -234,5 +216,57 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
     private BarristerChange getToBeRevokedBarristers(StopRepresentingClientInfo info, BarristerParty barristerParty) {
         return manageBarristerService.getBarristerChange(info.getCaseDetails(), info.getFinremCaseDataBefore(),
             barristerParty);
+    }
+
+    private List<SendCorrespondenceEventWithDescription> revokeBarristers(StopRepresentingClientInfo info) {
+        List<SendCorrespondenceEventWithDescription> events = new ArrayList<>();
+
+        for (BarristerParty party : BarristerParty.values()) {
+            BarristerChange barristerChange = getToBeRevokedBarristers(info, party);
+            Set<Barrister> removed = Optional.ofNullable(barristerChange)
+                .orElseThrow(() -> new IllegalStateException("barristerChange must not be null"))
+                .getRemoved();
+
+            if (CollectionUtils.isEmpty(removed)) {
+                continue;
+            }
+
+            String description = "revoking " + party.name().toLowerCase() + " barrister access";
+
+            Optional<List<SendCorrespondenceEventWithDescription>> maybeResult =
+                retryExecutor.supplyWithRetrySuppressException(
+                    () -> revokeBarristers(info, barristerChange),
+                    description,
+                    info.getCaseIdInString()
+                );
+
+            maybeResult.ifPresent(events::addAll);
+        }
+
+        return events;
+    }
+
+    private List<SendCorrespondenceEventWithDescription> revokeBarristers(StopRepresentingClientInfo info, BarristerChange barristerChange) {
+        manageBarristerService.executeBarristerChange(info.getCaseId(), barristerChange);
+
+        BarristerParty barristerParty = barristerChange.getBarristerParty();
+        return SetUtils.emptyIfNull(barristerChange.getRemoved())
+            .stream()
+            .map(barrister -> switch (barristerParty) {
+                case APPLICANT -> stopRepresentingClientCorresponder
+                    .prepareApplicantBarristerEmailNotificationEvent(info, barrister);
+                case RESPONDENT -> stopRepresentingClientCorresponder
+                    .prepareRespondentBarristerEmailNotificationEvent(info, barrister);
+                case INTERVENER1 -> stopRepresentingClientCorresponder
+                    .prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_ONE, barrister);
+                case INTERVENER2 -> stopRepresentingClientCorresponder
+                    .prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_TWO, barrister);
+                case INTERVENER3 -> stopRepresentingClientCorresponder
+                    .prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_THREE, barrister);
+                case INTERVENER4 -> stopRepresentingClientCorresponder
+                    .prepareIntervenerBarristerEmailNotificationEvent(info, IntervenerType.INTERVENER_FOUR, barrister);
+            })
+            .filter(Objects::nonNull)
+            .toList();
     }
 }

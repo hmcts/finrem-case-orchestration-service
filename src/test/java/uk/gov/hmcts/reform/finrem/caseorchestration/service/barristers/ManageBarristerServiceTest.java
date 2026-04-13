@@ -7,7 +7,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.BarristerUpdateDifferenceCalculator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -17,33 +19,43 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG2_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 
 @ExtendWith(MockitoExtension.class)
 class ManageBarristerServiceTest {
 
     @InjectMocks
+    @Spy
     private ManageBarristerService manageBarristerService;
     @Mock
     private BarristerUpdateDifferenceCalculator barristerUpdateDifferenceCalculator;
     @Mock
     private PrdOrganisationService organisationService;
     @Mock
-    private SystemUserService systemUserService;
+    private AssignCaseAccessService assignCaseAccessService;
 
     @Test
     void givenCaseWorkerRunsManageBarristerEvent_whenGetManageBarristerParty_thenReturnSelectedParty() {
@@ -144,9 +156,8 @@ class ManageBarristerServiceTest {
 
     @Test
     void testAddUserIdToBarristerData() {
-        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
-        when(organisationService.findUserByEmail("barrister1@test.com", AUTH_TOKEN)).thenReturn(Optional.of("barrister1-userid"));
-        when(organisationService.findUserByEmail("barrister2@test.com", AUTH_TOKEN)).thenReturn(Optional.of("barrister2-userid"));
+        when(organisationService.findUserByEmail("barrister1@test.com")).thenReturn(Optional.of("barrister1-userid"));
+        when(organisationService.findUserByEmail("barrister2@test.com")).thenReturn(Optional.of("barrister2-userid"));
 
         List<BarristerCollectionItem> barristers = List.of(
             BarristerCollectionItem.builder()
@@ -164,7 +175,7 @@ class ManageBarristerServiceTest {
         manageBarristerService.addUserIdToBarristerData(barristers);
 
         assertThat(barristers.getFirst().getValue().getUserId()).isEqualTo("barrister1-userid");
-        assertThat(barristers.get(1).getValue().getUserId()).isEqualTo("barrister2-userid");
+        assertThat(barristers.getLast().getValue().getUserId()).isEqualTo("barrister2-userid");
     }
 
     @Test
@@ -186,6 +197,68 @@ class ManageBarristerServiceTest {
             caseDetailsBefore.getData(), CaseRole.CASEWORKER);
 
         assertThat(barristerChange).isEqualTo(calculatedBarristerChange);
+    }
+
+    @Test
+    void testExecuteBarristerChange() {
+        BarristerParty barristerParty = mock(BarristerParty.class);
+
+        BarristerChange barristerChange = mock(BarristerChange.class);
+        when(barristerChange.getBarristerParty()).thenReturn(barristerParty);
+
+        Barrister barristerAdded = mock(Barrister.class);
+        when(barristerAdded.getUserId()).thenReturn(TEST_USER_ID);
+        when(barristerAdded.getOrganisation()).thenReturn(TestSetUpUtils.organisation(TEST_ORG_ID));
+        when(barristerChange.getAdded()).thenReturn(
+          Set.of(barristerAdded)
+        );
+        Barrister barristerRemoved = mock(Barrister.class);
+        when(barristerRemoved.getUserId()).thenReturn("userIdToBeRemoved");
+        when(barristerRemoved.getOrganisation()).thenReturn(TestSetUpUtils.organisation(TEST_ORG2_ID));
+        when(barristerChange.getRemoved()).thenReturn(
+            Set.of(barristerRemoved)
+        );
+
+        CaseRole caseRole = mock(CaseRole.class);
+        when(caseRole.getCcdCode()).thenReturn(TEST_CASE_ROLE);
+        when(manageBarristerService.getBarristerCaseRole(barristerParty)).thenReturn(caseRole);
+
+        manageBarristerService.executeBarristerChange(CASE_ID_IN_LONG, barristerChange);
+
+        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID, TEST_CASE_ROLE, TEST_ORG_ID);
+        verify(assignCaseAccessService).removeCaseRoleToUser(CASE_ID_IN_LONG, "userIdToBeRemoved", TEST_CASE_ROLE,
+            TEST_ORG2_ID);
+    }
+
+    @Test
+    void testExecuteBarristerChangeWhenRemoveUserIdMissing() {
+        BarristerParty barristerParty = mock(BarristerParty.class);
+
+        BarristerChange barristerChange = mock(BarristerChange.class);
+        when(barristerChange.getBarristerParty()).thenReturn(barristerParty);
+
+        Barrister barristerAdded = mock(Barrister.class);
+        when(barristerAdded.getUserId()).thenReturn(TEST_USER_ID);
+        when(barristerAdded.getOrganisation()).thenReturn(TestSetUpUtils.organisation(TEST_ORG_ID));
+        when(barristerChange.getAdded()).thenReturn(
+            Set.of(barristerAdded)
+        );
+        Barrister barristerRemoved = mock(Barrister.class);
+        when(barristerRemoved.getUserId()).thenReturn(null);
+        when(barristerRemoved.getOrganisation()).thenReturn(TestSetUpUtils.organisation(TEST_ORG2_ID));
+        when(barristerChange.getRemoved()).thenReturn(
+            Set.of(barristerRemoved)
+        );
+
+        CaseRole caseRole = mock(CaseRole.class);
+        when(caseRole.getCcdCode()).thenReturn(TEST_CASE_ROLE);
+        when(manageBarristerService.getBarristerCaseRole(barristerParty)).thenReturn(caseRole);
+
+        manageBarristerService.executeBarristerChange(CASE_ID_IN_LONG, barristerChange);
+
+        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID_IN_LONG, TEST_USER_ID, TEST_CASE_ROLE, TEST_ORG_ID);
+        verify(assignCaseAccessService, never()).removeCaseRoleToUser(eq(CASE_ID_IN_LONG), anyString(), eq(TEST_CASE_ROLE),
+            eq(TEST_ORG2_ID));
     }
 
     private FinremCaseDetails createCaseDetails(BarristerParty barristerParty) {

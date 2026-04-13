@@ -12,11 +12,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.util.List;
+import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
@@ -26,7 +28,7 @@ public class ManageBarristerService {
 
     private final BarristerUpdateDifferenceCalculator barristerUpdateDifferenceCalculator;
     private final PrdOrganisationService organisationService;
-    private final SystemUserService systemUserService;
+    private final AssignCaseAccessService assignCaseAccessService;
 
     /**
      * Gets the party that a barrister is being added or removed for in the Manage Barrister event.
@@ -93,11 +95,9 @@ public class ManageBarristerService {
      * @param barristers the list of barristers to update
      */
     public void addUserIdToBarristerData(List<BarristerCollectionItem> barristers) {
-        String authToken = systemUserService.getSysUserToken();
-
         barristers.stream()
             .map(BarristerCollectionItem::getValue)
-            .forEach(barrister -> organisationService.findUserByEmail(barrister.getEmail(), authToken)
+            .forEach(barrister -> organisationService.findUserByEmail(barrister.getEmail())
                 .ifPresent(barrister::setUserId));
     }
 
@@ -135,5 +135,45 @@ public class ManageBarristerService {
             .toList();
 
         return barristerUpdateDifferenceCalculator.calculate(barristerParty, barristersBefore, barristers);
+    }
+
+    /**
+     * Applies access changes for barristers on a case.
+     *
+     * <p>This method determines the appropriate {@link CaseRole} for the given
+     * barrister party and updates case access accordingly. Barristers listed in
+     * {@code barristerChange.getAdded()} are granted access, while those in
+     * {@code barristerChange.getRemoved()} have their access removed.
+     *
+     * <p><strong>Note:</strong> This method replaces
+     * {@code BarristerChangeCaseAccessUpdater.executeBarristerChange}.
+     *
+     * @param caseId          the unique identifier of the case
+     * @param barristerChange the object describing which barristers to grant or remove access
+     */
+    public void executeBarristerChange(long caseId, BarristerChange barristerChange) {
+        CaseRole caseRole = getBarristerCaseRole(barristerChange.getBarristerParty());
+        barristerChange.getAdded()
+            .forEach(barristerToAdd -> addUserToCase(caseId, caseRole, barristerToAdd));
+        barristerChange.getRemoved()
+            .forEach(barristerToRemove -> removeUserFromCase(caseId, caseRole, barristerToRemove));
+    }
+
+    private void addUserToCase(long caseId, CaseRole caseRole, Barrister barristerToAdd) {
+        String orgId = barristerToAdd.getOrganisation().getOrganisationID();
+        assignCaseAccessService.grantCaseRoleToUser(caseId, barristerToAdd.getUserId(), caseRole.getCcdCode(), orgId);
+    }
+
+    private void removeUserFromCase(long caseId, CaseRole caseRole, Barrister barristerToRemove) {
+        Optional<String> userId = ofNullable(barristerToRemove.getUserId());
+        if (userId.isEmpty()) {
+            userId = organisationService.findUserByEmail(barristerToRemove.getEmail());
+        }
+
+        String orgId = barristerToRemove.getOrganisation().getOrganisationID();
+        userId.ifPresentOrElse(
+            id -> assignCaseAccessService.removeCaseRoleToUser(caseId, id, caseRole.getCcdCode(), orgId),
+            () -> log.warn("Case ID {}: Could not find user to remove with organisation id {}", caseId, orgId)
+        );
     }
 }

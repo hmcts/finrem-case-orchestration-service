@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -15,10 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -31,30 +28,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,7 +59,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG2_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
@@ -102,13 +87,7 @@ class StopRepresentingClientServiceTest {
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Mock
-    private BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
-
-    @Mock
     private CoreCaseDataService coreCaseDataService;
-
-    @Mock
-    private IntervenerService intervenerService;
 
     @Mock
     private IdamService idamService;
@@ -118,14 +97,10 @@ class StopRepresentingClientServiceTest {
 
     private StopRepresentingClientService underTest;
 
-    @Mock
-    private StopRepresentingClientCorresponder stopRepresentingClientCorresponder;
-
     @BeforeEach
     void setup() {
         underTest = spy(new StopRepresentingClientService(assignCaseAccessService, systemUserService, finremCaseDetailsMapper,
-            barristerChangeCaseAccessUpdater, coreCaseDataService, intervenerService,
-            caseRoleService, idamService, stopRepresentingClientCorresponder));
+            coreCaseDataService, caseRoleService, idamService));
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
     }
 
@@ -284,273 +259,6 @@ class StopRepresentingClientServiceTest {
 
         List<IntervenerWrapper> actual = underTest.getToBeRevokedIntervenerSolicitors(info);
         assertThat(actual).containsExactly(originalWrapper, originalTwoWrapper);
-    }
-
-    @Nested
-    class RevokeBarristersTests {
-
-        @ParameterizedTest
-        @ValueSource(ints = {1, 5})
-        void shouldRevokeMultipleApplicantBarristersDynamically(int numBarristers) {
-            // ---------- Given ----------
-            FinremCaseData finremCaseData = mock(FinremCaseData.class);
-            when(finremCaseData.getCcdCaseId()).thenReturn(CASE_ID);
-
-            FinremCaseDetails infoCaseDetails = mock(FinremCaseDetails.class);
-            when(infoCaseDetails.getData()).thenReturn(finremCaseData);
-
-            FinremCaseDetails infoCaseDetailsBefore = mock(FinremCaseDetails.class);
-
-            StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
-                .userAuthorisation(AUTH_TOKEN)
-                .caseDetails(infoCaseDetails)
-                .caseDetailsBefore(infoCaseDetailsBefore)
-                .build();
-
-            // dynamically generate any number of barristers
-            Set<Barrister> removedBarristers = IntStream.rangeClosed(1, numBarristers)
-                .mapToObj(i -> mock(Barrister.class, "barrister" + i))
-                .collect(Collectors.toSet());
-
-            BarristerChange barristerChange = mock(BarristerChange.class);
-            when(barristerChange.getBarristerParty()).thenReturn(BarristerParty.APPLICANT);
-            when(barristerChange.getRemoved()).thenReturn(removedBarristers);
-
-            // stub email notifications for each barrister dynamically
-            Map<Barrister, SendCorrespondenceEventWithDescription> eventsWithDesc = removedBarristers.stream()
-                .collect(Collectors.toMap(
-                    b -> b,
-                    b -> {
-                        SendCorrespondenceEventWithDescription eventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
-                        when(stopRepresentingClientCorresponder.prepareApplicantBarristerEmailNotificationEvent(info, b))
-                            .thenReturn(eventWithDesc);
-                        return eventWithDesc;
-                    }
-                ));
-
-            // ---------- Act ----------
-            var result = underTest.revokeBarristers(info, barristerChange);
-
-            // ---------- Then ----------
-            assertAll(
-                () -> assertThat(result)
-                    .containsExactlyInAnyOrderElementsOf(eventsWithDesc.values()),
-
-                () -> removedBarristers.forEach(b ->
-                    verify(stopRepresentingClientCorresponder).prepareApplicantBarristerEmailNotificationEvent(info, b)
-                ),
-
-                () -> verify(barristerChangeCaseAccessUpdater)
-                    .executeBarristerChange(CASE_ID_IN_LONG, barristerChange)
-            );
-        }
-
-        @ParameterizedTest
-        @ValueSource(ints = {1, 5})
-        void shouldRevokeMultipleRespondentBarristersDynamically(int numBarristers) {
-            // ---------- Given ----------
-            FinremCaseData finremCaseData = mock(FinremCaseData.class);
-            when(finremCaseData.getCcdCaseId()).thenReturn(CASE_ID);
-
-            FinremCaseDetails infoCaseDetails = mock(FinremCaseDetails.class);
-            when(infoCaseDetails.getData()).thenReturn(finremCaseData);
-
-            FinremCaseDetails infoCaseDetailsBefore = mock(FinremCaseDetails.class);
-
-            StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
-                .userAuthorisation(AUTH_TOKEN)
-                .caseDetails(infoCaseDetails)
-                .caseDetailsBefore(infoCaseDetailsBefore)
-                .build();
-
-            // dynamically generate any number of barristers
-            Set<Barrister> removedBarristers = IntStream.rangeClosed(1, numBarristers)
-                .mapToObj(i -> mock(Barrister.class, "barrister" + i))
-                .collect(Collectors.toSet());
-
-            BarristerChange barristerChange = mock(BarristerChange.class);
-            when(barristerChange.getBarristerParty()).thenReturn(BarristerParty.RESPONDENT);
-            when(barristerChange.getRemoved()).thenReturn(removedBarristers);
-
-            // stub email notifications for each barrister dynamically
-            Map<Barrister, SendCorrespondenceEventWithDescription> eventsWithDesc = removedBarristers.stream()
-                .collect(Collectors.toMap(
-                    b -> b,
-                    b -> {
-                        SendCorrespondenceEventWithDescription eventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
-                        when(stopRepresentingClientCorresponder.prepareRespondentBarristerEmailNotificationEvent(info, b))
-                            .thenReturn(eventWithDesc);
-                        return eventWithDesc;
-                    }
-                ));
-
-            // ---------- Act ----------
-            var result = underTest.revokeBarristers(info, barristerChange);
-
-            // ---------- Then ----------
-            assertAll(
-                () -> assertThat(result)
-                    .containsExactlyInAnyOrderElementsOf(eventsWithDesc.values()),
-
-                () -> removedBarristers.forEach(b ->
-                    verify(stopRepresentingClientCorresponder).prepareRespondentBarristerEmailNotificationEvent(info, b)
-                ),
-
-                () -> verify(barristerChangeCaseAccessUpdater)
-                    .executeBarristerChange(CASE_ID_IN_LONG, barristerChange)
-            );
-        }
-
-        static Stream<Arguments> shouldRevokeMultipleIntervenerBarristersDynamically() {
-            int[] counts = {1, 5};
-
-            IntervenerType[] intervenerTypes = IntervenerType.values();
-
-            BarristerParty[] barristerParties = { BarristerParty.INTERVENER1, BarristerParty.INTERVENER2,
-                BarristerParty.INTERVENER3, BarristerParty.INTERVENER4 };
-
-            return Arrays.stream(counts)
-                .boxed()
-                .flatMap(count ->
-                    IntStream.range(0, intervenerTypes.length)
-                        .mapToObj(i -> Arguments.of(
-                            count,
-                            intervenerTypes[i],
-                            barristerParties[i]
-                        ))
-                );
-        }
-
-        @ParameterizedTest
-        @MethodSource
-        void shouldRevokeMultipleIntervenerBarristersDynamically(int numBarristers,
-                                                                 IntervenerType intervenerType,
-                                                                 BarristerParty intervenerBarristerParty) {
-            // ---------- Given ----------
-            FinremCaseData finremCaseData = mock(FinremCaseData.class);
-            when(finremCaseData.getCcdCaseId()).thenReturn(CASE_ID);
-
-            FinremCaseDetails infoCaseDetails = mock(FinremCaseDetails.class);
-            when(infoCaseDetails.getData()).thenReturn(finremCaseData);
-
-            FinremCaseDetails infoCaseDetailsBefore = mock(FinremCaseDetails.class);
-
-            StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
-                .userAuthorisation(AUTH_TOKEN)
-                .caseDetails(infoCaseDetails)
-                .caseDetailsBefore(infoCaseDetailsBefore)
-                .build();
-
-            // dynamically generate any number of barristers
-            Set<Barrister> removedBarristers = IntStream.rangeClosed(1, numBarristers)
-                .mapToObj(i -> mock(Barrister.class, "barrister" + i))
-                .collect(Collectors.toSet());
-
-            BarristerChange barristerChange = mock(BarristerChange.class);
-            when(barristerChange.getBarristerParty()).thenReturn(intervenerBarristerParty);
-            when(barristerChange.getRemoved()).thenReturn(removedBarristers);
-
-            // stub email notifications for each barrister dynamically
-            Map<Barrister, SendCorrespondenceEventWithDescription> eventWithDescriptionMap = removedBarristers.stream()
-                .collect(Collectors.toMap(
-                    b -> b,
-                    b -> {
-                        SendCorrespondenceEventWithDescription eventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
-                        when(stopRepresentingClientCorresponder.prepareIntervenerBarristerEmailNotificationEvent(info, intervenerType, b))
-                            .thenReturn(eventWithDesc);
-                        return eventWithDesc;
-                    }
-                ));
-
-            // ---------- Act ----------
-            var result = underTest.revokeBarristers(info, barristerChange);
-
-            // ---------- Then ----------
-            assertAll(
-                () -> assertThat(result)
-                    .containsExactlyInAnyOrderElementsOf(eventWithDescriptionMap.values()),
-
-                () -> removedBarristers.forEach(b ->
-                    verify(stopRepresentingClientCorresponder).prepareIntervenerBarristerEmailNotificationEvent(info, intervenerType, b)
-                ),
-
-                () -> verify(barristerChangeCaseAccessUpdater)
-                    .executeBarristerChange(CASE_ID_IN_LONG, barristerChange)
-            );
-        }
-    }
-
-    @Nested
-    class RevokeIntervenerSolicitorTest {
-
-        SendCorrespondenceEventWithDescription intv1Event = mock(SendCorrespondenceEventWithDescription.class);
-        SendCorrespondenceEventWithDescription intv2Event = mock(SendCorrespondenceEventWithDescription.class);
-        SendCorrespondenceEventWithDescription intv3Event = mock(SendCorrespondenceEventWithDescription.class);
-        SendCorrespondenceEventWithDescription intv4Event = mock(SendCorrespondenceEventWithDescription.class);
-
-        static Stream<Arguments> shouldRevokeIntervenerSolicitor_andReturnNotificationEvent() {
-
-            IntervenerType[] intervenerTypes = IntervenerType.values();
-            Supplier<?>[] intervenerBuilders = new Supplier[]{
-                () -> IntervenerOne.builder().build(),
-                () -> IntervenerTwo.builder().build(),
-                () -> IntervenerThree.builder().build(),
-                () -> IntervenerFour.builder().build()
-            };
-
-            List<Arguments> arguments = new ArrayList<>();
-            for (int i = 0; i < 4; i++) {
-                arguments.add(Arguments.of(
-                    intervenerBuilders[i].get(),
-                    intervenerTypes[i]
-                ));
-            }
-
-            return arguments.stream();
-        }
-
-        @ParameterizedTest
-        @MethodSource
-        void shouldRevokeIntervenerSolicitor_andReturnNotificationEvent(IntervenerWrapper intervenerWrapper,
-                                                                        IntervenerType intervenerType) {
-            // given
-            FinremCaseData finremCaseData = mock(FinremCaseData.class);
-            when(finremCaseData.getCcdCaseId()).thenReturn(CASE_ID);
-            FinremCaseDetails infoCaseDetails = mock(FinremCaseDetails.class);
-            when(infoCaseDetails.getData()).thenReturn(finremCaseData);
-            FinremCaseDetails infoCaseDetailsBefore = mock(FinremCaseDetails.class);
-            StopRepresentingClientInfo info = StopRepresentingClientInfo.builder()
-                .userAuthorisation(AUTH_TOKEN)
-                .caseDetails(infoCaseDetails)
-                .caseDetailsBefore(infoCaseDetailsBefore)
-                .build();
-
-            IntervenerType[] intervenerTypes = IntervenerType.values();
-            SendCorrespondenceEventWithDescription[] expectedEvent = {intv1Event, intv2Event, intv3Event,
-                intv4Event};
-            for (int i = 0; i < 4; i++) {
-                lenient()
-                    .when(stopRepresentingClientCorresponder
-                        .prepareIntervenerSolicitorEmailNotificationEvent(
-                            info,
-                            intervenerTypes[i]
-                        ))
-                    .thenReturn(expectedEvent[i]);
-            }
-
-            // when
-            SendCorrespondenceEventWithDescription actual = underTest.revokeIntervenerSolicitor(info, intervenerWrapper);
-
-            // then
-            verify(intervenerService).revokeIntervenerSolicitor(CASE_ID_IN_LONG, intervenerWrapper);
-
-
-            assertAll(
-                () -> assertThat(actual).isEqualTo(expectedEvent[intervenerType.getIntervenerId() - 1]),
-                () -> verify(stopRepresentingClientCorresponder)
-                    .prepareIntervenerSolicitorEmailNotificationEvent(info, intervenerType)
-            );
-        }
     }
 
     @Nested
