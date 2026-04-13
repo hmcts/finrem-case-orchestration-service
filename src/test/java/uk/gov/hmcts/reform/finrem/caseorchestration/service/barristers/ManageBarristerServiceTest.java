@@ -209,15 +209,11 @@ class ManageBarristerServiceTest {
         Barrister barristerAdded = mock(Barrister.class);
         when(barristerAdded.getUserId()).thenReturn(TEST_USER_ID);
         when(barristerAdded.getOrganisation()).thenReturn(TestSetUpUtils.organisation(TEST_ORG_ID));
-        when(barristerChange.getAdded()).thenReturn(
-          Set.of(barristerAdded)
-        );
+        when(barristerChange.getAdded()).thenReturn(Set.of(barristerAdded));
         Barrister barristerRemoved = mock(Barrister.class);
         when(barristerRemoved.getUserId()).thenReturn("userIdToBeRemoved");
         when(barristerRemoved.getOrganisation()).thenReturn(TestSetUpUtils.organisation(TEST_ORG2_ID));
-        when(barristerChange.getRemoved()).thenReturn(
-            Set.of(barristerRemoved)
-        );
+        when(barristerChange.getRemoved()).thenReturn(Set.of(barristerRemoved));
 
         CaseRole caseRole = mock(CaseRole.class);
         when(caseRole.getCcdCode()).thenReturn(TEST_CASE_ROLE);

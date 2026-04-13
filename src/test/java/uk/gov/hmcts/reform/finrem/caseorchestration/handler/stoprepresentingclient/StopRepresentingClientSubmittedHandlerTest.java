@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.function.ThrowingSupplier;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
@@ -32,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.LitigantRevocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
@@ -42,8 +45,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,6 +74,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThr
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingSupplierCaptor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.runSafely;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -85,18 +91,9 @@ class StopRepresentingClientSubmittedHandlerTest {
         return ArgumentCaptor.forClass(StopRepresentingClientInfo.class);
     }
 
-    private static FinremCaseData buildFinremCaseData(NoticeOfChangeParty party) {
-        return FinremCaseData.builder()
-            .contactDetailsWrapper(
-                ContactDetailsWrapper.builder()
-                    .nocParty(party)
-                    .build()
-            )
-            .build();
-    }
-
     private static void verifyStopRepresentingClientInfoCaptured(ArgumentCaptor<StopRepresentingClientInfo> captor,
                                                                  FinremCaseData caseData) {
+        assertThat(captor.getValue()).isNotNull();
         captor.getAllValues().forEach(a ->
             assertThat(a)
                 .extracting(
@@ -124,12 +121,16 @@ class StopRepresentingClientSubmittedHandlerTest {
     private ManageBarristerService manageBarristerService;
     @Mock
     private IntervenerService intervenerService;
+    @Mock
+    private CoreCaseDataService coreCaseDataService;
+    @Mock
+    private CaseType caseType;
 
     @BeforeEach
     void setup() {
         underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, stopRepresentingClientService,
             stopRepresentingClientCorresponder, featureToggleService, applicationEventPublisher, retryExecutor,
-            manageBarristerService, intervenerService);
+            manageBarristerService, intervenerService, coreCaseDataService);
         lenient().when(featureToggleService.isExui3990WorkaroundEnabled()).thenReturn(true);
         lenient().when(manageBarristerService.getBarristerChange(any(FinremCaseDetails.class),
             any(FinremCaseData.class), any(BarristerParty.class))).thenReturn(mock(BarristerChange.class));
@@ -499,12 +500,12 @@ class StopRepresentingClientSubmittedHandlerTest {
             // ---------- Then ----------
             verifyRevokeApplicantSolicitorOrRespondentSolicitorInvoked(party);
             // Verify correct data was passed to clean-up method
-            ArgumentCaptor<StopRepresentingClientInfo> infoCaptor =
-                getStopRepresentingClientInfoCaptor();
+            ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> captor = ArgumentCaptor.forClass(Function.class);
+            verify(coreCaseDataService)
+                .performPostSubmitCallback(eq(caseType), eq(CASE_ID_IN_LONG), eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()), captor.capture());
 
-            verify(stopRepresentingClientService)
-                .performCleanUpAfterNocWorkflow(infoCaptor.capture());
-            verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
+            assertThat(captor.getValue().apply(mock(CaseDetails.class)))
+                .containsEntry("changeOrganisationRequestField", null);
         }
 
         @ParameterizedTest
@@ -537,8 +538,7 @@ class StopRepresentingClientSubmittedHandlerTest {
                 );
 
             // Clean-up service must NOT be called directly
-            verify(stopRepresentingClientService, never())
-                .performCleanUpAfterNocWorkflow(any(StopRepresentingClientInfo.class));
+            verifyNoMoreInteractions(coreCaseDataService);
         }
 
         @ParameterizedTest
@@ -782,5 +782,16 @@ class StopRepresentingClientSubmittedHandlerTest {
             eq("preparing litigant letter notifications"),
             eq(CASE_ID)
         )).thenReturn(Optional.of(List.of()));
+    }
+
+    private FinremCaseData buildFinremCaseData(NoticeOfChangeParty party) {
+        return FinremCaseData.builder()
+            .ccdCaseType(caseType)
+            .contactDetailsWrapper(
+                ContactDetailsWrapper.builder()
+                    .nocParty(party)
+                    .build()
+            )
+            .build();
     }
 }

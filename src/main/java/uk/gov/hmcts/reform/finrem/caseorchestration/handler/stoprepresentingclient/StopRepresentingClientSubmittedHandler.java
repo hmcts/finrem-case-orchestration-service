@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.Send
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.LitigantRevocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
@@ -41,11 +42,13 @@ import java.util.concurrent.TimeUnit;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.INTERNAL_CHANGE_UPDATE_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isApplicantForRepresentationChange;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty.isRespondentForRepresentationChange;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils.clearChangeOrganisationRequestField;
 
 @Slf4j
 @Service
@@ -61,6 +64,8 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    private final CoreCaseDataService coreCaseDataService;
+
     private final RetryExecutor retryExecutor;
 
     private final IntervenerService intervenerService;
@@ -72,7 +77,8 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                                                   ApplicationEventPublisher applicationEventPublisher,
                                                   RetryExecutor retryExecutor,
                                                   ManageBarristerService manageBarristerService,
-                                                  IntervenerService intervenerService) {
+                                                  IntervenerService intervenerService,
+                                                  CoreCaseDataService coreCaseDataService) {
         super(finremCaseDetailsMapper);
         this.stopRepresentingClientService = stopRepresentingClientService;
         this.featureToggleService = featureToggleService;
@@ -81,6 +87,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         this.stopRepresentingClientCorresponder = stopRepresentingClientCorresponder;
         this.manageBarristerService = manageBarristerService;
         this.intervenerService = intervenerService;
+        this.coreCaseDataService = coreCaseDataService;
     }
 
     @Override
@@ -154,7 +161,12 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
             if (litigantRevocation.wasRevoked()) {
                 // Call to internal service (coreCaseDataApi) to update the case data to clear ChangeOrganisationRequestField
                 retryExecutor.runWithRetrySuppressException(
-                    () -> stopRepresentingClientService.performCleanUpAfterNocWorkflow(info),
+                    () -> {
+                        // to reset the targeted field by case id and case type only
+                        // coreCaseDataService loads the case data again in the internal event call.
+                        coreCaseDataService.performPostSubmitCallback(info.getCaseDetails().getCaseType(), info.getCaseId(),
+                            INTERNAL_CHANGE_UPDATE_CASE.getCcdType(), caseDetails -> clearChangeOrganisationRequestField());
+                    },
                     "cleaning up after noc workflow",
                     info.getCaseIdInString());
             }

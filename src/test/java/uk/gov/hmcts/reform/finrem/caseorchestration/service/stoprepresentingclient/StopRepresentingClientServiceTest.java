@@ -8,7 +8,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -34,24 +33,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -59,7 +53,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG2_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
@@ -87,9 +80,6 @@ class StopRepresentingClientServiceTest {
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Mock
-    private CoreCaseDataService coreCaseDataService;
-
-    @Mock
     private IdamService idamService;
 
     @Mock
@@ -100,38 +90,8 @@ class StopRepresentingClientServiceTest {
     @BeforeEach
     void setup() {
         underTest = spy(new StopRepresentingClientService(assignCaseAccessService, systemUserService, finremCaseDetailsMapper,
-            coreCaseDataService, caseRoleService, idamService));
+            caseRoleService, idamService));
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
-    }
-
-    @Test
-    void shouldPerformCleanupAfterNocWorkflow() {
-        // given
-        CaseType caseType = mock(CaseType.class);
-        FinremCaseDetails caseDetailsWrapper = mock(FinremCaseDetails.class);
-        StopRepresentingClientInfo info = mock(StopRepresentingClientInfo.class);
-
-        when(caseDetailsWrapper.getCaseType()).thenReturn(caseType);
-        when(info.getCaseDetails()).thenReturn(caseDetailsWrapper);
-        when(info.getCaseId()).thenReturn(CASE_ID_IN_LONG);
-
-        ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> callbackCaptor =
-            ArgumentCaptor.forClass(Function.class);
-
-        // when
-        underTest.performCleanUpAfterNocWorkflow(info);
-
-        // then
-        verify(coreCaseDataService).performPostSubmitCallback(
-            eq(caseType),
-            eq(CASE_ID_IN_LONG),
-            eq("internal-change-UPDATE_CASE"),
-            callbackCaptor.capture()
-        );
-
-        Map<String, Object> result = callbackCaptor.getValue().apply(mock(CaseDetails.class));
-        assertThat(result)
-            .contains(entry("changeOrganisationRequestField", null));
     }
 
     @Test
