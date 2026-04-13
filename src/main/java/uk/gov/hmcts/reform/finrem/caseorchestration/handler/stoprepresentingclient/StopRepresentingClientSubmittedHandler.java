@@ -132,7 +132,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         Optional<LitigantRevocation> litigantRevocationOptional =
             retryExecutor.supplyWithRetrySuppressException(
                 () -> stopRepresentingClientService.revokeApplicantSolicitorOrRespondentSolicitor(info),
-                "revoking %s access".formatted(describeLigtantPartyString(info.getFinremCaseData())),
+                "revoking %s access".formatted(describeLitigantPartyString(info.getFinremCaseData())),
                 info.getCaseIdInString());
 
         List<SendCorrespondenceEventWithDescription> events = new ArrayList<>();
@@ -221,7 +221,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
             .orElse("(intervener#unknown)");
     }
 
-    private String describeLigtantPartyString(FinremCaseData finremCaseData) {
+    private String describeLitigantPartyString(FinremCaseData finremCaseData) {
         String party = isApplicantForRepresentationChange(finremCaseData) ? "applicant" : "";
         party = (isBlank(party) && isRespondentForRepresentationChange(finremCaseData)) ? "respondent" : party;
         return party;
