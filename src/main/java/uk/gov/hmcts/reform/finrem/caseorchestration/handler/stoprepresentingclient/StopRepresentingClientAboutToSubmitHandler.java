@@ -358,11 +358,11 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         finremCaseData.getContactDetailsWrapper().setNocParty(null);
 
         if (isRepresentingApplicant(request)) {
-            stopRepresentingByApplicantRepresentative(finremCaseData);
             generateCoverSheetService.generateAndSetApplicantCoverSheet(request.finremCaseDetails, userAuthorisation);
+            stopRepresentingByApplicantRepresentative(finremCaseData);
         } else if (isRepresentingRespondent(request)) {
-            stopRepresentingByRespondentRepresentative(finremCaseData);
             generateCoverSheetService.generateAndSetRespondentCoverSheet(request.finremCaseDetails, userAuthorisation);
+            stopRepresentingByRespondentRepresentative(finremCaseData);
         } else if (isRepresentingAnyInterveners(request)) {
             // NOTE: Intervener coversheet only reflects the party address, so is unchanged when representation changes.
             if (isRepresentingAnyIntervenerBarristers(request)) {
