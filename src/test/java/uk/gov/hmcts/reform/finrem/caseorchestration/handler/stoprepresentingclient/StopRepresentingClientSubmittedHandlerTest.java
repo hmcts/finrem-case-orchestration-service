@@ -10,6 +10,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.function.ThrowingSupplier;
@@ -35,6 +37,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.LitigantRevocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
@@ -504,8 +507,10 @@ class StopRepresentingClientSubmittedHandlerTest {
             verify(coreCaseDataService)
                 .performPostSubmitCallback(eq(caseType), eq(CASE_ID_IN_LONG), eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()), captor.capture());
 
-            assertThat(captor.getValue().apply(mock(CaseDetails.class)))
-                .containsEntry("changeOrganisationRequestField", null);
+            try (MockedStatic<NocUtils> mockedStatic = Mockito.mockStatic(NocUtils.class)) {
+                captor.getValue().apply(mock(CaseDetails.class));
+                mockedStatic.verify(NocUtils::clearChangeOrganisationRequestField);
+            }
         }
 
         @ParameterizedTest
