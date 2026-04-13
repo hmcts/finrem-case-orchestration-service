@@ -102,19 +102,24 @@ public class StopRepresentingClientCorresponder {
     }
 
     /**
-     * Prepares a list of {@link SendCorrespondenceEventWithDescription} for notifying litigants
-     * (applicant or respondent) whose representation has been revoked.
+     * Prepares email notification events for representatives whose access has been revoked.
      *
-     * <p>This method does not send the notifications directly. It constructs the
-     * correspondence events which will be processed later
-     * in the workflow to trigger the actual notifications.</p>
+     * <p>If the {@link LitigantRevocation} indicates that a revocation has occurred, this method
+     * will generate notification events for the affected representatives based on which parties
+     * have had their solicitors revoked.</p>
      *
-     * @param litigantRevocation flags indicating which litigants' representation was revoked
-     * @param info the stop representing client event information
-     * @return a list of {@link SendCorrespondenceEventWithDescription} for later notification processing
+     * <ul>
+     *     <li>If the applicant's solicitor is revoked, an applicant notification event is created.</li>
+     *     <li>If the respondent's solicitor is revoked, a respondent notification event is created.</li>
+     * </ul>
+     *
+     * @param litigantRevocation contains information about which representatives have been revoked
+     * @param info additional context required to build the notification events
+     * @return a list of {@link SendCorrespondenceEventWithDescription} representing the notifications
+     *         to be sent; returns an empty list if no revocations occurred
      */
-    public List<SendCorrespondenceEventWithDescription> prepareLitigantRevocationNotificationEvents(LitigantRevocation litigantRevocation,
-                                                                                                    StopRepresentingClientInfo info) {
+    public List<SendCorrespondenceEventWithDescription> prepareRepresentativeRevocationNotificationEvent(
+        LitigantRevocation litigantRevocation, StopRepresentingClientInfo info) {
         List<SendCorrespondenceEventWithDescription> eventsWithDesc = new ArrayList<>();
         if (litigantRevocation.wasRevoked()) {
             if (litigantRevocation.applicantSolicitorRevoked()) {

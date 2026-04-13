@@ -514,7 +514,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             when(eventWithDesc.getEvent()).thenReturn(event);
 
             // Mock service to return notification event
-            when(stopRepresentingClientCorresponder.prepareLitigantRevocationNotificationEvents(
+            when(stopRepresentingClientCorresponder.prepareRepresentativeRevocationNotificationEvent(
                 eq(revocation),
                 any(StopRepresentingClientInfo.class)
             )).thenReturn(List.of(eventWithDesc));
@@ -530,7 +530,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             ArgumentCaptor<StopRepresentingClientInfo> infoCaptor =
                 getStopRepresentingClientInfoCaptor();
             verify(stopRepresentingClientCorresponder)
-                .prepareLitigantRevocationNotificationEvents(eq(revocation), infoCaptor.capture());
+                .prepareRepresentativeRevocationNotificationEvent(eq(revocation), infoCaptor.capture());
             // Assert correct case data and case ID were passed
             verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
 
@@ -564,7 +564,7 @@ class StopRepresentingClientSubmittedHandlerTest {
                 eq(CASE_ID)
             )).thenReturn(Optional.of(revocation));
 
-            when(stopRepresentingClientCorresponder.prepareLitigantRevocationNotificationEvents(
+            when(stopRepresentingClientCorresponder.prepareRepresentativeRevocationNotificationEvent(
                 eq(revocation),
                 any(StopRepresentingClientInfo.class)
             )).thenReturn(List.of());
@@ -584,7 +584,7 @@ class StopRepresentingClientSubmittedHandlerTest {
                 getStopRepresentingClientInfoCaptor();
 
             verify(stopRepresentingClientCorresponder)
-                .prepareLitigantRevocationNotificationEvents(eq(revocation), infoCaptor.capture());
+                .prepareRepresentativeRevocationNotificationEvent(eq(revocation), infoCaptor.capture());
             verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
 
             // Verify retry interactions
@@ -658,7 +658,7 @@ class StopRepresentingClientSubmittedHandlerTest {
             FinremCaseData caseData = buildFinremCaseData(party);
 
             // ---------- Service ----------
-            when(stopRepresentingClientCorresponder.prepareLitigantRevocationNotificationEvents(
+            when(stopRepresentingClientCorresponder.prepareRepresentativeRevocationNotificationEvent(
                 eq(revocation),
                 any(StopRepresentingClientInfo.class)
             )).thenReturn(List.of());
@@ -672,7 +672,7 @@ class StopRepresentingClientSubmittedHandlerTest {
                 getStopRepresentingClientInfoCaptor();
 
             verify(stopRepresentingClientCorresponder)
-                .prepareLitigantRevocationNotificationEvents(eq(revocation), infoCaptor.capture());
+                .prepareRepresentativeRevocationNotificationEvent(eq(revocation), infoCaptor.capture());
             verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
 
             verify(stopRepresentingClientCorresponder)

@@ -245,7 +245,7 @@ class StopRepresentingClientCorresponderTest {
         void shouldReturnEmptyEmailNotification_whenLitigantSolicitorWasNotRevoked() {
             LitigantRevocation litigantRevocation =
                 new LitigantRevocation(false, false);
-            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation,
+            List<SendCorrespondenceEventWithDescription> actual = underTest.prepareRepresentativeRevocationNotificationEvent(litigantRevocation,
                 mock(StopRepresentingClientInfo.class));
             assertThat(actual).isEmpty();
         }
@@ -281,7 +281,8 @@ class StopRepresentingClientCorresponderTest {
                 when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(), APP_SOLICITOR))
                     .thenReturn(notificationRequest);
 
-                List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation, info);
+                List<SendCorrespondenceEventWithDescription> actual = underTest
+                    .prepareRepresentativeRevocationNotificationEvent(litigantRevocation, info);
                 var eventWithDesc = actual.getFirst();
                 var event = eventWithDesc.getEvent();
 
@@ -384,7 +385,8 @@ class StopRepresentingClientCorresponderTest {
                 when(finremNotificationRequestMapper.getNotificationRequestForStopRepresentingClientEmail(info.getCaseDetailsBefore(),
                     RESP_SOLICITOR)).thenReturn(notificationRequest);
 
-                List<SendCorrespondenceEventWithDescription> actual = underTest.prepareLitigantRevocationNotificationEvents(litigantRevocation, info);
+                List<SendCorrespondenceEventWithDescription> actual = underTest
+                    .prepareRepresentativeRevocationNotificationEvent(litigantRevocation, info);
                 var eventWithDesc = actual.getFirst();
                 var event = eventWithDesc.getEvent();
 

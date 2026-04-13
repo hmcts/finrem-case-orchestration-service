@@ -147,7 +147,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                     info.getCaseIdInString());
             }
 
-            events.addAll(stopRepresentingClientCorresponder.prepareLitigantRevocationNotificationEvents(litigantRevocation, info));
+            events.addAll(stopRepresentingClientCorresponder.prepareRepresentativeRevocationNotificationEvent(litigantRevocation, info));
             events.addAll(
                 retryExecutor.supplyWithRetrySuppressException(
                     () -> stopRepresentingClientCorresponder.prepareLitigantRevocationLetterNotificationEvents(litigantRevocation, info),
