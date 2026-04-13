@@ -42,7 +42,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
 import java.util.ArrayList;
@@ -103,9 +102,6 @@ class StopRepresentingClientServiceTest {
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Mock
-    private ManageBarristerService manageBarristerService;
-
-    @Mock
     private BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
 
     @Mock
@@ -128,12 +124,9 @@ class StopRepresentingClientServiceTest {
     @BeforeEach
     void setup() {
         underTest = spy(new StopRepresentingClientService(assignCaseAccessService, systemUserService, finremCaseDetailsMapper,
-            manageBarristerService, barristerChangeCaseAccessUpdater, coreCaseDataService, intervenerService,
+            barristerChangeCaseAccessUpdater, coreCaseDataService, intervenerService,
             caseRoleService, idamService, stopRepresentingClientCorresponder));
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
-        lenient().when(manageBarristerService
-                .getBarristerChange(any(FinremCaseDetails.class), any(FinremCaseData.class), any(BarristerParty.class)))
-            .thenReturn(BarristerChange.builder().build());
     }
 
     @Test
@@ -291,38 +284,6 @@ class StopRepresentingClientServiceTest {
 
         List<IntervenerWrapper> actual = underTest.getToBeRevokedIntervenerSolicitors(info);
         assertThat(actual).containsExactly(originalWrapper, originalTwoWrapper);
-    }
-
-    @Test
-    void shouldReturnBarristerChange_fromManageBarristerService() {
-        // given
-        StopRepresentingClientInfo info = mock(StopRepresentingClientInfo.class);
-        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
-
-        BarristerParty barristerParty = mock(BarristerParty.class);
-        BarristerChange expectedChange = mock(BarristerChange.class);
-
-        when(info.getCaseDetails()).thenReturn(caseDetails);
-        when(info.getFinremCaseDataBefore()).thenReturn(finremCaseDataBefore);
-
-        when(manageBarristerService.getBarristerChange(
-            caseDetails,
-            finremCaseDataBefore,
-            barristerParty
-        )).thenReturn(expectedChange);
-
-        // when
-        BarristerChange result = underTest.getToBeRevokedBarristers(info, barristerParty);
-
-        // then
-        assertThat(result).isEqualTo(expectedChange);
-
-        verify(manageBarristerService).getBarristerChange(
-            caseDetails,
-            finremCaseDataBefore,
-            barristerParty
-        );
     }
 
     @Nested

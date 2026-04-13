@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.LitigantRevocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
@@ -114,14 +116,17 @@ class StopRepresentingClientSubmittedHandlerTest {
     private RetryExecutor retryExecutor;
     @Mock
     private StopRepresentingClientCorresponder stopRepresentingClientCorresponder;
+    @Mock
+    private ManageBarristerService manageBarristerService;
 
     @BeforeEach
     void setup() {
         underTest = new StopRepresentingClientSubmittedHandler(finremCaseDetailsMapper, stopRepresentingClientService,
-            stopRepresentingClientCorresponder, featureToggleService, applicationEventPublisher, retryExecutor);
+            stopRepresentingClientCorresponder, featureToggleService, applicationEventPublisher, retryExecutor,
+            manageBarristerService);
         lenient().when(featureToggleService.isExui3990WorkaroundEnabled()).thenReturn(true);
-        lenient().when(stopRepresentingClientService.getToBeRevokedBarristers(any(StopRepresentingClientInfo.class),
-            any(BarristerParty.class))).thenReturn(mock(BarristerChange.class));
+        lenient().when(manageBarristerService.getBarristerChange(any(FinremCaseDetails.class),
+            any(FinremCaseData.class), any(BarristerParty.class))).thenReturn(mock(BarristerChange.class));
     }
 
     @Test
@@ -172,8 +177,8 @@ class StopRepresentingClientSubmittedHandlerTest {
 
             BarristerChange barristerChange = mock(BarristerChange.class);
             when(barristerChange.getRemoved()).thenReturn(Set.of(mock(Barrister.class)));
-            when(stopRepresentingClientService.getToBeRevokedBarristers(any(StopRepresentingClientInfo.class),
-                eq(barristerParty))).thenReturn(barristerChange);
+            when(manageBarristerService.getBarristerChange(any(FinremCaseDetails.class),
+                any(FinremCaseData.class), eq(barristerParty))).thenReturn(barristerChange);
 
             SendCorrespondenceEventWithDescription eventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
             SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
@@ -190,9 +195,8 @@ class StopRepresentingClientSubmittedHandlerTest {
             underTest.handle(FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData), AUTH_TOKEN);
 
             // ---------- Then ----------
-            ArgumentCaptor<StopRepresentingClientInfo> infoCaptor = getStopRepresentingClientInfoCaptor();
-            verify(stopRepresentingClientService).getToBeRevokedBarristers(infoCaptor.capture(), eq(barristerParty));
-            verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
+            verify(manageBarristerService).getBarristerChange(any(FinremCaseDetails.class),
+                any(FinremCaseData.class), eq(barristerParty));
 
             // Verify revokeBarristers called
             ArgumentCaptor<ThrowingSupplier<SendCorrespondenceEventWithDescription>> throwingSupplierCaptor = getThrowingSupplierCaptor();
@@ -224,12 +228,12 @@ class StopRepresentingClientSubmittedHandlerTest {
 
             BarristerChange applicantBarristerChange = mock(BarristerChange.class);
             when(applicantBarristerChange.getRemoved()).thenReturn(Set.of(mock(Barrister.class)));
-            when(stopRepresentingClientService.getToBeRevokedBarristers(any(StopRepresentingClientInfo.class),
-                eq(BarristerParty.APPLICANT))).thenReturn(applicantBarristerChange);
+            when(manageBarristerService.getBarristerChange(any(FinremCaseDetails.class),
+                any(FinremCaseData.class), eq(BarristerParty.APPLICANT))).thenReturn(applicantBarristerChange);
             BarristerChange intervenerTwoBarristerChange = mock(BarristerChange.class);
             when(intervenerTwoBarristerChange.getRemoved()).thenReturn(Set.of(mock(Barrister.class), mock(Barrister.class)));
-            when(stopRepresentingClientService.getToBeRevokedBarristers(any(StopRepresentingClientInfo.class),
-                eq(BarristerParty.INTERVENER2))).thenReturn(intervenerTwoBarristerChange);
+            when(manageBarristerService.getBarristerChange(any(FinremCaseDetails.class),
+                any(FinremCaseData.class), eq(BarristerParty.INTERVENER2))).thenReturn(intervenerTwoBarristerChange);
 
             SendCorrespondenceEventWithDescription applicantBarristerEventWithDesc = mock(SendCorrespondenceEventWithDescription.class);
             SendCorrespondenceEvent applicantBarristerEvent = mock(SendCorrespondenceEvent.class);
@@ -253,10 +257,10 @@ class StopRepresentingClientSubmittedHandlerTest {
             underTest.handle(FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, caseData), AUTH_TOKEN);
 
             // ---------- Then ----------
-            ArgumentCaptor<StopRepresentingClientInfo> infoCaptor = getStopRepresentingClientInfoCaptor();
-            verify(stopRepresentingClientService).getToBeRevokedBarristers(infoCaptor.capture(), eq(BarristerParty.APPLICANT));
-            verify(stopRepresentingClientService).getToBeRevokedBarristers(infoCaptor.capture(), eq(BarristerParty.INTERVENER2));
-            verifyStopRepresentingClientInfoCaptured(infoCaptor, caseData);
+            verify(manageBarristerService).getBarristerChange(any(FinremCaseDetails.class),
+                any(FinremCaseData.class), eq(BarristerParty.APPLICANT));
+            verify(manageBarristerService).getBarristerChange(any(FinremCaseDetails.class),
+                any(FinremCaseData.class), eq(BarristerParty.INTERVENER2));
 
             // Verify revokeBarristers called
             ArgumentCaptor<ThrowingSupplier<SendCorrespondenceEventWithDescription>> throwingSupplierCaptor = getThrowingSupplierCaptor();

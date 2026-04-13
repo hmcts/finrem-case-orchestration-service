@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEventWithDescription;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.LitigantRevocation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientInfo;
@@ -49,6 +50,8 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
     private final StopRepresentingClientService stopRepresentingClientService;
 
+    private final ManageBarristerService manageBarristerService;
+
     private final StopRepresentingClientCorresponder stopRepresentingClientCorresponder;
 
     private final FeatureToggleService featureToggleService;
@@ -62,13 +65,15 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
                                                   StopRepresentingClientCorresponder stopRepresentingClientCorresponder,
                                                   FeatureToggleService featureToggleService,
                                                   ApplicationEventPublisher applicationEventPublisher,
-                                                  RetryExecutor retryExecutor) {
+                                                  RetryExecutor retryExecutor,
+                                                  ManageBarristerService manageBarristerService) {
         super(finremCaseDetailsMapper);
         this.stopRepresentingClientService = stopRepresentingClientService;
         this.featureToggleService = featureToggleService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.retryExecutor = retryExecutor;
         this.stopRepresentingClientCorresponder = stopRepresentingClientCorresponder;
+        this.manageBarristerService = manageBarristerService;
     }
 
     @Override
@@ -178,7 +183,7 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
 
         for (BarristerParty party : BarristerParty.values()) {
 
-            BarristerChange barristerChange = stopRepresentingClientService.getToBeRevokedBarristers(info, party);
+            BarristerChange barristerChange = getToBeRevokedBarristers(info, party);
             Set<Barrister> removed = Optional.ofNullable(barristerChange)
                 .orElseThrow(() -> new IllegalStateException("barristerChange must not be null"))
                 .getRemoved();
@@ -224,5 +229,10 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         String party = isApplicantForRepresentationChange(finremCaseData) ? "applicant" : "";
         party = (isBlank(party) && isRespondentForRepresentationChange(finremCaseData)) ? "respondent" : party;
         return party;
+    }
+
+    private BarristerChange getToBeRevokedBarristers(StopRepresentingClientInfo info, BarristerParty barristerParty) {
+        return manageBarristerService.getBarristerChange(info.getCaseDetails(), info.getFinremCaseDataBefore(),
+            barristerParty);
     }
 }

@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils;
 
@@ -59,8 +58,6 @@ public class StopRepresentingClientService {
     private final SystemUserService systemUserService;
 
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
-
-    private final ManageBarristerService manageBarristerService;
 
     private final BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
 
@@ -254,23 +251,6 @@ public class StopRepresentingClientService {
             }
         });
         return intervenerWrappers;
-    }
-
-    /**
-     * Determines which barristers should have their access revoked for a given litigant party.
-     *
-     * <p>This method compares the current case data with the previous snapshot to identify
-     * barristers associated with the specified {@link BarristerParty} whose access should be revoked.
-     * The actual revocation is not performed here; this is a calculation step that returns
-     * the changes to be applied.</p>
-     *
-     * @param info the stop representing client event information containing case details
-     * @param barristerParty the party (applicant or respondent) whose barristers are being checked
-     * @return a {@link BarristerChange} object containing the barristers to be revoked
-     */
-    public BarristerChange getToBeRevokedBarristers(StopRepresentingClientInfo info, BarristerParty barristerParty) {
-        FinremCaseData finremCaseDataBefore = info.getFinremCaseDataBefore();
-        return manageBarristerService.getBarristerChange(info.getCaseDetails(), finremCaseDataBefore, barristerParty);
     }
 
     /**
