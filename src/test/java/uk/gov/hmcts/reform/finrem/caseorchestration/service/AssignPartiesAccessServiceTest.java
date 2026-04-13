@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -328,10 +329,9 @@ class AssignPartiesAccessServiceTest {
             when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(Optional.empty());
             UserNotFoundInOrganisationApiException ex = assertThrows(UserNotFoundInOrganisationApiException.class,
                 () -> assignPartiesAccessService.revokeApplicantSolicitor(caseData));
-            String message = ex.getMessage();
-            assert message != null : "Exception message should not be null";
-            assert message.contains(CASE_ID) : "Missing case id in message: " + message;
-            assert message.contains(CaseRole.APP_SOLICITOR.getCcdCode()) : "Missing case role in message: " + message;
+            assertThat(ex.getMessage())
+                .isNotNull()
+                .contains(CASE_ID, CaseRole.APP_SOLICITOR.getCcdCode());
         }
     }
 
@@ -375,10 +375,9 @@ class AssignPartiesAccessServiceTest {
             when(prdOrganisationService.findUserByEmail(TEST_SOLICITOR_EMAIL)).thenReturn(Optional.empty());
             UserNotFoundInOrganisationApiException ex = assertThrows(UserNotFoundInOrganisationApiException.class,
                 () -> assignPartiesAccessService.revokeRespondentSolicitor(caseData));
-            String message = ex.getMessage();
-            assert message != null : "Exception message should not be null";
-            assert message.contains(CASE_ID) : "Missing case id in message: " + message;
-            assert message.contains(CaseRole.RESP_SOLICITOR.getCcdCode()) : "Missing case role in message: " + message;
+            assertThat(ex.getMessage())
+                .isNotNull()
+                .contains(CASE_ID, CaseRole.RESP_SOLICITOR.getCcdCode());
         }
     }
 
