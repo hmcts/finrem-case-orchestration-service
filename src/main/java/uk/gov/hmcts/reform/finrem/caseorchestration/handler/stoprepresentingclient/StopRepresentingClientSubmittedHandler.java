@@ -209,7 +209,6 @@ public class StopRepresentingClientSubmittedHandler extends FinremCallbackHandle
         events.addAll(revokeBarristers(info));
 
         log.info("{} - about to send {} notifications to relevant parties", info.getCaseId(), events.size());
-        // publish all notification
         events.forEach(e ->
             retryExecutor.runWithRetrySuppressException(() -> applicationEventPublisher.publishEvent(e.getEvent()),
                 e.getDescription(), info.getCaseIdInString())
