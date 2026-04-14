@@ -56,7 +56,8 @@ public abstract class AbstractLetterHandler implements LetterHandler {
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void handle(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authToken) {
-        log.info("In the LetterHandler for Recipient {} and Notice Type {} ", recipient, noticeType);
+        log.info("In the LetterHandler [{}] for Recipient {} and Notice Type {} ", getClass().getSimpleName(),
+            recipient, noticeType);
         Optional<NoticeOfChangeLetterDetails> noticeOfChangeLetterDetails =
             getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore);
         noticeOfChangeLetterDetails.ifPresent(letter -> {
