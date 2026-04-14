@@ -11,7 +11,8 @@ import java.lang.annotation.RetentionPolicy;
  *
  * <p><strong>Developer note:</strong> When adding {@code @TemporaryField} to a field in
  * a new class, ensure that the class is also added to the list returned by
- * {@code getClassesWithTemporaryFieldAnnotation()} so the field is cleared correctly.</p>
+ * {@code getClassesWithTemporaryFieldAnnotation()} and that the handler overrides {@code shouldClearTemporaryFields()}
+ * to return true, so that the field is cleared correctly.</p>
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TemporaryField {

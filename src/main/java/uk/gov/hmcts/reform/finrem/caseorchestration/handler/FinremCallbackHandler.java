@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCaseDocumentsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 
 import java.lang.reflect.Field;
@@ -164,5 +165,6 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      */
     private static List<Class> getClassesWithTemporaryFieldAnnotation() {
         return List.of(StopRepresentationWrapper.class, CaseDataMetricsWrapper.class, ManageCaseDocumentsWrapper.class);
+        return List.of(StopRepresentationWrapper.class, CaseDataMetricsWrapper.class, ContactDetailsWrapper.class);
     }
 }
