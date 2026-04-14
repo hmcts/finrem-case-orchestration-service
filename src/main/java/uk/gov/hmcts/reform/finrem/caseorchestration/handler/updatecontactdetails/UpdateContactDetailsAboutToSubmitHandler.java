@@ -108,7 +108,7 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
         }
 
-        FinremCaseDetails finremCaseDetailsBefore = callbackRequest.getCaseDetails();
+        FinremCaseDetails finremCaseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         generateCoverSheets(finremCaseDetails, finremCaseDetailsBefore, userAuthorisation);
 
         return response(finremCaseData);
