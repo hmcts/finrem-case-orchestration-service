@@ -34,7 +34,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -151,8 +150,8 @@ class GeneralApplicationDirectionsAboutToStartHandlerTest {
         DynamicMultiSelectList mockedDynamicMultiSelectList = mock(DynamicMultiSelectList.class);
         when(partyService.getAllActivePartyList(callbackRequest.getCaseDetails()))
             .thenReturn(mockedDynamicMultiSelectList);
-        when(mockedDynamicMultiSelectList.setValueByCodes(eq(List.of(APP_SOLICITOR.getCcdCode(),
-            RESP_SOLICITOR.getCcdCode())))).thenReturn(mockedDynamicMultiSelectList);
+        when(mockedDynamicMultiSelectList.setValueByCodes(List.of(APP_SOLICITOR.getCcdCode(),
+            RESP_SOLICITOR.getCcdCode()))).thenReturn(mockedDynamicMultiSelectList);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(handle.getData().getManageHearingsWrapper().getWorkingHearing()).isNotNull();
@@ -162,8 +161,8 @@ class GeneralApplicationDirectionsAboutToStartHandlerTest {
         assertThat(handle.getData().getManageHearingsWrapper().getWorkingHearing().getPartiesOnCaseMultiSelectList())
             .isEqualTo(mockedDynamicMultiSelectList);
 
-        verify(mockedDynamicMultiSelectList).setValueByCodes(eq(List.of(APP_SOLICITOR.getCcdCode(),
-            RESP_SOLICITOR.getCcdCode())));
+        verify(mockedDynamicMultiSelectList).setValueByCodes(List.of(APP_SOLICITOR.getCcdCode(),
+            RESP_SOLICITOR.getCcdCode()));
     }
 
     @Test
@@ -186,6 +185,26 @@ class GeneralApplicationDirectionsAboutToStartHandlerTest {
         assertEquals(HearingType.APPLICATION_HEARING.name(), listItems.getFirst().getCode());
         assertEquals(HearingType.APPLICATION_HEARING.getId(), listItems.getFirst().getLabel());
         verify(generalApplicationDirectionsService).resetGeneralApplicationDirectionsFields(caseData);
+    }
+
+    @Test
+    void whenInitialiseWorkingHearing_thenHearingTypeDynamicListValueIsFirstItem() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
+        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCaseData caseData = response.getData();
+        WorkingHearing workingHearing = caseData.getManageHearingsWrapper().getWorkingHearing();
+
+        DynamicList hearingTypeDynamicList = workingHearing.getHearingTypeDynamicList();
+        assertThat(hearingTypeDynamicList).isNotNull();
+        assertThat(hearingTypeDynamicList.getListItems()).isNotEmpty();
+        assertThat(hearingTypeDynamicList.getValue()).isNotNull();
+        assertThat(hearingTypeDynamicList.getValue()).isEqualTo(
+            hearingTypeDynamicList.getListItems().stream().findFirst().orElse(null)
+        );
     }
 
     private DynamicRadioListElement getDynamicListElement(String code, String label) {
