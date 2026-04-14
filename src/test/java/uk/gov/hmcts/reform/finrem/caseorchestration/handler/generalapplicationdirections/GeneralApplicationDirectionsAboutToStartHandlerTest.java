@@ -34,6 +34,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -150,8 +151,8 @@ class GeneralApplicationDirectionsAboutToStartHandlerTest {
         DynamicMultiSelectList mockedDynamicMultiSelectList = mock(DynamicMultiSelectList.class);
         when(partyService.getAllActivePartyList(callbackRequest.getCaseDetails()))
             .thenReturn(mockedDynamicMultiSelectList);
-        when(mockedDynamicMultiSelectList.setValueByCodes(List.of(APP_SOLICITOR.getCcdCode(),
-            RESP_SOLICITOR.getCcdCode()))).thenReturn(mockedDynamicMultiSelectList);
+        when(mockedDynamicMultiSelectList.setValueByCodes(eq(List.of(APP_SOLICITOR.getCcdCode(),
+            RESP_SOLICITOR.getCcdCode())))).thenReturn(mockedDynamicMultiSelectList);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(handle.getData().getManageHearingsWrapper().getWorkingHearing()).isNotNull();
@@ -161,8 +162,8 @@ class GeneralApplicationDirectionsAboutToStartHandlerTest {
         assertThat(handle.getData().getManageHearingsWrapper().getWorkingHearing().getPartiesOnCaseMultiSelectList())
             .isEqualTo(mockedDynamicMultiSelectList);
 
-        verify(mockedDynamicMultiSelectList).setValueByCodes(List.of(APP_SOLICITOR.getCcdCode(),
-            RESP_SOLICITOR.getCcdCode()));
+        verify(mockedDynamicMultiSelectList).setValueByCodes(eq(List.of(APP_SOLICITOR.getCcdCode(),
+            RESP_SOLICITOR.getCcdCode())));
     }
 
     @Test
