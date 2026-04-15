@@ -202,9 +202,8 @@ class GeneralApplicationDirectionsAboutToStartHandlerTest {
         DynamicList hearingTypeDynamicList = workingHearing.getHearingTypeDynamicList();
         assertThat(hearingTypeDynamicList).isNotNull();
         assertThat(hearingTypeDynamicList.getListItems()).isNotEmpty();
-        assertThat(hearingTypeDynamicList.getValue()).isNotNull();
         assertThat(hearingTypeDynamicList.getValue()).isEqualTo(
-            hearingTypeDynamicList.getListItems().stream().findFirst().orElse(null)
+            hearingTypeDynamicList.getListItems().getFirst()
         );
     }
 
