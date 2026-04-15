@@ -125,7 +125,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         StopRepresentingRequest request = buildStopRepresentingRequest(callbackRequest, userAuthorisation);
         logStopRepresentingRequest(request);
 
-        processRequest(request, userAuthorisation);
+        processRequest(request);
 
         // Populating entered service address
         populateServiceAddressToParty(request, userAuthorisation);
@@ -352,7 +352,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         removeIntervenerBarristerOrganisationsMatchingOrgId(finremCaseData, targetOrg);
     }
 
-    private void processRequest(StopRepresentingRequest request, String userAuthorisation) {
+    private void processRequest(StopRepresentingRequest request) {
         FinremCaseData finremCaseData = request.finremCaseDetails.getData();
 
         // reset noc party
