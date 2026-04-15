@@ -40,7 +40,7 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final InternationalPostalService internationalPostalService;
-//    private final GenerateCoverSheetService generateCoverSheetService;
+    private final GenerateCoverSheetService generateCoverSheetService;
 
     public UpdateContactDetailsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     UpdateContactDetailsService updateContactDetailsService,
@@ -54,6 +54,7 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.nocWorkflowService = nocWorkflowService;
         this.internationalPostalService = internationalPostalService;
+        this.generateCoverSheetService = generateCoverSheetService;
     }
 
     @Override
@@ -161,10 +162,10 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
 
     private void generateCoverSheets(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String userAuthorisation) {
         if (hasChangeApplicant(caseDetails, caseDetailsBefore)) {
-//            generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, userAuthorisation);
+            generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, userAuthorisation);
         }
         if (hasChangeRespondant(caseDetails, caseDetailsBefore)) {
-//            generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, userAuthorisation);
+            generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, userAuthorisation);
         }
     }
 
