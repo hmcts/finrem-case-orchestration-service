@@ -17,13 +17,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpda
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.APPLY_NOC_DECISION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @Slf4j
@@ -41,7 +39,7 @@ public class ApplyNocDecisionAboutToSubmitHandler extends FinremAboutToSubmitCal
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return ABOUT_TO_SUBMIT.equals(callbackType)
-            && Arrays.asList(CONTESTED, CONSENTED).contains(caseType)
+            && CONTESTED.equals(caseType)
             && APPLY_NOC_DECISION.equals(eventType);
     }
 
