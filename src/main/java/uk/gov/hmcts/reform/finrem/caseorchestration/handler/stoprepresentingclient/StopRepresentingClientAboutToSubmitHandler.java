@@ -384,7 +384,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         // extra service address to be captured
         populateServiceAddressToApplicant(request.finremCaseDetails, getServiceAddressConfigForApplicantIfAny(finremCaseData), userAuthorisation);
         populateServiceAddressToRespondent(request.finremCaseDetails, getServiceAddressConfigForRespondentIfAny(finremCaseData), userAuthorisation);
-        // NOTE: Intervener coversheet only reflects the party address, so is unchanged when representation changes.
         populateServiceAddressToIntervener(finremCaseData.getIntervenerOne(), getServiceAddressConfigForIntervener1IfAny(finremCaseData));
         populateServiceAddressToIntervener(finremCaseData.getIntervenerTwo(), getServiceAddressConfigForIntervener2IfAny(finremCaseData));
         populateServiceAddressToIntervener(finremCaseData.getIntervenerThree(), getServiceAddressConfigForIntervener3IfAny(finremCaseData));
@@ -432,6 +431,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
         intervenerWrapper.setIntervenerAddress(serviceAddress);
         intervenerWrapper.setIntervenerAddressConfidential(YesOrNo.forValue(isConfidential));
+        // NOTE: Intervener coversheet only reflects the party address, so is unchanged when representation changes.
     }
 
     private void throwIfServiceAddressIsNull(Address serviceAddress) {
