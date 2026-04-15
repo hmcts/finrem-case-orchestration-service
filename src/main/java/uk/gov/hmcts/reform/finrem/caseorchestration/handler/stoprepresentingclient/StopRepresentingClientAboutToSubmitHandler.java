@@ -363,7 +363,6 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         } else if (isRepresentingRespondent(request)) {
             stopRepresentingByRespondentRepresentative(finremCaseData);
         } else if (isRepresentingAnyInterveners(request)) {
-            // NOTE: Intervener coversheet only reflects the party address, so is unchanged when representation changes.
             if (isRepresentingAnyIntervenerBarristers(request)) {
                 stopRepresentingByIntervenerBarrister(finremCaseData, getIntervenerBarrister(request));
             } else {
@@ -385,6 +384,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         // extra service address to be captured
         populateServiceAddressToApplicant(request.finremCaseDetails, getServiceAddressConfigForApplicantIfAny(finremCaseData), userAuthorisation);
         populateServiceAddressToRespondent(request.finremCaseDetails, getServiceAddressConfigForRespondentIfAny(finremCaseData), userAuthorisation);
+        // NOTE: Intervener coversheet only reflects the party address, so is unchanged when representation changes.
         populateServiceAddressToIntervener(finremCaseData.getIntervenerOne(), getServiceAddressConfigForIntervener1IfAny(finremCaseData));
         populateServiceAddressToIntervener(finremCaseData.getIntervenerTwo(), getServiceAddressConfigForIntervener2IfAny(finremCaseData));
         populateServiceAddressToIntervener(finremCaseData.getIntervenerThree(), getServiceAddressConfigForIntervener3IfAny(finremCaseData));
