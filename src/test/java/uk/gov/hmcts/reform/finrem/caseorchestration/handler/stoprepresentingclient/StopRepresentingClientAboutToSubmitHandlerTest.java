@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
@@ -452,7 +453,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
-            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
+            FinremCallbackRequest callbackRequest = request(caseData);
+            FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+            caseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
 
             assertThat(caseData)
                 .extracting(FinremCaseData::getContactDetailsWrapper)
@@ -461,6 +464,8 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
 
             verify(stopRepresentingClientService, times(isApplicantRepresentative ? 1 : 0)).setApplicantUnrepresented(caseData);
             verify(stopRepresentingClientService, times(isApplicantRepresentative ? 0 : 1)).setRespondentUnrepresented(caseData);
+            verify(generateCoverSheetService, times(isApplicantRepresentative ? 1 : 0)).generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+            verify(generateCoverSheetService, times(isApplicantRepresentative ? 0 : 1)).generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
             verifyBuildRepresentationCalled(caseData);
         }
 

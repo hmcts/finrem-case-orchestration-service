@@ -127,7 +127,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         processRequest(request, userAuthorisation);
 
         // Populating entered service address
-        populateServiceAddressToParty(request);
+        populateServiceAddressToParty(request, userAuthorisation);
         buildRepresentationUpdateHistoryAndNocDataIfAny(request, userAuthorisation);
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
@@ -358,10 +358,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         finremCaseData.getContactDetailsWrapper().setNocParty(null);
 
         if (isRepresentingApplicant(request)) {
-            generateCoverSheetService.generateAndSetApplicantCoverSheet(request.finremCaseDetails, userAuthorisation);
             stopRepresentingByApplicantRepresentative(finremCaseData);
         } else if (isRepresentingRespondent(request)) {
-            generateCoverSheetService.generateAndSetRespondentCoverSheet(request.finremCaseDetails, userAuthorisation);
             stopRepresentingByRespondentRepresentative(finremCaseData);
         } else if (isRepresentingAnyInterveners(request)) {
             // NOTE: Intervener coversheet only reflects the party address, so is unchanged when representation changes.
@@ -374,46 +372,50 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         }
     }
 
-    private void populateServiceAddressToParty(StopRepresentingRequest request) {
+    private void populateServiceAddressToParty(StopRepresentingRequest request, String userAuthorisation) {
         FinremCaseData finremCaseData = request.finremCaseDetails.getData();
         Pair<Address, Boolean> serviceAddressConfig = getServiceAddressConfig(finremCaseData);
         if (isRepresentingApplicant(request) || isRepresentingRespondent(request)) {
-            populateMainServiceAddressToApplicantOrRespondent(request, serviceAddressConfig);
+            populateMainServiceAddressToApplicantOrRespondent(request, serviceAddressConfig, userAuthorisation);
         } else if (isRepresentingAnyInterveners(request)) {
             populateMainServiceAddressToIntervener(request, serviceAddressConfig);
         }
 
         // extra service address to be captured
-        populateServiceAddressToApplicant(finremCaseData, getServiceAddressConfigForApplicantIfAny(finremCaseData));
-        populateServiceAddressToRespondent(finremCaseData, getServiceAddressConfigForRespondentIfAny(finremCaseData));
+        populateServiceAddressToApplicant(request.finremCaseDetails, getServiceAddressConfigForApplicantIfAny(finremCaseData), userAuthorisation);
+        populateServiceAddressToRespondent(request.finremCaseDetails, getServiceAddressConfigForRespondentIfAny(finremCaseData), userAuthorisation);
         populateServiceAddressToIntervener(finremCaseData.getIntervenerOne(), getServiceAddressConfigForIntervener1IfAny(finremCaseData));
         populateServiceAddressToIntervener(finremCaseData.getIntervenerTwo(), getServiceAddressConfigForIntervener2IfAny(finremCaseData));
         populateServiceAddressToIntervener(finremCaseData.getIntervenerThree(), getServiceAddressConfigForIntervener3IfAny(finremCaseData));
         populateServiceAddressToIntervener(finremCaseData.getIntervenerFour(), getServiceAddressConfigForIntervener4IfAny(finremCaseData));
     }
 
-    private void populateServiceAddressToApplicant(FinremCaseData finremCaseData, Pair<Address, Boolean> serviceAddressConfig) {
+    private void populateServiceAddressToApplicant(FinremCaseDetails finremCaseDetails, Pair<Address, Boolean> serviceAddressConfig, String userAuthorisation) {
         if (serviceAddressConfig == null) {
             return;
         }
         Address serviceAddress = serviceAddressConfig.getLeft();
         boolean isConfidential = Boolean.TRUE.equals(serviceAddressConfig.getRight());
 
-        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
+        ContactDetailsWrapper contactDetailsWrapper = finremCaseDetails.getData().getContactDetailsWrapper();
         contactDetailsWrapper.setApplicantAddress(serviceAddress);
         contactDetailsWrapper.setApplicantAddressHiddenFromRespondent(YesOrNo.forValue(isConfidential));
+
+        generateCoverSheetService.generateAndSetApplicantCoverSheet(finremCaseDetails, userAuthorisation);
     }
 
-    private void populateServiceAddressToRespondent(FinremCaseData finremCaseData, Pair<Address, Boolean> serviceAddressConfig) {
+    private void populateServiceAddressToRespondent(FinremCaseDetails finremCaseDetails, Pair<Address, Boolean> serviceAddressConfig, String userAuthorisation) {
         if (serviceAddressConfig == null) {
             return;
         }
         Address serviceAddress = serviceAddressConfig.getLeft();
         boolean isConfidential = Boolean.TRUE.equals(serviceAddressConfig.getRight());
 
-        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
+        ContactDetailsWrapper contactDetailsWrapper = finremCaseDetails.getData().getContactDetailsWrapper();
         contactDetailsWrapper.setRespondentAddress(serviceAddress);
         contactDetailsWrapper.setRespondentAddressHiddenFromApplicant(YesOrNo.forValue(isConfidential));
+
+        generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
     }
 
     private void populateServiceAddressToIntervener(IntervenerWrapper intervenerWrapper, Pair<Address, Boolean> serviceAddressConfig) {
@@ -434,15 +436,15 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private void populateMainServiceAddressToApplicantOrRespondent(StopRepresentingRequest request,
-                                                                   Pair<Address, Boolean> serviceAddressConfig) {
-        FinremCaseData finremCaseData = request.finremCaseDetails.getData();
+                                                                   Pair<Address, Boolean> serviceAddressConfig,
+                                                                   String userAuthorisation) {
         Address serviceAddress = serviceAddressConfig.getLeft();
         throwIfServiceAddressIsNull(serviceAddress);
 
         if (isRepresentingApplicant(request)) {
-            populateServiceAddressToApplicant(finremCaseData, serviceAddressConfig);
+            populateServiceAddressToApplicant(request.finremCaseDetails, serviceAddressConfig, userAuthorisation);
         } else if (isRepresentingRespondent(request)) {
-            populateServiceAddressToRespondent(finremCaseData, serviceAddressConfig);
+            populateServiceAddressToRespondent(request.finremCaseDetails, serviceAddressConfig, userAuthorisation);
         }
     }
 
