@@ -12,22 +12,32 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 
 @Slf4j
 @Service
-public class UpdateCaseDetailsSolicitorContestedMidHandler extends AbstractUpdateCaseDetailsSolicitorHandler {
+public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends AbstractUpdateCaseDetailsSolicitorHandler {
 
-    public UpdateCaseDetailsSolicitorContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         UpdateRepresentationService updateRepresentationService) {
+    public UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                                   UpdateRepresentationService updateRepresentationService) {
         super(finremCaseDetailsMapper, updateRepresentationService);
     }
 
     @Override
+    /*
+     * Method shouldClearTemporaryFields explicitly overridden in this about-to-submit handler.
+     * Generally, extending FinremAboutToSubmitCallbackHandler is better.
+     * But this extends AbstractUpdateCaseDetailsSolicitorHandler, shared with the mid-handler, which depends on the fields.
+     */
+    protected final boolean shouldClearTemporaryFields() {
+        return true;
+    }
+
+    @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.MID_EVENT.equals(callbackType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && (CaseType.CONTESTED.equals(caseType) || CaseType.CONSENTED.equals(caseType))
             && EventType.UPDATE_CASE_DETAILS_SOLICITOR.equals(eventType);
     }
 
     @Override
     protected void handleLog(FinremCallbackRequest callbackRequest) {
-        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
     }
 }
