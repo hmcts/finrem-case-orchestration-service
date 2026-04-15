@@ -454,13 +454,14 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .build();
 
             FinremCallbackRequest callbackRequest = request(caseData);
-            FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
             caseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
 
             assertThat(caseData)
                 .extracting(FinremCaseData::getContactDetailsWrapper)
                 .extracting(ContactDetailsWrapper::getNocParty)
                 .isEqualTo(isApplicantRepresentative ? APPLICANT : RESPONDENT);
+
+            FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
             verify(stopRepresentingClientService, times(isApplicantRepresentative ? 1 : 0)).setApplicantUnrepresented(caseData);
             verify(stopRepresentingClientService, times(isApplicantRepresentative ? 0 : 1)).setRespondentUnrepresented(caseData);

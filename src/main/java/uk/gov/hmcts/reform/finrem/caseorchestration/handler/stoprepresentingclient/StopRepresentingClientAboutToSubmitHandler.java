@@ -96,7 +96,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
                                                       ManageBarristerService manageBarristerService,
                                                       BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater,
                                                       IntervenerService intervenerService,
-                                                      StopRepresentingClientService stopRepresentingClientService, GenerateCoverSheetService generateCoverSheetService) {
+                                                      StopRepresentingClientService stopRepresentingClientService,
+                                                      GenerateCoverSheetService generateCoverSheetService) {
         super(finremCaseDetailsMapper);
         this.nocWorkflowService = nocWorkflowService;
         this.manageBarristerService = manageBarristerService;
@@ -390,7 +391,9 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         populateServiceAddressToIntervener(finremCaseData.getIntervenerFour(), getServiceAddressConfigForIntervener4IfAny(finremCaseData));
     }
 
-    private void populateServiceAddressToApplicant(FinremCaseDetails finremCaseDetails, Pair<Address, Boolean> serviceAddressConfig, String userAuthorisation) {
+    private void populateServiceAddressToApplicant(FinremCaseDetails finremCaseDetails,
+                                                   Pair<Address, Boolean> serviceAddressConfig,
+                                                   String userAuthorisation) {
         if (serviceAddressConfig == null) {
             return;
         }
@@ -404,7 +407,9 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         generateCoverSheetService.generateAndSetApplicantCoverSheet(finremCaseDetails, userAuthorisation);
     }
 
-    private void populateServiceAddressToRespondent(FinremCaseDetails finremCaseDetails, Pair<Address, Boolean> serviceAddressConfig, String userAuthorisation) {
+    private void populateServiceAddressToRespondent(FinremCaseDetails finremCaseDetails,
+                                                    Pair<Address, Boolean> serviceAddressConfig,
+                                                    String userAuthorisation) {
         if (serviceAddressConfig == null) {
             return;
         }
