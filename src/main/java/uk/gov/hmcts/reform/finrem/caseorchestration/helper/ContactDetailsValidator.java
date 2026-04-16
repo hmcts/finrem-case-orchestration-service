@@ -156,6 +156,7 @@ public class ContactDetailsValidator {
      * If the respondent is represented by a solicitor and the postcode in
      * {@code wrapper.getRespondentSolicitorAddress()} is missing or empty, an error message is added
      * to the provided {@code errors} list.
+     * Contested and Consented cases stored respondent solicitor address in a common field.
      * </p>
      *
      * @param caseData the case data indicating solicitor representation status
@@ -274,6 +275,92 @@ public class ContactDetailsValidator {
         return errors;
     }
 
+    /*
+     * Validates the applicant solicitor's email address based on the case type and representation status.
+     * Returns true if the email address is valid or not required, and false if it is invalid. Any validation
+     * errors are added to the provided errors list.
+     * @param caseData the case data containing case type and solicitor representation info
+     * @param wrapper the wrapper containing solicitor email details
+     * @param errors the list to which error messages will be added if validation fails
+     * @return true if the applicant solicitor's email address is valid or not required; false if it is invalid
+     */
+    public static boolean checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
+                                                                 List<String> errors) {
+        if (isContested(caseData)) {
+            if (caseData.isApplicantRepresentedByASolicitor()
+                && !isValidEmailAddress(wrapper.getApplicantSolicitorEmail())) {
+                errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getApplicantSolicitorEmail()));
+                return false;
+            }
+        } else if (isConsented(caseData)
+            && caseData.isApplicantRepresentedByASolicitor()
+            && !isValidEmailAddress(wrapper.getSolicitorEmail())) {
+            errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getSolicitorEmail()));
+            return false;
+        }
+        return true;
+    }
+
+    /*
+     * This version of checkForApplicantSolicitorEmailAddress performs additional validation to check whether the email
+     * address is registered to the respondent's organisation.
+     */
+    private static void checkForApplicantSolicitorEmailAddress(FinremCaseData caseData,
+                                                               ValidatePartiesService validatePartiesService,
+                                                               List<String> errors) {
+        String applicantSolicitorEmail = caseData.getAppSolicitorEmail();
+
+        if (caseData.isApplicantRepresentedByASolicitor()) {
+            if (!isValidEmailAddress(applicantSolicitorEmail)) {
+                errors.add(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(applicantSolicitorEmail));
+            } else {
+                String orgId = getOrganisationId(caseData.getApplicantOrganisationPolicy());
+                if (!isEmailValidForOrganisation(validatePartiesService, applicantSolicitorEmail, orgId)) {
+                    errors.add(EMAIL_NOT_IN_APPLICANT_ORG_ERROR_MESSAGE.formatted(applicantSolicitorEmail));
+                }
+            }
+        }
+    }
+
+    /*
+     * Validates the respondent solicitor's email address based on the case type and representation status.
+     * Returns true if the email address is valid or not required, and false if it is invalid. Any validation
+     * errors are added to the provided errors list.
+     * For respondent solicitors, the email address is stored in the same field for both contested and consented cases.
+     * @param caseData the case data containing case type and solicitor representation info
+     * @param wrapper the wrapper containing solicitor email details
+     * @param errors the list to which error messages will be added if validation fails
+     * @return true if the respondent solicitor's email address is valid or not required; false if it is invalid
+     */
+    public static boolean checkForRespondentSolicitorEmail(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
+        if (caseData.isRespondentRepresentedByASolicitor()
+            && !isValidEmailAddress(wrapper.getRespondentSolicitorEmail(), true)) {
+            errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getRespondentSolicitorEmail()));
+            return false;
+        }
+        return true;
+    }
+
+    /*
+     * This version of checkForRespondentSolicitorEmail performs additional validation to check whether the email
+     * address is registered to the respondent's organisation.
+     */
+    private static void checkForRespondentSolicitorEmail(FinremCaseData caseData, ValidatePartiesService validatePartiesService,
+                                                         List<String> errors) {
+        String respondentSolicitorEmail = caseData.getContactDetailsWrapper().getRespondentSolicitorEmail();
+
+        if (caseData.isRespondentRepresentedByASolicitor()) {
+            if (!isValidEmailAddress(respondentSolicitorEmail, true)) {
+                errors.add(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(respondentSolicitorEmail));
+            } else if (StringUtils.isNotBlank(respondentSolicitorEmail)) {
+                String orgId = getOrganisationId(caseData.getRespondentOrganisationPolicy());
+                if (!isEmailValidForOrganisation(validatePartiesService, respondentSolicitorEmail, orgId)) {
+                    errors.add(EMAIL_NOT_IN_RESPONDENT_ORG_ERROR_MESSAGE.formatted(respondentSolicitorEmail));
+                }
+            }
+        }
+    }
+
     private static String getOrganisationId(OrganisationPolicy policy) {
         return Optional.ofNullable(policy)
             .map(OrganisationPolicy::getOrganisation)
@@ -334,23 +421,6 @@ public class ContactDetailsValidator {
         return livesInUK && addressMissingRequiredPostcode;
     }
 
-    private static void checkForApplicantSolicitorEmailAddress(FinremCaseData caseData,
-                                                               ValidatePartiesService validatePartiesService,
-                                                               List<String> errors) {
-        String applicantSolicitorEmail = caseData.getAppSolicitorEmail();
-
-        if (caseData.isApplicantRepresentedByASolicitor()) {
-            if (!isValidEmailAddress(applicantSolicitorEmail)) {
-                errors.add(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(applicantSolicitorEmail));
-            } else {
-                String orgId = getOrganisationId(caseData.getApplicantOrganisationPolicy());
-                if (!isEmailValidForOrganisation(validatePartiesService, applicantSolicitorEmail, orgId)) {
-                    errors.add(EMAIL_NOT_IN_APPLICANT_ORG_ERROR_MESSAGE.formatted(applicantSolicitorEmail));
-                }
-            }
-        }
-    }
-
     private static boolean isEmailValidForOrganisation(ValidatePartiesService validatePartiesService,
                                                        String email, String orgId) {
         if (validatePartiesService == null) {
@@ -363,22 +433,6 @@ public class ContactDetailsValidator {
         String applicantEmail = wrapper.getApplicantEmail();
         if (!isValidEmailAddress(applicantEmail, true)) {
             errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, applicantEmail));
-        }
-    }
-
-    private static void checkForRespondentSolicitorEmail(FinremCaseData caseData, ValidatePartiesService validatePartiesService,
-                                                         List<String> errors) {
-        String respondentSolicitorEmail = caseData.getContactDetailsWrapper().getRespondentSolicitorEmail();
-
-        if (caseData.isRespondentRepresentedByASolicitor()) {
-            if (!isValidEmailAddress(respondentSolicitorEmail, true)) {
-                errors.add(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(respondentSolicitorEmail));
-            } else if (StringUtils.isNotBlank(respondentSolicitorEmail)) {
-                String orgId = getOrganisationId(caseData.getRespondentOrganisationPolicy());
-                if (!isEmailValidForOrganisation(validatePartiesService, respondentSolicitorEmail, orgId)) {
-                    errors.add(EMAIL_NOT_IN_RESPONDENT_ORG_ERROR_MESSAGE.formatted(respondentSolicitorEmail));
-                }
-            }
         }
     }
 
