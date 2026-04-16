@@ -84,8 +84,8 @@ class FormerIntervenerOneBarristerListenerTest extends BasePartyListenerTest {
 
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
-            solicitorReferenceNumber)
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
+            caseDetailsBefore, emailTemplate, solicitorReferenceNumber)
             .toBuilder()
             .barrister(barrister(TEST_ORG_ID, TEST_INTV_BARRISTER_USER_ID, TEST_INTV_BARRISTER_NAME, TEST_INTV_BARRISTER_EMAIL))
             .build();
@@ -108,7 +108,8 @@ class FormerIntervenerOneBarristerListenerTest extends BasePartyListenerTest {
     void shouldNotSendEmailNotificationIfCaseDetailsBeforeIsAbsent() {
         FinremCaseDetails caseDetailsBefore = null;
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, mock(EmailTemplateNames.class));
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
+            caseDetailsBefore, mock(EmailTemplateNames.class));
 
         underTest.handleNotification(event);
 
@@ -131,8 +132,8 @@ class FormerIntervenerOneBarristerListenerTest extends BasePartyListenerTest {
 
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
-            TEST_INTV_SOLICITOR_REFERENCE)
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
+            caseDetailsBefore, emailTemplate, TEST_INTV_SOLICITOR_REFERENCE)
             .toBuilder()
             .barrister(barrister(TEST_ORG_ID, TEST_INTV_BARRISTER_USER_ID, TEST_INTV_BARRISTER_NAME, TEST_INTV_BARRISTER_EMAIL))
             .build();

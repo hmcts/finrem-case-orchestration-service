@@ -1680,6 +1680,16 @@ public class NotificationService {
         sendNocEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
     }
 
+    /**
+     * Sends a Notice of Change (NOC) email to solicitors, initiated by a caseworker.
+     *
+     * <p>This method determines the appropriate email template based on the given
+     * {@link FinremCaseDetails}, constructs a {@link NotificationRequest}, and
+     * sends the email only if the solicitor is a digital user.
+     *
+     * @param caseDetails the case details used to determine the template and populate
+     *                    the notification request
+     */
     public void sendNoticeOfChangeEmailCaseworker(FinremCaseDetails caseDetails) {
         EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
         NotificationRequest notificationRequest = finremNotificationRequestMapper
