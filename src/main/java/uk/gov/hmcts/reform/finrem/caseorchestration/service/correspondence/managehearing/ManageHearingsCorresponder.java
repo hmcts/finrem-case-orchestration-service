@@ -215,6 +215,28 @@ public class ManageHearingsCorresponder {
             .authToken(userAuthorisation)
             .build()
         );
+        applicationEventPublisher.publishEvent(buildSendCorrespondenceEvent(
+            caseDetails, hearing, action, userAuthorisation, documentsToPost, templateName, partiesOnCase
+        ));
+    }
+
+    private SendCorrespondenceEvent buildSendCorrespondenceEvent(FinremCaseDetails caseDetails,
+                                                                 HearingLike hearing,
+                                                                 ManageHearingsAction action,
+                                                                 String userAuthorisation,
+                                                                 List<CaseDocument> documentsToPost,
+                                                                 EmailTemplateNames templateName,
+                                                                 List<PartyOnCaseCollectionItem> partiesOnCase) {
+        return SendCorrespondenceEvent.builder()
+            .notificationParties(partiesOnCase.stream()
+                .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
+                .toList())
+            .emailNotificationRequest(buildNotificationRequest(caseDetails.getData(), action, hearing))
+            .emailTemplate(templateName)
+            .documentsToPost(documentsToPost)
+            .caseDetails(caseDetails)
+            .authToken(userAuthorisation)
+            .build();
     }
 
     private boolean shouldNotSendVacateOrAdjournNotification(boolean isVacatedAndRelistedHearing,

@@ -14,17 +14,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 @Slf4j
 @Service
 public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
 
+    private final RetryExecutor retryExecutor;
+
     private final ManageHearingsCorresponder manageHearingsCorresponder;
 
     public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                          ManageHearingsCorresponder manageHearingsCorresponder) {
+                                          ManageHearingsCorresponder manageHearingsCorresponder,
+                                          RetryExecutor retryExecutor) {
         super(finremCaseDetailsMapper);
         this.manageHearingsCorresponder = manageHearingsCorresponder;
+        this.retryExecutor = retryExecutor;
     }
 
     @Override
@@ -38,8 +43,10 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
+        
+        FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
 
-        ManageHearingsWrapper manageHearingsWrapper = callbackRequest.getCaseDetails().getData().getManageHearingsWrapper();
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
 
         ManageHearingsAction actionSelection = manageHearingsWrapper.getManageHearingsActionSelection();
 
@@ -57,8 +64,6 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             manageHearingsCorresponder.sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, userAuthorisation);
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .build();
+        return response(finremCaseData);
     }
 }
