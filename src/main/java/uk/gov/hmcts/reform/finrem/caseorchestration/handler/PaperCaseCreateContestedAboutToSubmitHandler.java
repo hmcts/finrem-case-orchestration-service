@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AccessCodeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.ArrayList;
@@ -106,6 +107,8 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallback
         caseData = finremCaseDetailsMapper.mapToFinremCaseData(oldCaseDetails.getData());
 
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+
+        AccessCodeGenerator.setAccessCode(caseData);
 
         List<String> errors = new ArrayList<>(ContactDetailsValidator.validateOrganisationPolicy(caseData));
         errors.addAll(applicantSolicitorDetailsValidator.validate(caseData));

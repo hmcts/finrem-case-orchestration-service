@@ -50,11 +50,22 @@ public final class AccessCodeGenerator {
                 .isValid(YesOrNo.YES)
                 .build();
 
+            AccessCodeEntry entry1 = AccessCodeEntry.builder()
+                .accessCode(generateAccessCode())
+                .createdAt(LocalDateTime.now())
+                .validUntil(setValidUntilDate(LocalDateTime.now()))
+                .isValid(YesOrNo.NO)
+                .build();
+
             AccessCodeCollection collection = AccessCodeCollection.builder()
                 .value(entry)
                 .build();
 
-            setter.accept(new ArrayList<>(List.of(collection)));
+            AccessCodeCollection collection1 = AccessCodeCollection.builder()
+                .value(entry1)
+                .build();
+
+            setter.accept(new ArrayList<>(List.of(collection, collection1)));
         }
     }
 
