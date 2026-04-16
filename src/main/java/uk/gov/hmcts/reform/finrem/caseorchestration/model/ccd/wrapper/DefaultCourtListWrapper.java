@@ -72,6 +72,12 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
 
     @JsonIgnore
     @Override
+    public LondonCourt getLondonCourt() {
+        return londonCourtList;
+    }
+
+    @JsonIgnore
+    @Override
     public CfcCourt getCfcCourt() {
         return cfcCourtList;
     }
