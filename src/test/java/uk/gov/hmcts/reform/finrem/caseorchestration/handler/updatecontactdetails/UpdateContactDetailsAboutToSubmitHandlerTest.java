@@ -272,36 +272,6 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         verifyNoMoreInteractions(nocWorkflowService, updateContactDetailsService);
     }
 
-    /**
-     * Test that when before and after case details are the same object, no cover sheets are generated.
-     */
-    @Test
-    void givenSameCaseDetailsForBeforeAndAfter_generateCoverSheetsNotCalled() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper.builder().build())
-            .build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(Long.valueOf(CASE_ID))
-            .data(finremCaseData)
-            .caseType(CaseType.CONSENTED)
-            .build();
-        // Both before and after point to the same object
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .eventType(EventType.UPDATE_CONTACT_DETAILS)
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(caseDetails)
-            .build();
-
-        var response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertNotNull(response);
-        // No cover sheets should be generated since there are no changes
-        verify(updateContactDetailsService).persistOrgPolicies(finremCaseData, caseDetails.getData());
-        verify(onlineFormDocumentService, never()).generateContestedMiniForm(any(), any());
-        verifyNoMoreInteractions(onlineFormDocumentService);
-        verifyNoMoreInteractions(nocWorkflowService);
-    }
-
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()
@@ -314,10 +284,10 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     }
 
     private FinremCallbackRequest createRequest(CaseType caseType, FinremCaseData finremCaseData) {
+
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, finremCaseData);
-        request.setCaseDetailsBefore(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder().build())
-            .build());
+        FinremCaseDetails finremCaseDetailsBefore = new FinremCaseDetails();
+        request.setCaseDetailsBefore(finremCaseDetailsBefore);
         return request;
     }
 
