@@ -56,6 +56,12 @@ public class Court implements CourtListWrapper {
 
     @JsonIgnore
     @Override
+    public LondonCourt getLondonCourt() {
+        return getDefaultCourtListWrapper().getLondonCourtList();
+    }
+
+    @JsonIgnore
+    @Override
     public BirminghamCourt getBirminghamCourt() {
         return getDefaultCourtListWrapper().getBirminghamCourtList();
     }
