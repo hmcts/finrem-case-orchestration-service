@@ -204,17 +204,6 @@ public class ManageHearingsCorresponder {
         List<PartyOnCaseCollectionItem> partiesOnCase =
             Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
 
-        applicationEventPublisher.publishEvent(SendCorrespondenceEvent.builder()
-            .notificationParties(partiesOnCase.stream()
-                .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
-                .toList())
-            .emailNotificationRequest(buildNotificationRequest(caseDetails.getData(), action, hearing))
-            .emailTemplate(templateName)
-            .documentsToPost(documentsToPost)
-            .caseDetails(caseDetails)
-            .authToken(userAuthorisation)
-            .build()
-        );
         applicationEventPublisher.publishEvent(buildSendCorrespondenceEvent(
             caseDetails, hearing, action, userAuthorisation, documentsToPost, templateName, partiesOnCase
         ));
