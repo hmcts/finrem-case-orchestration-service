@@ -863,7 +863,6 @@ class NotificationServiceTest {
         myNotificationRequest.setNotificationEmail("test@test.com");
         myNotificationRequest.setName(TEST_SOLICITOR_NAME);
 
-
         CaseDetails caseDetails = getContestedCallbackRequest().getCaseDetails();
 
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(caseDetails)).thenReturn(myNotificationRequest);
@@ -1473,7 +1472,6 @@ class NotificationServiceTest {
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
         List<String> hearingIdsToProcess = List.of("1f7e210d-87d8-4e98-8c48-db15d1dc0d14");
         when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
-
 
         hearings.forEach(hearingData -> {
             if (hearingIdsToProcess.contains(hearingData.getId())) {
