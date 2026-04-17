@@ -13,8 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
@@ -58,29 +58,21 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
-        
-        FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
 
-        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = caseDetails.getData();
+        ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
 
-        ManageHearingsAction actionSelection = manageHearingsWrapper.getManageHearingsActionSelection();
+        log.info("Beginning hearing correspondence for {} action. Case reference: {}",
+            actionSelection.getDescription(), caseDetails.getCaseIdAsString());
 
         List<String> errors = new ArrayList<>();
-
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
-            log.info("Beginning hearing correspondence for {} action. Case reference: {}",
-                ManageHearingsAction.ADD_HEARING.getDescription(),
-                callbackRequest.getCaseDetails().getCaseIdAsString());
             ofNullable(
                 manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation)
             ).ifPresent(event -> this.publishEvent(
                 appendNotifyingParties("Send hearing correspondence", event), event, errors));
-        }
-
-        if (ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(actionSelection)) {
-            log.info("Beginning hearing correspondence for {} action. Case reference: {}",
-                ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.getDescription(),
-                callbackRequest.getCaseDetails().getCaseIdAsString());
+        } else if (ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(actionSelection)) {
             ofNullable(
                 manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation)
             ).ifPresent(event -> this.publishEvent(
