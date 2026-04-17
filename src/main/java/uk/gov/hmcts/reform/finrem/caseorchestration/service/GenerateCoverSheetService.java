@@ -25,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("java:S1133")
 public class GenerateCoverSheetService {
 
     private final GenericDocumentService genericDocumentService;
