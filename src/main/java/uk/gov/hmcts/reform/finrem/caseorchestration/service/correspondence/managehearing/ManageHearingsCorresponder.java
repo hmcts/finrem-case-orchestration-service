@@ -73,7 +73,7 @@ public class ManageHearingsCorresponder {
      *         or {@code null} if no notification is required
      */
     public SendCorrespondenceEvent buildHearingCorrespondenceEventIfNeeded(FinremCallbackRequest callbackRequest,
-                                                                   String userAuthorisation) {
+                                                                           String userAuthorisation) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
@@ -100,13 +100,29 @@ public class ManageHearingsCorresponder {
     }
 
     /**
-     * Collect associated vacated hearing information and send hearing notification to the solicitor through
-     *  a correspondence event publisher.
+     * Builds a {@link SendCorrespondenceEvent} to notify the solicitor when a hearing
+     * is adjourned or vacated, if notification is required.
+     *
+     * <p>
+     * This method determines whether the hearing has been vacated and relisted. In such cases,
+     * a hearing correspondence is always sent via {@code sendHearingCorrespondence}, as the user
+     * cannot opt out of notifications. It then retrieves the vacated or adjourned hearing in context
+     * and evaluates whether a notification should be sent.
+     * </p>
+     *
+     * <p>
+     * If notification is required, it prepares the relevant hearing notice document and selects
+     * the appropriate email template based on whether the hearing was adjourned or vacated,
+     * before constructing the correspondence event.
+     * </p>
      *
      * @param callbackRequest the callback request containing case details and data
      * @param userAuthorisation the authorization token of the user initiating this action
+     * @return a {@link SendCorrespondenceEvent} containing the hearing notification details,
+     *         or {@code null} if notification should not be sent
      */
-    public void sendAdjournedOrVacatedHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+    public SendCorrespondenceEvent buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(FinremCallbackRequest callbackRequest,
+                                                                                             String userAuthorisation) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
@@ -123,7 +139,7 @@ public class ManageHearingsCorresponder {
 
         // Always send vacate hearing notice when relisted, as user cannot select to send or not in this scenario
         if (shouldNotSendVacateOrAdjournNotification(isVacatedAndRelistedHearing, vacateOrAdjournedHearing)) {
-            return;
+            return null;
         }
 
         VacateOrAdjournAction action = vacateOrAdjournedHearing.getHearingStatus();
@@ -134,7 +150,7 @@ public class ManageHearingsCorresponder {
             ? FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR
             : FR_CONTESTED_VACATE_NOTIFICATION_SOLICITOR;
 
-        publishEvent(
+        return buildSendCorrespondenceEvent(
             finremCaseDetails,
             vacateOrAdjournedHearing,
             ManageHearingsAction.ADJOURN_OR_VACATE_HEARING,

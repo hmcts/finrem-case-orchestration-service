@@ -38,7 +38,7 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
-class HearingsSubmittedHandlerTest {
+class ManageHearingsSubmittedHandlerTest {
 
     @TestLogs
     private final TestLogger logs = new TestLogger(ManageHearingsSubmittedHandler.class);
@@ -70,7 +70,7 @@ class HearingsSubmittedHandlerTest {
         assertThat(response.getErrors()).isNullOrEmpty();
         assertThat(logs.getInfos()).contains("Beginning hearing correspondence for Hearing Added action. Case reference: 123");
         verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
-        verify(manageHearingsCorresponder, never()).sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder, never()).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
     }
 
     @Test
@@ -88,7 +88,7 @@ class HearingsSubmittedHandlerTest {
         assertThat(response.getErrors()).isNullOrEmpty();
         assertThat(logs.getInfos()).contains("Beginning hearing correspondence for Hearing Adjourned Or Vacated action. Case reference: 123");
         verify(manageHearingsCorresponder, never()).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
-        verify(manageHearingsCorresponder).sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
     }
 
     private FinremCallbackRequest buildCallbackRequest(UUID hearingID, UUID hearingItemId, ManageHearingsAction action) {

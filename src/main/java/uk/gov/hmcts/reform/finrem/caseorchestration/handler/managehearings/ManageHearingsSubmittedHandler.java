@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import com.ibm.icu.text.ListFormatter;
+import feign.FeignException;
+import feign.Request;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -73,14 +76,19 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
                 callbackRequest.getCaseDetails().getCaseIdAsString());
             ofNullable(
                 manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation)
-            ).ifPresent(event -> this.sendHearingCorrespondence(event, errors));
+            ).ifPresent(event -> this.publishEvent(
+                appendNotifyingParties("Send hearing correspondence", event), event, errors));
         }
 
         if (ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(actionSelection)) {
             log.info("Beginning hearing correspondence for {} action. Case reference: {}",
                 ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.getDescription(),
                 callbackRequest.getCaseDetails().getCaseIdAsString());
-            manageHearingsCorresponder.sendAdjournedOrVacatedHearingCorrespondence(callbackRequest, userAuthorisation);
+            ofNullable(
+                manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation)
+            ).ifPresent(event -> this.publishEvent(
+                appendNotifyingParties("Send adjourned or vacate hearing correspondence", event), event, errors)
+            );
         }
 
         if (errors.isEmpty()) {
@@ -92,7 +100,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         );
     }
 
-    private void sendHearingCorrespondence(SendCorrespondenceEvent event, List<String> errors) {
+    private String appendNotifyingParties(String eventName, SendCorrespondenceEvent event) {
         String notifyingPartiesString = ListFormatter.getInstance(Locale.ENGLISH)
             .format(
                 event.getNotificationParties().stream()
@@ -100,13 +108,33 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
                     .sorted()
                     .toList()
             );
+        return format("%s to %s", eventName, notifyingPartiesString);
+    }
 
+    private void publishEvent(String eventDescription, SendCorrespondenceEvent event, List<String> errors) {
         retryExecutor.runWithRetryWithHandler(
-            () -> applicationEventPublisher.publishEvent(event),
-            format("Send hearing correspondence to %s", notifyingPartiesString),
+            () -> {
+                if (eventDescription.contains("adjourned")) {
+                    throw new FeignException.InternalServerError(
+                        "Simulated 500",
+                        Request.create(
+                            Request.HttpMethod.GET,
+                            "/test",
+                            Map.of(),
+                            null,
+                            null,
+                            null
+                        ),
+                        null,
+                        null
+                    );
+                }
+                applicationEventPublisher.publishEvent(event);
+            },
+            eventDescription,
             event.getCaseId(),
             (exception, actionName, caseId1) ->
-                errors.add(format("Fail to send hearing correspondence to %s.", notifyingPartiesString))
+                errors.add(format("Fail to %s.", eventDescription.toLowerCase()))
         );
     }
 }
