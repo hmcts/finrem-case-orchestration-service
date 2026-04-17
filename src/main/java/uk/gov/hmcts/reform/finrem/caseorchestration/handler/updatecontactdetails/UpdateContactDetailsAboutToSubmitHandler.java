@@ -11,16 +11,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddressUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.ArrayList;
@@ -37,18 +40,21 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final InternationalPostalService internationalPostalService;
+    private final GenerateCoverSheetService generateCoverSheetService;
 
     public UpdateContactDetailsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     UpdateContactDetailsService updateContactDetailsService,
                                                     OnlineFormDocumentService onlineFormDocumentService,
                                                     UpdateRepresentationWorkflowService nocWorkflowService,
-                                                    InternationalPostalService internationalPostalService
+                                                    InternationalPostalService internationalPostalService,
+                                                    GenerateCoverSheetService generateCoverSheetService
     ) {
         super(finremCaseDetailsMapper);
         this.updateContactDetailsService = updateContactDetailsService;
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.nocWorkflowService = nocWorkflowService;
         this.internationalPostalService = internationalPostalService;
+        this.generateCoverSheetService = generateCoverSheetService;
     }
 
     @Override
@@ -102,6 +108,9 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
         }
 
+        FinremCaseDetails finremCaseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        generateCoverSheets(finremCaseDetails, finremCaseDetailsBefore, userAuthorisation);
+
         return response(finremCaseData);
     }
 
@@ -149,5 +158,40 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
         }
 
         return errors;
+    }
+
+    private void generateCoverSheets(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String userAuthorisation) {
+        if (hasChangeApplicant(caseDetails, caseDetailsBefore)) {
+            generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, userAuthorisation);
+        }
+        if (hasChangeRespondant(caseDetails, caseDetailsBefore)) {
+            generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, userAuthorisation);
+        }
+    }
+
+    private boolean hasChangeApplicant(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
+        Map<String, Object[]> fieldsChanged = ContactDetailsWrapper.diff(finremCaseDetails.getData().getContactDetailsWrapper(),
+            finremCaseDetailsBefore.getData().getContactDetailsWrapper());
+
+        Address applicantAddress = finremCaseDetails.getData().getContactDetailsWrapper().getApplicantAddress();
+        Address applicantAddressBefore = finremCaseDetailsBefore.getData().getContactDetailsWrapper().getApplicantAddress();
+        boolean applicantAddressChanged = AddressUtils.hasChange(applicantAddressBefore, applicantAddress);
+
+        return (fieldsChanged.keySet().contains("applicantFmName")
+            || fieldsChanged.keySet().contains("applicantLname")
+            || applicantAddressChanged);
+    }
+
+    private boolean hasChangeRespondant(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
+        Map<String, Object[]> fieldsChanged = ContactDetailsWrapper.diff(finremCaseDetails.getData().getContactDetailsWrapper(),
+            finremCaseDetailsBefore.getData().getContactDetailsWrapper());
+
+        Address respondentAddress = finremCaseDetails.getData().getContactDetailsWrapper().getRespondentAddress();
+        Address respondentAddressBefore = finremCaseDetailsBefore.getData().getContactDetailsWrapper().getRespondentAddress();
+        boolean respondentAddressChanged = AddressUtils.hasChange(respondentAddressBefore, respondentAddress);
+
+        return (fieldsChanged.keySet().contains("respondentFmName")
+            || fieldsChanged.keySet().contains("respondentLname")
+            || respondentAddressChanged);
     }
 }
