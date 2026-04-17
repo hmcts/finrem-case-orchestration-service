@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -864,7 +863,6 @@ class NotificationServiceTest {
         myNotificationRequest.setNotificationEmail("test@test.com");
         myNotificationRequest.setName(TEST_SOLICITOR_NAME);
 
-
         CaseDetails caseDetails = getContestedCallbackRequest().getCaseDetails();
 
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(caseDetails)).thenReturn(myNotificationRequest);
@@ -1370,24 +1368,6 @@ class NotificationServiceTest {
     }
 
     @Test
-    void givenBarristerAdded_sendAddedEmail() {
-        Barrister barrister = new Barrister().toBuilder().build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        when(notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister)).thenReturn(notificationRequest);
-        notificationService.sendBarristerAddedEmail(caseDetails, barrister);
-        verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
-    }
-
-    @Test
-    void givenBarristerRemoved_sendRemovedEmail() {
-        Barrister barrister = new Barrister().toBuilder().build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        when(notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister)).thenReturn(notificationRequest);
-        notificationService.sendBarristerRemovedEmail(caseDetails, barrister);
-        verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
-    }
-
-    @Test
     void sendInterimHearingNotificationEmailToApplicantSolicitor() {
         FinremCallbackRequest callbackRequest = buildHearingFinremCallbackRequest(INTERIM_HEARING_JSON);
 
@@ -1492,7 +1472,6 @@ class NotificationServiceTest {
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
         List<String> hearingIdsToProcess = List.of("1f7e210d-87d8-4e98-8c48-db15d1dc0d14");
         when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
-
 
         hearings.forEach(hearingData -> {
             if (hearingIdsToProcess.contains(hearingData.getId())) {

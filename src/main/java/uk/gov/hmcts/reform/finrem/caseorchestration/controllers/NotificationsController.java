@@ -161,12 +161,32 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
+    /**
+     * Sends Notice of Change notifications when initiated by a caseworker.
+     *
+     * <p>This endpoint validates the incoming {@link CallbackRequest}, determines whether
+     * notifications are required, and if so:
+     * <ul>
+     *     <li>Sends a Notice of Change email to the solicitor via {@code notificationService}</li>
+     *     <li>Sends a Notice of Change letter to the organisation via {@code nocLetterNotificationService}</li>
+     * </ul>
+     *
+     * <p>After processing, it clears temporary flags related to the representative update
+     * and returns the updated case data in the response.
+     *
+     * @param authorisationToken the authorisation token used for downstream service calls
+     * @param callbackRequest the callback request containing case details
+     * @return a {@link ResponseEntity} containing the updated case data
+     *
+     * @deprecated This endpoint is deprecated and will be removed after DFR-4810 is completed.
+     */
     @PostMapping(value = "/notice-of-change/caseworker", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "Initiated by caseworker, sends a notice of change to the Solicitor email and a letter to the organization.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Notice of change e-mail and letter sent successfully",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    @Deprecated(forRemoval = true)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotificationsCaseworker(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody CallbackRequest callbackRequest) {
