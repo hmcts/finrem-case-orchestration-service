@@ -225,26 +225,6 @@ public class ManageHearingsCorresponder {
             .toList());
     }
 
-    /**
-     * Publishes a correspondence event for managing hearing notifications.
-     *
-     * @param caseDetails the details of the financial remedy case
-     * @param hearing the hearing-related information to be included in the event
-     * @param userAuthorisation the authorization token of the user triggering the event
-     * @param documentsToPost the list of documents to be sent as part of the correspondence
-     * @param templateName the email template name to use for notifications
-     */
-    private void publishEvent(FinremCaseDetails caseDetails,
-                              HearingLike hearing,
-                              ManageHearingsAction action,
-                              String userAuthorisation,
-                              List<CaseDocument> documentsToPost,
-                              EmailTemplateNames templateName) {
-        applicationEventPublisher.publishEvent(buildSendCorrespondenceEvent(
-            caseDetails, hearing, action, userAuthorisation, documentsToPost, templateName
-        ));
-    }
-
     private SendCorrespondenceEvent buildSendCorrespondenceEvent(FinremCaseDetails caseDetails,
                                                                  HearingLike hearing,
                                                                  ManageHearingsAction action,
