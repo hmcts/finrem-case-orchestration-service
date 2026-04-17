@@ -98,6 +98,7 @@ public enum EventType {
     FR_HWF_DECISION_MADE("FR_HWFDecisionMade"),
     FR_HWF_DECISION_MADE_FROM_AWAITING_PAYMENT("FR_HWFDecisionMadeFromAwaitingPayment"),
     STOP_REPRESENTING_CLIENT("FR_stopRepresentingClient"),
+    APPLY_NOC_DECISION("applyNocDecision"),
     @JsonEnumDefaultValue
     NONE("");
 
