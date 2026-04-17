@@ -66,10 +66,9 @@ class ManageHearingsSubmittedHandlerTest {
             manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
-        assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isNullOrEmpty();
         assertThat(logs.getInfos()).contains("Beginning hearing correspondence for Hearing Added action. Case reference: 123");
-        verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
         verify(manageHearingsCorresponder, never()).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
     }
 
@@ -84,7 +83,6 @@ class ManageHearingsSubmittedHandlerTest {
             manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
-        assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isNullOrEmpty();
         assertThat(logs.getInfos()).contains("Beginning hearing correspondence for Hearing Adjourned Or Vacated action. Case reference: 123");
         verify(manageHearingsCorresponder, never()).sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
