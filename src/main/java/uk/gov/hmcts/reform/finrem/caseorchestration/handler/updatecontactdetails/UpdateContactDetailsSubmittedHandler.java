@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -14,28 +15,31 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
-
     private static final String CONFIRMATION_HEADER_WITH_ERROR = "Contact details updated with Errors";
-
     private final UpdateContactDetailsNotificationService updateContactDetailsNotificationService;
+    private final SolicitorAccessService solicitorAccessService;
     private final RetryExecutor retryExecutor;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public UpdateContactDetailsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                 UpdateContactDetailsNotificationService updateContactDetailsNotificationService,
+                                                SolicitorAccessService solicitorAccessService,
                                                 RetryExecutor retryExecutor,
                                                 ApplicationEventPublisher applicationEventPublisher) {
         super(finremCaseDetailsMapper);
         this.updateContactDetailsNotificationService = updateContactDetailsNotificationService;
+        this.solicitorAccessService = solicitorAccessService;
         this.retryExecutor = retryExecutor;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -56,9 +60,14 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        /*
-        DFR-4589 AUto assigning applicant solicitor logic here
-        */
+        String checkAndAssignSolicitorAccessError = checkAndAssignSolicitorAccess(callbackRequest);
+
+        if (StringUtils.isNotBlank(checkAndAssignSolicitorAccessError)) {
+            return submittedResponse(
+                toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
+                toConfirmationBody(checkAndAssignSolicitorAccessError)
+            );
+        }
 
         if (requiresNotifications(finremCaseData)) {
             List<String> errors = new ArrayList<>();
@@ -119,5 +128,24 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
                                           String userAuthorisation) {
         updateContactDetailsNotificationService.sendNocLetterToLitigants(finremCaseDetails, finremCaseDetailsBefore,
             userAuthorisation);
+    }
+
+    private String checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest) {
+
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+
+        AtomicReference<String> error = new AtomicReference<>();
+
+        retryExecutor.runWithRetryWithHandler(
+            () -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore),
+            "Update Contact Details - Case Solicitor Change",
+            caseData.getCcdCaseId(),
+            (exception, actionName, caseId) ->
+                error.set("There was a problem updating solicitor access to case.")
+        );
+
+        return error.get();
     }
 }
