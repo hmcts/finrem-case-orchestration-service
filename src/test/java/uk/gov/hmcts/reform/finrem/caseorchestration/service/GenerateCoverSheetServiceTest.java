@@ -1,8 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,11 +18,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -52,29 +57,9 @@ class GenerateCoverSheetServiceTest {
     @Mock
     private CaseType caseType;
 
-    @BeforeEach
-    void setUp() {
-        when(documentConfiguration.getBulkPrintTemplate()).thenReturn(BULK_PRINT_TEMPLATE);
-        when(documentConfiguration.getBulkPrintFileName()).thenReturn(BULK_PRINT_FILE_NAME);
-
-        when(bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(any(), any(), any()))
-            .thenReturn(Map.of("caseDetails", Map.of("id", CASE_ID_IN_LONG)));
-
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(
-            eq(AUTH_TOKEN),
-            any(),
-            eq(BULK_PRINT_TEMPLATE),
-            eq(BULK_PRINT_FILE_NAME),
-            eq(caseType)
-        )).thenReturn(CaseDocument.builder()
-            .documentBinaryUrl(TEST_DOCUMENT_BINARY_URL)
-            .documentUrl(TEST_DOCUMENT_URL)
-            .documentFilename(TEST_DOCUMENT_FILENAME)
-            .build());
-    }
-
     @Test
     void shouldGenerateApplicantCoverSheet() {
+        setUpDocGenerationMocks();
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
 
         CaseDocument result = generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
@@ -93,6 +78,7 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldGenerateAndSetApplicantCoverSheet_whenAddressNotHidden() {
+        setUpDocGenerationMocks();
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(
             caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
@@ -108,18 +94,20 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldNotDeleteDocument_whenOldCoverSheetIsNull() {
+        setUpDocGenerationMocks();
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
 
         generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
         assertEquals(TEST_DOCUMENT_FILENAME,
-                caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
+            caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
         verify(genericDocumentService, org.mockito.Mockito.never()).deleteDocument(any(), eq(AUTH_TOKEN));
     }
 
     @Test
     void shouldStoreApplicantCoverSheetInConfidentialField_whenApplicantAddressHiddenFromRespondent() {
+        setUpDocGenerationMocks();
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.YES, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(
             caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
@@ -135,6 +123,7 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldGenerateAndSetRespondentCoverSheet_whenAddressNotHidden() {
+        setUpDocGenerationMocks();
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(
             caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
@@ -150,6 +139,7 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldStoreRespondentCoverSheetInConfidentialField_whenRespondentAddressHiddenFromApplicant() {
+        setUpDocGenerationMocks();
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.YES);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(
             caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
@@ -165,6 +155,7 @@ class GenerateCoverSheetServiceTest {
 
     @Test
     void shouldGenerateIntervenerCoverSheet() {
+        setUpDocGenerationMocks();
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
 
         CaseDocument result = generateCoverSheetService.generateIntervenerCoverSheet(
@@ -179,6 +170,98 @@ class GenerateCoverSheetServiceTest {
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE,
             caseDetails.getData().getRegionWrapper().getDefaultCourtList()
         );
+    }
+
+    @ParameterizedTest
+    @EnumSource(IntervenerType.class)
+    void shouldGenerateAndStoreIntervenerCoverSheet(IntervenerType intervenerType) {
+        setUpDocGenerationMocks();
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
+        setIntervenerCoverSheet(caseDetails, intervenerType, caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME));
+
+        generateCoverSheetService.generateAndStoreIntervenerCoversheet(caseDetails, intervenerType, AUTH_TOKEN);
+
+        assertEquals(TEST_DOCUMENT_FILENAME, Objects.requireNonNull(getIntervenerCoverSheet(caseDetails, intervenerType)).getDocumentFilename());
+        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+    }
+
+    @ParameterizedTest
+    @EnumSource(IntervenerType.class)
+    void shouldRemoveIntervenerCoverSheet(IntervenerType intervenerType) {
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
+        setIntervenerCoverSheet(caseDetails, intervenerType, caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME));
+
+        IntervenerChangeDetails changeDetails = new IntervenerChangeDetails();
+        changeDetails.setIntervenerType(intervenerType);
+
+        generateCoverSheetService.removeIntervenerCoverSheet(caseDetails, changeDetails, AUTH_TOKEN);
+
+        assertNull(getIntervenerCoverSheet(caseDetails, intervenerType));
+        verify(genericDocumentService).deleteDocument(OLD_COVERESHEET_URL, AUTH_TOKEN);
+    }
+
+    @Test
+    void shouldThrowException_whenInvalidIntervenerTypeProvided() {
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
+
+        IntervenerChangeDetails changeDetails = new IntervenerChangeDetails();
+        changeDetails.setIntervenerType(null); // Invalid intervener type
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            generateCoverSheetService.removeIntervenerCoverSheet(caseDetails, changeDetails, AUTH_TOKEN);
+        });
+    }
+
+    private void setIntervenerCoverSheet(FinremCaseDetails caseDetails, IntervenerType intervenerType, CaseDocument document) {
+        BulkPrintCoversheetWrapper wrapper = caseDetails.getData().getBulkPrintCoversheetWrapper();
+        switch (intervenerType) {
+            case INTERVENER_ONE -> wrapper.setBulkPrintCoverSheetIntv1(document);
+            case INTERVENER_TWO -> wrapper.setBulkPrintCoverSheetIntv2(document);
+            case INTERVENER_THREE -> wrapper.setBulkPrintCoverSheetIntv3(document);
+            case INTERVENER_FOUR -> wrapper.setBulkPrintCoverSheetIntv4(document);
+            default -> { /* do nothing */ }
+        }
+    }
+
+    private CaseDocument getIntervenerCoverSheet(FinremCaseDetails caseDetails, IntervenerType intervenerType) {
+        BulkPrintCoversheetWrapper wrapper = caseDetails.getData().getBulkPrintCoversheetWrapper();
+        switch (intervenerType) {
+            case INTERVENER_ONE -> {
+                return wrapper.getBulkPrintCoverSheetIntv1();
+            }
+            case INTERVENER_TWO -> {
+                return wrapper.getBulkPrintCoverSheetIntv2();
+            }
+            case INTERVENER_THREE -> {
+                return wrapper.getBulkPrintCoverSheetIntv3();
+            }
+            case INTERVENER_FOUR -> {
+                return wrapper.getBulkPrintCoverSheetIntv4();
+            }
+            default -> {
+                return null;
+            }
+        }
+    }
+
+    private void setUpDocGenerationMocks() {
+        when(documentConfiguration.getBulkPrintTemplate()).thenReturn(BULK_PRINT_TEMPLATE);
+        when(documentConfiguration.getBulkPrintFileName()).thenReturn(BULK_PRINT_FILE_NAME);
+
+        when(bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(any(), any(), any()))
+            .thenReturn(Map.of("caseDetails", Map.of("id", CASE_ID_IN_LONG)));
+
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(
+            eq(AUTH_TOKEN),
+            any(),
+            eq(BULK_PRINT_TEMPLATE),
+            eq(BULK_PRINT_FILE_NAME),
+            eq(caseType)
+        )).thenReturn(CaseDocument.builder()
+            .documentBinaryUrl(TEST_DOCUMENT_BINARY_URL)
+            .documentUrl(TEST_DOCUMENT_URL)
+            .documentFilename(TEST_DOCUMENT_FILENAME)
+            .build());
     }
 
     private void assertGeneratedDocument(CaseDocument result) {
