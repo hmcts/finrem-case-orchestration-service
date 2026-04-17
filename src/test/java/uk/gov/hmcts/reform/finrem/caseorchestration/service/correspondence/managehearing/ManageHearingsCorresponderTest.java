@@ -324,10 +324,6 @@ class ManageHearingsCorresponderTest {
         SendCorrespondenceEvent actualEvent = corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
 
         // Assert
-//        ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-//        verify(eventPublisher).publishEvent(captor.capture());
-
-//        SendCorrespondenceEvent actualEvent = captor.getValue();
         SendCorrespondenceEvent expectedEvent = getExpectedVacatedOrAdjournedHearingEvent(callbackRequest.getCaseDetails());
 
         assertThat(actualEvent.getEmailNotificationRequest())
@@ -367,9 +363,6 @@ class ManageHearingsCorresponderTest {
             CaseDocument.builder().documentFilename("VacateHearingNotice.pdf").build());
 
         SendCorrespondenceEvent actualEvent = corresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
-
-//        ArgumentCaptor<SendCorrespondenceEvent> captor = ArgumentCaptor.forClass(SendCorrespondenceEvent.class);
-//        verify(eventPublisher).publishEvent(captor.capture());
 
         assertThat(actualEvent.getEmailTemplate())
             .isEqualTo(EmailTemplateNames.FR_CONTESTED_ADJOURN_NOTIFICATION_SOLICITOR);
