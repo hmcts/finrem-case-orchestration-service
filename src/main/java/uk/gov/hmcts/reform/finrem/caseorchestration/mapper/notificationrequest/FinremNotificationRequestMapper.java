@@ -60,8 +60,15 @@ public class FinremNotificationRequestMapper extends AbstractNotificationRequest
         return buildNotificationRequest(caseDetails, caseDataKeysWrapper);
     }
 
+    @Deprecated(forRemoval = true)
     public NotificationRequest getNotificationRequestForNoticeOfChange(FinremCaseDetails caseDetails) {
         return isRespondentSolicitorChangedOnLatestRepresentationUpdate(caseDetails)
+            ? getNotificationRequestForRespondentSolicitor(caseDetails)
+            : getNotificationRequestForApplicantSolicitor(caseDetails);
+    }
+
+    public NotificationRequest getNotificationRequestForNoticeOfChange(FinremCaseDetails caseDetails, boolean isRespondentSolicitorChanged) {
+        return isRespondentSolicitorChanged
             ? getNotificationRequestForRespondentSolicitor(caseDetails)
             : getNotificationRequestForApplicantSolicitor(caseDetails);
     }
