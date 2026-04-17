@@ -1,13 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -46,6 +50,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -70,7 +76,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
-public class UpdateRepresentationServiceTest extends BaseServiceTest {
+@ExtendWith(MockitoExtension.class)
+class UpdateRepresentationServiceTest {
 
     private static final String PATH = "/fixtures/noticeOfChange/";
     private static final String NOC_EVENT = "nocRequest";
@@ -86,34 +93,41 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     private static final String NOTICE_OF_CHANGE = "Notice of Change";
     private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
 
-    @Autowired
+    @Spy
+    private final ObjectMapper objectMapper = new ObjectMapper()
+        .findAndRegisterModules()
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+    private ObjectMapper mapper;
+
+    @InjectMocks
     private UpdateRepresentationService updateRepresentationService;
 
-    @MockitoBean
+    @Mock
     private AuditEventService auditEventService;
 
-    @MockitoBean
+    @Mock
     private IdamAuthService idamClient;
 
-    @MockitoBean
+    @Mock
     private CaseDataService caseDataService;
 
-    @MockitoBean
+    @Mock
     private PrdOrganisationService organisationService;
 
-    @MockitoBean
+    @Mock
     private UpdateSolicitorDetailsService updateSolicitorDetailsService;
 
-    @MockitoBean
+    @Mock
     private ChangeOfRepresentationService changeOfRepresentationService;
 
-    @MockitoBean
+    @Mock
     private AddedSolicitorService addedSolicitorService;
 
-    @MockitoBean
+    @Mock
     private RemovedSolicitorService removedSolicitorService;
 
-    @MockitoBean
+    @Mock
     private BarristerRepresentationChecker barristerRepresentationChecker;
 
     private UserDetails testAppSolicitor;
@@ -140,8 +154,10 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     CaseDetails initialDetails;
     Map<String, Object> expectedCaseData;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
+        mapper = objectMapper;
+
         testAppSolicitor = UserDetails.builder()
             .forename("Sir")
             .surname("Solicitor")
@@ -185,7 +201,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenContestedCaseAndEmptyChangeOfRepsForApplicant_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
+    void givenContestedCaseAndEmptyChangeOfRepsForApplicant_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
         setUpDefaultMockContext();
         setUpCaseDetails("contestedAppSolicitorAdding/after-update-details.json");
 
@@ -220,7 +236,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenContestedCaseAndEmptyChangeOfRepsForInterveners_WhenUpdateRepresentation_thenReturnCorrectCaseData() {
+    void givenContestedCaseAndEmptyChangeOfRepsForInterveners_WhenUpdateRepresentation_thenReturnCorrectCaseData() {
         Map<String, String> intervenersJson = Map.of("contestedIntvr1SolicitorAdding/after-update-details.json",
             "contestedIntvr1SolicitorAdding/change-of-representatives-before.json",
             "contestedIntvr2SolicitorAdding/after-update-details.json",
@@ -262,16 +278,13 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void addRemovedSolicitorOrganisationFieldToCaseDataTest() {
-        // Prepare test data
+    void addRemovedSolicitorOrganisationFieldToCaseDataTest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
 
-        // Test when ChangeOrganisationRequest is null
         updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
         assertNull(caseData.get("changeOrganisationRequestField"));
 
-        // Test when ChangeOrganisationRequest is not null and OrganisationToRemove is not null
         ChangeOrganisationRequest changeRequest = ChangeOrganisationRequest.builder()
             .organisationToRemove(Organisation.builder().organisationID("org1").build())
             .build();
@@ -280,7 +293,6 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertEquals("org1", ((ChangeOrganisationRequest) caseData.get("changeOrganisationRequestField"))
             .getOrganisationToRemove().getOrganisationID());
 
-        // Test when ChangeOrganisationRequest is not null and OrganisationToRemove is null
         changeRequest = ChangeOrganisationRequest.builder().build();
         caseData.put("changeOrganisationRequestField", changeRequest);
         updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
@@ -289,7 +301,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenConsentedCaseAndEmptyChangeOfReps_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
+    void givenConsentedCaseAndEmptyChangeOfReps_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
         String fixture = "consentedAppSolicitorAdding";
         setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
         when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
@@ -336,10 +348,11 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowException()
+    void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowException()
         throws Exception {
         String fixture = "consentedAppSolicitorAdding";
-        setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
+        setUpExceptionMockContext(testAppSolicitor, orgResponse);
+
         when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
             ChangedRepresentative.builder()
                 .name(testAppSolicitor.getFullName())
@@ -350,9 +363,9 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                     .build())
                 .build()
         );
-        setUpCaseDetails("consentedAppSolicitorAdding/after-update-details.json");
+        setUpCaseDetails(fixture + "/after-update-details.json");
         try (InputStream resourceAsStream = getClass()
-            .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-before.json")) {
+            .getResourceAsStream(PATH + fixture + "/change-of-representatives-before.json")) {
             initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
                 .getCaseDetails();
             Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData()
@@ -369,10 +382,10 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsUnrecognised_thenThrowException()
+    void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsUnrecognised_thenThrowException()
         throws Exception {
         String fixture = "consentedAppSolicitorAdding";
-        setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
+        setUpExceptionMockContext(testAppSolicitor, orgResponse);
         when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
             ChangedRepresentative.builder()
                 .name(testAppSolicitor.getFullName())
@@ -383,9 +396,9 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                     .build())
                 .build()
         );
-        setUpCaseDetails("consentedAppSolicitorAdding/after-update-details.json");
+        setUpCaseDetails(fixture + "/after-update-details.json");
         try (InputStream resourceAsStream = getClass()
-            .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-before.json")) {
+            .getResourceAsStream(PATH + fixture + "/change-of-representatives-before.json")) {
             initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
                 .getCaseDetails();
             Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData().get("changeOrganisationRequestField");
@@ -402,7 +415,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenEmptyChangeOfRepsAndRespSolicitor_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
+    void givenEmptyChangeOfRepsAndRespSolicitor_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
         String fixture = "RespSolicitorAdding";
         setUpMockContext(testRespSolicitor, orgResponse, this::getChangeOfRepsRespondent, fixture, false);
         when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
@@ -448,7 +461,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenPopulatedChangeOfReps_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
+    void givenPopulatedChangeOfReps_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
         UserDetails replacingSolicitor = UserDetails.builder().forename("Test Applicant").surname("Solicitor")
             .email("appsolicitor1@yahoo.com").build();
 
@@ -509,7 +522,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenUserHasRepresentedLitigantAsBarrister_whenUpdateRepresentation_thenRejectChangeOrgRequest() throws Exception {
+    void givenUserHasRepresentedLitigantAsBarrister_whenUpdateRepresentation_thenRejectChangeOrgRequest() throws Exception {
         when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
         when(barristerRepresentationChecker.hasUserBeenBarristerOnCase(any(), eq(testAppSolicitor))).thenReturn(true);
@@ -534,17 +547,22 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     private void setUpDefaultMockContext() throws Exception {
+        // Precompute values that use the @Spy mapper BEFORE any when(...).thenReturn(...)
+        Map<String, Object> solicitorAddressData = prepareSolAddressData(orgResponse);
+        Map<String, Object> updatedContactData = getUpdatedContactData("contestedAppSolicitorAdding");
+        RepresentationUpdateHistory repUpdateHistory = getChangeOfRepsAppContested();
+
         when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
         when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
-            .thenReturn(prepareSolAddressData(orgResponse));
+            .thenReturn(solicitorAddressData);
         when(changeOfRepresentationService.generateRepresentationUpdateHistory(any()))
-            .thenReturn(getChangeOfRepsAppContested());
+            .thenReturn(repUpdateHistory);
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
-            .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
+            .thenReturn(updatedContactData);
         when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
-            .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
+            .thenReturn(updatedContactData);
         when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
             ChangedRepresentative.builder()
                 .name("Sir Solicitor")
@@ -561,34 +579,52 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                                   Supplier<RepresentationUpdateHistory> supplier,
                                   String fixture,
                                   boolean isConsented) throws Exception {
+        // Precompute values that use the @Spy mapper BEFORE any when(...).thenReturn(...)
+        Map<String, Object> solicitorAddressData = prepareSolAddressData(orgResponse);
+        Map<String, Object> updatedContactData = getUpdatedContactData(fixture);
+        RepresentationUpdateHistory repUpdateHistory = supplier.get();
+
         when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(solicitor);
         when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
-            .thenReturn(prepareSolAddressData(orgResponse));
+            .thenReturn(solicitorAddressData);
         when(changeOfRepresentationService.generateRepresentationUpdateHistory(any()))
-            .thenReturn(supplier.get());
+            .thenReturn(repUpdateHistory);
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
-            .thenReturn(getUpdatedContactData(fixture));
+            .thenReturn(updatedContactData);
         when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
-            .thenReturn(getUpdatedContactData(fixture));
+            .thenReturn(updatedContactData);
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(isConsented);
+    }
+
+    private void setUpExceptionMockContext(UserDetails solicitor,
+                                  OrganisationsResponse orgResponse) {
+
+        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+        when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(solicitor);
+        lenient().when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
     }
 
     private void setUpMockContextReplacing(UserDetails newSolicitor,
                                            OrganisationsResponse orgResponse,
                                            Organisation newSolicitorOrg) throws Exception {
+        // Precompute values that use the @Spy mapper BEFORE any when(...).thenReturn(...)
+        Map<String, Object> solicitorAddressData = prepareSolAddressData(orgResponse);
+        Map<String, Object> updatedContactData = getUpdatedContactData("AppSolReplacing");
+        RepresentationUpdateHistory repUpdateHistory = getChangeOfRepsReplacingApplicant(newSolicitor, newSolicitorOrg);
+
         when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(newSolicitor);
         when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
-            .thenReturn(prepareSolAddressData(orgResponse));
+            .thenReturn(solicitorAddressData);
         when(changeOfRepresentationService.generateRepresentationUpdateHistory(any()))
-            .thenReturn(getChangeOfRepsReplacingApplicant(newSolicitor, newSolicitorOrg));
+            .thenReturn(repUpdateHistory);
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
-            .thenReturn(getUpdatedContactData("AppSolReplacing"));
+            .thenReturn(updatedContactData);
         when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
-            .thenReturn(getUpdatedContactData("AppSolReplacing"));
+            .thenReturn(updatedContactData);
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
     }
 
@@ -685,4 +721,49 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                     .build()))).build();
     }
 
+    @Test
+    void validateEmailActiveForOrganisation_whenUserLinked_thenReturnNoErrors() {
+        String email = "valid@test.com";
+        String caseRef = "12345678";
+
+        when(organisationService.findUserByEmail(email, AUTH_TOKEN)).thenReturn(Optional.of("user-id-1"));
+
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
+
+        assertEquals(List.of(), errors);
+        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
+    }
+
+    @Test
+    void validateEmailActiveForOrganisation_whenUserNotLinked_thenReturnNotActiveUserError() {
+        String email = "missing@test.com";
+        String caseRef = "12345678";
+
+        when(organisationService.findUserByEmail(email, AUTH_TOKEN)).thenReturn(Optional.empty());
+
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
+
+        assertEquals(List.of("Email is not linked to an active User within a HMCTS organisation"), errors);
+        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
+    }
+
+    @Test
+    void validateEmailActiveForOrganisation_whenFindUserThrows_thenReturnGenericErrorWithCaseReference() {
+        String email = "error@test.com";
+        String caseRef = "12345678";
+
+        when(organisationService.findUserByEmail(email, AUTH_TOKEN))
+            .thenThrow(new RuntimeException("boom"));
+
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
+
+        assertEquals(
+            List.of("Email could not be linked to your organisation. Please check and try again Case reference: " + caseRef),
+            errors
+        );
+        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
+    }
 }
