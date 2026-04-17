@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import com.ibm.icu.text.ListFormatter;
-import feign.FeignException;
-import feign.Request;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -113,24 +110,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
 
     private void publishEvent(String eventDescription, SendCorrespondenceEvent event, List<String> errors) {
         retryExecutor.runWithRetryWithHandler(
-            () -> {
-                if (eventDescription.contains("adjourned")) {
-                    throw new FeignException.InternalServerError(
-                        "Simulated 500",
-                        Request.create(
-                            Request.HttpMethod.GET,
-                            "/test",
-                            Map.of(),
-                            null,
-                            null,
-                            null
-                        ),
-                        null,
-                        null
-                    );
-                }
-                applicationEventPublisher.publishEvent(event);
-            },
+            () -> applicationEventPublisher.publishEvent(event),
             eventDescription,
             event.getCaseId(),
             (exception, actionName, caseId1) ->
