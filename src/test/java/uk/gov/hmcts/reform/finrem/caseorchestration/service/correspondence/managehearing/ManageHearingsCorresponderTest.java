@@ -62,7 +62,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.manageheari
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsCorresponderTest {
 
-    private static final UUID hearingId = UUID.fromString("c0a78b4c-5d85-4e50-9d62-219b1b8eb9bb");
+    private static final UUID hearingId = UUID.randomUUID();
     private static final Set<CaseRole> ALL_SOLICITOR_ROLES = Set.of(
         CaseRole.APP_SOLICITOR, CaseRole.RESP_SOLICITOR,
         CaseRole.INTVR_SOLICITOR_1, CaseRole.INTVR_SOLICITOR_2,
