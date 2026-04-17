@@ -81,7 +81,7 @@ class ManageHearingsSubmittedHandlerTest {
 
     @ParameterizedTest
     @EnumSource(NotificationParty.class)
-    void shouldHandleSubmittedCallbackForAddHearing(NotificationParty notificationParty) {
+    void givenSinglePartyToBeNotified_whenHandleAddHearingAction_thenPublishSendCorrespondenceEvent(NotificationParty notificationParty) {
         // Arrange
         UUID hearingID = UUID.randomUUID();
         FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, hearingID, ManageHearingsAction.ADD_HEARING);
@@ -108,6 +108,47 @@ class ManageHearingsSubmittedHandlerTest {
             .runWithRetryWithHandler(
                 publishEventCaptor.capture(),
                 eq(format("Send hearing correspondence to %s", notificationParty.getDescription())),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
+            );
+        publishEventCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
+        verify(applicationEventPublisher).publishEvent(event);
+        verifyNoMoreInteractions(retryExecutor);
+    }
+
+    @Test
+    void givenMultiplePartiesToBeNotified_whenHandleAddHearingAction_thenPublishSendCorrespondenceEvent() {
+        // Arrange
+        UUID hearingID = UUID.randomUUID();
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, hearingID, ManageHearingsAction.ADD_HEARING);
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getCaseId()).thenReturn(CASE_ID);
+        when(event.getNotificationParties()).thenReturn(List.of(NotificationParty.RESPONDENT,
+            NotificationParty.INTERVENER_ONE,
+            NotificationParty.APPLICANT));
+        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertThat(response.getErrors()).isNullOrEmpty();
+        assertThat(logs.getInfos()).contains(
+            format("Beginning hearing correspondence for Hearing Added action. Case reference: %s", CASE_ID)
+        );
+        verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder, never()).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
+
+        ArgumentCaptor<ThrowingRunnable> publishEventCaptor = getThrowingRunnableCaptor();
+        verify(retryExecutor)
+            .runWithRetryWithHandler(
+                publishEventCaptor.capture(),
+                eq(format("Send hearing correspondence to %s, %s, and %s",
+                    NotificationParty.APPLICANT.getDescription(),
+                    NotificationParty.INTERVENER_ONE.getDescription(),
+                    NotificationParty.RESPONDENT.getDescription())),
                 eq(CASE_ID),
                 any(RetryErrorHandler.class)
             );
