@@ -7,80 +7,138 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings("java:S1133")
 public class GenerateCoverSheetService {
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
 
-    public CaseDocument generateApplicantCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
-        logCoverSheetGeneration(DocumentHelper.PaperNotificationRecipient.APPLICANT);
-
-        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+    public CaseDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+        logCoverSheetGeneration(APPLICANT, caseDetails.getCaseIdAsString());
+        return generateCoverSheet(caseDetails, authorisationToken, APPLICANT);
     }
 
-    public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
-        CaseDocument applicantCoverSheet = generateApplicantCoverSheet(caseDetails, authorisationToken);
+    /**
+     * Generates an applicant's cover sheet, determines whether it should be public or confidential
+     * based on the applicant's address visibility settings, and stores the generated cover sheet
+     * accordingly in the case data.
+     *
+     * @param caseDetails        the {@link FinremCaseDetails} object containing the case information
+     * @param authorisationToken the authorization token used to access and store the generated document
+     */
+    public void generateAndSetApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+        FinremCaseData caseData = caseDetails.getData();
+        logCoverSheetGenerationAndStorage(APPLICANT, caseDetails.getCaseIdAsString());
 
-        if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent())) {
-            log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
-            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
-            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
-        } else {
-            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(applicantCoverSheet);
-        }
+        replaceAndStoreCoverSheet(
+            generateApplicantCoverSheet(caseDetails, authorisationToken),
+            caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent(),
+            authorisationToken,
+            caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetApp,
+            caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetAppConfidential,
+            caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetApp,
+            caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetAppConfidential
+        );
     }
 
-    public CaseDocument generateRespondentCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
-        logCoverSheetGeneration(DocumentHelper.PaperNotificationRecipient.RESPONDENT);
-
-        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+    public CaseDocument generateRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+        logCoverSheetGeneration(RESPONDENT, caseDetails.getCaseIdAsString());
+        return generateCoverSheet(caseDetails, authorisationToken, RESPONDENT);
     }
 
-    public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, final String authorisationToken) {
-        CaseDocument respondentCoverSheet = generateRespondentCoverSheet(caseDetails, authorisationToken);
+    /**
+     * Generates a respondent's cover sheet, determines if it should be public or confidential
+     * based on the respondent's address visibility settings, and updates the case data with
+     * the appropriate cover sheet.
+     *
+     * @param caseDetails        the {@link FinremCaseDetails} object containing the case information
+     * @param authorisationToken the authorization token used to access and store the generated document
+     */
+    public void generateAndSetRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
+        FinremCaseData caseData = caseDetails.getData();
+        logCoverSheetGenerationAndStorage(RESPONDENT, caseDetails.getCaseIdAsString());
 
-        if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant())) {
-            log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
-            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(null);
-            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
-        } else {
-            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
-        }
+        replaceAndStoreCoverSheet(
+            generateRespondentCoverSheet(caseDetails, authorisationToken),
+            caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant(),
+            authorisationToken,
+            caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetRes,
+            caseData.getBulkPrintCoversheetWrapper()::getBulkPrintCoverSheetResConfidential,
+            caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetRes,
+            caseData.getBulkPrintCoversheetWrapper()::setBulkPrintCoverSheetResConfidential
+        );
     }
 
-    public CaseDocument generateIntervenerCoverSheet(final FinremCaseDetails caseDetails,
-                                                     final String authorisationToken,
-                                                     DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating Intervener cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate());
+    public CaseDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails,
+                                                     String authorisationToken,
+                                                     DocumentHelper.PaperNotificationRecipient intervenerRecipient) {
+        logCoverSheetGeneration(intervenerRecipient, caseDetails.getCaseIdAsString());
+        return generateCoverSheet(caseDetails, authorisationToken, intervenerRecipient);
+    }
 
-        return generateCoverSheet(caseDetails, authorisationToken, recipient);
+    private void replaceAndStoreCoverSheet(CaseDocument coverSheet,
+                                           YesOrNo hiddenFlag,
+                                           String authToken,
+                                           Supplier<CaseDocument> oldCoverSheetSupplier,
+                                           Supplier<CaseDocument> oldCoverSheetConfidentialSupplier,
+                                           Consumer<CaseDocument> publicSetter,
+                                           Consumer<CaseDocument> confidentialSetter) {
+        boolean isHiddenFromPublic = YesOrNo.isYes(hiddenFlag);
+        Optional<CaseDocument> oldCoverSheet = Optional.ofNullable(isHiddenFromPublic
+            ? oldCoverSheetConfidentialSupplier.get()
+            : oldCoverSheetSupplier.get());
+
+        oldCoverSheet.ifPresent(cs -> {
+            log.info("Deleting old cover sheet with url: {}", cs.getDocumentUrl());
+            genericDocumentService.deleteDocument(cs.getDocumentUrl(), authToken);
+        });
+
+        publicSetter.accept(isHiddenFromPublic ? null : coverSheet);
+        confidentialSetter.accept(isHiddenFromPublic ? coverSheet : null);
     }
 
     private CaseDocument generateCoverSheet(FinremCaseDetails caseDetails,
                                             String authorisationToken,
                                             DocumentHelper.PaperNotificationRecipient recipient) {
+        Map<String, Object> placeholdersMap = bulkPrintCoverLetterDetailsMapper.getLetterDetailsAsMap(
+            caseDetails,
+            recipient,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList()
+        );
 
-        Map<String, Object> placeholdersMap = bulkPrintCoverLetterDetailsMapper
-            .getLetterDetailsAsMap(caseDetails, recipient, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
-
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, placeholdersMap,
-            documentConfiguration.getBulkPrintTemplate(), documentConfiguration.getBulkPrintFileName(),
-            caseDetails.getCaseType());
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(
+            authorisationToken,
+            placeholdersMap,
+            documentConfiguration.getBulkPrintTemplate(),
+            documentConfiguration.getBulkPrintFileName(),
+            caseDetails.getCaseType()
+        );
     }
 
-    private void logCoverSheetGeneration(DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating {} cover sheet {} from {} for bulk print", recipient, documentConfiguration.getBulkPrintFileName(),
-            documentConfiguration.getBulkPrintTemplate());
+    private void logCoverSheetGeneration(DocumentHelper.PaperNotificationRecipient recipient, String caseId) {
+        log.info("Generating {} Bulkprint cover sheet on Case ID: {}",
+            recipient,
+            caseId);
+    }
+
+    private void logCoverSheetGenerationAndStorage(DocumentHelper.PaperNotificationRecipient recipient, String caseId) {
+        log.info("Generating and storing {} Bulkprint cover sheet on Case ID: {}",
+            recipient,
+            caseId);
     }
 }
