@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
+import com.ibm.icu.text.ListFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Locale;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -92,17 +93,20 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
     }
 
     private void sendHearingCorrespondence(SendCorrespondenceEvent event, List<String> errors) {
-        String notifyingPartiesString = event.getNotificationParties().stream()
-            .map(NotificationParty::getDescription)
-            .sorted()
-            .collect(Collectors.joining(", "));
+        String notifyingPartiesString = ListFormatter.getInstance(Locale.ENGLISH)
+            .format(
+                event.getNotificationParties().stream()
+                    .map(NotificationParty::getDescription)
+                    .sorted()
+                    .toList()
+            );
 
         retryExecutor.runWithRetryWithHandler(
             () -> applicationEventPublisher.publishEvent(event),
             format("Send hearing correspondence to %s", notifyingPartiesString),
             event.getCaseId(),
             (exception, actionName, caseId1) ->
-                errors.add(format("Fail to send hearing correspondence to %s", notifyingPartiesString))
+                errors.add(format("Fail to send hearing correspondence to %s.", notifyingPartiesString))
         );
     }
 }
