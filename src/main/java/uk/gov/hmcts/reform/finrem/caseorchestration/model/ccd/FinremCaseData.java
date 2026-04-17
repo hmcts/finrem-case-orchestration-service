@@ -882,7 +882,7 @@ public class FinremCaseData implements HasCaseDocument {
         if (allocatedRegionWrapper.getRegionList() != null) {
             return Map.of(
                 Region.MIDLANDS, getMidlandsCourt(allocatedRegionWrapper.getMidlandsFrcList(), courtList),
-                Region.LONDON, getCourtListIdOrDefault(allocatedRegionWrapper.getDefaultCourtListWrapper().getCfcCourtList()).getSelectedCourtId(),
+                Region.LONDON, getLondonCourt(allocatedRegionWrapper.getLondonFrcList(), courtList),
                 Region.NORTHEAST, getNorthEastCourt(allocatedRegionWrapper.getNorthEastFrcList(), courtList),
                 Region.NORTHWEST, getNorthWestCourt(allocatedRegionWrapper.getNorthWestFrcList(), courtList),
                 Region.SOUTHWEST, getSouthWestCourt(allocatedRegionWrapper.getSouthWestFrcList(), courtList),
@@ -927,6 +927,23 @@ public class FinremCaseData implements HasCaseDocument {
         } else {
             return StringUtils.EMPTY;
         }
+    }
+
+    @JsonIgnore
+    private String getLondonCourt(RegionLondonFrc frc, CourtListWrapper courtList) {
+        if (frc == null) {
+            return StringUtils.EMPTY;
+        }
+
+        if (frc == RegionLondonFrc.LONDON && courtList.getCfcCourt() != null) {
+            return getCourtListIdOrDefault(courtList.getCfcCourt()).getSelectedCourtId();
+        }
+
+        if (frc == RegionLondonFrc.LONDON_CONSENTED_COURT && courtList.getLondonCourt() != null) {
+            return getCourtListIdOrDefault(courtList.getLondonCourt()).getSelectedCourtId();
+        }
+
+        return StringUtils.EMPTY;
     }
 
     @JsonIgnore
