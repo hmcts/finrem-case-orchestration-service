@@ -50,6 +50,30 @@ public class ManageHearingsCorresponder {
      * @param userAuthorisation the authorization token of the user initiating this action
      */
     public void sendHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+        SendCorrespondenceEvent event = buildHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation);
+        if (event != null) {
+            applicationEventPublisher.publishEvent(event);
+        }
+    }
+
+    /**
+     * Builds a {@link SendCorrespondenceEvent} for a hearing notification to be sent to the solicitor,
+     * if notification is required.
+     *
+     * <p>
+     * This method retrieves the active hearing in context and checks whether notifications
+     * should be sent. If notifications are enabled, it gathers all relevant documents including
+     * additional hearing documents, any required mini Form A, and associated working hearing
+     * documents. It then constructs a correspondence event to notify the solicitor.
+     * </p>
+     *
+     * @param callbackRequest the callback request containing case details and data
+     * @param userAuthorisation the authorization token of the user initiating this action
+     * @return a {@link SendCorrespondenceEvent} containing the hearing notification details,
+     *         or {@code null} if no notification is required
+     */
+    public SendCorrespondenceEvent buildHearingCorrespondenceEventIfNeeded(FinremCallbackRequest callbackRequest,
+                                                                   String userAuthorisation) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
@@ -57,7 +81,7 @@ public class ManageHearingsCorresponder {
         Hearing hearing = hearingCorrespondenceHelper.getActiveHearingInContext(wrapper, wrapper.getWorkingHearingId());
 
         if (!hearing.shouldSendNotifications()) {
-            return;
+            return null;
         }
 
         List<CaseDocument> documentsToPost = getAdditionalHearingDocs(hearing);
@@ -65,7 +89,7 @@ public class ManageHearingsCorresponder {
             .ifPresent(documentsToPost::add);
         documentsToPost.addAll(wrapper.getAssociatedWorkingHearingDocuments());
 
-        publishEvent(
+        return buildSendCorrespondenceEvent(
             finremCaseDetails,
             hearing,
             ManageHearingsAction.ADD_HEARING,
@@ -200,12 +224,8 @@ public class ManageHearingsCorresponder {
                               String userAuthorisation,
                               List<CaseDocument> documentsToPost,
                               EmailTemplateNames templateName) {
-
-        List<PartyOnCaseCollectionItem> partiesOnCase =
-            Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
-
         applicationEventPublisher.publishEvent(buildSendCorrespondenceEvent(
-            caseDetails, hearing, action, userAuthorisation, documentsToPost, templateName, partiesOnCase
+            caseDetails, hearing, action, userAuthorisation, documentsToPost, templateName
         ));
     }
 
@@ -214,8 +234,10 @@ public class ManageHearingsCorresponder {
                                                                  ManageHearingsAction action,
                                                                  String userAuthorisation,
                                                                  List<CaseDocument> documentsToPost,
-                                                                 EmailTemplateNames templateName,
-                                                                 List<PartyOnCaseCollectionItem> partiesOnCase) {
+                                                                 EmailTemplateNames templateName) {
+        List<PartyOnCaseCollectionItem> partiesOnCase =
+            Optional.ofNullable(hearing.getPartiesOnCase()).orElseGet(List::of);
+
         return SendCorrespondenceEvent.builder()
             .notificationParties(partiesOnCase.stream()
                 .map(party -> getNotificationPartyFromRole(party.getValue().getRole()))
