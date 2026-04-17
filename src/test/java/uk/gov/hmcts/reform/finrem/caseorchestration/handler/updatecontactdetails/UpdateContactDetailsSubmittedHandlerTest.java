@@ -241,25 +241,25 @@ class UpdateContactDetailsSubmittedHandlerTest {
             () -> verify(updateContactDetailsNotificationService).requiresNotifications(finremCaseData),
             () -> verify(updateContactDetailsNotificationService).prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()),
             () -> verify(retryExecutor).runWithRetryWithHandler(
-                    nocEmailToSolicitorsCaptor.capture(),
-                    eq("Sending NOC email to litigant solicitor"),
-                    eq(CASE_ID),
-                    any(RetryErrorHandler.class)),
+                nocEmailToSolicitorsCaptor.capture(),
+                eq("Sending NOC email to litigant solicitor"),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)),
             () -> {
                 nocEmailToSolicitorsCaptor.getValue().run();
                 verify(applicationEventPublisher).publishEvent(event);
             },
             () -> verify(retryExecutor).runWithRetryWithHandler(
-                    nocEmailToSolicitorsCaptor.capture(),
-                    eq("Sending NOC letter"),
-                    eq(CASE_ID),
+                nocEmailToSolicitorsCaptor.capture(),
+                eq("Sending NOC letter"),
+                eq(CASE_ID),
                 any(RetryErrorHandler.class)),
             () -> {
                 nocEmailToSolicitorsCaptor.getValue().run();
                 verify(updateContactDetailsNotificationService).sendNocLetterToLitigants(callbackRequest.getCaseDetails(),
                     callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN);
             },
-            () -> verifyNoMoreInteractions(retryExecutor, applicationEventPublisher)
+            () -> verifyNoMoreInteractions(applicationEventPublisher)
         );
     }
 
@@ -287,7 +287,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
         }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
 
         doAnswer(invocation -> {
-            // No cast needed, just get the error handler and call it
             String actionName = invocation.getArgument(1);
             String caseId = invocation.getArgument(2);
             RetryErrorHandler errorHandler = invocation.getArgument(3);
@@ -372,7 +371,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
             return null;
         }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
         doAnswer(invocation -> {
-            // No cast needed, just get the error handler and call it
             String actionName = invocation.getArgument(1);
             String caseId = invocation.getArgument(2);
             RetryErrorHandler errorHandler = invocation.getArgument(3);
