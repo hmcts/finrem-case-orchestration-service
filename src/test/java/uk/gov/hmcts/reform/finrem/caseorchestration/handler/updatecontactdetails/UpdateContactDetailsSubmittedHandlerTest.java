@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mockRunWithRetryWithHandlerInvokesFirstErrorHandler;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -152,23 +153,14 @@ class UpdateContactDetailsSubmittedHandlerTest {
         when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
             .thenReturn(event);
 
-        doAnswer(invocation -> {
-            // No cast needed, just get the error handler and call it
-            String actionName = invocation.getArgument(1);
-            String caseId = invocation.getArgument(2);
-            RetryErrorHandler errorHandler = invocation.getArgument(3);
-            errorHandler.handle(new RuntimeException(), actionName, caseId);
-            return null;
-        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
-
-        doAnswer(invocation -> {
-            // No cast needed, just get the error handler and call it
-            String actionName = invocation.getArgument(1);
-            String caseId = invocation.getArgument(2);
-            RetryErrorHandler errorHandler = invocation.getArgument(3);
-            errorHandler.handle(new RuntimeException(), actionName, caseId);
-            return null;
-        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC letter"), any(), any());
+        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+            retryExecutor,
+            "Sending NOC email to litigant solicitor"
+        );
+        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+            retryExecutor,
+            "Sending NOC letter"
+        );
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -196,15 +188,10 @@ class UpdateContactDetailsSubmittedHandlerTest {
         when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
             .thenReturn(event);
 
-        // Simulate retryExecutor calling the handler with an exception
-        doAnswer(invocation -> {
-            // No cast needed, just get the error handler and call it
-            String actionName = invocation.getArgument(1);
-            String caseId = invocation.getArgument(2);
-            RetryErrorHandler errorHandler = invocation.getArgument(3);
-            errorHandler.handle(new RuntimeException(), actionName, caseId);
-            return null;
-        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
+        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+            retryExecutor,
+            "Sending NOC email to litigant solicitor"
+        );
         doAnswer(invocation -> {
             // Nothing happened
             return null;
@@ -236,19 +223,14 @@ class UpdateContactDetailsSubmittedHandlerTest {
         when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
             .thenReturn(event);
 
-        // Simulate retryExecutor calling the handler with an exception
         doAnswer(invocation -> {
             // Nothing happened
             return null;
         }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
-        doAnswer(invocation -> {
-            // No cast needed, just get the error handler and call it
-            String actionName = invocation.getArgument(1);
-            String caseId = invocation.getArgument(2);
-            RetryErrorHandler errorHandler = invocation.getArgument(3);
-            errorHandler.handle(new RuntimeException(), actionName, caseId);
-            return null;
-        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC letter"), any(), any());
+        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+            retryExecutor,
+            "Sending NOC letter"
+        );
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
