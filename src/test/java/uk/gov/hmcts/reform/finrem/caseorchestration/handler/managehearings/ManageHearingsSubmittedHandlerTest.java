@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
 import java.util.List;
-import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,7 +72,6 @@ class ManageHearingsSubmittedHandlerTest {
     @EnumSource(NotificationParty.class)
     void givenSinglePartyToBeNotified_whenHandleAddHearingAction_thenPublishSendCorrespondenceEvent(NotificationParty notificationParty) {
         // Arrange
-        UUID hearingID = UUID.randomUUID();
         FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADD_HEARING);
 
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
@@ -109,7 +107,6 @@ class ManageHearingsSubmittedHandlerTest {
     @Test
     void givenMultiplePartiesToBeNotified_whenHandleAddHearingAction_thenPublishSendCorrespondenceEvent() {
         // Arrange
-        UUID hearingID = UUID.randomUUID();
         FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADD_HEARING);
 
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
@@ -150,7 +147,6 @@ class ManageHearingsSubmittedHandlerTest {
     @Test
     void shouldHandleSubmittedCallbackForVacateHearing() {
         // Arrange
-        UUID hearingID = UUID.randomUUID();
         FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
 
         // Act
