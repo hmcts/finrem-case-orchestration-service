@@ -32,6 +32,7 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -43,6 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mockRunWithRetryWithHandlerInvokesFirstErrorHandler;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,6 +68,33 @@ class ManageHearingsSubmittedHandlerTest {
     @Test
     void testCanHandle() {
         assertCanHandle(manageHearingsSubmittedHandler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.MANAGE_HEARINGS);
+    }
+
+    @Test
+    void givenExceptionThrown_whenSendingHearingCorrespondenceFailed_thenPopulateErrorToConfirmationBody() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADD_HEARING);
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getCaseId()).thenReturn(CASE_ID);
+        when(event.getNotificationParties()).thenReturn(List.of(NotificationParty.APPLICANT));
+        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
+
+        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+            retryExecutor,
+            format("Send hearing correspondence to %s", NotificationParty.APPLICANT.getDescription())
+        );
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = manageHearingsSubmittedHandler
+            .handle(callbackRequest, AUTH_TOKEN);
+
+        // then
+        assertAll(
+            () -> assertThat(response.getConfirmationHeader()).contains("Manage Hearings completed with some errors"),
+            () -> assertThat(response.getConfirmationBody())
+                .contains("Fail to send hearing correspondence to the applicant or their legal representative.")
+        );
     }
 
     @ParameterizedTest
