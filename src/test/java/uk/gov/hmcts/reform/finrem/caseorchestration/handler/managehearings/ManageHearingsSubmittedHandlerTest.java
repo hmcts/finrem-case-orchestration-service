@@ -91,10 +91,75 @@ class ManageHearingsSubmittedHandlerTest {
 
         // then
         assertAll(
+            () -> verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN),
             () -> assertThat(response.getConfirmationHeader()).contains("Manage Hearings completed with some errors"),
             () -> assertThat(response.getConfirmationBody())
                 .contains("Fail to send hearing correspondence to the applicant or their legal representative.")
         );
+    }
+
+    @Test
+    void givenExceptionThrown_whenSendingAdjournedOrVacateHearingCorrespondenceFailed_thenPopulateErrorToConfirmationBody() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getCaseId()).thenReturn(CASE_ID);
+        when(event.getNotificationParties()).thenReturn(List.of(NotificationParty.APPLICANT));
+        when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
+
+        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+            retryExecutor,
+            format("Send adjourned or vacate hearing correspondence to %s", NotificationParty.APPLICANT.getDescription())
+        );
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = manageHearingsSubmittedHandler
+            .handle(callbackRequest, AUTH_TOKEN);
+
+        // then
+        assertAll(
+            () -> verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN),
+            () -> assertThat(response.getConfirmationHeader()).contains("Manage Hearings completed with some errors"),
+            () -> assertThat(response.getConfirmationBody())
+                .contains("Fail to send adjourned or vacate hearing correspondence to the applicant or their legal representative.")
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(NotificationParty.class)
+    void givenSinglePartyToBeNotified_whenHandleAdjournOrVacateHearingAction_thenPublishSendCorrespondenceEvent(NotificationParty notificationParty) {
+        // Arrange
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getCaseId()).thenReturn(CASE_ID);
+        when(event.getNotificationParties()).thenReturn(List.of(notificationParty));
+        when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertThat(response.getErrors()).isNullOrEmpty();
+        assertThat(logs.getInfos()).contains(
+            format("Beginning hearing correspondence for Hearing Adjourned Or Vacated action. Case reference: %s", CASE_ID)
+        );
+        verify(manageHearingsCorresponder, never()).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
+
+        ArgumentCaptor<ThrowingRunnable> publishEventCaptor = getThrowingRunnableCaptor();
+        verify(retryExecutor)
+            .runWithRetryWithHandler(
+                publishEventCaptor.capture(),
+                eq(format("Send adjourned or vacate hearing correspondence to %s", notificationParty.getDescription())),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
+            );
+        publishEventCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
+        verify(applicationEventPublisher).publishEvent(event);
+        verifyNoMoreInteractions(retryExecutor);
     }
 
     @ParameterizedTest
