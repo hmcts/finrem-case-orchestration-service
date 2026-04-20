@@ -57,7 +57,7 @@ public class BarristerValidationService {
 
         return Streams.mapWithIndex(
                 barristers.stream(), (barristerData, index) -> performBasicValidation(
-                    barristerData.getBarrister(), index, barristers.size(), authToken, caseId, caseRole))
+                    barristerData.getBarrister(), index, barristers.size(), caseId, caseRole))
             .flatMap(Collection::stream).toList();
     }
 
@@ -75,7 +75,6 @@ public class BarristerValidationService {
     private List<String> performBasicValidation(Barrister barrister,
                                                 long currentRepresentativeIndex,
                                                 int sizeOfRepresentatives,
-                                                String authToken,
                                                 String caseId,
                                                 CaseRole caseRole) {
         List<String> validationErrors = newArrayList();
@@ -86,7 +85,7 @@ public class BarristerValidationService {
             default -> ALL_ROLES;
         };
 
-        Optional<String> userId = organisationService.findUserByEmail(barrister.getEmail(), authToken);
+        Optional<String> userId = organisationService.findUserByEmail(barrister.getEmail());
 
         if (userId.isEmpty()) {
             log.info("User id is empty");
