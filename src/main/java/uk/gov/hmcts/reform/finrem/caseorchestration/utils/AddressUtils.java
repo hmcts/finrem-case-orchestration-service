@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 
-import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 
@@ -9,8 +8,10 @@ import static java.util.Objects.isNull;
 /**
  * Utility class for comparing Address objects.
  */
-@UtilityClass
 public class AddressUtils {
+    private AddressUtils() {
+        /* This utility class should not be instantiated */
+    }
 
     private static final String[] ADDRESS_FIELDS = {
         "addressLine1",
