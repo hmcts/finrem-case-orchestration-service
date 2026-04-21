@@ -43,7 +43,7 @@ public class AddressUtils {
         }
 
         for (String field : ADDRESS_FIELDS) {
-            if (!equalsIgnoreCaseAndTrim(getAddressFieldValue(oldAddress, field), getAddressFieldValue(newAddress, field))) {
+            if (!equals(getAddressFieldValue(oldAddress, field), getAddressFieldValue(newAddress, field))) {
                 return true;
             }
         }
@@ -63,8 +63,8 @@ public class AddressUtils {
         };
     }
 
-    private static boolean equalsIgnoreCaseAndTrim(String s1, String s2) {
-        return StringUtils.defaultString(s1).trim().equalsIgnoreCase(StringUtils.defaultString(s2).trim());
+    static boolean equals(String s1, String s2) {
+        return StringUtils.defaultString(s1).trim().equals(StringUtils.defaultString(s2).trim());
     }
 }
 

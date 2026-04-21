@@ -6,10 +6,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -18,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetSe
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CASE_DETAILS_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -51,8 +48,16 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
     @Test
     void whenHandleWithNonNullCaseDetailsBeforeData_thenNoExceptionAndReturnsNotNull() {
-        FinremCaseData finremCaseData = FinremCaseData.builder().build();
-        FinremCallbackRequest request = createRequest(CaseType.CONTESTED, finremCaseData);
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder()
+            .applicantSolicitorName("A")
+            .applicantSolicitorFirm("Firm1")
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(wrapper).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        FinremCallbackRequest request = FinremCallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
         assertThat(handler.handle(request, AUTH_TOKEN)).isNotNull();
     }
 
@@ -97,11 +102,63 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(afterDetails, AUTH_TOKEN);
     }
 
-    private FinremCallbackRequest createRequest(CaseType caseType, FinremCaseData finremCaseData) {
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, finremCaseData);
-        request.setCaseDetailsBefore(FinremCaseDetails.builder()
-            .data(FinremCaseData.builder().build())
-            .build());
-        return request;
+    @Test
+    void hasChangeApplicantSolicitorName_shouldDetectChangeAndNoChange() {
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder().applicantSolicitorName("A").build();
+        ContactDetailsWrapper afterSameWrapper = ContactDetailsWrapper.builder().applicantSolicitorName("A").build();
+        ContactDetailsWrapper afterDiffWrapper = ContactDetailsWrapper.builder().applicantSolicitorName("B").build();
+        FinremCaseDetails before = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(beforeWrapper).build()).build();
+        FinremCaseDetails afterSame = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterSameWrapper).build()).build();
+        FinremCaseDetails afterDiff = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterDiffWrapper).build()).build();
+        assertThat(handler.hasChangeApplicantSolicitorName(afterSame, before)).isFalse();
+        assertThat(handler.hasChangeApplicantSolicitorName(afterDiff, before)).isTrue();
+    }
+
+    @Test
+    void hasChangeApplicantSolicitorFirm_shouldDetectChangeAndNoChange() {
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder().applicantSolicitorFirm("Firm1").build();
+        ContactDetailsWrapper afterSameWrapper = ContactDetailsWrapper.builder().applicantSolicitorFirm("Firm1").build();
+        ContactDetailsWrapper afterDiffWrapper = ContactDetailsWrapper.builder().applicantSolicitorFirm("Firm2").build();
+        FinremCaseDetails before = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(beforeWrapper).build()).build();
+        FinremCaseDetails afterSame = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterSameWrapper).build()).build();
+        FinremCaseDetails afterDiff = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterDiffWrapper).build()).build();
+        assertThat(handler.hasChangeApplicantSolicitorFirm(afterSame, before)).isFalse();
+        assertThat(handler.hasChangeApplicantSolicitorFirm(afterDiff, before)).isTrue();
+    }
+
+    @Test
+    void hasChangeRespondentSolicitorName_shouldDetectChangeAndNoChange() {
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder().respondentSolicitorName("R").build();
+        ContactDetailsWrapper afterSameWrapper = ContactDetailsWrapper.builder().respondentSolicitorName("R").build();
+        ContactDetailsWrapper afterDiffWrapper = ContactDetailsWrapper.builder().respondentSolicitorName("S").build();
+        FinremCaseDetails before = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(beforeWrapper).build()).build();
+        FinremCaseDetails afterSame = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterSameWrapper).build()).build();
+        FinremCaseDetails afterDiff = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterDiffWrapper).build()).build();
+        assertThat(handler.hasChangeRespondentSolicitorName(afterSame, before)).isFalse();
+        assertThat(handler.hasChangeRespondentSolicitorName(afterDiff, before)).isTrue();
+    }
+
+    @Test
+    void hasChangeRespondentSolicitorFirm_shouldDetectChangeAndNoChange() {
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder().respondentSolicitorFirm("FirmA").build();
+        ContactDetailsWrapper afterSameWrapper = ContactDetailsWrapper.builder().respondentSolicitorFirm("FirmA").build();
+        ContactDetailsWrapper afterDiffWrapper = ContactDetailsWrapper.builder().respondentSolicitorFirm("FirmB").build();
+        FinremCaseDetails before = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(beforeWrapper).build()).build();
+        FinremCaseDetails afterSame = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterSameWrapper).build()).build();
+        FinremCaseDetails afterDiff = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterDiffWrapper).build()).build();
+        assertThat(handler.hasChangeRespondentSolicitorFirm(afterSame, before)).isFalse();
+        assertThat(handler.hasChangeRespondentSolicitorFirm(afterDiff, before)).isTrue();
     }
 }
