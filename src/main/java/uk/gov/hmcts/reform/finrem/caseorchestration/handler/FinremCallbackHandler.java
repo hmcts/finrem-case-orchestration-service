@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageCaseDocumentsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 
 import java.lang.reflect.Field;
@@ -158,11 +159,16 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
      *
      * <p><strong>Developer note:</strong> If you introduce a new class that uses
      * {@code @TemporaryField}, you must add it to this list so that its temporary
-     * fields are removed correctly.</p>
+     * fields are removed correctly. In addition, make sure shouldClearTemporaryFields returns true</p>
      *
      * @return a list of classes containing {@code @TemporaryField}-annotated fields
      */
     private static List<Class> getClassesWithTemporaryFieldAnnotation() {
-        return List.of(StopRepresentationWrapper.class, CaseDataMetricsWrapper.class, ContactDetailsWrapper.class);
+        return List.of(
+            StopRepresentationWrapper.class,
+            CaseDataMetricsWrapper.class,
+            ContactDetailsWrapper.class,
+            ManageCaseDocumentsWrapper.class
+        );
     }
 }
