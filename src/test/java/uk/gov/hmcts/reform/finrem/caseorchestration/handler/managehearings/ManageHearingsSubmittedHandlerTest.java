@@ -82,7 +82,7 @@ class ManageHearingsSubmittedHandlerTest {
 
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
-            format("Send hearing correspondence to %s", NotificationParty.APPLICANT.getDescription())
+            "Send hearing correspondence"
         );
 
         // Act
@@ -92,9 +92,9 @@ class ManageHearingsSubmittedHandlerTest {
         // then
         assertAll(
             () -> verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN),
-            () -> assertThat(response.getConfirmationHeader()).contains("Manage Hearings completed with some errors"),
+            () -> assertThat(response.getConfirmationHeader()).contains("Manage Hearings completed with error"),
             () -> assertThat(response.getConfirmationBody())
-                .contains("Fail to send hearing correspondence to the applicant or their legal representative.")
+                .contains("Notification to applicant has failed. Please send notification to applicant manually.")
         );
     }
 
@@ -110,7 +110,7 @@ class ManageHearingsSubmittedHandlerTest {
 
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
-            format("Send adjourned or vacate hearing correspondence to %s", NotificationParty.APPLICANT.getDescription())
+            "Send adjourned or vacate hearing correspondence"
         );
 
         // Act
@@ -120,50 +120,20 @@ class ManageHearingsSubmittedHandlerTest {
         // then
         assertAll(
             () -> verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN),
-            () -> assertThat(response.getConfirmationHeader()).contains("Manage Hearings completed with some errors"),
+            () -> assertThat(response.getConfirmationHeader()).contains("Manage Hearings completed with error"),
             () -> assertThat(response.getConfirmationBody())
-                .contains("Fail to send adjourned or vacate hearing correspondence to the applicant or their legal representative.")
+                .contains("Notification to applicant has failed. Please send notification to applicant manually.")
         );
     }
 
     @ParameterizedTest
-    @EnumSource(NotificationParty.class)
-    void givenSinglePartyToBeNotified_whenHandleAdjournOrVacateHearingAction_thenPublishSendCorrespondenceEvent(NotificationParty notificationParty) {
-        // Arrange
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
-
-        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
-        when(event.getCaseId()).thenReturn(CASE_ID);
-        when(event.getNotificationParties()).thenReturn(List.of(notificationParty));
-        when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
-
-        // Act
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        // Assert
-        assertThat(response.getErrors()).isNullOrEmpty();
-        assertThat(logs.getInfos()).contains(
-            format("Beginning hearing correspondence for Hearing Adjourned Or Vacated action. Case reference: %s", CASE_ID)
-        );
-        verify(manageHearingsCorresponder, never()).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
-        verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
-
-        ArgumentCaptor<ThrowingRunnable> publishEventCaptor = getThrowingRunnableCaptor();
-        verify(retryExecutor)
-            .runWithRetryWithHandler(
-                publishEventCaptor.capture(),
-                eq(format("Send adjourned or vacate hearing correspondence to %s", notificationParty.getDescription())),
-                eq(CASE_ID),
-                any(RetryErrorHandler.class)
-            );
-        publishEventCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
-        verify(applicationEventPublisher).publishEvent(event);
-        verifyNoMoreInteractions(retryExecutor);
-    }
-
-    @ParameterizedTest
-    @EnumSource(NotificationParty.class)
+    @EnumSource(value = NotificationParty.class, names = {
+        "APPLICANT",
+        "RESPONDENT",
+        "INTERVENER_ONE",
+        "INTERVENER_TWO",
+        "INTERVENER_THREE",
+        "INTERVENER_FOUR"})
     void givenSinglePartyToBeNotified_whenHandleAddHearingAction_thenPublishSendCorrespondenceEvent(NotificationParty notificationParty) {
         // Arrange
         FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADD_HEARING);
@@ -189,7 +159,49 @@ class ManageHearingsSubmittedHandlerTest {
         verify(retryExecutor)
             .runWithRetryWithHandler(
                 publishEventCaptor.capture(),
-                eq(format("Send hearing correspondence to %s", notificationParty.getDescription())),
+                eq("Send hearing correspondence"),
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
+            );
+        publishEventCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
+        verify(applicationEventPublisher).publishEvent(event);
+        verifyNoMoreInteractions(retryExecutor);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = NotificationParty.class, names = {
+        "APPLICANT",
+        "RESPONDENT",
+        "INTERVENER_ONE",
+        "INTERVENER_TWO",
+        "INTERVENER_THREE",
+        "INTERVENER_FOUR"})
+    void givenSinglePartyToBeNotified_whenHandleAdjournOrVacateHearingAction_thenPublishSendCorrespondenceEvent(NotificationParty notificationParty) {
+        // Arrange
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getCaseId()).thenReturn(CASE_ID);
+        when(event.getNotificationParties()).thenReturn(List.of(notificationParty));
+        when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertThat(response.getErrors()).isNullOrEmpty();
+        assertThat(logs.getInfos()).contains(
+            format("Beginning hearing correspondence for Hearing Adjourned Or Vacated action. Case reference: %s", CASE_ID)
+        );
+        verify(manageHearingsCorresponder, never()).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
+        verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN);
+
+        ArgumentCaptor<ThrowingRunnable> publishEventCaptor = getThrowingRunnableCaptor();
+        verify(retryExecutor)
+            .runWithRetryWithHandler(
+                publishEventCaptor.capture(),
+                eq("Send adjourned or vacate hearing correspondence"),
                 eq(CASE_ID),
                 any(RetryErrorHandler.class)
             );
@@ -226,10 +238,7 @@ class ManageHearingsSubmittedHandlerTest {
         verify(retryExecutor)
             .runWithRetryWithHandler(
                 publishEventCaptor.capture(),
-                eq(format("Send hearing correspondence to %s, %s, and %s",
-                    NotificationParty.APPLICANT.getDescription(),
-                    NotificationParty.INTERVENER_ONE.getDescription(),
-                    NotificationParty.RESPONDENT.getDescription())),
+                eq("Send hearing correspondence"),
                 eq(CASE_ID),
                 any(RetryErrorHandler.class)
             );

@@ -17,61 +17,40 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifie
 @Getter
 public enum NotificationParty {
     // notify both applicant and applicant solicitor
-    APPLICANT("[APPSOLICITOR]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY,
-        "the applicant or their legal representative"),
+    APPLICANT("[APPSOLICITOR]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY),
     // notify both respondent and respondent solicitor
-    RESPONDENT("[RESPSOLICITOR]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY,
-        "the respondent or their legal representative"),
+    RESPONDENT("[RESPSOLICITOR]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY),
     // notify both intervener and intervener solicitor
-    INTERVENER_ONE("[INTVRSOLICITOR1]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY,
-        "the intervener one or their legal representative"),
-    INTERVENER_TWO("[INTVRSOLICITOR2]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY,
-        "the intervener two or their legal representative"),
-    INTERVENER_THREE("[INTVRSOLICITOR3]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY,
-        "the intervener three or their legal representative"),
-    INTERVENER_FOUR("[INTVRSOLICITOR4]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY,
-        "the intervener four or their legal representative"),
+    INTERVENER_ONE("[INTVRSOLICITOR1]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY),
+    INTERVENER_TWO("[INTVRSOLICITOR2]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY),
+    INTERVENER_THREE("[INTVRSOLICITOR3]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY),
+    INTERVENER_FOUR("[INTVRSOLICITOR4]", NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY),
     // notify applicant solicitor only
-    APPLICANT_SOLICITOR_ONLY(CaseRole.APP_SOLICITOR.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY,
-        "the applicant solicitor only"),
+    APPLICANT_SOLICITOR_ONLY(CaseRole.APP_SOLICITOR.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY),
     // notify respondent solicitor only
-    RESPONDENT_SOLICITOR_ONLY(CaseRole.RESP_SOLICITOR.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY,
-        "the respondent solicitor only"),
+    RESPONDENT_SOLICITOR_ONLY(CaseRole.RESP_SOLICITOR.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, DO_NOT_NOTIFY_FORMER_PARTY),
     // notify former applicant solicitor only
-    FORMER_APPLICANT_SOLICITOR_ONLY(CaseRole.APP_SOLICITOR.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former applicant solicitor only"),
+    FORMER_APPLICANT_SOLICITOR_ONLY(CaseRole.APP_SOLICITOR.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY),
     // notify former applicant barristers only
-    FORMER_APPLICANT_BARRISTER_ONLY(CaseRole.APP_BARRISTER.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former applicant barrister only"),
+    FORMER_APPLICANT_BARRISTER_ONLY(CaseRole.APP_BARRISTER.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY),
     // notify former respondent solicitor only
-    FORMER_RESPONDENT_SOLICITOR_ONLY(CaseRole.RESP_SOLICITOR.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former respondent solicitor only"),
+    FORMER_RESPONDENT_SOLICITOR_ONLY(CaseRole.RESP_SOLICITOR.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY),
     // notify former respondent barristers only
-    FORMER_RESPONDENT_BARRISTER_ONLY(CaseRole.RESP_BARRISTER.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former respondent barrister only"),
+    FORMER_RESPONDENT_BARRISTER_ONLY(CaseRole.RESP_BARRISTER.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY),
     // notify former interveners solicitor only
-    FORMER_INTERVENER_ONE_SOLICITOR_ONLY(CaseRole.INTVR_SOLICITOR_1.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former intervener one solicitor only"),
-    FORMER_INTERVENER_TWO_SOLICITOR_ONLY(CaseRole.INTVR_SOLICITOR_2.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former intervener two solicitor only"),
-    FORMER_INTERVENER_THREE_SOLICITOR_ONLY(CaseRole.INTVR_SOLICITOR_3.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former intervener three solicitor only"),
-    FORMER_INTERVENER_FOUR_SOLICITOR_ONLY(CaseRole.INTVR_SOLICITOR_4.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former intervener four solicitor only"),
+    FORMER_INTERVENER_ONE_SOLICITOR_ONLY(CaseRole.INTVR_SOLICITOR_1.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY),
+    FORMER_INTERVENER_TWO_SOLICITOR_ONLY(CaseRole.INTVR_SOLICITOR_2.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY),
+    FORMER_INTERVENER_THREE_SOLICITOR_ONLY(CaseRole.INTVR_SOLICITOR_3.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY),
+    FORMER_INTERVENER_FOUR_SOLICITOR_ONLY(CaseRole.INTVR_SOLICITOR_4.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY),
     // notify former interveners barristers only
-    FORMER_INTERVENER_ONE_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_1.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former intervener one barrister only"),
-    FORMER_INTERVENER_TWO_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_2.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former intervener two barrister only"),
-    FORMER_INTERVENER_THREE_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_3.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former intervener three barrister only"),
-    FORMER_INTERVENER_FOUR_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_4.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY,
-        "the former intervener four barrister only"),;
+    FORMER_INTERVENER_ONE_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_1.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY),
+    FORMER_INTERVENER_TWO_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_2.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY),
+    FORMER_INTERVENER_THREE_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_3.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY),
+    FORMER_INTERVENER_FOUR_BARRISTER_ONLY(CaseRole.INTVR_BARRISTER_4.getCcdCode(), DO_NOT_NOTIFY_REPRESENTED, NOTIFY_FORMER_PARTY);
 
     private final String role;
     private final NotifyRepresented notifyRepresented;
     private final NotifyFormerParty notifyFormerParty;
-    private final String description;
 
     public static NotificationParty getNotificationPartyFromRole(String role) {
         return Arrays.stream(NotificationParty.values())

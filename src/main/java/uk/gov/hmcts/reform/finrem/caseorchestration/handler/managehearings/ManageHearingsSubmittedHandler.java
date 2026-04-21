@@ -71,12 +71,12 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             ofNullable(
                 manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation)
             ).ifPresent(event -> this.publishEvent(
-                appendNotifyingParties("Send hearing correspondence", event), event, errors));
+                "Send hearing correspondence", event, errors));
         } else if (ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(actionSelection)) {
             ofNullable(
                 manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation)
             ).ifPresent(event -> this.publishEvent(
-                appendNotifyingParties("Send adjourned or vacate hearing correspondence", event), event, errors)
+                "Send adjourned or vacate hearing correspondence", event, errors)
             );
         }
 
@@ -84,29 +84,38 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             return submittedResponse();
         }
         return submittedResponse(
-            toConfirmationHeader("Manage Hearings completed with some errors"),
+            toConfirmationHeader("Manage Hearings completed with error"),
             toConfirmationBody(errors.toArray(new String[0]))
         );
     }
 
-    private String appendNotifyingParties(String eventName, SendCorrespondenceEvent event) {
-        String notifyingPartiesString = ListFormatter.getInstance(Locale.ENGLISH)
-            .format(
-                event.getNotificationParties().stream()
-                    .map(NotificationParty::getDescription)
-                    .sorted()
-                    .toList()
-            );
-        return format("%s to %s", eventName, notifyingPartiesString);
+    private String describeNotificationParties(SendCorrespondenceEvent event) {
+        return ListFormatter.getInstance(Locale.ENGLISH).format(event.getNotificationParties()
+            .stream().map(this::describeNotificationParty).sorted().toList());
+    }
+
+    private String describeNotificationParty(NotificationParty notificationParty) {
+        // only
+        return switch (notificationParty) {
+            case APPLICANT -> "applicant";
+            case RESPONDENT -> "respondent";
+            case INTERVENER_ONE -> "intervener 1";
+            case INTERVENER_TWO -> "intervener 2";
+            case INTERVENER_THREE -> "intervener 3";
+            case INTERVENER_FOUR -> "intervener 4";
+            default -> throw new IllegalStateException("Unexpected value: " + notificationParty);
+        };
     }
 
     private void publishEvent(String eventDescription, SendCorrespondenceEvent event, List<String> errors) {
+        String notifyingPartyInString = describeNotificationParties(event);
         retryExecutor.runWithRetryWithHandler(
             () -> applicationEventPublisher.publishEvent(event),
             eventDescription,
             event.getCaseId(),
             (exception, actionName, caseId1) ->
-                errors.add(format("Fail to %s.", eventDescription.toLowerCase()))
+                errors.add(format("Notification to %s has failed. Please send notification to %s manually.",
+                    notifyingPartyInString, notifyingPartyInString))
         );
     }
 }
