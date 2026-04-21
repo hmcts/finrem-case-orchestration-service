@@ -42,7 +42,7 @@ public class RetryLogger extends RetryListenerSupport {
             context.getRetryCount(),
             info.actionName(),
             info.caseId(),
-            throwable.getMessage()
+            throwable
         );
     }
 
