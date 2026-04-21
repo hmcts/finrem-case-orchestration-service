@@ -188,6 +188,25 @@ class GeneralApplicationDirectionsAboutToStartHandlerTest {
         verify(generalApplicationDirectionsService).resetGeneralApplicationDirectionsFields(caseData);
     }
 
+    @Test
+    void whenInitialiseWorkingHearing_thenHearingTypeDynamicListValueIsFirstItem() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(GA_JSON);
+        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
+        callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper().getGeneralApplications()
+            .forEach(ga -> ga.getValue().setGeneralApplicationSender(buildDynamicIntervenerList()));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCaseData caseData = response.getData();
+        WorkingHearing workingHearing = caseData.getManageHearingsWrapper().getWorkingHearing();
+
+        DynamicList hearingTypeDynamicList = workingHearing.getHearingTypeDynamicList();
+        assertThat(hearingTypeDynamicList).isNotNull();
+        assertThat(hearingTypeDynamicList.getListItems()).isNotEmpty();
+        assertThat(hearingTypeDynamicList.getValue()).isEqualTo(
+            hearingTypeDynamicList.getListItems().getFirst()
+        );
+    }
+
     private DynamicRadioListElement getDynamicListElement(String code, String label) {
         return DynamicRadioListElement.builder()
             .code(code)

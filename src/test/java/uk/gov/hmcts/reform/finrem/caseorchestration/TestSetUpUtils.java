@@ -44,6 +44,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
 import java.io.InputStream;
@@ -59,6 +61,8 @@ import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
@@ -634,6 +638,37 @@ public class TestSetUpUtils {
                     null,
                     null))
                 .build()
+        );
+    }
+
+    /**
+     * Mocks the {@link RetryExecutor#runWithRetryWithHandler} method to simulate a failure scenario
+     * where the first {@link RetryErrorHandler} is invoked.
+     *
+     * <p>When {@code runWithRetryWithHandler} is called with the specified action name, this stub
+     * intercepts the invocation and triggers the first provided error handler with a
+     * {@link RuntimeException}, passing through the original action name and case ID.</p>
+     *
+     * <p>This utility is intended for testing error-handling logic without executing the actual
+     * retry mechanism.</p>
+     *
+     * @param retryExecutor the mocked {@link RetryExecutor} to configure
+     * @param actionName the action name used to match the invocation of
+     *                   {@code runWithRetryWithHandler}
+     */
+    public static void mockRunWithRetryWithHandlerInvokesFirstErrorHandler(RetryExecutor retryExecutor, String actionName) {
+        doAnswer(invocation -> {
+            String invokedActionName = invocation.getArgument(1);
+            String caseId = invocation.getArgument(2);
+            RetryErrorHandler errorHandler = invocation.getArgument(3);
+
+            errorHandler.handle(new RuntimeException(), invokedActionName, caseId);
+            return null;
+        }).when(retryExecutor).runWithRetryWithHandler(
+            any(),
+            eq(actionName),
+            any(),
+            any()
         );
     }
 }
