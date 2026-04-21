@@ -58,6 +58,7 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        super.handle(callbackRequest, userAuthorisation);
         handleLog(callbackRequest);
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
