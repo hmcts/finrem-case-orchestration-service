@@ -33,6 +33,7 @@ import java.util.List;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -128,12 +129,9 @@ class ManageHearingsSubmittedHandlerTest {
 
     @ParameterizedTest
     @EnumSource(value = NotificationParty.class, names = {
-        "APPLICANT",
-        "RESPONDENT",
-        "INTERVENER_ONE",
-        "INTERVENER_TWO",
-        "INTERVENER_THREE",
-        "INTERVENER_FOUR"})
+        "APPLICANT", "RESPONDENT",
+        "INTERVENER_ONE", "INTERVENER_TWO",
+        "INTERVENER_THREE", "INTERVENER_FOUR"})
     void givenSinglePartyToBeNotified_whenHandleAddHearingAction_thenPublishSendCorrespondenceEvent(NotificationParty notificationParty) {
         // Arrange
         FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADD_HEARING);
@@ -169,13 +167,31 @@ class ManageHearingsSubmittedHandlerTest {
     }
 
     @ParameterizedTest
+    @EnumSource(value = NotificationParty.class, mode = EnumSource.Mode.EXCLUDE, names = {
+        "APPLICANT", "RESPONDENT",
+        "INTERVENER_ONE", "INTERVENER_TWO",
+        "INTERVENER_THREE", "INTERVENER_FOUR"})
+    void givenInvalidNotificationParty_whenHandleAddHearingAction_thenThrowIllegalStateException(NotificationParty notificationParty) {
+        // Arrange
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADD_HEARING);
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getNotificationParties()).thenReturn(List.of(notificationParty));
+        when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
+
+        // Act
+        assertAll(
+            () -> assertThrows(IllegalStateException.class, () ->
+                manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN)),
+            () -> verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)
+        );
+    }
+
+    @ParameterizedTest
     @EnumSource(value = NotificationParty.class, names = {
-        "APPLICANT",
-        "RESPONDENT",
-        "INTERVENER_ONE",
-        "INTERVENER_TWO",
-        "INTERVENER_THREE",
-        "INTERVENER_FOUR"})
+        "APPLICANT", "RESPONDENT",
+        "INTERVENER_ONE", "INTERVENER_TWO",
+        "INTERVENER_THREE", "INTERVENER_FOUR"})
     void givenSinglePartyToBeNotified_whenHandleAdjournOrVacateHearingAction_thenPublishSendCorrespondenceEvent(NotificationParty notificationParty) {
         // Arrange
         FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
@@ -208,6 +224,28 @@ class ManageHearingsSubmittedHandlerTest {
         publishEventCaptor.getAllValues().forEach(TestSetUpUtils::runSafely);
         verify(applicationEventPublisher).publishEvent(event);
         verifyNoMoreInteractions(retryExecutor);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = NotificationParty.class, mode = EnumSource.Mode.EXCLUDE, names = {
+        "APPLICANT", "RESPONDENT",
+        "INTERVENER_ONE", "INTERVENER_TWO",
+        "INTERVENER_THREE", "INTERVENER_FOUR"})
+    void givenInvalidNotificationParty_whenHandleAdjournOrVacateHearingAction_thenThrowIllegalStateException(
+        NotificationParty notificationParty) {
+        // Arrange
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADJOURN_OR_VACATE_HEARING);
+
+        SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+        when(event.getNotificationParties()).thenReturn(List.of(notificationParty));
+        when(manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
+
+        // Act
+        assertAll(
+            () -> assertThrows(IllegalStateException.class, () ->
+                manageHearingsSubmittedHandler.handle(callbackRequest, AUTH_TOKEN)),
+            () -> verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)
+        );
     }
 
     @Test

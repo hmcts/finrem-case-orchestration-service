@@ -78,6 +78,8 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             ).ifPresent(event -> this.publishEvent(
                 "Send adjourned or vacate hearing correspondence", event, errors)
             );
+        } else {
+            throw new IllegalStateException("unexpected action selection: " + actionSelection);
         }
 
         if (errors.isEmpty()) {
