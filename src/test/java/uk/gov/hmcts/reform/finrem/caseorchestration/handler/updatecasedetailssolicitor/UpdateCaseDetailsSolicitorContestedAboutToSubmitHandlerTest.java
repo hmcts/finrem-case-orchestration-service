@@ -161,4 +161,48 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         assertThat(handler.hasChangeRespondentSolicitorFirm(afterSame, before)).isFalse();
         assertThat(handler.hasChangeRespondentSolicitorFirm(afterDiff, before)).isTrue();
     }
+
+    @Test
+    void hasChangeApplicantSolicitorName_shouldBeCaseInsensitiveAndTrimmed() {
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder().applicantSolicitorName("  Alice  ").build();
+        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder().applicantSolicitorName("alice").build();
+        FinremCaseDetails before = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(beforeWrapper).build()).build();
+        FinremCaseDetails after = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterWrapper).build()).build();
+        assertThat(handler.hasChangeApplicantSolicitorName(after, before)).isFalse();
+    }
+
+    @Test
+    void hasChangeApplicantSolicitorFirm_shouldBeCaseInsensitiveAndTrimmed() {
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder().applicantSolicitorFirm("  FirmX  ").build();
+        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder().applicantSolicitorFirm("firmx").build();
+        FinremCaseDetails before = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(beforeWrapper).build()).build();
+        FinremCaseDetails after = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterWrapper).build()).build();
+        assertThat(handler.hasChangeApplicantSolicitorFirm(after, before)).isFalse();
+    }
+
+    @Test
+    void hasChangeRespondentSolicitorName_shouldBeCaseInsensitiveAndTrimmed() {
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder().respondentSolicitorName("  Bob  ").build();
+        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder().respondentSolicitorName("bob").build();
+        FinremCaseDetails before = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(beforeWrapper).build()).build();
+        FinremCaseDetails after = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterWrapper).build()).build();
+        assertThat(handler.hasChangeRespondentSolicitorName(after, before)).isFalse();
+    }
+
+    @Test
+    void hasChangeRespondentSolicitorFirm_shouldBeCaseInsensitiveAndTrimmed() {
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder().respondentSolicitorFirm("  FirmY  ").build();
+        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder().respondentSolicitorFirm("firmy").build();
+        FinremCaseDetails before = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(beforeWrapper).build()).build();
+        FinremCaseDetails after = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder().contactDetailsWrapper(afterWrapper).build()).build();
+        assertThat(handler.hasChangeRespondentSolicitorFirm(after, before)).isFalse();
+    }
 }
