@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.stoprepresentingclient;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerService;
@@ -80,6 +82,7 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     @TestLogs
     private final TestLogger logs = new TestLogger(StopRepresentingClientAboutToSubmitHandler.class);
 
+    @InjectMocks
     private StopRepresentingClientAboutToSubmitHandler underTest;
 
     @Mock
@@ -98,6 +101,9 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     private IntervenerService intervenerService;
 
     @Mock
+    private GenerateCoverSheetService generateCoverSheetService;
+
+    @Mock
     private StopRepresentingClientService stopRepresentingClientService;
 
     private static final String APPLICANT_ORG_ID = "APPLICANT_ORG_ID";
@@ -106,12 +112,6 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
     private static final String INTERVENER2_ORG_ID = "INTERVENER2_ORG_ID";
     private static final String INTERVENER4_ORG_ID = "INTERVENER4_ORG_ID";
     private static final String MATCHING_ORG_ID = "MATCHING_ORG_ID";
-
-    @BeforeEach
-    void setup() {
-        underTest = new StopRepresentingClientAboutToSubmitHandler(finremCaseDetailsMapper, nocWorkflowService,
-            manageBarristerService, barristerChangeCaseAccessUpdater, intervenerService, stopRepresentingClientService);
-    }
 
     @Test
     void testCanHandle() {
@@ -453,15 +453,20 @@ class StopRepresentingClientAboutToSubmitHandlerTest {
                 .stopRepresentationWrapper(clientConsentedStopRepresentationWrapper(mock(Address.class)))
                 .build();
 
-            caseData = underTest.handle(request(caseData), AUTH_TOKEN).getData();
+            FinremCallbackRequest callbackRequest = request(caseData);
+            caseData = underTest.handle(callbackRequest, AUTH_TOKEN).getData();
 
             assertThat(caseData)
                 .extracting(FinremCaseData::getContactDetailsWrapper)
                 .extracting(ContactDetailsWrapper::getNocParty)
                 .isEqualTo(isApplicantRepresentative ? APPLICANT : RESPONDENT);
 
+            FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
             verify(stopRepresentingClientService, times(isApplicantRepresentative ? 1 : 0)).setApplicantUnrepresented(caseData);
             verify(stopRepresentingClientService, times(isApplicantRepresentative ? 0 : 1)).setRespondentUnrepresented(caseData);
+            verify(generateCoverSheetService, times(isApplicantRepresentative ? 1 : 0)).generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+            verify(generateCoverSheetService, times(isApplicantRepresentative ? 0 : 1)).generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
             verifyBuildRepresentationCalled(caseData);
         }
 
