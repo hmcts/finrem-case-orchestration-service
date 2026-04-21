@@ -17,6 +17,13 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 
+/**
+ * Service used to invalidate access codes without removing other entries from the CCD collection.
+ * CCD replaces the entire collection when updates are sent.
+ * Sending only the updated access code would therefore delete all other access codes.
+ * This service merges the updated entry back into the full collection so only the validity flag is changed.
+ */
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
