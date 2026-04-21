@@ -2,62 +2,35 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InvalidateAccessCodeService;
 
 import java.util.List;
 
-import static java.util.Optional.ofNullable;
-
 @Slf4j
 @Service
-public class InvalidateApplicantAccessCodeAboutToSubmitHandler extends FinremCallbackHandler {
-
-    private final InvalidateAccessCodeService invalidateAccessCodeService;
+public class InvalidateApplicantAccessCodeAboutToSubmitHandler extends InvalidateAccessCodeAboutToSubmitHandler {
 
     public InvalidateApplicantAccessCodeAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                              InvalidateAccessCodeService invalidateAccessCodeService) {
-        super(finremCaseDetailsMapper);
-        this.invalidateAccessCodeService = invalidateAccessCodeService;
+        super(finremCaseDetailsMapper, invalidateAccessCodeService);
     }
 
     @Override
-    public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.INVALIDATE_APPLICANT_ACCESS_CODE.equals(eventType);
+    protected EventType handledEventType() {
+        return EventType.INVALIDATE_APPLICANT_ACCESS_CODE;
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    protected List<AccessCodeCollection> getAccessCodes(FinremCaseData data) {
+        return data.getApplicantAccessCodes();
+    }
 
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
-
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        FinremCaseDetails finremCaseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-
-        FinremCaseData caseData = finremCaseDetails.getData();
-        FinremCaseData caseDataBefore = finremCaseDetailsBefore.getData();
-
-
-        List<AccessCodeCollection> merged =
-            invalidateAccessCodeService.mergeForInvalidation(
-                ofNullable(caseDataBefore.getApplicantAccessCodes()).orElse(List.of()),
-                ofNullable(caseData.getApplicantAccessCodes()).orElse(List.of())
-            );
-
-        caseData.setApplicantAccessCodes(merged);
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData)
-            .build();
+    @Override
+    protected void setAccessCodes(FinremCaseData data, List<AccessCodeCollection> accessCodes) {
+        data.setApplicantAccessCodes(accessCodes);
     }
 }
