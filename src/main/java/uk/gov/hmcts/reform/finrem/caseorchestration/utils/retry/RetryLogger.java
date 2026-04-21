@@ -38,7 +38,7 @@ public class RetryLogger extends RetryListenerSupport {
 
         ContextInfo info = extractContextInfo(context);
 
-        log.warn("{} - Attempt #{} for action: {} failed:",
+        log.warn("{} - Attempt #{} for action ({}) failed:",
             info.caseId(),
             context.getRetryCount(),
             info.actionName(),
@@ -53,7 +53,7 @@ public class RetryLogger extends RetryListenerSupport {
         if (throwable != null) {
             ContextInfo info = extractContextInfo(context);
 
-            log.error("{} - All {} retry attempts failed for action: {}",
+            log.error("{} - All {} retry attempts failed for action ({})",
                 info.caseId(),
                 context.getRetryCount(),
                 info.actionName(),

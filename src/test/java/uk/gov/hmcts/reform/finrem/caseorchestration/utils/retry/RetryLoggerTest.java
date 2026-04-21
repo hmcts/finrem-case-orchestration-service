@@ -38,7 +38,7 @@ class RetryLoggerTest {
 
     @Test
     void shouldLogWarningOnError() {
-        when(context.getAttribute("actionName")).thenReturn("send");
+        when(context.getAttribute("actionName")).thenReturn("granting access");
         when(context.getAttribute("caseId")).thenReturn(CASE_ID);
         when(context.getRetryCount()).thenReturn(2);
 
@@ -51,7 +51,7 @@ class RetryLoggerTest {
             () -> verify(context).getAttribute("caseId"),
             () -> verify(context).getRetryCount(),
             () -> assertThat(logs.getWarns())
-                .containsExactly("1234567890 - Attempt #2 for action: send failed:"),
+                .containsExactly("1234567890 - Attempt #2 for action (granting access) failed:"),
 
             // throwable message
             () -> assertThat(logs.getWarnThrowableMessages())
@@ -61,7 +61,7 @@ class RetryLoggerTest {
 
     @Test
     void shouldLogErrorOnCloseWhenThrowablePresent() {
-        when(context.getAttribute("actionName")).thenReturn("send");
+        when(context.getAttribute("actionName")).thenReturn("granting access");
         when(context.getAttribute("caseId")).thenReturn(CASE_ID);
         when(context.getRetryCount()).thenReturn(3);
 
@@ -77,7 +77,7 @@ class RetryLoggerTest {
 
             // log message
             () -> assertThat(logs.getErrors())
-                .anyMatch(log -> log.contains("1234567890 - All 3 retry attempts failed for action: send")),
+                .anyMatch(log -> log.contains("1234567890 - All 3 retry attempts failed for action (granting access)")),
 
             // throwable class
             () -> assertThat(logs.getErrorThrowableClassNames())
