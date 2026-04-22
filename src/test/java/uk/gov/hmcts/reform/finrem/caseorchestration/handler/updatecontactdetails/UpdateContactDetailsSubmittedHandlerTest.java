@@ -275,27 +275,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
         when(updateContactDetailsNotificationService.requiresNotifications(finremCaseData)).thenReturn(true);
         when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
             .thenReturn(event);
-
-<<<<<<< DFR-4589-Update-Contact-Details-Automatic-Assigment-base-DFR-4661
-        // Lenient stub for solicitor access retry
-        doNothing().when(retryExecutor).runWithRetryWithHandler(any(), eq("Update Contact Details - Case Solicitor Change"), any(), any());
-
-        doAnswer(invocation -> {
-            String actionName = invocation.getArgument(1);
-            String caseId = invocation.getArgument(2);
-            RetryErrorHandler errorHandler = invocation.getArgument(3);
-            errorHandler.handle(new RuntimeException(), actionName, caseId);
-            return null;
-        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
-
-        doAnswer(invocation -> {
-            String actionName = invocation.getArgument(1);
-            String caseId = invocation.getArgument(2);
-            RetryErrorHandler errorHandler = invocation.getArgument(3);
-            errorHandler.handle(new RuntimeException(), actionName, caseId);
-            return null;
-        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC letter"), any(), any());
-=======
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
             "Sending NOC email to litigant solicitor"
@@ -304,7 +283,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
             retryExecutor,
             "Sending NOC letter"
         );
->>>>>>> master
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);

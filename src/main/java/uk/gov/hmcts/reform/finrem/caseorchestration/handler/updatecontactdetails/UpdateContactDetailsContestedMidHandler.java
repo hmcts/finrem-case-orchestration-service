@@ -51,13 +51,10 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
 
         List<String> errors = new ArrayList<>();
         errors.addAll(internationalPostalService.validate(finremCaseData));
-<<<<<<< DFR-4589-Update-Contact-Details-Automatic-Assigment-base-DFR-4661
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData, validatePartiesService));
-=======
         errors.addAll(ContactDetailsValidator.validatePostcodesByRepresentation(caseDetails));
         errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData));
->>>>>>> master
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).errors(errors).build();
