@@ -33,7 +33,6 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 @EnableAspectJAutoProxy(exposeProxy = true)
 public class RetryExecutor {
 
-
     private static final RetryErrorHandler SUPPRESS_HANDLER = (ex, actionName, caseId) ->
         log.error(
             "{} - unexpected exception when executing {} in suppress mode. This indicates a bug or retry exhausted in RetryExecutor.",
