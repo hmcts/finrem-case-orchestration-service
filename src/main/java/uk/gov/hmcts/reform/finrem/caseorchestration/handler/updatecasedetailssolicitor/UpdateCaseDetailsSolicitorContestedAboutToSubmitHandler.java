@@ -79,12 +79,12 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
     }
 
     private boolean hasChangeApplicantSolicitor(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
-        String applicantSolicitorName = finremCaseDetails.getAppSolicitorName().trim();
-        String applicantSolicitorNameBefore = finremCaseDetailsBefore.getAppSolicitorName().trim();
+        String applicantSolicitorName = finremCaseDetails.getAppSolicitorName();
+        String applicantSolicitorNameBefore = finremCaseDetailsBefore.getAppSolicitorName();
         boolean applicantSolicitorNameHasChanged = hasChangeSolicitorName(applicantSolicitorNameBefore, applicantSolicitorName);
 
-        String applicantSolicitorFirm = finremCaseDetails.getAppSolicitorFirm().trim();
-        String applicantSolicitorFirmBefore = finremCaseDetailsBefore.getAppSolicitorFirm().trim();
+        String applicantSolicitorFirm = finremCaseDetails.getAppSolicitorFirm();
+        String applicantSolicitorFirmBefore = finremCaseDetailsBefore.getAppSolicitorFirm();
         boolean applicantSolicitorFirmHasChanged = hasChangeSolicitorFirm(applicantSolicitorFirmBefore, applicantSolicitorFirm);
         
         Address applicantSolicitorAddress = finremCaseDetails.getData().getContactDetailsWrapper().getApplicantSolicitorAddress();
@@ -97,12 +97,12 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
     }
 
     private boolean hasChangeRespondentSolicitor(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
-        String respondentSolicitorName = finremCaseDetails.getRespSolicitorName().trim();
-        String respondentSolicitorNameBefore = finremCaseDetailsBefore.getRespSolicitorName().trim();
+        String respondentSolicitorName = finremCaseDetails.getRespSolicitorName();
+        String respondentSolicitorNameBefore = finremCaseDetailsBefore.getRespSolicitorName();
         boolean respondentSolicitorNameHasChanged = hasChangeSolicitorName(respondentSolicitorNameBefore, respondentSolicitorName);
 
-        String respondentSolicitorFirm = finremCaseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorFirm().trim();
-        String respondentSolicitorFirmBefore = finremCaseDetailsBefore.getData().getContactDetailsWrapper().getRespondentSolicitorFirm().trim();
+        String respondentSolicitorFirm = finremCaseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorFirm();
+        String respondentSolicitorFirmBefore = finremCaseDetailsBefore.getData().getContactDetailsWrapper().getRespondentSolicitorFirm();
         boolean respondentSolicitorFirmHasChanged = hasChangeSolicitorFirm(respondentSolicitorFirmBefore, respondentSolicitorFirm);
 
         Address respondentSolicitorAddress = finremCaseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorAddress();
