@@ -128,8 +128,6 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     /*
      * Distinct mid-event handlers validate postcodes for Consented and Contested cases.
      * This blends validation from each, to protect Users from skipping validation with browser controls.
-     * TODO Merge the duplicate validation methods from UpdateContactDetailsConsentedMidHandler
-     *  and UpdateContactDetailsContestedMidHandler.
      *
      * @param finremCaseDetails case details
      * @return list of errors
@@ -139,14 +137,7 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
         List<String> errors = new ArrayList<>();
         errors.addAll(internationalPostalService.validate(finremCaseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData));
-
-        if (CaseType.CONSENTED.equals(finremCaseDetails.getCaseType())) {
-            errors.addAll(ContactDetailsValidator.validatePostcodesByRepresentation(finremCaseDetails));
-        }
-
-        if (CaseType.CONTESTED.equals(finremCaseDetails.getCaseType())) {
-            errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseData));
-        }
+        errors.addAll(ContactDetailsValidator.validatePostcodesByRepresentation(finremCaseDetails));
 
         return errors;
     }
