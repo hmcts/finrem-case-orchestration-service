@@ -82,6 +82,8 @@ public class BulkScanService {
         OcrValidationResult ocrDataFieldsValidationResult
             = validateBulkScanForm(exceptionRecord.getFormType(), exceptionRecord.getOcrDataFields());
 
+        log.info("OCR Data Fields Validation Result: {}", ocrDataFieldsValidationResult.getStatus());
+
         if (!ocrDataFieldsValidationResult.getStatus().equals(ValidationStatus.SUCCESS)) {
             String ocrValidationError = String.format("Validation of Exception Record %s finished with status %s",
                 exceptionRecord.getId(), ocrDataFieldsValidationResult.getStatus());
@@ -95,6 +97,8 @@ public class BulkScanService {
         }
 
         OcrValidationResult bulkScanFormsValidationResult = formAValidator.validateFormAScannedDocuments(exceptionRecord);
+
+        log.info("OCR Data Fields Validation Result: {}", ocrDataFieldsValidationResult.getStatus());
 
         if (!bulkScanFormsValidationResult.getStatus().equals(ValidationStatus.SUCCESS)) {
             String docValidationError = String.format("Validation of Exception Record attached documents %s finished with status %s",
