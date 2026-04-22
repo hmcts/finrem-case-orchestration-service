@@ -215,7 +215,6 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
     void whenSolicitorNameOrFirmNoChange_thenShouldNeverInvokeGenerateCoverSheetService() {
         when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString())).thenReturn(new ArrayList<>());
 
-
         ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
             .applicantSolicitorName("Old AppSol Name")
             .applicantSolicitorFirm("Old AppSol Firm")
@@ -269,7 +268,6 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
     @Test
     void whenSolicitorNameOrFirmDiffersOnlyByCase_thenShouldTreatAsChange() {
         when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString())).thenReturn(new ArrayList<>());
-
 
         ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
             .applicantSolicitorName("old appsol name")

@@ -63,7 +63,7 @@ public class AddressUtils {
         };
     }
 
-    static boolean equals(String s1, String s2) {
+    private static boolean equals(String s1, String s2) {
         return StringUtils.defaultString(s1).trim().equals(StringUtils.defaultString(s2).trim());
     }
 }
