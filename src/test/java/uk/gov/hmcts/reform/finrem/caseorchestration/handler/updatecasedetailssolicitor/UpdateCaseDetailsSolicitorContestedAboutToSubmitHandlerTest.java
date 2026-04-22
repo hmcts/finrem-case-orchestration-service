@@ -13,12 +13,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,8 +62,10 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
     @Test
     void whenHandleWithNonNullCaseDetailsBeforeData_thenNoExceptionAndReturnsNotNull() {
-        doNothing().when(updateRepresentationService)
-            .validateEmailActiveForOrganisation(anyString(), anyString(), anyString());
+
+
+        PrdOrganisationService prdOrganisationService = mock(PrdOrganisationService.class);
+        when(prdOrganisationService.findUserByEmail(anyString(), AUTH_TOKEN)).thenReturn(Optional.of(CASE_ID));
 
         ValidatePartiesService validatePartiesService = mock(ValidatePartiesService.class);
         when(validatePartiesService.isEmailRegisteredInOrg("OldAppSol@email.com", TEST_ORG_ID)).thenReturn(true);
