@@ -10,13 +10,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CASE_DETAILS_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -24,7 +33,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 // Common methods tested in Abstract test class.
-
 @ExtendWith(MockitoExtension.class)
 class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
@@ -33,6 +41,9 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
     @Mock
     private GenerateCoverSheetService generateCoverSheetService;
+
+    @Mock
+    private UpdateRepresentationService updateRepresentationService;
 
     @Test
     void testCanHandle() {
@@ -49,15 +60,49 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
     @Test
     void whenHandleWithNonNullCaseDetailsBeforeData_thenNoExceptionAndReturnsNotNull() {
+        doNothing().when(updateRepresentationService)
+            .validateEmailActiveForOrganisation(anyString(), anyString(), anyString());
+
+        ValidatePartiesService validatePartiesService = mock(ValidatePartiesService.class);
+        when(validatePartiesService.isEmailRegisteredInOrg("OldAppSol@email.com", TEST_ORG_ID)).thenReturn(true);
+        when(validatePartiesService.isEmailRegisteredInOrg("NewAppSol@email.com", TEST_ORG_ID)).thenReturn(true);
+        UpdateRepresentationService updateRepresentationService = mock(UpdateRepresentationService.class);
+        when(updateRepresentationService.validateEmailActiveForOrganisation("OldAppSol@email.com", CASE_ID, AUTH_TOKEN)).thenReturn(null);
+        when(updateRepresentationService.validateEmailActiveForOrganisation("NewAppSol@email.com", CASE_ID, AUTH_TOKEN)).thenReturn(null);
+
         ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
-            .applicantSolicitorName("A")
-            .applicantSolicitorFirm("Firm1")
-            .currentUserIsApplicantSolicitor(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES)
+            .applicantSolicitorName("Old AppSol Name")
+            .applicantSolicitorFirm("Old AppSol Firm")
+            .applicantSolicitorEmail("OldAppSol@email.com")
+            .applicantSolicitorAddress(
+                Address.builder()
+                    .addressLine1("AddressLine1")
+                    .addressLine2("AddressLine2")
+                    .addressLine3("AddressLine3")
+                    .county("County")
+                    .country("Country")
+                    .postTown("Town")
+                    .postCode("EC1 3AS")
+                    .build()
+            )
+            .currentUserIsApplicantSolicitor(YesOrNo.YES)
             .build();
         ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder()
-            .applicantSolicitorName("A")
-            .applicantSolicitorFirm("Firm1")
-            .currentUserIsApplicantSolicitor(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES)
+            .applicantSolicitorName("New AppSol Name")
+            .applicantSolicitorFirm("New AppSol Firm")
+            .applicantSolicitorEmail("NewAppSol@email.com")
+            .applicantSolicitorAddress(
+                Address.builder()
+                    .addressLine1("AddressLine1")
+                    .addressLine2("AddressLine2")
+                    .addressLine3("AddressLine3")
+                    .county("County")
+                    .country("Country")
+                    .postTown("Town")
+                    .postCode("EC1 3AS")
+                    .build()
+            )
+            .currentUserIsApplicantSolicitor(YesOrNo.YES)
             .build();
         FinremCaseData beforeData = FinremCaseData.builder().contactDetailsWrapper(beforeWrapper).build();
         FinremCaseData afterData = FinremCaseData.builder().contactDetailsWrapper(afterWrapper).build();
