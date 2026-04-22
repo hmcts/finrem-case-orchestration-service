@@ -54,11 +54,6 @@ public class RetryExecutor {
      * @throws Exception if the operation ultimately fails after all retry attempts
      */
     @Retryable(
-//        value = {
-//            FeignException.InternalServerError.class,
-//            FeignException.ServiceUnavailable.class,
-//            FeignException.GatewayTimeout.class
-//        },
         interceptor = "retryLoggerInterceptor"
     )
     public <T> T supplyWithRetry(ThrowingSupplier<T> supplier, String actionName, String caseId) throws Exception {
@@ -84,11 +79,6 @@ public class RetryExecutor {
      * @throws Exception if the operation ultimately fails after all retry attempts
      */
     @Retryable(
-//        value = {
-//            FeignException.InternalServerError.class,
-//            FeignException.ServiceUnavailable.class,
-//            FeignException.GatewayTimeout.class
-//        },
         interceptor = "retryLoggerInterceptor"
     )
     public void runWithRetry(ThrowingRunnable action, String actionName, String caseId) throws Exception {
