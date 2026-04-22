@@ -115,10 +115,10 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
     }
 
     private boolean hasChangeSolicitorName(String oldSolicitorName, String newSolicitorName) {
-        return !Objects.equals(oldSolicitorName, newSolicitorName);
+        return !Objects.equals(oldSolicitorName.trim(), newSolicitorName.trim());
     }
 
     private boolean hasChangeSolicitorFirm(String oldSolicitorFirm, String newSolicitorFirm) {
-        return !Objects.equals(oldSolicitorFirm, newSolicitorFirm);
+        return !Objects.equals(oldSolicitorFirm.trim(), newSolicitorFirm.trim());
     }
 }

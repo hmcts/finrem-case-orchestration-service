@@ -315,7 +315,6 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
             .caseDetailsBefore(beforeDetails)
             .build(), AUTH_TOKEN);
 
-        // If case-only changes should trigger cover sheet generation:
         verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(afterDetails, AUTH_TOKEN);
     }
 }
