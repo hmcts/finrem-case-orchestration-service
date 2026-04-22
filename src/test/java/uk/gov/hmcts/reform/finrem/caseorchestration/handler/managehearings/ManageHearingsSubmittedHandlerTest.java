@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,19 +69,41 @@ class ManageHearingsSubmittedHandlerTest {
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
 
+    private final String expectedConfirmationHeader = "Manage Hearings completed with error";
+
     @Test
     void testCanHandle() {
         assertCanHandle(manageHearingsSubmittedHandler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.MANAGE_HEARINGS);
     }
 
-    @Test
-    void givenExceptionThrown_whenSendingHearingCorrespondenceFailed_thenPopulateErrorToConfirmationBody() {
+    static Stream<Arguments> givenExceptionThrown_whenSendingHearingCorrespondenceFailed_thenPopulateErrorToConfirmationBody() {
+        return Stream.of(
+            Arguments.of(
+                List.of(NotificationParty.APPLICANT),
+                "Notification to applicant has failed. Please send notification to applicant manually."),
+            Arguments.of(
+                List.of(NotificationParty.RESPONDENT, NotificationParty.APPLICANT),
+                "Notification to applicant and respondent has failed. "
+                    + "Please send notification to applicant and respondent manually."),
+            Arguments.of(
+                List.of(NotificationParty.APPLICANT, NotificationParty.RESPONDENT, NotificationParty.INTERVENER_ONE),
+                "Notification to applicant, intervener 1, and respondent has failed. "
+                    + "Please send notification to applicant, intervener 1, and respondent manually.")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void givenExceptionThrown_whenSendingHearingCorrespondenceFailed_thenPopulateErrorToConfirmationBody(
+        List<NotificationParty> notificationParties, String expectedConfirmationBody
+    ) {
         // Arrange
         FinremCallbackRequest callbackRequest = buildCallbackRequest(ManageHearingsAction.ADD_HEARING);
 
         SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
         when(event.getCaseId()).thenReturn(CASE_ID);
-        when(event.getNotificationParties()).thenReturn(List.of(NotificationParty.APPLICANT));
+        when(event.getNotificationParties()).thenReturn(
+            notificationParties);
         when(manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN)).thenReturn(event);
 
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
@@ -93,9 +118,9 @@ class ManageHearingsSubmittedHandlerTest {
         // then
         assertAll(
             () -> verify(manageHearingsCorresponder).buildHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN),
-            () -> assertThat(response.getConfirmationHeader()).contains("Manage Hearings completed with error"),
+            () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
             () -> assertThat(response.getConfirmationBody())
-                .contains("Notification to applicant has failed. Please send notification to applicant manually.")
+                .contains(expectedConfirmationBody)
         );
     }
 
@@ -121,7 +146,7 @@ class ManageHearingsSubmittedHandlerTest {
         // then
         assertAll(
             () -> verify(manageHearingsCorresponder).buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, AUTH_TOKEN),
-            () -> assertThat(response.getConfirmationHeader()).contains("Manage Hearings completed with error"),
+            () -> assertThat(response.getConfirmationHeader()).contains(expectedConfirmationHeader),
             () -> assertThat(response.getConfirmationBody())
                 .contains("Notification to applicant has failed. Please send notification to applicant manually.")
         );
