@@ -15,6 +15,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 
 class RetryLoggerTest {
 
@@ -37,8 +38,8 @@ class RetryLoggerTest {
 
     @Test
     void shouldLogWarningOnError() {
-        when(context.getAttribute("actionName")).thenReturn("send");
-        when(context.getAttribute("caseId")).thenReturn("12345");
+        when(context.getAttribute("actionName")).thenReturn("granting access");
+        when(context.getAttribute("caseId")).thenReturn(CASE_ID);
         when(context.getRetryCount()).thenReturn(2);
 
         Throwable throwable = new RuntimeException("boom");
@@ -50,14 +51,18 @@ class RetryLoggerTest {
             () -> verify(context).getAttribute("caseId"),
             () -> verify(context).getRetryCount(),
             () -> assertThat(logs.getWarns())
-                .containsExactly("Attempt 2 for send (case: 12345) failed: boom")
+                .containsExactly("1234567890 - Attempt #2 for action (granting access) failed:"),
+
+            // throwable message
+            () -> assertThat(logs.getWarnThrowableMessages())
+                .contains("boom")
         );
     }
 
     @Test
     void shouldLogErrorOnCloseWhenThrowablePresent() {
-        when(context.getAttribute("actionName")).thenReturn("send");
-        when(context.getAttribute("caseId")).thenReturn("12345");
+        when(context.getAttribute("actionName")).thenReturn("granting access");
+        when(context.getAttribute("caseId")).thenReturn(CASE_ID);
         when(context.getRetryCount()).thenReturn(3);
 
         Throwable throwable = new RuntimeException("final failure");
@@ -72,7 +77,7 @@ class RetryLoggerTest {
 
             // log message
             () -> assertThat(logs.getErrors())
-                .anyMatch(log -> log.contains("12345 - All 3 retry attempts failed for send")),
+                .anyMatch(log -> log.contains("1234567890 - All 3 retry attempts failed for action (granting access)")),
 
             // throwable class
             () -> assertThat(logs.getErrorThrowableClassNames())
