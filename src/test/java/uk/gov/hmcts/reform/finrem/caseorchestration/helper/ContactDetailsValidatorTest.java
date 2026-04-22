@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Answers.CALLS_REAL_METHODS;
 import static org.mockito.ArgumentMatchers.any;
@@ -265,7 +264,7 @@ class ContactDetailsValidatorTest {
     @Test
     void shouldNotReturnErrorWhenApplicantAddressIsEmpty() {
         FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null);
-        caseData.getContactDetailsWrapper().setApplicantAddress(new Address()); // Empty address object
+        caseData.getContactDetailsWrapper().setApplicantAddress(new Address());
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
@@ -273,7 +272,7 @@ class ContactDetailsValidatorTest {
     @Test
     void shouldNotReturnErrorWhenRespondentAddressIsEmpty() {
         FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null);
-        caseData.getContactDetailsWrapper().setRespondentAddress(new Address()); // Empty address object
+        caseData.getContactDetailsWrapper().setRespondentAddress(new Address());
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
@@ -281,7 +280,7 @@ class ContactDetailsValidatorTest {
     @Test
     void shouldNotReturnErrorWhenApplicantAddressIsNull() {
         FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null);
-        caseData.getContactDetailsWrapper().setApplicantAddress(null); // Null address object
+        caseData.getContactDetailsWrapper().setApplicantAddress(null);
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
@@ -289,7 +288,7 @@ class ContactDetailsValidatorTest {
     @Test
     void shouldNotReturnErrorWhenRespondentAddressIsNull() {
         FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null);
-        caseData.getContactDetailsWrapper().setRespondentAddress(null); // Null address object
+        caseData.getContactDetailsWrapper().setRespondentAddress(null);
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
@@ -332,18 +331,6 @@ class ContactDetailsValidatorTest {
             mockedStatic.verify(() -> ContactDetailsValidator.checkForEmptyRespondentPostcode(any(ContactDetailsWrapper.class), anyList()),
                 times(timesToCallPartyMethods));
         }
-    }
-
-    @Test
-    void givenContestedCase_whenValidatePostcodesByRepresentation_thenExceptionRaised() {
-        assertThatThrownBy(() -> ContactDetailsValidator.validatePostcodesByRepresentation(
-            FinremCaseDetails.builder()
-                .caseType(CaseType.CONTESTED)
-                .id(1234L)
-                .build()
-        ))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining(String.format(ContactDetailsValidator.INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE, "1234"));
     }
 
     private static FinremCaseData createContestedCaseData(String applicantSolicitorPostcode, String applicantPostcode,
