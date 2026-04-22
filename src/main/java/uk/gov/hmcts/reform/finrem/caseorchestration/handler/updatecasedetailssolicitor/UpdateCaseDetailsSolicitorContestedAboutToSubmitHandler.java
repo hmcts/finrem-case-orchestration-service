@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddressUtils;
 
 import java.util.Objects;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -57,9 +56,6 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
     /**
      *  This method is responsible for generating cover sheets for the applicant and
      *  respondent when there is a change in their solicitor details.
-     * @param callbackRequest
-     * @param userAuthorisation
-     * @return
      */
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
@@ -119,16 +115,10 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
     }
 
     private boolean hasChangeSolicitorName(String oldSolicitorName, String newSolicitorName) {
-        return !Objects.equals(
-            Optional.ofNullable(oldSolicitorName).orElse(null),
-            Optional.ofNullable(newSolicitorName).orElse(null)
-        );
+        return !Objects.equals(oldSolicitorName, newSolicitorName);
     }
 
     private boolean hasChangeSolicitorFirm(String oldSolicitorFirm, String newSolicitorFirm) {
-        return !Objects.equals(
-            Optional.ofNullable(oldSolicitorFirm).orElse(null),
-            Optional.ofNullable(newSolicitorFirm).orElse(null)
-        );
+        return !Objects.equals(oldSolicitorFirm, newSolicitorFirm);
     }
 }
