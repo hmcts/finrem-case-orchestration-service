@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddressUtils;
@@ -55,17 +54,22 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
     }
 
+    /**
+     *  This method is responsible for generating cover sheets for the applicant and
+     *  respondent when there is a change in their solicitor details.
+     * @param callbackRequest
+     * @param userAuthorisation
+     * @return
+     */
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        super.handle(callbackRequest, userAuthorisation);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = super.handle(callbackRequest, userAuthorisation);
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
-
         FinremCaseDetails finremCaseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         generateCoverSheets(finremCaseDetails, finremCaseDetailsBefore, userAuthorisation);
 
-        return response(finremCaseData);
+        return response;
     }
 
     private void generateCoverSheets(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String userAuthorisation) {
@@ -81,11 +85,11 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
     private boolean hasChangeApplicantSolicitor(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
         String applicantSolicitorName = finremCaseDetails.getAppSolicitorName();
         String applicantSolicitorNameBefore = finremCaseDetailsBefore.getAppSolicitorName();
-        boolean applicantSolicitorNameHasChanged = !applicantSolicitorName.equals(applicantSolicitorNameBefore);
+        boolean applicantSolicitorNameHasChanged = hasChangeSolicitorName(applicantSolicitorNameBefore, applicantSolicitorName);
 
         String applicantSolicitorFirm = finremCaseDetails.getAppSolicitorFirm();
         String applicantSolicitorFirmBefore = finremCaseDetailsBefore.getAppSolicitorFirm();
-        boolean applicantSolicitorFirmHasChanged = !applicantSolicitorFirm.equals(applicantSolicitorFirmBefore);
+        boolean applicantSolicitorFirmHasChanged = hasChangeSolicitorFirm(applicantSolicitorFirmBefore, applicantSolicitorFirm);
         
         Address applicantSolicitorAddress = finremCaseDetails.getData().getContactDetailsWrapper().getApplicantSolicitorAddress();
         Address applicantSolicitorAddressBefore = finremCaseDetailsBefore.getData().getContactDetailsWrapper().getApplicantSolicitorAddress();
@@ -99,11 +103,11 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
     private boolean hasChangeRespondentSolicitor(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
         String respondentSolicitorName = finremCaseDetails.getRespSolicitorName();
         String respondentSolicitorNameBefore = finremCaseDetailsBefore.getRespSolicitorName();
-        boolean respondentSolicitorNameHasChanged = !Objects.equals(respondentSolicitorName, respondentSolicitorNameBefore);
+        boolean respondentSolicitorNameHasChanged = hasChangeSolicitorName(respondentSolicitorNameBefore, respondentSolicitorName);
 
         String respondentSolicitorFirm = finremCaseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorFirm();
         String respondentSolicitorFirmBefore = finremCaseDetailsBefore.getData().getContactDetailsWrapper().getRespondentSolicitorFirm();
-        boolean respondentSolicitorFirmHasChanged = !Objects.equals(respondentSolicitorFirm, respondentSolicitorFirmBefore);
+        boolean respondentSolicitorFirmHasChanged = hasChangeSolicitorFirm(respondentSolicitorFirmBefore, respondentSolicitorFirm);
 
         Address respondentSolicitorAddress = finremCaseDetails.getData().getContactDetailsWrapper().getRespondentSolicitorAddress();
         Address respondentSolicitorAddressBefore = finremCaseDetailsBefore.getData().getContactDetailsWrapper().getRespondentSolicitorAddress();
@@ -114,71 +118,17 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
             || respondentSolicitorAddressChanged);
     }
 
-    /**
-     * Checks if the applicantSolicitorName has changed between the two case details.
-     * @param current current case details
-     * @param before previous case details
-     * @return true if applicantSolicitorName has changed, false otherwise
-     */
-    public boolean hasChangeApplicantSolicitorName(FinremCaseDetails current, FinremCaseDetails before) {
+    private boolean hasChangeSolicitorName(String oldSolicitorName, String newSolicitorName) {
         return !Objects.equals(
-            Optional.ofNullable(current).map(FinremCaseDetails::getAppSolicitorName).orElse(null),
-            Optional.ofNullable(before).map(FinremCaseDetails::getAppSolicitorName).orElse(null)
+            Optional.ofNullable(oldSolicitorName).orElse(null),
+            Optional.ofNullable(newSolicitorName).orElse(null)
         );
     }
 
-    /**
-     * Checks if the applicantSolicitorFirm has changed between the two case details.
-     * @param current current case details
-     * @param before previous case details
-     * @return true if applicantSolicitorFirm has changed, false otherwise
-     */
-    public boolean hasChangeApplicantSolicitorFirm(FinremCaseDetails current, FinremCaseDetails before) {
+    private boolean hasChangeSolicitorFirm(String oldSolicitorFirm, String newSolicitorFirm) {
         return !Objects.equals(
-            Optional.ofNullable(current).map(FinremCaseDetails::getAppSolicitorFirm).orElse(null),
-            Optional.ofNullable(before).map(FinremCaseDetails::getAppSolicitorFirm).orElse(null)
-        );
-    }
-
-    /**
-     * Checks if the respondentSolicitorName has changed between the two case details.
-     * @param current current case details
-     * @param before previous case details
-     * @return true if respondentSolicitorName has changed, false otherwise
-     */
-    public boolean hasChangeRespondentSolicitorName(FinremCaseDetails current, FinremCaseDetails before) {
-        return !Objects.equals(
-            Optional.ofNullable(current)
-                .map(FinremCaseDetails::getData)
-                .map(FinremCaseData::getContactDetailsWrapper)
-                .map(ContactDetailsWrapper::getRespondentSolicitorName)
-                .orElse(null),
-            Optional.ofNullable(before)
-                .map(FinremCaseDetails::getData)
-                .map(FinremCaseData::getContactDetailsWrapper)
-                .map(ContactDetailsWrapper::getRespondentSolicitorName)
-                .orElse(null)
-        );
-    }
-
-    /**
-     * Checks if the respondentSolicitorFirm has changed between the two case details.
-     * @param current current case details
-     * @param before previous case details
-     * @return true if respondentSolicitorFirm has changed, false otherwise
-     */
-    public boolean hasChangeRespondentSolicitorFirm(FinremCaseDetails current, FinremCaseDetails before) {
-        return !Objects.equals(
-            Optional.ofNullable(current)
-                .map(FinremCaseDetails::getData)
-                .map(FinremCaseData::getContactDetailsWrapper)
-                .map(ContactDetailsWrapper::getRespondentSolicitorFirm)
-                .orElse(null),
-            Optional.ofNullable(before)
-                .map(FinremCaseDetails::getData)
-                .map(FinremCaseData::getContactDetailsWrapper)
-                .map(ContactDetailsWrapper::getRespondentSolicitorFirm)
-                .orElse(null)
+            Optional.ofNullable(oldSolicitorFirm).orElse(null),
+            Optional.ofNullable(newSolicitorFirm).orElse(null)
         );
     }
 }

@@ -38,7 +38,7 @@ public class AddressUtils {
         if (isNull(oldAddress) && isNull(newAddress)) {
             return false;
         }
-        if (oldAddress == null ^ newAddress == null) {
+        if ((isNull(oldAddress) && !isNull(newAddress)) || (!isNull(oldAddress) && isNull(newAddress))) {
             return true;
         }
 
