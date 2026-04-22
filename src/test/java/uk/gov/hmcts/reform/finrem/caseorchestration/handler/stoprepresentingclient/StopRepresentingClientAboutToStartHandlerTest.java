@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclie
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -415,18 +414,18 @@ class StopRepresentingClientAboutToStartHandlerTest {
     }
 
     @Test
-    void givenAsCaseworker_whenHandled_thenExceptionIsThrown() {
+    void givenAnIncorrectRole_whenHandled_thenErrorsContainExpectedMessage() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
             new RepresentativeInContext(TEST_USER_ID, false, false, null, null)
         );
 
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
-            givenFinremCaseData);
-        assertThatThrownBy(() -> underTest.handle(callbackRequest, AUTH_TOKEN))
-            .isInstanceOf(UnsupportedOperationException.class)
-            .hasMessage(CASE_ID + " - It supports applicant/respondent representatives only");
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), givenFinremCaseData);
 
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors())
+            .containsExactly(CASE_ID + " - It supports applicant/respondent representatives only");
         verify(stopRepresentingClientService).buildRepresentation(givenFinremCaseData, AUTH_TOKEN);
     }
 }
