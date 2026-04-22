@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mockRunWithRetryWithHandlerInvokesFirstErrorHandler;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -275,6 +276,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
         when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
             .thenReturn(event);
 
+<<<<<<< DFR-4589-Update-Contact-Details-Automatic-Assigment-base-DFR-4661
         // Lenient stub for solicitor access retry
         doNothing().when(retryExecutor).runWithRetryWithHandler(any(), eq("Update Contact Details - Case Solicitor Change"), any(), any());
 
@@ -293,6 +295,16 @@ class UpdateContactDetailsSubmittedHandlerTest {
             errorHandler.handle(new RuntimeException(), actionName, caseId);
             return null;
         }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC letter"), any(), any());
+=======
+        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+            retryExecutor,
+            "Sending NOC email to litigant solicitor"
+        );
+        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+            retryExecutor,
+            "Sending NOC letter"
+        );
+>>>>>>> master
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -320,17 +332,10 @@ class UpdateContactDetailsSubmittedHandlerTest {
         when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
             .thenReturn(event);
 
-        // Lenient stub for solicitor access retry
-        doNothing().when(retryExecutor).runWithRetryWithHandler(any(), eq("Update Contact Details - Case Solicitor Change"), any(), any());
-
-        // Simulate retryExecutor calling the handler with an exception
-        doAnswer(invocation -> {
-            String actionName = invocation.getArgument(1);
-            String caseId = invocation.getArgument(2);
-            RetryErrorHandler errorHandler = invocation.getArgument(3);
-            errorHandler.handle(new RuntimeException(), actionName, caseId);
-            return null;
-        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
+        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+            retryExecutor,
+            "Sending NOC email to litigant solicitor"
+        );
         doAnswer(invocation -> {
             // Nothing happened
             return null;
@@ -370,13 +375,10 @@ class UpdateContactDetailsSubmittedHandlerTest {
             // Nothing happened
             return null;
         }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
-        doAnswer(invocation -> {
-            String actionName = invocation.getArgument(1);
-            String caseId = invocation.getArgument(2);
-            RetryErrorHandler errorHandler = invocation.getArgument(3);
-            errorHandler.handle(new RuntimeException(), actionName, caseId);
-            return null;
-        }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC letter"), any(), any());
+        mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+            retryExecutor,
+            "Sending NOC letter"
+        );
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);

@@ -65,18 +65,25 @@ public class BarristerChangeCaseAccessUpdater {
     }
 
     /**
-     * Executes barrister access changes for a case.
+     * Applies access changes for barristers on a given case.
      *
-     * <p>
-     * This method determines the appropriate {@link CaseRole} for the barrister party,
-     * then interacts with the Assign Case Access Service to update user access
-     * on the case. All barristers listed in {@code barristerChange.getAdded()} are
-     * granted access, and all barristers listed in {@code barristerChange.getRemoved()}
-     * have their access removed.
+     * <p>This method resolves the {@link CaseRole} associated with the barrister party
+     * from the provided {@link BarristerChange}, and updates case access accordingly
+     * via the Assign Case Access Service.
      *
-     * @param caseId           the case ID
-     * @param barristerChange  the object describing which barristers to add or remove
+     * <p>All barristers in {@code barristerChange.getAdded()} are granted access,
+     * while those in {@code barristerChange.getRemoved()} have their access revoked.
+     *
+     * <p><strong>Note:</strong> This method does not perform null checks on
+     * {@code barristerChange} or its collections and expects them to be non-null.
+     *
+     * @param caseId          the unique identifier of the case
+     * @param barristerChange encapsulates barristers to be granted or removed access
+     *
+     * @deprecated Use {@link ManageBarristerService#executeBarristerChange(long, BarristerChange)}
+     *             which provides the updated implementation.
      */
+    @Deprecated(forRemoval = true)
     public void executeBarristerChange(long caseId, BarristerChange barristerChange) {
         CaseRole caseRole = manageBarristerService.getBarristerCaseRole(barristerChange.getBarristerParty());
         barristerChange.getAdded()
