@@ -110,6 +110,8 @@ public class BulkScanController {
                         transformedCaseData))
                 .build();
 
+            log.info("Transformation success for exception record id: {}", exceptionRecordId);
+
             controllerResponse = ok(callbackResponse);
         } catch (UnsupportedFormTypeException exception) {
             log.error(format("Error transforming exception record. Exception record id is %s", exceptionRecordId), exception);
