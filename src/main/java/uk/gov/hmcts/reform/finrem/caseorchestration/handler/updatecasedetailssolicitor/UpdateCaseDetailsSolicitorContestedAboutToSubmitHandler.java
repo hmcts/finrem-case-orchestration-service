@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddressUtils;
 
 import java.util.Objects;
 
+import static java.util.Objects.isNull;
+
 @Slf4j
 @Service
 public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends AbstractUpdateCaseDetailsSolicitorHandler {
@@ -115,10 +117,14 @@ public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends Abs
     }
 
     private boolean hasChangeSolicitorName(String oldSolicitorName, String newSolicitorName) {
+        oldSolicitorName = !isNull(oldSolicitorName) ? oldSolicitorName.trim() : null;
+        newSolicitorName = !isNull(newSolicitorName) ? newSolicitorName.trim() : null;
         return !Objects.equals(oldSolicitorName, newSolicitorName);
     }
 
     private boolean hasChangeSolicitorFirm(String oldSolicitorFirm, String newSolicitorFirm) {
+        oldSolicitorFirm = !isNull(oldSolicitorFirm) ? oldSolicitorFirm.trim() : null;
+        newSolicitorFirm = !isNull(newSolicitorFirm) ? newSolicitorFirm.trim() : null;
         return !Objects.equals(oldSolicitorFirm, newSolicitorFirm);
     }
 }
