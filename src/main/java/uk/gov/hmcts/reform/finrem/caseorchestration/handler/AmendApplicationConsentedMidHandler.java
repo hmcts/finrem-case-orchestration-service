@@ -53,6 +53,6 @@ public class AmendApplicationConsentedMidHandler extends FinremCallbackHandler {
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return response(caseData, null, errors);
     }
 }

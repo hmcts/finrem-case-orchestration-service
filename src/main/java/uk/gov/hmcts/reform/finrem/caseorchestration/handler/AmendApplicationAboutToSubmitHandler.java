@@ -85,7 +85,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
                 .data(caseData).build();
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return response(caseData, null, errors);
     }
 
     private void updateLatestConsentOrder(FinremCallbackRequest callbackRequest) {
