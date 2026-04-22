@@ -18,17 +18,34 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 
 /**
- * Service used to invalidate access codes without removing other entries from the CCD collection.
- * CCD replaces the entire collection when updates are sent.
- * Sending only the updated access code would therefore delete all other access codes.
- * This service merges the updated entry back into the full collection so only the validity flag is changed.
+ * Service responsible for merging access code collections during invalidation.
  */
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class InvalidateAccessCodeService {
 
+    /**
+     * Merges an existing CCD access code collection with an updated collection
+     * where an access code has been invalidated.
+     *
+     * <p>
+     * Invalidation is triggered from the Citizen UI rather than Manage Cases.
+     * The Citizen UI submits only the updated access code, not the full collection.
+     * Since CCD replaces the entire collection on update, merging is required to
+     * prevent other access codes from being unintentionally deleted.
+     *
+     * <p>
+     * All existing access codes are preserved and only the {@code isValid} flag
+     * is updated for matching entries, identified by access code ID.
+     *
+     * <p>
+     * The resulting collection is sorted by creation date in descending order.
+     *
+     * @param before  the original access code collection stored in CCD
+     * @param current the updated access code collection received from the Citizen UI
+     * @return a merged collection safe to persist back to CCD
+     */
     public List<AccessCodeCollection> mergeForInvalidation(List<AccessCodeCollection> before, List<AccessCodeCollection> current) {
 
         Map<UUID, AccessCodeCollection> currentById =
@@ -59,6 +76,17 @@ public class InvalidateAccessCodeService {
         return merged;
     }
 
+    /**
+     * Merges a single access code entry.
+     *
+     * <p>
+     * All access code details are preserved from the original entry.
+     * Only the {@code isValid} flag is applied from the updated entry.
+     *
+     * @param beforeItem the original access code entry
+     * @param updated    the updated access code entry containing the new validity value
+     * @return a merged access code entry with updated validity
+     */
     private AccessCodeCollection mergeSingle(AccessCodeCollection beforeItem, AccessCodeCollection updated) {
 
         AccessCodeEntry beforeValue = beforeItem.getValue();
@@ -74,5 +102,4 @@ public class InvalidateAccessCodeService {
                 .build())
             .build();
     }
-
 }
