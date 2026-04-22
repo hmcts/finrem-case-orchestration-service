@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -30,7 +31,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-// Common methods tested in Abstract test class.
 @ExtendWith(MockitoExtension.class)
 class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
@@ -209,6 +209,61 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         // Assert
         verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(afterDetails, AUTH_TOKEN);
         verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(afterDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    void whenSolicitorNameOrFirmNoChange_thenShouldNeverInvokeGenerateCoverSheetService() {
+        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString())).thenReturn(new ArrayList<>());
+
+
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
+            .applicantSolicitorName("Old AppSol Name")
+            .applicantSolicitorFirm("Old AppSol Firm")
+            .applicantSolicitorEmail("OldAppSol@email.com")
+            .applicantSolicitorAddress(
+                Address.builder()
+                    .addressLine1("AddressLine1")
+                    .addressLine2("AddressLine2")
+                    .addressLine3("AddressLine3")
+                    .county("County")
+                    .country("Country")
+                    .postTown("Town")
+                    .postCode("EC1 3AS")
+                    .build()
+            )
+            .currentUserIsApplicantSolicitor(YesOrNo.YES)
+            .build();
+
+        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder()
+            .applicantSolicitorName("Old AppSol Name")
+            .applicantSolicitorFirm("Old AppSol Firm")
+            .applicantSolicitorEmail("OldAppSol@email.com")
+            .applicantSolicitorAddress(
+                Address.builder()
+                    .addressLine1("AddressLine1")
+                    .addressLine2("AddressLine2")
+                    .addressLine3("AddressLine3")
+                    .county("County")
+                    .country("Country")
+                    .postTown("Town")
+                    .postCode("EC1 3AS")
+                    .build()
+            )
+            .currentUserIsApplicantSolicitor(YesOrNo.YES)
+            .build();
+
+        FinremCaseData beforeData = FinremCaseData.builder().contactDetailsWrapper(beforeWrapper).build();
+        FinremCaseData afterData = FinremCaseData.builder().contactDetailsWrapper(afterWrapper).build();
+        FinremCaseDetails beforeDetails = FinremCaseDetails.builder().data(beforeData).id(CASE_ID_IN_LONG).build();
+        FinremCaseDetails afterDetails = FinremCaseDetails.builder().data(afterData).id(CASE_ID_IN_LONG).build();
+
+        underTest.handle(FinremCallbackRequest.builder()
+            .caseDetails(afterDetails)
+            .caseDetailsBefore(beforeDetails)
+            .build(), AUTH_TOKEN);
+
+        // If case-only changes should trigger cover sheet generation:
+        verify(generateCoverSheetService, never()).generateAndSetApplicantCoverSheet(afterDetails, AUTH_TOKEN);
     }
 
     @Test
