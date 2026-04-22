@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecasedetailssolicitor;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
@@ -13,9 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
-
-import java.lang.reflect.Field;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.verify;
@@ -33,27 +29,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
     @InjectMocks
-    private UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler handler;
+    private UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler underTest;
 
     @Mock
     private GenerateCoverSheetService generateCoverSheetService;
 
-    @Mock
-    private UpdateRepresentationService updateRepresentationService;
-
-    @BeforeEach
-    void injectMocks() throws Exception {
-        Field field = handler.getClass().getSuperclass().getDeclaredField("updateRepresentationService");
-        field.setAccessible(true);
-        field.set(handler, updateRepresentationService);
-        // Correctly stub the void method
-        org.mockito.Mockito.doNothing().when(updateRepresentationService)
-            .validateEmailActiveForOrganisation(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString());
-    }
-
     @Test
     void testCanHandle() {
-        assertCanHandle(handler,
+        assertCanHandle(underTest,
             Arguments.of(ABOUT_TO_SUBMIT, CONTESTED, UPDATE_CASE_DETAILS_SOLICITOR),
             Arguments.of(ABOUT_TO_SUBMIT, CONSENTED, UPDATE_CASE_DETAILS_SOLICITOR)
         );
@@ -61,7 +44,7 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
     @Test
     void when_handle_then_shouldNotClearTemporaryFields() {
-        assertThat(handler.clearsTemporaryFields()).isTrue();
+        assertThat(underTest.clearsTemporaryFields()).isTrue();
     }
 
     @Test
@@ -84,7 +67,7 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
             .caseDetails(afterDetails)
             .caseDetailsBefore(beforeDetails)
             .build();
-        assertThat(handler.handle(request, AUTH_TOKEN)).isNotNull();
+        assertThat(underTest.handle(request, AUTH_TOKEN)).isNotNull();
     }
 
     @Test
@@ -120,7 +103,7 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         FinremCaseDetails afterDetails = FinremCaseDetails.builder().data(afterData).id(CASE_ID_IN_LONG).build();
 
         // Act
-        handler.handle(FinremCallbackRequest.builder()
+        underTest.handle(FinremCallbackRequest.builder()
             .caseDetails(afterDetails)
             .caseDetailsBefore(beforeDetails)
             .build(), AUTH_TOKEN);
