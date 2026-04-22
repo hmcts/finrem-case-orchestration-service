@@ -44,9 +44,6 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
     @Mock
     private GenerateCoverSheetService generateCoverSheetService;
 
-    @Mock
-    private UpdateRepresentationService updateRepresentationService;
-
     @Test
     void testCanHandle() {
         assertCanHandle(underTest,
