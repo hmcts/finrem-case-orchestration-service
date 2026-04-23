@@ -127,12 +127,6 @@ public class ProcessOrderService {
         return !intendedDocumentUrls.containsAll(currentDocumentUrls);
     }
 
-    // PT todo
-    public boolean todo(FinremCaseData caseData) {
-        return CollectionUtils.isEmpty(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
-            && CollectionUtils.isEmpty(caseData.getUnprocessedUploadHearingDocuments());
-    }
-
     /**
      * Checks if all newly uploaded orders in the given case data are PDF documents.
      *
