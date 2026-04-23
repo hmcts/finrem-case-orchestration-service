@@ -275,6 +275,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
         when(updateContactDetailsNotificationService.requiresNotifications(finremCaseData)).thenReturn(true);
         when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
             .thenReturn(event);
+
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
             "Sending NOC email to litigant solicitor"
@@ -282,6 +283,9 @@ class UpdateContactDetailsSubmittedHandlerTest {
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
             "Sending NOC letter"
+        );
+        doAnswer(invocation -> null).when(retryExecutor).runWithRetryWithHandler(
+            any(), eq("Update Contact Details - Case Solicitor Change"), any(), any()
         );
 
         // Act
@@ -318,6 +322,9 @@ class UpdateContactDetailsSubmittedHandlerTest {
             // Nothing happened
             return null;
         }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC letter"), any(), any());
+        doAnswer(invocation -> null).when(retryExecutor).runWithRetryWithHandler(
+            any(), eq("Update Contact Details - Case Solicitor Change"), any(), any()
+        );
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
