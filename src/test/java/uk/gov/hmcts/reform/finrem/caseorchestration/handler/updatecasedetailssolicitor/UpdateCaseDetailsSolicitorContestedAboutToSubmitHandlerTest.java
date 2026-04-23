@@ -97,6 +97,13 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         return FinremCaseDetails.builder().data(data).id(CASE_ID_IN_LONG).build();
     }
 
+    /**
+     *  Tests various scenarios of solicitor name and firm changes to verify the generation of cover sheets for both applicant and respondent.
+     * @param beforeWrapper - Contact details wrapper representing the application and respondent solicitor details before the update
+     * @param afterWrapper - Contact details wrapper representing the application and respondent solicitor details after the update
+     * @param expectApplicantCoverSheet -   boolean flag indicating whether an applicant cover sheet is expected to be generated based on the changes
+     * @param expectRespondentCoverSheet -  boolean flag indicating whether a respondent cover sheet is expected to be generated based on the changes
+     */
     @ParameterizedTest
     @MethodSource("provideSolicitorChangeScenarios")
     void testSolicitorChangeScenarios(ContactDetailsWrapper beforeWrapper, ContactDetailsWrapper afterWrapper,
@@ -200,13 +207,30 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
         // 8. No change Respondent Solicitor, Applicant not represented.
         ContactDetailsWrapper before8 = buildContactDetailsWrapper(
-            null, null, null, true,
-            true, "Old RespSol Name", "Old RespSol Firm", false);
+            null, null, null, false,
+            true, "Old RespSol Name", "Old RespSol Firm", true);
 
         ContactDetailsWrapper after8 = buildContactDetailsWrapper(
             null, null, null, false,
             true, "Old RespSol Name", "Old RespSol Firm", true);
 
+        // 9. White space change for Applicant Solicitor, Respondent not represented.
+        ContactDetailsWrapper before9 = buildContactDetailsWrapper(
+            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+            false, null, null, false);
+
+        ContactDetailsWrapper after9 = buildContactDetailsWrapper(
+            "Old AppSol Name ", "Old AppSol Firm ", "OldAppSol@email.com", true,
+            false, null, null, false);
+
+        // 10. White space change Respondent Solicitor, Applicant not represented.
+        ContactDetailsWrapper before10 = buildContactDetailsWrapper(
+            null, null, null, false,
+            true, "Old RespSol Name", "Old RespSol Firm", true);
+
+        ContactDetailsWrapper after10 = buildContactDetailsWrapper(
+            null, null, null, false,
+            true, "Old RespSol Name ", "Old RespSol Firm ", true);
 
         // Arguments denotes: Before ContactDetails of Solicitors, After ontactDetails of Solicitors,
         // Expected applicant cover sheet, Expected respondent cover sheet
@@ -218,8 +242,10 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
             Arguments.of(before5, after5, true, false),
             Arguments.of(before6, after6, false, true),
             Arguments.of(before7, after7, false, false),
-            Arguments.of(before8, after8, false, false)
-            );
+            Arguments.of(before8, after8, false, false),
+            Arguments.of(before9, after9, false, false),
+            Arguments.of(before10, after10, false, false)
+        );
     }
 
     @Test
@@ -245,6 +271,9 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         assertThat(underTest.handle(request, AUTH_TOKEN)).isNotNull();
     }
 
+    /**
+     *  Tests various scenarios of solicitor name, firm, email, and address changes to verify the generation of cover sheets for both applicant and respondent.
+     */
     @ParameterizedTest
     @MethodSource("provideSolicitorAndAddressChangeScenarios")
     void testSolicitorAndAddressChangeScenarios(
@@ -312,51 +341,67 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
     static Stream<Arguments> provideSolicitorAndAddressChangeScenarios() {
         Address oldAddress = buildAddress();
         Address newAddress = Address.builder().addressLine1("OtherLine1").postCode("ZZ1 1ZZ").build();
+        Address addressWhiteSpace = buildAddress();
+        addressWhiteSpace.setPostCode("EC1 3AS ");
         Address addressNull = null;
 
         return Stream.of(
-            // Both applicant and respondent address changed
+            // 1. Both applicant and respondent address changed
             Arguments.of(
                 "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
                 "Old RespSol Name", "Old AppSol Firm", oldAddress,
                 "New AppSol Firm", "New AppSol Firm", "NewAppSol@email.com", newAddress,
                 "New RespSol Name", "New RespSol Firm", newAddress,
                 true, true),
-            // Only applicant address changed
+            // 2. Only applicant address changed
             Arguments.of(
                 "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
                 "Old RespSol Name", "Old AppSol Firm", oldAddress,
                 "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", newAddress,
                 "Old RespSol Name", "Old AppSol Firm", oldAddress,
                 true, false),
-            // Only respondent address changed
+            // 3. Only respondent address changed
             Arguments.of(
                 "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
                 "Old RespSol Name", "Old AppSol Firm", oldAddress,
                 "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
                 "Old RespSol Name", "Old AppSol Firm", newAddress,
                 false, true),
-            // No address change
+            // 4. No address change
             Arguments.of(
                 "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
                 "Old RespSol Name", "Old AppSol Firm", oldAddress,
                 "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
                 "Old RespSol Name", "Old AppSol Firm", oldAddress,
                 false, false),
-            // Applicant address becomes null
+            // 5. Applicant address becomes null
             Arguments.of(
                 "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
                 "Old RespSol Name", "Old AppSol Firm", oldAddress,
                 "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", addressNull,
                 "Old RespSol Name", "Old AppSol Firm", oldAddress,
                 true, false),
-            // Respondent address becomes null
+            // 6. Respondent address becomes null
             Arguments.of(
                 "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
                 "Old RespSol Name", "Old AppSol Firm", oldAddress,
                 "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
                 "Old RespSol Name", "Old AppSol Firm", addressNull,
-                false, true)
+                false, true),
+            // 7. Applicant address with whitespace trim
+            Arguments.of(
+                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
+                "Old RespSol Name", "Old AppSol Firm", oldAddress,
+                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", addressWhiteSpace,
+                "Old RespSol Name", "Old AppSol Firm", oldAddress,
+                false, false),
+            // 8. Respondent address with whitespace trim
+            Arguments.of(
+                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
+                "Old RespSol Name", "Old AppSol Firm", oldAddress,
+                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
+                "Old RespSol Name", "Old AppSol Firm", addressWhiteSpace,
+                false, false)
         );
     }
 }
