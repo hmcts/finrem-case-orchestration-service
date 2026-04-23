@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry;
 
+import feign.FeignException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,33 +10,41 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.retry.RetryListener;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.interceptor.RetryInterceptorBuilder;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.util.function.ThrowingSupplier;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignException;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingSupplierCaptor;
@@ -54,13 +65,27 @@ class RetryExecutorTest {
     @Import(RetryExecutor.class)
     static class Config {
 
-        @Bean(name = "retryLogger")
-        RetryListener retryLogger() {
-            RetryListener listener = mock(RetryListener.class);
+        @Bean(name = "retryLoggerInterceptor")
+        public RetryOperationsInterceptor retryLoggerInterceptor() {
+            Map<Class<? extends Throwable>, Boolean> retryableExceptions = new HashMap<>();
+            retryableExceptions.put(FeignException.InternalServerError.class, true);
+            retryableExceptions.put(FeignException.ServiceUnavailable.class, true);
+            retryableExceptions.put(FeignException.GatewayTimeout.class, true);
 
-            when(listener.open(any(), any())).thenReturn(true);
+            SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(3, retryableExceptions);
 
-            return listener;
+            RetryTemplate retryTemplate = new RetryTemplate();
+            retryTemplate.setRetryPolicy(retryPolicy);
+
+            FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
+            backOffPolicy.setBackOffPeriod(2000);
+            retryTemplate.setBackOffPolicy(backOffPolicy);
+
+            retryTemplate.setListeners(new RetryListener[]{ new RetryLogger() });
+
+            return RetryInterceptorBuilder.stateless()
+                .retryOperations(retryTemplate)
+                .build();
         }
     }
 
@@ -73,6 +98,19 @@ class RetryExecutorTest {
         private RetryErrorHandler handler2;
         @Spy
         RetryExecutor spyExecutor;
+        private MockedStatic<AopContext> aopContextMock;
+
+        @BeforeEach
+        void setUp() {
+            aopContextMock = mockStatic(AopContext.class);
+            aopContextMock.when(AopContext::currentProxy)
+                .thenReturn(spyExecutor);
+        }
+
+        @AfterEach
+        void tearDown() {
+            aopContextMock.close(); // IMPORTANT
+        }
 
         @Test
         void shouldExecuteSuccessfully_whenNoExceptionThrown() {
@@ -167,6 +205,19 @@ class RetryExecutorTest {
         private RetryErrorHandler handler2;
         @Spy
         RetryExecutor spyExecutor;
+        private MockedStatic<AopContext> aopContextMock;
+
+        @BeforeEach
+        void setUp() {
+            aopContextMock = mockStatic(AopContext.class);
+            aopContextMock.when(AopContext::currentProxy)
+                .thenReturn(spyExecutor);
+        }
+
+        @AfterEach
+        void tearDown() {
+            aopContextMock.close(); // IMPORTANT
+        }
 
         @Test
         void shouldExecuteSuccessfully_whenNoExceptionThrown() {
