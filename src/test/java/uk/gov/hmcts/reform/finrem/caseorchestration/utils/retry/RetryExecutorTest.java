@@ -36,7 +36,7 @@ class RetryExecutorTest {
     private final TestLogger logs = new TestLogger(RetryExecutor.class);
 
     @Spy
-    RetryExecutor spyExecutor;
+    private RetryExecutor spyExecutor;
     private MockedStatic<AopContext> aopContextMock;
 
     @BeforeEach
