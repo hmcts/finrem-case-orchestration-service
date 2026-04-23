@@ -272,7 +272,8 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
     }
 
     /**
-     *  Tests various scenarios of solicitor name, firm, email, and address changes to verify the generation of cover sheets for both applicant and respondent.
+     *  Tests various scenarios of solicitor name, firm, email, and address changes to verify the generation
+     *  of cover sheets for both applicant and respondent.
      */
     @ParameterizedTest
     @MethodSource("provideSolicitorAndAddressChangeScenarios")
