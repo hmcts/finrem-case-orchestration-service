@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managecasedocuments.ManageCaseDocumentsAction;
@@ -21,7 +20,6 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManageCaseDocumentsWrapper implements HasCaseDocument {
 
-    @TemporaryField
     private ManageCaseDocumentsAction manageCaseDocumentsActionSelection;
 
     // It was used for capturing user input in the old event.
@@ -29,6 +27,5 @@ public class ManageCaseDocumentsWrapper implements HasCaseDocument {
     private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
 
     // it's used for capturing user's input in FR_newManageCaseDocuments event.
-    @TemporaryField
     private List<UploadCaseDocumentCollection> inputManageCaseDocumentCollection;
 }

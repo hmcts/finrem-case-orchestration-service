@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.barristers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import feign.FeignException;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -43,6 +42,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.F
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.notificationrequest.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
@@ -84,23 +84,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Check
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
+import java.net.URISyntaxException;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.barrister;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_BARRISTER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -112,6 +109,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_BARRISTER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(CcdCallbackController.class)
@@ -127,6 +125,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
     FinremNotificationRequestMapper.class, CaseRoleService.class, NotificationRequestBuilderFactory.class})
 public class ManageBarristersITest implements IntegrationTest {
 
+    private static final String SERVICE_AUTH_TOKEN = "serviceAuth";
+    private static final String CASE_ID = "12345678";
+    private static final String USER_ID = "userId";
     private static final String APP_BARRISTER_EMAIL_ONE = "appbarr@gmail.com";
     private static final String APP_BARRISTER_NAME = "Barrister App";
     private static final String RESP_BARRISTER_EMAIL_ONE = "respbarr@gmail.com";
@@ -194,44 +195,39 @@ public class ManageBarristersITest implements IntegrationTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    @Before
-    public void setUp() {
-        lenient().when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
-    }
-
     @Test
     public void givenValidRequest_whenManageBarristerAboutToStart_thenProcess() {
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
                 .build());
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
-        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
 
         CallbackRequest request = buildCallbackRequest();
 
         ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
             ccdCallbackController.ccdAboutToStart(AUTH_TOKEN, request);
 
-        verify(dataStoreClient).getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID);
+        verify(dataStoreClient).getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID);
         assertNotNull(response.getBody());
         FinremCaseData caseData = (FinremCaseData) response.getBody().getData();
-        assertThat(caseData.getCurrentUserCaseRole()).isEqualTo(CaseRole.APP_SOLICITOR);
+        assertThat(caseData.getCurrentUserCaseRole(), is(CaseRole.APP_SOLICITOR));
     }
 
     @Test
     public void givenValidRequest_whenManageBarristerMidEvent_thenProcess() {
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
                 .build());
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
-        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
-        when(organisationApi.findUserByEmail(SYS_USER_TOKEN, TEST_SERVICE_TOKEN, APP_BARRISTER_EMAIL_ONE))
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
+        when(organisationApi.findUserByEmail(AUTH_TOKEN, SERVICE_AUTH_TOKEN, APP_BARRISTER_EMAIL_ONE))
             .thenReturn(OrganisationUser.builder().userIdentifier(BARRISTER_ID).build());
         when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
         CaseAssignmentUserRolesResource caseAssignmentUserRolesResource = getCaseAssignmentUserRolesResource();
-        when(caseDataApiV2.getUserRoles(SYS_USER_TOKEN, TEST_SERVICE_TOKEN, List.of(CASE_ID)))
+        when(caseDataApiV2.getUserRoles(SYS_USER_TOKEN, SERVICE_AUTH_TOKEN, List.of(CASE_ID)))
             .thenReturn(caseAssignmentUserRolesResource);
 
         CallbackRequest request = buildCallbackRequest();
@@ -242,18 +238,18 @@ public class ManageBarristersITest implements IntegrationTest {
 
         assertNotNull(response.getBody());
         List errors = response.getBody().getErrors();
-        assertThat(errors).isEmpty();
+        assertThat(errors.size(), is(0));
     }
 
     @Test
     public void givenBarristerIsUnregistered_whenManageBarristerMidEvent_thenReturnCorrectError() {
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
                 .build());
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
-        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
-        when(organisationApi.findUserByEmail(SYS_USER_TOKEN, TEST_SERVICE_TOKEN, APP_BARRISTER_EMAIL_ONE))
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
+        when(organisationApi.findUserByEmail(AUTH_TOKEN, SERVICE_AUTH_TOKEN, APP_BARRISTER_EMAIL_ONE))
             .thenThrow(FeignException.NotFound.class);
 
         CallbackRequest request = buildCallbackRequest();
@@ -264,24 +260,25 @@ public class ManageBarristersITest implements IntegrationTest {
 
         assertNotNull(response.getBody());
         List errors = response.getBody().getErrors();
-        assertThat(errors).containsExactly(""" 
+        assertThat(errors.size(), is(1));
+        assertThat(errors.get(0), is(""" 
             Email address for Barrister is not registered with myHMCTS.
-            They can register at https://manage-org.platform.hmcts.net/register-org/register""");
+            They can register at https://manage-org.platform.hmcts.net/register-org/register"""));
     }
 
     @Test
     public void givenBarristerAlreadyRepresentsOpposingLitigant_whenManageBarristerMidEvent_thenReturnCorrectError() {
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
                 .build());
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
-        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
-        when(organisationApi.findUserByEmail(SYS_USER_TOKEN, TEST_SERVICE_TOKEN, APP_BARRISTER_EMAIL_ONE))
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
+        when(organisationApi.findUserByEmail(AUTH_TOKEN, SERVICE_AUTH_TOKEN, APP_BARRISTER_EMAIL_ONE))
             .thenReturn(OrganisationUser.builder().userIdentifier(RESP_SOL_ID).build());
         when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
         CaseAssignmentUserRolesResource caseAssignmentUserRolesResource = getCaseAssignmentUserRolesResource();
-        when(caseDataApiV2.getUserRoles(SYS_USER_TOKEN, TEST_SERVICE_TOKEN, List.of(CASE_ID)))
+        when(caseDataApiV2.getUserRoles(SYS_USER_TOKEN, SERVICE_AUTH_TOKEN, List.of(CASE_ID)))
             .thenReturn(caseAssignmentUserRolesResource);
 
         CallbackRequest request = buildCallbackRequest();
@@ -291,20 +288,20 @@ public class ManageBarristersITest implements IntegrationTest {
             ccdCallbackController.ccdMidEvent(AUTH_TOKEN, request);
 
         assertNotNull(response.getBody());
-        assertThat(response.getBody().getErrors()).containsExactly("Barrister is already representing another party on this case");
+        assertThat(response.getBody().getErrors().get(0), is("Barrister is already representing another party on this case"));
         postalService.isRecipientResideOutsideOfUK(request.getCaseDetails().getData(), "APPLICANT");
     }
 
     @Test
     public void givenValidRequest_whenManageBarristerAboutToSubmitAsSolicitor_thenProcess() {
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(RESP_SOLICITOR_POLICY).build()))
                 .build());
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
-        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(SOLICITOR_NAME);
-        when(organisationApi.findUserByEmail(SYS_USER_TOKEN, TEST_SERVICE_TOKEN, RESP_BARRISTER_EMAIL_ONE))
+        when(organisationApi.findUserByEmail(SYS_USER_TOKEN, SERVICE_AUTH_TOKEN, RESP_BARRISTER_EMAIL_ONE))
             .thenReturn(OrganisationUser.builder().userIdentifier(RESP_BARRISTER_ID).build());
         when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
 
@@ -314,32 +311,32 @@ public class ManageBarristersITest implements IntegrationTest {
         ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
             ccdCallbackController.ccdAboutToSubmit(AUTH_TOKEN, request);
 
-        verify(caseDataApiV2).addCaseUserRoles(SYS_USER_TOKEN, TEST_SERVICE_TOKEN, caseAssignmentUserRolesRequest());
+        verify(caseDataApiV2).addCaseUserRoles(SYS_USER_TOKEN, SERVICE_AUTH_TOKEN, caseAssignmentUserRolesRequest());
 
         List<RepresentationUpdateHistoryCollection> representationUpdateHistory =
             ((FinremCaseData) response.getBody().getData()).getRepresentationUpdateHistory();
 
-        assertThat(representationUpdateHistory).hasSize(1);
+        assertThat(representationUpdateHistory, hasSize(1));
         RepresentationUpdate update = representationUpdateHistory.getFirst().getValue();
-        assertThat(update.getAdded()).isEqualTo(ChangedRepresentative.builder()
+        assertThat(update.getAdded(), is(ChangedRepresentative.builder()
             .name(RESP_BARRISTER_NAME)
             .email(RESP_BARRISTER_EMAIL_ONE)
             .organisation(Organisation.builder().organisationID(RESP_BARR_ORG_ID).build())
-            .build());
-        assertThat(update.getBy()).isEqualTo(SOLICITOR_NAME);
-        assertThat(update.getClientName()).isEqualTo("Jane Smith");
+            .build()));
+        assertThat(update.getBy(), is(SOLICITOR_NAME));
+        assertThat(update.getClientName(), is("Jane Smith"));
     }
 
     @Test
     public void givenValidRequestAsCaseworker_whenManageBarristerAboutToSubmit_thenProcess() {
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(RESP_SOLICITOR_POLICY).build()))
                 .build());
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
-        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(CASEWORKER_NAME);
-        when(organisationApi.findUserByEmail(SYS_USER_TOKEN, TEST_SERVICE_TOKEN, RESP_BARRISTER_EMAIL_ONE))
+        when(organisationApi.findUserByEmail(SYS_USER_TOKEN, SERVICE_AUTH_TOKEN, RESP_BARRISTER_EMAIL_ONE))
             .thenReturn(OrganisationUser.builder().userIdentifier(RESP_BARRISTER_ID).build());
         when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
 
@@ -351,32 +348,32 @@ public class ManageBarristersITest implements IntegrationTest {
         ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
             ccdCallbackController.ccdAboutToSubmit(AUTH_TOKEN, request);
 
-        verify(caseDataApiV2).addCaseUserRoles(SYS_USER_TOKEN, TEST_SERVICE_TOKEN, caseAssignmentUserRolesRequest());
+        verify(caseDataApiV2).addCaseUserRoles(SYS_USER_TOKEN, SERVICE_AUTH_TOKEN, caseAssignmentUserRolesRequest());
 
         assertNotNull(response.getBody());
         List<RepresentationUpdateHistoryCollection> representationUpdateHistory =
             ((FinremCaseData) response.getBody().getData()).getRepresentationUpdateHistory();
 
-        assertThat(representationUpdateHistory).hasSize(1);
+        assertThat(representationUpdateHistory, hasSize(1));
         RepresentationUpdate update = representationUpdateHistory.getFirst().getValue();
-        assertThat(update.getAdded()).isEqualTo(ChangedRepresentative.builder()
+        assertThat(update.getAdded(), is(ChangedRepresentative.builder()
             .name(RESP_BARRISTER_NAME)
             .email(RESP_BARRISTER_EMAIL_ONE)
             .organisation(Organisation.builder().organisationID(RESP_BARR_ORG_ID).build())
-            .build());
-        assertThat(update.getBy()).isEqualTo(CASEWORKER_NAME);
-        assertThat(update.getClientName()).isEqualTo("Jane Smith");
+            .build()));
+        assertThat(update.getBy(), is(CASEWORKER_NAME));
+        assertThat(update.getClientName(), is("Jane Smith"));
     }
 
     @Test
     public void givenValidRequest_WhenManageBarristerAddedSubmitted_thenProcess() {
         CaseDocument addedDocument = CaseDocument.builder().documentBinaryUrl(ADDED_BIN_URL).build();
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
                 .build());
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
-        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(), any(), any(), eq(CONTESTED)))
             .thenReturn(addedDocument);
         when(organisationApi.findOrganisationByOrgId(any(), any(), any())).thenReturn(organisationsResponse());
@@ -397,12 +394,12 @@ public class ManageBarristersITest implements IntegrationTest {
     @Test
     public void givenValidRequest_WhenManageBarristerRemovedSubmitted_thenProcess() {
         CaseDocument removedDocument = CaseDocument.builder().documentBinaryUrl(REMOVED_BIN_URL).build();
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
                 .build());
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
-        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(), any(), any(), eq(CONTESTED)))
             .thenReturn(removedDocument);
         when(organisationApi.findOrganisationByOrgId(any(), any(), any())).thenReturn(organisationsResponse());
@@ -421,13 +418,13 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenRepresentedApplicant_WhenManageBarristerAddedSubmitted_thenProcessWithoutLetter() {
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, CASE_ID, TEST_USER_ID))
+    public void givenRepresentedApplicant_WhenManageBarristerAddedSubmitted_thenProcessWithoutLetter() throws URISyntaxException {
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
                 .build());
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
-        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
 
         CallbackRequest request = buildCallbackRequest();
         request.getCaseDetails().getData().put(MANAGE_BARRISTER_PARTY, BarristerParty.APPLICANT);
@@ -459,13 +456,21 @@ public class ManageBarristersITest implements IntegrationTest {
 
     private List<BarristerData> applicantBarristerCollection() {
         return List.of(BarristerData.builder()
-            .barrister(barrister(APP_BARR_ORG_ID, "appBarrUserId", APP_BARRISTER_NAME, APP_BARRISTER_EMAIL_ONE))
+            .barrister(Barrister.builder()
+                .name(APP_BARRISTER_NAME)
+                .email(APP_BARRISTER_EMAIL_ONE)
+                .organisation(Organisation.builder().organisationID(APP_BARR_ORG_ID).build())
+                .build())
             .build());
     }
 
     private List<BarristerData> respondentBarristerCollection() {
         return List.of(BarristerData.builder()
-            .barrister(barrister(RESP_BARR_ORG_ID, "resBarrUserId", RESP_BARRISTER_NAME, RESP_BARRISTER_EMAIL_ONE))
+            .barrister(Barrister.builder()
+                .name(RESP_BARRISTER_NAME)
+                .email(RESP_BARRISTER_EMAIL_ONE)
+                .organisation(Organisation.builder().organisationID(RESP_BARR_ORG_ID).build())
+                .build())
             .build());
     }
 
@@ -479,7 +484,7 @@ public class ManageBarristersITest implements IntegrationTest {
                 CaseAssignmentUserRole.builder()
                     .caseDataId(CASE_ID)
                     .caseRole(APP_SOLICITOR_POLICY)
-                    .userId(TEST_USER_ID)
+                    .userId(USER_ID)
                     .build())).build();
     }
 

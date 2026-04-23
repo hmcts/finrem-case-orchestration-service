@@ -172,7 +172,7 @@ public class IntegrationTestUtils {
      */
     public static void givenProfessionalUserWithEmail(PrdOrganisationService prdOrganisationService, String email) {
         String userId = UUID.randomUUID().toString();
-        when(prdOrganisationService.findUserByEmail(email)).thenReturn(ofNullable(userId));
+        when(prdOrganisationService.findUserByEmail(email, TEST_SYSTEM_TOKEN)).thenReturn(ofNullable(userId));
     }
 
     /**

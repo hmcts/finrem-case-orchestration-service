@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -396,6 +395,7 @@ class IntervenerServiceTest {
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerOne(oneWrapper1);
 
+
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);
         DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
@@ -448,6 +448,7 @@ class IntervenerServiceTest {
             .intervenerAddress(Address.builder().addressLine1("1 London Road").build())
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerOne(oneWrapper1);
+
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -509,6 +510,7 @@ class IntervenerServiceTest {
             .intervenerDateAdded(LocalDate.of(2023, 1, 1))
             .intervenerOrganisation(organisationPolicy).build();
         finremCaseData.setIntervenerOne(oneWrapper1);
+
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);
@@ -573,6 +575,7 @@ class IntervenerServiceTest {
             .intervenerOrganisation(organisationPolicyChange).build();
         finremCaseData.setIntervenerOne(oneWrapper1);
 
+
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);
         DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
@@ -630,6 +633,7 @@ class IntervenerServiceTest {
             .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
             .build();
         finremCaseData.setIntervenerOne(oneWrapper1);
+
 
         DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         List<DynamicRadioListElement> list = List.of(option);

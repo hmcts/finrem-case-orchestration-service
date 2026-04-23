@@ -385,6 +385,8 @@ public class CCDConfigConstant {
     public static final String CONTESTED_ORDER_DIRECTION_DATE = "consentDateOfOrder";
 
     public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
+    public static final String FR_CONSENT_ORDER = "FR_consentOrder";
+    public static final String FR_RESPOND_TO_CONSENT_ORDER = "FR_respondToConsentOrder";
 
     //general document
     public static final String GENERAL_UPLOADED_DOCUMENTS = "uploadGeneralDocuments";

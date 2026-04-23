@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangePart
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
@@ -37,6 +38,8 @@ public class StopRepresentingClientEventHandler {
 
     private final ManageBarristerService manageBarristerService;
 
+    private final BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
+
     private final CoreCaseDataService coreCaseDataService;
 
     @EventListener
@@ -53,11 +56,11 @@ public class StopRepresentingClientEventHandler {
 
         BarristerChange applicantBarristerChange = manageBarristerService
             .getBarristerChange(event.getCaseDetails(), finremCaseDataBefore, CaseRole.APP_SOLICITOR);
-        manageBarristerService.executeBarristerChange(caseId, applicantBarristerChange);
+        barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, applicantBarristerChange);
 
         BarristerChange respondentBarristerChange = manageBarristerService
             .getBarristerChange(event.getCaseDetails(), finremCaseDataBefore, CaseRole.RESP_SOLICITOR);
-        manageBarristerService.executeBarristerChange(caseId, respondentBarristerChange);
+        barristerChangeCaseAccessUpdater.executeBarristerChange(caseId, respondentBarristerChange);
 
         revertOrgPolicyToOriginalOrgPolicy(finremCaseData, finremCaseDataBefore);
         assignCaseAccessService.applyDecision(systemUserService.getSysUserToken(), finremCaseDetailsMapper

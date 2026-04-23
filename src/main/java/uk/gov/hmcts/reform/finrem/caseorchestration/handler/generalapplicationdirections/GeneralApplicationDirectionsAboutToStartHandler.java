@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 
@@ -124,19 +123,11 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
     }
 
     private void initialiseWorkingHearing(ManageHearingsWrapper manageHearingsWrapper, FinremCaseDetails finremCaseDetails) {
-        WorkingHearing workingHearing = WorkingHearing.builder()
+        manageHearingsWrapper.setWorkingHearing(WorkingHearing.builder()
             .partiesOnCaseMultiSelectList(getDefaultPartiesOnCaseMultiSelectList(finremCaseDetails))
             .hearingNoticePrompt(YesOrNo.YES)
             .withHearingTypes(HearingType.APPLICATION_HEARING)
-            .build();
-
-        DynamicList hearingTypeList = workingHearing.getHearingTypeDynamicList();
-        if (!isNull(hearingTypeList)) {
-            hearingTypeList.setValue(
-                hearingTypeList.getListItems().stream().findFirst().orElse(null)
-            );
-        }
-        manageHearingsWrapper.setWorkingHearing(workingHearing);
+            .build());
     }
 
     private DynamicMultiSelectList getDefaultPartiesOnCaseMultiSelectList(FinremCaseDetails finremCaseDetails) {

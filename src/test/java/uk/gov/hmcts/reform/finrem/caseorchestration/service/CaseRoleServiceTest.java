@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.util.List;
 import java.util.Optional;
@@ -188,10 +187,10 @@ class CaseRoleServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(IntervenerType.class)
-    void givenIntervenerSolicitorRoleAssigned_whenIsIntervenerRepresentativeCalled_thenReturnTrue(IntervenerType intervenerType) {
+    @ValueSource(ints = {1, 2, 3, 4})
+    void givenIntervenerSolicitorRoleAssigned_whenIsIntervenerRepresentativeCalled_thenReturnTrue(int index) {
         // given
-        CaseRole caseRole = CaseRole.valueOf("INTVR_SOLICITOR_" + intervenerType.getIntervenerId());
+        CaseRole caseRole = CaseRole.valueOf("INTVR_SOLICITOR_" + index);
         CaseAssignedUserRole userRole = CaseAssignedUserRole.builder().caseRole(caseRole.getCcdCode()).build();
 
         CaseAssignedUserRolesResource resource = new CaseAssignedUserRolesResource();
@@ -208,16 +207,15 @@ class CaseRoleServiceTest {
         assertIsApplicantRepresentative(caseData, caseRole, false);
         assertIsRespondentRepresentative(caseData, caseRole, true);
         assertThat(caseRoleService.isIntervenerRepresentative(caseData, AUTH_TOKEN)).isEqualTo(true);
-        assertThat(caseRoleService.getIntervenerType(caseData, AUTH_TOKEN)).isEqualTo(Optional.of(intervenerType));
-        assertThat(caseRoleService.getIntervenerSolicitorIndex(caseData, AUTH_TOKEN))
-            .isEqualTo(Optional.of(intervenerType.getIntervenerId()));
+        assertThat(caseRoleService.getIntervenerIndex(caseData, AUTH_TOKEN)).isEqualTo(Optional.of(index));
+        assertThat(caseRoleService.getIntervenerSolicitorIndex(caseData, AUTH_TOKEN)).isEqualTo(Optional.of(index));
     }
 
     @ParameterizedTest
-    @EnumSource(IntervenerType.class)
-    void givenIntervenerBarristerRoleAssigned_whenIsIntervenerRepresentativeCalled_thenReturnTrue(IntervenerType intervenerType) {
+    @ValueSource(ints = {1, 2, 3, 4})
+    void givenIntervenerBarristerRoleAssigned_whenIsIntervenerRepresentativeCalled_thenReturnTrue(int index) {
         // given
-        CaseRole caseRole = CaseRole.valueOf("INTVR_BARRISTER_" + intervenerType.getIntervenerId());
+        CaseRole caseRole = CaseRole.valueOf("INTVR_BARRISTER_" + index);
         CaseAssignedUserRole userRole = CaseAssignedUserRole.builder().caseRole(caseRole.getCcdCode()).build();
 
         CaseAssignedUserRolesResource resource = new CaseAssignedUserRolesResource();
@@ -234,7 +232,7 @@ class CaseRoleServiceTest {
         assertIsApplicantRepresentative(caseData, caseRole, false);
         assertIsRespondentRepresentative(caseData, caseRole, true);
         assertThat(caseRoleService.isIntervenerRepresentative(caseData, AUTH_TOKEN)).isEqualTo(true);
-        assertThat(caseRoleService.getIntervenerType(caseData, AUTH_TOKEN)).isEqualTo(Optional.of(intervenerType));
+        assertThat(caseRoleService.getIntervenerIndex(caseData, AUTH_TOKEN)).isEqualTo(Optional.of(index));
         assertThat(caseRoleService.getIntervenerSolicitorIndex(caseData, AUTH_TOKEN)).isEqualTo(Optional.empty());
     }
 

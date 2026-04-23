@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
@@ -38,25 +39,23 @@ abstract class BasePartyListenerTest {
             .build();
     }
 
-    protected SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(FinremCaseDetails caseDetails,
+    protected SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(
         FinremCaseDetails caseDetailsBefore, EmailTemplateNames emailTemplate) {
 
-        return sendCorrespondenceEventWithTargetNotificationParty(caseDetails, caseDetailsBefore, emailTemplate, null);
+        return sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate, null);
     }
 
     protected SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(
-        FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore,
-        EmailTemplateNames emailTemplate, String solicitorReferenceNumber) {
-        return sendCorrespondenceEventWithTargetNotificationParty(caseDetails, caseDetailsBefore, emailTemplate,
-            solicitorReferenceNumber, null);
+        FinremCaseDetails caseDetailsBefore, EmailTemplateNames emailTemplate, String solicitorReferenceNumber) {
+        return sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate, solicitorReferenceNumber,
+            null);
     }
 
     protected SendCorrespondenceEvent sendCorrespondenceEventWithTargetNotificationParty(
-        FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore,
-        EmailTemplateNames emailTemplate, String solicitorReferenceNumber, Barrister barrister) {
+        FinremCaseDetails caseDetailsBefore, EmailTemplateNames emailTemplate, String solicitorReferenceNumber, Barrister barrister) {
 
         return SendCorrespondenceEvent.builder()
-            .caseDetails(caseDetails)
+            .caseDetails(mock(FinremCaseDetails.class))
             .caseDetailsBefore(caseDetailsBefore)
             .notificationParties(List.of(NotificationParty.values()))
             .emailNotificationRequest(emailNotificationRequest(solicitorReferenceNumber))

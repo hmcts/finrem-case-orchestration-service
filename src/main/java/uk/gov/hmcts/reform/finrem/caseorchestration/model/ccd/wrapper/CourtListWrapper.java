@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HumberCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.KentSurreyCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LancashireCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LiverpoolCourt;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LondonCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ManchesterCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NewportCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NorthWalesCourt;
@@ -23,8 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ThamesValleyCourt;
 
 public interface CourtListWrapper {
     NottinghamCourt getNottinghamCourt();
-
-    LondonCourt getLondonCourt();
 
     CfcCourt getCfcCourt();
 

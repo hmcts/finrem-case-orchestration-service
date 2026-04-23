@@ -44,7 +44,7 @@ class BarristerValidationServiceTest {
 
     @Test
     void givenRegisteredBarrister_whenValidateBarristerEmail_thenValidateWithNoErrors() {
-        when(organisationService.findUserByEmail(REGISTERED_EMAIL)).thenReturn(Optional.of("UserId"));
+        when(organisationService.findUserByEmail(REGISTERED_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of("UserId"));
         when(assignCaseAccessService.isLegalCounselRepresentingOpposingLitigant(any(), any(), any())).thenReturn(false);
 
         List<String> actualErrors = barristerValidationService.validateBarristerEmails(
@@ -58,8 +58,8 @@ class BarristerValidationServiceTest {
 
     @Test
     void givenMultipleRegisteredBarristers_whenValidateBarristerEmails_thenValidateWithNoErrors() {
-        when(organisationService.findUserByEmail(REGISTERED_EMAIL)).thenReturn(Optional.of("UserId"));
-        when(organisationService.findUserByEmail(ANOTHER_REGISTERED_EMAIL)).thenReturn(Optional.of("AnotherUserId"));
+        when(organisationService.findUserByEmail(REGISTERED_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of("UserId"));
+        when(organisationService.findUserByEmail(ANOTHER_REGISTERED_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of("AnotherUserId"));
         when(assignCaseAccessService.isLegalCounselRepresentingOpposingLitigant(eq("UserId"), any(), any())).thenReturn(false);
         when(assignCaseAccessService.isLegalCounselRepresentingOpposingLitigant(eq("AnotherUserId"), any(), any())).thenReturn(false);
 
@@ -72,8 +72,8 @@ class BarristerValidationServiceTest {
 
     @Test
     void givenMultipleUnregisteredBarristers_whenValidateBarristerEmails_thenReturnCorrectErrorMessages() {
-        when(organisationService.findUserByEmail("barrister1@test.com")).thenReturn(Optional.empty());
-        when(organisationService.findUserByEmail("barrister2@test.com")).thenReturn(Optional.empty());
+        when(organisationService.findUserByEmail("barrister1@test.com", AUTH_TOKEN)).thenReturn(Optional.empty());
+        when(organisationService.findUserByEmail("barrister2@test.com", AUTH_TOKEN)).thenReturn(Optional.empty());
 
         List<String> actualErrors = barristerValidationService.validateBarristerEmails(List.of(
             buildInvalidBarristerData("barrister1@test.com"),
@@ -93,8 +93,8 @@ class BarristerValidationServiceTest {
     @EnumSource(value = CaseRole.class, names = {"APP_BARRISTER", "RESP_BARRISTER",
         "INTVR_BARRISTER_1", "INTVR_BARRISTER_2", "INTVR_BARRISTER_3", "INTVR_BARRISTER_4"})
     void givenBarristerHasRepresentedOpposingLitigant_whenValidateBarristers_thenReturnCorrectErrorMessage(CaseRole barristerCaseRole) {
-        when(organisationService.findUserByEmail(REGISTERED_EMAIL)).thenReturn(Optional.of("UserId"));
-        when(organisationService.findUserByEmail(ANOTHER_REGISTERED_EMAIL)).thenReturn(Optional.of("AnotherUserId"));
+        when(organisationService.findUserByEmail(REGISTERED_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of("UserId"));
+        when(organisationService.findUserByEmail(ANOTHER_REGISTERED_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of("AnotherUserId"));
         when(assignCaseAccessService.isLegalCounselRepresentingOpposingLitigant(eq("UserId"), any(), any())).thenReturn(true);
         when(assignCaseAccessService.isLegalCounselRepresentingOpposingLitigant(eq("AnotherUserId"), any(), any())).thenReturn(true);
 

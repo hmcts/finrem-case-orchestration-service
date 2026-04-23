@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangePart
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
@@ -58,6 +59,9 @@ class StopRepresentingClientEventHandlerTest {
     private ManageBarristerService manageBarristerService;
 
     @Mock
+    private BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
+
+    @Mock
     private CoreCaseDataService coreCaseDataService;
 
     private StopRepresentingClientEventHandler underTest;
@@ -65,7 +69,7 @@ class StopRepresentingClientEventHandlerTest {
     @BeforeEach
     void setup() {
         underTest = new StopRepresentingClientEventHandler(assignCaseAccessService, systemUserService, finremCaseDetailsMapper,
-            manageBarristerService, coreCaseDataService);
+            manageBarristerService, barristerChangeCaseAccessUpdater, coreCaseDataService);
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
     }
 
@@ -135,8 +139,8 @@ class StopRepresentingClientEventHandlerTest {
 
         underTest.handleEvent(event);
 
-        verify(manageBarristerService).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
-        verify(manageBarristerService).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
+        verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
+        verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
     }
 
     @Test

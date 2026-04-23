@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.util.List;
 import java.util.Optional;
@@ -153,15 +152,15 @@ public class CaseRoleService {
     }
 
     /**
-     * Returns the {@link IntervenerType} if the current user is acting as an
-     * intervener solicitor or barrister for the given case.
+     * Returns the intervener index (1–4) if the user is an Intervener Solicitor
+     * or Intervener Barrister for the given case.
      *
-     * @param finremCaseData the case data containing the CCD case ID
-     * @param userAuthorisation the user's authorisation token
-     * @return an {@link Optional} containing the corresponding {@link IntervenerType}
-     *         if the user is an intervener representative; otherwise {@link Optional#empty()}
+     * @param finremCaseData The case data containing the CCD Case ID.
+     * @param userAuthorisation The user's authorisation token.
+     * @return an {@link Optional} containing the intervener index (1–4),
+     *         or {@link Optional#empty()} if the user is not an intervener representative.
      */
-    public Optional<IntervenerType> getIntervenerType(FinremCaseData finremCaseData, String userAuthorisation) {
+    public Optional<Integer> getIntervenerIndex(FinremCaseData finremCaseData, String userAuthorisation) {
         CaseRole caseRole = getUserCaseRole(finremCaseData.getCcdCaseId(), userAuthorisation);
 
         if (caseRole == null) {
@@ -169,10 +168,10 @@ public class CaseRoleService {
         }
 
         return switch (caseRole) {
-            case INTVR_SOLICITOR_1, INTVR_BARRISTER_1 -> Optional.of(IntervenerType.INTERVENER_ONE);
-            case INTVR_SOLICITOR_2, INTVR_BARRISTER_2 -> Optional.of(IntervenerType.INTERVENER_TWO);
-            case INTVR_SOLICITOR_3, INTVR_BARRISTER_3 -> Optional.of(IntervenerType.INTERVENER_THREE);
-            case INTVR_SOLICITOR_4, INTVR_BARRISTER_4 -> Optional.of(IntervenerType.INTERVENER_FOUR);
+            case INTVR_SOLICITOR_1, INTVR_BARRISTER_1 -> Optional.of(1);
+            case INTVR_SOLICITOR_2, INTVR_BARRISTER_2 -> Optional.of(2);
+            case INTVR_SOLICITOR_3, INTVR_BARRISTER_3 -> Optional.of(3);
+            case INTVR_SOLICITOR_4, INTVR_BARRISTER_4 -> Optional.of(4);
             default -> Optional.empty();
         };
     }

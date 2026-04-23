@@ -46,8 +46,7 @@ class FormerApplicantSolicitorListenerTest extends BasePartyListenerTest {
         FinremCaseDetails caseDetailsBefore = mock(FinremCaseDetails.class);
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
-            caseDetailsBefore, emailTemplate,
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
             solicitorReferenceNumber);
         when(notificationService.isApplicantSolicitorEmailPopulatedAndPresented(caseDetailsBefore)).thenReturn(true);
 
@@ -68,8 +67,7 @@ class FormerApplicantSolicitorListenerTest extends BasePartyListenerTest {
     void shouldNotSendEmailNotificationIfApplicantSolicitorEmailIsNotPresent() {
         FinremCaseDetails caseDetailsBefore = mock(FinremCaseDetails.class);
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
-            caseDetailsBefore, mock(EmailTemplateNames.class));
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, mock(EmailTemplateNames.class));
         when(notificationService.isApplicantSolicitorEmailPopulatedAndPresented(caseDetailsBefore)).thenReturn(false);
 
         underTest.handleNotification(event);
@@ -82,8 +80,7 @@ class FormerApplicantSolicitorListenerTest extends BasePartyListenerTest {
     void shouldNotSendEmailNotificationIfCaseDetailsBeforeIsAbsent() {
         FinremCaseDetails caseDetailsBefore = null;
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
-            caseDetailsBefore, mock(EmailTemplateNames.class));
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, mock(EmailTemplateNames.class));
 
         underTest.handleNotification(event);
 

@@ -24,9 +24,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerTwoLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.RespondentLetterAddresseeGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -54,6 +57,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,6 +70,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 
 @RunWith(SpringRunner.class)
@@ -272,6 +277,17 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void givenNoticeOfChangeAsCaseworker_whenSendNoCNotifications_ThenSendNoticeOfChangeServiceCalled() {
+        notificationsController.sendNoticeOfChangeNotificationsCaseworker(AUTH_TOKEN,
+            buildNoCCaseworkerCallbackRequest());
+
+        verify(notificationService).sendNoticeOfChangeEmailCaseworker(any(CaseDetails.class));
+
+        verify(nocLetterNotificationService)
+            .sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
+    }
+
+    @Test
     public void givenUpdateFrc_whenSendEmail_thenNotificationServiceCalledThreeTimes() throws JsonProcessingException {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
@@ -304,6 +320,22 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService).sendUpdateFrcInformationEmailToAppSolicitor(any(CaseDetails.class));
         verify(notificationService, never()).sendUpdateFrcInformationEmailToRespondentSolicitor(any(CaseDetails.class));
         verify(notificationService).sendUpdateFrcInformationEmailToCourt(any(CaseDetails.class));
+    }
+
+    private CallbackRequest createCallbackRequestWithFinalOrder() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+
+        ArrayList<HearingOrderCollectionData> finalOrderCollection = new ArrayList<>();
+        finalOrderCollection.add(HearingOrderCollectionData.builder()
+            .hearingOrderDocuments(HearingOrderDocument
+                .builder()
+                .uploadDraftDocument(new CaseDocument())
+                .build())
+            .build());
+
+        callbackRequest.getCaseDetails().getData().put(FINAL_ORDER_COLLECTION, finalOrderCollection);
+
+        return callbackRequest;
     }
 
     private FinremCaseDetails getFinremCaseDetailsFromCaseDetails() {

@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ClevelandCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LondonCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthEastFrc;
@@ -46,7 +45,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc.LONDON;
 
 @Slf4j
 class FinremCaseDataTest {
@@ -193,44 +191,6 @@ class FinremCaseDataTest {
     }
 
     @Test
-    void givenContestedCaseWithLondonFRC_whenGetSelectedCourt_shouldSelectCorrectLondonCourt() {
-        DefaultCourtListWrapper courtListWrapper = DefaultCourtListWrapper.builder()
-            .cfcCourtList(CfcCourt.CENTRAL_FAMILY_COURT)
-            .build();
-        FinremCaseData data = FinremCaseData.builder()
-            .regionWrapper(RegionWrapper.builder()
-                .allocatedRegionWrapper(
-                    AllocatedRegionWrapper.builder()
-                        .regionList(Region.LONDON)
-                        .londonFrcList(LONDON)
-                        .courtListWrapper(courtListWrapper)
-                        .build())
-                .build())
-            .build();
-
-        assertEquals(CfcCourt.CENTRAL_FAMILY_COURT.getSelectedCourtId(), data.getSelectedAllocatedCourt());
-    }
-
-    @Test
-    void givenConsentedCaseWithLondonFRC_whenGetSelectedCourt_shouldSelectCorrectLondonCourt() {
-        DefaultCourtListWrapper courtListWrapper = DefaultCourtListWrapper.builder()
-            .londonCourtList(LondonCourt.CENTRAL_FAMILY_COURT)
-            .build();
-        FinremCaseData data = FinremCaseData.builder()
-            .regionWrapper(RegionWrapper.builder()
-                .allocatedRegionWrapper(
-                    AllocatedRegionWrapper.builder()
-                        .regionList(Region.LONDON)
-                        .londonFrcList(RegionLondonFrc.LONDON_CONSENTED_COURT)
-                        .courtListWrapper(courtListWrapper)
-                        .build())
-                .build())
-            .build();
-
-        assertEquals(LondonCourt.CENTRAL_FAMILY_COURT.getSelectedCourtId(), data.getSelectedAllocatedCourt());
-    }
-
-    @Test
     void testGetSelectedHearingCourtStringFromCourt() {
 
         // Arrange
@@ -257,7 +217,7 @@ class FinremCaseDataTest {
                 .workingHearing(WorkingHearing.builder()
                     .hearingCourtSelection(Court.builder()
                         .region(Region.LONDON)
-                        .londonList(LONDON)
+                        .londonList(RegionLondonFrc.LONDON)
                         .courtListWrapper(DefaultCourtListWrapper.builder()
                             .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
                             .build())

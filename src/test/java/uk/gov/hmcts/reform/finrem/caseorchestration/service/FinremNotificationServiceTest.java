@@ -48,6 +48,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -69,6 +70,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT;
@@ -88,6 +90,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
@@ -747,6 +750,48 @@ class FinremNotificationServiceTest {
     }
 
     @Test
+    void givenContestedCase_whenSendNoCCaseworkerEmail_thenSendContestedEmail() {
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
+
+        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_NOC_CASEWORKER));
+    }
+
+    @Test
+    void givenConsentedCase_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
+        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails();
+
+        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENTED_NOC_CASEWORKER));
+    }
+
+    @Test
+    void givenContestedCaseAndNonDigitalSol_whenSendNocEmail_thenNotSendContestedEmailCaseworker() {
+        NotificationRequest notificationRequest = NotificationRequest.builder().build();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(finremNotificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(false);
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
+
+        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
+        verifyNoMoreInteractions(emailService);
+    }
+
+    @Test
     void sendUpdateFrcInformationEmailToAppSolicitor() {
         notificationService.sendUpdateFrcInformationEmailToAppSolicitor(contestedFinremCaseDetails);
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
@@ -883,6 +928,38 @@ class FinremNotificationServiceTest {
 
         // Assert the result
         assertEquals(expectedResult, result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testIsApplicantSolicitorResponsibleToDraftOrder(boolean isResponsible) {
+        // Prepare mock data
+        Map<String, Object> caseData = new HashMap<>();
+
+        // Mock the service method
+        when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(caseData)).thenReturn(isResponsible);
+
+        // Perform the test
+        boolean result = notificationService.isApplicantSolicitorResponsibleToDraftOrder(caseData);
+
+        // Assert the result
+        assertEquals(isResponsible, result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testIsRespondentSolicitorResponsibleToDraftOrder(boolean isResponsible) {
+        // Prepare mock data
+        Map<String, Object> caseData = new HashMap<>();
+
+        // Mock the service method
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData)).thenReturn(isResponsible);
+
+        // Perform the test
+        boolean result = notificationService.isRespondentSolicitorResponsibleToDraftOrder(caseData);
+
+        // Assert the result
+        assertEquals(isResponsible, result);
     }
 
     @ParameterizedTest

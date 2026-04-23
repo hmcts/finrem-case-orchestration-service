@@ -38,8 +38,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.Callback
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_ONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.IntervenerRole.BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.IntervenerRole.SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -115,7 +113,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
     void givenAsIntervenerSolicitor_whenHandled_thenPopulateCorrectLabel() {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            new RepresentativeInContext(TEST_USER_ID, false, false, INTERVENER_ONE, SOLICITOR)
+            new RepresentativeInContext(TEST_USER_ID, false, false, 1, SOLICITOR)
         );
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID),
@@ -141,7 +139,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
         RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, INTERVENER_TWO, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
         when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(true);
@@ -172,7 +170,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
         FinremCaseData givenFinremCaseData = FinremCaseData.builder().build();
         RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, INTERVENER_TWO, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
         when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(false);
@@ -208,7 +206,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
             .build();
         RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, INTERVENER_TWO, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
         when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(false);
@@ -249,7 +247,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
             .build();
         RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, INTERVENER_ONE, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 1, BARRISTER)
         );
         when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(false);
@@ -298,7 +296,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
             .build();
         RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, INTERVENER_TWO, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
         when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(false);
@@ -344,7 +342,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
             .build();
         RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, INTERVENER_TWO, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
         when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(true);
@@ -386,7 +384,7 @@ class StopRepresentingClientAboutToStartHandlerTest {
             .build();
         RepresentativeInContext representativeInContext = null;
         when(stopRepresentingClientService.buildRepresentation(givenFinremCaseData, AUTH_TOKEN)).thenReturn(
-            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, INTERVENER_TWO, BARRISTER)
+            representativeInContext = new RepresentativeInContext(TEST_USER_ID, false, false, 2, BARRISTER)
         );
         when(stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(givenFinremCaseData, representativeInContext))
             .thenReturn(true);

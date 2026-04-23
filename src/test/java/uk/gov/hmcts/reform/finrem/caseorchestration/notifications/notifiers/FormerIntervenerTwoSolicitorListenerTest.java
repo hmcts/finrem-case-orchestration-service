@@ -75,8 +75,8 @@ class FormerIntervenerTwoSolicitorListenerTest extends BasePartyListenerTest {
 
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
-            caseDetailsBefore, emailTemplate, solicitorReferenceNumber);
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
+            solicitorReferenceNumber);
 
         underTest.handleNotification(event);
 
@@ -107,8 +107,8 @@ class FormerIntervenerTwoSolicitorListenerTest extends BasePartyListenerTest {
 
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
-            caseDetailsBefore, emailTemplate, TEST_INTV_SOLICITOR_REFERENCE);
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
+            TEST_INTV_SOLICITOR_REFERENCE);
 
         underTest.handleNotification(event);
 
@@ -131,8 +131,8 @@ class FormerIntervenerTwoSolicitorListenerTest extends BasePartyListenerTest {
 
         EmailTemplateNames emailTemplate = mock(EmailTemplateNames.class);
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
-            caseDetailsBefore, emailTemplate, TEST_INTV_SOLICITOR_REFERENCE);
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, emailTemplate,
+            TEST_INTV_SOLICITOR_REFERENCE);
 
         underTest.handleNotification(event);
 
@@ -144,8 +144,7 @@ class FormerIntervenerTwoSolicitorListenerTest extends BasePartyListenerTest {
     void shouldNotSendEmailNotificationIfCaseDetailsBeforeIsAbsent() {
         FinremCaseDetails caseDetailsBefore = null;
 
-        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(mock(FinremCaseDetails.class),
-            caseDetailsBefore, mock(EmailTemplateNames.class));
+        SendCorrespondenceEvent event = sendCorrespondenceEventWithTargetNotificationParty(caseDetailsBefore, mock(EmailTemplateNames.class));
 
         underTest.handleNotification(event);
 

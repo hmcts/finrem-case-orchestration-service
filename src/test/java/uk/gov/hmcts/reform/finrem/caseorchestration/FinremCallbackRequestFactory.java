@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
-import static java.util.Optional.ofNullable;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockingDetails;
 
@@ -66,7 +65,7 @@ public class FinremCallbackRequestFactory {
     }
 
     public static FinremCallbackRequest from(Long id, FinremCaseData data) {
-        return single(details(id, ofNullable(data).map(FinremCaseData::getCcdCaseType).orElse(null), data, null));
+        return single(details(id, null, data, null));
     }
 
     public static FinremCallbackRequest from(Long id,

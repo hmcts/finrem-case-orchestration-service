@@ -143,7 +143,7 @@ public class StopRepresentingClientMidHandler extends FinremCallbackHandler {
         }
         if (representativeInContext.isIntervenerRepresentative()) {
             return Optional.of("Intervener %s".formatted(
-                representativeInContext.intervenerType().getIntervenerId()
+                Optional.ofNullable(representativeInContext.intervenerIndex()).orElseThrow()
             ));
         }
         return Optional.empty();

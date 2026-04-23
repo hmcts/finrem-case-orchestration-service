@@ -2,11 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -46,19 +46,21 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@ExtendWith(MockitoExtension.class)
-class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
+@RunWith(MockitoJUnitRunner.class)
+public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
+
+    public static final String AUTH_TOKEN = "AuthTokien";
+
+    private static final String USER_ID = "testUserId";
+    public static final String CASE_ID = "1234567890";
 
     @Mock
     protected UploadedDocumentService uploadedDocumentHelper;
@@ -93,8 +95,8 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     private FinremCaseData caseData;
     private final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
 
-    @BeforeEach
-    void setup() {
+    @Before
+    public void setup() {
         caseDetails = buildCaseDetails();
         caseDetailsBefore = buildCaseDetails();
         caseData = caseDetails.getData();
@@ -114,21 +116,31 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
                     intervenerOneChronologiesStatementHandler, intervenerTwoChronologiesStatementHandler,
                     intervenerThreeChronologiesStatementHandler, intervenerFourChronologiesStatementHandler,
                     intervenerOneFdrHandler, caseDocumentHandler, fdrDocumentsHandler)
-                .toList();
+                .collect(Collectors.toList());
         FinremCaseDetailsMapper finremCaseDetailsMapper =
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         uploadContestedCaseDocumentsHandler =
             new UploadContestedCaseDocumentsAboutToSubmitHandler(finremCaseDetailsMapper,
                 documentHandlers, uploadedDocumentHelper, caseAssignedRoleService);
+
     }
 
     @Test
-    void testHandlerCanHandle() {
-        assertCanHandle(uploadContestedCaseDocumentsHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_CASE_FILES);
+    public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventUploadCaseDocument_thenHandlerCanHandle() {
+        assertThat(uploadContestedCaseDocumentsHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_CASE_FILES),
+            is(true));
     }
 
     @Test
-    void givenAnNonConfidentialUploadCaseFile_WhenFdr_thenFdrCollectionsSet() {
+    public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventUploadCaseDocument_thenHandlerCanNotHandle() {
+        assertThat(uploadContestedCaseDocumentsHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_CASE_FILES),
+            is(false));
+    }
+
+    @Test
+    public void givenAnNonConfidentialUploadCaseFile_WhenFdr_thenFdrCollectionsSet() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
             null, YesOrNo.NO, YesOrNo.YES, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
@@ -151,7 +163,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsApplicantAndScreenPartyIsNull_thenApplicantCollectionsSet() {
+    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsApplicantAndScreenPartyIsNull_thenApplicantCollectionsSet() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
             null, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
@@ -174,7 +186,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsRespondentAndScreenPartyIsNull_thenRespondentCollectionsSet() {
+    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsRespondentAndScreenPartyIsNull_thenRespondentCollectionsSet() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
             null, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
@@ -197,7 +209,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol1AndScreenPartyIsNull_thenIntervSol1CollectionsSet() {
+    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol1AndScreenPartyIsNull_thenIntervSol1CollectionsSet() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
             null, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
@@ -221,7 +233,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol2AndScreenPartyIsNull_thenIntervSol2CollectionsSet() {
+    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol2AndScreenPartyIsNull_thenIntervSol2CollectionsSet() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
             null, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
@@ -244,7 +256,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol3AndScreenPartyIsNull_thenIntervSol3CollectionsSet() {
+    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol3AndScreenPartyIsNull_thenIntervSol3CollectionsSet() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
             null, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
@@ -267,7 +279,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol4AndScreenPartyIsNull_thenIntervSol4CollectionsSet() {
+    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsIntervSol4AndScreenPartyIsNull_thenIntervSol4CollectionsSet() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
             null, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
@@ -290,7 +302,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsCaseWorkerScreenPartyIsNull_thenCaseCollectionsSet() {
+    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsCaseWorkerScreenPartyIsNull_thenCaseCollectionsSet() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
             null, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
@@ -313,7 +325,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnFdrCaseFile_WhenActiveUserIsIntervener1_thenIntv1FdrCollectionsSet() {
+    public void givenAnFdrCaseFile_WhenActiveUserIsIntervener1_thenIntv1FdrCollectionsSet() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
             null, YesOrNo.NO, YesOrNo.YES, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
@@ -340,7 +352,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsApplicantAndScreenPartyIsRespondent_thenApplicantCollectionsSet() {
+    public void givenAnNonConfidentialUploadCaseFile_WhenActiveUserIsApplicantAndScreenPartyIsRespondent_thenApplicantCollectionsSet() {
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
@@ -363,7 +375,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenUploadFileTrialBundleSelected_WhenAboutToSubmit_ThenShowTrialBundleErrorMessage() {
+    public void givenUploadFileTrialBundleSelected_WhenAboutToSubmit_ThenShowTrialBundleErrorMessage() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -378,12 +390,12 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors().size(), is(1));
-        assertThat(response.getErrors().getFirst(),
+        assertThat(response.getErrors().iterator().next(),
             is(UploadContestedCaseDocumentsAboutToSubmitHandler.TRIAL_BUNDLE_SELECTED_ERROR));
     }
 
     @Test
-    void givenUploadFileWithoutTrialBundle_WhenAboutToSubmit_ThenNoErrors() {
+    public void givenUploadFileWithoutTrialBundle_WhenAboutToSubmit_ThenNoErrors() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -404,7 +416,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenUploadFileWithAdministrativeDocTypes_ThenErrors() {
+    public void givenUploadFileWithAdministrativeDocTypes_ThenErrors() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -419,12 +431,12 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors().size(), is(1));
-        assertThat(response.getErrors().getFirst(),
+        assertThat(response.getErrors().iterator().next(),
             is("Attendance Sheets cannot be uploaded using this event"));
     }
 
     @Test
-    void givenUploadFileNoDocSelected_WhenAboutToSubmit_ThenShowNoDocErrorMessage() {
+    public void givenUploadFileNoDocSelected_WhenAboutToSubmit_ThenShowNoDocErrorMessage() {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -437,12 +449,12 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
             response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors().size(), is(1));
-        assertThat(response.getErrors().getFirst(),
+        assertThat(response.getErrors().iterator().next(),
             is(UploadContestedCaseDocumentsAboutToSubmitHandler.NO_DOCUMENT_ERROR));
     }
 
     @Test
-    void shouldSetDefaultsForWithoutPrejudiceOffersCorrectly() {
+    public void shouldSetDefaultsForWithoutPrejudiceOffersCorrectly() {
         UploadCaseDocument uploadCaseDocument = UploadCaseDocument.builder()
             .caseDocuments(new CaseDocument())
             .caseDocumentType(CaseDocumentType.WITHOUT_PREJUDICE_OFFERS)
@@ -498,7 +510,7 @@ class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     private CaseAssignedUserRolesResource getCaseAssignedUserRolesResource(String caseRole) {
         return CaseAssignedUserRolesResource.builder()
             .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder()
-                .userId(TEST_USER_ID)
+                .userId(USER_ID)
                 .caseRole(caseRole)
                 .caseDataId(CASE_ID)
                 .build()))

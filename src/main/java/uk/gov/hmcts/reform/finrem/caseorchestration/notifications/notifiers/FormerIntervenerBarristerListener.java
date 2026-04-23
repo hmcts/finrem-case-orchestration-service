@@ -30,7 +30,7 @@ public abstract class FormerIntervenerBarristerListener extends EmailNotificatio
             Barrister barrister = event.getBarrister(); // target barrister is set in the event
             FinremCaseData caseDataBefore = event.getCaseDetailsBefore().getData();
             return ofNullable(caseDataBefore.getBarristerCollectionWrapper()
-                .getIntervenerBarristers(intervenerType)
+                .getIntervenerBarristersByIndex(intervenerType.getIntervenerId())
             ).orElseThrow(IllegalStateException::new)
                 .stream()
                 .map(BarristerCollectionItem::getValue)

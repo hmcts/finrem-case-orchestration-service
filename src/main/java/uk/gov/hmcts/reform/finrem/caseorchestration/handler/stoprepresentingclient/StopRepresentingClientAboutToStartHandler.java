@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.RepresentativeInContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
 
@@ -34,10 +33,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy.isSameOrganisation;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_FOUR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_ONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_THREE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_TWO;
 
 @Slf4j
 @Service
@@ -110,7 +105,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
                 && !stopRepresentingClientService.isIntervenerBarristerFromSameOrganisationAsSolicitor(caseData, representativeInContext)) {
                 showClientAddressForService  = false;
             } else {
-                int index = representativeInContext.intervenerType().getIntervenerId();
+                int index = representativeInContext.intervenerIndex();
 
                 label = getIntervenerClientAddressLabels(index)[0];
                 confidentialLabel = getIntervenerClientAddressLabels(index)[1];
@@ -167,7 +162,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private boolean shouldCaptureIntervenerOneServiceAddressInExtraField(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
-        if (INTERVENER_ONE.equals(representativeInContext.intervenerType())) {
+        if (Integer.valueOf(1).equals(representativeInContext.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 1),
@@ -175,7 +170,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private boolean shouldCaptureIntervenerTwoServiceAddressInExtraField(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
-        if (INTERVENER_TWO.equals(representativeInContext.intervenerType())) {
+        if (Integer.valueOf(2).equals(representativeInContext.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 2),
@@ -183,7 +178,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private boolean shouldCaptureIntervenerThreeServiceAddressInExtraField(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
-        if (INTERVENER_THREE.equals(representativeInContext.intervenerType())) {
+        if (Integer.valueOf(3).equals(representativeInContext.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 3),
@@ -191,7 +186,7 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private boolean shouldCaptureIntervenerFourServiceAddressInExtraField(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
-        if (INTERVENER_FOUR.equals(representativeInContext.intervenerType())) {
+        if (Integer.valueOf(4).equals(representativeInContext.intervenerIndex())) {
             return false;
         }
         return isSameOrganisation(resolveIntervenerOrganisationPolicy(caseData, 4),
@@ -234,12 +229,12 @@ public class StopRepresentingClientAboutToStartHandler extends FinremCallbackHan
     }
 
     private IntervenerWrapper getIntervener(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
-        return caseData.getIntervenerById(representativeInContext.intervenerType().getIntervenerId());
+        return caseData.getIntervenerById(representativeInContext.intervenerIndex());
     }
 
     private Barrister getIntervenerBarrister(FinremCaseData caseData, RepresentativeInContext representativeInContext) {
-        IntervenerType intervenerType = representativeInContext.intervenerType();
-        List<BarristerCollectionItem> items = caseData.getBarristerCollectionWrapper().getIntervenerBarristers(intervenerType);
+        int index = representativeInContext.intervenerIndex();
+        List<BarristerCollectionItem> items = caseData.getBarristerCollectionWrapper().getIntervenerBarristersByIndex(index);
         return emptyIfNull(items).stream().map(BarristerCollectionItem::getValue)
             .filter(b -> representativeInContext.userId().equals(b.getUserId()))
             .findFirst()

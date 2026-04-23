@@ -38,7 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumen
 @Service
 public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private static final List<CaseDocumentType> ADMINISTRATIVE_CASE_DOCUMENT_TYPES = List.of(
+    private static List<CaseDocumentType> administrativeCaseDocumentTypes = List.of(
         CaseDocumentType.ATTENDANCE_SHEETS,
         CaseDocumentType.JUDICIAL_NOTES,
         CaseDocumentType.JUDGMENT,
@@ -76,18 +76,15 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
-
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = getValidatedResponse(caseData);
 
+        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentsWrapper()
+            .getManageCaseDocumentCollection();
         if (response.hasErrors()) {
             return response;
         }
-
-        List<UploadCaseDocumentCollection> managedCollections = caseData.getManageCaseDocumentsWrapper()
-            .getManageCaseDocumentCollection();
 
         CaseDocumentParty loggedInUserRole =
             getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
@@ -118,9 +115,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         if (CollectionUtils.isEmpty(managedCollections)) {
             return;
         }
-        managedCollections.forEach(uploadCaseDocumentCollection -> {
+        managedCollections.stream().forEach(uploadCaseDocumentCollection -> {
             CaseDocumentType caseDocumentType = uploadCaseDocumentCollection.getUploadCaseDocument().getCaseDocumentType();
-            if (ADMINISTRATIVE_CASE_DOCUMENT_TYPES.contains(caseDocumentType)) {
+            if (administrativeCaseDocumentTypes.contains(caseDocumentType)) {
                 errors.add(caseDocumentType.getId() + " cannot be uploaded using this event");
             }
         });
@@ -156,7 +153,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
         if (caseAssignedUserRole != null) {
             List<CaseAssignedUserRole> caseAssignedUserRoleList = caseAssignedUserRole.getCaseAssignedUserRoles();
             if (!caseAssignedUserRoleList.isEmpty()) {
-                String loggedInUserCaseRole = caseAssignedUserRoleList.getFirst().getCaseRole();
+                String loggedInUserCaseRole = caseAssignedUserRoleList.get(0).getCaseRole();
                 log.info("logged-in user role {} in Case ID: {}", loggedInUserCaseRole, caseId);
                 return getRole(logMessage, caseId, loggedInUserCaseRole);
             }

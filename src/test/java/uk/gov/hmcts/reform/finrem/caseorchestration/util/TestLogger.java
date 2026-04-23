@@ -49,13 +49,6 @@ public class TestLogger extends ListAppender<ILoggingEvent> implements AutoClose
             .toList();
     }
 
-    public List<String> getWarnThrowableMessages() {
-        return this.list.stream()
-            .filter(event -> Level.WARN.equals(event.getLevel()))
-            .map(e -> e.getThrowableProxy().getMessage())
-            .toList();
-    }
-
     public List<String> get(Level level) {
         return this.list.stream()
             .filter(event -> level.equals(event.getLevel()))
