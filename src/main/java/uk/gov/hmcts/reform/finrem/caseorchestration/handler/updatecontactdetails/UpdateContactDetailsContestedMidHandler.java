@@ -51,10 +51,9 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
 
         List<String> errors = new ArrayList<>();
         errors.addAll(internationalPostalService.validate(finremCaseData));
-        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseData));
-        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData, validatePartiesService));
         errors.addAll(ContactDetailsValidator.validatePostcodesByRepresentation(caseDetails));
-        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData, validatePartiesService));
+        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).errors(errors).build();
