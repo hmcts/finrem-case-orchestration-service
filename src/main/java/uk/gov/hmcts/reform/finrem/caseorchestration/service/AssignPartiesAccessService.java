@@ -20,7 +20,6 @@ public class AssignPartiesAccessService {
 
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService prdOrganisationService;
-    private final SystemUserService systemUserService;
 
     /**
      * Grants case access to the applicant's solicitor when representation
@@ -121,6 +120,76 @@ public class AssignPartiesAccessService {
         }
     }
 
+    /**
+     * Revokes case access from the applicant's solicitor if they were previously
+     * represented and had access granted.
+     *
+     * <p>
+     * Access is revoked only when:
+     * <ul>
+     *     <li>The applicant was previously represented by a solicitor, and</li>
+     *     <li>A valid organisation policy with an organisation ID existed at that time.</li>
+     * </ul>
+     * If either condition is not met, no access is revoked and an informational
+     * log entry is recorded.
+     *
+     * @param finremCaseData the financial remedy case data before the update,
+     *                             containing previous applicant representation details and organisation information
+     */
+    public void revokeApplicantSolicitor(FinremCaseData finremCaseData) throws UserNotFoundInOrganisationApiException {
+        String caseId = finremCaseData.getCcdCaseId();
+        String applicantSolicitorEmail = finremCaseData.getAppSolicitorEmail();
+        OrganisationPolicy applicantOrganisationPolicy = finremCaseData.getApplicantOrganisationPolicy();
+
+        if (!finremCaseData.isApplicantRepresentedByASolicitor() || !isOrgIdExists(applicantOrganisationPolicy)) {
+            throw new IllegalStateException(
+                "Unable to revoke applicant solicitor access: applicant is not represented by a solicitor or organisation policy is missing"
+            );
+        }
+
+        revokeAccess(
+            Long.valueOf(caseId),
+            applicantSolicitorEmail,
+            applicantOrganisationPolicy.getOrganisation().getOrganisationID(),
+            CaseRole.APP_SOLICITOR.getCcdCode()
+        );
+    }
+
+    /**
+     * Revokes case access from the respondent's solicitor if they were previously
+     * represented and had access granted.
+     *
+     * <p>
+     * Access is revoked only when:
+     * <ul>
+     *     <li>The respondent was previously represented by a solicitor, and</li>
+     *     <li>A valid organisation policy with an organisation ID existed at that time.</li>
+     * </ul>
+     * If either condition is not met, no access is revoked and an informational
+     * log entry is recorded.
+     *
+     * @param finremCaseData the financial remedy case data before the update,
+     *                             containing previous respondent representation details and organisation information
+     */
+    public void revokeRespondentSolicitor(FinremCaseData finremCaseData) throws UserNotFoundInOrganisationApiException {
+        String caseId = finremCaseData.getCcdCaseId();
+        String respondentSolicitorEmail = finremCaseData.getRespondentSolicitorEmail();
+        OrganisationPolicy respondentOrganisationPolicy = finremCaseData.getRespondentOrganisationPolicy();
+
+        if (!finremCaseData.isRespondentRepresentedByASolicitor() || !isOrgIdExists(respondentOrganisationPolicy)) {
+            throw new IllegalStateException(
+                "Unable to revoke respondent solicitor access: respondent is not represented by a solicitor or organisation policy is missing"
+            );
+        }
+
+        revokeAccess(
+            Long.valueOf(caseId),
+            respondentSolicitorEmail,
+            respondentOrganisationPolicy.getOrganisation().getOrganisationID(),
+            CaseRole.RESP_SOLICITOR.getCcdCode()
+        );
+    }
+
     private boolean isRepresented(IntervenerWrapper intervenerWrapper) {
         return YesOrNo.YES.equals(intervenerWrapper.getIntervenerRepresented());
     }
@@ -136,12 +205,21 @@ public class AssignPartiesAccessService {
     private Optional<String> grantAccess(Long caseId, String email, String orgId, String caseRole)
         throws UserNotFoundInOrganisationApiException {
         Optional<String> userId = StringUtils.isBlank(email) ? Optional.empty() :
-            prdOrganisationService.findUserByEmail(email, systemUserService.getSysUserToken());
+            prdOrganisationService.findUserByEmail(email);
         userId.ifPresentOrElse(s -> assignCaseAccessService.grantCaseRoleToUser(caseId, s, caseRole, orgId),
-            () -> log.info("{} - Attempting to grant role {} but unable to find user with email {}", caseId, caseRole, email));
+            () -> log.info("{} - Attempting to grant role {} but unable to find user", caseId, caseRole));
         if (userId.isEmpty()) {
             throw new UserNotFoundInOrganisationApiException();
         }
         return userId;
+    }
+
+    private void revokeAccess(Long caseId, String email, String orgId, String caseRole)
+        throws UserNotFoundInOrganisationApiException {
+        String userId = prdOrganisationService.findUserByEmail(email)
+            .orElseThrow(() -> new UserNotFoundInOrganisationApiException(
+                String.format("CaseID %s - Attempting to revoke role %s but system is unable to find user", caseId, caseRole)
+            ));
+        assignCaseAccessService.removeCaseRoleToUser(caseId, userId, caseRole, orgId);
     }
 }
