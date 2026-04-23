@@ -17,6 +17,6 @@ class ApplicantLocalCourtValidator implements MandatoryDataValidator {
 
         return NullChecker.anyNonNull(courtList)
             ? Collections.emptyList()
-            : List.of("Applicant's Local Court is required. Update Please choose the Region in which the Applicant resides");
+            : List.of("Applicant's Local Court is required. Update Please state in which Financial Remedies Court Zone the applicant resides");
     }
 }
