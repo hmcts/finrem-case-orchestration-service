@@ -74,7 +74,7 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
     static ContactDetailsWrapper buildContactDetailsWrapper(
         String applicantSolicitorName, String applicantSolicitorFirm, String applicantSolicitorEmail, boolean isCurrentUserApplicantSolicitor,
-        boolean includeRespondent, String respondentSolicitorName, String respondentSolicitorFirm) {
+        boolean includeRespondent, String respondentSolicitorName, String respondentSolicitorFirm, boolean isCurrentUserRespondentSolicitor) {
 
         ContactDetailsWrapper.ContactDetailsWrapperBuilder builder = ContactDetailsWrapper.builder()
             .applicantSolicitorName(applicantSolicitorName)
@@ -86,7 +86,8 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         if (includeRespondent) {
             builder.respondentSolicitorName(respondentSolicitorName)
                 .respondentSolicitorFirm(respondentSolicitorFirm)
-                .respondentSolicitorAddress(buildAddress());
+                .respondentSolicitorAddress(buildAddress())
+                .currentUserIsRespondentSolicitor(isCurrentUserRespondentSolicitor ? YesOrNo.YES : YesOrNo.NO);
         }
         return builder.build();
     }
@@ -137,65 +138,75 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         // 1. Both applicant and respondent changed
         ContactDetailsWrapper before1 = buildContactDetailsWrapper(
             "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm");
+            true, "Old RespSol Name", "Old RespSol Firm", false);
 
         ContactDetailsWrapper after1 = buildContactDetailsWrapper(
             "New AppSol Name", "New AppSol Firm", "NewAppSol@email.com", true,
-            true, "New RespSol Name", "New RespSol Firm");
+            true, "New RespSol Name", "New RespSol Firm", false);
 
         // 2. No change both Applicant Solicitor and Respondent solicitor
         ContactDetailsWrapper before2 = buildContactDetailsWrapper(
             "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm");
+            true, "Old RespSol Name", "Old RespSol Firm", false);
 
         ContactDetailsWrapper after2 = buildContactDetailsWrapper(
             "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm");
+            true, "Old RespSol Name", "Old RespSol Firm", false);
 
         // 3. Only applicant changed
         ContactDetailsWrapper before3 = buildContactDetailsWrapper(
             "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm");
+            true, "Old RespSol Name", "Old RespSol Firm", false);
 
         ContactDetailsWrapper after3 = buildContactDetailsWrapper(
             "New AppSol Name", "New AppSol Firm", "NewAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm");
+            true, "Old RespSol Name", "Old RespSol Firm", false);
 
         // 4. Only respondent changed
         ContactDetailsWrapper before4 = buildContactDetailsWrapper(
             "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm");
+            true, "Old RespSol Name", "Old RespSol Firm", false);
 
         ContactDetailsWrapper after4 = buildContactDetailsWrapper(
             "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "New RespSol Name", "New RespSol Firm");
+            true, "New RespSol Name", "New RespSol Firm", false);
 
         // 5. Only Applicant Change only by case sensitive
         ContactDetailsWrapper before5 = buildContactDetailsWrapper(
             "old appsol name", "old appsol firm", "OldAppSol@email.com", true,
-            false, null, null);
+            false, null, null, false);
 
         ContactDetailsWrapper after5 = buildContactDetailsWrapper(
             "OLD APPSOL NAME", "OLD APPSOL FIRM", "OldAppSol@email.com", true,
-            false, null, null);
+            false, null, null, false);
 
         // 6. Only Respondent Change only by case sensitive
         ContactDetailsWrapper before6 = buildContactDetailsWrapper(
             "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm");
+            true, "Old RespSol Name", "Old RespSol Firm", false);
 
         ContactDetailsWrapper after6 = buildContactDetailsWrapper(
             "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "OLD RESPSOL NAME", "OLD RESPSOL FIRM");
+            true, "OLD RESPSOL NAME", "OLD RESPSOL FIRM", false);
 
         // 7. No change Applicant Solicitor, Respondent not represented.
         ContactDetailsWrapper before7 = buildContactDetailsWrapper(
             "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            false, null, null);
+            false, null, null, false);
 
         ContactDetailsWrapper after7 = buildContactDetailsWrapper(
             "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            false, null, null);
+            false, null, null, false);
+
+        // 8. No change Respondent Solicitor, Applicant not represented.
+        ContactDetailsWrapper before8 = buildContactDetailsWrapper(
+            null, null, null, true,
+            true, "Old RespSol Name", "Old RespSol Firm", false);
+
+        ContactDetailsWrapper after8 = buildContactDetailsWrapper(
+            null, null, null, false,
+            true, "Old RespSol Name", "Old RespSol Firm", true);
+
 
         // Arguments denotes: Before ContactDetails of Solicitors, After ontactDetails of Solicitors, Expected applicant cover sheet, Expected respondent cover sheet
         return Stream.of(
@@ -205,8 +216,9 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
             Arguments.of(before4, after4, false, true),
             Arguments.of(before5, after5, true, false),
             Arguments.of(before6, after6, false, true),
-            Arguments.of(before7, after7, false, false)
-        );
+            Arguments.of(before7, after7, false, false),
+            Arguments.of(before8, after8, false, false)
+            );
     }
 
     @Test
@@ -216,11 +228,11 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
         ContactDetailsWrapper beforeWrapper = buildContactDetailsWrapper(
             "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm");
+            true, "Old RespSol Name", "Old RespSol Firm", false);
 
         ContactDetailsWrapper afterWrapper = buildContactDetailsWrapper(
             "New AppSol Name", "New AppSol Firm", "NewAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm");
+            true, "Old RespSol Name", "Old RespSol Firm", false);
 
         FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
         FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);
