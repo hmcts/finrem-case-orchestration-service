@@ -19,8 +19,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasAppro
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -115,6 +118,21 @@ public class ProcessOrderService {
             && CollectionUtils.isEmpty(caseData.getUnprocessedUploadHearingDocuments());
     }
 
+    // PT todo
+    public boolean uploadHearingOrderListAlteredOrRemoved(List<DirectionOrderCollection> intendedUploadHearingOrderList,
+                                                          List<DirectionOrderCollection> currentStoredUploadHearingOrderList) {
+        Set<String> intendedDocumentUrls = extractUnprocessedDocumentUrls(intendedUploadHearingOrderList);
+        Set<String> currentDocumentUrls = extractUnprocessedDocumentUrls(currentStoredUploadHearingOrderList);
+
+        return !intendedDocumentUrls.containsAll(currentDocumentUrls);
+    }
+
+    // PT todo
+    public boolean todo(FinremCaseData caseData) {
+        return CollectionUtils.isEmpty(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
+            && CollectionUtils.isEmpty(caseData.getUnprocessedUploadHearingDocuments());
+    }
+
     /**
      * Checks if all newly uploaded orders in the given case data are PDF documents.
      *
@@ -177,5 +195,32 @@ public class ProcessOrderService {
     private boolean areAllNewDocumentsWordOrPdf(List<DirectionOrderCollection> afterList) {
         return areAllDocumentsWithExtensions(nullSafeList(afterList).stream()
             .filter(doc -> doc.getValue().getOriginalDocument() == null).toList(), List.of("pdf", "doc", "docx"));
+    }
+
+    /* Extracts the document URLs from a list of DirectionOrderCollection objects, filtering out any null values.
+     * Used for comparison of documents in collections.
+     *
+     * @param list the list of DirectionOrderCollection objects to extract document URLs from
+     * @return a set of non-null document URLs extracted from the list
+     */
+    private static Set<String> extractUnprocessedDocumentUrls(List<DirectionOrderCollection> list) {
+        return nullSafeList(list).stream()
+            .map(ProcessOrderService::extractUnprocessedDocumentUrl)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+    }
+
+    /*
+     * Extracts the document URL from the given DirectionOrderCollection.
+     * @param directionOrderCollection the DirectionOrderCollection to extract the document URL from
+     * @return the document URL if present; null otherwise
+     */
+    private static String extractUnprocessedDocumentUrl(DirectionOrderCollection directionOrderCollection) {
+        return java.util.Optional.ofNullable(directionOrderCollection)
+            .map(DirectionOrderCollection::getValue)
+            .filter(order -> !YesOrNo.YES.equals(order.getIsOrderStamped()))
+            .map(DirectionOrder::getUploadDraftDocument)
+            .map(CaseDocument::getDocumentUrl)
+            .orElse(null);
     }
 }

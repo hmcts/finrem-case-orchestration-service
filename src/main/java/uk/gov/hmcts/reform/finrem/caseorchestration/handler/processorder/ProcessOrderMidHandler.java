@@ -34,6 +34,8 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
     private static final String ERROR_NO_ORDERS = "There are no draft orders to be processed.";
     private static final String ERROR_NEW_DOCS = "You must upload a Microsoft Word file or PDF for new documents.";
     private static final String ERROR_FILE_FORMAT = "You must upload a Microsoft Word file or PDF for modifying an unprocessed document.";
+    private static final String WARNING_ORDERS_HAVE_CHANGED = "Existing unprocessed hearing order(s) have been removed or amended. "
+        + "This is not supported.  Existing orders will remain unprocessed.";
 
     public ProcessOrderMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                   BulkPrintDocumentService bulkPrintDocumentService, ProcessOrderService processOrderService,
@@ -60,9 +62,6 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
 
         List<String> errors = new ArrayList<>();
 
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
-
         if (processOrderService.hasNoApprovedOrdersToProcess(caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(List.of(ERROR_NO_ORDERS)).build();
@@ -75,6 +74,13 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
                     .build();
         }
 
+        if (showExistingOrdersHaveBeenAlteredWarning(caseData)) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData).warnings(List.of(WARNING_ORDERS_HAVE_CHANGED)).build();
+        }
+
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
         List<DirectionOrderCollection> uploadHearingOrders = filterNewItems(
             caseData.getUnprocessedUploadHearingDocuments(),
             caseDataBefore.getUnprocessedUploadHearingDocuments()
@@ -126,5 +132,35 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
             .stream()
             .filter(item -> safePreviousList.stream().noneMatch(item::equals))
             .toList();
+    }
+
+    /*
+     * Function to determine if a warning should be shown to the user to say that existing unprocessed hearing order(s)
+     * have been altered.
+     * @param caseData the current case data.
+     * @return true if the user should see a warning.
+     */
+    private boolean showExistingOrdersHaveBeenAlteredWarning(FinremCaseData caseData) {
+        List<DirectionOrderCollection> intendedUploadHearingOrderList = caseData.getUnprocessedUploadHearingDocuments();
+        List<DirectionOrderCollection> currentStoredUploadHearingOrderList = caseData.getUploadHearingOrder();
+
+        boolean onTheRightPage = validatingUnprocessedHearingOrdersPage(caseData);
+        boolean existingOrdersHaveBeenAltered = processOrderService.uploadHearingOrderListAlteredOrRemoved(
+            intendedUploadHearingOrderList,
+            currentStoredUploadHearingOrderList);
+
+        return onTheRightPage && existingOrdersHaveBeenAltered;
+    }
+
+    /*
+     * Simple function to determine if this mid-event handler is currently validating the Unprocessed Hearing Orders page.
+     * To do this, makes a simple check to see if the "Add Hearing" option has been selected, if so, User is on the
+     * "Do you want to add a hearing?" page instead.  This mid-event only handles two pages, so this works.
+     * @param caseData the current case data
+     * @return true if the user is currently on the Unprocessed Hearing Orders page, false otherwise
+     */
+    private boolean validatingUnprocessedHearingOrdersPage(FinremCaseData caseData) {
+        return caseData.getManageHearingsWrapper() != null
+            && caseData.getManageHearingsWrapper().getIsAddHearingChosen() == null;
     }
 }
