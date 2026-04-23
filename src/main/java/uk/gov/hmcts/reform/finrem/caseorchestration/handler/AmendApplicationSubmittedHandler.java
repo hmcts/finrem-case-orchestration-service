@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
@@ -43,16 +42,16 @@ public class AmendApplicationSubmittedHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
 
-        String assignApplicantSolicitorError = grantApplicantSolicitor(caseData);
-        boolean isHavingErrors = !StringUtils.isAllBlank(assignApplicantSolicitorError);
+        String grantAppSolicitorError = grantApplicantSolicitor(callbackRequest.getFinremCaseData());
+        String revokeAppSolicitorError = revokeApplicantSolicitor(callbackRequest.getFinremCaseDataBefore());
+
+        boolean isHavingErrors = !StringUtils.isAllBlank(grantAppSolicitorError, revokeAppSolicitorError);
 
         if (isHavingErrors) {
             return submittedResponse(
                 toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
-                toConfirmationBody(assignApplicantSolicitorError));
+                toConfirmationBody(grantAppSolicitorError));
         } else {
             return submittedResponse();
         }
@@ -69,7 +68,25 @@ public class AmendApplicationSubmittedHandler extends FinremCallbackHandler {
             return null;
         } catch (Exception ex) {
             log.error("Error granting applicant solicitor", ex);
-            return "There was a problem granting access to applicant solicitor: %s".formatted(appSolicitorEmail);
+            return "There was a problem granting access to applicant solicitor (%s). Please grant access manually."
+                .formatted(appSolicitorEmail);
+        }
+    }
+
+    private String revokeApplicantSolicitor(FinremCaseData caseDataBefore) {
+        String appSolicitorEmail = caseDataBefore.getAppSolicitorEmailIfRepresented();
+        if (StringUtils.isBlank(appSolicitorEmail)) {
+            return null;
+        }
+        try {
+            // TODO revoke
+            retryExecutor.runWithRetry(() -> assignPartiesAccessService.grantApplicantSolicitor(caseDataBefore),
+                "revoking applicant solicitor", caseDataBefore.getCcdCaseId());
+            return null;
+        } catch (Exception ex) {
+            log.error("Error revoking applicant solicitor", ex);
+            return "There was a problem revoking access to applicant solicitor (%s). Please grant access manually."
+                .formatted(appSolicitorEmail);
         }
     }
 }
