@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 class InvalidateApplicantAccessCodeAboutToSubmitHandlerTest {
 
@@ -40,46 +41,8 @@ class InvalidateApplicantAccessCodeAboutToSubmitHandlerTest {
     }
 
     @Test
-    void canHandleShouldReturnTrueForCorrectCallbackCaseAndEvent() {
-        boolean result = handler.canHandle(
-            CallbackType.ABOUT_TO_SUBMIT,
-            CaseType.CONTESTED,
-            EventType.INVALIDATE_APPLICANT_ACCESS_CODE
-        );
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void canHandleShouldReturnFalseForWrongCallbackType() {
-        boolean result = handler.canHandle(
-            CallbackType.ABOUT_TO_START,
-            CaseType.CONTESTED,
-            EventType.INVALIDATE_APPLICANT_ACCESS_CODE
-        );
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    void canHandleShouldReturnFalseForWrongCaseType() {
-        boolean result = handler.canHandle(
-            CallbackType.ABOUT_TO_SUBMIT,
-            CaseType.CONSENTED,
-            EventType.INVALIDATE_APPLICANT_ACCESS_CODE
-        );
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    void canHandleShouldReturnFalseForWrongEventType() {
-        boolean result = handler.canHandle(
-            CallbackType.ABOUT_TO_SUBMIT,
-            CaseType.CONTESTED,
-            EventType.AMEND_CASE);
-
-        assertThat(result).isFalse();
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.INVALIDATE_APPLICANT_ACCESS_CODE);
     }
 
     @Test
