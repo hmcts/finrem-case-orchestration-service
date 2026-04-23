@@ -208,7 +208,8 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
             true, "Old RespSol Name", "Old RespSol Firm", true);
 
 
-        // Arguments denotes: Before ContactDetails of Solicitors, After ontactDetails of Solicitors, Expected applicant cover sheet, Expected respondent cover sheet
+        // Arguments denotes: Before ContactDetails of Solicitors, After ontactDetails of Solicitors,
+        // Expected applicant cover sheet, Expected respondent cover sheet
         return Stream.of(
             Arguments.of(before1, after1, true, true),
             Arguments.of(before2, after2, false, false),
