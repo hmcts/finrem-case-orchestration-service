@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

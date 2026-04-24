@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.consented;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;

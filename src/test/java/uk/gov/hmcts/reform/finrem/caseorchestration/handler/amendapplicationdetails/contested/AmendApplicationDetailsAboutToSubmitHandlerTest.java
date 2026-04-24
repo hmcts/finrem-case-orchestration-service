@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.contested;
 
 import org.assertj.core.api.ObjectEnumerableAssert;
 import org.junit.jupiter.api.Test;

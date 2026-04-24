@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.contested;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 import java.util.ArrayList;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+
 @Slf4j
 @Service
 public class AmendApplicationDetailsMidHandler extends FinremCallbackHandler {
@@ -40,10 +45,8 @@ public class AmendApplicationDetailsMidHandler extends FinremCallbackHandler {
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.MID_EVENT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && List.of(EventType.AMEND_CONTESTED_APP_DETAILS, EventType.AMEND_CONTESTED_PAPER_APP_DETAILS)
-            .contains(eventType);
+        return MID_EVENT.equals(callbackType) && CONTESTED.equals(caseType)
+            && List.of(AMEND_CONTESTED_PAPER_APP_DETAILS, AMEND_CONTESTED_APP_DETAILS).contains(eventType);
     }
 
     @Override

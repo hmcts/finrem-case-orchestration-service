@@ -1,9 +1,10 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.contested;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -46,13 +47,13 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType));
+            && EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Amend Application Details contested for Case ID : {}", callbackRequest.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
         onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
         onStartDefaultValueService.defaultTypeOfApplication(callbackRequest);
