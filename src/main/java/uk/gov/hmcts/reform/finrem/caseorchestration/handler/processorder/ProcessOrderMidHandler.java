@@ -35,7 +35,7 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
     private static final String ERROR_NEW_DOCS = "You must upload a Microsoft Word file or PDF for new documents.";
     private static final String ERROR_FILE_FORMAT = "You must upload a Microsoft Word file or PDF for modifying an unprocessed document.";
     private static final String WARNING_ORDERS_HAVE_CHANGED = "Existing unprocessed hearing order(s) have been removed or amended. "
-        + "This is not supported.  Existing orders will remain unprocessed.";
+        + "This is not supported. Existing orders will remain unprocessed.";
 
     public ProcessOrderMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                   BulkPrintDocumentService bulkPrintDocumentService, ProcessOrderService processOrderService,
@@ -144,7 +144,7 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
         List<DirectionOrderCollection> intendedUploadHearingOrderList = caseData.getUnprocessedUploadHearingDocuments();
         List<DirectionOrderCollection> currentStoredUploadHearingOrderList = caseData.getUploadHearingOrder();
 
-        boolean onTheRightPage = validatingUnprocessedHearingOrdersPage(caseData);
+        boolean onTheRightPage = onValidatingUnprocessedHearingOrdersPage(caseData);
         boolean existingOrdersHaveBeenAltered = processOrderService.uploadHearingOrderListAlteredOrRemoved(
             intendedUploadHearingOrderList,
             currentStoredUploadHearingOrderList);
@@ -159,7 +159,7 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
      * @param caseData the current case data
      * @return true if the user is currently on the Unprocessed Hearing Orders page, false otherwise
      */
-    private boolean validatingUnprocessedHearingOrdersPage(FinremCaseData caseData) {
+    private boolean onValidatingUnprocessedHearingOrdersPage(FinremCaseData caseData) {
         return caseData.getManageHearingsWrapper() != null
             && caseData.getManageHearingsWrapper().getIsAddHearingChosen() == null;
     }

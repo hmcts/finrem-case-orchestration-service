@@ -118,11 +118,19 @@ public class ProcessOrderService {
             && CollectionUtils.isEmpty(caseData.getUnprocessedUploadHearingDocuments());
     }
 
-    // PT todo
+    /*
+     * Returns true if anything from the original Uploaded Hearing Order list will be removed or changed,
+     * assuming the User proceeds and submit the Process Order event.
+     * Compares the list of documents in the original upload hearing order collection with the list of documents in the
+     * unprocessed upload hearing documents collection.
+     * @param intendedUploadHearingOrderList the list of unprocessed upload hearing documents that the user has currently in event data.
+     * @currentStoredUploadHearingOrderList the list of upload hearing orders that are currently stored in the case data.
+     * @return true if there are removals or alterations.
+     */
     public boolean uploadHearingOrderListAlteredOrRemoved(List<DirectionOrderCollection> intendedUploadHearingOrderList,
                                                           List<DirectionOrderCollection> currentStoredUploadHearingOrderList) {
-        Set<String> intendedDocumentUrls = extractUnprocessedDocumentUrls(intendedUploadHearingOrderList);
-        Set<String> currentDocumentUrls = extractUnprocessedDocumentUrls(currentStoredUploadHearingOrderList);
+        Set<String> intendedDocumentUrls = extractUnstampedDocumentUrls(intendedUploadHearingOrderList);
+        Set<String> currentDocumentUrls = extractUnstampedDocumentUrls(currentStoredUploadHearingOrderList);
 
         return !intendedDocumentUrls.containsAll(currentDocumentUrls);
     }
@@ -191,25 +199,24 @@ public class ProcessOrderService {
             .filter(doc -> doc.getValue().getOriginalDocument() == null).toList(), List.of("pdf", "doc", "docx"));
     }
 
-    /* Extracts the document URLs from a list of DirectionOrderCollection objects, filtering out any null values.
+    /* Extracts the unstamped document URLs from a list of DirectionOrderCollection objects, filtering out any null values.
      * Used for comparison of documents in collections.
-     *
      * @param list the list of DirectionOrderCollection objects to extract document URLs from
      * @return a set of non-null document URLs extracted from the list
      */
-    private static Set<String> extractUnprocessedDocumentUrls(List<DirectionOrderCollection> list) {
+    private static Set<String> extractUnstampedDocumentUrls(List<DirectionOrderCollection> list) {
         return nullSafeList(list).stream()
-            .map(ProcessOrderService::extractUnprocessedDocumentUrl)
+            .map(ProcessOrderService::extractUnstampedDocumentUrl)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
     }
 
     /*
-     * Extracts the document URL from the given DirectionOrderCollection.
+     * Extracts the unstamped document URL from the given DirectionOrderCollection.
      * @param directionOrderCollection the DirectionOrderCollection to extract the document URL from
      * @return the document URL if present; null otherwise
      */
-    private static String extractUnprocessedDocumentUrl(DirectionOrderCollection directionOrderCollection) {
+    private static String extractUnstampedDocumentUrl(DirectionOrderCollection directionOrderCollection) {
         return java.util.Optional.ofNullable(directionOrderCollection)
             .map(DirectionOrderCollection::getValue)
             .filter(order -> !YesOrNo.YES.equals(order.getIsOrderStamped()))
