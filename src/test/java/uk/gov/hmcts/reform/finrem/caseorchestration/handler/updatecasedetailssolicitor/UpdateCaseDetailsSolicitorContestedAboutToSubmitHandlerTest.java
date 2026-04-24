@@ -105,7 +105,7 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
      * @param expectRespondentCoverSheet -  boolean flag indicating whether a respondent cover sheet is expected to be generated based on the changes
      */
     @ParameterizedTest
-    @MethodSource("provideSolicitorChangeScenarios")
+    @MethodSource
     void testSolicitorChangeScenarios(ContactDetailsWrapper beforeWrapper, ContactDetailsWrapper afterWrapper,
                                       boolean expectApplicantCoverSheet, boolean expectRespondentCoverSheet) {
         when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString()))
@@ -141,110 +141,88 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
      *  4. New Respondent Solicitor details
      *  5. Expected cover sheet generation for applicant and respondent (boolean flags)
      */
-    static Stream<Arguments> provideSolicitorChangeScenarios() {
-        // 1. Both applicant and respondent changed
-        ContactDetailsWrapper before1 = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm", false);
-
-        ContactDetailsWrapper after1 = buildContactDetailsWrapper(
-            "New AppSol Name", "New AppSol Firm", "NewAppSol@email.com", true,
-            true, "New RespSol Name", "New RespSol Firm", false);
-
-        // 2. No change both Applicant Solicitor and Respondent solicitor
-        ContactDetailsWrapper before2 = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm", false);
-
-        ContactDetailsWrapper after2 = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm", false);
-
-        // 3. Only applicant changed
-        ContactDetailsWrapper before3 = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm", false);
-
-        ContactDetailsWrapper after3 = buildContactDetailsWrapper(
-            "New AppSol Name", "New AppSol Firm", "NewAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm", false);
-
-        // 4. Only respondent changed
-        ContactDetailsWrapper before4 = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm", false);
-
-        ContactDetailsWrapper after4 = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "New RespSol Name", "New RespSol Firm", false);
-
-        // 5. Only Applicant Change only by case sensitive
-        ContactDetailsWrapper before5 = buildContactDetailsWrapper(
-            "old appsol name", "old appsol firm", "OldAppSol@email.com", true,
-            false, null, null, false);
-
-        ContactDetailsWrapper after5 = buildContactDetailsWrapper(
-            "OLD APPSOL NAME", "OLD APPSOL FIRM", "OldAppSol@email.com", true,
-            false, null, null, false);
-
-        // 6. Only Respondent Change only by case sensitive
-        ContactDetailsWrapper before6 = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm", false);
-
-        ContactDetailsWrapper after6 = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "OLD RESPSOL NAME", "OLD RESPSOL FIRM", false);
-
-        // 7. No change Applicant Solicitor, Respondent not represented.
-        ContactDetailsWrapper before7 = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            false, null, null, false);
-
-        ContactDetailsWrapper after7 = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            false, null, null, false);
-
-        // 8. No change Respondent Solicitor, Applicant not represented.
-        ContactDetailsWrapper before8 = buildContactDetailsWrapper(
-            null, null, null, false,
-            true, "Old RespSol Name", "Old RespSol Firm", true);
-
-        ContactDetailsWrapper after8 = buildContactDetailsWrapper(
-            null, null, null, false,
-            true, "Old RespSol Name", "Old RespSol Firm", true);
-
-        // 9. White space change for Applicant Solicitor, Respondent not represented.
-        ContactDetailsWrapper before9 = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            false, null, null, false);
-
-        ContactDetailsWrapper after9 = buildContactDetailsWrapper(
-            "Old AppSol Name ", "Old AppSol Firm ", "OldAppSol@email.com", true,
-            false, null, null, false);
-
-        // 10. White space change Respondent Solicitor, Applicant not represented.
-        ContactDetailsWrapper before10 = buildContactDetailsWrapper(
-            null, null, null, false,
-            true, "Old RespSol Name", "Old RespSol Firm", true);
-
-        ContactDetailsWrapper after10 = buildContactDetailsWrapper(
-            null, null, null, false,
-            true, "Old RespSol Name ", "Old RespSol Firm ", true);
-
-        // Arguments denotes: Before ContactDetails of Solicitors, After ontactDetails of Solicitors,
-        // Expected applicant cover sheet, Expected respondent cover sheet
+    static Stream<Arguments> testSolicitorChangeScenarios() {
         return Stream.of(
-            Arguments.of(before1, after1, true, true),
-            Arguments.of(before2, after2, false, false),
-            Arguments.of(before3, after3, true, false),
-            Arguments.of(before4, after4, false, true),
-            Arguments.of(before5, after5, true, false),
-            Arguments.of(before6, after6, false, true),
-            Arguments.of(before7, after7, false, false),
-            Arguments.of(before8, after8, false, false),
-            Arguments.of(before9, after9, false, false),
-            Arguments.of(before10, after10, false, false)
+            // 1. Both applicant and respondent changed
+            Arguments.of(
+                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+                                           true, "Old RespSol Name", "Old RespSol Firm", false),
+                buildContactDetailsWrapper("New AppSol Name", "New AppSol Firm", "NewAppSol@email.com", true,
+                                           true, "New RespSol Name", "New RespSol Firm", false),
+                true, true
+            ),
+            // 2. No change both Applicant Solicitor and Respondent solicitor
+            Arguments.of(
+                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+                                           true, "Old RespSol Name", "Old RespSol Firm", false),
+                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+                                           true, "Old RespSol Name", "Old RespSol Firm", false),
+                false, false
+            ),
+            // 3. Only applicant changed
+            Arguments.of(
+                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+                                           true, "Old RespSol Name", "Old RespSol Firm", false),
+                buildContactDetailsWrapper("New AppSol Name", "New AppSol Firm", "NewAppSol@email.com", true,
+                                           true, "Old RespSol Name", "Old RespSol Firm", false),
+                true, false
+            ),
+            // 4. Only respondent changed
+            Arguments.of(
+                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+                                           true, "Old RespSol Name", "Old RespSol Firm", false),
+                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+                                           true, "New RespSol Name", "New RespSol Firm", false),
+                false, true
+            ),
+            // 5. Only Applicant Change only by case sensitive
+            Arguments.of(
+                buildContactDetailsWrapper("old appsol name", "old appsol firm", "OldAppSol@email.com", true,
+                                           false, null, null, false),
+                buildContactDetailsWrapper("OLD APPSOL NAME", "OLD APPSOL FIRM", "OldAppSol@email.com", true,
+                                           false, null, null, false),
+                true, false
+            ),
+            // 6. Only Respondent Change only by case sensitive
+            Arguments.of(
+                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+                                           true, "Old RespSol Name", "Old RespSol Firm", false),
+                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+                                           true, "OLD RESPSOL NAME", "OLD RESPSOL FIRM", false),
+                false, true
+            ),
+            // 7. No change Applicant Solicitor, Respondent not represented.
+            Arguments.of(
+                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+                                           false, null, null, false),
+                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+                                           false, null, null, false),
+                false, false
+            ),
+            // 8. No change Respondent Solicitor, Applicant not represented.
+            Arguments.of(
+                buildContactDetailsWrapper(null, null, null, false,
+                                           true, "Old RespSol Name", "Old RespSol Firm", true),
+                buildContactDetailsWrapper(null, null, null, false,
+                                           true, "Old RespSol Name", "Old RespSol Firm", true),
+                false, false
+            ),
+            // 9. White space change for Applicant Solicitor, Respondent not represented.
+            Arguments.of(
+                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
+                                           false, null, null, false),
+                buildContactDetailsWrapper("Old AppSol Name ", "Old AppSol Firm ", "OldAppSol@email.com", true,
+                                           false, null, null, false),
+                false, false
+            ),
+            // 10. White space change Respondent Solicitor, Applicant not represented.
+            Arguments.of(
+                buildContactDetailsWrapper(null, null, null, false,
+                                           true, "Old RespSol Name", "Old RespSol Firm", true),
+                buildContactDetailsWrapper(null, null, null, false,
+                                           true, "Old RespSol Name ", "Old RespSol Firm ", true),
+                false, false
+            )
         );
     }
 
@@ -276,7 +254,7 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
      *  of cover sheets for both applicant and respondent.
      */
     @ParameterizedTest
-    @MethodSource("provideSolicitorAndAddressChangeScenarios")
+    @MethodSource
     void testSolicitorAndAddressChangeScenarios(
         String beforeAppSolName, String beforeAppSolFirm, String beforeAppSolEmail, Address beforeAppSolAddress,
         String beforeRespSolName, String beforeRespSolFirm, Address beforeRespSolAddress,
@@ -339,7 +317,7 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
      *  4. New Respondent Solicitor details
      *  5. Expected cover sheet generation for applicant and respondent (boolean flags)
      */
-    static Stream<Arguments> provideSolicitorAndAddressChangeScenarios() {
+    static Stream<Arguments> testSolicitorAndAddressChangeScenarios() {
         Address oldAddress = buildAddress();
         Address newAddress = Address.builder().addressLine1("OtherLine1").postCode("ZZ1 1ZZ").build();
         Address addressWhiteSpace = buildAddress();
