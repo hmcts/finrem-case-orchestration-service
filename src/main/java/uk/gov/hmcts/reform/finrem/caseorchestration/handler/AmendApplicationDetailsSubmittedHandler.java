@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 @Slf4j
 @Service
-public class AmendApplicationSubmittedHandler extends FinremCallbackHandler {
+public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandler {
 
     private static final String CONFIRMATION_HEADER_WITH_ERROR = "Application amended with errors";
 
@@ -24,9 +24,9 @@ public class AmendApplicationSubmittedHandler extends FinremCallbackHandler {
     private final RetryExecutor retryExecutor;
 
     @Autowired
-    public AmendApplicationSubmittedHandler(FinremCaseDetailsMapper mapper,
-                                            RetryExecutor retryExecutor,
-                                            AssignPartiesAccessService assignPartiesAccessService) {
+    public AmendApplicationDetailsSubmittedHandler(FinremCaseDetailsMapper mapper,
+                                                   RetryExecutor retryExecutor,
+                                                   AssignPartiesAccessService assignPartiesAccessService) {
         super(mapper);
         this.retryExecutor = retryExecutor;
         this.assignPartiesAccessService = assignPartiesAccessService;
