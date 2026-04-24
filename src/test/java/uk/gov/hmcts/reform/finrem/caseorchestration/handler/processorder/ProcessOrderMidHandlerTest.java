@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.Process
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.isNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -320,5 +324,66 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         // Assert
         assertThat(response.getErrors()).containsExactly("All additional hearing documents must be Word or PDF files.");
         verify(validateHearingService).hasInvalidAdditionalHearingDocsForAddHearingChosen(finremCaseData);
+    }
+
+    /*
+     * Simulates user modifying/removing existing unprocessed hearing orders, then asserts warning shown.
+     * Checks that the warning is shown on the Unprocessed Hearing Orders page (onValidatingUnprocessedHearingOrdersPage).
+     * Checks that the warning is NOT shown on the Add Hearing page (onAddAHearingPage).
+     */
+    @ParameterizedTest
+    @EnumSource(YesOrNo.class)
+    @NullSource
+    void givenTamperedHearingOrders_whenHandle_thenReturnsWarning(YesOrNo yesOrNo) {
+        // Arrange
+        List<DirectionOrderCollection> intendedUploadHearingOrderList = List.of(DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder().build())
+            .build());
+        List<DirectionOrderCollection> currentStoredUploadHearingOrderList = List.of((DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder().build())
+            .build()));
+
+        FinremCaseDetails.FinremCaseDetailsBuilder caseDataBuilder = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .unprocessedUploadHearingDocuments(intendedUploadHearingOrderList)
+                .uploadHearingOrder(currentStoredUploadHearingOrderList)
+                .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                    .isAddHearingChosen(yesOrNo)
+                    .build())
+                .build());
+
+        FinremCaseDetails.FinremCaseDetailsBuilder caseDataBefore = FinremCaseDetails.builder().data(mock(FinremCaseData.class));
+
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory
+            .from(PROCESS_ORDER, caseDataBefore, caseDataBuilder);
+
+        when(processOrderService.uploadHearingOrderListAlteredOrRemoved(
+            intendedUploadHearingOrderList, currentStoredUploadHearingOrderList)).thenReturn(true);
+
+        boolean onAddAHearingPage = !isNull(yesOrNo);
+        if (onAddAHearingPage) {
+            mockPassAllValidations();
+        }
+
+        // Act
+        var response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        // Assert
+        verify(processOrderService).uploadHearingOrderListAlteredOrRemoved(
+            intendedUploadHearingOrderList,
+            currentStoredUploadHearingOrderList);
+
+        assertThat(response.getErrors()).isEmpty();
+
+        boolean onValidatingUnprocessedHearingOrdersPage = isNull(yesOrNo);
+        if (onValidatingUnprocessedHearingOrdersPage) {
+            assertThat(response.getWarnings()).containsExactly(
+                "Existing unprocessed hearing order(s) have been removed or amended. This is not supported. "
+                    + "Existing orders will remain unprocessed.");
+        }
+
+        if (onAddAHearingPage) {
+            assertThat(response.getWarnings()).isEmpty();
+        }
     }
 }

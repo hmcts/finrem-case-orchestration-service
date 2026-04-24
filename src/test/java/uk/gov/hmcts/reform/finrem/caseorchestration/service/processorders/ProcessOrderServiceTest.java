@@ -429,4 +429,77 @@ class ProcessOrderServiceTest {
     private CaseDocument createCaseDocument(String documentUrl) {
         return CaseDocument.builder().documentFilename(extractFileName(documentUrl)).documentUrl(documentUrl).build();
     }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("provideUploadHearingOrderListAlteredOrRemovedCases")
+    void testUploadHearingOrderListAlteredOrRemoved(String scenario,
+                                                    List<DirectionOrderCollection> intendedUploadHearingOrderList,
+                                                    List<DirectionOrderCollection> currentStoredUploadHearingOrderList,
+                                                    boolean expected) {
+        boolean result = underTest.uploadHearingOrderListAlteredOrRemoved(
+            intendedUploadHearingOrderList,
+            currentStoredUploadHearingOrderList
+        );
+
+        assertEquals(expected, result);
+    }
+
+    /*
+     * Test cases for uploadHearingOrderListAlteredOrRemoved:
+     * The first List parameter represents the intended list of unprocessed upload hearing orders (what the user is trying to process).
+     * The second List parameter represents the current stored list of upload hearing orders (what is currently in the system).
+     * The boolean parameter represents whether we expect the method to return true (indicating tampering) or false (no tampering).
+     * Null lists are not tested.  About to start doesn't allow null current list.  And intended list is validated to be
+     * sure it's never null.
+     */
+    private static Stream<Arguments> provideUploadHearingOrderListAlteredOrRemovedCases() {
+        return Stream.of(
+            Arguments.of(
+                "returns false when intended and current contain the same unstamped document URLs",
+                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO)),
+                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO)),
+                false
+            ),
+            Arguments.of(
+                "returns true when intended is missing an unstamped document URL present in current",
+                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO)),
+                List.of(
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO),
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", NO)
+                ),
+                true
+            ),
+            Arguments.of(
+                "returns false when intended contains extra unstamped document URLs not present in current",
+                List.of(
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO),
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", NO)
+                ),
+                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO)),
+                false
+            ),
+            Arguments.of(
+                "ignores stamped YES documents in current when comparing URLs",
+                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", NO)),
+                List.of(
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", YesOrNo.YES),
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", NO)
+                ),
+                false
+            )
+        );
+    }
+
+    private static DirectionOrderCollection createDirectionOrderForUploadHearingOrderListAltered(String documentUrl,
+                                                                                                 YesOrNo isOrderStamped) {
+        return DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .isOrderStamped(isOrderStamped)
+                .uploadDraftDocument(CaseDocument.builder()
+                    .documentUrl(documentUrl)
+                    .documentFilename(extractFileName(documentUrl))
+                    .build())
+                .build())
+            .build();
+    }
 }
