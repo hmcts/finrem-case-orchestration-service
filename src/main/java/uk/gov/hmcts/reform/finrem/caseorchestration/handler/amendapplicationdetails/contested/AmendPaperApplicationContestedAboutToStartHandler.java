@@ -1,9 +1,12 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.contested;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -18,8 +21,9 @@ public class AmendPaperApplicationContestedAboutToStartHandler extends FinremCal
 
     private final OnStartDefaultValueService onStartDefaultValueService;
 
-    public AmendPaperApplicationContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                        OnStartDefaultValueService onStartDefaultValueService) {
+    public AmendPaperApplicationContestedAboutToStartHandler(
+        FinremCaseDetailsMapper finremCaseDetailsMapper,
+        OnStartDefaultValueService onStartDefaultValueService) {
         super(finremCaseDetailsMapper);
         this.onStartDefaultValueService = onStartDefaultValueService;
     }
@@ -28,12 +32,13 @@ public class AmendPaperApplicationContestedAboutToStartHandler extends FinremCal
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.AMEND_CONTESTED_PAPER_APP_DETAILS.equals(eventType));
+            && EventType.AMEND_CONTESTED_PAPER_APP_DETAILS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
         onStartDefaultValueService.defaultTypeOfApplication(callbackRequest);
         onStartDefaultValueService.defaultUrgencyQuestion(callbackRequest);
@@ -42,8 +47,6 @@ public class AmendPaperApplicationContestedAboutToStartHandler extends FinremCal
         RefugeWrapperUtils.populateApplicantInRefugeQuestion(caseDetails);
         RefugeWrapperUtils.populateRespondentInRefugeQuestion(caseDetails);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .build();
+        return response(callbackRequest.getCaseDetails().getData());
     }
 }

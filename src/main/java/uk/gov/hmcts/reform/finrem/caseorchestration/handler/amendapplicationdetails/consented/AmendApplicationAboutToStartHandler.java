@@ -1,9 +1,12 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.consented;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -29,15 +32,16 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.AMEND_APP_DETAILS.equals(eventType));
+            && EventType.AMEND_APP_DETAILS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Handling amend application about to start callback for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
+
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to set nature of application for consented case with Case ID: {}", caseDetails.getId());
+
         FinremCaseData caseData = caseDetails.getData();
         final Intention intention = caseData.getApplicantIntendsTo();
         log.info("Applicant intends to {} for Case ID: {}", intention, caseDetails.getId());
@@ -55,6 +59,6 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
             caseData.setCivilPartnership(YesOrNo.NO);
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return response(caseData);
     }
 }
