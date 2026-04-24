@@ -49,24 +49,17 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
             && (matchesContestedEvents(caseType, eventType) || matchesConsentedEvents(caseType, eventType));
     }
 
-    private boolean matchesConsentedEvents(CaseType caseType, EventType eventType) {
-        return CONSENTED.equals(caseType) && AMEND_APP_DETAILS
-            .equals(eventType);
-    }
-
-    private boolean matchesContestedEvents(CaseType caseType, EventType eventType) {
-        return CONTESTED.equals(caseType) && List.of(AMEND_CONTESTED_PAPER_APP_DETAILS, AMEND_CONTESTED_APP_DETAILS)
-            .contains(eventType);
-    }
-
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        String grantAppSolicitorError = grantApplicantSolicitor(callbackRequest.getFinremCaseData());
-        // TODO  bug need to check if present equals to before image
-        String revokeAppSolicitorError = revokeApplicantSolicitor(callbackRequest.getFinremCaseDataBefore());
+        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
+        FinremCaseData finremCaseDataBefore = callbackRequest.getFinremCaseDataBefore();
+
+        String grantAppSolicitorError = grantApplicantSolicitor(finremCaseData);
+        String revokeAppSolicitorError = shouldRevokeApplicantSolicitor(finremCaseData, finremCaseDataBefore)
+            ? null : revokeApplicantSolicitor(finremCaseDataBefore);
 
         boolean isHavingErrors = !StringUtils.isAllBlank(grantAppSolicitorError, revokeAppSolicitorError);
 
@@ -77,6 +70,10 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
         } else {
             return submittedResponse();
         }
+    }
+
+    private boolean shouldRevokeApplicantSolicitor(FinremCaseData finremCaseData, FinremCaseData finremCaseDataBefore) {
+        return false;
     }
 
     private String grantApplicantSolicitor(FinremCaseData caseData) {
@@ -109,5 +106,15 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
             return "There was a problem revoking access to applicant solicitor (%s). Please grant access manually."
                 .formatted(appSolicitorEmail);
         }
+    }
+
+    private boolean matchesConsentedEvents(CaseType caseType, EventType eventType) {
+        return CONSENTED.equals(caseType) && AMEND_APP_DETAILS
+            .equals(eventType);
+    }
+
+    private boolean matchesContestedEvents(CaseType caseType, EventType eventType) {
+        return CONTESTED.equals(caseType) && List.of(AMEND_CONTESTED_PAPER_APP_DETAILS, AMEND_CONTESTED_APP_DETAILS)
+            .contains(eventType);
     }
 }
