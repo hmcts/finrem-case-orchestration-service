@@ -79,8 +79,7 @@ public class AmendApplicationSubmittedHandler extends FinremCallbackHandler {
             return null;
         }
         try {
-            // TODO revoke
-            retryExecutor.runWithRetry(() -> assignPartiesAccessService.grantApplicantSolicitor(caseDataBefore),
+            retryExecutor.runWithRetry(() -> assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore),
                 "revoking applicant solicitor", caseDataBefore.getCcdCaseId());
             return null;
         } catch (Exception ex) {
