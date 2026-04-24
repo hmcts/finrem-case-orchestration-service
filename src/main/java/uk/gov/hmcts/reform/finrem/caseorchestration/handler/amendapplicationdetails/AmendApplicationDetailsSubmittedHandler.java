@@ -16,6 +16,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
+import java.util.List;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_APP_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_PAPER_APP_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+
 @Slf4j
 @Service
 public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandler {
@@ -38,7 +46,17 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
-            && EventType.AMEND_APP_DETAILS.equals(eventType);
+            && (matchesContestedEvents(caseType, eventType) || matchesConsentedEvents(caseType, eventType));
+    }
+
+    private boolean matchesConsentedEvents(CaseType caseType, EventType eventType) {
+        return CONSENTED.equals(caseType) && AMEND_APP_DETAILS
+            .equals(eventType);
+    }
+
+    private boolean matchesContestedEvents(CaseType caseType, EventType eventType) {
+        return CONTESTED.equals(caseType) && List.of(AMEND_CONTESTED_PAPER_APP_DETAILS, AMEND_CONTESTED_APP_DETAILS)
+            .contains(eventType);
     }
 
     @Override
@@ -47,6 +65,7 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
         String grantAppSolicitorError = grantApplicantSolicitor(callbackRequest.getFinremCaseData());
+        // TODO  bug need to check if present equals to before image
         String revokeAppSolicitorError = revokeApplicantSolicitor(callbackRequest.getFinremCaseDataBefore());
 
         boolean isHavingErrors = !StringUtils.isAllBlank(grantAppSolicitorError, revokeAppSolicitorError);
