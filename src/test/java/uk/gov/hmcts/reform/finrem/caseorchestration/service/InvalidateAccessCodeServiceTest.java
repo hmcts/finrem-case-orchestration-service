@@ -93,7 +93,7 @@ class InvalidateAccessCodeServiceTest {
             .extracting(c -> c.getValue().getAccessCode())
             .containsExactly("NEW", "OLD");
 
-        assertThat(result.get(0).getValue().getIsValid()).isEqualTo(YesOrNo.NO);
+        assertThat(result.getFirst().getValue().getIsValid()).isEqualTo(YesOrNo.NO);
     }
 
     @Test

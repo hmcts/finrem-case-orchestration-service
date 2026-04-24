@@ -8,12 +8,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessCodeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InvalidateAccessCodeService;
 
 import java.util.List;
 
-import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 public abstract class InvalidateAccessCodeAboutToSubmitHandler extends FinremCallbackHandler {
@@ -40,23 +39,18 @@ public abstract class InvalidateAccessCodeAboutToSubmitHandler extends FinremCal
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
-        FinremCaseDetails details = callbackRequest.getCaseDetails();
-        FinremCaseDetails detailsBefore = callbackRequest.getCaseDetailsBefore();
-
-        FinremCaseData data = details.getData();
-        FinremCaseData dataBefore = detailsBefore.getData();
+        FinremCaseData data = callbackRequest.getFinremCaseData();
+        FinremCaseData dataBefore = callbackRequest.getFinremCaseDataBefore();
 
         List<AccessCodeCollection> merged =
             invalidateAccessCodeService.mergeForInvalidation(
-                ofNullable(getAccessCodes(dataBefore)).orElse(List.of()),
-                ofNullable(getAccessCodes(data)).orElse(List.of())
+                emptyIfNull(getAccessCodes(dataBefore)),
+                emptyIfNull(getAccessCodes(data))
             );
 
         setAccessCodes(data, merged);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(data)
-            .build();
+        return response(data);
     }
 
     protected abstract EventType handledEventType();
