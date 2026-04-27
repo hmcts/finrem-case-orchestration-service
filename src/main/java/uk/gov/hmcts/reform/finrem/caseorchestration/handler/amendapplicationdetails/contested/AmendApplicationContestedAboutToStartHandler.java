@@ -73,13 +73,10 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
 
         // setCurrentUserCaseRoleType so applicantInRefugeQuestion and respondentInRefugeQuestion labels show correctly.
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseDetails.getCaseIdAsString(),
-                userAuthorisation);
+            userAuthorisation);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .warnings(warnings)
-            .build();
+        return response(callbackRequest.getCaseDetails().getData(), warnings, null);
     }
 
     private List<String> getMiamInvalidLegacyExemptionWarnings(MiamWrapper miamWrapper) {
