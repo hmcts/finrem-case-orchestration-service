@@ -292,7 +292,7 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
             true, beforeRespSolName, beforeRespSolFirm, beforeRespSolAddress, false);
 
 
-        ContactDetailsWrapper afterWrapper =buildContactDetailsWrapper(
+        ContactDetailsWrapper afterWrapper = buildContactDetailsWrapper(
             afterAppSolName, afterAppSolFirm, afterAppSolEmail,afterAppSolAddress,true,
             true, afterRespSolName, afterRespSolFirm, afterRespSolAddress, false);
 
