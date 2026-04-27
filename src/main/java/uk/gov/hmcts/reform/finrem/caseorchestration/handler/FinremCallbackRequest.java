@@ -10,7 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
+import java.util.Objects;
+
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy.isSameOrganisation;
 
 @Data
 @Builder(toBuilder = true)
@@ -38,6 +41,39 @@ public class FinremCallbackRequest {
     public FinremCaseData getFinremCaseDataBefore() {
         return ofNullable(getCaseDetailsBefore())
             .map(FinremCaseDetails::getData)
+            .orElse(null);
+    }
+
+    @JsonIgnore
+    public boolean isApplicantSolicitorChanged() {
+        boolean emailMismatch = !Objects.equals(
+            normalizeAndLower(getFinremCaseDataBefore().getAppSolicitorEmailIfRepresented()),
+            normalizeAndLower(getFinremCaseData().getAppSolicitorEmailIfRepresented())
+        );
+
+        return emailMismatch || !isSameOrganisation(
+            getFinremCaseDataBefore().getApplicantOrganisationPolicy(),
+            getFinremCaseData().getApplicantOrganisationPolicy());
+    }
+
+    @JsonIgnore
+    public boolean isRespondentSolicitorChanged() {
+        boolean emailMismatch = !Objects.equals(
+            normalizeAndLower(getFinremCaseDataBefore().getRespSolicitorEmailIfRepresented()),
+            normalizeAndLower(getFinremCaseData().getRespSolicitorEmailIfRepresented())
+        );
+
+        return emailMismatch || !isSameOrganisation(
+            getFinremCaseDataBefore().getRespondentOrganisationPolicy(),
+            getFinremCaseData().getRespondentOrganisationPolicy());
+    }
+
+
+    private String normalizeAndLower(String email) {
+        return ofNullable(email)
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .map(String::toLowerCase)
             .orElse(null);
     }
 }

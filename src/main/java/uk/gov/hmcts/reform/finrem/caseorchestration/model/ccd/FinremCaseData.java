@@ -64,7 +64,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.isYes;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -809,7 +808,21 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     public String getAppSolicitorEmailIfRepresented() {
         var contactWrapper = getContactDetailsWrapper();
-        if (contactWrapper == null || !isYes(contactWrapper.getApplicantRepresented())) {
+        if (contactWrapper == null || !isApplicantRepresentedByASolicitor()) {
+            return null;
+        }
+
+        if (isConsentedApplication()) {
+            return contactWrapper.getSolicitorEmail();
+        } else {
+            return contactWrapper.getApplicantSolicitorEmail();
+        }
+    }
+
+    @JsonIgnore
+    public String getRespSolicitorEmailIfRepresented() {
+        var contactWrapper = getContactDetailsWrapper();
+        if (contactWrapper == null || !isRespondentRepresentedByASolicitor()) {
             return null;
         }
 
@@ -855,7 +868,7 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     /*
-     * Respondent solictor email is kept in a consistent field for contested and consented cases.
+     * Respondent solicitor email is kept in a consistent field for contested and consented cases.
      */
     @JsonIgnore
     public String getRespondentSolicitorEmail() {
