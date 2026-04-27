@@ -17,13 +17,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 
 @Slf4j
 @Service
-public class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler extends AbstractUpdateCaseDetailsSolicitorHandler {
+public class UpdateCaseDetailsSolicitorAboutToSubmitHandler extends AbstractUpdateCaseDetailsSolicitorHandler {
 
     private final GenerateCoverSheetService generateCoverSheetService;
 
-    public UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                                   UpdateRepresentationService updateRepresentationService,
-                                                                   GenerateCoverSheetService generateCoverSheetService) {
+    public UpdateCaseDetailsSolicitorAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                          UpdateRepresentationService updateRepresentationService,
+                                                          GenerateCoverSheetService generateCoverSheetService) {
         super(finremCaseDetailsMapper, updateRepresentationService);
         this.generateCoverSheetService = generateCoverSheetService;
     }
