@@ -92,7 +92,7 @@ class AmendApplicationConsentedMidHandlerTest {
 
         FinremCaseData caseData = mock(FinremCaseData.class);
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), CONSENTED, AMEND_APP_DETAILS, caseData);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData);
 
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
@@ -116,7 +116,6 @@ class AmendApplicationConsentedMidHandlerTest {
                 () -> verify(objectMapper).convertValue(callbackRequest, CallbackRequest.class),
                 () -> verifyNoMoreInteractions(consentOrderService, internationalPostalService, objectMapper)
             );
-
         }
     }
 }
