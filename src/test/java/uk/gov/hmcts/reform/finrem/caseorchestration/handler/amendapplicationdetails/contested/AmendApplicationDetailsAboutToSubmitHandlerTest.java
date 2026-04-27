@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
@@ -921,7 +922,7 @@ class AmendApplicationDetailsAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = mock(FinremCallbackRequest.class);
         when(finremCallbackRequest.getCaseDetails()).thenReturn(finremCaseDetails);
 
-        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertDoesNotThrow(() -> handler.handle(finremCallbackRequest, AUTH_TOKEN));
     }
 
     @Test
