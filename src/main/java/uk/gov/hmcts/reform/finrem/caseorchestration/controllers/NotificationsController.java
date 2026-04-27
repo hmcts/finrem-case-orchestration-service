@@ -28,14 +28,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotific
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 
 @RestController
 @Slf4j
@@ -161,33 +158,6 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
-    @PostMapping(value = "/notice-of-change/caseworker", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Initiated by caseworker, sends a notice of change to the Solicitor email and a letter to the organization.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Notice of change e-mail and letter sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotificationsCaseworker(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        validateCaseData(callbackRequest);
-
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        if (!requiresNotifications(callbackRequest)) {
-            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
-        }
-        log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
-
-        log.info("Call the noc letter service");
-        nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
-
-        caseDetails.getData().put(INCLUDES_REPRESENTATIVE_UPDATE, null);
-        caseDetails.getData().put(NOC_PARTY, null);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
-    }
-
     @PostMapping(value = "/update-frc", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "Send FRC change update notifications")
     @ApiResponses(value = {
@@ -206,13 +176,6 @@ public class NotificationsController extends BaseController {
         updateFrcCorrespondenceService.sendCorrespondence(caseDetails, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    private boolean requiresNotifications(CallbackRequest callbackRequest) {
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-
-        return Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATIVE_UPDATE))
-            .map(updateField -> updateField.equals(YES_VALUE)).orElse(false);
     }
 
     private boolean isNocRequestAccepted(Map<String, Object> caseData) {

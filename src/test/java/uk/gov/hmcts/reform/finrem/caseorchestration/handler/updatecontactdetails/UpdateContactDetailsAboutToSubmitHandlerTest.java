@@ -259,14 +259,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
 
             handler.handle(callbackRequest, AUTH_TOKEN);
             mockedStatic.verify(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseData));
-
-            if (CaseType.CONSENTED.equals(caseTypeParam)) {
-                mockedStatic.verify(() -> ContactDetailsValidator.validatePostcodesByRepresentation(callbackRequest.getCaseDetails()));
-            }
-
-            if (CaseType.CONTESTED.equals(caseTypeParam)) {
-                mockedStatic.verify(() -> ContactDetailsValidator.validateCaseDataAddresses(finremCaseData));
-            }
+            mockedStatic.verify(() -> ContactDetailsValidator.validatePostcodesByRepresentation(callbackRequest.getCaseDetails()));
         }
         verify(internationalPostalService).validate(finremCaseData);
         verifyNoMoreInteractions(nocWorkflowService, updateContactDetailsService);

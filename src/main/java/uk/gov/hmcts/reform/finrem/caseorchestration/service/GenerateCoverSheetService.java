@@ -10,6 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +30,13 @@ public class GenerateCoverSheetService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
+
+    private record IntervenerCoverSheetMapping(
+        DocumentHelper.PaperNotificationRecipient recipient,
+        Supplier<CaseDocument> oldCoverSheetSupplier,
+        Consumer<CaseDocument> setter
+    ) {
+    }
 
     public CaseDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         logCoverSheetGeneration(APPLICANT, caseDetails.getCaseIdAsString());
@@ -84,11 +94,105 @@ public class GenerateCoverSheetService {
         );
     }
 
+    /**
+     * Generates a cover sheet document for the specified intervener.
+     *
+     * @param caseDetails         the {@link FinremCaseDetails} object containing the case information
+     * @param authorisationToken  the authorisation token used to authenticate the request
+     * @param intervenerRecipient the recipient information for the intervener, specifying the paper notification details
+     * @return the generated cover sheet document as a {@code CaseDocument}
+     */
     public CaseDocument generateIntervenerCoverSheet(FinremCaseDetails caseDetails,
                                                      String authorisationToken,
                                                      DocumentHelper.PaperNotificationRecipient intervenerRecipient) {
         logCoverSheetGeneration(intervenerRecipient, caseDetails.getCaseIdAsString());
         return generateCoverSheet(caseDetails, authorisationToken, intervenerRecipient);
+    }
+
+    /**
+     * Generates and stores an intervener coversheet for a specified case and intervener type.
+     *
+     * @param caseDetails        the {@link FinremCaseDetails} object containing the case information
+     * @param intervenerType     the type of the intervener for whom the coversheet is being generated
+     * @param authorisationToken the authorization token to be used for generating and storing the coversheet
+     */
+    public void generateAndStoreIntervenerCoversheet(FinremCaseDetails caseDetails,
+                                                     IntervenerType intervenerType,
+                                                     String authorisationToken) {
+        FinremCaseData caseData = caseDetails.getData();
+        BulkPrintCoversheetWrapper wrapper = caseData.getBulkPrintCoversheetWrapper();
+
+        IntervenerCoverSheetMapping mapping = resolveIntervenerCoverSheetMapping(wrapper, intervenerType);
+
+        logCoverSheetGenerationAndStorage(mapping.recipient(), caseDetails.getCaseIdAsString());
+        replaceAndStoreIntervenerCoverSheet(
+            generateIntervenerCoverSheet(caseDetails, authorisationToken, mapping.recipient()),
+            authorisationToken,
+            mapping.oldCoverSheetSupplier(),
+            mapping.setter()
+        );
+    }
+
+    /**
+     * Removes the intervener cover sheet with specified intervener change details.
+     *
+     * @param finremCaseDetails       the {@link FinremCaseDetails} object containing the case information
+     * @param intervenerChangeDetails The details of the intervener change, including the type of intervener.
+     * @param authorisationToken      The authorisation token required to authenticate the operation.
+     */
+    public void removeIntervenerCoverSheet(FinremCaseDetails finremCaseDetails,
+                                           IntervenerChangeDetails intervenerChangeDetails,
+                                           String authorisationToken) {
+        IntervenerCoverSheetMapping mapping =
+            resolveIntervenerCoverSheetMapping(
+                finremCaseDetails.getData().getBulkPrintCoversheetWrapper(),
+                intervenerChangeDetails.getIntervenerType()
+            );
+
+        deleteCoverSheet(mapping.oldCoverSheetSupplier().get().getDocumentUrl(), authorisationToken);
+        mapping.setter().accept(null);
+    }
+
+    private IntervenerCoverSheetMapping resolveIntervenerCoverSheetMapping(BulkPrintCoversheetWrapper wrapper,
+                                                                           IntervenerType intervenerType) {
+        if (IntervenerType.INTERVENER_ONE.equals(intervenerType)) {
+            return new IntervenerCoverSheetMapping(
+                DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE,
+                wrapper::getBulkPrintCoverSheetIntv1,
+                wrapper::setBulkPrintCoverSheetIntv1
+            );
+        }
+        if (IntervenerType.INTERVENER_TWO.equals(intervenerType)) {
+            return new IntervenerCoverSheetMapping(
+                DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO,
+                wrapper::getBulkPrintCoverSheetIntv2,
+                wrapper::setBulkPrintCoverSheetIntv2
+            );
+        }
+        if (IntervenerType.INTERVENER_THREE.equals(intervenerType)) {
+            return new IntervenerCoverSheetMapping(
+                DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE,
+                wrapper::getBulkPrintCoverSheetIntv3,
+                wrapper::setBulkPrintCoverSheetIntv3
+            );
+        }
+        if (IntervenerType.INTERVENER_FOUR.equals(intervenerType)) {
+            return new IntervenerCoverSheetMapping(
+                DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR,
+                wrapper::getBulkPrintCoverSheetIntv4,
+                wrapper::setBulkPrintCoverSheetIntv4
+            );
+        }
+
+        throw new IllegalArgumentException("Invalid intervener type: " + intervenerType);
+    }
+
+    private void replaceAndStoreIntervenerCoverSheet(CaseDocument coverSheet,
+                                                     String authToken,
+                                                     Supplier<CaseDocument> oldCoverSheetSupplier,
+                                                     Consumer<CaseDocument> publicSetter) {
+        replaceAndStoreCoverSheet(coverSheet, null, authToken, oldCoverSheetSupplier, () -> null, publicSetter, caseDocument -> {
+        });
     }
 
     private void replaceAndStoreCoverSheet(CaseDocument coverSheet,
@@ -105,11 +209,15 @@ public class GenerateCoverSheetService {
 
         oldCoverSheet.ifPresent(cs -> {
             log.info("Deleting old cover sheet with url: {}", cs.getDocumentUrl());
-            genericDocumentService.deleteDocument(cs.getDocumentUrl(), authToken);
+            deleteCoverSheet(cs.getDocumentUrl(), authToken);
         });
 
         publicSetter.accept(isHiddenFromPublic ? null : coverSheet);
         confidentialSetter.accept(isHiddenFromPublic ? coverSheet : null);
+    }
+
+    private void deleteCoverSheet(String coverSheetUrl, String authToken) {
+        genericDocumentService.deleteDocument(coverSheetUrl, authToken);
     }
 
     private CaseDocument generateCoverSheet(FinremCaseDetails caseDetails,

@@ -23,9 +23,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepresentationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.RepresentativeInContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.stoprepresentingclient.StopRepresentingClientService;
@@ -61,6 +63,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
     private final StopRepresentingClientService stopRepresentingClientService;
 
+    private final GenerateCoverSheetService generateCoverSheetService;
+
     record StopRepresentingRequest(long caseId, FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
                                    RepresentativeInContext representativeInContext) {}
 
@@ -93,13 +97,15 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
                                                       ManageBarristerService manageBarristerService,
                                                       BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater,
                                                       IntervenerService intervenerService,
-                                                      StopRepresentingClientService stopRepresentingClientService) {
+                                                      StopRepresentingClientService stopRepresentingClientService,
+                                                      GenerateCoverSheetService generateCoverSheetService) {
         super(finremCaseDetailsMapper);
         this.nocWorkflowService = nocWorkflowService;
         this.manageBarristerService = manageBarristerService;
         this.barristerChangeCaseAccessUpdater = barristerChangeCaseAccessUpdater;
         this.intervenerService = intervenerService;
         this.stopRepresentingClientService = stopRepresentingClientService;
+        this.generateCoverSheetService = generateCoverSheetService;
     }
 
     @Override
@@ -123,7 +129,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         processRequest(request);
 
         // Populating entered service address
-        populateServiceAddressToParty(request);
+        populateServiceAddressToParty(request, userAuthorisation);
         buildRepresentationUpdateHistoryAndNocDataIfAny(request, userAuthorisation);
         
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
@@ -143,8 +149,8 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private int getIntervenerIndex(StopRepresentingRequest request) {
-        return of(request.representativeInContext.intervenerIndex()).orElseThrow(()
-            -> new IllegalStateException(format("%s - expecting intervener index exists", request.caseId)));
+        return of(request.representativeInContext.intervenerType()).map(IntervenerType::getIntervenerId)
+            .orElseThrow(() -> new IllegalStateException(format("%s - expecting intervener index exists", request.caseId)));
     }
 
     private boolean hasApplicantOrRespondentOrganisationPolicyChange(StopRepresentingRequest request) {
@@ -367,46 +373,54 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         }
     }
 
-    private void populateServiceAddressToParty(StopRepresentingRequest request) {
+    private void populateServiceAddressToParty(StopRepresentingRequest request, String userAuthorisation) {
         FinremCaseData finremCaseData = request.finremCaseDetails.getData();
         Pair<Address, Boolean> serviceAddressConfig = getServiceAddressConfig(finremCaseData);
         if (isRepresentingApplicant(request) || isRepresentingRespondent(request)) {
-            populateMainServiceAddressToApplicantOrRespondent(request, serviceAddressConfig);
+            populateMainServiceAddressToApplicantOrRespondent(request, serviceAddressConfig, userAuthorisation);
         } else if (isRepresentingAnyInterveners(request)) {
             populateMainServiceAddressToIntervener(request, serviceAddressConfig);
         }
 
         // extra service address to be captured
-        populateServiceAddressToApplicant(finremCaseData, getServiceAddressConfigForApplicantIfAny(finremCaseData));
-        populateServiceAddressToRespondent(finremCaseData, getServiceAddressConfigForRespondentIfAny(finremCaseData));
+        populateServiceAddressToApplicant(request.finremCaseDetails, getServiceAddressConfigForApplicantIfAny(finremCaseData), userAuthorisation);
+        populateServiceAddressToRespondent(request.finremCaseDetails, getServiceAddressConfigForRespondentIfAny(finremCaseData), userAuthorisation);
         populateServiceAddressToIntervener(finremCaseData.getIntervenerOne(), getServiceAddressConfigForIntervener1IfAny(finremCaseData));
         populateServiceAddressToIntervener(finremCaseData.getIntervenerTwo(), getServiceAddressConfigForIntervener2IfAny(finremCaseData));
         populateServiceAddressToIntervener(finremCaseData.getIntervenerThree(), getServiceAddressConfigForIntervener3IfAny(finremCaseData));
         populateServiceAddressToIntervener(finremCaseData.getIntervenerFour(), getServiceAddressConfigForIntervener4IfAny(finremCaseData));
     }
 
-    private void populateServiceAddressToApplicant(FinremCaseData finremCaseData, Pair<Address, Boolean> serviceAddressConfig) {
+    private void populateServiceAddressToApplicant(FinremCaseDetails finremCaseDetails,
+                                                   Pair<Address, Boolean> serviceAddressConfig,
+                                                   String userAuthorisation) {
         if (serviceAddressConfig == null) {
             return;
         }
         Address serviceAddress = serviceAddressConfig.getLeft();
         boolean isConfidential = Boolean.TRUE.equals(serviceAddressConfig.getRight());
 
-        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
+        ContactDetailsWrapper contactDetailsWrapper = finremCaseDetails.getData().getContactDetailsWrapper();
         contactDetailsWrapper.setApplicantAddress(serviceAddress);
         contactDetailsWrapper.setApplicantAddressHiddenFromRespondent(YesOrNo.forValue(isConfidential));
+
+        generateCoverSheetService.generateAndSetApplicantCoverSheet(finremCaseDetails, userAuthorisation);
     }
 
-    private void populateServiceAddressToRespondent(FinremCaseData finremCaseData, Pair<Address, Boolean> serviceAddressConfig) {
+    private void populateServiceAddressToRespondent(FinremCaseDetails finremCaseDetails,
+                                                    Pair<Address, Boolean> serviceAddressConfig,
+                                                    String userAuthorisation) {
         if (serviceAddressConfig == null) {
             return;
         }
         Address serviceAddress = serviceAddressConfig.getLeft();
         boolean isConfidential = Boolean.TRUE.equals(serviceAddressConfig.getRight());
 
-        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
+        ContactDetailsWrapper contactDetailsWrapper = finremCaseDetails.getData().getContactDetailsWrapper();
         contactDetailsWrapper.setRespondentAddress(serviceAddress);
         contactDetailsWrapper.setRespondentAddressHiddenFromApplicant(YesOrNo.forValue(isConfidential));
+
+        generateCoverSheetService.generateAndSetRespondentCoverSheet(finremCaseDetails, userAuthorisation);
     }
 
     private void populateServiceAddressToIntervener(IntervenerWrapper intervenerWrapper, Pair<Address, Boolean> serviceAddressConfig) {
@@ -418,6 +432,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
 
         intervenerWrapper.setIntervenerAddress(serviceAddress);
         intervenerWrapper.setIntervenerAddressConfidential(YesOrNo.forValue(isConfidential));
+        // NOTE: Intervener coversheet only reflects the party address, so is unchanged when representation changes.
     }
 
     private void throwIfServiceAddressIsNull(Address serviceAddress) {
@@ -427,15 +442,15 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     }
 
     private void populateMainServiceAddressToApplicantOrRespondent(StopRepresentingRequest request,
-                                                                   Pair<Address, Boolean> serviceAddressConfig) {
-        FinremCaseData finremCaseData = request.finremCaseDetails.getData();
+                                                                   Pair<Address, Boolean> serviceAddressConfig,
+                                                                   String userAuthorisation) {
         Address serviceAddress = serviceAddressConfig.getLeft();
         throwIfServiceAddressIsNull(serviceAddress);
 
         if (isRepresentingApplicant(request)) {
-            populateServiceAddressToApplicant(finremCaseData, serviceAddressConfig);
+            populateServiceAddressToApplicant(request.finremCaseDetails, serviceAddressConfig, userAuthorisation);
         } else if (isRepresentingRespondent(request)) {
-            populateServiceAddressToRespondent(finremCaseData, serviceAddressConfig);
+            populateServiceAddressToRespondent(request.finremCaseDetails, serviceAddressConfig, userAuthorisation);
         }
     }
 
@@ -473,7 +488,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
     private Barrister getIntervenerBarrister(StopRepresentingRequest request) {
         return emptyIfNull(
             request.finremCaseDetails.getData().getBarristerCollectionWrapper()
-                .getIntervenerBarristersByIndex(getIntervenerIndex(request))
+                .getIntervenerBarristers(request.representativeInContext().intervenerType())
         ).stream()
             .map(BarristerCollectionItem::getValue)
             .filter(d -> getUserId(request).equals(d.getUserId()))
@@ -498,7 +513,7 @@ public class StopRepresentingClientAboutToSubmitHandler extends FinremAboutToSub
         } else if (isRepresentingApplicant(request)) {
             return "applicant";
         } else if (isRepresentingAnyInterveners(request)) {
-            return format("intervener %s", getIntervenerIndex(request));
+            return format("intervener%s", getIntervenerIndex(request));
         } else {
             throw new IllegalStateException(UNREACHABLE_MESSAGE);
         }

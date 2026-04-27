@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangePart
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerChangeCaseAccessUpdater;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ccd.CoreCaseDataService;
 
@@ -59,9 +58,6 @@ class StopRepresentingClientEventHandlerTest {
     private ManageBarristerService manageBarristerService;
 
     @Mock
-    private BarristerChangeCaseAccessUpdater barristerChangeCaseAccessUpdater;
-
-    @Mock
     private CoreCaseDataService coreCaseDataService;
 
     private StopRepresentingClientEventHandler underTest;
@@ -69,7 +65,7 @@ class StopRepresentingClientEventHandlerTest {
     @BeforeEach
     void setup() {
         underTest = new StopRepresentingClientEventHandler(assignCaseAccessService, systemUserService, finremCaseDetailsMapper,
-            manageBarristerService, barristerChangeCaseAccessUpdater, coreCaseDataService);
+            manageBarristerService, coreCaseDataService);
         lenient().when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
     }
 
@@ -139,8 +135,8 @@ class StopRepresentingClientEventHandlerTest {
 
         underTest.handleEvent(event);
 
-        verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
-        verify(barristerChangeCaseAccessUpdater).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
+        verify(manageBarristerService).executeBarristerChange(Long.parseLong(CASE_ID), applicantBarristerChange);
+        verify(manageBarristerService).executeBarristerChange(Long.parseLong(CASE_ID), respondentBarristerChange);
     }
 
     @Test
@@ -163,7 +159,6 @@ class StopRepresentingClientEventHandlerTest {
         ArgumentCaptor<Function<CaseDetails, Map<String, Object>>> captor = ArgumentCaptor.forClass(Function.class);
         verify(coreCaseDataService).performPostSubmitCallback(eq(caseType), eq(Long.valueOf(CASE_ID)),
             eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()), captor.capture());
-
 
         Function<CaseDetails, Map<String, Object>> fn = captor.getValue();
         CaseDetails ccdCaseDetails = mock(CaseDetails.class);

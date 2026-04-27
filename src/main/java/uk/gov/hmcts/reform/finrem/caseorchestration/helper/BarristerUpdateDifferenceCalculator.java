@@ -17,6 +17,20 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BarristerUpdateDifferenceCalculator {
 
+    /**
+     * Calculates the difference between the original and updated lists of barristers
+     * for a given {@link BarristerParty}. It determines which barristers have been
+     * added and which have been removed based on their relevant unique information.
+     *
+     * <p>The comparison is performed by converting both input lists into sets of
+     * {@link RelevantUniqueInformation}, and then computing the set differences.</p>
+     *
+     * @param barristerParty the party to which the barristers belong
+     * @param original the original list of barristers
+     * @param updated the updated list of barristers
+     * @return a {@link BarristerChange} containing the added and removed barristers;
+     *         never {@code null}
+     */
     public BarristerChange calculate(BarristerParty barristerParty, List<Barrister> original, List<Barrister> updated) {
         Set<RelevantUniqueInformation> addedUniqueBarristers = Sets.difference(toRelevantSet(updated), toRelevantSet(original));
         Set<RelevantUniqueInformation> removedUniqueBarristers = Sets.difference(toRelevantSet(original), toRelevantSet(updated));
