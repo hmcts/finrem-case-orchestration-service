@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 
-import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 
@@ -9,8 +8,11 @@ import static java.util.Objects.isNull;
 /**
  * Utility class for comparing Address objects.
  */
-@UtilityClass
 public class AddressUtils {
+
+    private AddressUtils() {
+        /* This utility class should not be instantiated */
+    }
 
     private static final String[] ADDRESS_FIELDS = {
         "addressLine1",
@@ -37,12 +39,12 @@ public class AddressUtils {
         if (isNull(oldAddress) && isNull(newAddress)) {
             return false;
         }
-        if (oldAddress == null ^ newAddress == null) {
+        if ((isNull(oldAddress) && !isNull(newAddress)) || (!isNull(oldAddress) && isNull(newAddress))) {
             return true;
         }
 
         for (String field : ADDRESS_FIELDS) {
-            if (!equalsIgnoreCaseAndTrim(getAddressFieldValue(oldAddress, field), getAddressFieldValue(newAddress, field))) {
+            if (!equals(getAddressFieldValue(oldAddress, field), getAddressFieldValue(newAddress, field))) {
                 return true;
             }
         }
@@ -62,8 +64,7 @@ public class AddressUtils {
         };
     }
 
-    private static boolean equalsIgnoreCaseAndTrim(String s1, String s2) {
-        return StringUtils.defaultString(s1).trim().equalsIgnoreCase(StringUtils.defaultString(s2).trim());
+    private static boolean equals(String s1, String s2) {
+        return StringUtils.defaultString(s1).trim().equals(StringUtils.defaultString(s2).trim());
     }
 }
-

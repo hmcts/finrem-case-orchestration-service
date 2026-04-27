@@ -45,10 +45,10 @@ class AddressUtilsTest {
         }
 
         @Test
-        void shouldReturnFalseWhenFieldsDifferOnlyInCaseOrWhitespace() {
+        void shouldReturnTrueWhenFieldsDifferOnlyInCaseOrWhitespace() {
             Address a1 = Address.builder().addressLine1(" 123 main st ").build();
             Address a2 = Address.builder().addressLine1("123 MAIN ST").build();
-            assertFalse(AddressUtils.hasChange(a1, a2));
+            assertTrue(AddressUtils.hasChange(a1, a2));
         }
 
         @Test
@@ -73,4 +73,3 @@ class AddressUtilsTest {
         }
     }
 }
-
