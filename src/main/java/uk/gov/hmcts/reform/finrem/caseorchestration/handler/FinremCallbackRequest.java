@@ -9,8 +9,10 @@ import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy.isSameOrganisation;
@@ -46,28 +48,37 @@ public class FinremCallbackRequest {
 
     @JsonIgnore
     public boolean isApplicantSolicitorChanged() {
-        boolean emailMismatch = !Objects.equals(
-            normalizeAndLower(getFinremCaseDataBefore().getAppSolicitorEmailIfRepresented()),
-            normalizeAndLower(getFinremCaseData().getAppSolicitorEmailIfRepresented())
+        return isSolicitorChanged(
+            FinremCaseData::getAppSolicitorEmailIfRepresented,
+            FinremCaseData::getApplicantOrganisationPolicy
         );
-
-        return emailMismatch || !isSameOrganisation(
-            getFinremCaseDataBefore().getApplicantOrganisationPolicy(),
-            getFinremCaseData().getApplicantOrganisationPolicy());
     }
 
     @JsonIgnore
     public boolean isRespondentSolicitorChanged() {
-        boolean emailMismatch = !Objects.equals(
-            normalizeAndLower(getFinremCaseDataBefore().getRespSolicitorEmailIfRepresented()),
-            normalizeAndLower(getFinremCaseData().getRespSolicitorEmailIfRepresented())
+        return isSolicitorChanged(
+            FinremCaseData::getRespSolicitorEmailIfRepresented,
+            FinremCaseData::getRespondentOrganisationPolicy
         );
-
-        return emailMismatch || !isSameOrganisation(
-            getFinremCaseDataBefore().getRespondentOrganisationPolicy(),
-            getFinremCaseData().getRespondentOrganisationPolicy());
     }
 
+    private boolean isSolicitorChanged(Function<FinremCaseData, String> emailExtractor,
+                                       Function<FinremCaseData, OrganisationPolicy> policyExtractor) {
+
+        String currentEmail = ofNullable(getFinremCaseData()).map(emailExtractor).orElse(null);
+        String beforeEmail = ofNullable(getFinremCaseDataBefore()).map(emailExtractor).orElse(null);
+
+        boolean emailMismatch = !Objects.equals(normalizeAndLower(currentEmail), normalizeAndLower(beforeEmail));
+
+        if (emailMismatch) {
+            return true;
+        }
+
+        OrganisationPolicy currentPolicy = ofNullable(getFinremCaseData()).map(policyExtractor).orElse(null);
+        OrganisationPolicy beforePolicy = ofNullable(getFinremCaseDataBefore()).map(policyExtractor).orElse(null);
+
+        return !isSameOrganisation(currentPolicy, beforePolicy);
+    }
 
     private String normalizeAndLower(String email) {
         return ofNullable(email)
