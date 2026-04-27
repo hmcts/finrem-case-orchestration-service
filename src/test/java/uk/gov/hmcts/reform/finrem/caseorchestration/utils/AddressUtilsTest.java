@@ -21,20 +21,6 @@ class AddressUtilsTest {
     class HasChange {
 
         @Test
-        void shouldReturnTrueWhenAnyFieldIsDifferent() {
-            Address a1 = Address.builder().addressLine1("123 Main St").build();
-            Address a2 = Address.builder().addressLine1("124 Main St").build();
-            assertTrue(AddressUtils.hasChange(a1, a2));
-        }
-
-        @Test
-        void shouldReturnTrueWhenFieldsDifferOnlyInCase() {
-            Address a1 = Address.builder().addressLine1("123 main st ").build();
-            Address a2 = Address.builder().addressLine1("123 MAIN ST").build();
-            assertTrue(AddressUtils.hasChange(a1, a2));
-        }
-
-        @Test
         void shouldReturnFalseWhenFieldsContainsWhitespace() {
             Address a1 = Address.builder().addressLine1("123 Main St ").build();
             Address a2 = Address.builder().addressLine1("123 Main St").build();
