@@ -46,6 +46,19 @@ public class FinremCallbackRequest {
             .orElse(null);
     }
 
+    /**
+     * Checks if the applicant's solicitor details have changed between the current
+     * and previous case state.
+     *
+     * <p>
+     * A change is detected if either the normalized email address or the
+     * organization policy (ID) differs. Emails are compared after trimming
+     * whitespace and converting to lowercase.
+     * </p>
+     *
+     * @return {@code true} if the applicant solicitor email or policy has changed;
+     * {@code false} otherwise.
+     */
     @JsonIgnore
     public boolean isApplicantSolicitorChanged() {
         return isSolicitorChanged(
@@ -54,6 +67,18 @@ public class FinremCallbackRequest {
         );
     }
 
+    /**
+     * Checks if the respondent's solicitor details have changed between the current
+     * and previous case state.
+     *
+     * <p>
+     * Follows the same comparison logic as {@link #isApplicantSolicitorChanged()},
+     * focusing on respondent-specific fields.
+     * </p>
+     *
+     * @return {@code true} if the respondent solicitor email or policy has changed;
+     * {@code false} otherwise.
+     */
     @JsonIgnore
     public boolean isRespondentSolicitorChanged() {
         return isSolicitorChanged(
