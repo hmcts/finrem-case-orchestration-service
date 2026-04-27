@@ -94,23 +94,19 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
 
     static ContactDetailsWrapper buildContactDetailsWrapper(
         String applicantSolicitorName, String applicantSolicitorFirm, String applicantSolicitorEmail, Address applicantSolicitorAddress,
-        boolean isCurrentUserApplicantSolicitor,
-        boolean includeRespondent, String respondentSolicitorName, String respondentSolicitorFirm, Address respondentSolicitorAddress,
-        boolean isCurrentUserRespondentSolicitor) {
+        String respondentSolicitorName, String respondentSolicitorFirm, Address respondentSolicitorAddress) {
 
         ContactDetailsWrapper.ContactDetailsWrapperBuilder builder = ContactDetailsWrapper.builder()
             .applicantSolicitorName(applicantSolicitorName)
             .applicantSolicitorFirm(applicantSolicitorFirm)
             .applicantSolicitorEmail(applicantSolicitorEmail)
             .applicantSolicitorAddress(applicantSolicitorAddress)
-            .currentUserIsApplicantSolicitor(isCurrentUserApplicantSolicitor ? YesOrNo.YES : YesOrNo.NO);
+            .currentUserIsApplicantSolicitor(YesOrNo.YES);
 
-        if (includeRespondent) {
-            builder.respondentSolicitorName(respondentSolicitorName)
-                .respondentSolicitorFirm(respondentSolicitorFirm)
-                .respondentSolicitorAddress(respondentSolicitorAddress)
-                .currentUserIsRespondentSolicitor(isCurrentUserRespondentSolicitor ? YesOrNo.YES : YesOrNo.NO);
-        }
+        builder.respondentSolicitorName(respondentSolicitorName)
+            .respondentSolicitorFirm(respondentSolicitorFirm)
+            .respondentSolicitorAddress(respondentSolicitorAddress)
+            .currentUserIsRespondentSolicitor(YesOrNo.NO);
         return builder.build();
     }
 
@@ -151,7 +147,6 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         } else {
             verify(generateCoverSheetService, never()).generateAndSetRespondentCoverSheet(afterDetails, AUTH_TOKEN);
         }
-        reset(generateCoverSheetService); // Reset for next parameterized run
     }
 
     /**
@@ -288,13 +283,13 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
             .thenReturn(new ArrayList<>());
 
         ContactDetailsWrapper beforeWrapper = buildContactDetailsWrapper(
-            beforeAppSolName, beforeAppSolFirm, beforeAppSolEmail, beforeAppSolAddress, true,
-            true, beforeRespSolName, beforeRespSolFirm, beforeRespSolAddress, false);
+            beforeAppSolName, beforeAppSolFirm, beforeAppSolEmail, beforeAppSolAddress,
+            beforeRespSolName, beforeRespSolFirm, beforeRespSolAddress);
 
 
         ContactDetailsWrapper afterWrapper = buildContactDetailsWrapper(
-            afterAppSolName, afterAppSolFirm, afterAppSolEmail,afterAppSolAddress,true,
-            true, afterRespSolName, afterRespSolFirm, afterRespSolAddress, false);
+            afterAppSolName, afterAppSolFirm, afterAppSolEmail,afterAppSolAddress,
+            afterRespSolName, afterRespSolFirm, afterRespSolAddress);
 
         FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
         FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);
