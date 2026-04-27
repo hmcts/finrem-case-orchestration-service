@@ -9,7 +9,6 @@ import static java.util.Objects.isNull;
  * Utility class for comparing Address objects.
  */
 public class AddressUtils {
-
     private AddressUtils() {
         /* This utility class should not be instantiated */
     }
@@ -68,3 +67,4 @@ public class AddressUtils {
         return StringUtils.defaultString(s1).trim().equals(StringUtils.defaultString(s2).trim());
     }
 }
+

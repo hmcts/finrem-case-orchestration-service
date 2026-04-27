@@ -307,6 +307,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     }
 
     private FinremCallbackRequest createRequest(CaseType caseType, FinremCaseData finremCaseData) {
+
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseType, finremCaseData);
         request.setCaseDetailsBefore(FinremCaseDetails.builder()
             .data(FinremCaseData.builder().build())
