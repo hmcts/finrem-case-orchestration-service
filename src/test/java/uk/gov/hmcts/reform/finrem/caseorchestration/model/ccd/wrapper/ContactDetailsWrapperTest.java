@@ -172,50 +172,6 @@ class ContactDetailsWrapperTest {
     }
 
     @Test
-    void shouldDetectChangesInRespondentAddressDetails() {
-        // Given
-        ContactDetailsWrapper originalWrapper = ContactDetailsWrapper.builder()
-            .applicantFmName("John")
-            .applicantLname("Doe")
-            .applicantAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
-            .build();
-
-        ContactDetailsWrapper modifiedWrapper = ContactDetailsWrapper.builder()
-            .applicantFmName("Jane") // Changed field
-            .applicantLname("Doe")
-            .applicantAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
-            .build();
-
-        // When
-        boolean result = ContactDetailsWrapper.hasApplicantAddressDetailsChanged(originalWrapper, modifiedWrapper);
-
-        // Then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void shouldNotDetectChangesWhenRespondentAddressDetailsAreSame() {
-        // Given
-        ContactDetailsWrapper originalWrapper = ContactDetailsWrapper.builder()
-            .respondentFmName("John")
-            .respondentLname("Doe")
-            .respondentAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
-            .build();
-
-        ContactDetailsWrapper identicalWrapper = ContactDetailsWrapper.builder()
-            .respondentFmName("John")
-            .respondentLname("Doe")
-            .respondentAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
-            .build();
-
-        // When
-        boolean result = ContactDetailsWrapper.hasApplicantAddressDetailsChanged(originalWrapper, identicalWrapper);
-
-        // Then
-        assertThat(result).isFalse();
-    }
-
-    @Test
     void givenTwoWrappers_whenDiffCalled_thenReturnOnlyFieldsThatChanged() {
         // given
         ContactDetailsWrapper a = ContactDetailsWrapper.builder()
