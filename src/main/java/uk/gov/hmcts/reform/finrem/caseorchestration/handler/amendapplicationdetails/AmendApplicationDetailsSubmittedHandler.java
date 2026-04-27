@@ -58,7 +58,7 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
         FinremCaseData finremCaseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
         String grantAppSolicitorError = grantApplicantSolicitor(finremCaseData);
-        String revokeAppSolicitorError = shouldRevokeApplicantSolicitor(callbackRequest)
+        String revokeAppSolicitorError = shouldRevokeOldApplicantSolicitor(callbackRequest)
             ? null : revokeApplicantSolicitor(finremCaseDataBefore);
 
         boolean isHavingErrors = !StringUtils.isAllBlank(grantAppSolicitorError, revokeAppSolicitorError);
@@ -70,11 +70,6 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
         } else {
             return submittedResponse();
         }
-    }
-
-    private boolean shouldRevokeApplicantSolicitor(FinremCallbackRequest callbackRequest) {
-        return callbackRequest.isApplicantSolicitorChanged()
-            && StringUtils.isNotBlank(callbackRequest.getFinremCaseData().getAppSolicitorEmailIfRepresented());
     }
 
     private String grantApplicantSolicitor(FinremCaseData caseData) {
@@ -93,25 +88,26 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
         }
     }
 
+    private boolean shouldRevokeOldApplicantSolicitor(FinremCallbackRequest callbackRequest) {
+        return callbackRequest.isApplicantSolicitorChanged()
+            && StringUtils.isNotBlank(callbackRequest.getFinremCaseData().getAppSolicitorEmailIfRepresented());
+    }
+
     private String revokeApplicantSolicitor(FinremCaseData caseDataBefore) {
         String appSolicitorEmail = caseDataBefore.getAppSolicitorEmailIfRepresented();
-        if (StringUtils.isBlank(appSolicitorEmail)) {
-            return null;
-        }
         try {
             retryExecutor.runWithRetry(() -> assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore),
-                "revoking applicant solicitor", caseDataBefore.getCcdCaseId());
+                "revoking old applicant solicitor", caseDataBefore.getCcdCaseId());
             return null;
         } catch (Exception ex) {
-            log.error("Error revoking applicant solicitor", ex);
-            return "There was a problem revoking access to applicant solicitor (%s). Please grant access manually."
+            log.error("Error revoking old applicant solicitor", ex);
+            return "There was a problem revoking access to applicant solicitor (%s). Please revoke access manually."
                 .formatted(appSolicitorEmail);
         }
     }
 
     private boolean matchesConsentedEvents(CaseType caseType, EventType eventType) {
-        return CONSENTED.equals(caseType) && AMEND_APP_DETAILS
-            .equals(eventType);
+        return CONSENTED.equals(caseType) && AMEND_APP_DETAILS.equals(eventType);
     }
 
     private boolean matchesContestedEvents(CaseType caseType, EventType eventType) {
