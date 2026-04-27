@@ -826,11 +826,7 @@ public class FinremCaseData implements HasCaseDocument {
             return null;
         }
 
-        if (isConsentedApplication()) {
-            return contactWrapper.getSolicitorEmail();
-        } else {
-            return contactWrapper.getApplicantSolicitorEmail();
-        }
+        return contactWrapper.getRespondentSolicitorEmail();
     }
 
     @JsonIgnore
