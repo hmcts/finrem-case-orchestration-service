@@ -72,8 +72,15 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
     }
 
     static ContactDetailsWrapper buildContactDetailsWrapper(
-        String applicantSolicitorName, String applicantSolicitorFirm,  String applicantSolicitorEmail, boolean isCurrentUserApplicantSolicitor,
-        boolean includeRespondent, String respondentSolicitorName, String respondentSolicitorFirm, boolean isCurrentUserRespondentSolicitor) {
+        String applicantSolicitorName,
+        String applicantSolicitorFirm,
+        String applicantSolicitorEmail,
+        boolean isCurrentUserApplicantSolicitor,
+        boolean includeRespondent,
+        String respondentSolicitorName,
+        String respondentSolicitorFirm,
+        String respondentSolicitorEmail,
+        boolean isCurrentUserRespondentSolicitor) {
 
         ContactDetailsWrapper.ContactDetailsWrapperBuilder builder = ContactDetailsWrapper.builder()
             .applicantSolicitorName(applicantSolicitorName)
@@ -85,6 +92,7 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         if (includeRespondent) {
             builder.respondentSolicitorName(respondentSolicitorName)
                 .respondentSolicitorFirm(respondentSolicitorFirm)
+                .respondentSolicitorEmail(respondentSolicitorEmail)
                 .respondentSolicitorAddress(buildAddress())
                 .currentUserIsRespondentSolicitor(isCurrentUserRespondentSolicitor ? YesOrNo.YES : YesOrNo.NO);
         }
@@ -92,8 +100,13 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
     }
 
     static ContactDetailsWrapper buildContactDetailsWrapper(
-        String applicantSolicitorName, String applicantSolicitorFirm, String applicantSolicitorEmail, Address applicantSolicitorAddress,
-        String respondentSolicitorName, String respondentSolicitorFirm, Address respondentSolicitorAddress) {
+        String applicantSolicitorName,
+        String applicantSolicitorFirm,
+        String applicantSolicitorEmail,
+        Address applicantSolicitorAddress,
+        String respondentSolicitorName,
+        String respondentSolicitorFirm,
+        Address respondentSolicitorAddress) {
 
         ContactDetailsWrapper.ContactDetailsWrapperBuilder builder = ContactDetailsWrapper.builder()
             .applicantSolicitorName(applicantSolicitorName)
@@ -161,82 +174,142 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         return Stream.of(
             // 1. Both applicant and respondent changed
             Arguments.of(
-                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-                                           true, "Old RespSol Name", "Old RespSol Firm", false),
-                buildContactDetailsWrapper("New AppSol Name", "New AppSol Firm", "NewAppSol@email.com", true,
-                                           true, "New RespSol Name", "New RespSol Firm", false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper(
+                    "New AppSol Name", "New AppSol Firm",
+                    "NewAppSol@email.com", true, true,
+                    "New RespSol Name", "New RespSol Firm",
+                    "NewRespSol@email.com", false),
                 true, true
             ),
             // 2. No change both Applicant Solicitor and Respondent solicitor
             Arguments.of(
-                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-                                           true, "Old RespSol Name", "Old RespSol Firm", false),
-                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-                                           true, "Old RespSol Name", "Old RespSol Firm", false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com",  false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
                 false, false
             ),
             // 3. Only applicant changed
             Arguments.of(
-                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-                                           true, "Old RespSol Name", "Old RespSol Firm", false),
-                buildContactDetailsWrapper("New AppSol Name", "New AppSol Firm", "NewAppSol@email.com", true,
-                                           true, "Old RespSol Name", "Old RespSol Firm", false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper(
+                    "New AppSol Name", "New AppSol Firm",
+                    "NewAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
                 true, false
             ),
             // 4. Only respondent changed
             Arguments.of(
-                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-                                           true, "Old RespSol Name", "Old RespSol Firm", false),
-                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-                                           true, "New RespSol Name", "New RespSol Firm", false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "New RespSol Name", "New RespSol Firm",
+                    "NewRespSol@email.com", false),
                 false, true
             ),
-            // 5. Only Applicant Change only by case sensitive
+            // 5. Only Applicant Change only by case-sensitive
             Arguments.of(
-                buildContactDetailsWrapper("old appsol name", "old appsol firm", "OldAppSol@email.com", true,
-                                           false, null, null, false),
-                buildContactDetailsWrapper("OLD APPSOL NAME", "OLD APPSOL FIRM", "OldAppSol@email.com", true,
-                                           false, null, null, false),
+                buildContactDetailsWrapper(
+                    "old appsol name", "old appsol firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    "OLD APPSOL NAME", "OLD APPSOL FIRM",
+                    "OldAppSol@email.com", true,
+                    false, null, null,
+                    null, false),
                 true, false
             ),
-            // 6. Only Respondent Change only by case sensitive
+            // 6. Only Respondent Change only by case-sensitive
             Arguments.of(
-                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-                                           true, "Old RespSol Name", "Old RespSol Firm", false),
-                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-                                           true, "OLD RESPSOL NAME", "OLD RESPSOL FIRM", false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true,
+                    true, "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "OLD RESPSOL NAME", "OLD RESPSOL FIRM",
+                    "OldRespSol@email.com", false),
                 false, true
             ),
             // 7. No change Applicant Solicitor, Respondent not represented.
             Arguments.of(
-                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-                                           false, null, null, false),
-                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-                                           false, null, null, false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
                 false, false
             ),
             // 8. No change Respondent Solicitor, Applicant not represented.
             Arguments.of(
-                buildContactDetailsWrapper(null, null, null, false,
-                                           true, "Old RespSol Name", "Old RespSol Firm", true),
-                buildContactDetailsWrapper(null, null, null, false,
-                                           true, "Old RespSol Name", "Old RespSol Firm", true),
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    null,true),
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    null, true),
                 false, false
             ),
             // 9. White space change for Applicant Solicitor, Respondent not represented.
             Arguments.of(
-                buildContactDetailsWrapper("Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-                                           false, null, null, false),
-                buildContactDetailsWrapper("Old AppSol Name ", "Old AppSol Firm ", "OldAppSol@email.com", true,
-                                           false, null, null, false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true,
+                    false, null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name ", "Old AppSol Firm ",
+                    "OldAppSol@email.com", true,
+                    false, null, null,
+                    null, false),
                 false, false
             ),
             // 10. White space change Respondent Solicitor, Applicant not represented.
             Arguments.of(
-                buildContactDetailsWrapper(null, null, null, false,
-                                           true, "Old RespSol Name", "Old RespSol Firm", true),
-                buildContactDetailsWrapper(null, null, null, false,
-                                           true, "Old RespSol Name ", "Old RespSol Firm ", true),
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false,
+                    true, "Old RespSol Name", "Old RespSol Firm",
+                    null, true),
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false,
+                    true, "Old RespSol Name ", "Old RespSol Firm ",
+                    null, true),
                 false, false
             )
         );
