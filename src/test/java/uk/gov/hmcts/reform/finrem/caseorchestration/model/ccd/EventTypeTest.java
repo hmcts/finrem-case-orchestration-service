@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +27,8 @@ class EventTypeTest {
 
         // Exclude test classes
         handlerClasses.removeIf(clazz ->
-            clazz.getProtectionDomain()
+                Modifier.isAbstract(clazz.getModifiers())
+                    || clazz.getProtectionDomain()
                 .getCodeSource()
                 .getLocation()
                 .getPath()
@@ -112,7 +114,7 @@ class EventTypeTest {
             obj = cons[0].newInstance();
         }
 
-        return (boolean) className.getDeclaredMethod("canHandle", CallbackType.class, CaseType.class, EventType.class)
+        return (boolean) className.getMethod("canHandle", CallbackType.class, CaseType.class, EventType.class)
             .invoke(obj, callbackType, caseType, eventType);
     }
 }
