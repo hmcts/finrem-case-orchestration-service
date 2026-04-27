@@ -355,7 +355,7 @@ class ProcessOrderMidHandlerTest extends BaseHandlerTestSetup {
         FinremCaseDetails.FinremCaseDetailsBuilder caseDataBefore = FinremCaseDetails.builder().data(mock(FinremCaseData.class));
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory
-            .from(PROCESS_ORDER, caseDataBefore, caseDataBuilder);
+            .from(caseDataBefore, caseDataBuilder);
 
         when(processOrderService.uploadHearingOrderListAlteredOrRemoved(
             intendedUploadHearingOrderList, currentStoredUploadHearingOrderList)).thenReturn(true);

@@ -45,6 +45,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
 
@@ -62,7 +63,7 @@ class ProcessOrderServiceTest {
         CaseDocument unstampedDocument = caseDocument("unstamped.pdf");
         DirectionOrderCollection stampedOrder = DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
-                .isOrderStamped(YesOrNo.YES)
+                .isOrderStamped(YES)
                 .uploadDraftDocument(CaseDocument.builder().documentFilename("stamped.pdf").build())
                 .build())
             .build();
@@ -453,37 +454,39 @@ class ProcessOrderServiceTest {
      * sure it's never null.
      */
     private static Stream<Arguments> provideUploadHearingOrderListAlteredOrRemovedCases() {
+        YesOrNo documentIsStamped = YES;
+        YesOrNo documentIsNotStamped = NO;
         return Stream.of(
             Arguments.of(
                 "returns false when intended and current contain the same unstamped document URLs",
-                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO)),
-                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO)),
+                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", documentIsNotStamped)),
+                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", documentIsNotStamped)),
                 false
             ),
             Arguments.of(
                 "returns true when intended is missing an unstamped document URL present in current",
-                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO)),
+                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", documentIsNotStamped)),
                 List.of(
-                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO),
-                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", NO)
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", documentIsNotStamped),
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", documentIsNotStamped)
                 ),
                 true
             ),
             Arguments.of(
                 "returns false when intended contains extra unstamped document URLs not present in current",
                 List.of(
-                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO),
-                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", NO)
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", documentIsNotStamped),
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", documentIsNotStamped)
                 ),
-                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", NO)),
+                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", documentIsNotStamped)),
                 false
             ),
             Arguments.of(
                 "ignores stamped YES documents in current when comparing URLs",
-                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", NO)),
+                List.of(createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", documentIsNotStamped)),
                 List.of(
-                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", YesOrNo.YES),
-                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", NO)
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/a.pdf", documentIsStamped),
+                    createDirectionOrderForUploadHearingOrderListAltered("http://example.com/b.pdf", documentIsNotStamped)
                 ),
                 false
             )

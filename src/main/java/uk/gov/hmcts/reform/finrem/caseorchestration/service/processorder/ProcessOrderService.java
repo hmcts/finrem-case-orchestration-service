@@ -217,9 +217,9 @@ public class ProcessOrderService {
      * @return the document URL if present; null otherwise
      */
     private static String extractUnstampedDocumentUrl(DirectionOrderCollection directionOrderCollection) {
-        return java.util.Optional.ofNullable(directionOrderCollection)
+        return Optional.ofNullable(directionOrderCollection)
             .map(DirectionOrderCollection::getValue)
-            .filter(order -> !YesOrNo.YES.equals(order.getIsOrderStamped()))
+            .filter(order -> YesOrNo.isNoOrNull(order.getIsOrderStamped()))
             .map(DirectionOrder::getUploadDraftDocument)
             .map(CaseDocument::getDocumentUrl)
             .orElse(null);
