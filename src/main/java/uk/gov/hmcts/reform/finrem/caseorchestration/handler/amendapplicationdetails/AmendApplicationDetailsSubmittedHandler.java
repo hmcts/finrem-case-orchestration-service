@@ -58,7 +58,7 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
         FinremCaseData finremCaseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
         String grantAppSolicitorError = grantApplicantSolicitor(finremCaseData);
-        String revokeAppSolicitorError = shouldRevokeApplicantSolicitor(finremCaseData, finremCaseDataBefore)
+        String revokeAppSolicitorError = shouldRevokeApplicantSolicitor(callbackRequest)
             ? null : revokeApplicantSolicitor(finremCaseDataBefore);
 
         boolean isHavingErrors = !StringUtils.isAllBlank(grantAppSolicitorError, revokeAppSolicitorError);
@@ -66,14 +66,15 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
         if (isHavingErrors) {
             return submittedResponse(
                 toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
-                toConfirmationBody(grantAppSolicitorError));
+                toConfirmationBody(grantAppSolicitorError, revokeAppSolicitorError));
         } else {
             return submittedResponse();
         }
     }
 
-    private boolean shouldRevokeApplicantSolicitor(FinremCaseData finremCaseData, FinremCaseData finremCaseDataBefore) {
-        return false;
+    private boolean shouldRevokeApplicantSolicitor(FinremCallbackRequest callbackRequest) {
+        return callbackRequest.isApplicantSolicitorChanged()
+            && StringUtils.isNotBlank(callbackRequest.getFinremCaseData().getAppSolicitorEmailIfRepresented());
     }
 
     private String grantApplicantSolicitor(FinremCaseData caseData) {
