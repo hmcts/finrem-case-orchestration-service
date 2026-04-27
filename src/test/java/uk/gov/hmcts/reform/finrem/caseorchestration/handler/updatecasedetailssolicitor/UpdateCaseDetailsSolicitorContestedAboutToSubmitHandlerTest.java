@@ -73,7 +73,7 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
     }
 
     static ContactDetailsWrapper buildContactDetailsWrapper(
-        String applicantSolicitorName, String applicantSolicitorFirm, String applicantSolicitorEmail, boolean isCurrentUserApplicantSolicitor,
+        String applicantSolicitorName, String applicantSolicitorFirm,  String applicantSolicitorEmail, boolean isCurrentUserApplicantSolicitor,
         boolean includeRespondent, String respondentSolicitorName, String respondentSolicitorFirm, boolean isCurrentUserRespondentSolicitor) {
 
         ContactDetailsWrapper.ContactDetailsWrapperBuilder builder = ContactDetailsWrapper.builder()
@@ -87,6 +87,28 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
             builder.respondentSolicitorName(respondentSolicitorName)
                 .respondentSolicitorFirm(respondentSolicitorFirm)
                 .respondentSolicitorAddress(buildAddress())
+                .currentUserIsRespondentSolicitor(isCurrentUserRespondentSolicitor ? YesOrNo.YES : YesOrNo.NO);
+        }
+        return builder.build();
+    }
+
+    static ContactDetailsWrapper buildContactDetailsWrapper(
+        String applicantSolicitorName, String applicantSolicitorFirm, String applicantSolicitorEmail, Address applicantSolicitorAddress,
+        boolean isCurrentUserApplicantSolicitor,
+        boolean includeRespondent, String respondentSolicitorName, String respondentSolicitorFirm, Address respondentSolicitorAddress,
+        boolean isCurrentUserRespondentSolicitor) {
+
+        ContactDetailsWrapper.ContactDetailsWrapperBuilder builder = ContactDetailsWrapper.builder()
+            .applicantSolicitorName(applicantSolicitorName)
+            .applicantSolicitorFirm(applicantSolicitorFirm)
+            .applicantSolicitorEmail(applicantSolicitorEmail)
+            .applicantSolicitorAddress(applicantSolicitorAddress)
+            .currentUserIsApplicantSolicitor(isCurrentUserApplicantSolicitor ? YesOrNo.YES : YesOrNo.NO);
+
+        if (includeRespondent) {
+            builder.respondentSolicitorName(respondentSolicitorName)
+                .respondentSolicitorFirm(respondentSolicitorFirm)
+                .respondentSolicitorAddress(respondentSolicitorAddress)
                 .currentUserIsRespondentSolicitor(isCurrentUserRespondentSolicitor ? YesOrNo.YES : YesOrNo.NO);
         }
         return builder.build();
@@ -265,27 +287,14 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString()))
             .thenReturn(new ArrayList<>());
 
-        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
-            .applicantSolicitorName(beforeAppSolName)
-            .applicantSolicitorFirm(beforeAppSolFirm)
-            .applicantSolicitorEmail(beforeAppSolEmail)
-            .applicantSolicitorAddress(beforeAppSolAddress)
-            .respondentSolicitorName(beforeRespSolName)
-            .respondentSolicitorFirm(beforeRespSolFirm)
-            .respondentSolicitorAddress(beforeRespSolAddress)
-            .currentUserIsApplicantSolicitor(YesOrNo.YES)
-            .build();
+        ContactDetailsWrapper beforeWrapper = buildContactDetailsWrapper(
+            beforeAppSolName, beforeAppSolFirm, beforeAppSolEmail, beforeAppSolAddress, true,
+            true, beforeRespSolName, beforeRespSolFirm, beforeRespSolAddress, false);
 
-        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder()
-            .applicantSolicitorName(afterAppSolName)
-            .applicantSolicitorFirm(afterAppSolFirm)
-            .applicantSolicitorEmail(afterAppSolEmail)
-            .applicantSolicitorAddress(afterAppSolAddress)
-            .respondentSolicitorName(afterRespSolName)
-            .respondentSolicitorFirm(afterRespSolFirm)
-            .respondentSolicitorAddress(afterRespSolAddress)
-            .currentUserIsApplicantSolicitor(YesOrNo.YES)
-            .build();
+
+        ContactDetailsWrapper afterWrapper =buildContactDetailsWrapper(
+            afterAppSolName, afterAppSolFirm, afterAppSolEmail,afterAppSolAddress,true,
+            true, afterRespSolName, afterRespSolFirm, afterRespSolAddress, false);
 
         FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
         FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);

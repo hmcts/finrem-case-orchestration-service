@@ -62,7 +62,7 @@ class AddressUtilsTest {
                 Arguments.of("AddressLine2",
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA"),
                     buildAddress("123 Main St", "Apt 5", "Block B", "County", "UK", "London", "E1 1AA")),
-                //  Addresss line3
+                //  Address line3
                 Arguments.of("AddressLine3",
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA"),
                     buildAddress("123 Main St", "Apt 4", "Block C", "County", "UK", "London", "E1 1AA")),
@@ -83,31 +83,31 @@ class AddressUtilsTest {
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA"),
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "E2 2BB")),
                 //  Address line1 case
-                Arguments.of("AddressLine1",
+                Arguments.of("AddressLine1 Case",
                     buildAddress("main street", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA"),
                     buildAddress("MAIN STREET", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA")),
                 //  Address line2 case
-                Arguments.of("AddressLine2",
+                Arguments.of("AddressLine2 Case",
                     buildAddress("123 Main St", "apt 4", "Block B", "County", "UK", "London", "E1 1AA"),
                     buildAddress("123 Main St", "APT 4", "Block B", "County", "UK", "London", "E1 1AA")),
                 //  Address line3 case
-                Arguments.of("AddressLine3",
+                Arguments.of("AddressLine3 Case",
                     buildAddress("123 Main St", "Apt 4", "block b", "County", "UK", "London", "E1 1AA"),
                     buildAddress("123 Main St", "Apt 4", "BLOCK B", "County", "UK", "London", "E1 1AA")),
                 //  Address county case
-                Arguments.of("County",
+                Arguments.of("County Case",
                     buildAddress("123 Main St", "Apt 4", "Block B", "county", "UK", "London", "E1 1AA"),
                     buildAddress("123 Main St", "Apt 4", "Block B", "COUNTY", "UK", "London", "E1 1AA")),
                 //  Address country case
-                Arguments.of("Country",
+                Arguments.of("Country Case",
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "uk", "London", "E1 1AA"),
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA")),
                 //  Address post town case
-                Arguments.of("PostTown",
+                Arguments.of("PostTown Case",
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "london", "E1 1AA"),
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "LONDON", "E1 1AA")),
                 //  Address post code case
-                Arguments.of("PostCode",
+                Arguments.of("PostCode Case",
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "e1 1aa"),
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA"))
             );
