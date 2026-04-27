@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
@@ -65,6 +66,9 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
 
     @Mock
     private InternationalPostalService internationalPostalService;
+
+    @Mock
+    private GenerateCoverSheetService generateCoverSheetService;
 
     @Mock
     private FinremCaseDetailsMapper detailsMapper;
@@ -291,6 +295,8 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         // No cover sheets should be generated since there are no changes
         verify(updateContactDetailsService).persistOrgPolicies(finremCaseData, caseDetails.getData());
         verify(onlineFormDocumentService, never()).generateContestedMiniForm(any(), any());
+        verify(generateCoverSheetService, never()).generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(generateCoverSheetService, never()).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verifyNoMoreInteractions(onlineFormDocumentService);
         verifyNoMoreInteractions(nocWorkflowService);
     }
