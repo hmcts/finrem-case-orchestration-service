@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -10,10 +11,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.organisationPolicy;
 
 class FinremCallbackRequestTest {
     
@@ -99,7 +103,7 @@ class FinremCallbackRequestTest {
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
 
-        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
+        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
         when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(afterEmail);
 
         FinremCallbackRequest underTest = FinremCallbackRequest.builder()
@@ -118,7 +122,7 @@ class FinremCallbackRequestTest {
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
 
-        when(finremCaseDataBefore.getRespSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
+        when(finremCaseData.getRespSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
         when(finremCaseDataBefore.getRespSolicitorEmailIfRepresented()).thenReturn(afterEmail);
 
         FinremCallbackRequest underTest = FinremCallbackRequest.builder()
@@ -126,5 +130,68 @@ class FinremCallbackRequestTest {
             .caseDetailsBefore(finremCaseDetailsBefore)
             .build();
         assertTrue(underTest.isRespondentSolicitorChanged());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "TEST_ORG_ID, TEST_ORG2_ID",
+        "null, TEST_ORG2_ID",
+        "TEST_ORG_ID, null"
+    }, nullValues = {"null"})
+    void shouldReturnTrueWhenApplicantOrganisationPoliciesChanged(String beforeOrganisationPolicyId, String afterOrganisationPolicyId) {
+        FinremCaseData finremCaseData = mock(FinremCaseData.class);
+        FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
+
+        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(finremCaseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(afterOrganisationPolicyId));
+        when(finremCaseDataBefore.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(beforeOrganisationPolicyId));
+
+        FinremCallbackRequest underTest = FinremCallbackRequest.builder()
+            .caseDetails(finremCaseDetails)
+            .caseDetailsBefore(finremCaseDetailsBefore)
+            .build();
+        assertTrue(underTest.isApplicantSolicitorChanged());
+    }
+
+    @Test
+    void shouldReturnFalseWhenBothApplicantOrganisationPoliciesAreMissing() {
+        FinremCaseData finremCaseData = mock(FinremCaseData.class);
+        FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
+
+        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+
+        FinremCallbackRequest underTest = FinremCallbackRequest.builder()
+            .caseDetails(finremCaseDetails)
+            .caseDetailsBefore(finremCaseDetailsBefore)
+            .build();
+        assertFalse(underTest.isApplicantSolicitorChanged());
+    }
+
+    @Test
+    void shouldReturnFalseWhenBothApplicantOrganisationPoliciesAndEmailsMatch() {
+        FinremCaseData finremCaseData = mock(FinremCaseData.class);
+        FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
+
+        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(finremCaseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+        when(finremCaseDataBefore.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
+
+        FinremCallbackRequest underTest = FinremCallbackRequest.builder()
+            .caseDetails(finremCaseDetails)
+            .caseDetailsBefore(finremCaseDetailsBefore)
+            .build();
+        assertFalse(underTest.isApplicantSolicitorChanged());
     }
 }
