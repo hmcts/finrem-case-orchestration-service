@@ -1,16 +1,219 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.Map;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.mock;
 
 class ContactDetailsWrapperTest {
+
+    @ParameterizedTest
+    @MethodSource("applicantAddressDetailFieldChanges")
+    void shouldDetectChangesInApplicantAddressDetails(
+        String fieldName,
+        UnaryOperator<ContactDetailsWrapper.ContactDetailsWrapperBuilder> fieldChange
+    ) {
+        // Given
+        ContactDetailsWrapper originalWrapper = applicantAddressDetailsWrapperBuilder().build();
+        ContactDetailsWrapper modifiedWrapper = fieldChange.apply(applicantAddressDetailsWrapperBuilder()).build();
+
+        // When
+        boolean result = ContactDetailsWrapper.hasApplicantAddressDetailsChanged(originalWrapper, modifiedWrapper);
+
+        // Then
+        assertThat(result)
+            .as("Expected change to applicant address detail field '%s' to be detected", fieldName)
+            .isTrue();
+    }
+
+    @ParameterizedTest
+    @MethodSource("applicantAddressDetailFieldChanges")
+    void shouldNotDetectChangesWhenApplicantAddressDetailsAreSame(
+        String fieldName,
+        UnaryOperator<ContactDetailsWrapper.ContactDetailsWrapperBuilder> fieldChange
+    ) {
+        // Given
+        ContactDetailsWrapper originalWrapper = fieldChange.apply(applicantAddressDetailsWrapperBuilder()).build();
+        ContactDetailsWrapper identicalWrapper = fieldChange.apply(applicantAddressDetailsWrapperBuilder()).build();
+
+        // When
+        boolean result = ContactDetailsWrapper.hasApplicantAddressDetailsChanged(originalWrapper, identicalWrapper);
+
+        // Then
+        assertThat(result)
+            .as("Expected identical applicant address detail field '%s' not to be detected as changed", fieldName)
+            .isFalse();
+    }
+
+    private static Stream<Arguments> applicantAddressDetailFieldChanges() {
+        return Stream.of(
+            Arguments.of("applicantFmName", fieldChange(
+                builder -> builder.applicantFmName("Jane")
+            )),
+            Arguments.of("applicantLname", fieldChange(
+                builder -> builder.applicantLname("Smith")
+            )),
+            Arguments.of("applicantAddress", fieldChange(
+                builder -> builder.applicantAddress(new Address(
+                    "Changed Line1",
+                    "Changed Line2",
+                    "Changed Line3",
+                    "Changed Town",
+                    "Changed County",
+                    "Changed PostCode",
+                    "Changed Country"
+                ))
+            )),
+            Arguments.of("applicantAddressConfidential", fieldChange(
+                builder -> builder.applicantAddressHiddenFromRespondent(YesOrNo.YES)
+            )),
+            Arguments.of("applicantSolicitorName", fieldChange(
+                builder -> builder.applicantSolicitorName("Changed Applicant Solicitor")
+            )),
+            Arguments.of("applicantSolicitorAddress", fieldChange(
+                builder -> builder.applicantSolicitorAddress(new Address(
+                    "Changed Solicitor Line1",
+                    "Changed Solicitor Line2",
+                    "Changed Solicitor Line3",
+                    "Changed Solicitor Town",
+                    "Changed Solicitor County",
+                    "Changed Solicitor PostCode",
+                    "Changed Solicitor Country"
+                ))
+            ))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("respondentAddressDetailFieldChanges")
+    void shouldDetectChangesInRespondentAddressDetails(
+        String fieldName,
+        UnaryOperator<ContactDetailsWrapper.ContactDetailsWrapperBuilder> fieldChange
+    ) {
+        // Given
+        ContactDetailsWrapper originalWrapper = respondentAddressDetailsWrapperBuilder().build();
+        ContactDetailsWrapper modifiedWrapper = fieldChange.apply(respondentAddressDetailsWrapperBuilder()).build();
+
+        // When
+        boolean result = ContactDetailsWrapper.hasRespondentAddressDetailsChanged(originalWrapper, modifiedWrapper);
+
+        // Then
+        assertThat(result)
+            .as("Expected change to respondent address detail field '%s' to be detected", fieldName)
+            .isTrue();
+    }
+
+    @ParameterizedTest
+    @MethodSource("respondentAddressDetailFieldChanges")
+    void shouldNotDetectChangesWhenRespondentAddressDetailsAreSame(
+        String fieldName,
+        UnaryOperator<ContactDetailsWrapper.ContactDetailsWrapperBuilder> fieldChange
+    ) {
+        // Given
+        ContactDetailsWrapper originalWrapper = fieldChange.apply(respondentAddressDetailsWrapperBuilder()).build();
+        ContactDetailsWrapper identicalWrapper = fieldChange.apply(respondentAddressDetailsWrapperBuilder()).build();
+
+        // When
+        boolean result = ContactDetailsWrapper.hasRespondentAddressDetailsChanged(originalWrapper, identicalWrapper);
+
+        // Then
+        assertThat(result)
+            .as("Expected identical respondent address detail field '%s' not to be detected as changed", fieldName)
+            .isFalse();
+    }
+
+    private static Stream<Arguments> respondentAddressDetailFieldChanges() {
+        return Stream.of(
+            Arguments.of("respondentFmName", fieldChange(
+                builder -> builder.respondentFmName("Jane")
+            )),
+            Arguments.of("respondentLname", fieldChange(
+                builder -> builder.respondentLname("Smith")
+            )),
+            Arguments.of("respondentAddress", fieldChange(
+                builder -> builder.respondentAddress(new Address(
+                    "Changed Line1",
+                    "Changed Line2",
+                    "Changed Line3",
+                    "Changed Town",
+                    "Changed County",
+                    "Changed PostCode",
+                    "Changed Country"
+                ))
+            )),
+            Arguments.of("respondentAddressHiddenFromApplicant", fieldChange(
+                builder -> builder.respondentAddressHiddenFromApplicant(YesOrNo.YES)
+            )),
+            Arguments.of("respondentSolicitorName", fieldChange(
+                builder -> builder.respondentSolicitorName("Changed Respondent Solicitor")
+            )),
+            Arguments.of("respondentSolicitorAddress", fieldChange(
+                builder -> builder.respondentSolicitorAddress(new Address(
+                    "Changed Solicitor Line1",
+                    "Changed Solicitor Line2",
+                    "Changed Solicitor Line3",
+                    "Changed Solicitor Town",
+                    "Changed Solicitor County",
+                    "Changed Solicitor PostCode",
+                    "Changed Solicitor Country"
+                ))
+            ))
+        );
+    }
+
+    @Test
+    void shouldDetectChangesInRespondentAddressDetails() {
+        // Given
+        ContactDetailsWrapper originalWrapper = ContactDetailsWrapper.builder()
+            .applicantFmName("John")
+            .applicantLname("Doe")
+            .applicantAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
+            .build();
+
+        ContactDetailsWrapper modifiedWrapper = ContactDetailsWrapper.builder()
+            .applicantFmName("Jane") // Changed field
+            .applicantLname("Doe")
+            .applicantAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
+            .build();
+
+        // When
+        boolean result = ContactDetailsWrapper.hasApplicantAddressDetailsChanged(originalWrapper, modifiedWrapper);
+
+        // Then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void shouldNotDetectChangesWhenRespondentAddressDetailsAreSame() {
+        // Given
+        ContactDetailsWrapper originalWrapper = ContactDetailsWrapper.builder()
+            .respondentFmName("John")
+            .respondentLname("Doe")
+            .respondentAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
+            .build();
+
+        ContactDetailsWrapper identicalWrapper = ContactDetailsWrapper.builder()
+            .respondentFmName("John")
+            .respondentLname("Doe")
+            .respondentAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
+            .build();
+
+        // When
+        boolean result = ContactDetailsWrapper.hasApplicantAddressDetailsChanged(originalWrapper, identicalWrapper);
+
+        // Then
+        assertThat(result).isFalse();
+    }
 
     @Test
     void givenTwoWrappers_whenDiffCalled_thenReturnOnlyFieldsThatChanged() {
@@ -109,5 +312,47 @@ class ContactDetailsWrapperTest {
             () -> assertThat(contactDetails.getApplicantSolicitorDxNumber()).isNull(),
             () -> assertThat(contactDetails.getApplicantSolicitorConsentForEmails()).isNull()
         );
+    }
+
+    private static ContactDetailsWrapper.ContactDetailsWrapperBuilder applicantAddressDetailsWrapperBuilder() {
+        return ContactDetailsWrapper.builder()
+            .applicantFmName("John")
+            .applicantLname("Doe")
+            .applicantAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
+            .applicantAddressHiddenFromRespondent(YesOrNo.NO)
+            .applicantSolicitorName("Applicant Solicitor")
+            .applicantSolicitorAddress(new Address(
+                "Solicitor Line1",
+                "Solicitor Line2",
+                "Solicitor Line3",
+                "Solicitor Town",
+                "Solicitor County",
+                "Solicitor PostCode",
+                "Solicitor Country"
+            ));
+    }
+
+    private static ContactDetailsWrapper.ContactDetailsWrapperBuilder respondentAddressDetailsWrapperBuilder() {
+        return ContactDetailsWrapper.builder()
+            .respondentFmName("John")
+            .respondentLname("Doe")
+            .respondentAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
+            .respondentAddressHiddenFromApplicant(YesOrNo.NO)
+            .respondentSolicitorName("Respondent Solicitor")
+            .respondentSolicitorAddress(new Address(
+                "Solicitor Line1",
+                "Solicitor Line2",
+                "Solicitor Line3",
+                "Solicitor Town",
+                "Solicitor County",
+                "Solicitor PostCode",
+                "Solicitor Country"
+            ));
+    }
+
+    private static UnaryOperator<ContactDetailsWrapper.ContactDetailsWrapperBuilder> fieldChange(
+        UnaryOperator<ContactDetailsWrapper.ContactDetailsWrapperBuilder> fieldChange
+    ) {
+        return fieldChange;
     }
 }

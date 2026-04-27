@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -23,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.AddressUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.ArrayList;
@@ -103,15 +101,14 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
                 .handleNoticeOfChangeWorkflow(caseDetails, userAuthorisation, caseDetailsBefore)
                 .getData();
 
-            finremCaseData = finremCaseDetailsMapper.mapToFinremCaseData(updateCaseData, caseDetails.getCaseTypeId());
+            finremCaseDetails.setData(finremCaseDetailsMapper.mapToFinremCaseData(updateCaseData, caseDetails.getCaseTypeId()));
         } else {
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
         }
 
         FinremCaseDetails finremCaseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        generateCoverSheets(finremCaseDetails, finremCaseDetailsBefore, userAuthorisation);
-
-        return response(finremCaseData);
+        generateCoverSheets(finremCaseDetails, finremCaseDetailsBefore.getData().getContactDetailsWrapper(), userAuthorisation);
+        return response(finremCaseDetails.getData());
     }
 
     private void considerContestedMiniFormA(FinremCaseDetails finremCaseDetails,
@@ -151,38 +148,12 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
         return errors;
     }
 
-    private void generateCoverSheets(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String userAuthorisation) {
-        if (hasChangeApplicant(caseDetails, caseDetailsBefore)) {
+    private void generateCoverSheets(FinremCaseDetails caseDetails, ContactDetailsWrapper contactDetailsBefore, String userAuthorisation) {
+        if (ContactDetailsWrapper.hasApplicantAddressDetailsChanged(caseDetails.getData().getContactDetailsWrapper(), contactDetailsBefore)) {
             generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, userAuthorisation);
         }
-        if (hasChangeRespondant(caseDetails, caseDetailsBefore)) {
+        if (ContactDetailsWrapper.hasRespondentAddressDetailsChanged(caseDetails.getData().getContactDetailsWrapper(), contactDetailsBefore)) {
             generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, userAuthorisation);
         }
-    }
-
-    private boolean hasChangeApplicant(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
-        Map<String, Object[]> fieldsChanged = ContactDetailsWrapper.diff(finremCaseDetails.getData().getContactDetailsWrapper(),
-            finremCaseDetailsBefore.getData().getContactDetailsWrapper());
-
-        Address applicantAddress = finremCaseDetails.getData().getContactDetailsWrapper().getApplicantAddress();
-        Address applicantAddressBefore = finremCaseDetailsBefore.getData().getContactDetailsWrapper().getApplicantAddress();
-        boolean applicantAddressChanged = AddressUtils.hasChange(applicantAddressBefore, applicantAddress);
-
-        return (fieldsChanged.keySet().contains("applicantFmName")
-            || fieldsChanged.keySet().contains("applicantLname")
-            || applicantAddressChanged);
-    }
-
-    private boolean hasChangeRespondant(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore) {
-        Map<String, Object[]> fieldsChanged = ContactDetailsWrapper.diff(finremCaseDetails.getData().getContactDetailsWrapper(),
-            finremCaseDetailsBefore.getData().getContactDetailsWrapper());
-
-        Address respondentAddress = finremCaseDetails.getData().getContactDetailsWrapper().getRespondentAddress();
-        Address respondentAddressBefore = finremCaseDetailsBefore.getData().getContactDetailsWrapper().getRespondentAddress();
-        boolean respondentAddressChanged = AddressUtils.hasChange(respondentAddressBefore, respondentAddress);
-
-        return (fieldsChanged.keySet().contains("respondentFmName")
-            || fieldsChanged.keySet().contains("respondentLname")
-            || respondentAddressChanged);
     }
 }

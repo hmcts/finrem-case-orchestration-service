@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,6 +17,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -91,6 +93,38 @@ public class ContactDetailsWrapper {
     private YesOrNo currentUserIsApplicantSolicitor;
     @TemporaryField
     private YesOrNo currentUserIsRespondentSolicitor;
+
+    @JsonIgnore
+    private static final Set<String> APPLICANT_ADDRESS_DETAIL_FIELDS = Set.of(
+        "applicantFmName",
+        "applicantLname",
+        "applicantAddress",
+        "applicantAddressHiddenFromRespondent",
+        "applicantSolicitorName",
+        "applicantSolicitorAddress"
+    );
+
+    @JsonIgnore
+    private static final Set<String> RESPONDENT_ADDRESS_DETAIL_FIELDS = Set.of(
+        "respondentFmName",
+        "respondentLname",
+        "respondentAddress",
+        "respondentAddressHiddenFromApplicant",
+        "respondentSolicitorName",
+        "respondentSolicitorAddress"
+    );
+
+    public static boolean hasApplicantAddressDetailsChanged(ContactDetailsWrapper a, ContactDetailsWrapper b) {
+        return hasAnyFieldChanged(diff(a, b), APPLICANT_ADDRESS_DETAIL_FIELDS);
+    }
+
+    public static boolean hasRespondentAddressDetailsChanged(ContactDetailsWrapper a, ContactDetailsWrapper b) {
+        return hasAnyFieldChanged(diff(a, b), RESPONDENT_ADDRESS_DETAIL_FIELDS);
+    }
+
+    private static boolean hasAnyFieldChanged(Map<String, Object[]> fieldsChanged, Set<String> trackedFields) {
+        return trackedFields.stream().anyMatch(fieldsChanged::containsKey);
+    }
 
     /**
      * Compares two {@link ContactDetailsWrapper} objects field by field and returns a map
