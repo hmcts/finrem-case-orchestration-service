@@ -24,7 +24,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -243,29 +242,6 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         );
     }
 
-    @Test
-    void whenHandleWithNonNullCaseDetailsBeforeData_thenNoExceptionAndReturnsNotNull() {
-        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString()))
-            .thenReturn(new ArrayList<>());
-
-        ContactDetailsWrapper beforeWrapper = buildContactDetailsWrapper(
-            "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm", false);
-
-        ContactDetailsWrapper afterWrapper = buildContactDetailsWrapper(
-            "New AppSol Name", "New AppSol Firm", "NewAppSol@email.com", true,
-            true, "Old RespSol Name", "Old RespSol Firm", false);
-
-        FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
-        FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);
-
-        FinremCallbackRequest request = FinremCallbackRequest.builder()
-            .caseDetails(afterDetails)
-            .caseDetailsBefore(beforeDetails)
-            .build();
-        assertThat(underTest.handle(request, AUTH_TOKEN)).isNotNull();
-    }
-
     /**
      *  Tests various scenarios of solicitor name, firm, email, and address changes to verify the generation
      *  of cover sheets for both applicant and respondent.
@@ -309,7 +285,6 @@ class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
         } else {
             verify(generateCoverSheetService, never()).generateAndSetRespondentCoverSheet(afterDetails, AUTH_TOKEN);
         }
-        reset(generateCoverSheetService);
     }
 
     /**

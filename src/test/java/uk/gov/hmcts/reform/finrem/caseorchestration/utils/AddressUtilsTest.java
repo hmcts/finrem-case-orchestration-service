@@ -95,7 +95,11 @@ class AddressUtilsTest {
                 //  Address post code case
                 Arguments.of("PostCode Case",
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "e1 1aa"),
-                    buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA"))
+                    buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA")),
+                //  Address post code case
+                Arguments.of("Address Whitespace",
+                    buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "e1 1aa"),
+                    buildAddress("123 Main St ", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA"))
             );
         }
 
