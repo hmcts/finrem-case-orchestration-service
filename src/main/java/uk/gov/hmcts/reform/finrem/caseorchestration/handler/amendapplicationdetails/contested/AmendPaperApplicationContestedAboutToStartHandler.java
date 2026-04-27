@@ -47,6 +47,6 @@ public class AmendPaperApplicationContestedAboutToStartHandler extends FinremCal
         RefugeWrapperUtils.populateApplicantInRefugeQuestion(caseDetails);
         RefugeWrapperUtils.populateRespondentInRefugeQuestion(caseDetails);
 
-        return response(callbackRequest.getCaseDetails().getData());
+        return response(callbackRequest.getFinremCaseData());
     }
 }

@@ -43,9 +43,9 @@ class AmendPaperApplicationContestedAboutToStartHandlerTest {
     void testHandle() {
         FinremCaseData finremCaseData = mock(FinremCaseData.class);
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        when(caseDetails.getData()).thenReturn(finremCaseData);
         FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(callbackRequest.getFinremCaseData()).thenReturn(finremCaseData);
 
         try (MockedStatic<RefugeWrapperUtils> mockedStatic = Mockito.mockStatic(RefugeWrapperUtils.class)) {
             var response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -58,7 +58,7 @@ class AmendPaperApplicationContestedAboutToStartHandlerTest {
                 () -> assertEquals(finremCaseData, response.getData()),
                 () -> mockedStatic.verify(() -> RefugeWrapperUtils.populateApplicantInRefugeQuestion(caseDetails)),
                 () -> mockedStatic.verify(() -> RefugeWrapperUtils.populateRespondentInRefugeQuestion(caseDetails)),
-                () -> mockedStatic.verifyNoMoreInteractions()
+                mockedStatic::verifyNoMoreInteractions
             );
         }
     }
