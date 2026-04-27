@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -209,16 +210,21 @@ class FinremCallbackRequestTest {
         assertFalse(underTest.isRespondentSolicitorChanged());
     }
 
-    @Test
-    void shouldReturnFalseWhenApplicantPolicyAndEmailAreIdentical() {
+    @ParameterizedTest
+    @CsvSource(value = {
+        "solicitor@email.com,solicitor@email.com",
+        " emailPrefixWithSpace@email.com,emailPrefixWithSpace@email.com"
+    }, ignoreLeadingAndTrailingWhitespace = false)
+    void shouldReturnFalseWhenApplicantPolicyAndEmailAreIdentical(String appSolicitorEmailIfRepresented,
+                                                                  String beforeAppSolicitorEmailIfRepresented) {
         FinremCaseData finremCaseData = mock(FinremCaseData.class);
         FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
 
-        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
-        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(appSolicitorEmailIfRepresented);
+        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(beforeAppSolicitorEmailIfRepresented);
         when(finremCaseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
         when(finremCaseDataBefore.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
 
