@@ -57,7 +57,7 @@ public class FinremCallbackRequest {
      * </p>
      *
      * @return {@code true} if the applicant solicitor email or policy has changed;
-     * {@code false} otherwise.
+     *         {@code false} otherwise.
      */
     @JsonIgnore
     public boolean isApplicantSolicitorChanged() {
@@ -77,7 +77,7 @@ public class FinremCallbackRequest {
      * </p>
      *
      * @return {@code true} if the respondent solicitor email or policy has changed;
-     * {@code false} otherwise.
+     *         {@code false} otherwise.
      */
     @JsonIgnore
     public boolean isRespondentSolicitorChanged() {
