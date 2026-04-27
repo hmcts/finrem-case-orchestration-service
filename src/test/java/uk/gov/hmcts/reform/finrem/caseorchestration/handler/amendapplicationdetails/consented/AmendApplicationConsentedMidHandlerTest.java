@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
@@ -25,11 +24,13 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -47,7 +48,7 @@ class AmendApplicationConsentedMidHandlerTest {
     private ConsentOrderService consentOrderService;
     @Mock
     private InternationalPostalService internationalPostalService;
-    @Spy
+    @Mock
     private ObjectMapper objectMapper;
 
     @Test
@@ -98,7 +99,9 @@ class AmendApplicationConsentedMidHandlerTest {
                 .thenReturn(new ArrayList<>(addressErrors));
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
                 .thenReturn(new ArrayList<>(emailErrors));
-            when(consentOrderService.performCheck(any(CallbackRequest.class), eq(AUTH_TOKEN)))
+            CallbackRequest convertedCallbackRequest = mock(CallbackRequest.class);
+            when(objectMapper.convertValue(callbackRequest, CallbackRequest.class)).thenReturn(convertedCallbackRequest);
+            when(consentOrderService.performCheck(eq(convertedCallbackRequest), eq(AUTH_TOKEN)))
                 .thenReturn(new ArrayList<>(consentErrors));
             when(internationalPostalService.validate(caseData))
                 .thenReturn(new ArrayList<>(postalErrors));
@@ -106,10 +109,14 @@ class AmendApplicationConsentedMidHandlerTest {
             GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
                 underTest.handle(callbackRequest, AUTH_TOKEN);
 
-            assertThat(response.getErrors()).containsExactlyElementsOf(expectedErrors);
+            assertAll(
+                () -> assertThat(response.getErrors()).containsExactlyElementsOf(expectedErrors),
+                () -> verify(internationalPostalService).validate(caseData),
+                () -> verify(consentOrderService).performCheck(any(CallbackRequest.class), eq(AUTH_TOKEN)),
+                () -> verify(objectMapper).convertValue(callbackRequest, CallbackRequest.class),
+                () -> verifyNoMoreInteractions(consentOrderService, internationalPostalService, objectMapper)
+            );
 
-            verify(internationalPostalService).validate(caseData);
-            verify(consentOrderService).performCheck(any(CallbackRequest.class), eq(AUTH_TOKEN));
         }
     }
 }
