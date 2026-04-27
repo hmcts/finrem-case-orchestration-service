@@ -26,7 +26,7 @@ class AddressUtilsTest {
 
         static Stream<Arguments> testAddressFieldChangeScenarios() {
             return Stream.of(
-                //  Address line1 Whitespace
+                //  Address line1 Same
                 Arguments.of("Addresses Same",
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA"),
                     buildAddress("123 Main St", "Apt 4", "Block B", "County", "UK", "London", "E1 1AA"),
