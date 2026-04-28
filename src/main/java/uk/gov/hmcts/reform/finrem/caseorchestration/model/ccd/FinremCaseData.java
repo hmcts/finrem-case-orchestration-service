@@ -808,7 +808,7 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     public String getAppSolicitorEmailIfRepresented() {
         var contactWrapper = getContactDetailsWrapper();
-        if (contactWrapper == null || !isApplicantRepresentedByASolicitor()) {
+        if (!isApplicantRepresentedByASolicitor()) {
             return null;
         }
 
@@ -822,7 +822,7 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     public String getRespSolicitorEmailIfRepresented() {
         var contactWrapper = getContactDetailsWrapper();
-        if (contactWrapper == null || !isRespondentRepresentedByASolicitor()) {
+        if (!isRespondentRepresentedByASolicitor()) {
             return null;
         }
 
