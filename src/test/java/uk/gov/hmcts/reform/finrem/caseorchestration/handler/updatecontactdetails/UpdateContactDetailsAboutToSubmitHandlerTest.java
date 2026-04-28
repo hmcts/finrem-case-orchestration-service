@@ -330,7 +330,6 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
             .caseType(CaseType.CONSENTED)
             .build();
 
-        // Both before and after point to the same object
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .eventType(EventType.UPDATE_CONTACT_DETAILS)
             .caseDetails(caseDetails)
@@ -340,7 +339,6 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(response);
-        // No cover sheets should be generated since there are no changes
         verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
     }
 
@@ -348,7 +346,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     void givenApplicantAddressChange_generateRespondentCoverSheetCalled() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .applicantAddress(buildAddress(
+                .respondentAddress(buildAddress(
                     "New Address Line 1", "New Address Line 2", "SW1A 1AA"))
                 .build())
             .build();
@@ -359,20 +357,19 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
             .caseType(CaseType.CONSENTED)
             .build();
 
-        FinremCaseData finremCaseDatabefore = FinremCaseData.builder()
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .applicantAddress(buildAddress(
+                .respondentAddress(buildAddress(
                     "Old Address Line 1", "Old Address Line 2", "Old 1AA"))
                 .build())
             .build();
 
         FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder()
             .id(Long.valueOf(CASE_ID))
-            .data(finremCaseDatabefore)
+            .data(finremCaseDataBefore)
             .caseType(CaseType.CONSENTED)
             .build();
 
-        // Both before and after point to the same object
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .eventType(EventType.UPDATE_CONTACT_DETAILS)
             .caseDetails(caseDetails)
@@ -382,8 +379,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(response);
-        // No cover sheets should be generated since there are no changes
-        verify(generateCoverSheetService, never()).generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
     }
 
     private Address buildAddress(String addressLine1, String addressLine2, String postCode) {
