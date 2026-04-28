@@ -89,7 +89,7 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
     }
 
     private boolean shouldRevokeOldApplicantSolicitor(FinremCallbackRequest callbackRequest) {
-        return callbackRequest.isApplicantSolicitorChanged()
+        return callbackRequest.hasApplicantSolicitorChanged()
             && StringUtils.isNotBlank(callbackRequest.getFinremCaseData().getAppSolicitorEmailIfRepresented());
     }
 
