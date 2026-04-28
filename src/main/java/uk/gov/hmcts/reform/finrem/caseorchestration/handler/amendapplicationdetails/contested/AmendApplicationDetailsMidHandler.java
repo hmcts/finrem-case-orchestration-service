@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -54,9 +53,8 @@ public class AmendApplicationDetailsMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
 
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
-        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
+        FinremCaseData caseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
         if (featureToggleService.isExpressPilotEnabled()) {
             expressCaseService.setExpressCaseEnrollmentStatus(caseData);
@@ -64,8 +62,8 @@ public class AmendApplicationDetailsMidHandler extends FinremCallbackHandler {
         }
 
         List<String> errors = new ArrayList<>();
-        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseDetails.getData()));
-        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseDetails.getData()));
+        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
         errors.addAll(internationalPostalService.validate(caseData));
 
         return response(caseData, null, errors);
