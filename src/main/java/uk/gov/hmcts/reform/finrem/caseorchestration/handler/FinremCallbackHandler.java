@@ -146,8 +146,8 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         String caseID = finremCaseDetails.getCaseIdAsString();
         if (callbackRequest.getCaseDetailsBefore() != null) {
             finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
-            if (nonNull(finremCaseDetailsBefore.getData()) &&
-                isNull(finremCaseDetailsBefore.getData().getCcdCaseId())) {
+            if (nonNull(finremCaseDetailsBefore.getData())
+                && isNull(finremCaseDetailsBefore.getData().getCcdCaseId())) {
                 finremCaseDetailsBefore.getData().setCcdCaseId(caseID);
             }
         }
