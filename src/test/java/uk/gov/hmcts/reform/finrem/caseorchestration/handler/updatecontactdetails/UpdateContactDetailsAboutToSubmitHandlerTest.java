@@ -343,7 +343,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenApplicantAddressChange_generateRespondentCoverSheetCalled() {
+    void givenRespondentAddressChange_generateRespondentCoverSheetCalled() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
                 .respondentAddress(buildAddress(
