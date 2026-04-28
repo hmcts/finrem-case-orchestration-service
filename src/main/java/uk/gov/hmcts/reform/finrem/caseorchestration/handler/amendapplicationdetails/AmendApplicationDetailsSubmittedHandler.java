@@ -62,14 +62,12 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
             ? null : revokeApplicantSolicitor(finremCaseDataBefore);
 
         boolean isHavingErrors = !StringUtils.isAllBlank(grantAppSolicitorError, revokeAppSolicitorError);
-
         if (isHavingErrors) {
             return submittedResponse(
                 toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
                 toConfirmationBody(grantAppSolicitorError, revokeAppSolicitorError));
-        } else {
-            return submittedResponse();
         }
+        return submittedResponse();
     }
 
     private String grantApplicantSolicitor(FinremCaseData caseData) {
