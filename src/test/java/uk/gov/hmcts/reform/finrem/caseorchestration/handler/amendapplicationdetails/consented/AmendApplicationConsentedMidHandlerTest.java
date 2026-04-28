@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,8 @@ class AmendApplicationConsentedMidHandlerTest {
     private InternationalPostalService internationalPostalService;
     @Mock
     private ObjectMapper objectMapper;
+    @Mock
+    private ValidatePartiesService validatePartiesService;
 
     @Test
     void testCanHandle() {
@@ -97,7 +100,7 @@ class AmendApplicationConsentedMidHandlerTest {
         try (MockedStatic<ContactDetailsValidator> contactValidatorMock = mockStatic(ContactDetailsValidator.class)) {
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
                 .thenReturn(new ArrayList<>(addressErrors));
-            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService))
                 .thenReturn(new ArrayList<>(emailErrors));
             CallbackRequest convertedCallbackRequest = mock(CallbackRequest.class);
             when(objectMapper.convertValue(callbackRequest, CallbackRequest.class)).thenReturn(convertedCallbackRequest);
