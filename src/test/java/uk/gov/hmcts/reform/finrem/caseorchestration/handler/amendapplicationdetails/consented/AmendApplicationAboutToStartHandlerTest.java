@@ -1,71 +1,40 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdetails.consented;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Intention;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-public class AmendApplicationAboutToStartHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class AmendApplicationAboutToStartHandlerTest {
 
+    @InjectMocks
     private AmendApplicationAboutToStartHandler handler;
 
-    @Before
-    public void setup() {
-        handler = new AmendApplicationAboutToStartHandler(new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())));
+    @Test
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_START, CONSENTED, EventType.AMEND_APP_DETAILS);
     }
 
     @Test
-    public void givenCase_whenEventIsAmendApplication_thenCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS),
-            is(true));
-    }
-
-    @Test
-    public void given_case_when_wrong_callback_then_case_can_not_handle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS),
-            is(false));
-    }
-
-    @Test
-    public void given_case_when_wrong_casetype_then_case_can_not_handle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.AMEND_APP_DETAILS),
-            is(false));
-    }
-
-    @Test
-    public void given_case_when_wrong_eventType_then_case_can_not_handle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CLOSE),
-            is(false));
-    }
-
-    @Test
-    public void givenCase_whenIntendsToIsApplyToVary_thenShouldAddToNatureList() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.fromId(123L);
+    void givenCase_whenIntendsToIsApplyToVary_thenShouldAddToNatureList() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
@@ -73,19 +42,23 @@ public class AmendApplicationAboutToStartHandlerTest {
             NatureApplication.LUMP_SUM_ORDER));
         data.setApplicantIntendsTo(Intention.APPLY_TO_VARY);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
-        final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
-
-        assertThat(natureOfApplication2, hasItems(NatureApplication.VARIATION_ORDER));
-        assertThat(natureOfApplication2, hasSize(3));
-        assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
+        assertAll(
+            () -> assertThat(data.getNatureApplicationWrapper().getNatureOfApplication2())
+                .contains(
+                    NatureApplication.VARIATION_ORDER,
+                    NatureApplication.LUMP_SUM_ORDER,
+                    NatureApplication.PENSION_SHARING_ORDER
+                ),
+            () -> assertThat(data).extracting(FinremCaseData::getCivilPartnership)
+                .isEqualTo(YesOrNo.NO)
+        );
     }
 
     @Test
-    public void givenCase_whenIntendsToIsNotApplyToVary_thenShouldNotDoAnything() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.fromId(123L);
+    void givenCase_whenIntendsToIsNotApplyToVary_thenShouldNotDoAnything() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
@@ -93,31 +66,49 @@ public class AmendApplicationAboutToStartHandlerTest {
             NatureApplication.LUMP_SUM_ORDER));
         data.setApplicantIntendsTo(Intention.APPLY_TO_COURT_FOR);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
-        final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
-
-        assertThat(natureOfApplication2, hasItems(NatureApplication.PENSION_SHARING_ORDER,
-            NatureApplication.LUMP_SUM_ORDER));
-        assertThat(natureOfApplication2, hasSize(2));
-        assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
+        assertAll(
+            () -> assertThat(data.getNatureApplicationWrapper().getNatureOfApplication2())
+                .containsOnly(
+                    NatureApplication.LUMP_SUM_ORDER,
+                    NatureApplication.PENSION_SHARING_ORDER
+                ),
+            () -> assertThat(data).extracting(FinremCaseData::getCivilPartnership)
+                .isEqualTo(YesOrNo.NO)
+        );
     }
 
     @Test
-    public void givenCase_whenNatureListIsEmptyAndIntendsToIsApplyToVary_thenShouldAddToNatureList() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.fromId(123L);
+    void givenCase_whenNatureListIsEmptyAndIntendsToIsApplyToVary_thenShouldAddToNatureList() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.setApplicantIntendsTo(Intention.APPLY_TO_VARY);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final FinremCaseData responseData = response.getData();
-        final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
+        assertAll(
+            () -> assertThat(data.getNatureApplicationWrapper().getNatureOfApplication2())
+                .containsOnly(
+                    NatureApplication.VARIATION_ORDER
+                ),
+            () -> assertThat(data).extracting(FinremCaseData::getCivilPartnership)
+                .isEqualTo(YesOrNo.NO)
+        );
+    }
 
-        assertThat(natureOfApplication2, hasItems(NatureApplication.VARIATION_ORDER));
-        assertThat(natureOfApplication2, hasSize(1));
-        assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
+    @Test
+    void givenCase_whenCivilPartnershipAlreadyExists_thenShouldNotPrepopulateCivilPartnership() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
+
+        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        YesOrNo mockedYerOrNo = mock(YesOrNo.class);
+        data.setCivilPartnership(mockedYerOrNo);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(data).extracting(FinremCaseData::getCivilPartnership)
+            .isEqualTo(mockedYerOrNo);
     }
 }

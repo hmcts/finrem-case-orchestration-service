@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Intention;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -40,19 +39,14 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        FinremCaseData caseData = caseDetails.getData();
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
         final Intention intention = caseData.getApplicantIntendsTo();
-        log.info("Applicant intends to {} for Case ID: {}", intention, caseDetails.getId());
 
         if (Intention.APPLY_TO_VARY.equals(intention)) {
-            log.info("Add applicant intends to {} to nature of application for Case ID: {}", intention.getValue(), caseDetails.getId());
             List<NatureApplication> natureApplicationList =
                 Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
             natureApplicationList.add(NatureApplication.VARIATION_ORDER);
             caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureApplicationList);
-            log.info("Paper Case ID: {} marked as variation order", caseDetails.getId());
         }
 
         if (caseData.getCivilPartnership() == null) {
