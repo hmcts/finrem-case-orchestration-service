@@ -110,7 +110,7 @@ class FinremCallbackRequestTest {
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
             .build();
-        assertTrue(underTest.isApplicantSolicitorChanged());
+        assertTrue(underTest.hasApplicantSolicitorChanged());
     }
 
     @ParameterizedTest
@@ -129,7 +129,7 @@ class FinremCallbackRequestTest {
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
             .build();
-        assertTrue(underTest.isRespondentSolicitorChanged());
+        assertTrue(underTest.hasRespondentSolicitorChanged());
     }
 
     private static Stream<Arguments> changedPolicyProvider() {
@@ -154,7 +154,7 @@ class FinremCallbackRequestTest {
         FinremCallbackRequest underTest = FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder().data(finremCaseData).build())
             .caseDetailsBefore(FinremCaseDetails.builder().data(finremCaseDataBefore).build()).build();
-        assertTrue(underTest.isApplicantSolicitorChanged());
+        assertTrue(underTest.hasApplicantSolicitorChanged());
     }
 
     @ParameterizedTest
@@ -171,7 +171,7 @@ class FinremCallbackRequestTest {
         FinremCallbackRequest underTest = FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder().data(finremCaseData).build())
             .caseDetailsBefore(FinremCaseDetails.builder().data(finremCaseDataBefore).build()).build();
-        assertTrue(underTest.isRespondentSolicitorChanged());
+        assertTrue(underTest.hasRespondentSolicitorChanged());
     }
 
     @Test
@@ -189,7 +189,7 @@ class FinremCallbackRequestTest {
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
             .build();
-        assertFalse(underTest.isApplicantSolicitorChanged());
+        assertFalse(underTest.hasApplicantSolicitorChanged());
     }
 
     @Test
@@ -207,7 +207,7 @@ class FinremCallbackRequestTest {
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
             .build();
-        assertFalse(underTest.isRespondentSolicitorChanged());
+        assertFalse(underTest.hasRespondentSolicitorChanged());
     }
 
     @ParameterizedTest
@@ -232,7 +232,7 @@ class FinremCallbackRequestTest {
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
             .build();
-        assertFalse(underTest.isApplicantSolicitorChanged());
+        assertFalse(underTest.hasApplicantSolicitorChanged());
     }
 
     @Test
@@ -252,6 +252,6 @@ class FinremCallbackRequestTest {
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
             .build();
-        assertFalse(underTest.isRespondentSolicitorChanged());
+        assertFalse(underTest.hasRespondentSolicitorChanged());
     }
 }
