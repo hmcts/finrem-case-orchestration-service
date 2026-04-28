@@ -60,7 +60,7 @@ public class FinremCallbackRequest {
      *         {@code false} otherwise.
      */
     @JsonIgnore
-    public boolean isApplicantSolicitorChanged() {
+    public boolean hasApplicantSolicitorChanged() {
         return isSolicitorChanged(
             FinremCaseData::getAppSolicitorEmailIfRepresented,
             FinremCaseData::getApplicantOrganisationPolicy
@@ -72,7 +72,7 @@ public class FinremCallbackRequest {
      * and previous case state.
      *
      * <p>
-     * Follows the same comparison logic as {@link #isApplicantSolicitorChanged()},
+     * Follows the same comparison logic as {@link #hasApplicantSolicitorChanged()},
      * focusing on respondent-specific fields.
      * </p>
      *
@@ -80,7 +80,7 @@ public class FinremCallbackRequest {
      *         {@code false} otherwise.
      */
     @JsonIgnore
-    public boolean isRespondentSolicitorChanged() {
+    public boolean hasRespondentSolicitorChanged() {
         return isSolicitorChanged(
             FinremCaseData::getRespSolicitorEmailIfRepresented,
             FinremCaseData::getRespondentOrganisationPolicy

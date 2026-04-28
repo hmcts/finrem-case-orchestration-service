@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepres
 import java.lang.reflect.Field;
 import java.util.List;
 
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnotation;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -144,7 +145,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         String caseID = finremCaseDetails.getCaseIdAsString();
         if (callbackRequest.getCaseDetailsBefore() != null) {
             finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
-            if (finremCaseDetailsBefore.getData().getCcdCaseId() == null) {
+            if (isNull(finremCaseDetailsBefore.getData().getCcdCaseId())) {
                 finremCaseDetailsBefore.getData().setCcdCaseId(caseID);
             }
         }
