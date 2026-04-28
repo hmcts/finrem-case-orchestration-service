@@ -100,7 +100,9 @@ public class ContactDetailsWrapper {
         "applicantLname",
         "applicantAddress",
         "applicantAddressHiddenFromRespondent",
+        "solicitorName",
         "applicantSolicitorName",
+        "solicitorAddress",
         "applicantSolicitorAddress"
     );
 
@@ -108,6 +110,8 @@ public class ContactDetailsWrapper {
     private static final Set<String> RESPONDENT_ADDRESS_DETAIL_FIELDS = Set.of(
         "respondentFmName",
         "respondentLname",
+        "appRespondentFmName",
+        "appRespondentLName",
         "respondentAddress",
         "respondentAddressHiddenFromApplicant",
         "respondentSolicitorName",
