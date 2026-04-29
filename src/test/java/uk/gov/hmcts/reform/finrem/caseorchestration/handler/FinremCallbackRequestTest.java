@@ -103,8 +103,8 @@ class FinremCallbackRequestTest {
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
 
-        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
-        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(afterEmail);
+        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(afterEmail);
+        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
 
         FinremCallbackRequest underTest = FinremCallbackRequest.builder()
             .caseDetails(finremCaseDetails)
@@ -122,8 +122,8 @@ class FinremCallbackRequestTest {
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
 
-        when(finremCaseData.getRespSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
-        when(finremCaseDataBefore.getRespSolicitorEmailIfRepresented()).thenReturn(afterEmail);
+        when(finremCaseData.getRespSolicitorEmailIfRepresented()).thenReturn(afterEmail);
+        when(finremCaseDataBefore.getRespSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
 
         FinremCallbackRequest underTest = FinremCallbackRequest.builder()
             .caseDetails(finremCaseDetails)
