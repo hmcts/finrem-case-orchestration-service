@@ -99,23 +99,23 @@ public class ContactDetailsWrapper {
         "applicantFmName",
         "applicantLname",
         "applicantAddress",
-        "applicantAddressHiddenFromRespondent",
         "solicitorName",
-        "applicantSolicitorName",
         "solicitorAddress",
-        "applicantSolicitorAddress"
+        "applicantSolicitorName",
+        "applicantSolicitorAddress",
+        "applicantAddressHiddenFromRespondent"
     );
 
     @JsonIgnore
     private static final Set<String> RESPONDENT_ADDRESS_DETAIL_FIELDS = Set.of(
         "respondentFmName",
         "respondentLname",
+        "respondentAddress",
         "appRespondentFmName",
         "appRespondentLName",
-        "respondentAddress",
-        "respondentAddressHiddenFromApplicant",
         "respondentSolicitorName",
-        "respondentSolicitorAddress"
+        "respondentSolicitorAddress",
+        "respondentAddressHiddenFromApplicant"
     );
 
     public static boolean hasApplicantAddressDetailsChanged(ContactDetailsWrapper a, ContactDetailsWrapper b) {

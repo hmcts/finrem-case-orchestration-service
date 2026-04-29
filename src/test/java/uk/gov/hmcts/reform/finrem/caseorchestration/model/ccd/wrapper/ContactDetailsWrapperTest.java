@@ -90,8 +90,21 @@ class ContactDetailsWrapperTest {
                     "Changed Solicitor PostCode",
                     "Changed Solicitor Country"
                 ))
-            ))
-        );
+            )),
+            Arguments.of("solicitorName", fieldChange(
+                builder -> builder.solicitorName("Changed Consented Solicitor Name")
+            )),
+            Arguments.of("solicitorAddress", fieldChange(
+                builder -> builder.solicitorAddress(new Address(
+                    "Changed Consented Solicitor Line1",
+                    "Changed Consented Solicitor Line2",
+                    "Changed Consented Solicitor Line3",
+                    "Changed Consented Solicitor Town",
+                    "Changed Consented Solicitor County",
+                    "Changed Consented Solicitor PostCode",
+                    "Changed Consented Solicitor Country"
+                ))
+            )));
     }
 
     @ParameterizedTest
@@ -150,6 +163,12 @@ class ContactDetailsWrapperTest {
                     "Changed PostCode",
                     "Changed Country"
                 ))
+            )),
+            Arguments.of("appRespondentFmName", fieldChange(
+                builder -> builder.appRespondentFmName("Consented Jane")
+            )),
+            Arguments.of("appRespondentLName", fieldChange(
+                builder -> builder.appRespondentLName("Consented Smith")
             )),
             Arguments.of("respondentAddressHiddenFromApplicant", fieldChange(
                 builder -> builder.respondentAddressHiddenFromApplicant(YesOrNo.YES)
@@ -275,7 +294,6 @@ class ContactDetailsWrapperTest {
             .applicantFmName("John")
             .applicantLname("Doe")
             .applicantAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
-            .applicantAddressHiddenFromRespondent(YesOrNo.NO)
             .applicantSolicitorName("Applicant Solicitor")
             .applicantSolicitorAddress(new Address(
                 "Solicitor Line1",
@@ -285,7 +303,18 @@ class ContactDetailsWrapperTest {
                 "Solicitor County",
                 "Solicitor PostCode",
                 "Solicitor Country"
-            ));
+            ))
+            .solicitorName("Consented Solicitor Name")
+            .solicitorAddress(new Address(
+                "Consented Solicitor Line1",
+                "Consented Solicitor Line2",
+                "Consented Solicitor Line3",
+                "Consented Solicitor Town",
+                "Consented Solicitor County",
+                "Consented Solicitor PostCode",
+                "Consented Solicitor Country"
+            ))
+            .applicantAddressHiddenFromRespondent(YesOrNo.NO);
     }
 
     private static ContactDetailsWrapper.ContactDetailsWrapperBuilder respondentAddressDetailsWrapperBuilder() {
@@ -293,7 +322,8 @@ class ContactDetailsWrapperTest {
             .respondentFmName("John")
             .respondentLname("Doe")
             .respondentAddress(new Address("Line1", "Line2", "Line3", "Town", "County", "PostCode", "Country"))
-            .respondentAddressHiddenFromApplicant(YesOrNo.NO)
+            .appRespondentFmName("Consented John")
+            .appRespondentLName("Consented Doe")
             .respondentSolicitorName("Respondent Solicitor")
             .respondentSolicitorAddress(new Address(
                 "Solicitor Line1",
@@ -303,7 +333,8 @@ class ContactDetailsWrapperTest {
                 "Solicitor County",
                 "Solicitor PostCode",
                 "Solicitor Country"
-            ));
+            ))
+            .respondentAddressHiddenFromApplicant(YesOrNo.NO);
     }
 
     private static UnaryOperator<ContactDetailsWrapper.ContactDetailsWrapperBuilder> fieldChange(
