@@ -5,6 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ClevelandCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
@@ -41,10 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc.LONDON;
 
@@ -375,57 +376,122 @@ class FinremCaseDataTest {
     }
 
     @Test
-    void shouldReturnNull_whenApplicantNotRepresented() {
-        // given
-        FinremCaseData caseData = spy(new FinremCaseData());
-        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+    void givenContestedCase_whenApplicantSolicitorRepresented_thenReturnSolEmail() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantSolicitorEmail(TEST_SOLICITOR_EMAIL)
+                .solicitorEmail("INVALID@EMAIL.COM")
+                .applicantRepresented(YesOrNo.YES)
+                .build())
+            .build();
 
-        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
-        when(wrapper.getApplicantRepresented()).thenReturn(YesOrNo.NO);
-
-        // when
-        String result = caseData.getAppSolicitorEmailIfRepresented();
-
-        // then
-        assertNull(result);
+        assertEquals(TEST_SOLICITOR_EMAIL, caseData.getAppSolicitorEmailIfRepresented());
     }
 
     @Test
-    void shouldReturnSolicitorEmail_whenRepresentedAndConsentedApplication() {
-        // given
-        FinremCaseData caseData = spy(new FinremCaseData());
-        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+    void givenConsentedCase_whenApplicantSolicitorRepresented_thenReturnSolEmail() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONSENTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .solicitorEmail(TEST_SOLICITOR_EMAIL)
+                .applicantSolicitorEmail("INVALID@EMAIL.COM")
+                .applicantRepresented(YesOrNo.YES)
+                .build())
+            .build();
 
-        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
-        when(wrapper.getApplicantRepresented()).thenReturn(YesOrNo.YES);
-        when(wrapper.getSolicitorEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
-
-        doReturn(true).when(caseData).isConsentedApplication();
-
-        // when
-        String result = caseData.getAppSolicitorEmailIfRepresented();
-
-        // then
-        assertEquals(TEST_SOLICITOR_EMAIL, result);
+        assertEquals(TEST_SOLICITOR_EMAIL, caseData.getAppSolicitorEmailIfRepresented());
     }
 
-    @Test
-    void shouldReturnApplicantSolicitorEmail_whenRepresentedAndNotConsentedApplication() {
-        // given
-        FinremCaseData caseData = spy(new FinremCaseData());
-        ContactDetailsWrapper wrapper = mock(ContactDetailsWrapper.class);
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenConsentedCase_whenApplicantSolicitorNotRepresented_thenReturnNull(YesOrNo applicantRepresented) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONSENTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .solicitorEmail(TEST_SOLICITOR_EMAIL)
+                .applicantSolicitorEmail(TEST_SOLICITOR_EMAIL)
+                .applicantRepresented(applicantRepresented)
+                .build())
+            .build();
 
-        doReturn(wrapper).when(caseData).getContactDetailsWrapper();
-        when(wrapper.getApplicantRepresented()).thenReturn(YesOrNo.YES);
-        when(wrapper.getApplicantSolicitorEmail())
-            .thenReturn(TEST_SOLICITOR_EMAIL);
+        assertNull(caseData.getAppSolicitorEmailIfRepresented());
+    }
 
-        doReturn(false).when(caseData).isConsentedApplication();
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenContestedCase_whenApplicantSolicitorNotRepresented_thenReturnNull(YesOrNo applicantRepresented) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .solicitorEmail(TEST_SOLICITOR_EMAIL)
+                .applicantSolicitorEmail(TEST_SOLICITOR_EMAIL)
+                .applicantRepresented(applicantRepresented)
+                .build())
+            .build();
 
-        // when
-        String result = caseData.getAppSolicitorEmailIfRepresented();
+        assertNull(caseData.getAppSolicitorEmailIfRepresented());
+    }
 
-        // then
-        assertEquals(TEST_SOLICITOR_EMAIL, result);
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenContestedCase_whenRespondentSolicitorRepresented_thenReturnSolEmail(YesOrNo consentedRespondentRepresented) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail(TEST_SOLICITOR_EMAIL)
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .consentedRespondentRepresented(consentedRespondentRepresented)
+                .build())
+            .build();
+
+        assertEquals(TEST_SOLICITOR_EMAIL, caseData.getRespSolicitorEmailIfRepresented());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenConsentedCase_whenRespondentSolicitorRepresented_thenReturnSolEmail(YesOrNo contestedRespondentRepresented) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail(TEST_SOLICITOR_EMAIL)
+                .contestedRespondentRepresented(contestedRespondentRepresented)
+                .consentedRespondentRepresented(YesOrNo.YES)
+                .build())
+            .build();
+
+        assertEquals(TEST_SOLICITOR_EMAIL, caseData.getRespSolicitorEmailIfRepresented());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenConsentedCase_whenRespondentSolicitorNotRepresented_thenReturnNull(YesOrNo contestedRespondentRepresented) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail(TEST_SOLICITOR_EMAIL)
+                .contestedRespondentRepresented(contestedRespondentRepresented)
+                .consentedRespondentRepresented(YesOrNo.NO)
+                .build())
+            .build();
+
+        assertNull(caseData.getRespSolicitorEmailIfRepresented());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenContestedCase_whenRespondentSolicitorNotRepresented_thenReturnNull(YesOrNo consentedRespondentRepresented) {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentSolicitorEmail(TEST_SOLICITOR_EMAIL)
+                .contestedRespondentRepresented(YesOrNo.NO)
+                .consentedRespondentRepresented(consentedRespondentRepresented)
+                .build())
+            .build();
+
+        assertNull(caseData.getRespSolicitorEmailIfRepresented());
     }
 }
