@@ -21,7 +21,7 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
     private final UpdateRepresentationService updateRepresentationService;
 
     protected AbstractUpdateCaseDetailsSolicitorHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     UpdateRepresentationService updateRepresentationService) {
+                                                        UpdateRepresentationService updateRepresentationService) {
         super(finremCaseDetailsMapper);
         this.updateRepresentationService = updateRepresentationService;
     }

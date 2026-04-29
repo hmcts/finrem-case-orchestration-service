@@ -128,7 +128,6 @@ public class UpdateRepresentationService {
         return result;
     }
 
-
     /*
      * Checks if the email address provided is linked to an active user within a HMCTS organisation.
      * Upon missing or invalid email address, an error message is added to the list.
