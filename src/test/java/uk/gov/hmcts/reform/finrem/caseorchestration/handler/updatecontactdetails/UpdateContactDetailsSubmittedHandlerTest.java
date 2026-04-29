@@ -24,10 +24,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
+import java.lang.reflect.Method;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -406,5 +410,35 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 .contains("There was a problem updating solicitor access to case.")
                 .doesNotContain("Fail to send notice of change email to litigant solicitor.")
         );
+    }
+
+    @Test
+    void shouldReturnTrueWhenIssueDateIsPresent() throws Exception {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.getIssueDate()).thenReturn(LocalDate.now());
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        Method method = UpdateContactDetailsSubmittedHandler.class.getDeclaredMethod("hasApplicationBeenIssued", FinremCaseDetails.class);
+        method.setAccessible(true);
+
+        boolean result = (boolean) method.invoke(handler, caseDetails);
+
+        assertTrue(result, "Expected true when issue date is present");
+    }
+
+    @Test
+    void shouldReturnFalseWhenIssueDateIsNull() throws Exception {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.getIssueDate()).thenReturn(null);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        Method method = UpdateContactDetailsSubmittedHandler.class.getDeclaredMethod("hasApplicationBeenIssued", FinremCaseDetails.class);
+        method.setAccessible(true);
+
+        boolean result = (boolean) method.invoke(handler, caseDetails);
+
+        assertFalse(result, "Expected false when issue date is null");
     }
 }

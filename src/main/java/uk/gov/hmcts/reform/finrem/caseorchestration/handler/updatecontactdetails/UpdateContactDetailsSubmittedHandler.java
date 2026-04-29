@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import static java.util.Objects.isNull;
 
 @Slf4j
 @Service
@@ -60,13 +61,15 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        String checkAndAssignSolicitorAccessError = checkAndAssignSolicitorAccess(callbackRequest);
+        if (hasApplicationBeenIssued(caseDetails)) {
+            String checkAndAssignSolicitorAccessError = checkAndAssignSolicitorAccess(callbackRequest);
 
-        if (StringUtils.isNotBlank(checkAndAssignSolicitorAccessError)) {
-            return submittedResponse(
-                toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
-                toConfirmationBody(checkAndAssignSolicitorAccessError)
-            );
+            if (StringUtils.isNotBlank(checkAndAssignSolicitorAccessError)) {
+                return submittedResponse(
+                    toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
+                    toConfirmationBody(checkAndAssignSolicitorAccessError)
+                );
+            }
         }
 
         if (requiresNotifications(finremCaseData)) {
@@ -84,6 +87,14 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
             }
         }
         return submittedResponse();
+    }
+
+    /**
+     *  Checks if the application has been issued by verifying if the issue date is present in the case details.
+     *  If the issue date is not null, it indicates that the application has been issued.
+     */
+    private boolean hasApplicationBeenIssued(FinremCaseDetails caseDetails) {
+        return !isNull(caseDetails.getData().getIssueDate());
     }
 
     private void sendNocEmailToLitigantSolicitorWithRetry(List<SendCorrespondenceEvent> events, List<String> errors) {
