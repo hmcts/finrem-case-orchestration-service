@@ -103,8 +103,8 @@ class FinremCallbackRequestTest {
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
 
-        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
-        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(afterEmail);
+        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(afterEmail);
+        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
 
         FinremCallbackRequest underTest = FinremCallbackRequest.builder()
             .caseDetails(finremCaseDetails)
@@ -122,8 +122,8 @@ class FinremCallbackRequestTest {
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
 
-        when(finremCaseData.getRespSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
-        when(finremCaseDataBefore.getRespSolicitorEmailIfRepresented()).thenReturn(afterEmail);
+        when(finremCaseData.getRespSolicitorEmailIfRepresented()).thenReturn(afterEmail);
+        when(finremCaseDataBefore.getRespSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
 
         FinremCallbackRequest underTest = FinremCallbackRequest.builder()
             .caseDetails(finremCaseDetails)
@@ -215,16 +215,16 @@ class FinremCallbackRequestTest {
         "solicitor@email.com,solicitor@email.com",
         " emailPrefixWithSpace@email.com,emailPrefixWithSpace@email.com"
     }, ignoreLeadingAndTrailingWhitespace = false)
-    void shouldReturnFalseWhenApplicantPolicyAndEmailAreIdentical(String appSolicitorEmailIfRepresented,
-                                                                  String beforeAppSolicitorEmailIfRepresented) {
+    void shouldReturnFalseWhenApplicantPolicyAndEmailAreIdentical(String afterEmail,
+                                                                  String beforeEmail) {
         FinremCaseData finremCaseData = mock(FinremCaseData.class);
         FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
 
-        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(appSolicitorEmailIfRepresented);
-        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(beforeAppSolicitorEmailIfRepresented);
+        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(afterEmail);
+        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
         when(finremCaseData.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
         when(finremCaseDataBefore.getApplicantOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
 
@@ -235,16 +235,21 @@ class FinremCallbackRequestTest {
         assertFalse(underTest.hasApplicantSolicitorChanged());
     }
 
-    @Test
-    void shouldReturnFalseWhenRespondentPolicyAndEmailAreIdentical() {
+    @ParameterizedTest
+    @CsvSource(value = {
+        "solicitor@email.com,solicitor@email.com",
+        " emailPrefixWithSpace@email.com,emailPrefixWithSpace@email.com"
+    }, ignoreLeadingAndTrailingWhitespace = false)
+    void shouldReturnFalseWhenRespondentPolicyAndEmailAreIdentical(String afterEmail,
+                                                                   String beforeEmail) {
         FinremCaseData finremCaseData = mock(FinremCaseData.class);
         FinremCaseData finremCaseDataBefore = mock(FinremCaseData.class);
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetails.builder().data(finremCaseDataBefore).build();
 
-        when(finremCaseData.getRespSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
-        when(finremCaseDataBefore.getRespSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+        when(finremCaseData.getRespSolicitorEmailIfRepresented()).thenReturn(afterEmail);
+        when(finremCaseDataBefore.getRespSolicitorEmailIfRepresented()).thenReturn(beforeEmail);
         when(finremCaseData.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
         when(finremCaseDataBefore.getRespondentOrganisationPolicy()).thenReturn(organisationPolicy(TEST_ORG_ID));
 
