@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc;
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 
 public class NocUtils {
 
@@ -24,5 +26,9 @@ public class NocUtils {
         Map<String, Object> map = new HashMap<>();
         map.put(CHANGE_ORGANISATION_REQUEST, null);
         return map;
+    }
+
+    public static boolean isNocRequestAccepted(Map<String, Object> caseData) {
+        return !YES_VALUE.equals(caseData.get(IS_NOC_REJECTED));
     }
 }
