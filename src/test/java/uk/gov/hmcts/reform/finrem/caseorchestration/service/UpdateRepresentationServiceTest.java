@@ -726,13 +726,13 @@ class UpdateRepresentationServiceTest {
         String email = "valid@test.com";
         String caseRef = "12345678";
 
-        when(organisationService.findUserByEmail(email, AUTH_TOKEN)).thenReturn(Optional.of("user-id-1"));
+        when(organisationService.findUserByEmail(email)).thenReturn(Optional.of("user-id-1"));
 
         List<String> errors = updateRepresentationService
-            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
+            .validateEmailActiveForOrganisation(email, caseRef);
 
         assertEquals(List.of(), errors);
-        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
+        verify(organisationService).findUserByEmail(email);
     }
 
     @Test
@@ -740,13 +740,13 @@ class UpdateRepresentationServiceTest {
         String email = "missing@test.com";
         String caseRef = "12345678";
 
-        when(organisationService.findUserByEmail(email, AUTH_TOKEN)).thenReturn(Optional.empty());
+        when(organisationService.findUserByEmail(email)).thenReturn(Optional.empty());
 
         List<String> errors = updateRepresentationService
-            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
+            .validateEmailActiveForOrganisation(email, caseRef);
 
         assertEquals(List.of("Email is not linked to an active User within a HMCTS organisation"), errors);
-        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
+        verify(organisationService).findUserByEmail(email);
     }
 
     @Test
@@ -754,16 +754,16 @@ class UpdateRepresentationServiceTest {
         String email = "error@test.com";
         String caseRef = "12345678";
 
-        when(organisationService.findUserByEmail(email, AUTH_TOKEN))
+        when(organisationService.findUserByEmail(email))
             .thenThrow(new RuntimeException("boom"));
 
         List<String> errors = updateRepresentationService
-            .validateEmailActiveForOrganisation(email, caseRef, AUTH_TOKEN);
+            .validateEmailActiveForOrganisation(email, caseRef);
 
         assertEquals(
             List.of("Email could not be linked to your organisation. Please check and try again Case reference: " + caseRef),
             errors
         );
-        verify(organisationService).findUserByEmail(email, AUTH_TOKEN);
+        verify(organisationService).findUserByEmail(email);
     }
 }

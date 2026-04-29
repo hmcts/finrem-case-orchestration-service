@@ -20,7 +20,7 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
 
     private final UpdateRepresentationService updateRepresentationService;
 
-    public AbstractUpdateCaseDetailsSolicitorHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+    protected AbstractUpdateCaseDetailsSolicitorHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      UpdateRepresentationService updateRepresentationService) {
         super(finremCaseDetailsMapper);
         this.updateRepresentationService = updateRepresentationService;
@@ -34,7 +34,7 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
         FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
-        validateSolicitorFields(caseData, errors, userAuthorisation);
+        validateSolicitorFields(caseData, errors);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
@@ -53,16 +53,16 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
     }
 
     protected void validateSolicitorFields(FinremCaseData caseData,
-                                           List<String> errors, String userAuthorisation) {
+                                           List<String> errors) {
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
         if (YesOrNo.YES.equals(wrapper.getCurrentUserIsApplicantSolicitor())) {
-            validateApplicantSolicitorFields(caseData, errors, userAuthorisation);
+            validateApplicantSolicitorFields(caseData, errors);
             return;
         }
 
         if (YesOrNo.YES.equals(wrapper.getCurrentUserIsRespondentSolicitor())) {
-            validateRespondentSolicitorFields(caseData, errors, userAuthorisation);
+            validateRespondentSolicitorFields(caseData, errors);
             return;
         }
 
@@ -78,9 +78,8 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
      *
      * @param caseData the case data to validate.
      * @param errors the list to add any errors to. Any failing checks append errors.
-     * @param userAuthorisation the user authorisation token to pass to the representation service.
      */
-    private void validateApplicantSolicitorFields(FinremCaseData caseData, List<String> errors, String userAuthorisation) {
+    private void validateApplicantSolicitorFields(FinremCaseData caseData, List<String> errors) {
 
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
         ContactDetailsValidator.checkForEmptyApplicantSolicitorPostcode(caseData, wrapper, errors);
@@ -89,8 +88,7 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
             errors.addAll(
                 updateRepresentationService.validateEmailActiveForOrganisation(
                     caseData.getAppSolicitorEmail(),
-                    caseData.getCcdCaseId(),
-                    userAuthorisation)
+                    caseData.getCcdCaseId())
             );
         }
     }
@@ -102,9 +100,8 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
      *
      * @param caseData the case data to validate.
      * @param errors the list to add any errors to. Any failing checks append errors.
-     * @param userAuthorisation the user authorisation token to pass to the representation service.
      */
-    private void validateRespondentSolicitorFields(FinremCaseData caseData, List<String> errors, String userAuthorisation) {
+    private void validateRespondentSolicitorFields(FinremCaseData caseData, List<String> errors) {
 
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
         ContactDetailsValidator.checkForEmptyRespondentSolicitorPostcode(caseData, wrapper, errors);
@@ -113,8 +110,7 @@ public abstract class AbstractUpdateCaseDetailsSolicitorHandler extends FinremCa
             errors.addAll(
                 updateRepresentationService.validateEmailActiveForOrganisation(
                     caseData.getRespondentSolicitorEmail(),
-                    caseData.getCcdCaseId(),
-                    userAuthorisation)
+                    caseData.getCcdCaseId())
             );
         }
     }
