@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 
 @ExtendWith(MockitoExtension.class)
@@ -109,6 +111,35 @@ class FinremCallbackHandlerTest {
         generalFinremCallbackHandler = spy(new GeneralFinremCallbackHandler(finremCaseDetailsMapper));
         generalAboutToSubmitCallbackHandler = spy(new GeneralAboutToSubmitCallbackHandler(finremCaseDetailsMapper));
         generalSubmittedCallbackHandler = spy(new GeneralSubmittedCallbackHandler(finremCaseDetailsMapper));
+    }
+
+    @Test
+    void shouldPopulateCaseIdToBothFinremCaseDetails() {
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(finremCaseDetails.getData()).thenReturn(caseData);
+        when(finremCaseDetails.getCaseIdAsString()).thenReturn(CASE_ID);
+
+        FinremCaseData caseDataBefore = mock(FinremCaseData.class);
+        FinremCaseDetails finremCaseDetailsBefore = mock(FinremCaseDetails.class);
+        when(finremCaseDetailsBefore.getData()).thenReturn(caseDataBefore);
+        CallbackRequest callbackRequest = mock(CallbackRequest.class);
+        when(callbackRequest.getEventId()).thenReturn("FR_sendOrder");
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        CaseDetails caseDetailsBefore = mock(CaseDetails.class);
+        when(callbackRequest.getCaseDetailsBefore()).thenReturn(caseDetailsBefore);
+
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore)).thenReturn(finremCaseDetailsBefore);
+
+        generalFinremCallbackHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertAll(
+            () -> verify(caseData).setCcdCaseId(CASE_ID),
+            () -> verify(caseDataBefore).setCcdCaseId(CASE_ID)
+        );
     }
 
     @Test
