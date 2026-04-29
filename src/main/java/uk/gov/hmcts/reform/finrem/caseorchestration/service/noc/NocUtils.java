@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc;
 
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +31,31 @@ public class NocUtils {
         return map;
     }
 
+    /**
+     * Determines whether a Notice of Change (NoC) request is accepted based on raw case data.
+     *
+     * <p>A NoC request is considered accepted if the {@code IS_NOC_REJECTED} flag
+     * in the provided case data map is not equal to {@code YES_VALUE}.</p>
+     *
+     * @param caseData a map containing case data, including the {@code IS_NOC_REJECTED} flag
+     * @return {@code true} if the NoC request is accepted (i.e. not explicitly rejected),
+     *         {@code false} if it is rejected
+     */
     public static boolean isNocRequestAccepted(Map<String, Object> caseData) {
         return !YES_VALUE.equals(caseData.get(IS_NOC_REJECTED));
+    }
+
+    /**
+     * Determines whether a Notice of Change (NoC) request is accepted based on structured case data.
+     *
+     * <p>A NoC request is considered accepted if the {@code isNocRejected} field
+     * is either {@code No} or {@code null}.</p>
+     *
+     * @param caseData the {@link FinremCaseData} containing the NoC rejection flag
+     * @return {@code true} if the NoC request is accepted (i.e. not rejected or not set),
+     *         {@code false} if it is explicitly rejected
+     */
+    public static boolean isNocRequestAccepted(FinremCaseData caseData) {
+        return YesOrNo.isNoOrNull(caseData.getIsNocRejected());
     }
 }

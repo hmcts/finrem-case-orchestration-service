@@ -59,7 +59,7 @@ class UpdateCaseDetailsSolicitorAboutToSubmitHandlerTest {
     @Test
     void whenHandleWithNonNullCaseDetailsBeforeData_thenNoExceptionAndReturnsNotNull() {
 
-        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString())).thenReturn(new ArrayList<>());
+        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any())).thenReturn(new ArrayList<>());
 
         ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
             .applicantSolicitorName("Old AppSol Name")
@@ -133,7 +133,7 @@ class UpdateCaseDetailsSolicitorAboutToSubmitHandlerTest {
     @Test
     void shouldCallGenerateCoverSheetsForApplicantAndRespondentSolicitorChange() {
 
-        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString())).thenReturn(new ArrayList<>());
+        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any())).thenReturn(new ArrayList<>());
 
         // Arrange
         ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
@@ -213,7 +213,7 @@ class UpdateCaseDetailsSolicitorAboutToSubmitHandlerTest {
 
     @Test
     void whenSolicitorNameOrFirmNoChange_thenShouldNeverInvokeGenerateCoverSheetService() {
-        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString())).thenReturn(new ArrayList<>());
+        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any())).thenReturn(new ArrayList<>());
 
         ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
             .applicantSolicitorName("Old AppSol Name")
@@ -267,7 +267,7 @@ class UpdateCaseDetailsSolicitorAboutToSubmitHandlerTest {
 
     @Test
     void whenSolicitorNameOrFirmDiffersOnlyByCase_thenShouldTreatAsChange() {
-        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString())).thenReturn(new ArrayList<>());
+        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any())).thenReturn(new ArrayList<>());
 
         ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
             .applicantSolicitorName("old appsol name")
