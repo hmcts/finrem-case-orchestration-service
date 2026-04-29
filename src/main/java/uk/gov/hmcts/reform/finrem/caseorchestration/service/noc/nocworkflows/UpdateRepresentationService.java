@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
@@ -29,9 +31,12 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -74,6 +79,7 @@ public class UpdateRepresentationService {
     private final AddedSolicitorService addedSolicitorService;
     private final RemovedSolicitorService removedSolicitorService;
     private final BarristerRepresentationChecker barristerRepresentationChecker;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     /**
      * Updates the legal representation of a case when a solicitor submits a Notice of Change (NoC).
@@ -121,11 +127,53 @@ public class UpdateRepresentationService {
     }
 
     private boolean shouldRejectNoc(CaseDetails caseDetails, UserDetails solicitorToAdd) {
-        boolean result = barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseDetails.getData(), solicitorToAdd);
-        if (result) {
-            log.info("User has represented litigant as Barrister for Case ID: {}, REJECTING COR", caseDetails.getId());
+        Map<String, Object> data = caseDetails.getData();
+
+        if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(data, solicitorToAdd)) {
+            log.info("User has represented litigant as Barrister for Case ID: {}, REJECTING COR",
+                caseDetails.getId());
+            return true;
         }
-        return result;
+
+        FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseData(data);
+
+        boolean isApplicantRequest =
+            isRequestForApplicantSolicitorRole(caseDetails, caseData.getChangeOrganisationRequestField());
+
+        return isApplicantRequest
+            ? isSolicitorToAddAlreadyRepresentingRespondent(solicitorToAdd, caseData)
+            : isSolicitorToAddAlreadyRepresentingApplicant(solicitorToAdd, caseData);
+    }
+
+    private boolean isSolicitorAlreadyRepresenting(Function<FinremCaseData, String> emailExtractor,
+                                                   UserDetails solicitorToAdd,
+                                                   FinremCaseData finremCaseData) {
+
+        String existingEmail = emailExtractor.apply(finremCaseData);
+        String emailToBeAdded = solicitorToAdd.getEmail();
+
+        return Objects.equals(normalizeAndLower(emailToBeAdded), normalizeAndLower(existingEmail));
+    }
+
+    private boolean isSolicitorToAddAlreadyRepresentingApplicant(UserDetails solicitorToAdd,
+                                                                 FinremCaseData finremCaseData) {
+        return isSolicitorAlreadyRepresenting(FinremCaseData::getAppSolicitorEmailIfRepresented,
+            solicitorToAdd, finremCaseData);
+    }
+
+    private boolean isSolicitorToAddAlreadyRepresentingRespondent(UserDetails solicitorToAdd,
+                                                                  FinremCaseData finremCaseData) {
+        return isSolicitorAlreadyRepresenting(FinremCaseData::getRespSolicitorEmailIfRepresented,
+            solicitorToAdd, finremCaseData);
+    }
+
+    private String normalizeAndLower(String email) {
+        // TODO extract the same logic FinremCallbackRequest.normalizeAndLower
+        return ofNullable(email)
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .map(String::toLowerCase)
+            .orElse(null);
     }
 
     /*
@@ -182,14 +230,14 @@ public class UpdateRepresentationService {
         return caseData;
     }
 
-    private boolean isApplicant(CaseDetails caseDetails, ChangeOrganisationRequest changeRequest) {
-        if (Optional.ofNullable(changeRequest.getCaseRoleId())
+    private boolean isRequestForApplicantSolicitorRole(CaseDetails caseDetails, ChangeOrganisationRequest changeRequest) {
+        String roleId = Optional.ofNullable(changeRequest.getCaseRoleId())
             .map(DynamicList::getValueCode)
-            .isEmpty()
-        ) {
-            throw new NoticeOfChangeInvalidRequestException(format("%s - unexpected empty caseRoleId", caseDetails.getId()));
-        }
-        return APP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode());
+            .orElseThrow(() -> new NoticeOfChangeInvalidRequestException(
+                format("%s - unexpected empty caseRoleId", caseDetails.getId())
+            ));
+
+        return APP_SOLICITOR_POLICY.equals(roleId);
     }
 
     private Map<String, Object> updateCaseDataWithNewSolDetails(CaseDetails caseDetails,
@@ -197,7 +245,7 @@ public class UpdateRepresentationService {
                                                                 ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isApplicant = isApplicant(caseDetails, changeRequest);
+        boolean isApplicant = isRequestForApplicantSolicitorRole(caseDetails, changeRequest);
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
         addSolicitorAddressToCaseData(addedSolicitor, caseDetails, changeRequest, isConsented);
 
@@ -231,7 +279,7 @@ public class UpdateRepresentationService {
                                                CaseDetails caseDetails,
                                                ChangeOrganisationRequest changeRequest,
                                                boolean isConsented) {
-        final boolean isApplicant = isApplicant(caseDetails, changeRequest);
+        final boolean isApplicant = isRequestForApplicantSolicitorRole(caseDetails, changeRequest);
         String appSolicitorAddressField = isConsented ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
         String solicitorAddressField = isApplicant ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
 
@@ -275,7 +323,7 @@ public class UpdateRepresentationService {
                                                                              ChangeOrganisationRequest changeRequest) {
         return ChangeOfRepresentationRequest.builder()
             .by(addedSolicitor.getName())
-            .party(isApplicant(caseDetails, changeRequest) ? APPLICANT : RESPONDENT)
+            .party(isRequestForApplicantSolicitorRole(caseDetails, changeRequest) ? APPLICANT : RESPONDENT)
             .clientName(buildFullName(changeRequest, caseDetails))
             .current(current)
             .addedRepresentative(addedSolicitor)
@@ -284,7 +332,7 @@ public class UpdateRepresentationService {
     }
 
     private String buildFullName(ChangeOrganisationRequest changeRequest, CaseDetails caseDetails) {
-        if (isApplicant(caseDetails, changeRequest)) {
+        if (isRequestForApplicantSolicitorRole(caseDetails, changeRequest)) {
             return caseDataService.buildFullApplicantName(caseDetails);
         } else if (RESP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode())) {
             return caseDataService.buildFullRespondentName(caseDetails);
