@@ -128,9 +128,10 @@ public class UpdateRepresentationService {
     private boolean shouldRejectNoc(CaseDetails caseDetails, UserDetails solicitorToAdd) {
         Map<String, Object> data = caseDetails.getData();
 
+        long caseId = caseDetails.getId();
         if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(data, solicitorToAdd)) {
             log.info("User has represented litigant as Barrister for Case ID: {}, REJECTING COR",
-                caseDetails.getId());
+                caseId);
             return true;
         }
 
@@ -139,9 +140,16 @@ public class UpdateRepresentationService {
         boolean isApplicantRequest =
             isRequestForApplicantSolicitorRole(caseDetails, caseData.getChangeOrganisationRequestField());
 
-        return isApplicantRequest
+        boolean alreadyRepresenting = isApplicantRequest
             ? isSolicitorToAddAlreadyRepresentingRespondent(solicitorToAdd, caseData)
             : isSolicitorToAddAlreadyRepresentingApplicant(solicitorToAdd, caseData);
+
+        if (alreadyRepresenting) {
+            log.info("User is already representing the {} on Case ID: {}",
+                isApplicantRequest ? "Respondent" : "Applicant", caseId);
+        }
+
+        return alreadyRepresenting;
     }
 
     private boolean isSolicitorAlreadyRepresenting(Function<FinremCaseData, String> emailExtractor,
