@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.StopRepres
 import java.lang.reflect.Field;
 import java.util.List;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnotation;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -141,14 +143,15 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
         FinremCaseDetails finremCaseDetailsBefore = null;
-        String caseID = finremCaseDetails.getCaseIdAsString();
+        String caseId = finremCaseDetails.getCaseIdAsString();
         if (callbackRequest.getCaseDetailsBefore() != null) {
             finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
-            if (finremCaseDetailsBefore.getData().getCcdCaseId() == null) {
-                finremCaseDetailsBefore.getData().setCcdCaseId(caseID);
+            if (nonNull(finremCaseDetailsBefore.getData())
+                && isNull(finremCaseDetailsBefore.getData().getCcdCaseId())) {
+                finremCaseDetailsBefore.getData().setCcdCaseId(caseId);
             }
         }
-        finremCaseDetails.getData().setCcdCaseId(caseID);
+        finremCaseDetails.getData().setCcdCaseId(caseId);
 
         return FinremCallbackRequest.builder()
             .caseDetails(finremCaseDetails)
