@@ -31,12 +31,10 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
 import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -58,6 +56,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus.REJECTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.EmailUtils.areEmailsDifferent;
 
 @Slf4j
 @Service
@@ -151,8 +150,7 @@ public class UpdateRepresentationService {
 
         String existingEmail = emailExtractor.apply(finremCaseData);
         String emailToBeAdded = solicitorToAdd.getEmail();
-
-        return Objects.equals(normalizeAndLower(emailToBeAdded), normalizeAndLower(existingEmail));
+        return !areEmailsDifferent(existingEmail, emailToBeAdded);
     }
 
     private boolean isSolicitorToAddAlreadyRepresentingApplicant(UserDetails solicitorToAdd,
@@ -165,15 +163,6 @@ public class UpdateRepresentationService {
                                                                   FinremCaseData finremCaseData) {
         return isSolicitorAlreadyRepresenting(FinremCaseData::getRespSolicitorEmailIfRepresented,
             solicitorToAdd, finremCaseData);
-    }
-
-    private String normalizeAndLower(String email) {
-        // TODO extract the same logic FinremCallbackRequest.normalizeAndLower
-        return ofNullable(email)
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
-            .map(String::toLowerCase)
-            .orElse(null);
     }
 
     /*
