@@ -31,8 +31,7 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocUtils.isNocRequestAccepted;
 
 @RestController
 @Slf4j
@@ -176,9 +175,5 @@ public class NotificationsController extends BaseController {
         updateFrcCorrespondenceService.sendCorrespondence(caseDetails, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    private boolean isNocRequestAccepted(Map<String, Object> caseData) {
-        return !YES_VALUE.equals(caseData.get(IS_NOC_REJECTED));
     }
 }

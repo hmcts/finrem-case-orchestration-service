@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
@@ -30,12 +32,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
@@ -52,13 +56,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus.REJECTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.EmailUtils.areEmailsDifferent;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UpdateRepresentationService {
 
-    private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     private static final String NOC_EVENT = "nocRequest";
     private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
     private static final String NOT_ACTIVE_USER_ERROR = "Email is not linked to an active User within a HMCTS organisation";
@@ -74,7 +78,28 @@ public class UpdateRepresentationService {
     private final AddedSolicitorService addedSolicitorService;
     private final RemovedSolicitorService removedSolicitorService;
     private final BarristerRepresentationChecker barristerRepresentationChecker;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    /**
+     * Updates the legal representation of a case when a solicitor submits a Notice of Change (NoC).
+     *
+     * <p>This method retrieves the invoking user's details from the authentication token and extracts
+     * the {@code ChangeOrganisationRequest} from the case.</p>
+     *
+     * <p>It checks whether the user has previously acted as a barrister on the case. If so, the request
+     * is rejected, the NoC is marked as rejected, and no further changes are applied.</p>
+     *
+     * <p>If the request is valid, the method determines the solicitor being added and the solicitor
+     * being removed, updates the case data with the new solicitor details, and records the change in
+     * the representation update history.</p>
+     *
+     * @param caseDetails the case details containing the current case data and metadata; must not be {@code null}
+     * @param authToken the authentication token of the invoking user, used to identify the solicitor; must not be {@code null}
+     * @return a {@link Map} containing the updated case data. If the request is rejected due to prior
+     *         barrister involvement, the original case data is returned unchanged
+     *
+     * @throws RuntimeException if an error occurs while updating representation details
+     */
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
                                                                String authToken) {
 
@@ -83,13 +108,9 @@ public class UpdateRepresentationService {
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
 
-        if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseDetails.getData(), solicitorToAdd)) {
-            log.info("User has represented litigant as Barrister for Case ID: {}, REJECTING COR", caseDetails.getId());
-            changeRequest.setApprovalStatus(REJECTED);
-            Map<String, Object> caseData = caseDetails.getData();
-            caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
-            caseData.put(IS_NOC_REJECTED, YES_VALUE);
-            return caseData;
+        if (shouldRejectNoc(caseDetails, solicitorToAdd)) {
+            markNocRejected(caseDetails);
+            return caseDetails.getData();
         }
 
         final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd,
@@ -104,18 +125,67 @@ public class UpdateRepresentationService {
             removedSolicitor, changeRequest);
     }
 
+    private boolean shouldRejectNoc(CaseDetails caseDetails, UserDetails solicitorToAdd) {
+        Map<String, Object> data = caseDetails.getData();
+
+        long caseId = caseDetails.getId();
+        if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(data, solicitorToAdd)) {
+            log.info("User has represented litigant as Barrister for Case ID: {}, REJECTING COR",
+                caseId);
+            return true;
+        }
+        return isAlreadyRepresenting(caseDetails, solicitorToAdd);
+    }
+
+    private boolean isAlreadyRepresenting(CaseDetails caseDetails, UserDetails solicitorToAdd) {
+        FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseData(caseDetails.getData());
+        boolean isApplicantRequest =
+            isRequestForApplicantSolicitorRole(caseDetails, caseData.getChangeOrganisationRequestField());
+
+        boolean alreadyRepresenting = isApplicantRequest
+            ? isSolicitorToAddAlreadyRepresentingRespondent(solicitorToAdd, caseData)
+            : isSolicitorToAddAlreadyRepresentingApplicant(solicitorToAdd, caseData);
+
+        if (alreadyRepresenting) {
+            log.info("User is already representing the {} on Case ID: {}",
+                isApplicantRequest ? "Respondent" : "Applicant", caseDetails.getId());
+        }
+
+        return alreadyRepresenting;
+    }
+
+    private boolean isSolicitorAlreadyRepresenting(Function<FinremCaseData, String> emailExtractor,
+                                                   UserDetails solicitorToAdd,
+                                                   FinremCaseData finremCaseData) {
+
+        String existingEmail = emailExtractor.apply(finremCaseData);
+        String emailToBeAdded = solicitorToAdd.getEmail();
+        return !areEmailsDifferent(existingEmail, emailToBeAdded);
+    }
+
+    private boolean isSolicitorToAddAlreadyRepresentingApplicant(UserDetails solicitorToAdd,
+                                                                 FinremCaseData finremCaseData) {
+        return isSolicitorAlreadyRepresenting(FinremCaseData::getAppSolicitorEmailIfRepresented,
+            solicitorToAdd, finremCaseData);
+    }
+
+    private boolean isSolicitorToAddAlreadyRepresentingRespondent(UserDetails solicitorToAdd,
+                                                                  FinremCaseData finremCaseData) {
+        return isSolicitorAlreadyRepresenting(FinremCaseData::getRespSolicitorEmailIfRepresented,
+            solicitorToAdd, finremCaseData);
+    }
+
     /*
      * Checks if the email address provided is linked to an active user within a HMCTS organisation.
      * Upon missing or invalid email address, an error message is added to the list.
      * @param emailAddress the email address to validate
      * @param caseReference the case reference to include in error messages for traceability
-     * @param userAuthorisation the user authorisation token to access the organisation service
      * @return a list of error messages, empty if the email is valid and active
      */
-    public List<String> validateEmailActiveForOrganisation(String emailAddress, String caseReference, String userAuthorisation) {
+    public List<String> validateEmailActiveForOrganisation(String emailAddress, String caseReference) {
         List<String> errors  = new ArrayList<>();
         try {
-            Optional<String> userId = organisationService.findUserByEmail(emailAddress, userAuthorisation);
+            Optional<String> userId = organisationService.findUserByEmail(emailAddress);
             if (userId.isEmpty()) {
                 log.info("{} case reference: {}", NOT_ACTIVE_USER_ERROR, caseReference);
                 errors.add(NOT_ACTIVE_USER_ERROR);
@@ -159,14 +229,15 @@ public class UpdateRepresentationService {
         return caseData;
     }
 
-    private boolean isApplicant(CaseDetails caseDetails, ChangeOrganisationRequest changeRequest) {
-        if (Optional.ofNullable(changeRequest.getCaseRoleId())
+    private boolean isRequestForApplicantSolicitorRole(CaseDetails caseDetails, ChangeOrganisationRequest changeRequest) {
+        String roleId = Optional.ofNullable(changeRequest)
+            .map(ChangeOrganisationRequest::getCaseRoleId)
             .map(DynamicList::getValueCode)
-            .isEmpty()
-        ) {
-            throw new NoticeOfChangeInvalidRequestException(format("%s - unexpected empty caseRoleId", caseDetails.getId()));
-        }
-        return APP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode());
+            .orElseThrow(() -> new NoticeOfChangeInvalidRequestException(
+                format("%s - unexpected empty caseRoleId", caseDetails.getId())
+            ));
+
+        return APP_SOLICITOR_POLICY.equals(roleId);
     }
 
     private Map<String, Object> updateCaseDataWithNewSolDetails(CaseDetails caseDetails,
@@ -174,7 +245,7 @@ public class UpdateRepresentationService {
                                                                 ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isApplicant = isApplicant(caseDetails, changeRequest);
+        boolean isApplicant = isRequestForApplicantSolicitorRole(caseDetails, changeRequest);
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
         addSolicitorAddressToCaseData(addedSolicitor, caseDetails, changeRequest, isConsented);
 
@@ -208,7 +279,7 @@ public class UpdateRepresentationService {
                                                CaseDetails caseDetails,
                                                ChangeOrganisationRequest changeRequest,
                                                boolean isConsented) {
-        final boolean isApplicant = isApplicant(caseDetails, changeRequest);
+        final boolean isApplicant = isRequestForApplicantSolicitorRole(caseDetails, changeRequest);
         String appSolicitorAddressField = isConsented ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
         String solicitorAddressField = isApplicant ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
 
@@ -252,7 +323,7 @@ public class UpdateRepresentationService {
                                                                              ChangeOrganisationRequest changeRequest) {
         return ChangeOfRepresentationRequest.builder()
             .by(addedSolicitor.getName())
-            .party(isApplicant(caseDetails, changeRequest) ? APPLICANT : RESPONDENT)
+            .party(isRequestForApplicantSolicitorRole(caseDetails, changeRequest) ? APPLICANT : RESPONDENT)
             .clientName(buildFullName(changeRequest, caseDetails))
             .current(current)
             .addedRepresentative(addedSolicitor)
@@ -261,7 +332,7 @@ public class UpdateRepresentationService {
     }
 
     private String buildFullName(ChangeOrganisationRequest changeRequest, CaseDetails caseDetails) {
-        if (isApplicant(caseDetails, changeRequest)) {
+        if (isRequestForApplicantSolicitorRole(caseDetails, changeRequest)) {
             return caseDataService.buildFullApplicantName(caseDetails);
         } else if (RESP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode())) {
             return caseDataService.buildFullRespondentName(caseDetails);
@@ -277,5 +348,13 @@ public class UpdateRepresentationService {
             throw new UnsupportedOperationException(format("%s - Unrecognised caseRoleId: %s",
                 caseDetails.getId(), changeRequest.getCaseRoleId().getValueCode()));
         }
+    }
+
+    private void markNocRejected(CaseDetails caseDetails) {
+        ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
+        changeRequest.setApprovalStatus(REJECTED);
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
+        caseData.put(IS_NOC_REJECTED, YES_VALUE);
     }
 }
