@@ -86,7 +86,7 @@ public class SendCorrespondenceEvent {
             case INTERVENER_TWO -> "intervener 2";
             case INTERVENER_THREE -> "intervener 3";
             case INTERVENER_FOUR -> "intervener 4";
-            default -> throw new IllegalStateException("Unexpected value: " + notificationParty);
+            default -> throw new IllegalStateException("Unable to describe notification party: " + notificationParty);
         };
     }
 }
