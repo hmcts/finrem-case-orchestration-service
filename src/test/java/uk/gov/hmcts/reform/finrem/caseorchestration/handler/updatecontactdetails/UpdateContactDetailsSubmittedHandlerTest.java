@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetail
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -13,13 +15,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UserNotFoundInOrganisationApiException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
@@ -27,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -41,6 +47,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -79,20 +86,21 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
     @Test
     void givenUpdateContactDetails_WhenApplicantSolicitorEmailChangeThenCheckAndAssignSolicitorToCase() {
-        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder()
-                .applicantSolicitorEmail("new@email.com")
-                .applicantRepresented(YesOrNo.YES)
-                .build()).build();
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
+            .applicantSolicitorEmail("old@email.com")
+            .applicantRepresented(YesOrNo.YES)
+            .build();
 
-        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder()
-                .applicantSolicitorEmail("old@email.com")
-                .applicantRepresented(YesOrNo.YES)
-                .build()).build();
+        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder()
+            .applicantSolicitorEmail("new@email.com")
+            .applicantRepresented(YesOrNo.YES)
+            .build();
+
+        FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
+        FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);
 
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, caseDataBefore);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), beforeDetails.getData(), afterDetails.getData());
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -440,5 +448,327 @@ class UpdateContactDetailsSubmittedHandlerTest {
         boolean result = (boolean) method.invoke(handler, caseDetails);
 
         assertFalse(result, "Expected false when issue date is null");
+    }
+
+    @Test
+    void givenApplicantSolicitorEmailChangedAndApplicationNotIssued_thenDoNotCheckAndAssignSolicitorAccess()
+        throws UserNotFoundInOrganisationApiException {
+        // Arrange
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
+            .applicantSolicitorEmail("old@email.com")
+            .applicantRepresented(YesOrNo.YES)
+            .build();
+        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder()
+            .applicantSolicitorEmail("new@email.com")
+            .applicantRepresented(YesOrNo.YES)
+            .build();
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder()
+            .contactDetailsWrapper(beforeWrapper)
+            .build();
+        FinremCaseData caseDataAfter = FinremCaseData.builder()
+            .contactDetailsWrapper(afterWrapper)
+            .build();
+
+        // Ensure issue date is null (not issued)
+        FinremCaseData spyCaseDataAfter = spy(caseDataAfter);
+        when(spyCaseDataAfter.getIssueDate()).thenReturn(null);
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), spyCaseDataAfter, caseDataBefore);
+
+        // Act
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        verify(solicitorAccessService, never()).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+    }
+
+    @Test
+    void givenApplicantSolicitorEmailChangedAndApplicationIssued_thenCheckAndAssignSolicitorAccessIsCalled()
+        throws UserNotFoundInOrganisationApiException {
+        // Arrange
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
+            .applicantSolicitorEmail("old@email.com")
+            .applicantRepresented(YesOrNo.YES)
+            .build();
+        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder()
+            .applicantSolicitorEmail("new@email.com")
+            .applicantRepresented(YesOrNo.YES)
+            .build();
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder()
+            .contactDetailsWrapper(beforeWrapper)
+            .build();
+        FinremCaseData caseDataAfter = FinremCaseData.builder()
+            .contactDetailsWrapper(afterWrapper)
+            .build();
+
+        // Ensure issue date is present (application issued)
+        FinremCaseData spyCaseDataAfter = spy(caseDataAfter);
+        when(spyCaseDataAfter.getIssueDate()).thenReturn(LocalDate.now());
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(123456789L, spyCaseDataAfter, caseDataBefore);
+
+        // Act
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        verify(solicitorAccessService, times(1)).checkAndAssignSolicitorAccess(spyCaseDataAfter, caseDataBefore);
+    }
+
+    /**
+     *  Tests various scenarios of solicitor change and their impact on auto assignment of solicitor's access.
+     * @param beforeWrapper - Contact details wrapper representing the application and respondent solicitor details before the update
+     * @param afterWrapper - Contact details wrapper representing the application and respondent solicitor details after the update
+     * @param expectApplicantAutoAssignAccess -   boolean flag indicating whether an applicant auto assignment of solicitor's access is expected
+     * @param expectRespondentAutoAssignAccess -  boolean flag indicating whether a respondent auto assignment of solicitor's access is expected
+     */
+    @ParameterizedTest
+    @MethodSource
+    void testSolicitorChangeScenarios(String scenarioName,ContactDetailsWrapper beforeWrapper, ContactDetailsWrapper afterWrapper,
+                                      boolean expectApplicantAutoAssignAccess, boolean expectRespondentAutoAssignAccess) {
+
+        FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
+        FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);
+
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), beforeDetails.getData(), afterDetails.getData());
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Verify
+        ArgumentCaptor<ThrowingRunnable> checkAndAssignSolicitorAccessCaptor = getThrowingRunnableCaptor();
+
+        if (expectApplicantAutoAssignAccess) {
+            // Verify
+            assertAll(
+                () -> assertThat(response.getConfirmationBody()).isNull(),
+                () -> assertThat(response.getConfirmationHeader()).isNull(),
+                () -> verify(retryExecutor).runWithRetryWithHandler(
+                    checkAndAssignSolicitorAccessCaptor.capture(),
+                    eq("Update Contact Details - Case Solicitor Change"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)),
+                () -> {
+                    checkAndAssignSolicitorAccessCaptor.getValue().run();
+                    verify(solicitorAccessService).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                }
+            );
+        } else {
+            assertAll(
+                () -> assertThat(response.getConfirmationBody()).isNull(),
+                () -> assertThat(response.getConfirmationHeader()).isNull(),
+                () -> verify(retryExecutor).runWithRetryWithHandler(
+                    checkAndAssignSolicitorAccessCaptor.capture(),
+                    eq("Update Contact Details - Case Solicitor Change"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)),
+                () -> {
+                    checkAndAssignSolicitorAccessCaptor.getValue().run();
+                    verify(solicitorAccessService, never()).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                }
+            );
+        }
+
+        if (expectRespondentAutoAssignAccess) {
+            assertAll(
+                () -> assertThat(response.getConfirmationBody()).isNull(),
+                () -> assertThat(response.getConfirmationHeader()).isNull(),
+                () -> verify(retryExecutor).runWithRetryWithHandler(
+                    checkAndAssignSolicitorAccessCaptor.capture(),
+                    eq("Update Contact Details - Case Solicitor Change"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)),
+                () -> {
+                    checkAndAssignSolicitorAccessCaptor.getValue().run();
+                    verify(solicitorAccessService).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                }
+            );
+        } else {
+            assertAll(
+                () -> assertThat(response.getConfirmationBody()).isNull(),
+                () -> assertThat(response.getConfirmationHeader()).isNull(),
+                () -> verify(retryExecutor).runWithRetryWithHandler(
+                    checkAndAssignSolicitorAccessCaptor.capture(),
+                    eq("Update Contact Details - Case Solicitor Change"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)),
+                () -> {
+                    checkAndAssignSolicitorAccessCaptor.getValue().run();
+                    verify(solicitorAccessService, never()).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                }
+            );
+        }
+    }
+
+    static FinremCaseDetails buildCaseDetails(ContactDetailsWrapper wrapper) {
+        FinremCaseData data = FinremCaseData.builder()
+            .contactDetailsWrapper(wrapper)
+            .issueDate(LocalDate.now())
+            .build();
+        return FinremCaseDetails.builder()
+            .data(data)
+            .id(CASE_ID_IN_LONG)
+            .state(State.APPLICATION_ISSUED)
+            .build();
+    }
+
+    static Address buildAddress() {
+        return Address.builder()
+            .addressLine1("AddressLine1")
+            .addressLine2("AddressLine2")
+            .addressLine3("AddressLine3")
+            .county("County")
+            .country("Country")
+            .postTown("Town")
+            .postCode("EC1 3AS")
+            .build();
+    }
+
+    static ContactDetailsWrapper buildContactDetailsWrapper(
+        String applicantSolicitorName,
+        String applicantSolicitorFirm,
+        String applicantSolicitorEmail,
+        boolean isCurrentUserApplicantSolicitor,
+        boolean isUpdateIncludesRepresentativeChange,
+        String respondentSolicitorName,
+        String respondentSolicitorFirm,
+        String respondentSolicitorEmail,
+        boolean isCurrentUserRespondentSolicitor) {
+
+        ContactDetailsWrapper.ContactDetailsWrapperBuilder builder = ContactDetailsWrapper.builder()
+            .applicantSolicitorName(applicantSolicitorName)
+            .applicantSolicitorFirm(applicantSolicitorFirm)
+            .applicantSolicitorEmail(applicantSolicitorEmail)
+            .applicantSolicitorAddress(buildAddress())
+            .currentUserIsApplicantSolicitor(isCurrentUserApplicantSolicitor? YesOrNo.YES : YesOrNo.NO)
+            .updateIncludesRepresentativeChange(isUpdateIncludesRepresentativeChange? YesOrNo.YES : YesOrNo.NO)
+            .respondentSolicitorName(respondentSolicitorName)
+            .respondentSolicitorFirm(respondentSolicitorFirm)
+            .respondentSolicitorEmail(respondentSolicitorEmail)
+            .respondentSolicitorAddress(buildAddress())
+            .currentUserIsRespondentSolicitor(isCurrentUserRespondentSolicitor ? YesOrNo.YES : YesOrNo.NO);
+        return builder.build();
+    }
+
+    /**
+     *  Provides a stream of test scenarios for verifying solicitor change scenarios
+     *  and their impact on auto assignment of solicitor's access.
+     *  Stream of test scenario arguments lines corresponds to the following :-
+     *  1. Old Applicant Solicitor details
+     *  2. Old Respondent Solicitor details
+     *  3. New Applicant Solicitor details
+     *  4. New Respondent Solicitor details
+     *  5. Expected auto assignment for applicant and respondent (boolean flags)
+     */
+    static Stream<Arguments> testSolicitorChangeScenarios() {
+        return Stream.of(
+            Arguments.of("1. Both applicant Solicitor and respondent Solicitor changed",
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper(
+                    "New AppSol Name", "New AppSol Firm",
+                    "NewAppSol@email.com", true, true,
+                    "New RespSol Name", "New RespSol Firm",
+                    "NewRespSol@email.com", false),
+                true, true
+            ),
+            Arguments.of("2. No change both Applicant Solicitor and Respondent solicitor",
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com",  false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                false, false
+            ),
+            Arguments.of("3. Only applicant changed",
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper(
+                    "New AppSol Name", "New AppSol Firm",
+                    "NewAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                true, false
+            ),
+            Arguments.of("4. Only respondent changed",
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "New RespSol Name", "New RespSol Firm",
+                    "NewRespSol@email.com", false),
+                false, true
+            ),
+            // 5. Only Applicant Change only by case-sensitive
+            Arguments.of("5. Only Applicant Change only by case-sensitive",
+                buildContactDetailsWrapper(
+                    "old appsol name", "old appsol firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    "OLD APPSOL NAME", "OLD APPSOL FIRM",
+                    "OldAppSol@email.com", true,
+                    false, null, null,
+                    null, false),
+                true, false
+            ),
+            Arguments.of("6. Only Respondent Change only by case-sensitive",
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true,
+                    true, "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, true,
+                    "OLD RESPSOL NAME", "OLD RESPSOL FIRM",
+                    "OldRespSol@email.com", false),
+                false, true
+            ),
+            Arguments.of("7. No change Applicant Solicitor, Respondent not represented.",
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                false, false
+            ),
+            Arguments.of("8. No change Respondent Solicitor, Applicant not represented.",
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    null,true),
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    null, true),
+                false, false
+            )
+        );
     }
 }
