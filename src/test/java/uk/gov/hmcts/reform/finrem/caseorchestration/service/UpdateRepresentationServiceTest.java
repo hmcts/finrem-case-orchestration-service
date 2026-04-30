@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -196,6 +198,14 @@ class UpdateRepresentationServiceTest {
             .name("FRApplicantSolicitorFirm")
             .organisationIdentifier("FRApplicantSolicitorFirm")
             .build();
+
+        lenient().when(finremCaseDetailsMapper.mapToFinremCaseData(any(Map.class)))
+            .thenReturn(FinremCaseData.builder()
+                .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
+                    .caseRoleId(DynamicList.builder().value(DynamicListElement.builder().code("[APPSOLICITOR]").build()).build())
+                    .build())
+                .build());
+
     }
 
     private void setUpCaseDetails(String fileName) throws Exception {
@@ -261,7 +271,7 @@ class UpdateRepresentationServiceTest {
                 initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
                 Map<String, Object> actualData = updateRepresentationService
-                    .updateRepresentationAsSolicitor(initialDetails, "bebe");
+                    .updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
 
                 assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
                 assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
