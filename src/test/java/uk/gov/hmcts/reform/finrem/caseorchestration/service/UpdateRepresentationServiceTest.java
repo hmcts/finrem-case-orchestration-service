@@ -12,11 +12,13 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
@@ -129,6 +131,9 @@ class UpdateRepresentationServiceTest {
 
     @Mock
     private BarristerRepresentationChecker barristerRepresentationChecker;
+
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     private UserDetails testAppSolicitor;
     private UserDetails testRespSolicitor;
@@ -364,6 +369,7 @@ class UpdateRepresentationServiceTest {
                 .build()
         );
         setUpCaseDetails(fixture + "/after-update-details.json");
+        when(finremCaseDetailsMapper.mapToFinremCaseData(any(Map.class))).thenReturn(FinremCaseData.builder().build());
         try (InputStream resourceAsStream = getClass()
             .getResourceAsStream(PATH + fixture + "/change-of-representatives-before.json")) {
             initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)

@@ -228,7 +228,8 @@ public class UpdateRepresentationService {
     }
 
     private boolean isRequestForApplicantSolicitorRole(CaseDetails caseDetails, ChangeOrganisationRequest changeRequest) {
-        String roleId = Optional.ofNullable(changeRequest.getCaseRoleId())
+        String roleId = Optional.ofNullable(changeRequest)
+            .map(ChangeOrganisationRequest::getCaseRoleId)
             .map(DynamicList::getValueCode)
             .orElseThrow(() -> new NoticeOfChangeInvalidRequestException(
                 format("%s - unexpected empty caseRoleId", caseDetails.getId())
