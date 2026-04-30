@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.ArrayList;
@@ -51,6 +52,8 @@ class AmendApplicationDetailsMidHandlerTest {
     private FeatureToggleService featureToggleService;
     @Mock
     private ExpressCaseService expressCaseService;
+    @Mock
+    private ValidatePartiesService validatePartiesService;
 
     @Test
     void testHandlerCanHandle() {
@@ -112,7 +115,7 @@ class AmendApplicationDetailsMidHandlerTest {
 
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
                 .thenReturn(new ArrayList<>(addressErrors));
-            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService))
                 .thenReturn(new ArrayList<>(emailErrors));
             when(internationalPostalService.validate(caseData))
                 .thenReturn(new ArrayList<>(postalErrors));
@@ -149,7 +152,7 @@ class AmendApplicationDetailsMidHandlerTest {
 
             contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataAddresses(caseData))
                 .thenReturn(new ArrayList<>(addressErrors));
-            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData))
+            contactValidatorMock.when(() -> ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService))
                 .thenReturn(new ArrayList<>(emailErrors));
             when(internationalPostalService.validate(caseData))
                 .thenReturn(new ArrayList<>(postalErrors));

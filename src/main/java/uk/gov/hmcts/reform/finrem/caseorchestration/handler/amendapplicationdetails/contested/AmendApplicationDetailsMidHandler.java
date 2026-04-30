@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.ArrayList;
@@ -31,15 +32,18 @@ public class AmendApplicationDetailsMidHandler extends FinremCallbackHandler {
     private final InternationalPostalService internationalPostalService;
     private final ExpressCaseService expressCaseService;
     private final FeatureToggleService featureToggleService;
+    private final ValidatePartiesService validatePartiesService;
 
     public AmendApplicationDetailsMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                              InternationalPostalService internationalPostalService,
                                              ExpressCaseService expressCaseService,
-                                             FeatureToggleService featureToggleService) {
+                                             FeatureToggleService featureToggleService,
+                                             ValidatePartiesService validatePartiesService) {
         super(finremCaseDetailsMapper);
         this.internationalPostalService = internationalPostalService;
         this.expressCaseService = expressCaseService;
         this.featureToggleService = featureToggleService;
+        this.validatePartiesService = validatePartiesService;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class AmendApplicationDetailsMidHandler extends FinremCallbackHandler {
 
         List<String> errors = new ArrayList<>();
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
-        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData, validatePartiesService));
         errors.addAll(internationalPostalService.validate(caseData));
 
         return response(caseData, null, errors);
