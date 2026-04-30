@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
-import com.ibm.icu.text.ListFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -15,14 +14,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.NotificationParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -67,20 +64,13 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             actionSelection.getDescription(), caseDetails.getCaseIdAsString());
 
         List<String> errors = new ArrayList<>();
-        if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
-            ofNullable(
-                manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation)
-            ).ifPresent(event -> this.publishEvent(
-                "Send hearing correspondence", event, errors));
-        } else if (ManageHearingsAction.ADJOURN_OR_VACATE_HEARING.equals(actionSelection)) {
-            ofNullable(
-                manageHearingsCorresponder.buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(callbackRequest, userAuthorisation)
-            ).ifPresent(event -> this.publishEvent(
-                "Send adjourned or vacate hearing correspondence", event, errors)
-            );
-        } else {
-            throw new IllegalStateException("unexpected action selection: " + actionSelection);
-        }
+        SendCorrespondenceEvent correspondenceEvent = buildCorrespondenceEvent(
+            actionSelection,
+            callbackRequest,
+            userAuthorisation
+        );
+        ofNullable(correspondenceEvent)
+            .ifPresent(event -> publishEvent(getEventDescription(actionSelection), event, errors));
 
         if (errors.isEmpty()) {
             return submittedResponse();
@@ -91,26 +81,31 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         );
     }
 
-    private String describeNotificationParties(SendCorrespondenceEvent event) {
-        return ListFormatter.getInstance(Locale.ENGLISH).format(event.getNotificationParties()
-            .stream().map(this::describeNotificationParty).sorted().toList());
+    private SendCorrespondenceEvent buildCorrespondenceEvent(ManageHearingsAction actionSelection,
+                                                             FinremCallbackRequest callbackRequest,
+                                                             String userAuthorisation) {
+        return switch (actionSelection) {
+            case ADD_HEARING -> manageHearingsCorresponder.buildHearingCorrespondenceEventIfNeeded(
+                callbackRequest,
+                userAuthorisation
+            );
+            case ADJOURN_OR_VACATE_HEARING -> manageHearingsCorresponder
+                .buildAdjournedOrVacatedHearingCorrespondenceEventIfNeeded(
+                    callbackRequest,
+                    userAuthorisation
+                );
+        };
     }
 
-    private String describeNotificationParty(NotificationParty notificationParty) {
-        // only
-        return switch (notificationParty) {
-            case APPLICANT -> "applicant";
-            case RESPONDENT -> "respondent";
-            case INTERVENER_ONE -> "intervener 1";
-            case INTERVENER_TWO -> "intervener 2";
-            case INTERVENER_THREE -> "intervener 3";
-            case INTERVENER_FOUR -> "intervener 4";
-            default -> throw new IllegalStateException("Unexpected value: " + notificationParty);
+    private String getEventDescription(ManageHearingsAction actionSelection) {
+        return switch (actionSelection) {
+            case ADD_HEARING -> "Send hearing correspondence";
+            case ADJOURN_OR_VACATE_HEARING -> "Send adjourned or vacate hearing correspondence";
         };
     }
 
     private void publishEvent(String eventDescription, SendCorrespondenceEvent event, List<String> errors) {
-        String notifyingPartyInString = describeNotificationParties(event);
+        String notifyingPartyInString = event.describeNotificationParties();
         retryExecutor.runWithRetryWithHandler(
             () -> applicationEventPublisher.publishEvent(event),
             eventDescription,
