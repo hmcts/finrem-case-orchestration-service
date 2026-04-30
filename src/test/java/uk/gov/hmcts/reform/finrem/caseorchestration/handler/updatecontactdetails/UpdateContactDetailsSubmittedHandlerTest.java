@@ -516,92 +516,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
         verify(solicitorAccessService, times(1)).checkAndAssignSolicitorAccess(spyCaseDataAfter, caseDataBefore);
     }
 
-    /**
-     *  Tests various scenarios of solicitor change and their impact on auto assignment of solicitor's access.
-     * @param beforeWrapper - Contact details wrapper representing the application and respondent solicitor details before the update
-     * @param afterWrapper - Contact details wrapper representing the application and respondent solicitor details after the update
-     * @param expectApplicantAutoAssignAccess -   boolean flag indicating whether an applicant auto assignment of solicitor's access is expected
-     * @param expectRespondentAutoAssignAccess -  boolean flag indicating whether a respondent auto assignment of solicitor's access is expected
-     */
-    @ParameterizedTest
-    @MethodSource
-    void testSolicitorChangeScenarios(String scenarioName,ContactDetailsWrapper beforeWrapper, ContactDetailsWrapper afterWrapper,
-                                      boolean expectApplicantAutoAssignAccess, boolean expectRespondentAutoAssignAccess) {
-
-        FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
-        FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);
-
-        FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), beforeDetails.getData(), afterDetails.getData());
-
-        // Act
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        // Verify
-        ArgumentCaptor<ThrowingRunnable> checkAndAssignSolicitorAccessCaptor = getThrowingRunnableCaptor();
-
-        if (expectApplicantAutoAssignAccess) {
-            // Verify
-            assertAll(
-                () -> assertThat(response.getConfirmationBody()).isNull(),
-                () -> assertThat(response.getConfirmationHeader()).isNull(),
-                () -> verify(retryExecutor).runWithRetryWithHandler(
-                    checkAndAssignSolicitorAccessCaptor.capture(),
-                    eq("Update Contact Details - Case Solicitor Change"),
-                    eq(CASE_ID),
-                    any(RetryErrorHandler.class)),
-                () -> {
-                    checkAndAssignSolicitorAccessCaptor.getValue().run();
-                    verify(solicitorAccessService).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
-                }
-            );
-        } else {
-            assertAll(
-                () -> assertThat(response.getConfirmationBody()).isNull(),
-                () -> assertThat(response.getConfirmationHeader()).isNull(),
-                () -> verify(retryExecutor).runWithRetryWithHandler(
-                    checkAndAssignSolicitorAccessCaptor.capture(),
-                    eq("Update Contact Details - Case Solicitor Change"),
-                    eq(CASE_ID),
-                    any(RetryErrorHandler.class)),
-                () -> {
-                    checkAndAssignSolicitorAccessCaptor.getValue().run();
-                    verify(solicitorAccessService, never()).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
-                }
-            );
-        }
-
-        if (expectRespondentAutoAssignAccess) {
-            assertAll(
-                () -> assertThat(response.getConfirmationBody()).isNull(),
-                () -> assertThat(response.getConfirmationHeader()).isNull(),
-                () -> verify(retryExecutor).runWithRetryWithHandler(
-                    checkAndAssignSolicitorAccessCaptor.capture(),
-                    eq("Update Contact Details - Case Solicitor Change"),
-                    eq(CASE_ID),
-                    any(RetryErrorHandler.class)),
-                () -> {
-                    checkAndAssignSolicitorAccessCaptor.getValue().run();
-                    verify(solicitorAccessService).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
-                }
-            );
-        } else {
-            assertAll(
-                () -> assertThat(response.getConfirmationBody()).isNull(),
-                () -> assertThat(response.getConfirmationHeader()).isNull(),
-                () -> verify(retryExecutor).runWithRetryWithHandler(
-                    checkAndAssignSolicitorAccessCaptor.capture(),
-                    eq("Update Contact Details - Case Solicitor Change"),
-                    eq(CASE_ID),
-                    any(RetryErrorHandler.class)),
-                () -> {
-                    checkAndAssignSolicitorAccessCaptor.getValue().run();
-                    verify(solicitorAccessService, never()).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
-                }
-            );
-        }
-    }
-
     static FinremCaseDetails buildCaseDetails(ContactDetailsWrapper wrapper) {
         FinremCaseData data = FinremCaseData.builder()
             .contactDetailsWrapper(wrapper)
@@ -642,8 +556,8 @@ class UpdateContactDetailsSubmittedHandlerTest {
             .applicantSolicitorFirm(applicantSolicitorFirm)
             .applicantSolicitorEmail(applicantSolicitorEmail)
             .applicantSolicitorAddress(buildAddress())
-            .currentUserIsApplicantSolicitor(isCurrentUserApplicantSolicitor? YesOrNo.YES : YesOrNo.NO)
-            .updateIncludesRepresentativeChange(isUpdateIncludesRepresentativeChange? YesOrNo.YES : YesOrNo.NO)
+            .currentUserIsApplicantSolicitor(isCurrentUserApplicantSolicitor ? YesOrNo.YES : YesOrNo.NO)
+            .updateIncludesRepresentativeChange(isUpdateIncludesRepresentativeChange ? YesOrNo.YES : YesOrNo.NO)
             .respondentSolicitorName(respondentSolicitorName)
             .respondentSolicitorFirm(respondentSolicitorFirm)
             .respondentSolicitorEmail(respondentSolicitorEmail)
@@ -770,5 +684,91 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 false, false
             )
         );
+    }
+
+    /**
+     *  Tests various scenarios of solicitor change and their impact on auto assignment of solicitor's access.
+     * @param beforeWrapper - Contact details wrapper representing the application and respondent solicitor details before the update
+     * @param afterWrapper - Contact details wrapper representing the application and respondent solicitor details after the update
+     * @param expectApplicantAutoAssignAccess -   boolean flag indicating whether an applicant auto assignment of solicitor's access is expected
+     * @param expectRespondentAutoAssignAccess -  boolean flag indicating whether a respondent auto assignment of solicitor's access is expected
+     */
+    @ParameterizedTest
+    @MethodSource
+    void testSolicitorChangeScenarios(String scenarioName,ContactDetailsWrapper beforeWrapper, ContactDetailsWrapper afterWrapper,
+                                      boolean expectApplicantAutoAssignAccess, boolean expectRespondentAutoAssignAccess) {
+
+        FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
+        FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);
+
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), beforeDetails.getData(), afterDetails.getData());
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Verify
+        ArgumentCaptor<ThrowingRunnable> checkAndAssignSolicitorAccessCaptor = getThrowingRunnableCaptor();
+
+        if (expectApplicantAutoAssignAccess) {
+            // Verify
+            assertAll(
+                () -> assertThat(response.getConfirmationBody()).isNull(),
+                () -> assertThat(response.getConfirmationHeader()).isNull(),
+                () -> verify(retryExecutor).runWithRetryWithHandler(
+                    checkAndAssignSolicitorAccessCaptor.capture(),
+                    eq("Update Contact Details - Case Solicitor Change"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)),
+                () -> {
+                    checkAndAssignSolicitorAccessCaptor.getValue().run();
+                    verify(solicitorAccessService).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                }
+            );
+        } else {
+            assertAll(
+                () -> assertThat(response.getConfirmationBody()).isNull(),
+                () -> assertThat(response.getConfirmationHeader()).isNull(),
+                () -> verify(retryExecutor).runWithRetryWithHandler(
+                    checkAndAssignSolicitorAccessCaptor.capture(),
+                    eq("Update Contact Details - Case Solicitor Change"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)),
+                () -> {
+                    checkAndAssignSolicitorAccessCaptor.getValue().run();
+                    verify(solicitorAccessService, never()).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                }
+            );
+        }
+
+        if (expectRespondentAutoAssignAccess) {
+            assertAll(
+                () -> assertThat(response.getConfirmationBody()).isNull(),
+                () -> assertThat(response.getConfirmationHeader()).isNull(),
+                () -> verify(retryExecutor).runWithRetryWithHandler(
+                    checkAndAssignSolicitorAccessCaptor.capture(),
+                    eq("Update Contact Details - Case Solicitor Change"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)),
+                () -> {
+                    checkAndAssignSolicitorAccessCaptor.getValue().run();
+                    verify(solicitorAccessService).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                }
+            );
+        } else {
+            assertAll(
+                () -> assertThat(response.getConfirmationBody()).isNull(),
+                () -> assertThat(response.getConfirmationHeader()).isNull(),
+                () -> verify(retryExecutor).runWithRetryWithHandler(
+                    checkAndAssignSolicitorAccessCaptor.capture(),
+                    eq("Update Contact Details - Case Solicitor Change"),
+                    eq(CASE_ID),
+                    any(RetryErrorHandler.class)),
+                () -> {
+                    checkAndAssignSolicitorAccessCaptor.getValue().run();
+                    verify(solicitorAccessService, never()).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                }
+            );
+        }
     }
 }
