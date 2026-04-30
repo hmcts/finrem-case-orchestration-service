@@ -25,7 +25,8 @@ class EmailUtilsTest {
         "NULL,NULL,false",
         ",NULL,false",
         "NULL,,false",
-        ",,false"
+        ",,false",
+        " , ,false"
     }, ignoreLeadingAndTrailingWhitespace = false, nullValues = "NULL")
     void testAreEmailsDifferent(String email1, String email2, boolean expected) {
         assertThat(EmailUtils.areEmailsDifferent(email1, email2)).isEqualTo(expected);
