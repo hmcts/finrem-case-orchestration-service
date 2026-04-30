@@ -363,7 +363,6 @@ class UpdateRepresentationServiceTest {
         when(caseDetails.getData()).thenReturn(mockedMap);
         when(finremCaseDetailsMapper.mapToFinremCaseData(mockedMap)).thenReturn(FinremCaseData.builder().build());
 
-
         NoticeOfChangeInvalidRequestException ex = assertThrows(NoticeOfChangeInvalidRequestException.class, () -> updateRepresentationService
             .updateRepresentationAsSolicitor(caseDetails, AUTH_TOKEN));
 
