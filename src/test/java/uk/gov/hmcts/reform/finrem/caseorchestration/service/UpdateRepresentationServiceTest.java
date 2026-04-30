@@ -227,7 +227,7 @@ class UpdateRepresentationServiceTest {
         initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+            .updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
 
         assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
         assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
@@ -339,7 +339,7 @@ class UpdateRepresentationServiceTest {
         }
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+            .updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
 
         assertEquals(actualData.get(CONSENTED_SOLICITOR_NAME), expectedCaseData.get(CONSENTED_SOLICITOR_NAME));
         assertEquals(actualData.get(SOLICITOR_EMAIL), expectedCaseData.get(SOLICITOR_EMAIL));
@@ -407,7 +407,7 @@ class UpdateRepresentationServiceTest {
         }
 
         UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe"));
+            .updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN));
 
         String expectedMessage = "12345678 - Unrecognised caseRoleId: [INTVRSOLICITOR5]";
         String actualMessage = ex.getMessage();
@@ -434,7 +434,7 @@ class UpdateRepresentationServiceTest {
         initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+            .updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
 
         assertEquals(actualData.get(RESP_SOLICITOR_NAME), expectedCaseData.get(RESP_SOLICITOR_NAME));
         assertEquals(actualData.get(RESP_SOLICITOR_EMAIL), expectedCaseData.get(RESP_SOLICITOR_EMAIL));
@@ -598,8 +598,7 @@ class UpdateRepresentationServiceTest {
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(isConsented);
     }
 
-    private void setUpExceptionMockContext(UserDetails solicitor,
-                                  OrganisationsResponse orgResponse) {
+    private void setUpExceptionMockContext(UserDetails solicitor, OrganisationsResponse orgResponse) {
 
         when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(solicitor);
