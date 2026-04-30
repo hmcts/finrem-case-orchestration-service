@@ -540,6 +540,52 @@ class UpdateRepresentationServiceTest {
         assertThat(actualData.get(IS_NOC_REJECTED), is(YES_VALUE));
     }
 
+    @Test
+    void validateEmailActiveForOrganisation_whenUserLinked_thenReturnNoErrors() {
+        String email = "valid@test.com";
+        String caseRef = "12345678";
+
+        when(organisationService.findUserByEmail(email)).thenReturn(Optional.of("user-id-1"));
+
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef);
+
+        assertEquals(List.of(), errors);
+        verify(organisationService).findUserByEmail(email);
+    }
+
+    @Test
+    void validateEmailActiveForOrganisation_whenUserNotLinked_thenReturnNotActiveUserError() {
+        String email = "missing@test.com";
+        String caseRef = "12345678";
+
+        when(organisationService.findUserByEmail(email)).thenReturn(Optional.empty());
+
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef);
+
+        assertEquals(List.of("Email is not linked to an active User within a HMCTS organisation"), errors);
+        verify(organisationService).findUserByEmail(email);
+    }
+
+    @Test
+    void validateEmailActiveForOrganisation_whenFindUserThrows_thenReturnGenericErrorWithCaseReference() {
+        String email = "error@test.com";
+        String caseRef = "12345678";
+
+        when(organisationService.findUserByEmail(email))
+            .thenThrow(new RuntimeException("boom"));
+
+        List<String> errors = updateRepresentationService
+            .validateEmailActiveForOrganisation(email, caseRef);
+
+        assertEquals(
+            List.of("Email could not be linked to your organisation. Please check and try again Case reference: " + caseRef),
+            errors
+        );
+        verify(organisationService).findUserByEmail(email);
+    }
+
     private List<Element<RepresentationUpdate>> convertToChangeOfRepresentation(Map<String, Object> data) {
         return mapper.convertValue(data.get(REPRESENTATION_UPDATE_HISTORY),
             new TypeReference<>() {
@@ -718,51 +764,5 @@ class UpdateRepresentationServiceTest {
                     .by(testAppSolicitorReplacing.getFullName())
                     .via(NOTICE_OF_CHANGE)
                     .build()))).build();
-    }
-
-    @Test
-    void validateEmailActiveForOrganisation_whenUserLinked_thenReturnNoErrors() {
-        String email = "valid@test.com";
-        String caseRef = "12345678";
-
-        when(organisationService.findUserByEmail(email)).thenReturn(Optional.of("user-id-1"));
-
-        List<String> errors = updateRepresentationService
-            .validateEmailActiveForOrganisation(email, caseRef);
-
-        assertEquals(List.of(), errors);
-        verify(organisationService).findUserByEmail(email);
-    }
-
-    @Test
-    void validateEmailActiveForOrganisation_whenUserNotLinked_thenReturnNotActiveUserError() {
-        String email = "missing@test.com";
-        String caseRef = "12345678";
-
-        when(organisationService.findUserByEmail(email)).thenReturn(Optional.empty());
-
-        List<String> errors = updateRepresentationService
-            .validateEmailActiveForOrganisation(email, caseRef);
-
-        assertEquals(List.of("Email is not linked to an active User within a HMCTS organisation"), errors);
-        verify(organisationService).findUserByEmail(email);
-    }
-
-    @Test
-    void validateEmailActiveForOrganisation_whenFindUserThrows_thenReturnGenericErrorWithCaseReference() {
-        String email = "error@test.com";
-        String caseRef = "12345678";
-
-        when(organisationService.findUserByEmail(email))
-            .thenThrow(new RuntimeException("boom"));
-
-        List<String> errors = updateRepresentationService
-            .validateEmailActiveForOrganisation(email, caseRef);
-
-        assertEquals(
-            List.of("Email could not be linked to your organisation. Please check and try again Case reference: " + caseRef),
-            errors
-        );
-        verify(organisationService).findUserByEmail(email);
     }
 }
