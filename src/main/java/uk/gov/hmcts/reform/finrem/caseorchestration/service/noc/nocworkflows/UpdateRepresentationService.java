@@ -134,9 +134,11 @@ public class UpdateRepresentationService {
                 caseId);
             return true;
         }
+        return isAlreadyRepresenting(caseDetails, solicitorToAdd);
+    }
 
-        FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseData(data);
-
+    private boolean isAlreadyRepresenting(CaseDetails caseDetails, UserDetails solicitorToAdd) {
+        FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseData(caseDetails.getData());
         boolean isApplicantRequest =
             isRequestForApplicantSolicitorRole(caseDetails, caseData.getChangeOrganisationRequestField());
 
@@ -146,7 +148,7 @@ public class UpdateRepresentationService {
 
         if (alreadyRepresenting) {
             log.info("User is already representing the {} on Case ID: {}",
-                isApplicantRequest ? "Respondent" : "Applicant", caseId);
+                isApplicantRequest ? "Respondent" : "Applicant", caseDetails.getId());
         }
 
         return alreadyRepresenting;
