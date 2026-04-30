@@ -62,6 +62,17 @@ public class SendCorrespondenceEvent {
         return notificationParties;
     }
 
+    /**
+     * Returns a human-readable, comma-separated description of the notification parties.
+     *
+     * <p>
+     * The parties are first mapped to their display labels (e.g. "applicant", "respondent"),
+     * then sorted alphabetically, and finally formatted into a natural language list using
+     * {@link ListFormatter} for the English locale (e.g. "applicant, respondent and intervener 1").
+     *
+     * @return a formatted string describing the notification parties; never {@code null}
+     * @throws IllegalStateException if an unknown {@link NotificationParty} value is encountered
+     */
     public String describeNotificationParties() {
         return ListFormatter.getInstance(Locale.ENGLISH).format(getNotificationParties()
             .stream().map(this::describeNotificationParty).sorted().toList());
