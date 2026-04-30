@@ -87,7 +87,7 @@ class CreateCaseMandatoryDataIntegrationTest {
             .andExpect(jsonPath("$.errors",
                 hasItem("Applicant organisation policy is missing.")))
             .andExpect(jsonPath("$.errors",
-                hasItem("Applicant's Local Court is required. Update Please choose the Region in which the Applicant resides")))
+                hasItem("Applicant's Local Court is required. Update Please state in which Financial Remedies Court Zone the applicant resides")))
             .andExpect(jsonPath("$.errors",
                 hasItem("Respondent organisation policy is missing.")));
     }
