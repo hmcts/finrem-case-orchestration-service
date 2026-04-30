@@ -53,10 +53,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
@@ -353,36 +355,19 @@ class UpdateRepresentationServiceTest {
     }
 
     @Test
-    void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowException()
-        throws Exception {
-        String fixture = "consentedAppSolicitorAdding";
-        setUpExceptionMockContext(testAppSolicitor, orgResponse);
+    void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowException() {
+        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+        Map mockedMap = mock(Map.class);
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        when(caseDetails.getId()).thenReturn(CASE_ID_IN_LONG);
+        when(caseDetails.getData()).thenReturn(mockedMap);
+        when(finremCaseDetailsMapper.mapToFinremCaseData(mockedMap)).thenReturn(FinremCaseData.builder().build());
 
-        when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
-            ChangedRepresentative.builder()
-                .name(testAppSolicitor.getFullName())
-                .email(testAppSolicitor.getEmail())
-                .organisation(Organisation.builder()
-                    .organisationID("A31PTVA")
-                    .organisationName("FRApplicantSolicitorFirm")
-                    .build())
-                .build()
-        );
-        setUpCaseDetails(fixture + "/after-update-details.json");
-        when(finremCaseDetailsMapper.mapToFinremCaseData(any(Map.class))).thenReturn(FinremCaseData.builder().build());
-        try (InputStream resourceAsStream = getClass()
-            .getResourceAsStream(PATH + fixture + "/change-of-representatives-before.json")) {
-            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
-                .getCaseDetails();
-            Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData()
-                .get("changeOrganisationRequestField");
-            changeOrganisationRequestField.put("CaseRoleId", null);
-        }
 
         NoticeOfChangeInvalidRequestException ex = assertThrows(NoticeOfChangeInvalidRequestException.class, () -> updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe"));
+            .updateRepresentationAsSolicitor(caseDetails, AUTH_TOKEN));
 
-        String expectedMessage = "12345678 - unexpected empty caseRoleId";
+        String expectedMessage = "1234567890 - unexpected empty caseRoleId";
         String actualMessage = ex.getMessage();
         assertEquals(expectedMessage, actualMessage);
     }
