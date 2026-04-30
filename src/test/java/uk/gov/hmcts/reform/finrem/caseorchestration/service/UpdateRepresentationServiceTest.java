@@ -4,8 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -46,21 +49,26 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
@@ -521,23 +529,85 @@ class UpdateRepresentationServiceTest {
         assertEquals(POSTCODE, solicitorAddress.getPostCode());
     }
 
-    @Test
-    void givenUserHasRepresentedLitigantAsBarrister_whenUpdateRepresentation_thenRejectChangeOrgRequest() throws Exception {
-        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
-        when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
-        when(barristerRepresentationChecker.hasUserBeenBarristerOnCase(any(), eq(testAppSolicitor))).thenReturn(true);
+    @Nested
+    class RejectChangeOrgRequest {
 
-        InputStream resourceAsStream = getClass().getResourceAsStream(PATH
-            + "contestedAppSolicitorAdding/change-of-representatives-before.json");
-        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        @Test
+        void givenUserHasRepresentedLitigantAsBarrister_whenUpdateRepresentation_thenRejectChangeOrgRequest() throws Exception {
+            when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+            when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
+            when(barristerRepresentationChecker.hasUserBeenBarristerOnCase(any(), eq(testAppSolicitor))).thenReturn(true);
 
-        Map<String, Object> actualData = updateRepresentationService.updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
+            InputStream resourceAsStream = getClass().getResourceAsStream(PATH
+                + "contestedAppSolicitorAdding/change-of-representatives-before.json");
+            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
-        ChangeOrganisationRequest changeOrganisationRequest =
-            mapper.convertValue(actualData.get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
+            Map<String, Object> actualData = updateRepresentationService.updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
 
-        assertThat(changeOrganisationRequest.getApprovalStatus(), is(ChangeOrganisationApprovalStatus.REJECTED));
-        assertThat(actualData.get(IS_NOC_REJECTED), is(YES_VALUE));
+            ChangeOrganisationRequest changeOrganisationRequest =
+                mapper.convertValue(actualData.get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
+
+            assertAll(
+                () -> assertThat(changeOrganisationRequest.getApprovalStatus()).isEqualTo(ChangeOrganisationApprovalStatus.REJECTED),
+                () -> assertThat(actualData).containsEntry(IS_NOC_REJECTED, YES_VALUE)
+            );
+        }
+
+        @ParameterizedTest
+        @CsvSource(value = {
+            "[APPSOLICITOR],false",
+            "[RESPSOLICITOR],true"
+        })
+        void givenUserHasRepresentedOtherParty_whenUpdateRepresentation_thenRejectChangeOrgRequest(
+            String partyRequesting, boolean sameEmailRepresentingAppSolicitor) {
+            // Setup
+            ChangeOrganisationRequest request = ChangeOrganisationRequest.builder()
+                .caseRoleId(DynamicList.builder()
+                    .value(DynamicListElement.builder()
+                        .code(partyRequesting)
+                        .build())
+                    .build())
+                .build();
+            Map<String, Object> map = new HashMap<>(Map.of("changeOrganisationRequestField", request));
+            CaseDetails caseDetails = spy(CaseDetails.builder().build());
+            when(caseDetails.getId()).thenReturn(CASE_ID_IN_LONG);
+            when(caseDetails.getData()).thenReturn(map);
+            when(barristerRepresentationChecker.hasUserBeenBarristerOnCase(anyMap(), any(UserDetails.class)))
+                .thenReturn(false);
+
+            FinremCaseData finremCaseData = spy(FinremCaseData.builder()
+                .changeOrganisationRequestField(request)
+                .build());
+            if (sameEmailRepresentingAppSolicitor) {
+                when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+            } else {
+                when(finremCaseData.getRespSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
+            }
+            when(finremCaseDetailsMapper.mapToFinremCaseData(map)).thenReturn(finremCaseData);
+
+            AuditEvent auditEvent = mock(AuditEvent.class);
+            when(auditEvent.getUserId()).thenReturn(TEST_USER_ID);
+            when(auditEventService.getLatestAuditEventByName(CASE_ID, NOC_EVENT))
+                .thenReturn(Optional.of(auditEvent));
+            UserDetails userDetails = mock(UserDetails.class);
+            when(userDetails.getEmail()).thenReturn(TEST_SOLICITOR_EMAIL);
+            when(idamClient.getUserByUserId(AUTH_TOKEN, TEST_USER_ID)).thenReturn(userDetails);
+
+            // Act
+            Map<String, Object> actualData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, AUTH_TOKEN);
+
+            ChangeOrganisationRequest changeOrganisationRequest =
+                mapper.convertValue(actualData.get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
+
+            // Verify
+            assertAll(
+                () -> assertThat(changeOrganisationRequest.getApprovalStatus()).isEqualTo(ChangeOrganisationApprovalStatus.REJECTED),
+                () -> assertThat(actualData).containsEntry(IS_NOC_REJECTED, YES_VALUE),
+                () -> verify(finremCaseDetailsMapper).mapToFinremCaseData(map),
+                () -> verify(barristerRepresentationChecker).hasUserBeenBarristerOnCase(anyMap(), any(UserDetails.class)),
+                () -> verify(idamClient).getUserByUserId(AUTH_TOKEN, TEST_USER_ID)
+            );
+        }
     }
 
     @Test
