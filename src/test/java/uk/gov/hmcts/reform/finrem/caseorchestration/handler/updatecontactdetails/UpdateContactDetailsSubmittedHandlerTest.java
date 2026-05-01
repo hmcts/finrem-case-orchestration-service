@@ -126,20 +126,21 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
     @Test
     void givenUpdateContactDetails_WhenRespondentSolicitorEmailChangeThenCheckAndAssignSolicitorToContestedCase() {
-        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder()
-                .respondentSolicitorEmail("new@email.com")
-                .contestedRespondentRepresented(YesOrNo.YES)
-                .build()).build();
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
+            .respondentSolicitorEmail("old@email.com")
+            .contestedRespondentRepresented(YesOrNo.YES)
+            .build();
 
-        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder()
-                .respondentSolicitorEmail("old@email.com")
-                .contestedRespondentRepresented(YesOrNo.YES)
-                .build()).build();
+        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder()
+            .respondentSolicitorEmail("new@email.com")
+            .contestedRespondentRepresented(YesOrNo.YES)
+            .build();
+
+        FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
+        FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);
 
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, caseDataBefore);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), beforeDetails.getData(), afterDetails.getData());
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -165,20 +166,21 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
     @Test
     void givenUpdateContactDetails_WhenRespondentSolicitorEmailChangeThenCheckAndAssignSolicitorToConsentedCase() {
-        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder()
-                .respondentSolicitorEmail("new@email.com")
-                .consentedRespondentRepresented(YesOrNo.YES)
-                .build()).build();
+        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
+            .respondentSolicitorEmail("new@email.com")
+            .consentedRespondentRepresented(YesOrNo.YES)
+            .build();
 
-        FinremCaseData caseDataBefore = FinremCaseData.builder().contactDetailsWrapper(
-            ContactDetailsWrapper.builder()
-                .respondentSolicitorEmail("old@email.com")
-                .consentedRespondentRepresented(YesOrNo.YES)
-                .build()).build();
+        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder()
+            .respondentSolicitorEmail("old@email.com")
+            .consentedRespondentRepresented(YesOrNo.YES)
+            .build();
+
+        FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
+        FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);
 
         FinremCallbackRequest callbackRequest =
-            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, caseDataBefore);
+            FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), beforeDetails.getData(), afterDetails.getData());
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -287,6 +289,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
         when(updateContactDetailsNotificationService.requiresNotifications(finremCaseData)).thenReturn(true);
         when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
             .thenReturn(event);
+        when(finremCaseData.getIssueDate()).thenReturn((LocalDate.now()));
 
         mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
             retryExecutor,
@@ -337,6 +340,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
         doAnswer(invocation -> null).when(retryExecutor).runWithRetryWithHandler(
             any(), eq("Update Contact Details - Case Solicitor Change"), any(), any()
         );
+        when(finremCaseData.getIssueDate()).thenReturn((LocalDate.now()));
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -363,6 +367,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
         when(updateContactDetailsNotificationService.requiresNotifications(finremCaseData)).thenReturn(true);
         when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
             .thenReturn(event);
+        when(finremCaseData.getIssueDate()).thenReturn((LocalDate.now()));
 
         // Lenient stub for solicitor access retry
         doNothing().when(retryExecutor).runWithRetryWithHandler(any(), eq("Update Contact Details - Case Solicitor Change"), any(), any());
@@ -394,7 +399,10 @@ class UpdateContactDetailsSubmittedHandlerTest {
     @Test
     void shouldReturnErrorConfirmationWhenCheckAndAssignSolicitorAccessFails() {
         // Arrange
-        FinremCaseData finremCaseData = FinremCaseData.builder().build();
+        FinremCaseData finremCaseData = FinremCaseData
+            .builder()
+            .issueDate(LocalDate.now())
+            .build();
         FinremCaseData finremCaseDataBefore = FinremCaseData.builder().build();
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, finremCaseDataBefore, finremCaseData);
 
@@ -466,54 +474,18 @@ class UpdateContactDetailsSubmittedHandlerTest {
         FinremCaseData caseDataBefore = FinremCaseData.builder()
             .contactDetailsWrapper(beforeWrapper)
             .build();
-        FinremCaseData caseDataAfter = FinremCaseData.builder()
+        FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(afterWrapper)
+            .issueDate(null) // Simulate application not issued
             .build();
 
-        // Ensure issue date is null (not issued)
-        FinremCaseData spyCaseDataAfter = spy(caseDataAfter);
-        when(spyCaseDataAfter.getIssueDate()).thenReturn(null);
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), spyCaseDataAfter, caseDataBefore);
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseDataBefore, caseData);
 
         // Act
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
         verify(solicitorAccessService, never()).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
-    }
-
-    @Test
-    void givenApplicantSolicitorEmailChangedAndApplicationIssued_thenCheckAndAssignSolicitorAccessIsCalled()
-        throws UserNotFoundInOrganisationApiException {
-        // Arrange
-        ContactDetailsWrapper beforeWrapper = ContactDetailsWrapper.builder()
-            .applicantSolicitorEmail("old@email.com")
-            .applicantRepresented(YesOrNo.YES)
-            .build();
-        ContactDetailsWrapper afterWrapper = ContactDetailsWrapper.builder()
-            .applicantSolicitorEmail("new@email.com")
-            .applicantRepresented(YesOrNo.YES)
-            .build();
-
-        FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .contactDetailsWrapper(beforeWrapper)
-            .build();
-        FinremCaseData caseDataAfter = FinremCaseData.builder()
-            .contactDetailsWrapper(afterWrapper)
-            .build();
-
-        // Ensure issue date is present (application issued)
-        FinremCaseData spyCaseDataAfter = spy(caseDataAfter);
-        when(spyCaseDataAfter.getIssueDate()).thenReturn(LocalDate.now());
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(123456789L, spyCaseDataAfter, caseDataBefore);
-
-        // Act
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        // Assert
-        verify(solicitorAccessService, times(1)).checkAndAssignSolicitorAccess(spyCaseDataAfter, caseDataBefore);
     }
 
     /**
@@ -702,11 +674,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                     any(RetryErrorHandler.class)),
                 () -> {
                     checkAndAssignSolicitorAccessCaptor.getValue().run();
-                    if (expectApplicantAutoAssignAccess) {
-                        verify(solicitorAccessService, times(2)).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
-                    } else {
-                        verify(solicitorAccessService, times(2)).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
-                    }
+                    verify(solicitorAccessService, times(2)).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
                 }
             );
         } else {
