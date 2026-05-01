@@ -702,7 +702,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                     any(RetryErrorHandler.class)),
                 () -> {
                     checkAndAssignSolicitorAccessCaptor.getValue().run();
-                    if(expectApplicantAutoAssignAccess) {
+                    if (expectApplicantAutoAssignAccess) {
                         verify(solicitorAccessService, times(2)).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
                     } else {
                         verify(solicitorAccessService, times(2)).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
