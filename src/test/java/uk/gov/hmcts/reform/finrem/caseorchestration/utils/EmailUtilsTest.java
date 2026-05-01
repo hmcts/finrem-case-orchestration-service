@@ -4,16 +4,34 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EmailUtilsTest {
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "abc@abc.com,abc@abc.com,false",
+        "abc@abc.com,abc@ABC.com,false",
+        "ABC@abc.com,abc@abc.com,false",
+        " abc@abc.com ,abc@ABC.com ,false",
+        "def@abc.com,abc@abc.com,true",
+        "NULL,abc@abc.com,true",
+        "abc@abc.com,,true",
+        "abc@abc.com,NULL,true",
+        "NULL,NULL,false",
+        ",NULL,false",
+        "NULL,,false",
+        ",,false",
+        " , ,false"
+    }, ignoreLeadingAndTrailingWhitespace = false, nullValues = "NULL")
+    void testAreEmailsDifferent(String email1, String email2, boolean expected) {
+        assertThat(EmailUtils.areEmailsDifferent(email1, email2)).isEqualTo(expected);
+
+    }
 
     @Nested
     @DisplayName("Valid email addresses")
@@ -83,27 +101,5 @@ class EmailUtilsTest {
         void shouldRejectCopiedAndPastedFromOutlook() {
             assertFalse(EmailUtils.isValidEmailAddress("Claire Mumford<claire.mumford@yahoo.com>"));
         }
-    }
-
-    @ParameterizedTest
-    @MethodSource("emailChangeScenarios")
-    void testHasChange(String currentEmail, String previousEmail, boolean expectedChanged) {
-        boolean result = EmailUtils.hasChange(currentEmail, previousEmail);
-        assertEquals(expectedChanged, result);
-    }
-
-    private static Stream<Arguments> emailChangeScenarios() {
-        return Stream.of(
-            Arguments.of("new@email.com", "old@email.com", true),
-            Arguments.of("same@email.com", "same@email.com", false),
-            Arguments.of("same@email.com", "SAME@EMAIL.com", false),
-            Arguments.of(null, null, false),
-            Arguments.of(null, "old@email.com", true),
-            Arguments.of("new@email.com", null, true),
-            Arguments.of("", "", false),
-            Arguments.of(" ", " ", false),
-            Arguments.of("", null, true),
-            Arguments.of(null, "", true)
-        );
     }
 }
