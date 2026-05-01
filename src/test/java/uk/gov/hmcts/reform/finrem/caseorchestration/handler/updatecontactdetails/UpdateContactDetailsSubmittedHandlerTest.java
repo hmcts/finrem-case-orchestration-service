@@ -516,56 +516,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
         verify(solicitorAccessService, times(1)).checkAndAssignSolicitorAccess(spyCaseDataAfter, caseDataBefore);
     }
 
-    static FinremCaseDetails buildCaseDetails(ContactDetailsWrapper wrapper) {
-        FinremCaseData data = FinremCaseData.builder()
-            .contactDetailsWrapper(wrapper)
-            .issueDate(LocalDate.now())
-            .build();
-        return FinremCaseDetails.builder()
-            .data(data)
-            .id(CASE_ID_IN_LONG)
-            .state(State.APPLICATION_ISSUED)
-            .build();
-    }
-
-    static Address buildAddress() {
-        return Address.builder()
-            .addressLine1("AddressLine1")
-            .addressLine2("AddressLine2")
-            .addressLine3("AddressLine3")
-            .county("County")
-            .country("Country")
-            .postTown("Town")
-            .postCode("EC1 3AS")
-            .build();
-    }
-
-    static ContactDetailsWrapper buildContactDetailsWrapper(
-        String applicantSolicitorName,
-        String applicantSolicitorFirm,
-        String applicantSolicitorEmail,
-        boolean isCurrentUserApplicantSolicitor,
-        boolean isUpdateIncludesRepresentativeChange,
-        String respondentSolicitorName,
-        String respondentSolicitorFirm,
-        String respondentSolicitorEmail,
-        boolean isCurrentUserRespondentSolicitor) {
-
-        ContactDetailsWrapper.ContactDetailsWrapperBuilder builder = ContactDetailsWrapper.builder()
-            .applicantSolicitorName(applicantSolicitorName)
-            .applicantSolicitorFirm(applicantSolicitorFirm)
-            .applicantSolicitorEmail(applicantSolicitorEmail)
-            .applicantSolicitorAddress(buildAddress())
-            .currentUserIsApplicantSolicitor(isCurrentUserApplicantSolicitor ? YesOrNo.YES : YesOrNo.NO)
-            .updateIncludesRepresentativeChange(isUpdateIncludesRepresentativeChange ? YesOrNo.YES : YesOrNo.NO)
-            .respondentSolicitorName(respondentSolicitorName)
-            .respondentSolicitorFirm(respondentSolicitorFirm)
-            .respondentSolicitorEmail(respondentSolicitorEmail)
-            .respondentSolicitorAddress(buildAddress())
-            .currentUserIsRespondentSolicitor(isCurrentUserRespondentSolicitor ? YesOrNo.YES : YesOrNo.NO);
-        return builder.build();
-    }
-
     /**
      *  Provides a stream of test scenarios for verifying solicitor change scenarios
      *  and their impact on auto assignment of solicitor's access.
@@ -581,12 +531,12 @@ class UpdateContactDetailsSubmittedHandlerTest {
             Arguments.of("1. Both applicant Solicitor and respondent Solicitor changed",
                 buildContactDetailsWrapper(
                     "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
+                    "OldAppSol@email.com", true, false,
                     "Old RespSol Name", "Old RespSol Firm",
                     "OldRespSol@email.com", false),
                 buildContactDetailsWrapper(
                     "New AppSol Name", "New AppSol Firm",
-                    "NewAppSol@email.com", true, true,
+                    "NewAppSol@email.com", true, false,
                     "New RespSol Name", "New RespSol Firm",
                     "NewRespSol@email.com", false),
                 true, true
@@ -594,12 +544,12 @@ class UpdateContactDetailsSubmittedHandlerTest {
             Arguments.of("2. No change both Applicant Solicitor and Respondent solicitor",
                 buildContactDetailsWrapper(
                     "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
+                    "OldAppSol@email.com", true, false,
                     "Old RespSol Name", "Old RespSol Firm",
                     "OldRespSol@email.com",  false),
                 buildContactDetailsWrapper(
                     "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
+                    "OldAppSol@email.com", true, false,
                     "Old RespSol Name", "Old RespSol Firm",
                     "OldRespSol@email.com", false),
                 false, false
@@ -607,12 +557,12 @@ class UpdateContactDetailsSubmittedHandlerTest {
             Arguments.of("3. Only applicant changed",
                 buildContactDetailsWrapper(
                     "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
+                    "OldAppSol@email.com", true, false,
                     "Old RespSol Name", "Old RespSol Firm",
                     "OldRespSol@email.com", false),
                 buildContactDetailsWrapper(
                     "New AppSol Name", "New AppSol Firm",
-                    "NewAppSol@email.com", true, true,
+                    "NewAppSol@email.com", true, false,
                     "Old RespSol Name", "Old RespSol Firm",
                     "OldRespSol@email.com", false),
                 true, false
@@ -620,12 +570,12 @@ class UpdateContactDetailsSubmittedHandlerTest {
             Arguments.of("4. Only respondent changed",
                 buildContactDetailsWrapper(
                     "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
+                    "OldAppSol@email.com", true, false,
                     "Old RespSol Name", "Old RespSol Firm",
                     "OldRespSol@email.com", false),
                 buildContactDetailsWrapper(
                     "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
+                    "OldAppSol@email.com", true, false,
                     "New RespSol Name", "New RespSol Firm",
                     "NewRespSol@email.com", false),
                 false, true
@@ -736,7 +686,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                     any(RetryErrorHandler.class)),
                 () -> {
                     checkAndAssignSolicitorAccessCaptor.getValue().run();
-                    verify(solicitorAccessService, never()).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                    verify(solicitorAccessService).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
                 }
             );
         }
@@ -752,7 +702,11 @@ class UpdateContactDetailsSubmittedHandlerTest {
                     any(RetryErrorHandler.class)),
                 () -> {
                     checkAndAssignSolicitorAccessCaptor.getValue().run();
-                    verify(solicitorAccessService).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                    if(expectApplicantAutoAssignAccess) {
+                        verify(solicitorAccessService, times(2)).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                    } else {
+                        verify(solicitorAccessService, times(2)).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                    }
                 }
             );
         } else {
@@ -766,9 +720,59 @@ class UpdateContactDetailsSubmittedHandlerTest {
                     any(RetryErrorHandler.class)),
                 () -> {
                     checkAndAssignSolicitorAccessCaptor.getValue().run();
-                    verify(solicitorAccessService, never()).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
+                    verify(solicitorAccessService, times(2)).checkAndAssignSolicitorAccess(any(FinremCaseData.class), any(FinremCaseData.class));
                 }
             );
         }
+    }
+
+    static FinremCaseDetails buildCaseDetails(ContactDetailsWrapper wrapper) {
+        FinremCaseData data = FinremCaseData.builder()
+            .contactDetailsWrapper(wrapper)
+            .issueDate(LocalDate.now())
+            .build();
+        return FinremCaseDetails.builder()
+            .data(data)
+            .id(CASE_ID_IN_LONG)
+            .state(State.APPLICATION_ISSUED)
+            .build();
+    }
+
+    static Address buildAddress() {
+        return Address.builder()
+            .addressLine1("AddressLine1")
+            .addressLine2("AddressLine2")
+            .addressLine3("AddressLine3")
+            .county("County")
+            .country("Country")
+            .postTown("Town")
+            .postCode("EC1 3AS")
+            .build();
+    }
+
+    static ContactDetailsWrapper buildContactDetailsWrapper(
+        String applicantSolicitorName,
+        String applicantSolicitorFirm,
+        String applicantSolicitorEmail,
+        boolean isCurrentUserApplicantSolicitor,
+        boolean isUpdateIncludesRepresentativeChange,
+        String respondentSolicitorName,
+        String respondentSolicitorFirm,
+        String respondentSolicitorEmail,
+        boolean isCurrentUserRespondentSolicitor) {
+
+        ContactDetailsWrapper.ContactDetailsWrapperBuilder builder = ContactDetailsWrapper.builder()
+            .applicantSolicitorName(applicantSolicitorName)
+            .applicantSolicitorFirm(applicantSolicitorFirm)
+            .applicantSolicitorEmail(applicantSolicitorEmail)
+            .applicantSolicitorAddress(buildAddress())
+            .currentUserIsApplicantSolicitor(isCurrentUserApplicantSolicitor ? YesOrNo.YES : YesOrNo.NO)
+            .updateIncludesRepresentativeChange(isUpdateIncludesRepresentativeChange ? YesOrNo.YES : YesOrNo.NO)
+            .respondentSolicitorName(respondentSolicitorName)
+            .respondentSolicitorFirm(respondentSolicitorFirm)
+            .respondentSolicitorEmail(respondentSolicitorEmail)
+            .respondentSolicitorAddress(buildAddress())
+            .currentUserIsRespondentSolicitor(isCurrentUserRespondentSolicitor ? YesOrNo.YES : YesOrNo.NO);
+        return builder.build();
     }
 }
