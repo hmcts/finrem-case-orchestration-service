@@ -112,11 +112,9 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         log.info("Post state {} for Case ID: {}", postState, caseDetails.getId());
         generalApplicationsCategoriser.categorise(caseData);
         if (postState != null) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
-                .errors(errors).state(postState).build();
+            return responseWithoutWarnings(caseData, errors, postState);
         }
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return responseWithoutWarnings(caseData, errors);
     }
 
     private void migrateExistingApplication(FinremCaseDetails caseDetails,
