@@ -109,8 +109,8 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
     }
 
     /**
-     *  Checks if the application has been issued by verifying if the issue date is present in the case details.
-     *  If the issue date is not null, it indicates that the application has been issued.
+     * Checks if the application has been issued by verifying if the issue date is present in the case details.
+     * If the issue date is not null, it indicates that the application has been issued.
      */
     private boolean hasApplicationBeenIssued(FinremCaseData finremCaseData) {
         return !isNull(finremCaseData.getIssueDate());
@@ -129,7 +129,7 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
     }
 
     private void sendNocLetterToLitigantsWithRetry(FinremCaseDetails finremCaseDetails, FinremCaseDetails finremCaseDetailsBefore,
-                                                     String userAuthorisation, List<String> errors) {
+                                                   String userAuthorisation, List<String> errors) {
         retryExecutor.runWithRetryWithHandler(
             () -> sendNocLetterToLitigants(finremCaseDetails, finremCaseDetailsBefore,
                 userAuthorisation),
@@ -195,7 +195,35 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         }
 
         if (shouldProceedRespondentSolicitorCaseAssignment(callbackRequest)) {
-            // TODO @Dawud will do the respondent part.
+            String newEmail = caseData.getRespSolicitorEmailIfRepresented();
+            String oldEmail = caseDataBefore.getRespSolicitorEmailIfRepresented();
+
+            if (StringUtils.isNotBlank(newEmail)) {
+                result.respondentSolicitorGranted = retryExecutor.supplyWithRetryWithHandler(
+                    () -> {
+                        assignPartiesAccessService.grantRespondentSolicitor(caseData);
+                        return true;
+                    },
+                    "Update Contact Details - granting respondent solicitor",
+                    caseData.getCcdCaseId(),
+                    (exception, actionName, caseId) ->
+                        errors.add("There was a problem granting access to respondent solicitor (%s). Please grant access manually."
+                            .formatted(newEmail))
+                ).orElse(false);
+            }
+            if (StringUtils.isNotBlank(oldEmail)) {
+                result.respondentSolicitorRevoked = retryExecutor.supplyWithRetryWithHandler(
+                    () -> {
+                        assignPartiesAccessService.revokeRespondentSolicitor(caseDataBefore);
+                        return true;
+                    },
+                    "Update Contact Details - revoking respondent solicitor",
+                    caseData.getCcdCaseId(),
+                    (exception, actionName, caseId) ->
+                        errors.add("There was a problem revoking access to respondent solicitor (%s). Please revoke access manually."
+                            .formatted(oldEmail))
+                ).orElse(false);
+            }
         }
 
         return result;
