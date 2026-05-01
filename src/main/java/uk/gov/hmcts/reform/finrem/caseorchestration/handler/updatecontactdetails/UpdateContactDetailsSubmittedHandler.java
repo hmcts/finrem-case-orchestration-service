@@ -33,6 +33,13 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         private boolean applicantSolicitorRevoked;
         private boolean respondentSolicitorGranted;
         private boolean respondentSolicitorRevoked;
+
+        public boolean anySolicitorChanged() {
+            return applicantSolicitorGranted
+                || applicantSolicitorRevoked
+                || respondentSolicitorGranted
+                || respondentSolicitorRevoked;
+        }
     }
 
     private static final String CONFIRMATION_HEADER_WITH_ERROR = "Contact details updated with errors";
@@ -67,23 +74,22 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        FinremCaseData finremCaseData = caseDetails.getData();
 
         List<String> errors = new ArrayList<>();
 
         GrantRevokeResult result = checkAndAssignSolicitorAccess(callbackRequest, errors);
 
-        if (requiresNotifications(finremCaseData)) {
+        if (requiresNotifications(result)) {
             List<SendCorrespondenceEvent> events = prepareNocEmailToLitigantSolicitor(caseDetails);
             sendNocEmailToLitigantSolicitorWithRetry(events, errors);
             sendNocLetterToLitigantsWithRetry(caseDetails, caseDetailsBefore, userAuthorisation, errors);
+        }
 
-            if (!errors.isEmpty()) {
-                return submittedResponse(
-                    toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
-                    toConfirmationBody(errors.toArray(new String[0]))
-                );
-            }
+        if (!errors.isEmpty()) {
+            return submittedResponse(
+                toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
+                toConfirmationBody(errors.toArray(new String[0]))
+            );
         }
         return submittedResponse();
     }
@@ -129,8 +135,8 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         );
     }
 
-    private boolean requiresNotifications(FinremCaseData finremCaseData) {
-        return updateContactDetailsNotificationService.requiresNotifications(finremCaseData);
+    private boolean requiresNotifications(GrantRevokeResult result) {
+        return result.anySolicitorChanged();
     }
 
     private List<SendCorrespondenceEvent> prepareNocEmailToLitigantSolicitor(FinremCaseDetails caseDetails) {
