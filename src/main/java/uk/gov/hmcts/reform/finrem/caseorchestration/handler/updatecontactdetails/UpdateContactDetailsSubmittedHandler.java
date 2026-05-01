@@ -156,90 +156,128 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
             userAuthorisation);
     }
 
+    /**
+     * Checks if there are changes in the solicitor details for either the applicant or respondent and proceeds
+     * to update their access accordingly.
+     *
+     * @param callbackRequest -     the callback request containing the current and previous case details, which are used to
+     *                        determine if there has been a change in solicitor information and to perform the necessary access updates.
+     * @param errors          -  list to collect error messages in case of failures during the granting or revocation process,
+     *                        allowing for manual intervention if needed
+     * @return -    an object containing the results of solicitor access changes, including whether access was granted or
+     *              revoked for both the applicant and respondent solicitors.
+     */
     private SolicitorAccessChangeResult checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest, List<String> errors) {
         SolicitorAccessChangeResult result = new SolicitorAccessChangeResult();
-
         handleApplicantSolicitorAccess(callbackRequest, result, errors);
         handleRespondentSolicitorAccess(callbackRequest, result, errors);
-
         return result;
     }
 
-    private void handleApplicantSolicitorAccess(FinremCallbackRequest callbackRequest,
-                                                SolicitorAccessChangeResult result,
+    /**
+     * Checks if the applicant solicitor's access needs to be updated based on the changes in the case details.
+     * If there is a change in the applicant solicitor's email or organization policy, it proceeds to grant access
+     * to the new solicitor and revoke access from the old solicitor accordingly.
+     */
+    private void handleApplicantSolicitorAccess(FinremCallbackRequest callbackRequest, SolicitorAccessChangeResult result,
                                                 List<String> errors) {
-        FinremCaseData caseData = callbackRequest.getFinremCaseData();
-        FinremCaseData caseDataBefore = callbackRequest.getFinremCaseDataBefore();
-
         if (shouldProceedApplicantSolicitorCaseAssignment(callbackRequest)) {
-            String newEmail = caseData.getAppSolicitorEmailIfRepresented();
-            String oldEmail = caseDataBefore.getAppSolicitorEmailIfRepresented();
-
-            if (StringUtils.isNotBlank(newEmail)) {
-                result.applicantSolicitorGranted = retryExecutor.supplyWithRetryWithHandler(
-                    () -> {
-                        assignPartiesAccessService.grantApplicantSolicitor(caseData);
-                        return true;
-                    },
-                    "Update Contact Details - granting applicant solicitor",
-                    caseData.getCcdCaseId(),
-                    (exception, actionName, caseId) ->
-                        errors.add("There was a problem granting access to applicant solicitor (%s). Please grant access manually."
-                            .formatted(newEmail))
-                ).orElse(false);
-            }
-            if (StringUtils.isNotBlank(oldEmail)) {
-                result.applicantSolicitorRevoked = retryExecutor.supplyWithRetryWithHandler(
-                    () -> {
-                        assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore);
-                        return true;
-                    },
-                    "Update Contact Details - revoking applicant solicitor",
-                    caseData.getCcdCaseId(),
-                    (exception, actionName, caseId) ->
-                        errors.add("There was a problem revoking access to applicant solicitor (%s). Please revoke access manually."
-                            .formatted(oldEmail))
-                ).orElse(false);
-            }
+            grantApplicantSolicitorAccess(callbackRequest.getFinremCaseData(), result, errors);
+            revokeApplicantSolicitorAccess(callbackRequest.getFinremCaseData(), callbackRequest.getFinremCaseDataBefore(), result, errors);
         }
     }
 
-    private void handleRespondentSolicitorAccess(FinremCallbackRequest callbackRequest,
-                                                 SolicitorAccessChangeResult result,
-                                                 List<String> errors) {
-        FinremCaseData caseData = callbackRequest.getFinremCaseData();
-        FinremCaseData caseDataBefore = callbackRequest.getFinremCaseDataBefore();
+    /**
+     * Grants access to the new applicant solicitor if there was a change in the applicant solicitor's details.
+     */
+    private void grantApplicantSolicitorAccess(FinremCaseData caseData, SolicitorAccessChangeResult result, List<String> errors) {
+        String newEmail = caseData.getAppSolicitorEmailIfRepresented();
+        if (StringUtils.isNotBlank(newEmail)) {
+            result.applicantSolicitorGranted = retryExecutor.supplyWithRetryWithHandler(
+                () -> {
+                    assignPartiesAccessService.grantApplicantSolicitor(caseData);
+                    return true;
+                },
+                "Update Contact Details - granting applicant solicitor",
+                caseData.getCcdCaseId(),
+                (exception, actionName, caseId) ->
+                    errors.add("There was a problem granting access to applicant solicitor (%s). Please grant access manually."
+                        .formatted(newEmail))
+            ).orElse(false);
+        }
+    }
 
+    /**
+     * Revokes access for the previous applicant solicitor if there was a change in the applicant solicitor's details.
+     */
+    private void revokeApplicantSolicitorAccess(FinremCaseData caseData, FinremCaseData caseDataBefore, SolicitorAccessChangeResult result,
+                                                List<String> errors) {
+        String oldEmail = caseDataBefore.getAppSolicitorEmailIfRepresented();
+        if (StringUtils.isNotBlank(oldEmail)) {
+            result.applicantSolicitorRevoked = retryExecutor.supplyWithRetryWithHandler(
+                () -> {
+                    assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore);
+                    return true;
+                },
+                "Update Contact Details - revoking applicant solicitor",
+                caseData.getCcdCaseId(),
+                (exception, actionName, caseId) ->
+                    errors.add("There was a problem revoking access to applicant solicitor (%s). Please revoke access manually."
+                        .formatted(oldEmail))
+            ).orElse(false);
+        }
+    }
+
+    /**
+     * Checks if the respondent solicitor's access needs to be updated based on the changes in the case details.
+     * If there is a change in the respondent solicitor's email or organization policy, it proceeds to grant access
+     * to the new solicitor and revoke access from the old solicitor accordingly.
+     */
+    private void handleRespondentSolicitorAccess(FinremCallbackRequest callbackRequest, SolicitorAccessChangeResult result, List<String> errors) {
         if (shouldProceedRespondentSolicitorCaseAssignment(callbackRequest)) {
-            String newEmail = caseData.getRespSolicitorEmailIfRepresented();
-            String oldEmail = caseDataBefore.getRespSolicitorEmailIfRepresented();
+            grantRespondentSolicitorAccess(callbackRequest.getFinremCaseData(), result, errors);
+            revokeRespondentSolicitorAccess(callbackRequest.getFinremCaseData(), callbackRequest.getFinremCaseDataBefore(), result, errors);
+        }
+    }
 
-            if (StringUtils.isNotBlank(newEmail)) {
-                result.respondentSolicitorGranted = retryExecutor.supplyWithRetryWithHandler(
-                    () -> {
-                        assignPartiesAccessService.grantRespondentSolicitor(caseData);
-                        return true;
-                    },
-                    "Update Contact Details - granting respondent solicitor",
-                    caseData.getCcdCaseId(),
-                    (exception, actionName, caseId) ->
-                        errors.add("There was a problem granting access to respondent solicitor (%s). Please grant access manually."
-                            .formatted(newEmail))
-                ).orElse(false);
-            }
-            if (StringUtils.isNotBlank(oldEmail)) {
-                result.respondentSolicitorRevoked = retryExecutor.supplyWithRetryWithHandler(
-                    () -> {
-                        assignPartiesAccessService.revokeRespondentSolicitor(caseDataBefore);
-                        return true;
-                    },
-                    "Update Contact Details - revoking respondent solicitor",
-                    caseData.getCcdCaseId(),
-                    (exception, actionName, caseId) ->
-                        errors.add("There was a problem revoking access to respondent solicitor (%s). Please revoke access manually."
-                            .formatted(oldEmail))
-                ).orElse(false);
-            }
+    /**
+     * Grants access to the new respondent solicitor if there was a change in the respondent solicitor's details.
+     */
+    private void grantRespondentSolicitorAccess(FinremCaseData caseData, SolicitorAccessChangeResult result, List<String> errors) {
+        String newEmail = caseData.getRespSolicitorEmailIfRepresented();
+        if (StringUtils.isNotBlank(newEmail)) {
+            result.respondentSolicitorGranted = retryExecutor.supplyWithRetryWithHandler(
+                () -> {
+                    assignPartiesAccessService.grantRespondentSolicitor(caseData);
+                    return true;
+                },
+                "Update Contact Details - granting respondent solicitor",
+                caseData.getCcdCaseId(),
+                (exception, actionName, caseId) ->
+                    errors.add("There was a problem granting access to respondent solicitor (%s). Please grant access manually."
+                        .formatted(newEmail))
+            ).orElse(false);
+        }
+    }
+
+    /**
+     * Revokes access for the previous respondent solicitor if there was a change in the respondent solicitor's details.
+     */
+    private void revokeRespondentSolicitorAccess(FinremCaseData caseData, FinremCaseData caseDataBefore,
+                                                 SolicitorAccessChangeResult result, List<String> errors) {
+        String oldEmail = caseDataBefore.getRespSolicitorEmailIfRepresented();
+        if (StringUtils.isNotBlank(oldEmail)) {
+            result.respondentSolicitorRevoked = retryExecutor.supplyWithRetryWithHandler(
+                () -> {
+                    assignPartiesAccessService.revokeRespondentSolicitor(caseDataBefore);
+                    return true;
+                },
+                "Update Contact Details - revoking respondent solicitor",
+                caseData.getCcdCaseId(),
+                (exception, actionName, caseId) ->
+                    errors.add("There was a problem revoking access to respondent solicitor (%s). Please revoke access manually."
+                        .formatted(oldEmail))
+            ).orElse(false);
         }
     }
 }
