@@ -27,6 +27,14 @@ import static java.util.Objects.isNull;
 @Slf4j
 @Service
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
+
+    private class GrantRevokeResult {
+        private boolean applicantSolicitorGranted;
+        private boolean applicantSolicitorRevoked;
+        private boolean respondentSolicitorGranted;
+        private boolean respondentSolicitorRevoked;
+    }
+
     private static final String CONFIRMATION_HEADER_WITH_ERROR = "Contact details updated with errors";
     private final UpdateContactDetailsNotificationService updateContactDetailsNotificationService;
     private final AssignPartiesAccessService assignPartiesAccessService;
@@ -61,20 +69,11 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        if (hasApplicationBeenIssued(caseDetails)) {
-            List<String> grantOrRevokeErrors = checkAndAssignSolicitorAccess(callbackRequest);
+        List<String> errors = new ArrayList<>();
 
-            if (!grantOrRevokeErrors.isEmpty()) {
-                return submittedResponse(
-                    toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
-                    toConfirmationBody(grantOrRevokeErrors.toArray(new String[0]))
-                );
-            }
-        }
+        GrantRevokeResult result = checkAndAssignSolicitorAccess(callbackRequest, errors);
 
         if (requiresNotifications(finremCaseData)) {
-            List<String> errors = new ArrayList<>();
-
             List<SendCorrespondenceEvent> events = prepareNocEmailToLitigantSolicitor(caseDetails);
             sendNocEmailToLitigantSolicitorWithRetry(events, errors);
             sendNocLetterToLitigantsWithRetry(caseDetails, caseDetailsBefore, userAuthorisation, errors);
@@ -89,12 +88,21 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         return submittedResponse();
     }
 
+    private boolean shouldProceedRespondentSolicitorCaseAssignment(FinremCallbackRequest callbackRequest) {
+        return callbackRequest.hasRespondentSolicitorChanged()
+            && hasApplicationBeenIssued(callbackRequest.getFinremCaseData());
+    }
+
+    private boolean shouldProceedApplicantSolicitorCaseAssignment(FinremCallbackRequest callbackRequest) {
+        return callbackRequest.hasApplicantSolicitorChanged();
+    }
+
     /**
      *  Checks if the application has been issued by verifying if the issue date is present in the case details.
      *  If the issue date is not null, it indicates that the application has been issued.
      */
-    private boolean hasApplicationBeenIssued(FinremCaseDetails caseDetails) {
-        return !isNull(caseDetails.getData().getIssueDate());
+    private boolean hasApplicationBeenIssued(FinremCaseData finremCaseData) {
+        return !isNull(finremCaseData.getIssueDate());
     }
 
     private void sendNocEmailToLitigantSolicitorWithRetry(List<SendCorrespondenceEvent> events, List<String> errors) {
@@ -141,42 +149,48 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
             userAuthorisation);
     }
 
-    private List<String> checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest) {
+    private GrantRevokeResult checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest, List<String> errors) {
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
+        FinremCaseData caseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        FinremCaseData caseDataBefore = caseDetailsBefore.getData();
+        GrantRevokeResult result = new GrantRevokeResult();
 
-        List<String> errors = new ArrayList<>();
-
-        if (callbackRequest.hasApplicantSolicitorChanged()) {
+        if (shouldProceedApplicantSolicitorCaseAssignment(callbackRequest)) {
             String newEmail = caseData.getAppSolicitorEmailIfRepresented();
             String oldEmail = caseDataBefore.getAppSolicitorEmailIfRepresented();
 
             if (StringUtils.isNotBlank(newEmail)) {
-                retryExecutor.runWithRetryWithHandler(
-                    () -> assignPartiesAccessService.grantApplicantSolicitor(caseData),
+                result.applicantSolicitorGranted = retryExecutor.supplyWithRetryWithHandler(
+                    () -> {
+                        assignPartiesAccessService.grantApplicantSolicitor(caseData);
+                        return true;
+                    },
                     "Update Contact Details - granting applicant solicitor",
                     caseData.getCcdCaseId(),
                     (exception, actionName, caseId) ->
                         errors.add("There was a problem granting access to applicant solicitor (%s). Please grant access manually."
                             .formatted(newEmail))
-                );
+                ).orElse(false);
             }
             if (StringUtils.isNotBlank(oldEmail)) {
-                retryExecutor.runWithRetryWithHandler(
-                    () -> assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore),
+                result.applicantSolicitorRevoked = retryExecutor.supplyWithRetryWithHandler(
+                    () -> {
+                        assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore);
+                        return true;
+                    },
                     "Update Contact Details - revoking applicant solicitor",
                     caseData.getCcdCaseId(),
                     (exception, actionName, caseId) ->
                         errors.add("There was a problem revoking access to applicant solicitor (%s). Please revoke access manually."
                             .formatted(oldEmail))
-                );
+                ).orElse(false);
             }
         }
 
-        // @Dawud will do the respondent part.
+        if (shouldProceedRespondentSolicitorCaseAssignment(callbackRequest)) {
+            // TODO @Dawud will do the respondent part.
+        }
 
-        return errors;
+        return result;
     }
 }
