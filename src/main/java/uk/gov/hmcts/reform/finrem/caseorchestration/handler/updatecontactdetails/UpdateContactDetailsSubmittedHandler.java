@@ -27,7 +27,7 @@ import static java.util.Objects.isNull;
 @Slf4j
 @Service
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
-    private static final String CONFIRMATION_HEADER_WITH_ERROR = "Contact details updated with Errors";
+    private static final String CONFIRMATION_HEADER_WITH_ERROR = "Contact details updated with errors";
     private final UpdateContactDetailsNotificationService updateContactDetailsNotificationService;
     private final AssignPartiesAccessService assignPartiesAccessService;
     private final RetryExecutor retryExecutor;
