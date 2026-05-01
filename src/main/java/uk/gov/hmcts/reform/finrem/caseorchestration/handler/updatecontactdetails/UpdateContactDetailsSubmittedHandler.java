@@ -15,13 +15,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.notifiers.SendCorrespondenceEvent;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SolicitorAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+
 import static java.util.Objects.isNull;
 
 @Slf4j
@@ -29,18 +29,18 @@ import static java.util.Objects.isNull;
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
     private static final String CONFIRMATION_HEADER_WITH_ERROR = "Contact details updated with Errors";
     private final UpdateContactDetailsNotificationService updateContactDetailsNotificationService;
-    private final SolicitorAccessService solicitorAccessService;
+    private final AssignPartiesAccessService assignPartiesAccessService;
     private final RetryExecutor retryExecutor;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public UpdateContactDetailsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                 UpdateContactDetailsNotificationService updateContactDetailsNotificationService,
-                                                SolicitorAccessService solicitorAccessService,
+                                                AssignPartiesAccessService assignPartiesAccessService,
                                                 RetryExecutor retryExecutor,
                                                 ApplicationEventPublisher applicationEventPublisher) {
         super(finremCaseDetailsMapper);
         this.updateContactDetailsNotificationService = updateContactDetailsNotificationService;
-        this.solicitorAccessService = solicitorAccessService;
+        this.assignPartiesAccessService = assignPartiesAccessService;
         this.retryExecutor = retryExecutor;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -62,12 +62,12 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         FinremCaseData finremCaseData = caseDetails.getData();
 
         if (hasApplicationBeenIssued(caseDetails)) {
-            String checkAndAssignSolicitorAccessError = checkAndAssignSolicitorAccess(callbackRequest);
+            List<String> grantOrRevokeErrors = checkAndAssignSolicitorAccess(callbackRequest);
 
-            if (StringUtils.isNotBlank(checkAndAssignSolicitorAccessError)) {
+            if (!grantOrRevokeErrors.isEmpty()) {
                 return submittedResponse(
                     toConfirmationHeader(CONFIRMATION_HEADER_WITH_ERROR),
-                    toConfirmationBody(checkAndAssignSolicitorAccessError)
+                    toConfirmationBody(grantOrRevokeErrors.toArray(new String[0]))
                 );
             }
         }
@@ -141,22 +141,42 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
             userAuthorisation);
     }
 
-    private String checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest) {
+    private List<String> checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest) {
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
-        AtomicReference<String> error = new AtomicReference<>();
+        List<String> errors = new ArrayList<>();
 
-        retryExecutor.runWithRetryWithHandler(
-            () -> solicitorAccessService.checkAndAssignSolicitorAccess(caseData, caseDataBefore),
-            "Update Contact Details - Case Solicitor Change",
-            caseData.getCcdCaseId(),
-            (exception, actionName, caseId) ->
-                error.set("There was a problem updating solicitor access to case.")
-        );
+        if (callbackRequest.hasApplicantSolicitorChanged()) {
+            String newEmail = caseData.getAppSolicitorEmailIfRepresented();
+            String oldEmail = caseDataBefore.getAppSolicitorEmailIfRepresented();
 
-        return error.get();
+            if (StringUtils.isNotBlank(newEmail)) {
+                retryExecutor.runWithRetryWithHandler(
+                    () -> assignPartiesAccessService.grantApplicantSolicitor(caseData),
+                    "Update Contact Details - granting applicant solicitor",
+                    caseData.getCcdCaseId(),
+                    (exception, actionName, caseId) ->
+                        errors.add("There was a problem granting access to applicant solicitor (%s). Please grant access manually."
+                            .formatted(newEmail))
+                );
+            }
+            if (StringUtils.isNotBlank(oldEmail)) {
+                retryExecutor.runWithRetryWithHandler(
+                    () -> assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore),
+                    "Update Contact Details - revoking applicant solicitor",
+                    caseData.getCcdCaseId(),
+                    (exception, actionName, caseId) ->
+                        errors.add("There was a problem revoking access to applicant solicitor (%s). Please revoke access manually."
+                            .formatted(oldEmail))
+                );
+            }
+        }
+
+        // @Dawud will do the respondent part.
+
+        return errors;
     }
 }
