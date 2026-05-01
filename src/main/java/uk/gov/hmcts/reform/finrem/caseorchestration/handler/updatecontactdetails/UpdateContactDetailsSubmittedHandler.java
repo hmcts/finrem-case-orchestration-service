@@ -157,10 +157,19 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
     }
 
     private SolicitorAccessChangeResult checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest, List<String> errors) {
+        SolicitorAccessChangeResult result = new SolicitorAccessChangeResult();
+
+        handleApplicantSolicitorAccess(callbackRequest, result, errors);
+        handleRespondentSolicitorAccess(callbackRequest, result, errors);
+
+        return result;
+    }
+
+    private void handleApplicantSolicitorAccess(FinremCallbackRequest callbackRequest,
+                                                SolicitorAccessChangeResult result,
+                                                List<String> errors) {
         FinremCaseData caseData = callbackRequest.getFinremCaseData();
         FinremCaseData caseDataBefore = callbackRequest.getFinremCaseDataBefore();
-
-        SolicitorAccessChangeResult result = new SolicitorAccessChangeResult();
 
         if (shouldProceedApplicantSolicitorCaseAssignment(callbackRequest)) {
             String newEmail = caseData.getAppSolicitorEmailIfRepresented();
@@ -193,6 +202,13 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
                 ).orElse(false);
             }
         }
+    }
+
+    private void handleRespondentSolicitorAccess(FinremCallbackRequest callbackRequest,
+                                                 SolicitorAccessChangeResult result,
+                                                 List<String> errors) {
+        FinremCaseData caseData = callbackRequest.getFinremCaseData();
+        FinremCaseData caseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
         if (shouldProceedRespondentSolicitorCaseAssignment(callbackRequest)) {
             String newEmail = caseData.getRespSolicitorEmailIfRepresented();
@@ -225,7 +241,5 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
                 ).orElse(false);
             }
         }
-
-        return result;
     }
 }
