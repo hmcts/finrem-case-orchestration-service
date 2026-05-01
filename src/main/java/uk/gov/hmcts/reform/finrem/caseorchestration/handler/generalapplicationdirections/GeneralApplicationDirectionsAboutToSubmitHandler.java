@@ -77,9 +77,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
-        FinremCallbackRequest callbackRequest, String userAuthorisation) {
-
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
@@ -108,8 +107,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         }
 
         String postState = gaDirectionService.getEventPostState(caseDetails, userAuthorisation);
-
-        log.info("Post state {} for Case ID: {}", postState, caseDetails.getId());
         generalApplicationsCategoriser.categorise(caseData);
         if (postState != null) {
             return responseWithoutWarnings(caseData, errors, postState);
