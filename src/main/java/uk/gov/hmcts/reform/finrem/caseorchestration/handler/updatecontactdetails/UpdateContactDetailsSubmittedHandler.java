@@ -28,13 +28,13 @@ import static java.util.Objects.isNull;
 @Service
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
 
-    private class GrantRevokeResult {
+    private class SolicitorAccessChangeResult {
         private boolean applicantSolicitorGranted;
         private boolean applicantSolicitorRevoked;
         private boolean respondentSolicitorGranted;
         private boolean respondentSolicitorRevoked;
 
-        public boolean anySolicitorChanged() {
+        public boolean anySolicitorAccessChanged() {
             return applicantSolicitorGranted
                 || applicantSolicitorRevoked
                 || respondentSolicitorGranted
@@ -77,11 +77,14 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
 
         List<String> errors = new ArrayList<>();
 
-        GrantRevokeResult result = checkAndAssignSolicitorAccess(callbackRequest, errors);
+        SolicitorAccessChangeResult result = checkAndAssignSolicitorAccess(callbackRequest, errors);
 
-        if (requiresNotifications(result)) {
-            // It's assuming only one litigant party will be changed in this notification logic.
-            // It depends on the question ""Does this update include a change in representation for either party?".
+        if (result.anySolicitorAccessChanged()) {
+            // Assumes only one litigant party changes within this notification logic.
+            // Based on the question: "Does this update include a change in representation for either party?"
+            // Notifications will still be sent if the case assignment is only partially completed (e.g.,
+            // applicant solicitor granted but revocation of the previous solicitor failed).
+            // Further enhancement can refine notification accuracy if needed.
             List<SendCorrespondenceEvent> events = prepareNocEmailToLitigantSolicitor(caseDetails);
             sendNocEmailToLitigantSolicitorWithRetry(events, errors);
             sendNocLetterToLitigantsWithRetry(caseDetails, caseDetailsBefore, userAuthorisation, errors);
@@ -137,10 +140,6 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         );
     }
 
-    private boolean requiresNotifications(GrantRevokeResult result) {
-        return result.anySolicitorChanged();
-    }
-
     private List<SendCorrespondenceEvent> prepareNocEmailToLitigantSolicitor(FinremCaseDetails caseDetails) {
         return List.of(
             updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(caseDetails)
@@ -157,11 +156,11 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
             userAuthorisation);
     }
 
-    private GrantRevokeResult checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest, List<String> errors) {
+    private SolicitorAccessChangeResult checkAndAssignSolicitorAccess(FinremCallbackRequest callbackRequest, List<String> errors) {
         FinremCaseData caseData = callbackRequest.getFinremCaseData();
         FinremCaseData caseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
-        GrantRevokeResult result = new GrantRevokeResult();
+        SolicitorAccessChangeResult result = new SolicitorAccessChangeResult();
 
         if (shouldProceedApplicantSolicitorCaseAssignment(callbackRequest)) {
             String newEmail = caseData.getAppSolicitorEmailIfRepresented();
