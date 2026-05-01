@@ -80,6 +80,8 @@ public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler 
         GrantRevokeResult result = checkAndAssignSolicitorAccess(callbackRequest, errors);
 
         if (requiresNotifications(result)) {
+            // It's assuming only one litigant party will be changed in this notification logic.
+            // It depends on the question ""Does this update include a change in representation for either party?".
             List<SendCorrespondenceEvent> events = prepareNocEmailToLitigantSolicitor(caseDetails);
             sendNocEmailToLitigantSolicitorWithRetry(events, errors);
             sendNocLetterToLitigantsWithRetry(caseDetails, caseDetailsBefore, userAuthorisation, errors);
