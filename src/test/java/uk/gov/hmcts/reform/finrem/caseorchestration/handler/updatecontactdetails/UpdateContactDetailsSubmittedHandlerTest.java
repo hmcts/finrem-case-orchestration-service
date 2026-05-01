@@ -307,7 +307,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertAll(
-            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with Errors"),
+            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with errors"),
             () -> assertThat(response.getConfirmationBody())
                 .contains(
                     "Fail to send notice of change email to litigant solicitor.",
@@ -347,7 +347,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
         // then
         assertAll(
-            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with Errors"),
+            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with errors"),
             () -> assertThat(response.getConfirmationBody())
                 .contains("Fail to send notice of change email to litigant solicitor.")
                 .doesNotContain("Fail to send NOC letter to litigants."),
@@ -387,7 +387,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
         // then
         assertAll(
-            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with Errors"),
+            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with errors"),
             () -> assertThat(response.getConfirmationBody())
                 .contains("Fail to send NOC letter to litigants.")
                 .doesNotContain("Fail to send notice of change email to litigant solicitor."),
@@ -421,7 +421,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
         // Assert
         assertAll(
-            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with Errors"),
+            () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with errors"),
             () -> assertThat(response.getConfirmationBody())
                 .contains("There was a problem updating solicitor access to case.")
                 .doesNotContain("Fail to send notice of change email to litigant solicitor.")
