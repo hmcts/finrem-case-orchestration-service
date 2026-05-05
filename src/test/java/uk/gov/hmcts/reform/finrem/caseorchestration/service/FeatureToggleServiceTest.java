@@ -81,6 +81,11 @@ public class FeatureToggleServiceTest {
             // default value is defined in src/test/resources/application.properties
             assertThat(featureToggleService.isVacateHearingEnabled()).isFalse();
         }
+
+        @Test
+        void isFinremWorkAllocationEnabledReturnsFalse() {
+            assertThat(featureToggleService.isFinremWorkAllocationEnabled()).isFalse();
+        }
     }
 
     @Nested
