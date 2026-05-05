@@ -28,7 +28,7 @@ import static java.util.Objects.isNull;
 @Service
 public class UpdateContactDetailsSubmittedHandler extends FinremCallbackHandler {
 
-    private class SolicitorAccessChangeResult {
+    private static class SolicitorAccessChangeResult {
         private boolean applicantSolicitorGranted;
         private boolean applicantSolicitorRevoked;
         private boolean respondentSolicitorGranted;
