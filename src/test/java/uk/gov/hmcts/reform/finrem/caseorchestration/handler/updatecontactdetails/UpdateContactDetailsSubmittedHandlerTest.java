@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -42,7 +44,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCondition;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingSupplierCaptor;
@@ -77,20 +78,74 @@ class UpdateContactDetailsSubmittedHandlerTest {
     @Nested
     class NotificationTests {
 
-        @Test
-        void givenApplicantSolicitorChanged_whenHandled_thenNocEmailAndLetterSent() {
-            FinremCaseData finremCaseData = spy(new FinremCaseData());
-            when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
-            FinremCaseData finremCaseDataBefore = spy(new FinremCaseData());
+        FinremCaseData finremCaseData;
+        FinremCaseData finremCaseDataBefore;
+        FinremCallbackRequest callbackRequest;
 
-            FinremCallbackRequest callbackRequest = spy(FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
+        private void mockSolicitorChangedAndApplicationIssued(
+            boolean hasApplicantSolicitorChanged, boolean hasRespondentSolicitorChanged, boolean isApplicationIssued) {
+            finremCaseData = spy(new FinremCaseData());
+            when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn("new.applicant@solicitor.com");
+            when(finremCaseData.getRespSolicitorEmailIfRepresented()).thenReturn("new.respondent@solicitor.com");
+            finremCaseDataBefore = spy(new FinremCaseData());
+            when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn("old.applicant@solicitor.com");
+            when(finremCaseDataBefore.getRespSolicitorEmailIfRepresented()).thenReturn("old.respondent@solicitor.com");
+            lenient().when(finremCaseData.getIssueDate()).thenReturn(isApplicationIssued ? mock(LocalDate.class) : null);
+
+            callbackRequest = spy(FinremCallbackRequestFactory.from(CASE_ID_IN_LONG,
                 finremCaseDataBefore, finremCaseData));
-            when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(true);
-            when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(false);
+            when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(hasApplicantSolicitorChanged);
+            when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(hasRespondentSolicitorChanged);
+        }
+
+        @ParameterizedTest
+        @CsvSource(value = {
+            "false,false,false",
+            "false,false,true",
+            "true,false,false"
+        })
+        void givenNoSolicitorChanged_whenHandled_thenNoNocEmailAndLetterSent(
+            boolean hasApplicantSolicitorChanged, boolean hasRespondentSolicitorChanged, boolean isApplicationIssued
+        ) {
+            mockSolicitorChangedAndApplicationIssued(hasApplicantSolicitorChanged, hasRespondentSolicitorChanged, isApplicationIssued);
+
+            // Act
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+            // Verify
+            assertAll(
+                () -> assertThat(response.getConfirmationBody()).isNull(),
+                () -> assertThat(response.getConfirmationHeader()).isNull(),
+                () -> verifyNoInteractions(applicationEventPublisher, updateContactDetailsNotificationService)
+            );
+        }
+
+        @ParameterizedTest
+        @CsvSource(value = {
+            "true,true,false",
+            "true,true,true",
+            "true,false,true",
+            "true,false,false",
+            "false,true,true"
+        })
+        void givenAnySolicitorChanged_whenHandled_thenNocEmailAndLetterSent(
+            boolean hasApplicantSolicitorChanged, boolean hasRespondentSolicitorChanged, boolean isApplicationIssued
+        ) {
+            mockSolicitorChangedAndApplicationIssued(hasApplicantSolicitorChanged, hasRespondentSolicitorChanged, isApplicationIssued);
 
             // Act
             // Simulate grant applicant solicitor success
-            when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class), eq("Update Contact Details - granting applicant solicitor"),
+            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
+                eq("Update Contact Details - granting applicant solicitor"),
+                eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
+            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
+                eq("Update Contact Details - revoking applicant solicitor"),
+                eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
+            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
+                eq("Update Contact Details - granting respondent solicitor"),
+                eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
+            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
+                eq("Update Contact Details - revoking respondent solicitor"),
                 eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
 
             SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
@@ -103,7 +158,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
             // Verify
             ArgumentCaptor<ThrowingRunnable> nocNotificationCaptor = getThrowingRunnableCaptor();
-
             assertAll(
                 () -> assertThat(response.getConfirmationBody()).isNull(),
                 () -> assertThat(response.getConfirmationHeader()).isNull(),
@@ -130,8 +184,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 () -> verifyNoMoreInteractions(applicationEventPublisher, updateContactDetailsNotificationService)
             );
         }
-
-        // TODO Ashley is working on notification unit tests
     }
 
     @Nested
