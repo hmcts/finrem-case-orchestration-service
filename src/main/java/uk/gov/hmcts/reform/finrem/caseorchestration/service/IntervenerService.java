@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.EmailUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -302,10 +303,13 @@ public class IntervenerService {
         if (StringUtils.hasText(solUserID)) {
             assignCaseAccessService.removeCaseRoleToUser(caseId, solUserID, caseRole, orgId);
         } else {
-            Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
-            if (userId.isPresent()) {
-                assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
-            } else {
+            if (EmailUtils.isValidEmailAddress(email)) {
+                Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
+                if (userId.isPresent()) {
+                    assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
+                }
+            }
+             else {
                 logError(caseId, errors);
             }
         }
