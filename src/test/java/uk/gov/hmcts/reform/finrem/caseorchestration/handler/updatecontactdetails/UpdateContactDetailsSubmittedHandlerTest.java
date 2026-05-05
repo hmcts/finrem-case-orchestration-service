@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -583,34 +584,176 @@ class UpdateContactDetailsSubmittedHandlerTest {
                     "OldRespSol@email.com", false),
                 false, false
             ),
-            Arguments.of("3. Only applicant changed",
+            Arguments.of("3. Applicant no change, Respondent unrepresented",
                 buildContactDetailsWrapper(
                     "Old AppSol Name", "Old AppSol Firm",
                     "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                false, false
+            ),
+            Arguments.of("4. Respondent no change, Applicant unrepresented",
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, false,
                     "Old RespSol Name", "Old RespSol Firm",
                     "OldRespSol@email.com", false),
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, false,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                false, false
+            ),
+            Arguments.of("5. Both Unpresented no change",
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, false,
+                    null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, false,
+                    null, null,
+                    null, false),
+                false, false
+            ),
+            Arguments.of("6. Applicant Solicitor change, Respondent not represented.",
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
                 buildContactDetailsWrapper(
                     "New AppSol Name", "New AppSol Firm",
                     "NewAppSol@email.com", true, false,
-                    "Old RespSol Name", "Old RespSol Firm",
-                    "OldRespSol@email.com", false),
+                    null, null,
+                    null, false),
                 true, false
             ),
-            Arguments.of("4. Only respondent changed",
+            Arguments.of("7. Respondent Solicitor change, Applicant not represented.",
                 buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false, false,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", true),
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, false,
+                    "New RespSol Name", "New RespSol Firm",
+                    "NewRespSol@email.com", true),
+                false, true
+            ),
+            Arguments.of("9. Only applicant solicitor to unpresented, Respondent not represented.",
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, true,
                     "Old RespSol Name", "Old RespSol Firm",
                     "OldRespSol@email.com", false),
                 buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false, true,
                     "New RespSol Name", "New RespSol Firm",
                     "NewRespSol@email.com", false),
                 false, true
             ),
-            // 5. Only Applicant Change only by case-sensitive - but FinremCallbackRequest ignores this if email/policy is same
-            Arguments.of("5. Only Applicant Change by email case-sensitivity - FinremCallbackRequest normalizes emails",
+            Arguments.of("10. Only Applicant solicitor addded",
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, true,
+                    null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    "New AppSol Name", "New AppSol Firm",
+                    "NewAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                true, false
+            ),
+            Arguments.of("11. No change Applicant Solicitor, Respondent added.",
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, true,
+                    null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, true,
+                    "New RespSol Name", "New RespSol Firm",
+                    "NewRespSol@email.com", true),
+                false, true
+            ),
+            Arguments.of("12. Only RespSol change to rep.",
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                false, true
+            ),
+            Arguments.of("13. Only RespSol to Unrep.",
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                true, false
+            ),
+            Arguments.of("14. Only AppSol change, Respondent not represented.",
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    "New AppSol Name", "New AppSol Firm",
+                    "NewppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                true, false
+            ),
+            Arguments.of("15. Only RespSol change, Applicant not represented.",
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, true,
+                    "Old RespSol Name", "Old RespSol Firm",
+                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper(
+                    null, null,
+                    null, false, true,
+                    "New RespSol Name", "New RespSol Firm",
+                    "NewRespSol@email.com", false),
+                false, true
+            ),
+            Arguments.of("16. No change Applicant Solicitor, Respondent not represented.",
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                buildContactDetailsWrapper(
+                    "Old AppSol Name", "Old AppSol Firm",
+                    "OldAppSol@email.com", true, false,
+                    null, null,
+                    null, false),
+                false, false
+            ),
+            Arguments.of("17. Only Applicant Change by email case-sensitivity - FinremCallbackRequest normalizes emails",
                 buildContactDetailsWrapper(
                     "old appsol name", "old appsol firm",
                     "OldAppSol@email.com", true, false,
@@ -623,7 +766,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
                     null, false),
                 true, false
             ),
-            Arguments.of("6. Only Respondent Change by email",
+            Arguments.of("18. Only Respondent Change by email",
                 buildContactDetailsWrapper(
                     "Old AppSol Name", "Old AppSol Firm",
                     "OldAppSol@email.com", true,
@@ -635,32 +778,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
                     "OLD RESPSOL NAME", "OLD RESPSOL FIRM",
                     "newrespsol@email.com", false),
                 false, true
-            ),
-            Arguments.of("7. No change Applicant Solicitor, Respondent not represented.",
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, false,
-                    null, null,
-                    null, false),
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, false,
-                    null, null,
-                    null, false),
-                false, false
-            ),
-            Arguments.of("8. No change Respondent Solicitor, Applicant not represented.",
-                buildContactDetailsWrapper(
-                    null, null,
-                    null, false, true,
-                    "Old RespSol Name", "Old RespSol Firm",
-                    null, true),
-                buildContactDetailsWrapper(
-                    null, null,
-                    null, false, true,
-                    "Old RespSol Name", "Old RespSol Firm",
-                    null, true),
-                false, false
             )
         );
     }
@@ -682,7 +799,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
         FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);
 
         lenient().when(retryExecutor.supplyWithRetryWithHandler(any(), anyString(), anyString(), any()))
-            .thenReturn(java.util.Optional.of(true));
+            .thenReturn(Optional.of(true));
         lenient().when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(any()))
             .thenReturn(mock(SendCorrespondenceEvent.class));
         lenient().when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(any()))
