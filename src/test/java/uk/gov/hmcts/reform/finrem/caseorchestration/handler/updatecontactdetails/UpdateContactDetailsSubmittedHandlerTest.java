@@ -761,10 +761,10 @@ class UpdateContactDetailsSubmittedHandlerTest {
                     null, false),
                 buildContactDetailsWrapper(
                     "OLD APPSOL NAME", "OLD APPSOL FIRM",
-                    "newappsol@email.com", true,
+                    "OLDAPPSOL@email.com", true,
                     false, null, null,
                     null, false),
-                true, false
+                false, false
             ),
             Arguments.of("18. Only Respondent Change by email",
                 buildContactDetailsWrapper(
