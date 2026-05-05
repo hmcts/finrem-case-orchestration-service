@@ -57,9 +57,10 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         FinremCaseData finremCaseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
-        String grantAppSolicitorError = grantApplicantSolicitor(finremCaseData);
+        String grantAppSolicitorError = callbackRequest.hasApplicantSolicitorChanged()
+            ? grantApplicantSolicitor(finremCaseData) : null;
         String revokeAppSolicitorError = shouldRevokeOldApplicantSolicitor(callbackRequest)
-            ? null : revokeApplicantSolicitor(finremCaseDataBefore);
+            ? revokeApplicantSolicitor(finremCaseDataBefore) : null;
 
         boolean isHavingErrors = !StringUtils.isAllBlank(grantAppSolicitorError, revokeAppSolicitorError);
         if (isHavingErrors) {
