@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -47,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCondition;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingSupplierCaptor;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mockRunWithRetryWithHandlerInvokesFirstErrorHandler;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -98,6 +100,21 @@ class UpdateContactDetailsSubmittedHandlerTest {
             when(callbackRequest.hasRespondentSolicitorChanged()).thenReturn(hasRespondentSolicitorChanged);
         }
 
+        private void simulateGrantAndRevokeOperationsWorkingFine() {
+            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
+                eq("Update Contact Details - granting applicant solicitor"),
+                eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
+            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
+                eq("Update Contact Details - revoking applicant solicitor"),
+                eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
+            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
+                eq("Update Contact Details - granting respondent solicitor"),
+                eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
+            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
+                eq("Update Contact Details - revoking respondent solicitor"),
+                eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
+        }
+
         @ParameterizedTest
         @CsvSource(value = {
             "false,false,false",
@@ -134,19 +151,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
             mockSolicitorChangedAndApplicationIssued(hasApplicantSolicitorChanged, hasRespondentSolicitorChanged, isApplicationIssued);
 
             // Act
-            // Simulate grant applicant solicitor success
-            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
-                eq("Update Contact Details - granting applicant solicitor"),
-                eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
-            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
-                eq("Update Contact Details - revoking applicant solicitor"),
-                eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
-            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
-                eq("Update Contact Details - granting respondent solicitor"),
-                eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
-            lenient().when(retryExecutor.supplyWithRetryWithHandler(any(ThrowingSupplier.class),
-                eq("Update Contact Details - revoking respondent solicitor"),
-                eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
+            simulateGrantAndRevokeOperationsWorkingFine();
 
             SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
             when(event.getCaseId()).thenReturn(CASE_ID);
@@ -183,6 +188,69 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 },
                 () -> verifyNoMoreInteractions(applicationEventPublisher, updateContactDetailsNotificationService)
             );
+        }
+
+        @ParameterizedTest
+        @CsvSource(value = {
+            "true,true",
+            "true,false",
+            "false,true",
+            "false,false"
+        })
+        void givenExceptionThrown_whenSendingNotification_thenPopulateErrorToConfirmationBody(
+            boolean nocLetterFailure, boolean nocEmailToLitigantSolicitorFailure
+        ) {
+            mockSolicitorChangedAndApplicationIssued(true, true, false);
+
+            // Act
+            simulateGrantAndRevokeOperationsWorkingFine();
+            SendCorrespondenceEvent event = mock(SendCorrespondenceEvent.class);
+            when(event.getCaseId()).thenReturn(CASE_ID);
+            when(updateContactDetailsNotificationService.prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()))
+                .thenReturn(event);
+
+            if (nocEmailToLitigantSolicitorFailure) {
+                mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+                    retryExecutor,
+                    "Sending NOC email to litigant solicitor"
+                );
+            } else {
+                doAnswer(invocation -> {
+                    // Nothing happened
+                    return null;
+                }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC email to litigant solicitor"), any(), any());
+            }
+            if (nocLetterFailure) {
+                mockRunWithRetryWithHandlerInvokesFirstErrorHandler(
+                    retryExecutor,
+                    "Sending NOC letter"
+                );
+            } else {
+                doAnswer(invocation -> {
+                    // Nothing happened
+                    return null;
+                }).when(retryExecutor).runWithRetryWithHandler(any(), eq("Sending NOC letter"), any(), any());
+            }
+
+            // Act
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+            // then
+            if (!nocEmailToLitigantSolicitorFailure && !nocLetterFailure) {
+                assertAll(
+                    () -> assertThat(response.getConfirmationHeader()).isNull(),
+                    () -> assertThat(response.getConfirmationBody()).isNull()
+                );
+            } else {
+                assertAll(
+                    () -> assertThat(response.getConfirmationHeader()).contains("Contact details updated with errors"),
+                    () -> assertCondition(response.getConfirmationBody(), "Fail to send NOC letter to litigants.",
+                        nocLetterFailure),
+                    () -> assertCondition(response.getConfirmationBody(), "Fail to send notice of change email to litigant solicitor.",
+                        nocEmailToLitigantSolicitorFailure),
+                    () -> verify(updateContactDetailsNotificationService).prepareNocEmailToLitigantSolicitor(any(FinremCaseDetails.class))
+                );
+            }
         }
     }
 
