@@ -183,7 +183,7 @@ class AmendApplicationDetailsSubmittedHandlerTest {
             () -> captor.getAllValues().forEach(TestSetUpUtils::runSafely),
             () -> verify(assignPartiesAccessService).grantApplicantSolicitor(finremCaseData),
             () -> verify(assignPartiesAccessService).revokeApplicantSolicitor(finremCaseDataBefore),
-            () ->  verifyNoMoreInteractions(assignPartiesAccessService),
+            () -> verifyNoMoreInteractions(assignPartiesAccessService),
             () -> assertNull(response.getConfirmationBody()),
             () -> assertNull(response.getConfirmationHeader())
         );
