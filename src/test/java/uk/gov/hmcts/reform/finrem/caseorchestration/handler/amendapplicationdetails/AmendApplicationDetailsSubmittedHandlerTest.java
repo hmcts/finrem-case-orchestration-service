@@ -59,11 +59,41 @@ class AmendApplicationDetailsSubmittedHandlerTest {
     }
 
     @Test
-    void givenOldAppSolicitorEmailMissing_whenApplicantSolicitorChange_thenOnlyGrantApplicantSolicitor() {
+    void givenNoApplicantSolicitorChanged_whenHandled_thenOnlyGrantApplicantSolicitor() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
+
+        FinremCallbackRequest callbackRequest = spy(FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, finremCaseData));
+        when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(false);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
+        assertAll(
+            () -> verify(retryExecutor, never()).runWithRetry(
+                captor.capture(),
+                eq("granting applicant solicitor"),
+                eq(CASE_ID)
+            ),
+            () -> verify(retryExecutor, never()).runWithRetry(
+                any(ThrowingRunnable.class),
+                eq("revoking old applicant solicitor"),
+                eq(CASE_ID)
+            ),
+            () -> assertNull(response.getConfirmationBody()),
+            () -> assertNull(response.getConfirmationHeader())
+        );
+    }
+
+    @Test
+    void givenApplicantSolicitorChanged_whenAppSolicitorIsNewlyAdded_thenGrantApplicantSolicitorOnly() {
         FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
         when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(TEST_SOLICITOR_EMAIL);
 
-        FinremCallbackRequest callbackRequest = spy(FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, finremCaseData));
+        FinremCaseData finremCaseDataBefore = spy(FinremCaseData.builder().build());
+        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn(null);
+
+        FinremCallbackRequest callbackRequest = spy(FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, finremCaseDataBefore,
+            finremCaseData));
         when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(true);
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
@@ -90,7 +120,7 @@ class AmendApplicationDetailsSubmittedHandlerTest {
     }
 
     @Test
-    void givenOldAppSolicitorEmailExists_whenApplicantSolicitorChange_thenGrantAndRevokeApplicantSolicitor() {
+    void givenApplicantSolicitorChanged_whenAppSolicitorEmailIsReplaced_thenGrantAndRevokeApplicantSolicitor() {
         FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
         when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn("new@applicant.email");
 
@@ -119,6 +149,41 @@ class AmendApplicationDetailsSubmittedHandlerTest {
             () -> verify(assignPartiesAccessService).grantApplicantSolicitor(finremCaseData),
             () -> verify(assignPartiesAccessService).revokeApplicantSolicitor(finremCaseDataBefore),
             () ->  verifyNoMoreInteractions(assignPartiesAccessService),
+            () -> assertNull(response.getConfirmationBody()),
+            () -> assertNull(response.getConfirmationHeader())
+        );
+    }
+
+    @Test
+    void givenApplicantSolicitorChanged_whenAppSolicitorIsRemoved_thenRevokeApplicantSolicitorOnly() {
+        FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
+        when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn(null);
+
+        FinremCaseData finremCaseDataBefore = spy(FinremCaseData.builder().build());
+        when(finremCaseDataBefore.getAppSolicitorEmailIfRepresented()).thenReturn("old@applicant.email");
+
+        FinremCallbackRequest callbackRequest = spy(FinremCallbackRequestFactory.from(CASE_ID_IN_LONG, finremCaseDataBefore,
+            finremCaseData));
+        when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(true);
+
+        var response = underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
+        assertAll(
+            () -> verify(retryExecutor, never()).runWithRetry(
+                any(ThrowingRunnable.class),
+                eq("granting applicant solicitor"),
+                eq(CASE_ID)
+            ),
+            () -> verify(retryExecutor).runWithRetry(
+                captor.capture(),
+                eq("revoking old applicant solicitor"),
+                eq(CASE_ID)
+            ),
+            () -> {
+                captor.getValue().run();
+                verify(assignPartiesAccessService).revokeApplicantSolicitor(finremCaseDataBefore);
+            },
             () -> assertNull(response.getConfirmationBody()),
             () -> assertNull(response.getConfirmationHeader())
         );
