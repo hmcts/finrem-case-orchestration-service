@@ -674,4 +674,12 @@ public class TestSetUpUtils {
             any()
         );
     }
+
+    public static void assertCondition(String actual, String expect, boolean shouldContain) {
+        if (shouldContain) {
+            org.assertj.core.api.Assertions.assertThat(actual).contains(expect);
+        } else {
+            org.assertj.core.api.Assertions.assertThat(actual).doesNotContain(expect);
+        }
+    }
 }
