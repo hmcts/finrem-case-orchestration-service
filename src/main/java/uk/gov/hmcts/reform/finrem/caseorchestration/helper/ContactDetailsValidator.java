@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
@@ -74,6 +75,7 @@ public class ContactDetailsValidator {
      * If a party is unrepresented, only the party address is shown to the admin.
      * This method only validates the address that is shown to the admin.
      * This also stops validation failing for older case data that is already stored with errors (such as applicantAddress = {}).
+     *
      * @param finremCaseDetails the {@link FinremCaseDetails} containing contact details to validate
      * @return a list of validation error messages for any missing or invalid postcode fields
      */
@@ -110,8 +112,8 @@ public class ContactDetailsValidator {
      * </p>
      *
      * @param caseData the case data containing case type and solicitor representation info
-     * @param wrapper the wrapper containing solicitor address details
-     * @param errors the list to which error messages will be added if validation fails
+     * @param wrapper  the wrapper containing solicitor address details
+     * @param errors   the list to which error messages will be added if validation fails
      */
     public static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         // DFR-4704 - to simplify the logic by FinremCaseData.getAppSolicitorAddress
@@ -140,7 +142,7 @@ public class ContactDetailsValidator {
      * </p>
      *
      * @param wrapper the wrapper containing applicant address and residency details
-     * @param errors the list to which error messages will be added if validation fails
+     * @param errors  the list to which error messages will be added if validation fails
      */
     public static void checkForEmptyApplicantPostcode(ContactDetailsWrapper wrapper, List<String> errors) {
         Address applicantAddress = wrapper.getApplicantAddress();
@@ -160,8 +162,8 @@ public class ContactDetailsValidator {
      * </p>
      *
      * @param caseData the case data indicating solicitor representation status
-     * @param wrapper the wrapper containing respondent solicitor address details
-     * @param errors the list to which error messages will be added if validation fails
+     * @param wrapper  the wrapper containing respondent solicitor address details
+     * @param errors   the list to which error messages will be added if validation fails
      */
     public static void checkForEmptyRespondentSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()
@@ -184,7 +186,7 @@ public class ContactDetailsValidator {
      * </p>
      *
      * @param wrapper the wrapper containing respondent address and residency details
-     * @param errors the list to which error messages will be added if validation fails
+     * @param errors  the list to which error messages will be added if validation fails
      */
     public static void checkForEmptyRespondentPostcode(ContactDetailsWrapper wrapper, List<String> errors) {
         Address respondentAddress = wrapper.getRespondentAddress();
@@ -228,9 +230,9 @@ public class ContactDetailsValidator {
      * are collected and returned as a list of error messages. If no issues are found,
      * an empty list is returned.</p>
      *
-     * @param caseData the case data containing contact details to be validated
+     * @param caseData               the case data containing contact details to be validated
      * @param validatePartiesService an optional service used to perform additional
-     *                                party-related validation logic; may be {@code null}
+     *                               party-related validation logic; may be {@code null}
      * @return a list of validation error messages; never {@code null}
      */
     public static List<String> validateCaseDataEmailAddresses(FinremCaseData caseData,
@@ -273,6 +275,27 @@ public class ContactDetailsValidator {
         }
 
         return errors;
+    }
+
+    /*
+     * This version of checkForApplicantSolicitorEmailAddress performs additional validation to check whether the email
+     * address is registered to the respondent's organisation.
+     */
+    public static String checkForIntervenerSolicitorEmailAddress(IntervenerWrapper intervener,
+                                                                 ValidatePartiesService validatePartiesService) {
+
+        String intervenerSolicitorEmail = intervener.getIntervenerSolEmail();
+        if (intervener.getIntervenerRepresented().equals(YesOrNo.YES)) {
+            if (!isValidEmailAddress(intervener.getIntervenerSolEmail())) {
+                return INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(intervenerSolicitorEmail);
+            } else {
+                String orgId = getOrganisationId(intervener.getIntervenerOrganisation());
+                if (!isEmailValidForOrganisation(validatePartiesService, intervenerSolicitorEmail, orgId)) {
+                    return EMAIL_NOT_IN_APPLICANT_ORG_ERROR_MESSAGE.formatted(intervenerSolicitorEmail);
+                }
+            }
+        }
+        return null;
     }
 
     /*
@@ -401,9 +424,9 @@ public class ContactDetailsValidator {
      * the address is not considered invalid.
      * </p>
      *
-     * @param address           the address to validate
-     * @param resideOutsideUK   {@code YES} if the person lives outside the UK, {@code NO} if they live in the UK,
-     *                          or {@code null} if not answered
+     * @param address         the address to validate
+     * @param resideOutsideUK {@code YES} if the person lives outside the UK, {@code NO} if they live in the UK,
+     *                        or {@code null} if not answered
      * @return {@code true} if the postcode is invalid for someone living in the UK; {@code false} otherwise
      */
     private static boolean postCodeIsInvalid(Address address, YesOrNo resideOutsideUK) {
