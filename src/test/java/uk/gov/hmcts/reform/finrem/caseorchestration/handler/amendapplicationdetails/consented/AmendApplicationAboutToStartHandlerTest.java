@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.amendapplicationdet
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
@@ -16,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -98,17 +99,17 @@ class AmendApplicationAboutToStartHandlerTest {
         );
     }
 
-    @Test
-    void givenCase_whenCivilPartnershipAlreadyExists_thenShouldNotPrepopulateCivilPartnership() {
+    @ParameterizedTest
+    @EnumSource(YesOrNo.class)
+    void givenCase_whenCivilPartnershipAlreadyExists_thenShouldNotPrepopulateCivilPartnership(YesOrNo existingValue) {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from();
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
-        YesOrNo mockedYerOrNo = mock(YesOrNo.class);
-        data.setCivilPartnership(mockedYerOrNo);
+        data.setCivilPartnership(existingValue);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(data).extracting(FinremCaseData::getCivilPartnership)
-            .isEqualTo(mockedYerOrNo);
+            .isEqualTo(existingValue);
     }
 }
