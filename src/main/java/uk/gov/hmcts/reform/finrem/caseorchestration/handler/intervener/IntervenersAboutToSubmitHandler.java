@@ -8,12 +8,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,15 +35,18 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final IntervenerService intervenerService;
 
+    private final ValidatePartiesService validatePartiesService;
+
     private static final List<String> ADD_OPERATION_CODES = List.of(ADD_INTERVENER_ONE_CODE, ADD_INTERVENER_TWO_CODE,
         ADD_INTERVENER_THREE_CODE, ADD_INTERVENER_FOUR_CODE);
     private static final List<String> DELETE_OPERATION_CODES = List.of(DEL_INTERVENER_ONE_CODE, DEL_INTERVENER_TWO_CODE,
         DEL_INTERVENER_THREE_CODE, DEL_INTERVENER_FOUR_CODE);
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                           IntervenerService intervenerService) {
+                                           IntervenerService intervenerService, ValidatePartiesService validatePartiesService) {
         super(finremCaseDetailsMapper);
         this.intervenerService = intervenerService;
+        this.validatePartiesService = validatePartiesService;
     }
 
     @Override
@@ -64,9 +69,9 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         IntervenerWrapper intervener = getIntervenerWrapper(caseData, selectedOperationCode);
 
         if (ADD_OPERATION_CODES.contains(selectedOperationCode)) {
-            if (isIntervenerPostCodeMissing(intervener)) {
-                errors.add("Postcode field is required for the intervener.");
-            } else {
+            validateIntervenerInformation(intervener, errors);
+
+            if (errors.isEmpty()) {
                 intervenerService.updateIntervenerDetails(intervener, errors, callbackRequest);
             }
         } else if (DELETE_OPERATION_CODES.contains(selectedOperationCode)) {
@@ -79,9 +84,22 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             .data(caseData).errors(errors).build();
     }
 
-    private boolean isIntervenerPostCodeMissing(IntervenerWrapper intervener) {
+    private void validateIntervenerInformation(IntervenerWrapper intervener, List<String> errors) {
+        //Validate solicitor email address for intervener
+        errors.add(ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService));
+
+        //Validate postcode presence for intervener
+        errors.add(validateIntervenerPostCodeMissing(intervener));
+    }
+
+    private String validateIntervenerPostCodeMissing(IntervenerWrapper intervener) {
         String postCode = intervener.getIntervenerAddress().getPostCode();
-        return StringUtils.isEmpty(postCode);
+
+        if (StringUtils.isBlank(postCode)) {
+            return "Postcode field is required for the intervener.";
+        }
+
+        return null;
     }
 
     private IntervenerWrapper getIntervenerWrapper(FinremCaseData caseData, String selectedOperationCode) {
