@@ -102,28 +102,28 @@ class UpdateContactDetailsSubmittedHandlerTest {
             GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
             // Verify
-            ArgumentCaptor<ThrowingRunnable> nocEmailToSolicitorsCaptor = getThrowingRunnableCaptor();
+            ArgumentCaptor<ThrowingRunnable> nocNotificationCaptor = getThrowingRunnableCaptor();
 
             assertAll(
                 () -> assertThat(response.getConfirmationBody()).isNull(),
                 () -> assertThat(response.getConfirmationHeader()).isNull(),
                 () -> verify(updateContactDetailsNotificationService).prepareNocEmailToLitigantSolicitor(callbackRequest.getCaseDetails()),
                 () -> verify(retryExecutor).runWithRetryWithHandler(
-                    nocEmailToSolicitorsCaptor.capture(),
+                    nocNotificationCaptor.capture(),
                     eq("Sending NOC email to litigant solicitor"),
                     eq(CASE_ID),
                     any(RetryErrorHandler.class)),
                 () -> {
-                    nocEmailToSolicitorsCaptor.getValue().run();
+                    nocNotificationCaptor.getValue().run();
                     verify(applicationEventPublisher).publishEvent(event);
                 },
                 () -> verify(retryExecutor).runWithRetryWithHandler(
-                    nocEmailToSolicitorsCaptor.capture(),
+                    nocNotificationCaptor.capture(),
                     eq("Sending NOC letter"),
                     eq(CASE_ID),
                     any(RetryErrorHandler.class)),
                 () -> {
-                    nocEmailToSolicitorsCaptor.getValue().run();
+                    nocNotificationCaptor.getValue().run();
                     verify(updateContactDetailsNotificationService).sendNocLetterToLitigants(any(FinremCaseDetails.class),
                         any(FinremCaseDetails.class), eq(AUTH_TOKEN));
                 },
