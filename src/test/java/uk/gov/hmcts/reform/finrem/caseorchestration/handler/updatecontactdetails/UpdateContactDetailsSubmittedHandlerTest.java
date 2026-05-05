@@ -277,7 +277,11 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
         // TODO Dawud
         void givenRespondentSolicitorChanged_whenHandled_thenGrantAndRevokeApplicantSolicitorAndNotifyParties() {}
+
     }
+
+    // TODO Dawud
+    void givenRespondentSolicitorChangedButApplicationNotIssued_whenHandled_thenNoCaseAssignmentAndNoNotification() {}
 
     @Test
     void givenNoApplicantAndRespondentSolicitorChanged_whenHandled_thenNoCaseAssignmentAndNoNotification() {
