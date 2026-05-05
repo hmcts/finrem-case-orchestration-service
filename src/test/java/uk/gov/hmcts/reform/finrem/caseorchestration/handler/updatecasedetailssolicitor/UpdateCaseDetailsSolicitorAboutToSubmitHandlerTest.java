@@ -35,10 +35,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateCaseDetailsSolicitorContestedAboutToSubmitHandlerTest {
+class UpdateCaseDetailsSolicitorAboutToSubmitHandlerTest {
 
     @InjectMocks
-    private UpdateCaseDetailsSolicitorContestedAboutToSubmitHandler underTest;
+    private UpdateCaseDetailsSolicitorAboutToSubmitHandler underTest;
 
     @Mock
     private GenerateCoverSheetService generateCoverSheetService;

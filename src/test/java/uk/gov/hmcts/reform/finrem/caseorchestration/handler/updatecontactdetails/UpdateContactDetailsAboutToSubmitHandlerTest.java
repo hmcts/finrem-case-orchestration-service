@@ -18,12 +18,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
@@ -65,6 +67,9 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
 
     @Mock
     private InternationalPostalService internationalPostalService;
+
+    @Mock
+    private GenerateCoverSheetService generateCoverSheetService;
 
     @Mock
     private FinremCaseDetailsMapper detailsMapper;
@@ -291,8 +296,98 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         // No cover sheets should be generated since there are no changes
         verify(updateContactDetailsService).persistOrgPolicies(finremCaseData, caseDetails.getData());
         verify(onlineFormDocumentService, never()).generateContestedMiniForm(any(), any());
+        verify(generateCoverSheetService, never()).generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(generateCoverSheetService, never()).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verifyNoMoreInteractions(onlineFormDocumentService);
         verifyNoMoreInteractions(nocWorkflowService);
+    }
+
+    @Test
+    void givenApplicantAddressChange_generateApplicantCoverSheetCalled() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantAddress(buildAddress(
+                    "New Address Line 1", "New Address Line 2", "SW1A 1AA"))
+                .build())
+            .build();
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(finremCaseData)
+            .caseType(CaseType.CONSENTED)
+            .build();
+
+        FinremCaseData finremCaseDatabefore = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantAddress(buildAddress(
+                    "Old Address Line 1", "Old Address Line 2", "Old 1AA"))
+                .build())
+            .build();
+
+        FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(finremCaseDatabefore)
+            .caseType(CaseType.CONSENTED)
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .eventType(EventType.UPDATE_CONTACT_DETAILS)
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore)
+            .build();
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertNotNull(response);
+        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    void givenRespondentAddressChange_generateRespondentCoverSheetCalled() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentAddress(buildAddress(
+                    "New Address Line 1", "New Address Line 2", "SW1A 1AA"))
+                .build())
+            .build();
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(finremCaseData)
+            .caseType(CaseType.CONSENTED)
+            .build();
+
+        FinremCaseData finremCaseDataBefore = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentAddress(buildAddress(
+                    "Old Address Line 1", "Old Address Line 2", "Old 1AA"))
+                .build())
+            .build();
+
+        FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(finremCaseDataBefore)
+            .caseType(CaseType.CONSENTED)
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .eventType(EventType.UPDATE_CONTACT_DETAILS)
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore)
+            .build();
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertNotNull(response);
+        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+    }
+
+    private Address buildAddress(String addressLine1, String addressLine2, String postCode) {
+        return Address.builder()
+            .addressLine1(addressLine1)
+            .addressLine2(addressLine2)
+            .postCode(postCode)
+            .build();
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
