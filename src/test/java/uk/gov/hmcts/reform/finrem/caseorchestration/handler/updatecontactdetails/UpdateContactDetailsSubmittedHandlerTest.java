@@ -117,28 +117,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
         @ParameterizedTest
         @CsvSource(value = {
-            "false,false,false",
-            "false,false,true",
-            "true,false,false"
-        })
-        void givenNoSolicitorChanged_whenHandled_thenNoNocEmailAndLetterSent(
-            boolean hasApplicantSolicitorChanged, boolean hasRespondentSolicitorChanged, boolean isApplicationIssued
-        ) {
-            mockSolicitorChangedAndApplicationIssued(hasApplicantSolicitorChanged, hasRespondentSolicitorChanged, isApplicationIssued);
-
-            // Act
-            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-            // Verify
-            assertAll(
-                () -> assertThat(response.getConfirmationBody()).isNull(),
-                () -> assertThat(response.getConfirmationHeader()).isNull(),
-                () -> verifyNoInteractions(applicationEventPublisher, updateContactDetailsNotificationService)
-            );
-        }
-
-        @ParameterizedTest
-        @CsvSource(value = {
             "true,true,false",
             "true,true,true",
             "true,false,true",
@@ -541,14 +519,7 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
         // Act
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertAll(
-            () -> verifyNoInteractions(assignPartiesAccessService, updateContactDetailsNotificationService,
-                applicationEventPublisher, retryExecutor),
-            // to verify happy path that return null
-            () -> assertThat(response.getConfirmationHeader()).isNull(),
-            () -> assertThat(response.getConfirmationBody()).isNull()
-        );
+        verifyNoNotificationAndCaseAssignment(response);
     }
 
     @Test
@@ -559,7 +530,10 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
         // Act
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
+        verifyNoNotificationAndCaseAssignment(response);
+    }
 
+    private void verifyNoNotificationAndCaseAssignment(GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response) {
         assertAll(
             () -> verifyNoInteractions(assignPartiesAccessService, updateContactDetailsNotificationService,
                 applicationEventPublisher, retryExecutor),
