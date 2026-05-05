@@ -28,7 +28,7 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
 
     public UpdateContactDetailsContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                    InternationalPostalService internationalPostalService,
-                                                    ValidatePartiesService validatePartiesService
+                                                   ValidatePartiesService validatePartiesService
     ) {
         super(finremCaseDetailsMapper);
         this.internationalPostalService = internationalPostalService;
