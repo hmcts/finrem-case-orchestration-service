@@ -279,6 +279,7 @@ public class ContactDetailsValidator {
 
     /**
      * Validates the solicitor email address for the given intervener.
+     *
      * <p>
      * This method checks if the intervener's solicitor email address is present and valid.
      * If the email address is missing or invalid, it returns a descriptive error message.

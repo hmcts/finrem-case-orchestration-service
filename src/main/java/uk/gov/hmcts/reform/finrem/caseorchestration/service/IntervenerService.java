@@ -164,6 +164,7 @@ public class IntervenerService {
     /**
      * Checks if the intervener solicitor's organisation or email address has changed compared to the previous case state,
      * and revokes the previous solicitor's case role if necessary.
+     *
      * <p>
      * This method compares the current and previous intervener details. If the previous intervener was represented and had
      * a valid solicitor email address, and either the organisation ID or email address has changed, the previous solicitor's
