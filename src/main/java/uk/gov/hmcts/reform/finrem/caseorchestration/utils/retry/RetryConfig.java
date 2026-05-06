@@ -10,7 +10,6 @@ import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -46,10 +45,10 @@ public class RetryConfig {
 
     @Bean(name = "retryLoggerInterceptor")
     public RetryOperationsInterceptor retryLoggerInterceptor() {
-        Map<Class<? extends Throwable>, Boolean> retryableExceptions = new HashMap<>();
-        retryableExceptions.put(FeignException.InternalServerError.class, true);
-        retryableExceptions.put(FeignException.ServiceUnavailable.class, true);
-        retryableExceptions.put(FeignException.GatewayTimeout.class, true);
+        Map<Class<? extends Throwable>, Boolean> retryableExceptions = Map.of(
+            FeignException.InternalServerError.class, true,
+            FeignException.ServiceUnavailable.class, true,
+            FeignException.GatewayTimeout.class, true);
 
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(3, retryableExceptions);
 
