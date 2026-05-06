@@ -212,6 +212,7 @@ class IntervenersAboutToSubmitHandlerTest {
 
         verify(intervenerService, never()).updateIntervenerDetails(any(), any(), any());
     }
+
     private static Stream<Arguments> deleteIntervenerOperationCodes() {
         return Stream.of(
             arguments(DEL_INTERVENER_ONE_CODE, 1),
