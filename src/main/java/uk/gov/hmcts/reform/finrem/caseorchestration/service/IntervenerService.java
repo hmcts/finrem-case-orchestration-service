@@ -44,6 +44,9 @@ public class IntervenerService {
     private final IdamService idamService;
     private final AssignPartiesAccessService assignPartiesAccessService;
 
+    static final String INTERVENER_EMAIL_NOT_IN_ORG_ERROR_MESSAGE = "%s is not a valid Email address. "
+        + "The email address must be registered to access MyHMCTS";
+
     /**
      * Revokes an intervener solicitor role for the given case.
      *
@@ -72,6 +75,7 @@ public class IntervenerService {
         revokeIntervenerRole(caseId, email, orgId, intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), intervenerWrapper);
     }
 
+    //Invoked from manageInterveners AboutToSubmit
     public IntervenerChangeDetails removeIntervenerDetails(IntervenerWrapper intervenerWrapper,
                                                            List<String> errors,
                                                            FinremCaseData caseData,
@@ -93,6 +97,7 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
+    //Invoked from manageInterveners AboutToSubmit
     public IntervenerChangeDetails updateIntervenerDetails(IntervenerWrapper intervenerWrapper,
                                                            List<String> errors,
                                                            FinremCallbackRequest callbackRequest) {
@@ -117,7 +122,7 @@ public class IntervenerService {
             try {
                 assignPartiesAccessService.grantIntervenerSolicitor(caseId, intervenerWrapper);
             } catch (UserNotFoundInOrganisationApiException e) {
-                logError(caseId, errors);
+                logSolicitorEmailNotFoundError(caseId, email, errors);
             }
         } else {
             FinremCaseData beforeData = caseDetailsBefore.getData();
@@ -158,18 +163,33 @@ public class IntervenerService {
     }
 
     private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetailsBefore, String orgId,
-                                                          String email, List<String> errors) {
+                                                          String email,
+                                                          List<String> errors) {
         FinremCaseData beforeData = caseDetailsBefore.getData();
         IntervenerWrapper beforeIntv = intervenerWrapper.getIntervenerWrapperFromCaseData(beforeData);
 
-        if (ObjectUtils.isNotEmpty(beforeIntv)
-            && isRepresented(beforeIntv)) {
+        //If there is no previous intervener/intervener solicitor
+        if (ObjectUtils.isEmpty(beforeIntv) || !isRepresented(beforeIntv)) {
+            return;
+        }
+
+        String previousIntervenerSolEmail = beforeIntv.getIntervenerSolEmail();
+
+        if (EmailUtils.isValidEmailAddress(previousIntervenerSolEmail)) {
             String beforeOrgId = beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID();
-            if (ObjectUtils.notEqual(beforeOrgId, orgId) || !beforeIntv.getIntervenerSolEmail().equals(email)) {
-                revokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervenerSolEmail(),
+
+            if (ObjectUtils.notEqual(beforeOrgId, orgId) || !previousIntervenerSolEmail.equals(email)) {
+                revokeIntervenerRole(
+                    caseDetailsBefore.getId(),
+                    previousIntervenerSolEmail,
                     beforeOrgId,
-                    intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors, beforeIntv);
+                    intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(),
+                    errors,
+                    beforeIntv
+                );
             }
+        } else {
+            log.info("Invalid previous intervener email address. No revoke needed.");
         }
     }
 
@@ -241,10 +261,10 @@ public class IntervenerService {
      * of the removed solicitor, and is appended to the existing representation
      * update history on the current {@link FinremCaseData}.</p>
      *
-     * @param finremCaseData the current case data to be updated
+     * @param finremCaseData         the current case data to be updated
      * @param originalFinremCaseData the original case data used to detect changes
-     *                                in intervener representation
-     * @param userAuthorisation the authorisation token of the user making the change
+     *                               in intervener representation
+     * @param userAuthorisation      the authorisation token of the user making the change
      */
     public void updateIntervenerSolicitorStopRepresentingHistory(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData,
                                                                  String userAuthorisation) {
@@ -303,23 +323,18 @@ public class IntervenerService {
         if (StringUtils.hasText(solUserID)) {
             assignCaseAccessService.removeCaseRoleToUser(caseId, solUserID, caseRole, orgId);
         } else {
-            if (EmailUtils.isValidEmailAddress(email)) {
-                Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
-                if (userId.isPresent()) {
-                    assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
-                }
-            }
-             else {
-                logError(caseId, errors);
+            Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
+            if (userId.isPresent()) {
+                assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
+            } else {
+                logSolicitorEmailNotFoundError(caseId, email, errors);
             }
         }
+
     }
 
-    private void logError(Long caseId, List<String> errors) {
-        String error = "Could not find intervener with provided email";
-        log.info("{} for caseId {}", error, caseId);
-        if (errors != null) {
-            errors.add(error);
-        }
+    private void logSolicitorEmailNotFoundError(Long caseId, String email, List<String> errors) {
+        log.info("Invalid intervener email address for caseId {}", caseId);
+        errors.add(INTERVENER_EMAIL_NOT_IN_ORG_ERROR_MESSAGE.formatted(email));
     }
 }
