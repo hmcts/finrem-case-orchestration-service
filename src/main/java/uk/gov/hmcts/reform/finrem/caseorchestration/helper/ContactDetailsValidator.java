@@ -277,9 +277,17 @@ public class ContactDetailsValidator {
         return errors;
     }
 
-    /*
-     * This version of checkForApplicantSolicitorEmailAddress performs additional validation to check whether the email
-     * address is registered to the respondent's organisation.
+    /**
+     * Validates the solicitor email address for the given intervener.
+     * <p>
+     * This method checks if the intervener's solicitor email address is present and valid.
+     * If the email address is missing or invalid, it returns a descriptive error message.
+     * If the email address is valid, it returns {@code null}.
+     * </p>
+     *
+     * @param intervener the intervener whose solicitor email address is to be validated
+     * @param validatePartiesService the service used for validation to check whether the email is registered
+     * @return a validation error message if the email address is missing or invalid; otherwise {@code null}
      */
     public static String checkForIntervenerSolicitorEmailAddress(IntervenerWrapper intervener,
                                                                  ValidatePartiesService validatePartiesService) {
