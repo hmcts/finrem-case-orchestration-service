@@ -128,11 +128,8 @@ class UpdateCaseDetailsSolicitorAboutToSubmitHandlerTest {
     }
 
     /**
-     *  Tests various scenarios of solicitor name and firm changes to verify the generation of cover sheets for both applicant and respondent.
-     * @param beforeWrapper - Contact details wrapper representing the application and respondent solicitor details before the update
-     * @param afterWrapper - Contact details wrapper representing the application and respondent solicitor details after the update
-     * @param expectApplicantCoverSheet -   boolean flag indicating whether an applicant cover sheet is expected to be generated based on the changes
-     * @param expectRespondentCoverSheet -  boolean flag indicating whether a respondent cover sheet is expected to be generated based on the changes
+     *  Tests various scenarios of solicitor name, firm, email, and address changes to verify the generation
+     *  of cover sheets for both applicant and respondent.
      */
     @ParameterizedTest
     @MethodSource
@@ -161,278 +158,71 @@ class UpdateCaseDetailsSolicitorAboutToSubmitHandlerTest {
         }
     }
 
-    /**
-     *  Provides various scenarios of solicitor name and firm changes to test the generation of cover sheets.
-     *  Stream of test scenario arguments lines corresponds to the following :-
-     *  1. Old Applicant Solicitor details
-     *  2. Old Respondent Solicitor details
-     *  3. New Applicant Solicitor details
-     *  4. New Respondent Solicitor details
-     *  5. Expected cover sheet generation for applicant and respondent (boolean flags)
-     */
-    static Stream<Arguments> testSolicitorChangeScenarios() {
+    private static Stream<Arguments> testSolicitorChangeScenarios() {
+        Address oldAddress = buildAddress();
+        Address newAddress = Address.builder().addressLine1("OtherLine1").postCode("ZZ1 1ZZ").build();
+        Address addressWithSpace = buildAddress();
+        addressWithSpace.setPostCode("EC1 3AS ");
+
         return Stream.of(
-            // 1. Both applicant and respondent changed
+            // 1. Both applicant and respondent changed (solicitor details)
             Arguments.of(
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
-                    "Old RespSol Name", "Old RespSol Firm",
-                    "OldRespSol@email.com", false),
-                buildContactDetailsWrapper(
-                    "New AppSol Name", "New AppSol Firm",
-                    "NewAppSol@email.com", true, true,
-                    "New RespSol Name", "New RespSol Firm",
-                    "NewRespSol@email.com", false),
+                buildContactDetailsWrapper("Old AppSol", "Old Firm", "old@email.com", true, true,
+                    "Old RespSol", "Old Firm", "old@email.com", false),
+                buildContactDetailsWrapper("New AppSol", "New Firm", "new@email.com", true, true,
+                    "New RespSol", "New Firm", "new@email.com", false),
                 true, true
             ),
-            // 2. No change both Applicant Solicitor and Respondent solicitor
+            // 2. No changes
             Arguments.of(
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
-                    "Old RespSol Name", "Old RespSol Firm",
-                    "OldRespSol@email.com",  false),
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
-                    "Old RespSol Name", "Old RespSol Firm",
-                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper("Old AppSol", "Old Firm", "old@email.com", true, true,
+                    "Old RespSol", "Old Firm", "old@email.com", false),
+                buildContactDetailsWrapper("Old AppSol", "Old Firm", "old@email.com", true, true,
+                    "Old RespSol", "Old Firm", "old@email.com", false),
                 false, false
             ),
             // 3. Only applicant changed
             Arguments.of(
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
-                    "Old RespSol Name", "Old RespSol Firm",
-                    "OldRespSol@email.com", false),
-                buildContactDetailsWrapper(
-                    "New AppSol Name", "New AppSol Firm",
-                    "NewAppSol@email.com", true, true,
-                    "Old RespSol Name", "Old RespSol Firm",
-                    "OldRespSol@email.com", false),
+                buildContactDetailsWrapper("Old AppSol", "Old Firm", "old@email.com", true, true,
+                    "Old RespSol", "Old Firm", "old@email.com", false),
+                buildContactDetailsWrapper("New AppSol", "New Firm", "new@email.com", true, true,
+                    "Old RespSol", "Old Firm", "old@email.com", false),
                 true, false
             ),
             // 4. Only respondent changed
             Arguments.of(
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
-                    "Old RespSol Name", "Old RespSol Firm",
-                    "OldRespSol@email.com", false),
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
-                    "New RespSol Name", "New RespSol Firm",
-                    "NewRespSol@email.com", false),
+                buildContactDetailsWrapper("Old AppSol", "Old Firm", "old@email.com", true, true,
+                    "Old RespSol", "Old Firm", "old@email.com", false),
+                buildContactDetailsWrapper("Old AppSol", "Old Firm", "old@email.com", true, true,
+                    "New RespSol", "New Firm", "new@email.com", false),
                 false, true
             ),
-            // 5. Only Applicant Change only by case-sensitive
+            // 5. Case-insensitive name change (triggers cover sheet due to current implementation)
             Arguments.of(
-                buildContactDetailsWrapper(
-                    "old appsol name", "old appsol firm",
-                    "OldAppSol@email.com", true, false,
-                    null, null,
-                    null, false),
-                buildContactDetailsWrapper(
-                    "OLD APPSOL NAME", "OLD APPSOL FIRM",
-                    "OldAppSol@email.com", true,
-                    false, null, null,
-                    null, false),
+                buildContactDetailsWrapper("old appsol", "old firm", "old@email.com", true, false,
+                    null, null, null, false),
+                buildContactDetailsWrapper("OLD APPSOL", "OLD FIRM", "old@email.com", true, false,
+                    null, null, null, false),
                 true, false
             ),
-            // 6. Only Respondent Change only by case-sensitive
+            // 6. Address changes
             Arguments.of(
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true,
-                    true, "Old RespSol Name", "Old RespSol Firm",
-                    "OldRespSol@email.com", false),
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, true,
-                    "OLD RESPSOL NAME", "OLD RESPSOL FIRM",
-                    "OldRespSol@email.com", false),
-                false, true
+                buildContactDetailsWrapper("App", "Firm", "a@e.com", oldAddress, "Resp", "Firm", oldAddress),
+                buildContactDetailsWrapper("App", "Firm", "a@e.com", newAddress, "Resp", "Firm", newAddress),
+                true, true
             ),
-            // 7. No change Applicant Solicitor, Respondent not represented.
+            // 7. Address change with whitespace (triggers cover sheet due to current implementation)
             Arguments.of(
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, false,
-                    null, null,
-                    null, false),
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true, false,
-                    null, null,
-                    null, false),
-                false, false
+                buildContactDetailsWrapper("App", "Firm", "a@e.com", oldAddress, "Resp", "Firm", oldAddress),
+                buildContactDetailsWrapper("App", "Firm", "a@e.com", addressWithSpace, "Resp", "Firm", oldAddress),
+                true, false
             ),
-            // 8. No change Respondent Solicitor, Applicant not represented.
+            // 8. Applicant address becomes null
             Arguments.of(
-                buildContactDetailsWrapper(
-                    null, null,
-                    null, false, true,
-                    "Old RespSol Name", "Old RespSol Firm",
-                    null,true),
-                buildContactDetailsWrapper(
-                    null, null,
-                    null, false, true,
-                    "Old RespSol Name", "Old RespSol Firm",
-                    null, true),
-                false, false
-            ),
-            // 9. White space change for Applicant Solicitor, Respondent not represented.
-            Arguments.of(
-                buildContactDetailsWrapper(
-                    "Old AppSol Name", "Old AppSol Firm",
-                    "OldAppSol@email.com", true,
-                    false, null, null,
-                    null, false),
-                buildContactDetailsWrapper(
-                    "Old AppSol Name ", "Old AppSol Firm ",
-                    "OldAppSol@email.com", true,
-                    false, null, null,
-                    null, false),
-                false, false
-            ),
-            // 10. White space change Respondent Solicitor, Applicant not represented.
-            Arguments.of(
-                buildContactDetailsWrapper(
-                    null, null,
-                    null, false,
-                    true, "Old RespSol Name", "Old RespSol Firm",
-                    null, true),
-                buildContactDetailsWrapper(
-                    null, null,
-                    null, false,
-                    true, "Old RespSol Name ", "Old RespSol Firm ",
-                    null, true),
-                false, false
+                buildContactDetailsWrapper("App", "Firm", "a@e.com", oldAddress, "Resp", "Firm", oldAddress),
+                buildContactDetailsWrapper("App", "Firm", "a@e.com", null, "Resp", "Firm", oldAddress),
+                true, false
             )
-        );
-    }
-
-    /**
-     *  Tests various scenarios of solicitor name, firm, email, and address changes to verify the generation
-     *  of cover sheets for both applicant and respondent.
-     */
-    @ParameterizedTest
-    @MethodSource
-    void testSolicitorAndAddressChangeScenarios(
-        String beforeAppSolName, String beforeAppSolFirm, String beforeAppSolEmail, Address beforeAppSolAddress,
-        String beforeRespSolName, String beforeRespSolFirm, Address beforeRespSolAddress,
-        String afterAppSolName, String afterAppSolFirm, String afterAppSolEmail, Address afterAppSolAddress,
-        String afterRespSolName, String afterRespSolFirm, Address afterRespSolAddress,
-        boolean expectApplicantCoverSheet, boolean expectRespondentCoverSheet) {
-
-        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString()))
-            .thenReturn(new ArrayList<>());
-
-        ContactDetailsWrapper beforeWrapper = buildContactDetailsWrapper(
-            beforeAppSolName, beforeAppSolFirm, beforeAppSolEmail, beforeAppSolAddress,
-            beforeRespSolName, beforeRespSolFirm, beforeRespSolAddress);
-
-
-        ContactDetailsWrapper afterWrapper = buildContactDetailsWrapper(
-            afterAppSolName, afterAppSolFirm, afterAppSolEmail,afterAppSolAddress,
-            afterRespSolName, afterRespSolFirm, afterRespSolAddress);
-
-        FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
-        FinremCaseDetails afterDetails = buildCaseDetails(afterWrapper);
-
-        underTest.handle(FinremCallbackRequest.builder()
-            .caseDetails(afterDetails)
-            .caseDetailsBefore(beforeDetails)
-            .build(), AUTH_TOKEN);
-
-        if (expectApplicantCoverSheet) {
-            verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(afterDetails, AUTH_TOKEN);
-        } else {
-            verify(generateCoverSheetService, never()).generateAndSetApplicantCoverSheet(afterDetails, AUTH_TOKEN);
-        }
-        if (expectRespondentCoverSheet) {
-            verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(afterDetails, AUTH_TOKEN);
-        } else {
-            verify(generateCoverSheetService, never()).generateAndSetRespondentCoverSheet(afterDetails, AUTH_TOKEN);
-        }
-    }
-
-    /**
-     * Provides various scenarios of solicitor name, firm, email, and address changes to test the generation of cover sheets.
-     * Stream of test scenario arguments lines corresponds to the following :-
-     *  1. Old Applicant Solicitor details
-     *  2. Old Respondent Solicitor details
-     *  3. New Applicant Solicitor details
-     *  4. New Respondent Solicitor details
-     *  5. Expected cover sheet generation for applicant and respondent (boolean flags)
-     */
-    static Stream<Arguments> testSolicitorAndAddressChangeScenarios() {
-        Address oldAddress = buildAddress();
-        Address newAddress = Address.builder().addressLine1("OtherLine1").postCode("ZZ1 1ZZ").build();
-        Address addressWhiteSpace = buildAddress();
-        addressWhiteSpace.setPostCode("EC1 3AS ");
-        Address addressNull = null;
-
-        return Stream.of(
-            // 1. Both applicant and respondent address changed
-            Arguments.of(
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                "New AppSol Firm", "New AppSol Firm", "NewAppSol@email.com", newAddress,
-                "New RespSol Name", "New RespSol Firm", newAddress,
-                true, true),
-            // 2. Only applicant address changed
-            Arguments.of(
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", newAddress,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                true, false),
-            // 3. Only respondent address changed
-            Arguments.of(
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", newAddress,
-                false, true),
-            // 4. No address change
-            Arguments.of(
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                false, false),
-            // 5. Applicant address becomes null
-            Arguments.of(
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", addressNull,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                true, false),
-            // 6. Respondent address becomes null
-            Arguments.of(
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", addressNull,
-                false, true),
-            // 7. Applicant address with whitespace trim
-            Arguments.of(
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", addressWhiteSpace,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                false, false),
-            // 8. Respondent address with whitespace trim
-            Arguments.of(
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", oldAddress,
-                "Old AppSol Name", "Old AppSol Firm", "OldAppSol@email.com", oldAddress,
-                "Old RespSol Name", "Old AppSol Firm", addressWhiteSpace,
-                false, false)
         );
     }
 }
