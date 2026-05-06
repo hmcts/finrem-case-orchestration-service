@@ -115,7 +115,6 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
         }
 
-
         static final String BOTH_CHANGES = "true,true,false";
         static final String BOTH_CHANGES_AND_APP_ISSUED = "true,true,true";
         static final String APP_SOL_CHANGE_ONLY_AND_APP_ISSUED = "true,false,true";
