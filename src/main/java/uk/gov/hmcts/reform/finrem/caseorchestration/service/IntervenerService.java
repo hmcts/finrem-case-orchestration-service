@@ -352,6 +352,8 @@ public class IntervenerService {
 
     private void logSolicitorEmailNotFoundError(Long caseId, String email, List<String> errors) {
         log.info("Invalid intervener email address for caseId {}", caseId);
-        errors.add(INTERVENER_EMAIL_NOT_IN_ORG_ERROR_MESSAGE.formatted(email));
+        if (errors != null) {
+            errors.add(INTERVENER_EMAIL_NOT_IN_ORG_ERROR_MESSAGE.formatted(email));
+        }
     }
 }
