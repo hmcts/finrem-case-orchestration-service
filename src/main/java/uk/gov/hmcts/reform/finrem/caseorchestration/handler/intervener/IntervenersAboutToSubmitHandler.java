@@ -85,11 +85,21 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     }
 
     private void validateIntervenerInformation(IntervenerWrapper intervener, List<String> errors) {
-        //Validate solicitor email address for intervener
-        errors.add(ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService));
+        addErrorIfPresent(
+            errors,
+            ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+        );
 
-        //Validate postcode presence for intervener
-        errors.add(validateIntervenerPostCodeMissing(intervener));
+        addErrorIfPresent(
+            errors,
+            validateIntervenerPostCodeMissing(intervener)
+        );
+    }
+
+    private void addErrorIfPresent(List<String> errors, String error) {
+        if (StringUtils.isNotBlank(error)) {
+            errors.add(error);
+        }
     }
 
     private String validateIntervenerPostCodeMissing(IntervenerWrapper intervener) {
