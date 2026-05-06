@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry;
 
+import feign.FeignException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -69,13 +70,29 @@ class RetryExecutorIntegrationTest {
             AtomicInteger counter = new AtomicInteger();
 
             assertThatThrownBy(() ->
-                retryExecutor.supplyWithRetry(() -> {
+                retryExecutor.runWithRetry(() -> {
                     counter.incrementAndGet();
                     throw new RuntimeException("Not retryable");
                 }, "send", CASE_ID)
             ).isInstanceOf(RuntimeException.class);
 
             assertThat(counter.get()).isEqualTo(1);
+        }
+
+        @Test
+        void shouldNotRetryWhenMaximumAttemptsExceeded() {
+            AtomicInteger counter = new AtomicInteger();
+
+            assertThatThrownBy(() ->
+                retryExecutor.runWithRetry(() -> {
+                    counter.incrementAndGet();
+                    throw feignException(500, "Retryable Error");
+                }, "send", CASE_ID)
+            )
+                .isInstanceOf(FeignException.InternalServerError.class)
+                .hasMessageContaining("Retryable Error");
+
+            assertThat(counter.get()).isEqualTo(DEFAULT_MAX_ATTEMPTS);
         }
     }
 
@@ -126,6 +143,22 @@ class RetryExecutorIntegrationTest {
             ).isInstanceOf(RuntimeException.class);
 
             assertThat(counter.get()).isEqualTo(1);
+        }
+
+        @Test
+        void shouldNotRetryWhenMaximumAttemptsExceeded() {
+            AtomicInteger counter = new AtomicInteger();
+
+            assertThatThrownBy(() ->
+                retryExecutor.supplyWithRetry(() -> {
+                    counter.incrementAndGet();
+                    throw feignException(500, "Retryable Error");
+                }, "send", CASE_ID)
+            )
+                .isInstanceOf(FeignException.InternalServerError.class)
+                .hasMessageContaining("Retryable Error");
+
+            assertThat(counter.get()).isEqualTo(DEFAULT_MAX_ATTEMPTS);
         }
     }
 }
