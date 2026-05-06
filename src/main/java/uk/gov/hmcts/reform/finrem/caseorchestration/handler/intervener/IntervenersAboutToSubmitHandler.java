@@ -80,8 +80,7 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).errors(errors).build();
+        return response(caseData, null, errors);
     }
 
     private void validateIntervenerInformation(IntervenerWrapper intervener, List<String> errors) {
