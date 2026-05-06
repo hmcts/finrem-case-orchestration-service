@@ -293,7 +293,7 @@ public class ContactDetailsValidator {
                                                                  ValidatePartiesService validatePartiesService) {
 
         String intervenerSolicitorEmail = intervener.getIntervenerSolEmail();
-        if (intervener.getIntervenerRepresented().equals(YesOrNo.YES)) {
+        if (YesOrNo.YES.equals(intervener.getIntervenerRepresented())) {
             if (!isValidEmailAddress(intervener.getIntervenerSolEmail())) {
                 return INVALID_EMAIL_ADDRESS_ERROR_MESSAGE.formatted(intervenerSolicitorEmail);
             } else {
