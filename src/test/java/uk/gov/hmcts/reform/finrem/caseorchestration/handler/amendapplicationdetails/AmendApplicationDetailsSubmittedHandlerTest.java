@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryErrorHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.ThrowingRunnable;
 
@@ -23,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCondition;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.getThrowingRunnableCaptor;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mockRunWithRetryWithHandlerInvokesFirstErrorHandler;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
@@ -110,19 +111,21 @@ class AmendApplicationDetailsSubmittedHandlerTest {
 
         ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
         assertAll(
-            () -> verify(retryExecutor).runWithRetry(
+            () -> verify(retryExecutor).runWithRetryWithHandler(
                 captor.capture(),
                 eq("granting applicant solicitor"),
-                eq(CASE_ID)
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
             ),
             () -> {
                 captor.getValue().run();
                 verify(assignPartiesAccessService).grantApplicantSolicitor(finremCaseData);
             },
-            () -> verify(retryExecutor, never()).runWithRetry(
+            () -> verify(retryExecutor, never()).runWithRetryWithHandler(
                 any(ThrowingRunnable.class),
                 eq("revoking old applicant solicitor"),
-                eq(CASE_ID)
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
             ),
             () -> assertNull(response.getConfirmationBody()),
             () -> assertNull(response.getConfirmationHeader())
@@ -145,15 +148,17 @@ class AmendApplicationDetailsSubmittedHandlerTest {
 
         ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
         assertAll(
-            () -> verify(retryExecutor, never()).runWithRetry(
+            () -> verify(retryExecutor, never()).runWithRetryWithHandler(
                 any(ThrowingRunnable.class),
                 eq("granting applicant solicitor"),
-                eq(CASE_ID)
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
             ),
-            () -> verify(retryExecutor).runWithRetry(
+            () -> verify(retryExecutor).runWithRetryWithHandler(
                 captor.capture(),
                 eq("revoking old applicant solicitor"),
-                eq(CASE_ID)
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
             ),
             () -> {
                 captor.getValue().run();
@@ -180,15 +185,17 @@ class AmendApplicationDetailsSubmittedHandlerTest {
 
         ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
         assertAll(
-            () -> verify(retryExecutor).runWithRetry(
+            () -> verify(retryExecutor).runWithRetryWithHandler(
                 captor.capture(),
                 eq("granting applicant solicitor"),
-                eq(CASE_ID)
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
             ),
-            () -> verify(retryExecutor).runWithRetry(
+            () -> verify(retryExecutor).runWithRetryWithHandler(
                 captor.capture(),
                 eq("revoking old applicant solicitor"),
-                eq(CASE_ID)
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
             ),
             () -> captor.getAllValues().forEach(TestSetUpUtils::runSafely),
             () -> verify(assignPartiesAccessService).grantApplicantSolicitor(finremCaseData),
@@ -207,7 +214,7 @@ class AmendApplicationDetailsSubmittedHandlerTest {
     })
     void givenApplicantSolicitorChanged_whenGrantOrRevokeApplicantSolicitorFailure_thenPopulateConfirmationBody(
         boolean grantFailure, boolean revokeFailure
-    ) throws Exception {
+    ) {
         FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
         when(finremCaseData.getAppSolicitorEmailIfRepresented()).thenReturn("new@applicant.email");
 
@@ -219,44 +226,40 @@ class AmendApplicationDetailsSubmittedHandlerTest {
         when(callbackRequest.hasApplicantSolicitorChanged()).thenReturn(true);
 
         if (grantFailure) {
-            doThrow(RuntimeException.class).when(retryExecutor).runWithRetry(
-                any(),
-                eq("granting applicant solicitor"),
-                any()
-            );
+            mockRunWithRetryWithHandlerInvokesFirstErrorHandler(retryExecutor, "granting applicant solicitor");
         } else {
-            doNothing().when(retryExecutor).runWithRetry(
+            doNothing().when(retryExecutor).runWithRetryWithHandler(
                 any(),
                 eq("granting applicant solicitor"),
-                any()
+                any(),
+                any(RetryErrorHandler.class)
             );
         }
         if (revokeFailure) {
-            doThrow(RuntimeException.class).when(retryExecutor).runWithRetry(
-                any(),
-                eq("revoking old applicant solicitor"),
-                any()
-            );
+            mockRunWithRetryWithHandlerInvokesFirstErrorHandler(retryExecutor, "revoking old applicant solicitor");
         } else {
-            doNothing().when(retryExecutor).runWithRetry(
+            doNothing().when(retryExecutor).runWithRetryWithHandler(
                 any(),
                 eq("revoking old applicant solicitor"),
-                any()
+                any(),
+                any(RetryErrorHandler.class)
             );
         }
 
         var response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         assertAll(
-            () -> verify(retryExecutor).runWithRetry(
+            () -> verify(retryExecutor).runWithRetryWithHandler(
                 any(ThrowingRunnable.class),
                 eq("granting applicant solicitor"),
-                eq(CASE_ID)
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
             ),
-            () -> verify(retryExecutor).runWithRetry(
+            () -> verify(retryExecutor).runWithRetryWithHandler(
                 any(ThrowingRunnable.class),
                 eq("revoking old applicant solicitor"),
-                eq(CASE_ID)
+                eq(CASE_ID),
+                any(RetryErrorHandler.class)
             ),
             () -> assertThat(response.getConfirmationHeader()).contains("Application amended with errors"),
             () -> assertCondition(response.getConfirmationBody(),

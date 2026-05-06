@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessS
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.retry.RetryExecutor;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_APP_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CONTESTED_APP_DETAILS;
@@ -57,7 +58,7 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         FinremCaseData finremCaseDataBefore = callbackRequest.getFinremCaseDataBefore();
 
-        String grantAppSolicitorError = callbackRequest.hasApplicantSolicitorChanged()
+        String grantAppSolicitorError = shouldGrantApplicantSolicitor(callbackRequest)
             ? grantApplicantSolicitor(finremCaseData) : null;
         String revokeAppSolicitorError = shouldRevokeOldApplicantSolicitor(callbackRequest)
             ? revokeApplicantSolicitor(finremCaseDataBefore) : null;
@@ -71,20 +72,9 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
         return submittedResponse();
     }
 
-    private String grantApplicantSolicitor(FinremCaseData caseData) {
-        String appSolicitorEmail = caseData.getAppSolicitorEmailIfRepresented();
-        if (StringUtils.isBlank(appSolicitorEmail)) {
-            return null;
-        }
-        try {
-            retryExecutor.runWithRetry(() -> assignPartiesAccessService.grantApplicantSolicitor(caseData),
-                "granting applicant solicitor", caseData.getCcdCaseId());
-            return null;
-        } catch (Exception ex) {
-            log.error("Error granting applicant solicitor", ex);
-            return "There was a problem granting access to applicant solicitor (%s). Please grant access manually."
-                .formatted(appSolicitorEmail);
-        }
+    private boolean shouldGrantApplicantSolicitor(FinremCallbackRequest callbackRequest) {
+        return callbackRequest.hasApplicantSolicitorChanged()
+            && StringUtils.isNotBlank(callbackRequest.getFinremCaseData().getAppSolicitorEmailIfRepresented());
     }
 
     private boolean shouldRevokeOldApplicantSolicitor(FinremCallbackRequest callbackRequest) {
@@ -92,17 +82,28 @@ public class AmendApplicationDetailsSubmittedHandler extends FinremCallbackHandl
             && StringUtils.isNotBlank(callbackRequest.getFinremCaseDataBefore().getAppSolicitorEmailIfRepresented());
     }
 
+    private String grantApplicantSolicitor(FinremCaseData caseData) {
+        String appSolicitorEmail = caseData.getAppSolicitorEmailIfRepresented();
+
+        AtomicReference<String> error = new AtomicReference<>();
+        retryExecutor.runWithRetryWithHandler(() -> assignPartiesAccessService.grantApplicantSolicitor(caseData),
+            "granting applicant solicitor", caseData.getCcdCaseId(),
+            (exception, actionName, caseId1) ->
+                error.set("There was a problem granting access to applicant solicitor (%s). Please grant access manually."
+                    .formatted(appSolicitorEmail)));
+        return error.get();
+    }
+
     private String revokeApplicantSolicitor(FinremCaseData caseDataBefore) {
         String appSolicitorEmail = caseDataBefore.getAppSolicitorEmailIfRepresented();
-        try {
-            retryExecutor.runWithRetry(() -> assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore),
-                "revoking old applicant solicitor", caseDataBefore.getCcdCaseId());
-            return null;
-        } catch (Exception ex) {
-            log.error("Error revoking old applicant solicitor", ex);
-            return "There was a problem revoking access to applicant solicitor (%s). Please revoke access manually."
-                .formatted(appSolicitorEmail);
-        }
+
+        AtomicReference<String> error = new AtomicReference<>();
+        retryExecutor.runWithRetryWithHandler(() -> assignPartiesAccessService.revokeApplicantSolicitor(caseDataBefore),
+            "revoking old applicant solicitor", caseDataBefore.getCcdCaseId(),
+            (exception, actionName, caseId1) ->
+                error.set("There was a problem revoking access to applicant solicitor (%s). Please revoke access manually."
+                    .formatted(appSolicitorEmail)));
+        return error.get();
     }
 
     private boolean matchesConsentedEvents(CaseType caseType, EventType eventType) {
