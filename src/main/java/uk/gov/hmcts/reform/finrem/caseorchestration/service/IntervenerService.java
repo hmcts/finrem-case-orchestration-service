@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.EmailUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -43,6 +43,7 @@ public class IntervenerService {
     private final ChangeOfRepresentationService changeOfRepresentationService;
     private final IdamService idamService;
     private final AssignPartiesAccessService assignPartiesAccessService;
+    private final ValidatePartiesService validatePartiesService;
 
     static final String INTERVENER_EMAIL_NOT_IN_ORG_ERROR_MESSAGE = "%s is not a valid Email address. "
         + "The email address must be registered to access MyHMCTS";
@@ -160,6 +161,21 @@ public class IntervenerService {
         }
     }
 
+    /**
+     * Checks if the intervener solicitor's organisation or email address has changed compared to the previous case state,
+     * and revokes the previous solicitor's case role if necessary.
+     * <p>
+     * This method compares the current and previous intervener details. If the previous intervener was represented and had
+     * a valid solicitor email address, and either the organisation ID or email address has changed, the previous solicitor's
+     * case role is revoked. If the previous solicitor email is invalid, no action is taken.
+     * </p>
+     *
+     * @param intervenerWrapper   the current intervener details
+     * @param caseDetailsBefore   the previous case details for comparison
+     * @param orgId               the current organisation ID
+     * @param email               the current solicitor email address
+     * @param errors              the list to collect any error messages encountered during revocation
+     */
     private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetailsBefore, String orgId,
                                                           String email,
                                                           List<String> errors) {
@@ -173,7 +189,9 @@ public class IntervenerService {
 
         String previousIntervenerSolEmail = beforeIntv.getIntervenerSolEmail();
 
-        if (EmailUtils.isValidEmailAddress(previousIntervenerSolEmail)) {
+        //Only revoke access to previous emails if it's valid with org. No need to stop case from processing.
+        String error = ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(beforeIntv, validatePartiesService);
+        if (!StringUtils.hasText(error)) {
             String beforeOrgId = beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID();
 
             if (ObjectUtils.notEqual(beforeOrgId, orgId) || !previousIntervenerSolEmail.equals(email)) {
