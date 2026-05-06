@@ -61,6 +61,10 @@ public class GeneralApplicationDirectionsMidHandler extends FinremCallbackHandle
             warnings.addAll(validateHearingService.validateGeneralApplicationDirectionsIntervenerParties(finremCaseData));
         }
 
+        if (warnings.isEmpty() && errors.isEmpty()) {
+            generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocumentIfNeeded(userAuthorisation, finremCaseDetails)
+                .ifPresent(doc -> finremCaseData.getGeneralApplicationWrapper().setGadPreview(doc));
+        }
         return response(finremCaseData, warnings, errors);
     }
 }

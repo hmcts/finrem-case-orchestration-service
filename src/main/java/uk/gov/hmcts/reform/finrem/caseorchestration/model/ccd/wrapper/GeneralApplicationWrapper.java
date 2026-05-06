@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -40,7 +41,8 @@ public class GeneralApplicationWrapper implements HasCaseDocument {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate generalApplicationDirectionsCourtOrderDate;
     private String generalApplicationDirectionsTextFromJudge;
-
+    @TemporaryField
+    private CaseDocument gadPreview;
     @Deprecated
     private CaseDocument generalApplicationDirectionsDocument;
     private List<GeneralApplicationsCollection> generalApplicationIntvrOrders;
