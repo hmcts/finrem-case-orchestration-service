@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -8,7 +7,6 @@ import java.util.Objects;
 
 import static java.util.Optional.ofNullable;
 
-@Slf4j
 public class EmailUtils {
 
     private EmailUtils() {
