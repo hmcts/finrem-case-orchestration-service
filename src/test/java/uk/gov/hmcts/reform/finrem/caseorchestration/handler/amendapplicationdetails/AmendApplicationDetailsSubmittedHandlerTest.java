@@ -46,6 +46,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class AmendApplicationDetailsSubmittedHandlerTest {
 
+    static final String FAIL_GRANT_AND_REVOKE = "true,true";
+    static final String FAIL_GRANT_ONLY = "true,false";
+    static final String FAIL_REVOKE_ONLY = "false,true";
+
     @Mock
     private RetryExecutor retryExecutor;
 
@@ -196,7 +200,11 @@ class AmendApplicationDetailsSubmittedHandlerTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"true,true", "false,true", "true,false"})
+    @CsvSource({
+        FAIL_GRANT_AND_REVOKE,
+        FAIL_GRANT_ONLY,
+        FAIL_REVOKE_ONLY
+    })
     void givenApplicantSolicitorChanged_whenGrantOrRevokeApplicantSolicitorFailure_thenPopulateConfirmationBody(
         boolean grantFailure, boolean revokeFailure
     ) throws Exception {
