@@ -75,7 +75,6 @@ public class IntervenerService {
         revokeIntervenerRole(caseId, email, orgId, intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), intervenerWrapper);
     }
 
-    //Invoked from manageInterveners AboutToSubmit
     public IntervenerChangeDetails removeIntervenerDetails(IntervenerWrapper intervenerWrapper,
                                                            List<String> errors,
                                                            FinremCaseData caseData,
@@ -97,7 +96,6 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
-    //Invoked from manageInterveners AboutToSubmit
     public IntervenerChangeDetails updateIntervenerDetails(IntervenerWrapper intervenerWrapper,
                                                            List<String> errors,
                                                            FinremCallbackRequest callbackRequest) {
