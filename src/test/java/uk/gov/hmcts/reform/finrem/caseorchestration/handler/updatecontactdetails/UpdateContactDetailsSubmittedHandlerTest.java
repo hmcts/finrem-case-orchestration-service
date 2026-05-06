@@ -115,13 +115,20 @@ class UpdateContactDetailsSubmittedHandlerTest {
                 eq(CASE_ID), any(RetryErrorHandler.class))).thenAnswer(invocation -> Optional.of(Boolean.TRUE));
         }
 
+
+        static final String BOTH_CHANGES = "true,true,false";
+        static final String BOTH_CHANGES_AND_APP_ISSUED = "true,true,true";
+        static final String APP_SOL_CHANGE_ONLY_AND_APP_ISSUED = "true,false,true";
+        static final String APP_SOL_CHANGE_ONLY_AND_APP_NOT_ISSUED = "true,false,false";
+        static final String RESP_SOL_CHANGE_ONLY_AND_APP_ISSUED = "false,true,true";
+
         @ParameterizedTest
         @CsvSource(value = {
-            "true,true,false",
-            "true,true,true",
-            "true,false,true",
-            "true,false,false",
-            "false,true,true"
+            BOTH_CHANGES,
+            BOTH_CHANGES_AND_APP_ISSUED,
+            APP_SOL_CHANGE_ONLY_AND_APP_ISSUED,
+            APP_SOL_CHANGE_ONLY_AND_APP_NOT_ISSUED,
+            RESP_SOL_CHANGE_ONLY_AND_APP_ISSUED
         })
         void givenAnySolicitorChanged_whenHandled_thenNocEmailAndLetterSent(
             boolean hasApplicantSolicitorChanged, boolean hasRespondentSolicitorChanged, boolean isApplicationIssued
@@ -168,12 +175,17 @@ class UpdateContactDetailsSubmittedHandlerTest {
             );
         }
 
+        static final String NOC_LETTER_AND_EMAIL_FAIL = "true,true";
+        static final String NOC_LETTER_FAIL_ONLY = "true,false";
+        static final String NOC_EMAIL_FAIL_ONLY = "false,true";
+        static final String NO_FAILURE = "false,false";
+
         @ParameterizedTest
         @CsvSource(value = {
-            "true,true",
-            "true,false",
-            "false,true",
-            "false,false"
+            NOC_LETTER_AND_EMAIL_FAIL,
+            NOC_LETTER_FAIL_ONLY,
+            NOC_EMAIL_FAIL_ONLY,
+            NO_FAILURE
         })
         void givenExceptionThrown_whenSendingNotification_thenPopulateErrorToConfirmationBody(
             boolean nocLetterFailure, boolean nocEmailToLitigantSolicitorFailure
@@ -235,11 +247,15 @@ class UpdateContactDetailsSubmittedHandlerTest {
     @Nested
     class GrantOrRevokeTests {
 
+        static final String FAIL_GRANT_AND_REVOKE = "true,true";
+        static final String FAIL_GRANT_ONLY = "true,false";
+        static final String FAIL_REVOKE_ONLY = "false,true";
+
         @ParameterizedTest
         @CsvSource({
-            "true,true",
-            "true,false",
-            "false,true"
+            FAIL_GRANT_AND_REVOKE,
+            FAIL_GRANT_ONLY,
+            FAIL_REVOKE_ONLY
         })
         void givenApplicantSolicitorChanged_whenUnableToGrantOrRevoke_thenErrorsPopulatedToConfirmation(boolean failGrant, boolean failRevoke) {
             FinremCaseData finremCaseData = spy(FinremCaseData.builder().build());
@@ -372,9 +388,9 @@ class UpdateContactDetailsSubmittedHandlerTest {
 
         @ParameterizedTest
         @CsvSource({
-            "true,true",
-            "true,false",
-            "false,true"
+            FAIL_GRANT_AND_REVOKE,
+            FAIL_GRANT_ONLY,
+            FAIL_REVOKE_ONLY
         })
         void givenRespondentSolicitorChanged_whenUnableToGrantOrRevoke_thenErrorsPopulatedToConfirmation(boolean failGrant, boolean failRevoke) {
             FinremCaseData finremCaseData = spy(FinremCaseData.builder().issueDate(LocalDate.now()).build());
