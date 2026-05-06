@@ -1599,7 +1599,8 @@ class IntervenerServiceTest {
         intervenerService.updateIntervenerDetails(wrapper, errors,  finremCallbackRequest);
         assertThat(errors).contains(
             INTERVENER_TEST_EMAIL + " is not a valid Email address. The email address must be registered to access MyHMCTS"
-        );    }
+        );
+    }
 
     @Test
     void whenCalled_setIntervenerChangeDetailsForIntervenerOneOnAdding() {
