@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
@@ -46,20 +45,25 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_OTHER;
@@ -117,7 +121,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
+        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, GENERAL_APPLICATION_DIRECTIONS_MH);
     }
 
     /**
@@ -129,7 +133,7 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     void givenApplicationIsApproved_whenHandle_thenUpdateStatusToApprovedAndReturnToPostState() {
         // Arrange
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        callbackRequest.setEventType(EventType.GENERAL_APPLICATION_DIRECTIONS_MH);
+        callbackRequest.setEventType(GENERAL_APPLICATION_DIRECTIONS_MH);
 
         callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper()
             .setGeneralApplications(List.of(GeneralApplicationsCollection.builder().build()));
@@ -482,6 +486,37 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             .isEqualTo(ManageHearingsAction.ADD_HEARING);
         verify(manageHearingActionService).performAddHearing(caseDetails, userAuthorisation);
         verify(manageHearingActionService).updateTabData(caseDetails.getData());
+    }
+
+    @Test
+    void shouldRemoveGadPreviewWhenHandled() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .generalApplicationWrapper(GeneralApplicationWrapper.builder()
+                .generalApplications(List.of())
+                .build())
+            .build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+
+        when(helper.getGeneralApplicationList(finremCaseData, AUTH_TOKEN)).thenReturn(List.of());
+        when(helper.objectToDynamicList(any())).thenReturn(DynamicList.builder()
+                .value(DynamicListElement.builder().code("a#2").build())
+            .build());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(mock(CaseDetails.class))
+            .eventId(GENERAL_APPLICATION_DIRECTIONS_MH.getCcdType())
+            .build();
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails()))
+            .thenReturn(finremCaseDetails);
+
+        Map<String, Object> dataWithGadPreview = new HashMap(Map.of("gadPreview", caseDocument()));
+        CaseDetails toBeSanitised = CaseDetails.builder().data(dataWithGadPreview).build();
+        when(finremCaseDetailsMapper.mapToCaseDetails(argThat(a -> a.getData().equals(finremCaseData))))
+            .thenReturn(toBeSanitised);
+
+        aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(dataWithGadPreview).doesNotContainKey("gadPreview");
     }
 
     private DynamicRadioList buildDynamicIntervenerList() {
