@@ -31,6 +31,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.STOP_REPRESENTING_CLIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest.getIntervenerPartyByType;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.isSameOrganisation;
 
 @Service
 @RequiredArgsConstructor
@@ -115,9 +116,9 @@ public class IntervenerService {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         if (isRepresented(intervenerWrapper)) {
             log.info("Add {} case role for Case ID: {}", caseRole, caseId);
-            String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
+            Organisation newOrganisation = intervenerWrapper.getIntervenerOrganisation().getOrganisation();
             String email = intervenerWrapper.getIntervenerSolEmail();
-            checkIfIntervenerSolicitorDetailsChanged(intervenerWrapper, caseDetailsBefore, orgId, email, errors);
+            checkIfIntervenerSolicitorDetailsChanged(intervenerWrapper, caseDetailsBefore, newOrganisation, email, errors);
             try {
                 assignPartiesAccessService.grantIntervenerSolicitor(caseId, intervenerWrapper);
             } catch (UserNotFoundInOrganisationApiException e) {
@@ -166,17 +167,17 @@ public class IntervenerService {
      *
      * <p>
      * This method compares the current and previous intervener details. If the previous intervener was represented and had
-     * a valid solicitor email address, and either the organisation ID or email address has changed, the previous solicitor's
+     * a valid solicitor email address, and either the organisation or email address has changed, the previous solicitor's
      * case role is revoked. If the previous solicitor email is invalid, no action is taken.
      * </p>
      *
      * @param intervenerWrapper   the current intervener details
      * @param caseDetailsBefore   the previous case details for comparison
-     * @param orgId               the current organisation ID
+     * @param newOrganisation               the current organisation
      * @param email               the current solicitor email address
      * @param errors              the list to collect any error messages encountered during revocation
      */
-    private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetailsBefore, String orgId,
+    private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetailsBefore, Organisation newOrganisation,
                                                           String email,
                                                           List<String> errors) {
         FinremCaseData beforeData = caseDetailsBefore.getData();
@@ -193,8 +194,9 @@ public class IntervenerService {
         String error = ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(beforeIntv, validatePartiesService);
         if (!StringUtils.hasText(error)) {
             String beforeOrgId = getOrganisationId(beforeIntv);
+            Organisation previousOrganisation= beforeIntv.getIntervenerOrganisation().getOrganisation();
 
-            if (ObjectUtils.notEqual(beforeOrgId, orgId) || !previousIntervenerSolEmail.equals(email)) {
+            if (!isSameOrganisation(newOrganisation, previousOrganisation) || !previousIntervenerSolEmail.equals(email)) {
                 revokeIntervenerRole(
                     caseDetailsBefore.getId(),
                     previousIntervenerSolEmail,
