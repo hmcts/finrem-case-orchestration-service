@@ -97,7 +97,7 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
-    public IntervenerChangeDetails updateIntervenerDetails(IntervenerWrapper intervenerWrapper,
+    public void updateIntervenerDetails(IntervenerWrapper intervenerWrapper,
                                                            List<String> errors,
                                                            FinremCallbackRequest callbackRequest) {
         validateIntervenerCountryOfResident(intervenerWrapper, errors);
@@ -143,7 +143,6 @@ public class IntervenerService {
             setDefaultOrgForintervener(intervenerWrapper);
         }
         intervenerChangeDetails.setIntervenerDetails(intervenerWrapper);
-        return intervenerChangeDetails;
     }
 
     private boolean isRepresented(IntervenerWrapper intervenerWrapper) {
