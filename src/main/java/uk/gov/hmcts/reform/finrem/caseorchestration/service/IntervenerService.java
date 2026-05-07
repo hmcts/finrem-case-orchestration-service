@@ -192,7 +192,7 @@ public class IntervenerService {
         //Only revoke access to previous emails if it's valid with org. No need to stop case from processing.
         String error = ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(beforeIntv, validatePartiesService);
         if (!StringUtils.hasText(error)) {
-            String beforeOrgId = beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID();
+            String beforeOrgId = getOrganisationId(beforeIntv);
 
             if (ObjectUtils.notEqual(beforeOrgId, orgId) || !previousIntervenerSolEmail.equals(email)) {
                 revokeIntervenerRole(
@@ -207,6 +207,14 @@ public class IntervenerService {
         } else {
             log.info("Invalid previous intervener email address. No revoke needed.");
         }
+    }
+
+    private String getOrganisationId(IntervenerWrapper intervenerWrapper) {
+        return Optional.ofNullable(intervenerWrapper)
+            .map(IntervenerWrapper::getIntervenerOrganisation)
+            .map(OrganisationPolicy::getOrganisation)
+            .map(Organisation::getOrganisationID)
+            .orElse(null);
     }
 
     private boolean checkIfIntervenerOneSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
