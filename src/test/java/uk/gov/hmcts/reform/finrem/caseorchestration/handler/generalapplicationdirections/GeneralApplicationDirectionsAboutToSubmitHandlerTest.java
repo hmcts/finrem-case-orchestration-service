@@ -45,7 +45,6 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,15 +53,14 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_APPLICATION_DIRECTIONS_MH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_NOT_APPROVED;
@@ -499,24 +497,11 @@ class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
         when(helper.getGeneralApplicationList(finremCaseData, AUTH_TOKEN)).thenReturn(List.of());
         when(helper.objectToDynamicList(any())).thenReturn(DynamicList.builder()
-                .value(DynamicListElement.builder().code("a#2").build())
+                .value(DynamicListElement.builder().code("a#b").build())
             .build());
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(mock(CaseDetails.class))
-            .eventId(GENERAL_APPLICATION_DIRECTIONS_MH.getCcdType())
-            .build();
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails()))
-            .thenReturn(finremCaseDetails);
-
-        Map<String, Object> dataWithGadPreview = new HashMap(Map.of("gadPreview", caseDocument()));
-        CaseDetails toBeSanitised = CaseDetails.builder().data(dataWithGadPreview).build();
-        when(finremCaseDetailsMapper.mapToCaseDetails(argThat(a -> a.getData().equals(finremCaseData))))
-            .thenReturn(toBeSanitised);
-
-        aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(dataWithGadPreview).doesNotContainKey("gadPreview");
+        verifyTemporaryFieldsWereSanitised(GENERAL_APPLICATION_DIRECTIONS_MH, aboutToSubmitHandler,
+            finremCaseDetails, finremCaseDetailsMapper, Map.of("gadPreview", caseDocument()));
     }
 
     private DynamicRadioList buildDynamicIntervenerList() {
