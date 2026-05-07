@@ -32,8 +32,6 @@ public class ContactDetailsValidator {
     static final String EMAIL_NOT_IN_RESPONDENT_ORG_ERROR_MESSAGE = "%s is not a valid Email address. "
         + "The email address must be registered to access MyHMCTS";
     static final String ORGANISATION_POLICY_ERROR = "Solicitor can only represent one party.";
-    static final String INVALID_VALIDATE_POSTCODE_METHOD_MESSAGE = "%s. Method validatePostcodesByRepresentation is only for "
-        + "updating contact details on consented cases. Use validateCaseDataAddresses whenever possible.";
 
     private ContactDetailsValidator() {
     }
