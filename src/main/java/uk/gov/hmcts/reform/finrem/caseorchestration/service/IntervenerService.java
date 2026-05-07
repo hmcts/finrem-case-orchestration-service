@@ -146,9 +146,9 @@ public class IntervenerService {
     }
 
     private boolean isRepresented(IntervenerWrapper intervenerWrapper) {
-        return YesOrNo.YES.equals(intervenerWrapper.getIntervenerRepresented());
+        return !ObjectUtils.isEmpty(intervenerWrapper)
+            && YesOrNo.YES.equals(intervenerWrapper.getIntervenerRepresented());
     }
-
     private void validateIntervenerCountryOfResident(IntervenerWrapper intervenerWrapper, List<String> errors) {
         if (intervenerWrapper.getIntervenerRepresented().equals(YesOrNo.NO)) {
             YesOrNo intervenerResideOutsideUK = intervenerWrapper.getIntervenerResideOutsideUK();
@@ -183,7 +183,7 @@ public class IntervenerService {
         IntervenerWrapper beforeIntv = intervenerWrapper.getIntervenerWrapperFromCaseData(beforeData);
 
         //If there is no previous intervener/intervener solicitor
-        if (ObjectUtils.isEmpty(beforeIntv) || !isRepresented(beforeIntv)) {
+        if (!isRepresented(beforeIntv)) {
             return;
         }
 
