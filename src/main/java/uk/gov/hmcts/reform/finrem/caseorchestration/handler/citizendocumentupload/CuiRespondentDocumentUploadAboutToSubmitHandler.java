@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentupload;
 
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -35,7 +35,7 @@ public class CuiRespondentDocumentUploadAboutToSubmitHandler extends CuiDocument
      * @return {@link EventType#CUI_RESPONDENT_DOCUMENT_UPLOAD}
      */
     @Override
-    public EventType handledEventType() {
+    protected EventType handledEventType() {
         return EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD;
     }
 
@@ -47,7 +47,7 @@ public class CuiRespondentDocumentUploadAboutToSubmitHandler extends CuiDocument
      */
     @Override
     protected List<CitizenDocumentCollection> getDocuments(FinremCaseData caseData) {
-        return caseData.getCitizenRespondentDocument();
+        return caseData.getCitizenDocumentWrapper().getCitizenRespondentDocument();
     }
 
     /**
@@ -58,6 +58,6 @@ public class CuiRespondentDocumentUploadAboutToSubmitHandler extends CuiDocument
      */
     @Override
     protected void setDocuments(FinremCaseData caseData, List<CitizenDocumentCollection> documents) {
-        caseData.setCitizenRespondentDocument(documents);
+        caseData.getCitizenDocumentWrapper().setCitizenRespondentDocument(documents);
     }
 }

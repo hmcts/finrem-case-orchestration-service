@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,7 +15,6 @@ import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -25,7 +23,7 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ToString
-public class CitizenUploadDocument implements HasUploadingDocuments, HasCaseDocument {
+public class CitizenUploadDocument implements HasCaseDocument {
     @JsonProperty("DocumentType")
     private CitizenUploadDocumentType documentType;
     @JsonProperty("DocumentEmailContent")
@@ -43,9 +41,4 @@ public class CitizenUploadDocument implements HasUploadingDocuments, HasCaseDocu
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime generalDocumentUploadDateTime;
 
-    @Override
-    @JsonIgnore
-    public List<CaseDocument> getUploadingDocuments() {
-        return documentLink != null ? List.of(documentLink) : List.of();
-    }
 }

@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseDataMetricsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CfvMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CitizenDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderScannedDocWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -302,8 +303,6 @@ public class FinremCaseData implements HasCaseDocument {
     private DynamicMultiSelectList solicitorRoleList;
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
-    private List<CitizenDocumentCollection> citizenApplicantDocument;
-    private List<CitizenDocumentCollection> citizenRespondentDocument;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ManageCaseDocumentsWrapper manageCaseDocumentsWrapper;
@@ -450,6 +449,10 @@ public class FinremCaseData implements HasCaseDocument {
 
     private List<AccessCodeCollection> applicantAccessCodes;
     private List<AccessCodeCollection> respondentAccessCodes;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private CitizenDocumentWrapper citizenDocumentWrapper;
 
     @JsonIgnore
     public CaseDataMetricsWrapper getCaseDataMetricsWrapper() {
@@ -1170,5 +1173,13 @@ public class FinremCaseData implements HasCaseDocument {
             this.manageCaseDocumentsWrapper = new ManageCaseDocumentsWrapper();
         }
         return manageCaseDocumentsWrapper;
+    }
+
+    @JsonIgnore
+    public CitizenDocumentWrapper getCitizenDocumentWrapper() {
+        if (citizenDocumentWrapper == null) {
+            this.citizenDocumentWrapper = new CitizenDocumentWrapper();
+        }
+        return citizenDocumentWrapper;
     }
 }

@@ -1,11 +1,13 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentupload;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -20,15 +22,13 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
+@ExtendWith(MockitoExtension.class)
 class CuiDocumentUploadAboutToSubmitHandlerTest {
 
+    @Mock
     private FinremCaseDetailsMapper mapper;
-
-    @BeforeEach
-    void setUp() {
-        mapper = mock(FinremCaseDetailsMapper.class);
-    }
 
     @ParameterizedTest
     @MethodSource("handlers")
@@ -80,11 +80,9 @@ class CuiDocumentUploadAboutToSubmitHandlerTest {
     @ParameterizedTest
     @MethodSource("handlers")
     void canHandle_shouldReturnTrue_whenCorrectCallbackCaseAndEventType(HandlerCase handlerCase) {
-        assertThat(handlerCase.handler.canHandle(
-            CallbackType.ABOUT_TO_SUBMIT,
+        assertCanHandle(handlerCase.handler, CallbackType.ABOUT_TO_SUBMIT,
             CaseType.CONTESTED,
-            handlerCase.eventType
-        )).isTrue();
+            handlerCase.eventType);
     }
 
     @ParameterizedTest
@@ -95,8 +93,8 @@ class CuiDocumentUploadAboutToSubmitHandlerTest {
         CitizenDocumentCollection newDoc = doc(LocalDateTime.of(2024, 3, 1, 10, 0));
 
         FinremCaseData before = new FinremCaseData();
-        before.setCitizenApplicantDocument(List.of(existingApplicant));
-        before.setCitizenRespondentDocument(List.of(existingRespondent));
+        before.getCitizenDocumentWrapper().setCitizenApplicantDocument(List.of(existingApplicant));
+        before.getCitizenDocumentWrapper().setCitizenRespondentDocument(List.of(existingRespondent));
 
         FinremCaseData current = caseDataFor(handlerCase.party, List.of(newDoc));
 
@@ -104,50 +102,14 @@ class CuiDocumentUploadAboutToSubmitHandlerTest {
             handlerCase.handler.handle(buildRequest(current, before, handlerCase.eventType), "auth");
 
         if (handlerCase.party == Party.APPLICANT) {
-            assertThat(response.getData().getCitizenApplicantDocument())
+            assertThat(response.getData().getCitizenDocumentWrapper().getCitizenApplicantDocument())
                 .containsExactly(newDoc, existingApplicant);
-            assertThat(response.getData().getCitizenRespondentDocument()).isNull();
+            assertThat(response.getData().getCitizenDocumentWrapper().getCitizenRespondentDocument()).isNull();
         } else {
-            assertThat(response.getData().getCitizenRespondentDocument())
+            assertThat(response.getData().getCitizenDocumentWrapper().getCitizenRespondentDocument())
                 .containsExactly(newDoc, existingRespondent);
-            assertThat(response.getData().getCitizenApplicantDocument()).isNull();
+            assertThat(response.getData().getCitizenDocumentWrapper().getCitizenApplicantDocument()).isNull();
         }
-    }
-
-    @Test
-    void canHandle_shouldReturnFalse_whenEventTypeDoesNotMatch() {
-        CuiDocumentUploadAboutToSubmitHandler handler =
-            new CuiApplicantDocumentUploadAboutToSubmitHandler(mapper);
-
-        assertThat(handler.canHandle(
-            CallbackType.ABOUT_TO_SUBMIT,
-            CaseType.CONTESTED,
-            EventType.CUI_RESPONDENT_DOCUMENT_UPLOAD
-        )).isFalse();
-    }
-
-    @Test
-    void canHandle_shouldReturnFalse_whenCallbackTypeIsNotAboutToSubmit() {
-        CuiDocumentUploadAboutToSubmitHandler handler =
-            new CuiApplicantDocumentUploadAboutToSubmitHandler(mapper);
-
-        assertThat(handler.canHandle(
-            CallbackType.ABOUT_TO_START,
-            CaseType.CONTESTED,
-            EventType.CUI_APPLICANT_DOCUMENT_UPLOAD
-        )).isFalse();
-    }
-
-    @Test
-    void canHandle_shouldReturnFalse_whenCaseTypeIsNotContested() {
-        CuiDocumentUploadAboutToSubmitHandler handler =
-            new CuiApplicantDocumentUploadAboutToSubmitHandler(mapper);
-
-        assertThat(handler.canHandle(
-            CallbackType.ABOUT_TO_SUBMIT,
-            CaseType.CONSENTED,
-            EventType.CUI_APPLICANT_DOCUMENT_UPLOAD
-        )).isFalse();
     }
 
     private static Stream<HandlerCase> handlers() {
@@ -171,9 +133,9 @@ class CuiDocumentUploadAboutToSubmitHandlerTest {
         FinremCaseData caseData = new FinremCaseData();
 
         if (party == Party.APPLICANT) {
-            caseData.setCitizenApplicantDocument(documents);
+            caseData.getCitizenDocumentWrapper().setCitizenApplicantDocument(documents);
         } else {
-            caseData.setCitizenRespondentDocument(documents);
+            caseData.getCitizenDocumentWrapper().setCitizenRespondentDocument(documents);
         }
 
         return caseData;
@@ -181,8 +143,8 @@ class CuiDocumentUploadAboutToSubmitHandlerTest {
 
     private List<CitizenDocumentCollection> documentsFor(FinremCaseData caseData, Party party) {
         return party == Party.APPLICANT
-            ? caseData.getCitizenApplicantDocument()
-            : caseData.getCitizenRespondentDocument();
+            ? caseData.getCitizenDocumentWrapper().getCitizenApplicantDocument()
+            : caseData.getCitizenDocumentWrapper().getCitizenRespondentDocument();
     }
 
     private FinremCallbackRequest buildRequest(

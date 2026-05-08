@@ -1,8 +1,11 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentupload;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -39,7 +42,7 @@ import static java.util.Optional.ofNullable;
  * {@link #setDocuments(FinremCaseData, List)}.
  */
 @Slf4j
-public abstract class CuiDocumentUploadAboutToSubmitHandler extends FinremCallbackHandler {
+public abstract class CuiDocumentUploadAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     protected CuiDocumentUploadAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
@@ -121,7 +124,7 @@ public abstract class CuiDocumentUploadAboutToSubmitHandler extends FinremCallba
      *
      * @return event type (e.g. Applicant or Respondent upload)
      */
-    public abstract EventType handledEventType();
+    protected abstract EventType handledEventType();
 
     /**
      * Retrieves the relevant document collection from case data.
