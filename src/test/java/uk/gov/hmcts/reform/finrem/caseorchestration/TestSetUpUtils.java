@@ -566,6 +566,9 @@ public class TestSetUpUtils {
     }
 
     public static OrganisationPolicy organisationPolicy(String id) {
+        if (id == null) {
+            return null;
+        }
         return OrganisationPolicy.builder()
             .organisation(organisation(id))
             .build();
