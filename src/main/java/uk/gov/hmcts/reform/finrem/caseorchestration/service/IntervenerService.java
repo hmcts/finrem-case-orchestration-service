@@ -97,9 +97,7 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
-    public void updateIntervenerDetails(IntervenerWrapper intervenerWrapper,
-                                                           List<String> errors,
-                                                           FinremCallbackRequest callbackRequest) {
+    public void updateIntervenerDetails(IntervenerWrapper intervenerWrapper, List<String> errors, FinremCallbackRequest callbackRequest) {
         validateIntervenerCountryOfResident(intervenerWrapper, errors);
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
