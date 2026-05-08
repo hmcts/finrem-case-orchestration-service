@@ -150,6 +150,7 @@ public class IntervenerService {
         return !ObjectUtils.isEmpty(intervenerWrapper)
             && YesOrNo.YES.equals(intervenerWrapper.getIntervenerRepresented());
     }
+
     private void validateIntervenerCountryOfResident(IntervenerWrapper intervenerWrapper, List<String> errors) {
         if (intervenerWrapper.getIntervenerRepresented().equals(YesOrNo.NO)) {
             YesOrNo intervenerResideOutsideUK = intervenerWrapper.getIntervenerResideOutsideUK();
@@ -177,7 +178,8 @@ public class IntervenerService {
      * @param email               the current solicitor email address
      * @param errors              the list to collect any error messages encountered during revocation
      */
-    private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetailsBefore, Organisation newOrganisation,
+    private void checkIfIntervenerSolicitorDetailsChanged(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetailsBefore,
+                                                          Organisation newOrganisation,
                                                           String email,
                                                           List<String> errors) {
         FinremCaseData beforeData = caseDetailsBefore.getData();
@@ -194,7 +196,7 @@ public class IntervenerService {
         String error = ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(beforeIntv, validatePartiesService);
         if (!StringUtils.hasText(error)) {
             String beforeOrgId = getOrganisationId(beforeIntv);
-            Organisation previousOrganisation= beforeIntv.getIntervenerOrganisation().getOrganisation();
+            Organisation previousOrganisation = beforeIntv.getIntervenerOrganisation().getOrganisation();
 
             if (!isSameOrganisation(newOrganisation, previousOrganisation) || !previousIntervenerSolEmail.equals(email)) {
                 revokeIntervenerRole(
