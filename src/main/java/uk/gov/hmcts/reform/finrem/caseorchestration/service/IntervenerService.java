@@ -40,7 +40,6 @@ public class IntervenerService {
 
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
-    private final SystemUserService systemUserService;
     private final ChangeOfRepresentationService changeOfRepresentationService;
     private final IdamService idamService;
     private final AssignPartiesAccessService assignPartiesAccessService;
