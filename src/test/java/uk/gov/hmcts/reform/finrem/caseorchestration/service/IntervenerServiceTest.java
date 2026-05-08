@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -99,6 +101,11 @@ class IntervenerServiceTest {
     private AssignPartiesAccessService assignPartiesAccessService;
     @Mock
     private ValidatePartiesService validatePartiesService;
+
+    @BeforeEach
+    void setup() {
+        lenient().when(validatePartiesService.isEmailRegisteredInOrg(INTERVENER_TEST_EMAIL, SOME_ORG_ID)).thenReturn(true);
+    }
 
     @Test
     void givenCase_whenRemoveOperationChosenForIntv1NotRepresented_thenRemoveIntervener() {
@@ -479,8 +486,6 @@ class IntervenerServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        when(validatePartiesService.isEmailRegisteredInOrg(INTERVENER_TEST_EMAIL, SOME_ORG_ID))
-            .thenReturn(true);
 
         IntervenerOne oneWrapper = IntervenerOne
             .builder().intervenerName("One name").intervenerEmail("test@test.com")
@@ -575,8 +580,6 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(validatePartiesService.isEmailRegisteredInOrg(INTERVENER_TEST_EMAIL, SOME_ORG_ID))
-            .thenReturn(true);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
@@ -833,8 +836,6 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(validatePartiesService.isEmailRegisteredInOrg(INTERVENER_TEST_EMAIL, SOME_ORG_ID))
-            .thenReturn(true);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
         List<String> errors = new ArrayList<>();
         intervenerService.updateIntervenerDetails(current, errors, finremCallbackRequest);
@@ -896,8 +897,6 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(validatePartiesService.isEmailRegisteredInOrg(INTERVENER_TEST_EMAIL, SOME_ORG_ID))
-            .thenReturn(true);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
@@ -1091,8 +1090,6 @@ class IntervenerServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        when(validatePartiesService.isEmailRegisteredInOrg(INTERVENER_TEST_EMAIL, SOME_ORG_ID))
-            .thenReturn(true);
 
         IntervenerThree wrapper = IntervenerThree
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
@@ -1188,8 +1185,6 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(validatePartiesService.isEmailRegisteredInOrg(INTERVENER_TEST_EMAIL, SOME_ORG_ID))
-            .thenReturn(true);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
@@ -1431,8 +1426,6 @@ class IntervenerServiceTest {
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
             Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
-        when(validatePartiesService.isEmailRegisteredInOrg(INTERVENER_TEST_EMAIL, SOME_ORG_ID))
-            .thenReturn(true);
 
         IntervenerFour wrapper = IntervenerFour
             .builder().intervenerName("Two name").intervenerEmail("test@test.com")
@@ -1530,8 +1523,6 @@ class IntervenerServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
-        when(validatePartiesService.isEmailRegisteredInOrg(INTERVENER_TEST_EMAIL, SOME_ORG_ID))
-            .thenReturn(true);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         List<String> errors = new ArrayList<>();
