@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.stream.Stream;
 
@@ -52,9 +51,6 @@ class IntervenersAboutToSubmitHandlerTest {
 
     @Mock
     private IntervenerService intervenerService;
-
-    @Mock
-    private ValidatePartiesService validatePartiesService;
 
     @Test
     void testCanHandle() {
