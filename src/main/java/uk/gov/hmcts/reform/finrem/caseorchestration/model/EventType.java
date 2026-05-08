@@ -98,6 +98,8 @@ public enum EventType {
     FR_HWF_DECISION_MADE("FR_HWFDecisionMade"),
     FR_HWF_DECISION_MADE_FROM_AWAITING_PAYMENT("FR_HWFDecisionMadeFromAwaitingPayment"),
     STOP_REPRESENTING_CLIENT("FR_stopRepresentingClient"),
+    INVALIDATE_APPLICANT_ACCESS_CODE("CUI_invalidateApplicantAccessCode"),
+    INVALIDATE_RESPONDENT_ACCESS_CODE("CUI_invalidateRespondentAccessCode"),
     @JsonEnumDefaultValue
     NONE("");
 
