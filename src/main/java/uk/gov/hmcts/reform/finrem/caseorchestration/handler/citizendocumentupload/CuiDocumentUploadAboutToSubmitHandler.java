@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentuplo
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -69,7 +68,7 @@ public abstract class CuiDocumentUploadAboutToSubmitHandler extends FinremAboutT
         FinremCallbackRequest callbackRequest,
         String userAuthorisation
     ) {
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        handleLog(callbackRequest);
 
         FinremCaseData currentCaseData = callbackRequest.getFinremCaseData();
         FinremCaseData dataBefore = callbackRequest.getFinremCaseDataBefore();
@@ -153,4 +152,6 @@ public abstract class CuiDocumentUploadAboutToSubmitHandler extends FinremAboutT
         FinremCaseData caseData,
         List<CitizenDocumentCollection> documents
     );
+
+    protected abstract void handleLog(FinremCallbackRequest callbackRequest);
 }

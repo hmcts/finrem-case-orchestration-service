@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentupload;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CitizenDocumentCollection;
@@ -22,6 +25,7 @@ import java.util.List;
  * <p>All core merge and sort logic is implemented in
  * {@link CuiDocumentUploadAboutToSubmitHandler}.
  */
+@Slf4j
 @Service
 public class CuiRespondentDocumentUploadAboutToSubmitHandler extends CuiDocumentUploadAboutToSubmitHandler {
 
@@ -59,5 +63,10 @@ public class CuiRespondentDocumentUploadAboutToSubmitHandler extends CuiDocument
     @Override
     protected void setDocuments(FinremCaseData caseData, List<CitizenDocumentCollection> documents) {
         caseData.getCitizenDocumentWrapper().setCitizenRespondentDocument(documents);
+    }
+
+    @Override
+    protected void handleLog(FinremCallbackRequest callbackRequest) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
     }
 }

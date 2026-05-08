@@ -1,10 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.citizendocumentupload;
 
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -24,11 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@ExtendWith(MockitoExtension.class)
 class CuiDocumentUploadAboutToSubmitHandlerTest {
-
-    @Mock
-    private FinremCaseDetailsMapper mapper;
 
     @ParameterizedTest
     @MethodSource("handlers")
