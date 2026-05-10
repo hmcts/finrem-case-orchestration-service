@@ -31,8 +31,9 @@ public class OrganisationPolicy {
     public Organisation getOrganisation() {
         if (organisation == null) {
             return Organisation.builder().build();
-        } else
+        } else {
             return organisation;
+        }
     }
 
     /**
