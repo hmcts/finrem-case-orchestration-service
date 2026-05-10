@@ -275,6 +275,34 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
+    public void validateIntervenerInformation(IntervenerWrapper intervener, List<String> errors) {
+        addErrorIfPresent(
+            errors,
+            ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+        );
+
+        addErrorIfPresent(
+            errors,
+            validateIntervenerPostCodeMissing(intervener)
+        );
+    }
+
+    private String validateIntervenerPostCodeMissing(IntervenerWrapper intervener) {
+        String postCode = intervener.getIntervenerAddress().getPostCode();
+
+        if (org.apache.commons.lang3.StringUtils.isBlank(postCode)) {
+            return "Postcode field is required for the intervener.";
+        }
+
+        return null;
+    }
+
+    private void addErrorIfPresent(List<String> errors, String error) {
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(error)) {
+            errors.add(error);
+        }
+    }
+
     /**
      * Updates the representation update history when an intervener’s solicitor
      * stops representing their client.

@@ -1,21 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,18 +32,15 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final IntervenerService intervenerService;
 
-    private final ValidatePartiesService validatePartiesService;
-
     private static final List<String> ADD_OPERATION_CODES = List.of(ADD_INTERVENER_ONE_CODE, ADD_INTERVENER_TWO_CODE,
         ADD_INTERVENER_THREE_CODE, ADD_INTERVENER_FOUR_CODE);
     private static final List<String> DELETE_OPERATION_CODES = List.of(DEL_INTERVENER_ONE_CODE, DEL_INTERVENER_TWO_CODE,
         DEL_INTERVENER_THREE_CODE, DEL_INTERVENER_FOUR_CODE);
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                           IntervenerService intervenerService, ValidatePartiesService validatePartiesService) {
+                                           IntervenerService intervenerService) {
         super(finremCaseDetailsMapper);
         this.intervenerService = intervenerService;
-        this.validatePartiesService = validatePartiesService;
     }
 
     @Override
@@ -69,7 +63,7 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         IntervenerWrapper intervener = getIntervenerWrapper(caseData, selectedOperationCode);
 
         if (ADD_OPERATION_CODES.contains(selectedOperationCode)) {
-            validateIntervenerInformation(intervener, errors);
+            intervenerService.validateIntervenerInformation(intervener, errors);
 
             if (errors.isEmpty()) {
                 intervenerService.updateIntervenerDetails(intervener, errors, callbackRequest);
@@ -81,34 +75,6 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         }
 
         return response(caseData, null, errors);
-    }
-
-    private void validateIntervenerInformation(IntervenerWrapper intervener, List<String> errors) {
-        addErrorIfPresent(
-            errors,
-            ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
-        );
-
-        addErrorIfPresent(
-            errors,
-            validateIntervenerPostCodeMissing(intervener)
-        );
-    }
-
-    private void addErrorIfPresent(List<String> errors, String error) {
-        if (StringUtils.isNotBlank(error)) {
-            errors.add(error);
-        }
-    }
-
-    private String validateIntervenerPostCodeMissing(IntervenerWrapper intervener) {
-        String postCode = intervener.getIntervenerAddress().getPostCode();
-
-        if (StringUtils.isBlank(postCode)) {
-            return "Postcode field is required for the intervener.";
-        }
-
-        return null;
     }
 
     private IntervenerWrapper getIntervenerWrapper(FinremCaseData caseData, String selectedOperationCode) {

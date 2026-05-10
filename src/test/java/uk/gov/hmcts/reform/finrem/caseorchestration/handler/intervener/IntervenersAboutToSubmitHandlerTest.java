@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -7,24 +8,21 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,8 +31,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -57,111 +57,60 @@ class IntervenersAboutToSubmitHandlerTest {
     @Mock
     private IntervenerService intervenerService;
 
-    @Mock
-    private ValidatePartiesService validatePartiesService;
-
     @Test
     void testCanHandle() {
-        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANAGE_INTERVENERS);
-    }
-
-    @Test
-    void givenAddIntervenerOneAndValidationPasses_whenHandle_thenUpdateIntervenerDetailsIsCalled() {
-        // Arrange
-        FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(ADD_INTERVENER_ONE_CODE);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        IntervenerOne intervener = mockIntervenerOneWithPostCode("AB1 2CD");
-        when(caseData.getIntervenerOne()).thenReturn(intervener);
-
-        // Act
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        // Assert
-        assertAll(
-            () -> verify(intervenerService).updateIntervenerDetails(intervener, response.getErrors(), callbackRequest),
-            () -> assertThat(response.getErrors()).isEmpty(),
-            () -> assertThat(response.getData()).isEqualTo(caseData)
+        assertCanHandle(
+            aboutToSubmitHandler,
+            CallbackType.ABOUT_TO_SUBMIT,
+            CaseType.CONTESTED,
+            EventType.MANAGE_INTERVENERS
         );
     }
 
-    @Test
-    void givenAddIntervenerOneAndSolicitorEmailInvalid_whenHandle_thenReturnsErrorAndDoesNotUpdateIntervenerDetails() {
-        FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(ADD_INTERVENER_ONE_CODE);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+    @Nested
+    class AddIntervenerTests {
+        @Test
+        void givenAddIntervenerOneAndValidationPasses_whenHandle_thenValidateAndUpdateIntervenerDetailsIsCalled() {
+            FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(ADD_INTERVENER_ONE_CODE);
+            FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        IntervenerOne intervener = mockIntervenerOneWithPostCode("AB1 2CD");
-        when(intervener.getIntervenerRepresented()).thenReturn(YesOrNo.YES);
-        when(intervener.getIntervenerSolEmail()).thenReturn("invalid-email");
-        when(caseData.getIntervenerOne()).thenReturn(intervener);
+            IntervenerOne intervener = mock(IntervenerOne.class);
+            when(caseData.getIntervenerOne()).thenReturn(intervener);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getErrors())
-            .containsExactly("invalid-email is not a valid Email address.");
+            assertAll(
+                () -> verify(intervenerService).validateIntervenerInformation(intervener, response.getErrors()),
+                () -> verify(intervenerService).updateIntervenerDetails(intervener, response.getErrors(), callbackRequest),
+                () -> assertThat(response.getErrors()).isEmpty(),
+                () -> assertThat(response.getData()).isEqualTo(caseData)
+            );
+        }
 
-        verify(intervenerService, never()).updateIntervenerDetails(any(), any(), any());
-        verify(intervenerService, never()).removeIntervenerDetails(any(), any(), any(), any());
-    }
+        @Test
+        void givenAddIntervenerOneAndValidationReturnsError_whenHandle_thenDoesNotUpdateIntervenerDetails() {
+            FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(ADD_INTERVENER_ONE_CODE);
+            FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-    @Test
-    void givenAddIntervenerOneAndPostcodeMissing_whenHandle_thenReturnsErrorAndDoesNotUpdateIntervenerDetails() {
-        FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(ADD_INTERVENER_ONE_CODE);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+            IntervenerOne intervener = mock(IntervenerOne.class);
+            when(caseData.getIntervenerOne()).thenReturn(intervener);
 
-        IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
-        when(caseData.getIntervenerOne()).thenReturn(intervener);
+            doAnswer(invocation -> {
+                List<String> errors = invocation.getArgument(1);
+                errors.add("Validation error");
+                return null;
+            }).when(intervenerService).validateIntervenerInformation(eq(intervener), anyList());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+            GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getErrors())
-            .containsExactly("Postcode field is required for the intervener.");
+            assertThat(response.getErrors()).containsExactly("Validation error");
 
-        verify(intervenerService, never()).updateIntervenerDetails(any(), any(), any());
-        verify(intervenerService, never()).removeIntervenerDetails(any(), any(), any(), any());
-    }
-
-    @Test
-    void givenAddIntervenerOneAndPostcodeBlank_whenHandle_thenReturnsErrorAndDoesNotUpdateIntervenerDetails() {
-        FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(ADD_INTERVENER_ONE_CODE);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-
-        IntervenerOne intervener = mockIntervenerOneWithPostCode("  ");
-        when(caseData.getIntervenerOne()).thenReturn(intervener);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors())
-            .containsExactly("Postcode field is required for the intervener.");
-
-        verify(intervenerService, never()).updateIntervenerDetails(any(), any(), any());
-    }
-
-    @Test
-    void givenAddIntervenerOneAndSolicitorValidationReturnsNull_whenHandle_thenNullIsNotAddedToErrors() {
-        FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(ADD_INTERVENER_ONE_CODE);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-
-        IntervenerOne intervener = mockIntervenerOneWithPostCode("AB1 2CD");
-
-        /*
-         * Intervener is not represented, therefore
-         * ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(...)
-         * should return null.
-         */
-        when(intervener.getIntervenerRepresented()).thenReturn(YesOrNo.NO);
-        when(caseData.getIntervenerOne()).thenReturn(intervener);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors()).isEmpty();
-        assertThat(response.getErrors()).doesNotContainNull();
-
-        verify(intervenerService).updateIntervenerDetails(intervener, response.getErrors(), callbackRequest);
+            verify(intervenerService).validateIntervenerInformation(intervener, response.getErrors());
+            verify(intervenerService, never()).updateIntervenerDetails(any(), any(), any());
+            verify(intervenerService, never()).removeIntervenerDetails(any(), any(), any(), any());
+        }
     }
 
     @Test
@@ -169,7 +118,7 @@ class IntervenersAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(DEL_INTERVENER_ONE_CODE);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+        IntervenerOne intervener = mock(IntervenerOne.class);
         when(caseData.getIntervenerOne()).thenReturn(intervener);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
@@ -178,7 +127,14 @@ class IntervenersAboutToSubmitHandlerTest {
         assertThat(response.getErrors()).isEmpty();
         assertThat(response.getData()).isEqualTo(caseData);
 
-        verify(intervenerService).removeIntervenerDetails(intervener, response.getErrors(), caseData, Long.valueOf(CASE_ID));
+        verify(intervenerService).removeIntervenerDetails(
+            intervener,
+            response.getErrors(),
+            caseData,
+            Long.valueOf(CASE_ID)
+        );
+
+        verify(intervenerService, never()).validateIntervenerInformation(any(), any());
         verify(intervenerService, never()).updateIntervenerDetails(any(), any(), any());
     }
 
@@ -191,29 +147,6 @@ class IntervenersAboutToSubmitHandlerTest {
             .hasMessage("Invalid operation code: invalid-code");
 
         verifyNoInteractions(intervenerService);
-    }
-
-    @Test
-    void givenAddIntervener_whenHandle_thenValidatePartiesServiceIsPassedToValidator() {
-        FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(ADD_INTERVENER_ONE_CODE);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-
-        IntervenerOne intervener = mockIntervenerOneWithPostCode("AB1 2CD");
-        when(caseData.getIntervenerOne()).thenReturn(intervener);
-
-        try (MockedStatic<ContactDetailsValidator> mockedValidator =
-                 mockStatic(ContactDetailsValidator.class)) {
-
-            mockedValidator.when(() ->
-                ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
-            ).thenReturn(null);
-
-            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-
-            mockedValidator.verify(() ->
-                ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
-            );
-        }
     }
 
     @ParameterizedTest
@@ -239,6 +172,7 @@ class IntervenersAboutToSubmitHandlerTest {
             Long.valueOf(CASE_ID)
         );
 
+        verify(intervenerService, never()).validateIntervenerInformation(any(), any());
         verify(intervenerService, never()).updateIntervenerDetails(any(), any(), any());
     }
 
@@ -287,14 +221,4 @@ class IntervenersAboutToSubmitHandlerTest {
 
         return callbackRequest;
     }
-
-    private IntervenerOne mockIntervenerOneWithPostCode(String postCode) {
-        IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
-
-        when(intervener.getIntervenerRepresented()).thenReturn(YesOrNo.NO);
-        when(intervener.getIntervenerAddress().getPostCode()).thenReturn(postCode);
-
-        return intervener;
-    }
-
 }

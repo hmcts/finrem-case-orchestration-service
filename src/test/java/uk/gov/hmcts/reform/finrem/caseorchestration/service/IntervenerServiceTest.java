@@ -10,8 +10,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
@@ -47,11 +49,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -1809,6 +1813,139 @@ class IntervenerServiceTest {
             INTVR_SOLICITOR_1.getCcdCode(),
             SOME_ORG_ID
         );
+    }
+
+    @Nested
+    class ValidateIntervenerInformationTests {
+        @Test
+        void givenSolicitorEmailValidationErrorAndPostcodePresent_whenValidateIntervenerInformation_thenAddsSolicitorEmailErrorOnly() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+            when(intervener.getIntervenerAddress().getPostCode()).thenReturn("AB1 2CD");
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn("invalid-email is not a valid Email address.");
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+
+                mockedValidator.verify(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                );
+            }
+
+            assertThat(errors).containsExactly("invalid-email is not a valid Email address.");
+        }
+
+        @Test
+        void givenSolicitorEmailValidationReturnsNullAndPostcodePresent_whenValidateIntervenerInformation_thenNoErrorsAdded() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+            when(intervener.getIntervenerAddress().getPostCode()).thenReturn("AB1 2CD");
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn(null);
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+
+                mockedValidator.verify(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                );
+            }
+
+            assertThat(errors).isEmpty();
+        }
+
+        @Test
+        void givenSolicitorEmailValidationReturnsBlankAndPostcodePresent_whenValidateIntervenerInformation_thenNoErrorsAdded() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+            when(intervener.getIntervenerAddress().getPostCode()).thenReturn("AB1 2CD");
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn(" ");
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+            }
+
+            assertThat(errors).isEmpty();
+        }
+
+        @Test
+        void givenPostcodeMissing_whenValidateIntervenerInformation_thenAddsPostcodeError() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn(null);
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+            }
+
+            assertThat(errors).containsExactly("Postcode field is required for the intervener.");
+        }
+
+        @Test
+        void givenPostcodeBlank_whenValidateIntervenerInformation_thenAddsPostcodeError() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+            when(intervener.getIntervenerAddress().getPostCode()).thenReturn("  ");
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn(null);
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+            }
+
+            assertThat(errors).containsExactly("Postcode field is required for the intervener.");
+        }
+
+        @Test
+        void givenSolicitorEmailValidationErrorAndPostcodeBlank_whenValidateIntervenerInformation_thenAddsBothErrors() {
+            IntervenerOne intervener = mock(IntervenerOne.class, RETURNS_DEEP_STUBS);
+            when(intervener.getIntervenerAddress().getPostCode()).thenReturn("  ");
+
+            List<String> errors = new ArrayList<>();
+
+            try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                     mockStatic(ContactDetailsValidator.class)) {
+
+                mockedValidator.when(() ->
+                    ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+                ).thenReturn("invalid-email is not a valid Email address.");
+
+                intervenerService.validateIntervenerInformation(intervener, errors);
+            }
+
+            assertThat(errors).containsExactly(
+                "invalid-email is not a valid Email address.",
+                "Postcode field is required for the intervener."
+            );
+        }
     }
 
     @Nested
