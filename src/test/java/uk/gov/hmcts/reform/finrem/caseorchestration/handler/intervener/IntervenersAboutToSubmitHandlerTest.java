@@ -7,10 +7,12 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.util.stream.Stream;
 
@@ -31,6 +34,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -52,6 +56,9 @@ class IntervenersAboutToSubmitHandlerTest {
 
     @Mock
     private IntervenerService intervenerService;
+
+    @Mock
+    private ValidatePartiesService validatePartiesService;
 
     @Test
     void testCanHandle() {
@@ -184,6 +191,29 @@ class IntervenersAboutToSubmitHandlerTest {
             .hasMessage("Invalid operation code: invalid-code");
 
         verifyNoInteractions(intervenerService);
+    }
+
+    @Test
+    void givenAddIntervener_whenHandle_thenValidatePartiesServiceIsPassedToValidator() {
+        FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(ADD_INTERVENER_ONE_CODE);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        IntervenerOne intervener = mockIntervenerOneWithPostCode("AB1 2CD");
+        when(caseData.getIntervenerOne()).thenReturn(intervener);
+
+        try (MockedStatic<ContactDetailsValidator> mockedValidator =
+                 mockStatic(ContactDetailsValidator.class)) {
+
+            mockedValidator.when(() ->
+                ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+            ).thenReturn(null);
+
+            aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            mockedValidator.verify(() ->
+                ContactDetailsValidator.checkForIntervenerSolicitorEmailAddress(intervener, validatePartiesService)
+            );
+        }
     }
 
     @ParameterizedTest
