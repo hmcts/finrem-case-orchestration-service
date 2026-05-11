@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
-@Slf4j
+import java.util.Objects;
+
+import static java.util.Optional.ofNullable;
+
 public class EmailUtils {
 
     private EmailUtils() {
@@ -31,5 +33,32 @@ public class EmailUtils {
             return true;
         }
         return EmailValidator.getInstance().isValid(email);
+    }
+
+    /**
+     * Compares two email addresses to determine whether they are different,
+     * ignoring case, leading/trailing whitespace, and treating blank values as null.
+     *
+     * <p>Both email inputs are normalised before comparison by:
+     * <ul>
+     *     <li>Trimming leading and trailing whitespace</li>
+     *     <li>Converting to lower case</li>
+     *     <li>Converting empty strings to null</li>
+     * </ul>
+     *
+     * @param email1 the first email address to compare; may be null or blank
+     * @param email2 the second email address to compare; may be null or blank
+     * @return {@code true} if the normalised email addresses are different, {@code false} otherwise
+     */
+    public static boolean areEmailsDifferent(String email1, String email2) {
+        return !Objects.equals(normaliseAndLower(email1), normaliseAndLower(email2));
+    }
+
+    private static String normaliseAndLower(String email) {
+        return ofNullable(email)
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .map(String::toLowerCase)
+            .orElse(null);
     }
 }
