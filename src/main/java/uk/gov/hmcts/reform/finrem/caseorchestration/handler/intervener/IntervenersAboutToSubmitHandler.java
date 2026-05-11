@@ -11,8 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerCoversheetService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final IntervenerService intervenerService;
+    private final IntervenerCoversheetService intervenerCoversheetService;
 
     private static final List<String> ADD_OPERATION_CODES = List.of(ADD_INTERVENER_ONE_CODE, ADD_INTERVENER_TWO_CODE,
         ADD_INTERVENER_THREE_CODE, ADD_INTERVENER_FOUR_CODE);
@@ -38,9 +42,10 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         DEL_INTERVENER_THREE_CODE, DEL_INTERVENER_FOUR_CODE);
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                           IntervenerService intervenerService) {
+                                           IntervenerService intervenerService, IntervenerCoversheetService intervenerCoversheetService) {
         super(finremCaseDetailsMapper);
         this.intervenerService = intervenerService;
+        this.intervenerCoversheetService = intervenerCoversheetService;
     }
 
     @Override
@@ -55,23 +60,30 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         Long caseId = callbackRequest.getCaseDetails().getId();
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
 
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
 
         List<String> errors = new ArrayList<>();
         IntervenerWrapper intervener = getIntervenerWrapper(caseData, selectedOperationCode);
 
+        IntervenerChangeDetails intervenerChangeDetails;
+
+        if (!ADD_OPERATION_CODES.contains(selectedOperationCode) && !DELETE_OPERATION_CODES.contains(selectedOperationCode)) {
+            throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
+        }
+
         if (ADD_OPERATION_CODES.contains(selectedOperationCode)) {
             intervenerService.validateIntervenerInformation(intervener, errors);
 
             if (errors.isEmpty()) {
-                intervenerService.updateIntervenerDetails(intervener, errors, callbackRequest);
+                intervenerChangeDetails = intervenerService.updateIntervenerDetails(intervener, errors, callbackRequest);
+                intervenerCoversheetService.updateIntervenerCoversheet(caseDetails, intervenerChangeDetails, userAuthorisation);
             }
-        } else if (DELETE_OPERATION_CODES.contains(selectedOperationCode)) {
-            intervenerService.removeIntervenerDetails(intervener, errors, caseData, caseId);
         } else {
-            throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
+            intervenerChangeDetails = intervenerService.removeIntervenerDetails(intervener, errors, caseData, caseId);
+            intervenerCoversheetService.updateIntervenerCoversheet(caseDetails, intervenerChangeDetails, userAuthorisation);
         }
 
         return response(caseData, null, errors);

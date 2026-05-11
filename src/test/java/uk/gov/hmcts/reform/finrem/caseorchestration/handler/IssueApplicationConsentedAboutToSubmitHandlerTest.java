@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import java.time.LocalDate;
@@ -33,12 +34,12 @@ class IssueApplicationConsentedAboutToSubmitHandlerTest {
 
     @InjectMocks
     private IssueApplicationConsentedAboutToSubmitHandler handler;
-
     @Mock
     private OnlineFormDocumentService onlineFormDocumentService;
-
     @Mock
     private DefaultsConfiguration defaultsConfiguration;
+    @Mock
+    private GenerateCoverSheetService generateCoverSheetService;
 
     @Test
     void testCanHandle() {
@@ -46,7 +47,7 @@ class IssueApplicationConsentedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenCase_whenHandled_thenGenerateMiniFormA() {
+    void givenCase_whenHandled_thenGenerateMiniFormA_andGenerateCoverSheets() {
         FinremCaseData finremCaseData = FinremCaseData.builder().build();
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(finremCaseData);
 
@@ -61,6 +62,10 @@ class IssueApplicationConsentedAboutToSubmitHandlerTest {
         // Verify
         verify(onlineFormDocumentService).generateMiniFormA(AUTH_TOKEN, request.getCaseDetails());
         verifyNoMoreInteractions(onlineFormDocumentService);
+
+        verify(generateCoverSheetService).generateAndSetApplicantCoverSheet(request.getCaseDetails(), AUTH_TOKEN);
+        verify(generateCoverSheetService).generateAndSetRespondentCoverSheet(request.getCaseDetails(), AUTH_TOKEN);
+        verifyNoMoreInteractions(generateCoverSheetService);
 
         assertThat(finremCaseData)
             .extracting(

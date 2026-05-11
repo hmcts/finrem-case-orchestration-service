@@ -20,8 +20,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerCoversheetService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -57,6 +60,9 @@ class IntervenersAboutToSubmitHandlerTest {
     @Mock
     private IntervenerService intervenerService;
 
+    @Mock
+    private IntervenerCoversheetService intervenerCoversheetService;
+
     @Test
     void testCanHandle() {
         assertCanHandle(
@@ -74,8 +80,10 @@ class IntervenersAboutToSubmitHandlerTest {
             FinremCallbackRequest callbackRequest = getValidFinremCallbackRequest(ADD_INTERVENER_ONE_CODE);
             FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
+            IntervenerChangeDetails changeDetails = mock(IntervenerChangeDetails.class);
             IntervenerOne intervener = mock(IntervenerOne.class);
             when(caseData.getIntervenerOne()).thenReturn(intervener);
+            when(intervenerService.updateIntervenerDetails(intervener, new ArrayList<>(), callbackRequest)).thenReturn(changeDetails);
 
             GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
                 aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -83,6 +91,8 @@ class IntervenersAboutToSubmitHandlerTest {
             assertAll(
                 () -> verify(intervenerService).validateIntervenerInformation(intervener, response.getErrors()),
                 () -> verify(intervenerService).updateIntervenerDetails(intervener, response.getErrors(), callbackRequest),
+                () -> verify(intervenerCoversheetService).updateIntervenerCoversheet(callbackRequest.getCaseDetails(), changeDetails, AUTH_TOKEN),
+
                 () -> assertThat(response.getErrors()).isEmpty(),
                 () -> assertThat(response.getData()).isEqualTo(caseData)
             );

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignPartiesAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ChangeOfRepresentationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UserNotFoundInOrganisationApiException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidatePartiesService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -98,7 +105,8 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
-    public void updateIntervenerDetails(IntervenerWrapper intervenerWrapper, List<String> errors, FinremCallbackRequest callbackRequest) {
+    public IntervenerChangeDetails updateIntervenerDetails(IntervenerWrapper intervenerWrapper, List<String> errors,
+                                                           FinremCallbackRequest callbackRequest) {
         validateIntervenerCountryOfResident(intervenerWrapper, errors);
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
@@ -146,6 +154,7 @@ public class IntervenerService {
             setDefaultOrgForintervener(intervenerWrapper);
         }
         intervenerChangeDetails.setIntervenerDetails(intervenerWrapper);
+        return intervenerChangeDetails;
     }
 
     private boolean isRepresented(IntervenerWrapper intervenerWrapper) {
