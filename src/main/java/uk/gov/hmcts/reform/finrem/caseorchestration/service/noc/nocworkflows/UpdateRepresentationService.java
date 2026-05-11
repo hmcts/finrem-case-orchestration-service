@@ -130,7 +130,7 @@ public class UpdateRepresentationService {
 
         long caseId = caseDetails.getId();
         if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(data, solicitorToAdd)) {
-            log.info("User has represented litigant as Barrister for Case ID: {}, REJECTING COR",
+            log.info("User has represented litigant as Barrister for Case ID: {}, rejecting Change of Representation",
                 caseId);
             return true;
         }
