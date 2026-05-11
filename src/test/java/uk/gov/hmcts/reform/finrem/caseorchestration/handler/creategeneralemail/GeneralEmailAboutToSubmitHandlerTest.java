@@ -183,7 +183,6 @@ class GeneralEmailAboutToSubmitHandlerTest {
             ));
     }
 
-
     private void verifyDocumentCategory(FinremCallbackRequest callbackRequest, DocumentCategory category) {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getData()
