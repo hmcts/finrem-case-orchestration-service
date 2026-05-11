@@ -82,7 +82,7 @@ class GeneralEmailAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(true);
         handler.handle(callbackRequest, AUTH_TOKEN);
         verify(notificationService).sendConsentGeneralEmail(any(FinremCaseDetails.class), anyString());
-        verify(generalEmailService).storeGeneralEmail(any(FinremCaseDetails.class));
+        verify(generalEmailService).storeGeneralEmail(any(FinremCaseData.class));
     }
 
     @Test

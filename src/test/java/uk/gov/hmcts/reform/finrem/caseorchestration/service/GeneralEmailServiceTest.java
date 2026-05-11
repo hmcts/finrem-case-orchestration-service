@@ -1,80 +1,111 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailHolder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 
-import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
-public class GeneralEmailServiceTest extends BaseServiceTest {
+@ExtendWith(MockitoExtension.class)
+class GeneralEmailServiceTest {
 
-    @Autowired
+    private static final LocalDateTime FIXED_DATE = LocalDateTime.of(2026, 5, 5, 23, 0, 0);
+
+    @InjectMocks
     private GeneralEmailService generalEmailService;
 
     @Test
-    public void generateGeneralEmailConsented() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsConsented();
-        generalEmailService.storeGeneralEmail(caseDetails);
-        List<GeneralEmailCollection> generalEmailCollections = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailCollection();
-        assertThat(generalEmailCollections, hasSize(2));
+    void givenEmptyGeneralEmailCollection_whenStoreGeneralEmail_thenEmailIsStored() {
+        DocumentCollectionItem documentCollectionItem =
+            DocumentCollectionItem.fromCaseDocument(caseDocument("A_DOC_1.pdf"));
 
-        GeneralEmailHolder originalEmail = generalEmailCollections.get(0).getValue();
-        assertThat(originalEmail.getGeneralEmailRecipient(), is("a1@a.com"));
-        assertThat(originalEmail.getGeneralEmailCreatedBy(), is("first user"));
-        assertThat(originalEmail.getGeneralEmailBody(), is("original email body"));
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .generalEmailWrapper(GeneralEmailWrapper.builder()
+                .generalEmailBody("Hi, This is the body of an email.")
+                .generalEmailCreatedBy("John John")
+                .generalEmailRecipient("Claire Mumford")
+                .generalEmailUploadedDocuments(List.of(
+                    documentCollectionItem
+                ))
+                .build())
+            .build();
 
-        GeneralEmailHolder addedEmail = generalEmailCollections.get(1).getValue();
-        assertThat(addedEmail.getGeneralEmailRecipient(), is("b1@b.com"));
-        assertThat(addedEmail.getGeneralEmailCreatedBy(), is("Test user"));
-        assertThat(addedEmail.getGeneralEmailBody(), is("Test email body"));
-        assertThat(addedEmail.getGeneralEmailDateSent(), is(notNullValue()));
-    }
+        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+            mockedStatic.when(LocalDateTime::now).thenReturn(FIXED_DATE);
 
-    @Test
-    public void generateGeneralEmailContested() throws Exception {
-        FinremCaseDetails caseDetails = caseDetailsContested();
-        caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailUploadedDocument(caseDocument());
-        generalEmailService.storeGeneralEmail(caseDetails);
-        List<GeneralEmailCollection> generalEmailCollections = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailCollection();
-        assertThat(generalEmailCollections, hasSize(2));
+            generalEmailService.storeGeneralEmail(finremCaseData);
 
-        GeneralEmailHolder originalEmail = generalEmailCollections.get(0).getValue();
-        assertThat(originalEmail.getGeneralEmailRecipient(), is("a1@a.com"));
-        assertThat(originalEmail.getGeneralEmailCreatedBy(), is("first user"));
-        assertThat(originalEmail.getGeneralEmailBody(), is("original email body"));
-
-        GeneralEmailHolder addedEmail = generalEmailCollections.get(1).getValue();
-        assertThat(addedEmail.getGeneralEmailRecipient(), is("b1@b.com"));
-        assertThat(addedEmail.getGeneralEmailCreatedBy(), is("Test user"));
-        assertThat(addedEmail.getGeneralEmailBody(), is("Test email body"));
-        assertThat(addedEmail.getGeneralEmailUploadedDocument(), is(caseDocument()));
-        assertThat(addedEmail.getGeneralEmailDateSent(), is(notNullValue()));
-    }
-
-    private FinremCaseDetails caseDetailsConsented() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-email-consented.json")) {
-            FinremCallbackRequest finremCallbackRequest = mapper.readValue(resourceAsStream, FinremCallbackRequest.class);
-            finremCallbackRequest.getCaseDetails().getData().setCcdCaseType(finremCallbackRequest.getCaseDetails().getCaseType());
-            return finremCallbackRequest.getCaseDetails();
+            assertThat(finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection())
+                .extracting(GeneralEmailCollection::getValue)
+                .extracting(GeneralEmailHolder::getGeneralEmailBody,
+                    GeneralEmailHolder::getGeneralEmailRecipient,
+                    GeneralEmailHolder::getGeneralEmailCreatedBy,
+                    GeneralEmailHolder::getGeneralEmailDateSent)
+                .contains(Tuple.tuple("Hi, This is the body of an email.", "Claire Mumford", "John John",
+                    FIXED_DATE));
+            assertThat(finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection())
+                .extracting(GeneralEmailCollection::getValue)
+                .extracting(GeneralEmailHolder::getGeneralEmailUploadedDocuments)
+                .contains(List.of(documentCollectionItem));
         }
     }
 
-    private FinremCaseDetails caseDetailsContested() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/contested/general-email-contested.json")) {
-            FinremCallbackRequest finremCallbackRequest = mapper.readValue(resourceAsStream, FinremCallbackRequest.class);
-            finremCallbackRequest.getCaseDetails().getData().setCcdCaseType(finremCallbackRequest.getCaseDetails().getCaseType());
-            return finremCallbackRequest.getCaseDetails();
+    @Test
+    void givenNonEmptyGeneralEmailCollection_whenStoreGeneralEmail_thenEmailIsStored() {
+        DocumentCollectionItem documentCollectionItem =
+            DocumentCollectionItem.fromCaseDocument(caseDocument("A_DOC_1.pdf"));
+
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .generalEmailWrapper(GeneralEmailWrapper.builder()
+                .generalEmailBody("Hi, This is the body of an email.")
+                .generalEmailCreatedBy("John John")
+                .generalEmailRecipient("Claire Mumford")
+                .generalEmailUploadedDocuments(List.of(
+                    documentCollectionItem
+                ))
+                .generalEmailCollection(new ArrayList<>(List.of(
+                    GeneralEmailCollection.builder()
+                        .value(GeneralEmailHolder.builder()
+                            .generalEmailBody("Hi, This is an existing email.")
+                            .build())
+                        .build()
+                )))
+                .build())
+            .build();
+
+        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+            mockedStatic.when(LocalDateTime::now).thenReturn(FIXED_DATE);
+
+            generalEmailService.storeGeneralEmail(finremCaseData);
+
+            assertThat(finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection())
+                .extracting(GeneralEmailCollection::getValue)
+                .extracting(GeneralEmailHolder::getGeneralEmailBody,
+                    GeneralEmailHolder::getGeneralEmailRecipient,
+                    GeneralEmailHolder::getGeneralEmailCreatedBy,
+                    GeneralEmailHolder::getGeneralEmailDateSent)
+                .containsExactly(
+                    Tuple.tuple("Hi, This is an existing email.", null, null, null),
+                    Tuple.tuple("Hi, This is the body of an email.", "Claire Mumford", "John John", FIXED_DATE)
+                );
+            assertThat(finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection())
+                .extracting(GeneralEmailCollection::getValue)
+                .extracting(GeneralEmailHolder::getGeneralEmailUploadedDocuments)
+                .contains(List.of(documentCollectionItem));
         }
     }
 }
