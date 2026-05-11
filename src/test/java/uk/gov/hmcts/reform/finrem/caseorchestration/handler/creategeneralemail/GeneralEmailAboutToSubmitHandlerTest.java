@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -31,17 +30,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Ge
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -148,37 +148,6 @@ class GeneralEmailAboutToSubmitHandlerTest {
                 .getValue().getGeneralEmailUploadedDocument().getCategoryId());
     }
 
-    /**
-     * Checks that about-to-submit calls {@code setGeneralEmailValuesToNull} in {@link GeneralEmailWrapper}.
-     * For consented cases, check that {@code setGeneralEmailValuesToNull} is called once after the notification is sent
-     * For contested cases, check that {@code setGeneralEmailValuesToNull} is called once after the notification is sent
-     */
-    @Test
-    void shouldCallSetGeneralEmailValuesToNullOnce() {
-        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
-        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        GeneralEmailWrapper generalEmailWrapper = mock(GeneralEmailWrapper.class);
-        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        when(callbackRequest.getFinremCaseData()).thenReturn(caseData);
-        when(caseDetails.getData()).thenReturn(caseData);
-        when(caseData.getGeneralEmailWrapper()).thenReturn(generalEmailWrapper);
-
-        // consented test
-        when(caseDetails.isConsentedApplication()).thenReturn(true);
-        handler.handle(callbackRequest, AUTH_TOKEN);
-        InOrder inOrderConsented = inOrder(notificationService, generalEmailWrapper);
-        inOrderConsented.verify(notificationService).sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
-        inOrderConsented.verify(generalEmailWrapper).setGeneralEmailValuesToNull();
-
-        // contested test
-        when(caseDetails.isConsentedApplication()).thenReturn(false);
-        handler.handle(callbackRequest, AUTH_TOKEN);
-        InOrder inOrderContested = inOrder(notificationService, generalEmailWrapper);
-        inOrderContested.verify(notificationService).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
-        inOrderContested.verify(generalEmailWrapper).setGeneralEmailValuesToNull();
-    }
-
     @Test
     void givenInvalidEmailAddressException_whenHandled_thenReturnError() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(true);
@@ -198,6 +167,22 @@ class GeneralEmailAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).containsOnly("An error occurred when sending the email");
     }
+
+    @Test
+    void shouldRemoveGadPreviewWhenHandled() {
+        FinremCaseData finremCaseData = FinremCaseData.builder().build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .data(finremCaseData).build();
+
+        verifyTemporaryFieldsWereSanitised(EventType.CREATE_GENERAL_EMAIL, handler,
+            finremCaseDetails, finremCaseDetailsMapper, Map.of(
+                "generalEmailRecipient", "generalEmailRecipient",
+                "generalEmailCreatedBy", "generalEmailCreatedBy",
+                "generalEmailBody", "generalEmailBody",
+                "generalEmailUploadedDocument", "generalEmailUploadedDocument"
+            ));
+    }
+
 
     private void verifyDocumentCategory(FinremCallbackRequest callbackRequest, DocumentCategory category) {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);

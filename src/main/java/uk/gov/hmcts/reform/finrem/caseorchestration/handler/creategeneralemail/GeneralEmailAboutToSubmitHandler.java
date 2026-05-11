@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -26,7 +26,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
+public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
 
     private final NotificationService notificationService;
     private final GeneralEmailService generalEmailService;
@@ -61,28 +61,32 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
+
+        final boolean isConsented = caseDetails.isConsentedApplication();
         
         convertEmailAttachmentsToPdfIfRequired(finremCaseData, userAuthorisation);
         generalEmailService.storeGeneralEmail(caseDetails);
 
         List<String> errors = new ArrayList<>();
         try {
-            if (caseDetails.isConsentedApplication()) {
+            if (isConsented) {
                 notificationService.sendConsentGeneralEmail(caseDetails, userAuthorisation);
             } else {
                 notificationService.sendContestedGeneralEmail(caseDetails, userAuthorisation);
-                generalEmailCategoriser.categorise(finremCaseData);
             }
-
-            finremCaseData.getGeneralEmailWrapper().setGeneralEmailValuesToNull();
         } catch (InvalidEmailAddressException e) {
             errors.add("Not a valid email address");
         } catch (SendEmailException e) {
             errors.add("An error occurred when sending the email");
         }
 
+        if (!isConsented) {
+            generalEmailCategoriser.categorise(finremCaseData);
+        }
+
         return response(finremCaseData, null, errors);
     }
+
     private void convertEmailAttachmentsToPdfIfRequired(FinremCaseData finremCaseData, String userAuthorisation) {
         CaseDocument generalEmailUploadedDocument = finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         if (generalEmailUploadedDocument != null) {
