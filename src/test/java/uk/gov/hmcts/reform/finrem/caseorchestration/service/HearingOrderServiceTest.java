@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -585,6 +587,64 @@ class HearingOrderServiceTest {
             .extracting(DraftDirectionWrapper::getJudgesAmendedOrderCollection)
             .extracting(List::getFirst)
             .extracting(DraftDirectionOrderCollection::getValue).isEqualTo(latestDraftDirectionOrder);
+    }
+
+    @Test
+    void givenJudgeApprovedOrder_whenStampAndStore_thenIsFinalYnPropagated() {
+        // Arrange
+        CaseDocument orderDoc = caseDocument("order.docx");
+        DraftDirectionWrapper draftDirectionWrapper = DraftDirectionWrapper.builder()
+            .judgeApprovedOrderCollection(List.of(
+                DraftDirectionOrderCollection.builder()
+                    .value(DraftDirectionOrder.builder()
+                        .uploadDraftDocument(orderDoc)
+                        .build())
+                    .build()
+            ))
+            .draftDirectionDetailsCollection(List.of(
+                DraftDirectionDetailsCollection.builder()
+                    .value(DraftDirectionDetailsHolder.builder()
+                        .isThisFinalYN(YesOrNo.YES)
+                        .build())
+                    .build()
+            ))
+            .build();
+        FinremCaseData finremCaseData = getFinremCaseData();
+        finremCaseData.setDraftDirectionWrapper(draftDirectionWrapper);
+
+        // Act
+        underTest.stampAndStoreJudgeApprovedOrders(FinremCaseDetails.builder().data(finremCaseData).build(), AUTH_TOKEN);
+
+        // Assert
+        List<DirectionOrderCollection> uploadHearingOrder = finremCaseData.getUploadHearingOrder();
+        assertThat(uploadHearingOrder).hasSize(1);
+        assertThat(uploadHearingOrder.get(0).getValue().getIsThisFinalYN()).isEqualTo(YesOrNo.YES);
+    }
+
+    @Test
+    void givenJudgeApprovedOrder_whenStampAndStoreWithNullDraftDirectionDetails_thenIsFinalYnIsNull() {
+        // Arrange
+        CaseDocument orderDoc = caseDocument("order.docx");
+        DraftDirectionWrapper draftDirectionWrapper = DraftDirectionWrapper.builder()
+            .judgeApprovedOrderCollection(List.of(
+                DraftDirectionOrderCollection.builder()
+                    .value(DraftDirectionOrder.builder()
+                        .uploadDraftDocument(orderDoc)
+                        .build())
+                    .build()
+            ))
+            .draftDirectionDetailsCollection(null)
+            .build();
+        FinremCaseData finremCaseData = getFinremCaseData();
+        finremCaseData.setDraftDirectionWrapper(draftDirectionWrapper);
+
+        // Act
+        underTest.stampAndStoreJudgeApprovedOrders(FinremCaseDetails.builder().data(finremCaseData).build(), AUTH_TOKEN);
+
+        // Assert
+        List<DirectionOrderCollection> uploadHearingOrder = finremCaseData.getUploadHearingOrder();
+        assertThat(uploadHearingOrder).hasSize(1);
+        assertThat(uploadHearingOrder.get(0).getValue().getIsThisFinalYN()).isNull();
     }
 
     private DraftDirectionOrder makeDraftDirectionOrder() {
