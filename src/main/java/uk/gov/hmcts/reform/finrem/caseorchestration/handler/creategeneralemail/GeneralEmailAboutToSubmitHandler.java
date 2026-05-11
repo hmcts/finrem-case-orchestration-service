@@ -59,32 +59,23 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         validateCaseData(callbackRequest);
 
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
 
-        final boolean isConsented = caseDetails.isConsentedApplication();
-        
         convertEmailAttachmentsToPdfIfRequired(finremCaseData, userAuthorisation);
-        generalEmailService.storeGeneralEmail(caseDetails);
+        generalEmailService.storeGeneralEmail(finremCaseDetails);
 
         List<String> errors = new ArrayList<>();
-        try {
-            if (isConsented) {
-                notificationService.sendConsentGeneralEmail(caseDetails, userAuthorisation);
-            } else {
-                notificationService.sendContestedGeneralEmail(caseDetails, userAuthorisation);
-            }
-        } catch (InvalidEmailAddressException e) {
-            errors.add("Not a valid email address");
-        } catch (SendEmailException e) {
-            errors.add("An error occurred when sending the email");
+        sendGeneralEmail(finremCaseDetails, userAuthorisation, errors);
+        if (!errors.isEmpty()) {
+            return response(finremCaseData, null, errors);
         }
 
-        if (!isConsented) {
+        if (!isConsented(finremCaseDetails)) {
             generalEmailCategoriser.categorise(finremCaseData);
         }
 
-        return response(finremCaseData, null, errors);
+        return response(finremCaseData);
     }
 
     private void convertEmailAttachmentsToPdfIfRequired(FinremCaseData finremCaseData, String userAuthorisation) {
@@ -93,6 +84,24 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
             CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalEmailUploadedDocument,
                 userAuthorisation, finremCaseData.getCcdCaseType());
             finremCaseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(pdfDocument);
+        }
+    }
+
+    private boolean isConsented(FinremCaseDetails finremCaseDetails) {
+        return finremCaseDetails.isConsentedApplication();
+    }
+
+    private void sendGeneralEmail(FinremCaseDetails finremCaseDetails, String userAuthorisation, List<String> errors) {
+        try {
+            if (isConsented(finremCaseDetails)) {
+                notificationService.sendConsentGeneralEmail(finremCaseDetails, userAuthorisation);
+            } else {
+                notificationService.sendContestedGeneralEmail(finremCaseDetails, userAuthorisation);
+            }
+        } catch (InvalidEmailAddressException e) {
+            errors.add("Not a valid email address");
+        } catch (SendEmailException e) {
+            errors.add("An error occurred when sending the email");
         }
     }
 }

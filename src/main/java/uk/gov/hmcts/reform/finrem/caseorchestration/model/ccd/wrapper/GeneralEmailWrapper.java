@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.TemporaryField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 
@@ -27,7 +28,10 @@ public class GeneralEmailWrapper implements HasCaseDocument {
     @TemporaryField
     private String generalEmailBody;
     @TemporaryField
+    @Deprecated(forRemoval = true)
     private CaseDocument generalEmailUploadedDocument;
+    @TemporaryField
+    private List<DocumentCollectionItem> generalEmailUploadedDocuments;
 
     // It stores the emails sent
     private List<GeneralEmailCollection> generalEmailCollection;

@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -20,5 +21,6 @@ public class GeneralEmailHolder implements HasCaseDocument {
     private String generalEmailCreatedBy;
     private String generalEmailBody;
     private CaseDocument generalEmailUploadedDocument;
+    private List<DocumentCollectionItem> generalEmailUploadedDocuments;
     private LocalDateTime generalEmailDateSent;
 }
