@@ -284,6 +284,17 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
+    /**
+     * Validates the intervener's solicitor email address and postcode information.
+     *
+     * <p>This method checks if the intervener's solicitor email address is valid and registered,
+     * and verifies that the postcode field is present for the intervener's address.
+     * Any validation errors encountered are added to the provided errors list.
+     * </p>
+     *
+     * @param intervener the {@link IntervenerWrapper} containing intervener details to validate
+     * @param errors     the list to which any validation error messages will be appended
+     */
     public void validateIntervenerInformation(IntervenerWrapper intervener, List<String> errors) {
         addErrorIfPresent(
             errors,
