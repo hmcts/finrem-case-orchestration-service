@@ -18,8 +18,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UploadDocumentTest {
 
+    /*
+     * Arranges scannedDocumentCollection. The scannedDocument sits within that collection.
+     * The sourceCaseDocument is an attribute of the scannedDocument, retrieved by getUrl().
+     * The test runs from(), then checks that the UploadCaseDocument result, which basically transforms attributes
+     * of scannedDocument and sourceCaseDocument, has everything that should be there.
+     */
     @Test
     void shouldMapAllFieldsFromScannedDocumentCollection() {
+        // Arrange
         LocalDateTime scannedDate = LocalDateTime.of(2024, 10, 21, 11, 30, 45);
         LocalDateTime uploadTimestamp = LocalDateTime.of(2024, 10, 20, 9, 15, 10);
 
@@ -38,8 +45,10 @@ class UploadDocumentTest {
         when(sourceCaseDocument.getDocumentFilename()).thenReturn("stored-document.pdf");
         when(sourceCaseDocument.getUploadTimestamp()).thenReturn(uploadTimestamp);
 
+        // Act
         UploadCaseDocument result = UploadCaseDocument.from(scannedDocumentCollection);
 
+        // Assert
         assertAll(
             () -> assertNotNull(result),
             () -> assertEquals("scanned-document.pdf", result.getFileName()),
@@ -65,8 +74,14 @@ class UploadDocumentTest {
         );
     }
 
+    /*
+     * Arranges scannedDocumentCollection. The scannedDocument sits within that collection.
+     * The sourceCaseDocument is an attribute of the scannedDocument, retrieved by getUrl().
+     * In this test, everything is null.  Running from() checks everything is handled.
+     */
     @Test
     void shouldHandleNullValuesFromScannedDocumentCollection() {
+        // Arrange
         ScannedDocumentCollection scannedDocumentCollection = mock(ScannedDocumentCollection.class);
         ScannedDocument scannedDocument = mock(ScannedDocument.class);
         CaseDocument sourceCaseDocument = mock(CaseDocument.class);
@@ -82,8 +97,10 @@ class UploadDocumentTest {
         when(sourceCaseDocument.getDocumentFilename()).thenReturn(null);
         when(sourceCaseDocument.getUploadTimestamp()).thenReturn(null);
 
+        // Act
         UploadCaseDocument result = UploadCaseDocument.from(scannedDocumentCollection);
 
+        // Assert
         assertAll(
             () -> assertNotNull(result),
             () -> assertNull(result.getFileName()),
