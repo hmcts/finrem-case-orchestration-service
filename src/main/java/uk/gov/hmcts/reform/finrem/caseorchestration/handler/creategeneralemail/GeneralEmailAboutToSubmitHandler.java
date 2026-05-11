@@ -62,12 +62,7 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
         
-        CaseDocument generalEmailUploadedDocument = finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
-        if (generalEmailUploadedDocument != null) {
-            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalEmailUploadedDocument,
-                userAuthorisation, caseDetails.getCaseType());
-            finremCaseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(pdfDocument);
-        }
+        convertEmailAttachmentsToPdfIfRequired(finremCaseData, userAuthorisation);
         generalEmailService.storeGeneralEmail(caseDetails);
 
         List<String> errors = new ArrayList<>();
@@ -87,5 +82,13 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
         }
 
         return response(finremCaseData, null, errors);
+    }
+    private void convertEmailAttachmentsToPdfIfRequired(FinremCaseData finremCaseData, String userAuthorisation) {
+        CaseDocument generalEmailUploadedDocument = finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
+        if (generalEmailUploadedDocument != null) {
+            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalEmailUploadedDocument,
+                userAuthorisation, finremCaseData.getCcdCaseType());
+            finremCaseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(pdfDocument);
+        }
     }
 }
