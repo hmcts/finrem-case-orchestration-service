@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import java.time.LocalDate;
@@ -21,15 +22,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AssignToJud
 public class IssueApplicationConsentedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
-
     private final DefaultsConfiguration defaultsConfiguration;
+    private final GenerateCoverSheetService generateCoverSheetService;
 
     public IssueApplicationConsentedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                          OnlineFormDocumentService onlineFormDocumentService,
-                                                         DefaultsConfiguration defaultsConfiguration) {
+                                                         DefaultsConfiguration defaultsConfiguration,
+                                                         GenerateCoverSheetService generateCoverSheetService) {
         super(finremCaseDetailsMapper);
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.defaultsConfiguration = defaultsConfiguration;
+        this.generateCoverSheetService = generateCoverSheetService;
     }
 
     @Override
@@ -49,6 +52,7 @@ public class IssueApplicationConsentedAboutToSubmitHandler extends FinremCallbac
 
         caseData.setMiniFormA(onlineFormDocumentService.generateMiniFormA(userAuthorisation, caseDetails));
         populateAssignToJudgeFields(caseData);
+        generateCoverSheets(caseDetails, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
@@ -59,5 +63,10 @@ public class IssueApplicationConsentedAboutToSubmitHandler extends FinremCallbac
         caseData.setAssignedToJudgeReason(DRAFT_CONSENT_ORDER);
         caseData.getReferToJudgeWrapper().setReferToJudgeDate(LocalDate.now());
         caseData.getReferToJudgeWrapper().setReferToJudgeText("consent for approval");
+    }
+
+    private void generateCoverSheets(FinremCaseDetails caseDetails, String userAuthorisation) {
+        generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, userAuthorisation);
+        generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, userAuthorisation);
     }
 }

@@ -74,6 +74,7 @@ class IssueApplicationContestedSubmittedHandlerTest {
 
         ArgumentCaptor<ThrowingRunnable> captor = getThrowingRunnableCaptor();
         verify(retryExecutor).runWithRetry(captor.capture(), eq("sending correspondence"), eq(CASE_ID));
+
         verifySendCorrespondenceRun(captor, caseDetails);
         verifyNoMoreInteractions(retryExecutor);
     }
@@ -122,6 +123,7 @@ class IssueApplicationContestedSubmittedHandlerTest {
 
         doThrow(new RuntimeException("BOOM"))
             .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
+
         doAnswer(invocation -> {
             ThrowingRunnable runnable = invocation.getArgument(0);
             runnable.run();
@@ -162,6 +164,7 @@ class IssueApplicationContestedSubmittedHandlerTest {
 
         doThrow(new RuntimeException("BOOM"))
             .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
+
         doAnswer(invocation -> {
             ThrowingRunnable runnable = invocation.getArgument(0);
             runnable.run();
@@ -202,6 +205,7 @@ class IssueApplicationContestedSubmittedHandlerTest {
 
         doThrow(new RuntimeException("BOOM"))
             .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("sending correspondence"), eq(CASE_ID));
+
         doThrow(new RuntimeException("BOOM"))
             .when(retryExecutor).runWithRetry(any(ThrowingRunnable.class), eq("granting respondent solicitor"), eq(CASE_ID));
 

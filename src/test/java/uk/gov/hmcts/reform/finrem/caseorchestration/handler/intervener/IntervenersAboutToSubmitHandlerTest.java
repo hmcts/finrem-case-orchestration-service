@@ -18,15 +18,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerCoversheetService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.intervener.IntervenerService;
 
 import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_IN_LONG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_FOUR_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_ONE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_THREE_CODE;
@@ -57,6 +64,9 @@ class IntervenersAboutToSubmitHandlerTest {
     @Mock
     private IntervenerService intervenerService;
 
+    @Mock
+    private IntervenerCoversheetService intervenerCoversheetService;
+
     @Test
     void testCanHandle() {
         assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANAGE_INTERVENERS);
@@ -85,8 +95,12 @@ class IntervenersAboutToSubmitHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_ONE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
+        IntervenerChangeDetails changeDetails = mock(IntervenerChangeDetails.class);
+        when(intervenerService.updateIntervenerDetails(oneWrapper, new ArrayList<>(), finremCallbackRequest)).thenReturn(changeDetails);
+
         aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerService).updateIntervenerDetails(oneWrapper, new ArrayList<>(), finremCallbackRequest);
+        verify(intervenerCoversheetService).updateIntervenerCoversheet(finremCallbackRequest.getCaseDetails(), changeDetails, AUTH_TOKEN);
     }
 
     @Test
@@ -110,9 +124,13 @@ class IntervenersAboutToSubmitHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_ONE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
+        IntervenerChangeDetails changeDetails = mock(IntervenerChangeDetails.class);
+        when(intervenerService.removeIntervenerDetails(oneWrapper, new ArrayList<>(), finremCaseData, CASE_ID_IN_LONG)).thenReturn(changeDetails);
+
         aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerService).removeIntervenerDetails(oneWrapper, new ArrayList<>(),
             finremCaseData, finremCallbackRequest.getCaseDetails().getId());
+        verify(intervenerCoversheetService).updateIntervenerCoversheet(finremCallbackRequest.getCaseDetails(), changeDetails, AUTH_TOKEN);
     }
 
     @Test
@@ -138,8 +156,12 @@ class IntervenersAboutToSubmitHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_TWO_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
+        IntervenerChangeDetails changeDetails = mock(IntervenerChangeDetails.class);
+        when(intervenerService.updateIntervenerDetails(twoWrapper, new ArrayList<>(), finremCallbackRequest)).thenReturn(changeDetails);
+
         aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerService).updateIntervenerDetails(twoWrapper, new ArrayList<>(), finremCallbackRequest);
+        verify(intervenerCoversheetService).updateIntervenerCoversheet(finremCallbackRequest.getCaseDetails(), changeDetails, AUTH_TOKEN);
     }
 
     @Test
@@ -163,9 +185,13 @@ class IntervenersAboutToSubmitHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_TWO_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
+        IntervenerChangeDetails changeDetails = mock(IntervenerChangeDetails.class);
+        when(intervenerService.removeIntervenerDetails(twoWrapper, new ArrayList<>(), finremCaseData, CASE_ID_IN_LONG)).thenReturn(changeDetails);
+
         aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerService).removeIntervenerDetails(twoWrapper, new ArrayList<>(),
             finremCaseData, finremCallbackRequest.getCaseDetails().getId());
+        verify(intervenerCoversheetService).updateIntervenerCoversheet(finremCallbackRequest.getCaseDetails(), changeDetails, AUTH_TOKEN);
     }
 
     @Test
@@ -189,8 +215,12 @@ class IntervenersAboutToSubmitHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_THREE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
+        IntervenerChangeDetails changeDetails = mock(IntervenerChangeDetails.class);
+        when(intervenerService.updateIntervenerDetails(threeWrapper, new ArrayList<>(), finremCallbackRequest)).thenReturn(changeDetails);
+
         aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerService).updateIntervenerDetails(threeWrapper, new ArrayList<>(), finremCallbackRequest);
+        verify(intervenerCoversheetService).updateIntervenerCoversheet(finremCallbackRequest.getCaseDetails(), changeDetails, AUTH_TOKEN);
     }
 
     @Test
@@ -213,9 +243,13 @@ class IntervenersAboutToSubmitHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_THREE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
+        IntervenerChangeDetails changeDetails = mock(IntervenerChangeDetails.class);
+        when(intervenerService.removeIntervenerDetails(threeWrapper, new ArrayList<>(), finremCaseData, CASE_ID_IN_LONG)).thenReturn(changeDetails);
+
         aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerService).removeIntervenerDetails(threeWrapper, new ArrayList<>(),
             finremCaseData, finremCallbackRequest.getCaseDetails().getId());
+        verify(intervenerCoversheetService).updateIntervenerCoversheet(finremCallbackRequest.getCaseDetails(), changeDetails, AUTH_TOKEN);
     }
 
     @Test
@@ -241,15 +275,18 @@ class IntervenersAboutToSubmitHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_FOUR_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
+        IntervenerChangeDetails changeDetails = mock(IntervenerChangeDetails.class);
+        when(intervenerService.updateIntervenerDetails(fourWrapper, new ArrayList<>(), finremCallbackRequest)).thenReturn(changeDetails);
+
         aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerService).updateIntervenerDetails(fourWrapper, new ArrayList<>(), finremCallbackRequest);
+        verify(intervenerCoversheetService).updateIntervenerCoversheet(finremCallbackRequest.getCaseDetails(), changeDetails, AUTH_TOKEN);
     }
 
     @Test
     void givenContestedCase_whenSelectionMadeToRemoveIntervener4_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-
 
         IntervenerFour fourWrapper = IntervenerFour
             .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
@@ -267,9 +304,41 @@ class IntervenersAboutToSubmitHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_FOUR_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
+        IntervenerChangeDetails changeDetails = mock(IntervenerChangeDetails.class);
+        when(intervenerService.removeIntervenerDetails(fourWrapper, new ArrayList<>(), finremCaseData, CASE_ID_IN_LONG)).thenReturn(changeDetails);
+
         aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerService).removeIntervenerDetails(fourWrapper, new ArrayList<>(),
             finremCaseData, finremCallbackRequest.getCaseDetails().getId());
+        verify(intervenerCoversheetService).updateIntervenerCoversheet(finremCallbackRequest.getCaseDetails(), changeDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    void givenContestedCase_whenInvalidOperationCode_thenReturnError() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        finremCallbackRequest.getCaseDetails().setId(CASE_ID_IN_LONG);
+
+        IntervenerFour fourWrapper = IntervenerFour
+            .builder().intervenerName("Four name").intervenerEmail("test@test.com").build();
+
+        finremCaseData.setIntervenerFour(fourWrapper);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = aboutToStartHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
+
+        DynamicRadioListElement option4 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
+        handleResp.getData().getIntervenersList().setValue(option4);
+
+        midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        DynamicRadioListElement operation = DynamicRadioListElement.builder().code("INVALID_OPERATION").build();
+        finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        assertThrows(IllegalArgumentException.class,
+            () -> aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN),
+            "Invalid operation code: INVALID_OPERATION");
+        verifyNoInteractions(intervenerService, intervenerCoversheetService);
     }
 
     @Test
@@ -298,6 +367,7 @@ class IntervenersAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors()).contains("Postcode field is required for the intervener.");
+        verifyNoInteractions(intervenerService, intervenerCoversheetService);
     }
 
     @Test
@@ -319,7 +389,6 @@ class IntervenersAboutToSubmitHandlerTest {
 
         midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(INTERVENER_INVALID).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
@@ -327,9 +396,10 @@ class IntervenersAboutToSubmitHandlerTest {
             aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN)
         ).isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Invalid operation code: " + INTERVENER_INVALID);
+        verifyNoInteractions(intervenerService, intervenerCoversheetService);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequestFactory.from();
+        return FinremCallbackRequestFactory.fromId(CASE_ID_IN_LONG);
     }
 }
