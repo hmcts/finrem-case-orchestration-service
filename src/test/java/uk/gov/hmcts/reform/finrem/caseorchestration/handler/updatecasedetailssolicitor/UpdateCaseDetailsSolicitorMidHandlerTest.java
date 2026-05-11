@@ -16,10 +16,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 // Common methods tested in Abstract test class.
 
 @ExtendWith(MockitoExtension.class)
-class UpdateCaseDetailsSolicitorContestedMidHandlerTest {
+class UpdateCaseDetailsSolicitorMidHandlerTest {
 
     @InjectMocks
-    private UpdateCaseDetailsSolicitorContestedMidHandler underTest;
+    private UpdateCaseDetailsSolicitorMidHandler underTest;
 
     @Test
     void testCanHandle() {
