@@ -10,8 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 @Slf4j
@@ -19,11 +21,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentSe
 public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
+    private final GenerateCoverSheetService generateCoverSheetService;
 
     public IssueApplicationContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         OnlineFormDocumentService onlineFormDocumentService) {
+                                                         OnlineFormDocumentService onlineFormDocumentService,
+                                                         GenerateCoverSheetService generateCoverSheetService) {
         super(finremCaseDetailsMapper);
         this.onlineFormDocumentService = onlineFormDocumentService;
+        this.generateCoverSheetService = generateCoverSheetService;
     }
 
     @Override
@@ -38,7 +43,8 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
-        Long caseId = callbackRequest.getCaseDetails().getId();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Long caseId = caseDetails.getId();
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
@@ -53,8 +59,14 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
             caseData.setScheduleOneWrapper(ScheduleOneWrapper.builder()
                 .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
         }
+        generateCoverSheets(caseDetails, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData()).build();
+    }
+
+    private void generateCoverSheets(FinremCaseDetails caseDetails, String userAuthorisation) {
+        generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, userAuthorisation);
+        generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, userAuthorisation);
     }
 }

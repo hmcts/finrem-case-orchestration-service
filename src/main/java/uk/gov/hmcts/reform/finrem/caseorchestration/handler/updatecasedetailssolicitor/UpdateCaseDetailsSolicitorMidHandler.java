@@ -12,10 +12,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 
 @Slf4j
 @Service
-public class UpdateCaseDetailsSolicitorContestedMidHandler extends AbstractUpdateCaseDetailsSolicitorHandler {
+public class UpdateCaseDetailsSolicitorMidHandler extends AbstractUpdateCaseDetailsSolicitorHandler {
 
-    public UpdateCaseDetailsSolicitorContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         UpdateRepresentationService updateRepresentationService) {
+    public UpdateCaseDetailsSolicitorMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                UpdateRepresentationService updateRepresentationService) {
         super(finremCaseDetailsMapper, updateRepresentationService);
     }
 
