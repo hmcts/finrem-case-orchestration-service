@@ -23,6 +23,8 @@ public class GeneralEmailWrapper implements HasCaseDocument {
     private String generalEmailCreatedBy;
     private String generalEmailBody;
     private CaseDocument generalEmailUploadedDocument;
+
+    // It stores the emails sent
     private List<GeneralEmailCollection> generalEmailCollection;
 
     /**

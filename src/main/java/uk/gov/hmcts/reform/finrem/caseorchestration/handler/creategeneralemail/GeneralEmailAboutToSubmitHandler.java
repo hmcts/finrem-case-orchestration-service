@@ -60,11 +60,13 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
         validateCaseData(callbackRequest);
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseDocument generalEmailUploadedDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
+        FinremCaseData finremCaseData = callbackRequest.getFinremCaseData();
+        
+        CaseDocument generalEmailUploadedDocument = finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         if (generalEmailUploadedDocument != null) {
             CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalEmailUploadedDocument,
                 userAuthorisation, caseDetails.getCaseType());
-            caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailUploadedDocument(pdfDocument);
+            finremCaseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(pdfDocument);
         }
         generalEmailService.storeGeneralEmail(caseDetails);
 
@@ -74,19 +76,16 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
                 notificationService.sendConsentGeneralEmail(caseDetails, userAuthorisation);
             } else {
                 notificationService.sendContestedGeneralEmail(caseDetails, userAuthorisation);
-                generalEmailCategoriser.categorise(caseDetails.getData());
+                generalEmailCategoriser.categorise(finremCaseData);
             }
 
-            caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailValuesToNull();
+            finremCaseData.getGeneralEmailWrapper().setGeneralEmailValuesToNull();
         } catch (InvalidEmailAddressException e) {
             errors.add("Not a valid email address");
         } catch (SendEmailException e) {
             errors.add("An error occurred when sending the email");
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseDetails.getData())
-            .errors(errors)
-            .build();
+        return response(finremCaseData, null, errors);
     }
 }

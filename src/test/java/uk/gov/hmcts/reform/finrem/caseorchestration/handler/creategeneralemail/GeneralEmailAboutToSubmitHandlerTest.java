@@ -39,7 +39,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -161,6 +160,7 @@ class GeneralEmailAboutToSubmitHandlerTest {
         FinremCaseData caseData = mock(FinremCaseData.class);
         GeneralEmailWrapper generalEmailWrapper = mock(GeneralEmailWrapper.class);
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(callbackRequest.getFinremCaseData()).thenReturn(caseData);
         when(caseDetails.getData()).thenReturn(caseData);
         when(caseData.getGeneralEmailWrapper()).thenReturn(generalEmailWrapper);
 
@@ -168,15 +168,15 @@ class GeneralEmailAboutToSubmitHandlerTest {
         when(caseDetails.isConsentedApplication()).thenReturn(true);
         handler.handle(callbackRequest, AUTH_TOKEN);
         InOrder inOrderConsented = inOrder(notificationService, generalEmailWrapper);
-        inOrderConsented.verify(notificationService, times(1)).sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
-        inOrderConsented.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
+        inOrderConsented.verify(notificationService).sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
+        inOrderConsented.verify(generalEmailWrapper).setGeneralEmailValuesToNull();
 
         // contested test
         when(caseDetails.isConsentedApplication()).thenReturn(false);
         handler.handle(callbackRequest, AUTH_TOKEN);
         InOrder inOrderContested = inOrder(notificationService, generalEmailWrapper);
-        inOrderContested.verify(notificationService, times(1)).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
-        inOrderContested.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
+        inOrderContested.verify(notificationService).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
+        inOrderContested.verify(generalEmailWrapper).setGeneralEmailValuesToNull();
     }
 
     @Test
