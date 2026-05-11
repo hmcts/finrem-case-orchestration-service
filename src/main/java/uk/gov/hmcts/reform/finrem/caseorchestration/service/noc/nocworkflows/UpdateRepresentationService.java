@@ -86,8 +86,8 @@ public class UpdateRepresentationService {
      * <p>This method retrieves the invoking user's details from the authentication token and extracts
      * the {@code ChangeOrganisationRequest} from the case.</p>
      *
-     * <p>It checks whether the user has previously acted as a barrister on the case. If so, the request
-     * is rejected, the NoC is marked as rejected, and no further changes are applied.</p>
+     * <p>Checks whether the user has previously acted as a barrister on the case or is already representing a party.
+     * If so, the request is rejected, the NoC is marked as rejected, and no further changes are applied.</p>
      *
      * <p>If the request is valid, the method determines the solicitor being added and the solicitor
      * being removed, updates the case data with the new solicitor details, and records the change in
