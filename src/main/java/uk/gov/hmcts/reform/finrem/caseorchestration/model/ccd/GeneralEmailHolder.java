@@ -9,6 +9,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Stores details of emails that have been sent as part of the case workflow.
+ * This holder is used to persist email metadata and associated uploaded documents,
+ * including recipients, sender information, email body content, sent date,
+ * and any attachments related to the email communication.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
