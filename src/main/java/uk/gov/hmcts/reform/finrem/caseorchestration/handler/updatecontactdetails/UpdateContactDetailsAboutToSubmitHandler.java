@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
@@ -37,18 +38,21 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final InternationalPostalService internationalPostalService;
+    private final GenerateCoverSheetService generateCoverSheetService;
 
     public UpdateContactDetailsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     UpdateContactDetailsService updateContactDetailsService,
                                                     OnlineFormDocumentService onlineFormDocumentService,
                                                     UpdateRepresentationWorkflowService nocWorkflowService,
-                                                    InternationalPostalService internationalPostalService
+                                                    InternationalPostalService internationalPostalService,
+                                                    GenerateCoverSheetService generateCoverSheetService
     ) {
         super(finremCaseDetailsMapper);
         this.updateContactDetailsService = updateContactDetailsService;
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.nocWorkflowService = nocWorkflowService;
         this.internationalPostalService = internationalPostalService;
+        this.generateCoverSheetService = generateCoverSheetService;
     }
 
     @Override
@@ -97,12 +101,14 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
                 .handleNoticeOfChangeWorkflow(caseDetails, userAuthorisation, caseDetailsBefore)
                 .getData();
 
-            finremCaseData = finremCaseDetailsMapper.mapToFinremCaseData(updateCaseData, caseDetails.getCaseTypeId());
+            finremCaseDetails.setData(finremCaseDetailsMapper.mapToFinremCaseData(updateCaseData, caseDetails.getCaseTypeId()));
         } else {
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
         }
 
-        return response(finremCaseData);
+        FinremCaseData caseDataBefore = callbackRequest.getFinremCaseDataBefore();
+        generateCoverSheets(finremCaseDetails, caseDataBefore.getContactDetailsWrapper(), userAuthorisation);
+        return response(finremCaseDetails.getData());
     }
 
     private void considerContestedMiniFormA(FinremCaseDetails finremCaseDetails,
@@ -140,5 +146,14 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
         errors.addAll(ContactDetailsValidator.validatePostcodesByRepresentation(finremCaseDetails));
 
         return errors;
+    }
+
+    private void generateCoverSheets(FinremCaseDetails caseDetails, ContactDetailsWrapper contactDetailsBefore, String userAuthorisation) {
+        if (ContactDetailsWrapper.hasApplicantAddressDetailsChanged(caseDetails.getData().getContactDetailsWrapper(), contactDetailsBefore)) {
+            generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, userAuthorisation);
+        }
+        if (ContactDetailsWrapper.hasRespondentAddressDetailsChanged(caseDetails.getData().getContactDetailsWrapper(), contactDetailsBefore)) {
+            generateCoverSheetService.generateAndSetRespondentCoverSheet(caseDetails, userAuthorisation);
+        }
     }
 }

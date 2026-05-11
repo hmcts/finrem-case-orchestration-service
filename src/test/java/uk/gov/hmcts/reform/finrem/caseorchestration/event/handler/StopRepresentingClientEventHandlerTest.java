@@ -160,7 +160,6 @@ class StopRepresentingClientEventHandlerTest {
         verify(coreCaseDataService).performPostSubmitCallback(eq(caseType), eq(Long.valueOf(CASE_ID)),
             eq(INTERNAL_CHANGE_UPDATE_CASE.getCcdType()), captor.capture());
 
-
         Function<CaseDetails, Map<String, Object>> fn = captor.getValue();
         CaseDetails ccdCaseDetails = mock(CaseDetails.class);
         assertThat(fn.apply(ccdCaseDetails)).containsKey("changeOrganisationRequestField")
