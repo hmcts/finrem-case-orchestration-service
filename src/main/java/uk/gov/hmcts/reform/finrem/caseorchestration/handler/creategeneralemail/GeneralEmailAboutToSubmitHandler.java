@@ -24,6 +24,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Ge
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+
 @Slf4j
 @Service
 public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbackHandler {
@@ -79,12 +81,19 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
     }
 
     private void convertEmailAttachmentsToPdfIfRequired(FinremCaseData finremCaseData, String userAuthorisation) {
-        CaseDocument generalEmailUploadedDocument = finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
-        if (generalEmailUploadedDocument != null) {
-            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalEmailUploadedDocument,
-                userAuthorisation, finremCaseData.getCcdCaseType());
-            finremCaseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(pdfDocument);
-        }
+        emptyIfNull(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocuments()).forEach(item -> {
+            CaseDocument original = item.getValue();
+            if (original != null) {
+                CaseDocument pdfDocument =
+                    genericDocumentService.convertDocumentIfNotPdfAlready(
+                        original,
+                        userAuthorisation,
+                        finremCaseData.getCcdCaseType()
+                    );
+
+                item.setValue(pdfDocument);
+            }
+        });
     }
 
     private boolean isConsented(FinremCaseDetails finremCaseDetails) {
