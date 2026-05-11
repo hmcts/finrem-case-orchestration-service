@@ -372,6 +372,7 @@ bootWithCCD {
 
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
+    environment("CASE_DOCUMENT_S2S_AUTHORISED_SERVICES", "finrem_case_orchestration,cd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor")
 
     // ccd-definition-store-api
     environment("WELSH_TRANSLATION_ENABLED", "false")
