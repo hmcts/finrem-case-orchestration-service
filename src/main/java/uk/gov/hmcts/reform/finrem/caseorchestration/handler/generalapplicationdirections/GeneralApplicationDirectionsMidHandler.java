@@ -69,6 +69,7 @@ public class GeneralApplicationDirectionsMidHandler extends FinremCallbackHandle
 
     private void createPreviewOfGeneralApplicationDirectionIfNecessary(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
         generalApplicationDirectionsService.generateGeneralApplicationDirectionsDocumentIfNeeded(userAuthorisation, finremCaseDetails)
-            .ifPresent(doc -> finremCaseDetails.getData().getGeneralApplicationWrapper().setGadPreview(doc));
+            .ifPresent(doc -> finremCaseDetails.getData().getGeneralApplicationWrapper()
+                .setGeneralApplicationDirectionsPreview(doc));
     }
 }
