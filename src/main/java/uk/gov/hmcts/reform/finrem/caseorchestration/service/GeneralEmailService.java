@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.isNull;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -30,7 +32,7 @@ public class GeneralEmailService {
         GeneralEmailWrapper generalEmailWrapper = finremCaseData.getGeneralEmailWrapper();
         List<GeneralEmailCollection> generalEmailCollection = generalEmailWrapper
             .getGeneralEmailCollection();
-        if (generalEmailCollection == null) {
+        if (isNull(generalEmailCollection)) {
             generalEmailCollection = new ArrayList<>();
             generalEmailWrapper.setGeneralEmailCollection(generalEmailCollection);
         }
