@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.nonNull;
+
 @Slf4j
 @Service
 public class GeneralEmailMidHandler extends FinremCallbackHandler {
@@ -53,7 +55,7 @@ public class GeneralEmailMidHandler extends FinremCallbackHandler {
 
         List<String> errors = new ArrayList<>();
         CaseDocument uploadedDocument = finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
-        if (uploadedDocument != null) {
+        if (nonNull(uploadedDocument)) {
             bulkPrintDocumentService.validateEncryptionOnUploadedDocument(uploadedDocument, finremCaseData.getCcdCaseId(),
                 errors, userAuthorisation);
             if (doesUploadedFileExceeds2MB(finremCaseData, userAuthorisation)) {
