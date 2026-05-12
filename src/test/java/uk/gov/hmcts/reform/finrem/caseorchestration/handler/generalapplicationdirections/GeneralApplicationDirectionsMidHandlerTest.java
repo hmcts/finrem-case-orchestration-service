@@ -186,7 +186,7 @@ class GeneralApplicationDirectionsMidHandlerTest {
             () -> assertThat(response.getWarnings()).isEmpty(),
             () -> assertThat(request.getFinremCaseData())
                 .extracting(FinremCaseData::getGeneralApplicationWrapper)
-                .extracting(GeneralApplicationWrapper::getGadPreview)
+                .extracting(GeneralApplicationWrapper::getGeneralApplicationDirectionsPreview)
                 .isEqualTo(documentGenerated ? null : actualDocument)
         );
     }
