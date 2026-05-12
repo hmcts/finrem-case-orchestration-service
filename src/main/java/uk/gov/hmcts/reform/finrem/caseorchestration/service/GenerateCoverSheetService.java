@@ -30,6 +30,7 @@ public class GenerateCoverSheetService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
+    private final FeatureToggleService featureToggleService;
 
     private record IntervenerCoverSheetMapping(
         DocumentHelper.PaperNotificationRecipient recipient,
@@ -207,10 +208,10 @@ public class GenerateCoverSheetService {
             ? oldCoverSheetConfidentialSupplier.get()
             : oldCoverSheetSupplier.get());
 
-        oldCoverSheet.ifPresent(cs -> {
-            log.info("Deleting old cover sheet with url: {}", cs.getDocumentUrl());
-            deleteCoverSheet(cs.getDocumentUrl(), authToken);
-        });
+        if (featureToggleService.isDeleteOldBpCoversheetEnabled() && oldCoverSheet.isPresent()) {
+            log.info("Deleting old cover sheet with url: {}", oldCoverSheet.get().getDocumentUrl());
+            deleteCoverSheet(oldCoverSheet.get().getDocumentUrl(), authToken);
+        }
 
         publicSetter.accept(isHiddenFromPublic ? null : coverSheet);
         confidentialSetter.accept(isHiddenFromPublic ? coverSheet : null);
