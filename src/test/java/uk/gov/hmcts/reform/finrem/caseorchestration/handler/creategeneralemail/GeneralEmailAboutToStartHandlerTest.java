@@ -47,7 +47,6 @@ class GeneralEmailAboutToStartHandlerTest {
             () -> assertThat(finremCaseData.getGeneralEmailWrapper())
                 .extracting(
                     GeneralEmailWrapper::getGeneralEmailRecipient,
-                    GeneralEmailWrapper::getGeneralEmailUploadedDocument,
                     GeneralEmailWrapper::getGeneralEmailBody
                 )
                 .containsOnlyNulls(),

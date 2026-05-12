@@ -620,21 +620,6 @@ public class NotificationService {
         sendSolicitorToDraftOrderEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #sendSolicitorToDraftOrderEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails     instance of CaseDetails
-     * @param dataKeysWrapper of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendSolicitorToDraftOrderEmailIntervener(CaseDetails caseDetails,
-                                                         SolicitorCaseDataKeysWrapper dataKeysWrapper) {
-        sendSolicitorToDraftOrderEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));
-    }
-
     public void sendSolicitorToDraftOrderEmailIntervener(FinremCaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper dataKeysWrapper) {
         sendSolicitorToDraftOrderEmail(finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));

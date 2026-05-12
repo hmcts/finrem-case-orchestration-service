@@ -134,7 +134,7 @@ public class EmailService {
         }
         if (EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT.name().equals(templateName)) {
-            templateVars.put("link_to_file", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
+            templateVars.put("link_to_file", preparedForEmailAttachment(notificationRequest.getDocumentContents())); // TODO MULEIPLE?
         }
         if (CONSENTED.equals(notificationRequest.getCaseType()) && !EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC.name().equals(templateName)) {
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());

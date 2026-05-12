@@ -6,8 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * Stores details of emails that have been sent as part of the case workflow.
@@ -27,6 +27,5 @@ public class GeneralEmailHolder implements HasCaseDocument {
     private String generalEmailCreatedBy;
     private String generalEmailBody;
     private CaseDocument generalEmailUploadedDocument;
-    private List<DocumentCollectionItem> generalEmailUploadedDocuments;
     private LocalDateTime generalEmailDateSent;
 }

@@ -41,7 +41,6 @@ public class GeneralEmailAboutToStartHandler extends FinremCallbackHandler {
         validateCaseData(callbackRequest);
         caseData.getGeneralEmailWrapper().setGeneralEmailRecipient(null);
         caseData.getGeneralEmailWrapper().setGeneralEmailCreatedBy(idamService.getIdamFullName(userAuthorisation));
-        caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(null);
         caseData.getGeneralEmailWrapper().setGeneralEmailBody(null);
 
         return response(caseData);

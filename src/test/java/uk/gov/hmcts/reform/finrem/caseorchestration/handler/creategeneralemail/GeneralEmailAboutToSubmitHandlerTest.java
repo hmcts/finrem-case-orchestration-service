@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.creategeneralemail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -42,7 +41,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.verifyTemporaryFieldsWereSanitised;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandleAnyCaseType;
 
 @ExtendWith(MockitoExtension.class)
 class GeneralEmailAboutToSubmitHandlerTest {
@@ -62,10 +61,7 @@ class GeneralEmailAboutToSubmitHandlerTest {
 
     @Test
     void shouldHandleAllCaseTypes() {
-        assertCanHandle(handler,
-            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CREATE_GENERAL_EMAIL),
-            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CREATE_GENERAL_EMAIL)
-        );
+        assertCanHandleAnyCaseType(handler, CallbackType.ABOUT_TO_SUBMIT, EventType.CREATE_GENERAL_EMAIL);
     }
 
     @Test
@@ -164,7 +160,7 @@ class GeneralEmailAboutToSubmitHandlerTest {
                 "generalEmailRecipient", "generalEmailRecipient",
                 "generalEmailCreatedBy", "generalEmailCreatedBy",
                 "generalEmailBody", "generalEmailBody",
-                "generalEmailUploadedDocument", "generalEmailUploadedDocument"
+                "generalEmailUploadedDocuments", "generalEmailUploadedDocuments"
             ));
     }
 

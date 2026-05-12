@@ -51,7 +51,6 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && (CaseType.CONSENTED.equals(caseType) || CaseType.CONTESTED.equals(caseType))
             && EventType.CREATE_GENERAL_EMAIL.equals(eventType);
     }
 

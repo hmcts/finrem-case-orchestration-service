@@ -481,16 +481,6 @@ class NotificationServiceTest {
     }
 
     @Test
-    void sendSolicitorToDraftOrderEmailIntervener() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendSolicitorToDraftOrderEmailIntervener(callbackRequest.getCaseDetails(), dataKeysWrapper);
-
-        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
-            dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER);
-    }
-
-    @Test
     void sendFinremSolicitorToDraftOrderEmailIntervener() {
         FinremCallbackRequest finremCallbackRequest = getContestedNewCallbackRequest();
         notificationService.sendSolicitorToDraftOrderEmailIntervener(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);

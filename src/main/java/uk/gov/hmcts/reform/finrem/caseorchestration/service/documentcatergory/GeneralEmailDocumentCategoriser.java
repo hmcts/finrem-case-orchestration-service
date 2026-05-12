@@ -4,14 +4,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Component
 @Slf4j
@@ -25,14 +30,31 @@ public class GeneralEmailDocumentCategoriser extends DocumentCategoriser {
     @Override
     protected void categoriseDocuments(FinremCaseData finremCaseData) {
         log.info("Categorising general email documents for case with Case ID: {}", finremCaseData.getCcdCaseId());
-        List<GeneralEmailCollection> generalEmails = finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection();
-        if (generalEmails != null && !generalEmails.isEmpty()) {
-            for (GeneralEmailCollection generalEmail : generalEmails) {
-                CaseDocument generalEmailDocument = generalEmail.getValue().getGeneralEmailUploadedDocument();
-                String generalEmailRecipient = generalEmail.getValue().getGeneralEmailRecipient();
-                if (generalEmailDocument != null && generalEmailDocument.getCategoryId() == null && generalEmailRecipient != null) {
-                    generalEmailDocument.setCategoryId(getGeneralEmailCategory(generalEmailRecipient, finremCaseData));
-                }
+        List<GeneralEmailHolder> generalEmails = emptyIfNull(finremCaseData.getGeneralEmailWrapper().getGeneralEmailCollection())
+            .stream().map(GeneralEmailCollection::getValue).toList();
+        for (GeneralEmailHolder generalEmail : generalEmails) {
+            List<CaseDocument> emailDocuments = new ArrayList<>();
+
+            CaseDocument generalEmailDocument = generalEmail.getGeneralEmailUploadedDocument();
+            if (generalEmailDocument != null) {
+                emailDocuments.add(generalEmailDocument);
+            }
+
+            emailDocuments.addAll(
+                emptyIfNull(generalEmail.getGeneralEmailUploadedDocuments())
+                    .stream()
+                    .map(DocumentCollectionItem::getValue)
+                    .toList()
+            );
+
+            String generalEmailRecipient = generalEmail.getGeneralEmailRecipient();
+
+            if (generalEmailRecipient != null) {
+                emailDocuments.stream()
+                    .filter(document -> document.getCategoryId() == null)
+                    .forEach(document ->
+                        document.setCategoryId(getGeneralEmailCategory(generalEmailRecipient, finremCaseData))
+                    );
             }
         }
     }
