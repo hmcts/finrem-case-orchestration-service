@@ -135,7 +135,7 @@ class UpdateCaseDetailsSolicitorAboutToSubmitHandlerTest {
     @MethodSource
     void testSolicitorChangeScenarios(ContactDetailsWrapper beforeWrapper, ContactDetailsWrapper afterWrapper,
                                       boolean expectApplicantCoverSheet, boolean expectRespondentCoverSheet) {
-        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any(), anyString()))
+        when(updateRepresentationService.validateEmailActiveForOrganisation(anyString(), any()))
             .thenReturn(new ArrayList<>());
 
         FinremCaseDetails beforeDetails = buildCaseDetails(beforeWrapper);
