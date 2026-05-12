@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
@@ -35,6 +36,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -56,7 +58,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus.REJECTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.EmailUtils.areEmailsDifferent;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation.organisation;
 
 @Slf4j
 @Service
@@ -106,13 +108,13 @@ public class UpdateRepresentationService {
         log.info("Updating representation for Case ID: {}", caseDetails.getId());
 
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
-        final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
 
         if (shouldRejectNoc(caseDetails, solicitorToAdd)) {
             markNocRejected(caseDetails);
             return caseDetails.getData();
         }
 
+        final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
         final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd,
             changeRequest);
         final ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
@@ -142,10 +144,8 @@ public class UpdateRepresentationService {
         boolean isApplicantRequest =
             isRequestForApplicantSolicitorRole(caseDetails, caseData.getChangeOrganisationRequestField());
 
-        boolean alreadyRepresenting = isApplicantRequest
-            ? isSolicitorToAddAlreadyRepresentingRespondent(solicitorToAdd, caseData)
-            : isSolicitorToAddAlreadyRepresentingApplicant(solicitorToAdd, caseData);
-
+        boolean alreadyRepresenting = isSolicitorAlreadyRepresenting(
+            solicitorToAdd, caseData, isApplicantRequest);
         if (alreadyRepresenting) {
             log.info("User is already representing the {} on Case ID: {}",
                 isApplicantRequest ? "Respondent" : "Applicant", caseDetails.getId());
@@ -154,25 +154,23 @@ public class UpdateRepresentationService {
         return alreadyRepresenting;
     }
 
-    private boolean isSolicitorAlreadyRepresenting(Function<FinremCaseData, String> emailExtractor,
-                                                   UserDetails solicitorToAdd,
-                                                   FinremCaseData finremCaseData) {
+    private boolean isSolicitorAlreadyRepresenting(UserDetails solicitorToAdd, FinremCaseData finremCaseData,
+                                                   boolean isApplicantRequest) {
+        String newRepresentativeOrgId = organisationService.findOrganisationIdByUserId(solicitorToAdd.getId())
+            .orElse(null);
+        String existingRepresentativeOrgId = ofNullable(
+            getOrganisationPolicyExtractor(isApplicantRequest).apply(finremCaseData)
+        ).map(OrganisationPolicy::getOrganisation).map(Organisation::getOrganisationID).orElse(null);
 
-        String existingEmail = emailExtractor.apply(finremCaseData);
-        String emailToBeAdded = solicitorToAdd.getEmail();
-        return !areEmailsDifferent(existingEmail, emailToBeAdded);
+        return Organisation.isSameOrganisation(
+            organisation(newRepresentativeOrgId),
+            organisation(existingRepresentativeOrgId)
+        );
     }
 
-    private boolean isSolicitorToAddAlreadyRepresentingApplicant(UserDetails solicitorToAdd,
-                                                                 FinremCaseData finremCaseData) {
-        return isSolicitorAlreadyRepresenting(FinremCaseData::getAppSolicitorEmailIfRepresented,
-            solicitorToAdd, finremCaseData);
-    }
-
-    private boolean isSolicitorToAddAlreadyRepresentingRespondent(UserDetails solicitorToAdd,
-                                                                  FinremCaseData finremCaseData) {
-        return isSolicitorAlreadyRepresenting(FinremCaseData::getRespSolicitorEmailIfRepresented,
-            solicitorToAdd, finremCaseData);
+    private Function<FinremCaseData, OrganisationPolicy> getOrganisationPolicyExtractor(boolean isApplicantRequest) {
+        return isApplicantRequest ? FinremCaseData::getRespondentOrganisationPolicy
+            : FinremCaseData::getApplicantOrganisationPolicy;
     }
 
     /*
@@ -230,7 +228,7 @@ public class UpdateRepresentationService {
     }
 
     private boolean isRequestForApplicantSolicitorRole(CaseDetails caseDetails, ChangeOrganisationRequest changeRequest) {
-        String roleId = Optional.ofNullable(changeRequest)
+        String roleId = ofNullable(changeRequest)
             .map(ChangeOrganisationRequest::getCaseRoleId)
             .map(DynamicList::getValueCode)
             .orElseThrow(() -> new NoticeOfChangeInvalidRequestException(

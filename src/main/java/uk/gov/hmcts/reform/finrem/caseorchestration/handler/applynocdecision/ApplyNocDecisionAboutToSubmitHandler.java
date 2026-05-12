@@ -38,8 +38,7 @@ public class ApplyNocDecisionAboutToSubmitHandler extends FinremAboutToSubmitCal
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return ABOUT_TO_SUBMIT.equals(callbackType)
-            && APPLY_NOC_DECISION.equals(eventType);
+        return ABOUT_TO_SUBMIT.equals(callbackType) && APPLY_NOC_DECISION.equals(eventType);
     }
 
     @Override
