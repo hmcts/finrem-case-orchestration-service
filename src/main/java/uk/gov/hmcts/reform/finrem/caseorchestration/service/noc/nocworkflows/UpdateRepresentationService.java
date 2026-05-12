@@ -119,8 +119,7 @@ public class UpdateRepresentationService {
 
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
 
-        return updateRepresentationUpdateHistory(caseDetails, addedSolicitor,
-            removedSolicitor, changeRequest);
+        return updateRepresentationUpdateHistory(caseDetails, addedSolicitor, removedSolicitor, changeRequest);
     }
 
     private boolean shouldRejectNoc(CaseDetails caseDetails, UserDetails solicitorToAdd) {
