@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASE_FILE_VIEW_ENABLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.DELETE_OLD_BP_COVERSHEET_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.EXPRESS_PILOT_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.EXUI3990_WORKAROUND_ENABLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.FINREM_CITIZEN_UI_ENABLED;
@@ -130,6 +131,10 @@ public class FeatureToggleService {
 
     public boolean isFinremWorkAllocationEnabled() {
         return isFeatureEnabled(FINREM_WORK_ALLOCATION_ENABLED);
+    }
+
+    public boolean isDeleteOldBpCoversheetEnabled() {
+        return isFeatureEnabled(DELETE_OLD_BP_COVERSHEET_ENABLED);
     }
 
     /**
