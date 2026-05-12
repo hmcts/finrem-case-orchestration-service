@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -52,6 +53,8 @@ class GenerateCoverSheetServiceTest {
     private DocumentConfiguration documentConfiguration;
     @Mock
     private BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
+    @Mock
+    private FeatureToggleService featureToggleService;
     @InjectMocks
     private GenerateCoverSheetService generateCoverSheetService;
     @Mock
@@ -79,6 +82,7 @@ class GenerateCoverSheetServiceTest {
     @Test
     void shouldGenerateAndSetApplicantCoverSheet_whenAddressNotHidden() {
         setUpDocGenerationMocks();
+        when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(
             caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
@@ -95,6 +99,7 @@ class GenerateCoverSheetServiceTest {
     @Test
     void shouldNotDeleteDocument_whenOldCoverSheetIsNull() {
         setUpDocGenerationMocks();
+        when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
 
@@ -102,12 +107,27 @@ class GenerateCoverSheetServiceTest {
 
         assertEquals(TEST_DOCUMENT_FILENAME,
             caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
-        verify(genericDocumentService, org.mockito.Mockito.never()).deleteDocument(any(), eq(AUTH_TOKEN));
+        verify(genericDocumentService, never()).deleteDocument(any(), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    void shouldNotDeleteDocument_whenOldCoverSheetDeleteDisabled() {
+        setUpDocGenerationMocks();
+        when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(false);
+        FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
+        caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
+
+        generateCoverSheetService.generateAndSetApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+
+        assertEquals(TEST_DOCUMENT_FILENAME,
+            caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp().getDocumentFilename());
+        verify(genericDocumentService, never()).deleteDocument(any(), eq(AUTH_TOKEN));
     }
 
     @Test
     void shouldStoreApplicantCoverSheetInConfidentialField_whenApplicantAddressHiddenFromRespondent() {
         setUpDocGenerationMocks();
+        when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.YES, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(
             caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
@@ -124,6 +144,7 @@ class GenerateCoverSheetServiceTest {
     @Test
     void shouldGenerateAndSetRespondentCoverSheet_whenAddressNotHidden() {
         setUpDocGenerationMocks();
+        when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(
             caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
@@ -140,6 +161,7 @@ class GenerateCoverSheetServiceTest {
     @Test
     void shouldStoreRespondentCoverSheetInConfidentialField_whenRespondentAddressHiddenFromApplicant() {
         setUpDocGenerationMocks();
+        when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.YES);
         caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(
             caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME)
@@ -176,6 +198,7 @@ class GenerateCoverSheetServiceTest {
     @EnumSource(IntervenerType.class)
     void shouldGenerateAndStoreIntervenerCoverSheet(IntervenerType intervenerType) {
         setUpDocGenerationMocks();
+        when(featureToggleService.isDeleteOldBpCoversheetEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = getCaseDetails(YesOrNo.NO, YesOrNo.NO);
         setIntervenerCoverSheet(caseDetails, intervenerType, caseDocument(OLD_COVERESHEET_URL, BULK_PRINT_FILE_NAME));
 
