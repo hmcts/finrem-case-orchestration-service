@@ -105,8 +105,6 @@ public class UpdateRepresentationService {
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
                                                                String authToken) {
 
-        log.info("Updating representation for Case ID: {}", caseDetails.getId());
-
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
 
         if (shouldRejectNoc(caseDetails, solicitorToAdd)) {
@@ -120,7 +118,6 @@ public class UpdateRepresentationService {
         final ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
 
-        log.info("About to start updating solicitor details in the case data for Case ID: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
 
         return updateRepresentationUpdateHistory(caseDetails, addedSolicitor,
