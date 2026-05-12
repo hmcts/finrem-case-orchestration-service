@@ -58,7 +58,7 @@ public class GeneralEmailMidHandler extends FinremCallbackHandler {
         if (nonNull(uploadedDocument)) {
             bulkPrintDocumentService.validateEncryptionOnUploadedDocument(uploadedDocument, finremCaseData.getCcdCaseId(),
                 errors, userAuthorisation);
-            if (doesUploadedFileExceeds2MB(finremCaseData, userAuthorisation)) {
+            if (isUploadedFileOverSizeLimit(finremCaseData, userAuthorisation)) {
                 errors.add(UPLOADED_FILE_EXCEEDS_MAX_THRESHOLD_MESSAGE);
             }
         }
@@ -66,7 +66,7 @@ public class GeneralEmailMidHandler extends FinremCallbackHandler {
         return response(finremCaseData, null, errors);
     }
 
-    private boolean doesUploadedFileExceeds2MB(FinremCaseData data, String userAuthorisation) {
+    private boolean isUploadedFileOverSizeLimit(FinremCaseData data, String userAuthorisation) {
         CaseDocument uploadedDocument = data.getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         return evidenceManagementDownloadService.getByteArray(uploadedDocument, userAuthorisation).length > MAX_FILE_SIZE;
     }
