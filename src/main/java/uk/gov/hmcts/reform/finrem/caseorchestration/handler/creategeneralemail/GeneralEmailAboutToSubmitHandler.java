@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremAboutToSubmitC
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -23,6 +22,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Ge
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -78,16 +79,13 @@ public class GeneralEmailAboutToSubmitHandler extends FinremAboutToSubmitCallbac
     }
 
     private void convertEmailAttachmentToPdfIfRequired(FinremCaseData finremCaseData, String userAuthorisation) {
-        CaseDocument original = finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
-        if (original != null) {
-            CaseDocument pdfDocument =
-                genericDocumentService.convertDocumentIfNotPdfAlready(
-                    original,
-                    userAuthorisation,
-                    finremCaseData.getCcdCaseType()
-                );
-            finremCaseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(pdfDocument);
-        }
+        ofNullable(finremCaseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument())
+            .map(document -> genericDocumentService.convertDocumentIfNotPdfAlready(
+                document,
+                userAuthorisation,
+                finremCaseData.getCcdCaseType()
+            ))
+            .ifPresent(finremCaseData.getGeneralEmailWrapper()::setGeneralEmailUploadedDocument);
     }
 
     private boolean isConsented(FinremCaseDetails finremCaseDetails) {
