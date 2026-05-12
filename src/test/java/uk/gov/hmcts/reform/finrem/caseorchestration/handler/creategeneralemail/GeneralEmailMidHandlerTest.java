@@ -111,7 +111,7 @@ class GeneralEmailMidHandlerTest {
             () -> verify(bulkPrintDocumentService).validateEncryptionOnUploadedDocument(eq(attachment), eq(CASE_ID), anyList(),
                 eq(AUTH_TOKEN)),
             () -> verify(evidenceManagementDownloadService).getByteArray(attachment, AUTH_TOKEN),
-            () -> assertThat(response.getErrors()).containsOnly( "You attached a document which exceeds the size limit: 2MB")
+            () -> assertThat(response.getErrors()).containsOnly("You attached a document which exceeds the size limit: 2MB")
         );
     }
 
