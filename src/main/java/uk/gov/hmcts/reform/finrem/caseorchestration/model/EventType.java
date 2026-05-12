@@ -101,6 +101,8 @@ public enum EventType {
     APPLY_NOC_DECISION("applyNocDecision"),
     INVALIDATE_APPLICANT_ACCESS_CODE("CUI_invalidateApplicantAccessCode"),
     INVALIDATE_RESPONDENT_ACCESS_CODE("CUI_invalidateRespondentAccessCode"),
+    CUI_APPLICANT_DOCUMENT_UPLOAD("CUI_applicantUploadDocuments"),
+    CUI_RESPONDENT_DOCUMENT_UPLOAD("CUI_respondentUploadDocuments"),
     @JsonEnumDefaultValue
     NONE("");
 
